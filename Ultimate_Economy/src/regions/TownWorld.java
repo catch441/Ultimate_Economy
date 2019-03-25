@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Chunk;
-import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -19,9 +18,11 @@ public class TownWorld {
 	private File file;
 	private FileConfiguration config;
 	private List<String> townNames;
+	private List<Town> towns;
 	
 	public TownWorld(Ultimate_Economy main,String world) {
 		worldName = world;
+		towns = new ArrayList<>();
 		file = new File(main.getDataFolder() , world + "_TownWorld" + ".yml");
 		if(!file.exists()) {
 			try {
@@ -72,26 +73,26 @@ public class TownWorld {
 	}
 	public void createTown(String name,Chunk chunk,String owner) {
 		config = YamlConfiguration.loadConfiguration(file);
-		List<String> chunkCoords = new ArrayList<>();
-		chunkCoords.add(chunk.getX() + "/" + chunk.getZ());
-		List<String> citizens = new ArrayList<>();
-		citizens.add(owner);
-		List<String> citizens2 = new ArrayList<>();
-		citizens2.add(owner);
-		config.set("Towns." + name + ".mayor", citizens);
-		config.set("Towns." + name + ".citizens", citizens2);
-		config.set("Towns." + name + ".chunks", chunkCoords);
-		Location spawn = new Location(chunk.getWorld(), (chunk.getX() << 4) + 7, 0, (chunk.getZ() << 4) + 7);
-		spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn));
-		config.set("Towns." + name + ".townspawn", spawn.getX() + "/" + spawn.getY() + "/" + spawn.getZ());
+		Town town = new Town(file, owner, name, chunk);
+		towns.add(town);
+		file = town.getFile();
+		config = YamlConfiguration.loadConfiguration(file);
 		townNames.add(name);
 		config.set("TownNames", townNames);
 		save();
 	}
-	public boolean expandTown(String townname) {
-		boolean success = false;
-		
-		return success;
+	public void dissolveTown(String name) {
+		config = YamlConfiguration.loadConfiguration(file);
+		//TODO
+	}
+	public void expandTown(String townname,Chunk chunk) {
+		config = YamlConfiguration.loadConfiguration(file);
+		if(townNames.contains(townname) && chunkIsFree(chunk)) {
+			Town town = getTownByName(townname);
+			if(town != null) {
+				town.addChunk(file, chunk);
+			}
+		}
 	}
 	public boolean chunkIsFree(Chunk chunk) {
 		boolean isFree = true;
@@ -105,7 +106,7 @@ public class TownWorld {
 		}
 		return isFree;
 	}
-	public String getTownByChunk(Chunk chunk) {
+	public String getTownNameByChunk(Chunk chunk) {
 		config = YamlConfiguration.loadConfiguration(file);
 		String townname = null;
 		for(String town:townNames) {
@@ -116,7 +117,15 @@ public class TownWorld {
 		}
 		return townname;
 	}
-	public boolean playerIsCitizen(String townname,String playername) {
+	private Town getTownByName(String name) {
+		for(Town town: towns) {
+			if(town.getTownName().equals(name)) {
+				return town;
+			}
+		}
+		return null;
+	}
+	public boolean isPlayerCitizen(String townname,String playername) {
 		config = YamlConfiguration.loadConfiguration(file);
 		boolean is = false;
 		if(config.getStringList("Towns." + townname + ".citizens").contains(playername)) {

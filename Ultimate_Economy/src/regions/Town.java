@@ -3,7 +3,6 @@ package regions;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -15,103 +14,150 @@ public class Town {
 	private String townName;
 	private String owner;
 	private ArrayList<String> citizens,coOwners;
-	private ArrayList<Chunk> chunks;
+	private ArrayList<String> chunkCoords;
 	private Location townSpawn;
 	private File file;
-	private FileConfiguration config;
 	
 	public Town(File file,String owner,String townName,Chunk startChunk) {
-		this.file = file;
 		this.townName = townName;
 		this.owner = owner;
-		chunks = new ArrayList<>();
 		citizens = new ArrayList<>();
 		coOwners = new ArrayList<>();
+		chunkCoords = new ArrayList<>();
+		this.owner = owner;
 		citizens.add(owner);
-		config = YamlConfiguration.loadConfiguration(file);
-		List<String> chunkCoords = new ArrayList<>();
 		chunkCoords.add(startChunk.getX() + "/" + startChunk.getZ());
-		List<String> citizens = new ArrayList<>();
-		citizens.add(owner);
-		List<String> citizens2 = new ArrayList<>();
-		citizens2.add(owner);
-		config.set("Towns." + townName + ".mayor", citizens);
-		config.set("Towns." + townName + ".citizens", citizens2);
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("Towns." + townName + ".owner", owner);
+		config.set("Towns." + townName + ".coOwners", coOwners);
+		config.set("Towns." + townName + ".citizens", citizens);
 		config.set("Towns." + townName + ".chunks", chunkCoords);
 		Location spawn = new Location(startChunk.getWorld(), (startChunk.getX() << 4) + 7, 0, (startChunk.getZ() << 4) + 7);
 		spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn));
 		config.set("Towns." + townName + ".townspawn", spawn.getX() + "/" + spawn.getY() + "/" + spawn.getZ());
-		save();
+		save(file);
 	}
-	public void addChunk(Chunk chunk) {
-		chunks.add(chunk);
-	}
-	public boolean removeChunk(Chunk chunk) {
+	/**
+	 * <p>
+	 * Adds a chunk to this town
+	 * <p>
+	 * @param file
+	 * @param chunk
+	 * @return boolean success
+	 * <p>
+	 * false if this chunk is already owned by this town
+	 */
+	public boolean addChunk(File file,Chunk chunk) {
 		boolean success = false;
-		for(Chunk c:chunks) {
-			if(c.equals(chunk)) {
-				success = true;
-			}
-		}
-		if(success) {
-			chunks.remove(chunk);
-			/*config = YamlConfiguration.loadConfiguration(file);
-			List<Pair<Integer, Integer>> chunkCoords = new ArrayList<>();
-			for(Chunk c:chunks) {
-				chunkCoords.add(new Pair<Integer, Integer>(c.getX(), c.getZ()));
-			}
+		String coords = chunk.getX() + "/" + chunk.getZ();
+		if(!chunkCoords.contains(coords)) {
+			success = true;
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+			chunkCoords.add(chunk.getX() + "/" + chunk.getZ());
 			config.set("Towns." + townName + ".chunks", chunkCoords);
-			save();*/
+			save(file);
+		}
+		return success;
+	}
+	public boolean removeChunk(File file,Chunk chunk) {
+		boolean success = false;
+		String coords = chunk.getX() + "/" + chunk.getZ();
+		if(chunkCoords.contains(coords)) {
+			success = true;
+			chunkCoords.remove(coords);
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+			config.set("Towns." + townName + ".chunks", chunkCoords);
+			save(file);
 		}
 		return success;
 	}
 	public String getOwner() {
 		return owner;
 	}
-	public void setOwner(String owner) {
+	public void setOwner(File file,String owner) {
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 		this.owner = owner;
+		config.set("Towns." + townName + ".owner", owner);
+		save(file);
 	}
 	public ArrayList<String> getCitizens() {
 		return citizens;
 	}
-	public void addCitizen(String newCitizen) {
-		citizens.add(newCitizen);
-	}
-	public boolean removeCitizen(String citizen) {
-		boolean success= false;
-		for(String name : citizens) {
-			if(name.equals(citizen) ) {
-				success = true;
-			}
+	public boolean addCitizen(File file,String newCitizen) {
+		boolean success = false;
+		if(!citizens.contains(newCitizen)) {
+			success = true;
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+			citizens.add(newCitizen);
+			config.set("Towns." + townName + ".citizens", citizens);
+			save(file);
 		}
-		if(success) {
+		return success;
+	}
+	public boolean removeCitizen(File file,String citizen) {
+		boolean success= false;
+		if(citizens.contains(citizen)) {
+			success = true;
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			citizens.remove(citizen);
+			config.set("Towns." + townName + ".citizens", citizens);
+			save(file);
 		}
 		return success;
 	}
 	public String getTownName() {
 		return townName;
 	}
-	public void setTownName(String townName) {
+	public void setTownName(File file,String townName) {
 		this.townName = townName;
 	}
-	public ArrayList<Chunk> getChunkList() {
-		return chunks;
+	public ArrayList<String> getChunkList() {
+		return chunkCoords;
 	}
 	public Location getTownSpawn() {
 		return townSpawn;
 	}
-	public void setTownSpawn(Location townSpawn) {
+	public void setTownSpawn(File file,Location townSpawn) {
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 		this.townSpawn = townSpawn;
+		config.set("Towns." + townName + ".townspawn", townSpawn.getX() + "/" + townSpawn.getY() + "/" + townSpawn.getZ());
+		save(file);
 	}
 	public ArrayList<String> getCoOwners() {
 		return coOwners;
 	}
-	private void save() {
+	public boolean addCoOwner(File file,String coOwner) {
+		boolean success = false;
+		if(!coOwners.contains(coOwner)) {
+			success = true;
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+			coOwners.add(coOwner);
+			config.set("Towns." + townName + ".coOwners", coOwners);
+			save(file);
+		}
+		return success;
+	}
+	private void save(File file) {
 		try {
+			this.file = file;
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			config.save(file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+	public File getFile() {
+		return file;
+	}
+	public boolean isInTown(Chunk chunk) {
+		boolean is = false;
+		if(chunkCoords.contains(chunk.getX() + "/" + chunk.getZ())) {
+			is = true;
+		}
+		return is;
+	}
+	//For loading a town
+	/*public static Town loadTown() {
+		
+	}*/
 }

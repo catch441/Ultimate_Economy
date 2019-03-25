@@ -68,7 +68,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 	 * Lukas Heubach
 	 * buyable regions
 	 * 		set/break block event anpassen
-	 * 
+	 * maxjobs bug
 	 * job crafter,enchanter
 	 * op should remove playershops
 	 * limit playershops per player
@@ -2248,7 +2248,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 					event.setCancelled(true);
 					event.getPlayer().sendMessage(ChatColor.RED + "You are in the wilderness!");
 				}
-				else if(townWorld.playerIsCitizen(townWorld.getTownByChunk(event.getBlock().getChunk()), event.getPlayer().getName())){
+				else if(townWorld.isPlayerCitizen(townWorld.getTownNameByChunk(event.getBlock().getChunk()), event.getPlayer().getName())){
 					event.setCancelled(true);
 					event.getPlayer().sendMessage(ChatColor.RED + "You are not a citizen of this town!");
 				}
