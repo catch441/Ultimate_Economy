@@ -9,6 +9,12 @@ import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import com.ue.exceptions.Town.ChunkAlreadyClaimedException;
+import com.ue.exceptions.Town.ChunkNotClaimedByThisTownException;
+import com.ue.exceptions.Town.PlayerIsAlreadyCitizenException;
+import com.ue.exceptions.Town.PlayerIsAlreadyCoOwnerException;
+import com.ue.exceptions.Town.PlayerIsNotCitizenException;
+
 public class Town {
 
 	private String townName;
@@ -18,6 +24,13 @@ public class Town {
 	private Location townSpawn;
 	private File file;
 	
+	/**
+	 * 
+	 * @param file
+	 * @param owner
+	 * @param townName
+	 * @param startChunk
+	 */
 	public Town(File file,String owner,String townName,Chunk startChunk) {
 		this.townName = townName;
 		this.owner = owner;
@@ -37,106 +50,209 @@ public class Town {
 		config.set("Towns." + townName + ".townspawn", spawn.getX() + "/" + spawn.getY() + "/" + spawn.getZ());
 		save(file);
 	}
+	
 	/**
 	 * <p>
-	 * Adds a chunk to this town
+	 * Adds a chunk to a town
 	 * <p>
 	 * @param file
 	 * @param chunk
-	 * @return boolean success
-	 * <p>
-	 * false if this chunk is already owned by this town
+	 * @throws ChunkAlreadyClaimedException 
 	 */
-	public boolean addChunk(File file,Chunk chunk) {
-		boolean success = false;
+	public void addChunk(File file,Chunk chunk) throws ChunkAlreadyClaimedException {
 		String coords = chunk.getX() + "/" + chunk.getZ();
 		if(!chunkCoords.contains(coords)) {
-			success = true;
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			chunkCoords.add(chunk.getX() + "/" + chunk.getZ());
 			config.set("Towns." + townName + ".chunks", chunkCoords);
 			save(file);
 		}
-		return success;
+		else {
+			throw new ChunkAlreadyClaimedException(coords);
+		}
 	}
-	public boolean removeChunk(File file,Chunk chunk) {
-		boolean success = false;
+	
+	/**
+	 * <p>
+	 * Removes a chunk from a town
+	 * <p>
+	 * @param file
+	 * @param chunk
+	 * @throws ChunkNotClaimedByThisTownException 
+	 */
+	public void removeChunk(File file,Chunk chunk) throws ChunkNotClaimedByThisTownException {
 		String coords = chunk.getX() + "/" + chunk.getZ();
 		if(chunkCoords.contains(coords)) {
-			success = true;
 			chunkCoords.remove(coords);
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			config.set("Towns." + townName + ".chunks", chunkCoords);
 			save(file);
 		}
-		return success;
+		else {
+			throw new ChunkNotClaimedByThisTownException(coords);
+		}
 	}
+	
+	/**
+	 * <p>
+	 * Get town owner
+	 * <p>
+	 * @return String
+	 */
 	public String getOwner() {
 		return owner;
 	}
+	
+	/**
+	 * <p>
+	 * Set town owner
+	 * <p>
+	 * @param file
+	 * @param owner
+	 */
 	public void setOwner(File file,String owner) {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 		this.owner = owner;
 		config.set("Towns." + townName + ".owner", owner);
 		save(file);
 	}
+	
+	/**
+	 * <p>
+	 * Get list of citizens
+	 * <p>
+	 * @return ArrayList
+	 */
 	public ArrayList<String> getCitizens() {
 		return citizens;
 	}
-	public boolean addCitizen(File file,String newCitizen) {
-		boolean success = false;
+	
+	/**
+	 * <p>
+	 * Add a player as citizen to a town
+	 * <p>
+	 * @param file
+	 * @param newCitizen
+	 * @throws PlayerIsAlreadyCitizenException 
+	 */
+	public void addCitizen(File file,String newCitizen) throws PlayerIsAlreadyCitizenException {
 		if(!citizens.contains(newCitizen)) {
-			success = true;
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			citizens.add(newCitizen);
 			config.set("Towns." + townName + ".citizens", citizens);
 			save(file);
 		}
-		return success;
+		else {
+			throw new PlayerIsAlreadyCitizenException(newCitizen);
+		}
 	}
-	public boolean removeCitizen(File file,String citizen) {
-		boolean success= false;
+	
+	/**
+	 * <p>
+	 * Remove a player as citizen from a town
+	 * <p>
+	 * @param file
+	 * @param citizen
+	 * @throws PlayerIsNotCitizenException 
+	 */
+	public void removeCitizen(File file,String citizen) throws PlayerIsNotCitizenException {
 		if(citizens.contains(citizen)) {
-			success = true;
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			citizens.remove(citizen);
 			config.set("Towns." + townName + ".citizens", citizens);
 			save(file);
 		}
-		return success;
+		else {
+			throw new PlayerIsNotCitizenException(citizen);
+		}
 	}
+	
+	/**
+	 * <p>
+	 * Get town name
+	 * <p>
+	 * @return String
+	 */
 	public String getTownName() {
 		return townName;
 	}
+	
+	/**
+	 * <p>
+	 * Set town name
+	 * <p>
+	 * @param file
+	 * @param townName
+	 */
 	public void setTownName(File file,String townName) {
 		this.townName = townName;
 	}
+	
+	/**
+	 * <p>
+	 * Get a list of all claimed chunks
+	 * <p>
+	 * @return ArrayList
+	 */
 	public ArrayList<String> getChunkList() {
 		return chunkCoords;
 	}
+	
+	/**
+	 * <p>
+	 * Get the town spawn location
+	 * <p>
+	 * @return Location
+	 */
 	public Location getTownSpawn() {
 		return townSpawn;
 	}
+	
+	/**
+	 * <p>
+	 * Set the town spawn location
+	 * <p>
+	 * @param file
+	 * @param townSpawn
+	 */
 	public void setTownSpawn(File file,Location townSpawn) {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 		this.townSpawn = townSpawn;
 		config.set("Towns." + townName + ".townspawn", townSpawn.getX() + "/" + townSpawn.getY() + "/" + townSpawn.getZ());
 		save(file);
 	}
+	
+	/**
+	 * <p>
+	 * Get a list of CoOwners of the town
+	 * <p>
+	 * @return ArrayList
+	 */
 	public ArrayList<String> getCoOwners() {
 		return coOwners;
 	}
-	public boolean addCoOwner(File file,String coOwner) {
-		boolean success = false;
+	
+	/**
+	 * <p>
+	 * Set a player as CoOwner of a town
+	 * <p>
+	 * @param file
+	 * @param coOwner
+	 * @return
+	 * @throws PlayerIsAlreadyCoOwnerException 
+	 */
+	public void addCoOwner(File file,String coOwner) throws PlayerIsAlreadyCoOwnerException {
 		if(!coOwners.contains(coOwner)) {
-			success = true;
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			coOwners.add(coOwner);
 			config.set("Towns." + townName + ".coOwners", coOwners);
 			save(file);
 		}
-		return success;
+		else {
+			throw new PlayerIsAlreadyCoOwnerException(coOwner);
+		}
 	}
+	
 	private void save(File file) {
 		try {
 			this.file = file;
@@ -146,10 +262,25 @@ public class Town {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * <p>
+	 * Get savefile of townworld with this town
+	 * <p>
+	 * @return File
+	 */
 	public File getFile() {
 		return file;
 	}
-	public boolean isInTown(Chunk chunk) {
+	
+	/**
+	 * <p>
+	 * Returns true if the cunk is owned by any town
+	 * <p>
+	 * @param chunk
+	 * @return
+	 */
+	public boolean isClaimedByTown(Chunk chunk) {
 		boolean is = false;
 		if(chunkCoords.contains(chunk.getX() + "/" + chunk.getZ())) {
 			is = true;
@@ -157,7 +288,8 @@ public class Town {
 		return is;
 	}
 	//For loading a town
-	/*public static Town loadTown() {
-		
-	}*/
+	public static Town loadTown() {
+		//TODO 
+		return new Town(null, null, null, null);
+	}
 }

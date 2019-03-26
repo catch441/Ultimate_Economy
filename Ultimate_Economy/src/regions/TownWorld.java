@@ -9,6 +9,10 @@ import org.bukkit.Chunk;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import com.ue.exceptions.Town.ChunkAlreadyClaimedException;
+import com.ue.exceptions.Town.TownAlreadyExistsException;
+import com.ue.exceptions.Town.TownDoesNotExistException;
+
 import ultimate_economy.Ultimate_Economy;
 
 public class TownWorld {
@@ -71,29 +75,74 @@ public class TownWorld {
 	public String getWorldName() {
 		return worldName;
 	}
-	public void createTown(String name,Chunk chunk,String owner) {
+	/**
+	 * <p>
+	 * Creates a new town
+	 * <p>
+	 * @param name
+	 * @param chunk
+	 * @param owner
+	 * @throws TownAlreadyExistsException
+	 * @throws ChunkAlreadyClaimedException
+	 */
+	public void createTown(String name,Chunk chunk,String owner) throws TownAlreadyExistsException, ChunkAlreadyClaimedException {
+		//handle town exists
 		config = YamlConfiguration.loadConfiguration(file);
-		Town town = new Town(file, owner, name, chunk);
-		towns.add(town);
-		file = town.getFile();
-		config = YamlConfiguration.loadConfiguration(file);
-		townNames.add(name);
-		config.set("TownNames", townNames);
-		save();
+		if(townNames.contains(name) ) {
+			throw new TownAlreadyExistsException(name);
+		}
+		else if(!chunkIsFree(chunk)) {
+			throw new ChunkAlreadyClaimedException(chunk.getX() + "/" + chunk.getZ());
+		}
+		else {
+			Town town = new Town(file, owner, name, chunk);
+			towns.add(town);
+			file = town.getFile();
+			config = YamlConfiguration.loadConfiguration(file);
+			townNames.add(name);
+			config.set("TownNames", townNames);
+			save();
+		}
 	}
 	public void dissolveTown(String name) {
 		config = YamlConfiguration.loadConfiguration(file);
 		//TODO
 	}
-	public void expandTown(String townname,Chunk chunk) {
+	
+	/**
+	 * <p>
+	 * Expands a town by a chunk
+	 * <p>
+	 * @param townname
+	 * @param chunk
+	 * @throws ChunkAlreadyClaimedException
+	 * @throws TownDoesNotExistException
+	 */
+	public void expandTown(String townname,Chunk chunk) throws ChunkAlreadyClaimedException, TownDoesNotExistException {
 		config = YamlConfiguration.loadConfiguration(file);
-		if(townNames.contains(townname) && chunkIsFree(chunk)) {
-			Town town = getTownByName(townname);
-			if(town != null) {
-				town.addChunk(file, chunk);
+		if(!townNames.contains(townname)) {
+			throw new TownDoesNotExistException(townname);
+		}
+		else if(!chunkIsFree(chunk)) {
+			throw new ChunkAlreadyClaimedException(chunk.getX() + "/" + chunk.getZ());
+		}
+		else {
+			for(Town town: towns) {
+				if(town.getTownName().equals(townname)) {
+					town.addChunk(file, chunk);
+					break;
+				}
 			}
 		}
 	}
+	
+	/**
+	 * <p>
+	 * Returns true if the chunk is not claimed by any town
+	 * <p>
+	 * @param chunk
+	 * @return boolean
+	 */
 	public boolean chunkIsFree(Chunk chunk) {
 		boolean isFree = true;
 		config = YamlConfiguration.loadConfiguration(file);
@@ -106,24 +155,24 @@ public class TownWorld {
 		}
 		return isFree;
 	}
+	
+	/**
+	 * <p>
+	 * Get town name by chunk. Returns null if chunk is not claimed by any town.
+	 * <p>
+	 * @param chunk
+	 * @return
+	 */
 	public String getTownNameByChunk(Chunk chunk) {
 		config = YamlConfiguration.loadConfiguration(file);
 		String townname = null;
-		for(String town:townNames) {
-			if(config.getStringList("Towns." + town + ".chunks").contains(chunk.getX() + "/" + chunk.getZ())) {
-				townname = town;
+		for(Town town:towns) {
+			if(town.isClaimedByTown(chunk)) {
+				townname = town.getTownName();
 				break;
 			}
 		}
 		return townname;
-	}
-	private Town getTownByName(String name) {
-		for(Town town: towns) {
-			if(town.getTownName().equals(name)) {
-				return town;
-			}
-		}
-		return null;
 	}
 	public boolean isPlayerCitizen(String townname,String playername) {
 		config = YamlConfiguration.loadConfiguration(file);
@@ -132,6 +181,9 @@ public class TownWorld {
 			is = true;
 		}
 		return is;
+	}
+	public static void loadTownWorld(String name) {
+		//TODO
 	}
 	private void save() {
 		try {

@@ -54,6 +54,9 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
+import com.ue.exceptions.Town.ChunkAlreadyClaimedException;
+import com.ue.exceptions.Town.TownAlreadyExistsException;
+
 import job.Job;
 import job.JobCenter;
 import regions.TownWorld;
@@ -951,13 +954,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 								TownWorld tWorld = getTownWorld(player.getWorld().getName());
 								if(joinedTowns < getConfig().getInt("MaxJoinedTowns") && tWorld.getFoundationPrice() <= config.getDouble(player.getName() + ".account amount")) {
 									List<String> towns = getConfig().getStringList("TownList");
-									if(towns.contains(args[1])) {
-										player.sendMessage(ChatColor.RED + "This town name is already used!");
-									}
-									else if(!tWorld.chunkIsFree(player.getLocation().getChunk())) {
-										player.sendMessage(ChatColor.RED + "This chunk is owned by another city!");
-									}
-									else {
+									try {
 										tWorld.createTown(args[1], player.getLocation().getChunk(),player.getName());
 										config.set(player.getName() + ".account amount", config.getDouble(player.getName() + ".account amount") - tWorld.getFoundationPrice());
 										List<String> list = config.getStringList(player.getName() + ".joinedTowns");
@@ -969,6 +966,8 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 										saveConfig();
 										updateScoreBoard(player);
 										player.sendMessage(ChatColor.GOLD + "Congratulation! You founded the new city " + ChatColor.GREEN + args[1] + ChatColor.GOLD + "!");
+									} catch (TownAlreadyExistsException | ChunkAlreadyClaimedException e) {
+										player.sendMessage(ChatColor.RED + e.getMessage());
 									}
 								}
 								else if(tWorld.getFoundationPrice() > config.getDouble(player.getName() + ".account amount")){
