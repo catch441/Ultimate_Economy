@@ -3,17 +3,20 @@ package regions;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.ue.exceptions.Town.ChunkAlreadyClaimedException;
-import com.ue.exceptions.Town.ChunkNotClaimedByThisTownException;
-import com.ue.exceptions.Town.PlayerIsAlreadyCitizenException;
-import com.ue.exceptions.Town.PlayerIsAlreadyCoOwnerException;
-import com.ue.exceptions.Town.PlayerIsNotCitizenException;
+import com.ue.exceptions.town.ChunkAlreadyClaimedException;
+import com.ue.exceptions.town.ChunkNotClaimedByThisTownException;
+import com.ue.exceptions.town.PlayerIsAlreadyCitizenException;
+import com.ue.exceptions.town.PlayerIsAlreadyCoOwnerException;
+import com.ue.exceptions.town.PlayerIsNotCitizenException;
 
 public class Town {
 
@@ -25,7 +28,10 @@ public class Town {
 	private File file;
 	
 	/**
-	 * 
+	 * <p>
+	 * Creates a town object.
+	 * Only if you load a existing town, the parameter startChunk should be 'null'
+	 * <p>
 	 * @param file
 	 * @param owner
 	 * @param townName
@@ -45,10 +51,28 @@ public class Town {
 		config.set("Towns." + townName + ".coOwners", coOwners);
 		config.set("Towns." + townName + ".citizens", citizens);
 		config.set("Towns." + townName + ".chunks", chunkCoords);
-		Location spawn = new Location(startChunk.getWorld(), (startChunk.getX() << 4) + 7, 0, (startChunk.getZ() << 4) + 7);
-		spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn));
-		config.set("Towns." + townName + ".townspawn", spawn.getX() + "/" + spawn.getY() + "/" + spawn.getZ());
+		if(startChunk != null) {
+			Location spawn = new Location(startChunk.getWorld(), (startChunk.getX() << 4) + 7, 0, (startChunk.getZ() << 4) + 7);
+			spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn));
+			config.set("Towns." + townName + ".townspawn", spawn.getX() + "/" + spawn.getY() + "/" + spawn.getZ());
+		}
 		save(file);
+	}
+	
+	public void createTownManagerVillager() {
+		//TODO
+	}
+	
+	public void moveTownManagerVillager() {
+		//TODO
+	}
+	
+	public void despawnTownManagerVillager() {
+		//TODO
+	}
+	
+	public void removeTownManagerVillager() {
+		//TODO
 	}
 	
 	/**
@@ -59,11 +83,11 @@ public class Town {
 	 * @param chunk
 	 * @throws ChunkAlreadyClaimedException 
 	 */
-	public void addChunk(File file,Chunk chunk) throws ChunkAlreadyClaimedException {
-		String coords = chunk.getX() + "/" + chunk.getZ();
+	public void addChunk(File file,int chunkX,int chunkZ) throws ChunkAlreadyClaimedException {
+		String coords = chunkX + "/" + chunkZ;
 		if(!chunkCoords.contains(coords)) {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-			chunkCoords.add(chunk.getX() + "/" + chunk.getZ());
+			chunkCoords.add(coords);
 			config.set("Towns." + townName + ".chunks", chunkCoords);
 			save(file);
 		}
@@ -80,13 +104,17 @@ public class Town {
 	 * @param chunk
 	 * @throws ChunkNotClaimedByThisTownException 
 	 */
-	public void removeChunk(File file,Chunk chunk) throws ChunkNotClaimedByThisTownException {
-		String coords = chunk.getX() + "/" + chunk.getZ();
+	@SuppressWarnings("deprecation")
+	public void removeChunk(File file,int chunkX,int chunkZ,World world) throws ChunkNotClaimedByThisTownException {
+		String coords = chunkX + "/" + chunkZ;
 		if(chunkCoords.contains(coords)) {
 			chunkCoords.remove(coords);
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			config.set("Towns." + townName + ".chunks", chunkCoords);
 			save(file);
+			//TODO not for future, find a better solution
+			world.regenerateChunk(chunkX, chunkZ);
+			world.save();
 		}
 		else {
 			throw new ChunkNotClaimedByThisTownException(coords);
@@ -125,6 +153,15 @@ public class Town {
 	 */
 	public ArrayList<String> getCitizens() {
 		return citizens;
+	}
+	/**
+	 * <p>
+	 * Set all citizens.
+	 * <p>
+	 * @param citizens
+	 */
+	public void setCiticens(List<String> citizens) {
+		this.citizens.addAll(citizens);
 	}
 	
 	/**
@@ -197,6 +234,15 @@ public class Town {
 	public ArrayList<String> getChunkList() {
 		return chunkCoords;
 	}
+	/**
+	 * <p>
+	 * Set chunklist.
+	 * <p>
+	 * @param chunkCoords
+	 */
+	public void setChunkList(List<String> chunkCoords) {
+		this.chunkCoords.addAll(chunkCoords);
+	}
 	
 	/**
 	 * <p>
@@ -230,6 +276,15 @@ public class Town {
 	 */
 	public ArrayList<String> getCoOwners() {
 		return coOwners;
+	}
+	/**
+	 * <p>
+	 * Set all coOwners.
+	 * <p>
+	 * @param coOwners
+	 */
+	public void setCoOwners(List<String> coOwners) {
+		this.coOwners.addAll(coOwners);
 	}
 	
 	/**
@@ -287,9 +342,24 @@ public class Town {
 		}
 		return is;
 	}
-	//For loading a town
-	public static Town loadTown() {
+	
+	/**
+	 * <p>
+	 * Static method for loading a existing town by name.
+	 * <p>
+	 * @param file
+	 * @param townName
+	 * @return
+	 */
+	public static Town loadTown(File file,String townName) {
 		//TODO 
-		return new Town(null, null, null, null);
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+		Town town = new Town(file, config.getString("Towns." + townName + ".owner"), townName, null);
+		town.setCoOwners(config.getStringList("Towns." + townName + ".coOwners"));
+		town.setCiticens(config.getStringList("Towns." + townName + ".citizens"));
+		town.setChunkList(config.getStringList("Towns." + townName + ".chunks"));
+		String locationString = config.getString("Towns." + townName + ".townspawn");
+		town.setTownSpawn(file, new Location(Bukkit.getWorld(config.getString("World")), Integer.valueOf(locationString.substring(0, locationString.indexOf("/"))), Integer.valueOf(locationString.substring(locationString.indexOf("/")+1,locationString.lastIndexOf("/"))), Integer.valueOf(locationString.substring(locationString.lastIndexOf("/")+1))));
+		return town;
 	}
 }

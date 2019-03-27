@@ -5,13 +5,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.ue.exceptions.Town.ChunkAlreadyClaimedException;
-import com.ue.exceptions.Town.TownAlreadyExistsException;
-import com.ue.exceptions.Town.TownDoesNotExistException;
+import com.ue.exceptions.town.ChunkAlreadyClaimedException;
+import com.ue.exceptions.town.ChunkNotClaimedByThisTownException;
+import com.ue.exceptions.town.TownAlreadyExistsException;
+import com.ue.exceptions.town.TownDoesNotExistException;
 
 import ultimate_economy.Ultimate_Economy;
 
@@ -86,7 +88,6 @@ public class TownWorld {
 	 * @throws ChunkAlreadyClaimedException
 	 */
 	public void createTown(String name,Chunk chunk,String owner) throws TownAlreadyExistsException, ChunkAlreadyClaimedException {
-		//handle town exists
 		config = YamlConfiguration.loadConfiguration(file);
 		if(townNames.contains(name) ) {
 			throw new TownAlreadyExistsException(name);
@@ -104,9 +105,30 @@ public class TownWorld {
 			save();
 		}
 	}
-	public void dissolveTown(String name) {
+	/**
+	 * <p>
+	 * Dissolves a hole town and resets the chunks.
+	 * <p>
+	 * @param townname
+	 * @throws TownDoesNotExistException
+	 * @throws NumberFormatException
+	 * @throws ChunkNotClaimedByThisTownException
+	 */
+	public void dissolveTown(String townname) throws TownDoesNotExistException, NumberFormatException, ChunkNotClaimedByThisTownException {
 		config = YamlConfiguration.loadConfiguration(file);
-		//TODO
+		if(!townNames.contains(townname) ) {
+			throw new TownDoesNotExistException(townname);
+		}
+		else {
+			for(Town town: towns) {
+				if(town.getTownName().equals(townname)) {
+					for(String coords:town.getChunkList()) {
+						town.removeChunk(file, Integer.valueOf(coords.substring(0,coords.indexOf("/"))), Integer.valueOf(coords.substring(coords.indexOf("/")+1)),Bukkit.getWorld(worldName));
+					}
+					break;
+				}
+			}
+		}
 	}
 	
 	/**
@@ -129,12 +151,17 @@ public class TownWorld {
 		else {
 			for(Town town: towns) {
 				if(town.getTownName().equals(townname)) {
-					town.addChunk(file, chunk);
+					town.addChunk(file, chunk.getX(),chunk.getZ());
 					break;
 				}
 			}
 		}
 	}
+	
+	public void setTownSpawn() {
+		//TODO
+	}
+	
 	
 	/**
 	 * <p>
@@ -161,7 +188,7 @@ public class TownWorld {
 	 * Get town name by chunk. Returns null if chunk is not claimed by any town.
 	 * <p>
 	 * @param chunk
-	 * @return
+	 * @return String
 	 */
 	public String getTownNameByChunk(Chunk chunk) {
 		config = YamlConfiguration.loadConfiguration(file);
@@ -174,6 +201,14 @@ public class TownWorld {
 		}
 		return townname;
 	}
+	/**
+	 * <p>
+	 * Returns true if player is a citizen of this town.
+	 * <p>
+	 * @param townname
+	 * @param playername
+	 * @return boolean
+	 */
 	public boolean isPlayerCitizen(String townname,String playername) {
 		config = YamlConfiguration.loadConfiguration(file);
 		boolean is = false;
@@ -182,8 +217,9 @@ public class TownWorld {
 		}
 		return is;
 	}
-	public static void loadTownWorld(String name) {
+	public static TownWorld loadTownWorld(String name) {
 		//TODO
+		return null;
 	}
 	private void save() {
 		try {

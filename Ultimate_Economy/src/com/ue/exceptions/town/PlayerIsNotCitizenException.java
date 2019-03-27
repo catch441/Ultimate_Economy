@@ -1,4 +1,4 @@
-package com.ue.exceptions.Town;
+package com.ue.exceptions.town;
 
 public class PlayerIsNotCitizenException extends Exception{
 

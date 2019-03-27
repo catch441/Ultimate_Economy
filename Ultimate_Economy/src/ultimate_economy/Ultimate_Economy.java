@@ -54,8 +54,8 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
-import com.ue.exceptions.Town.ChunkAlreadyClaimedException;
-import com.ue.exceptions.Town.TownAlreadyExistsException;
+import com.ue.exceptions.town.ChunkAlreadyClaimedException;
+import com.ue.exceptions.town.TownAlreadyExistsException;
 
 import job.Job;
 import job.JobCenter;
@@ -984,7 +984,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if(args[0].equals("delete")) {
 							if(args.length == 2) {
-								
+
 							}
 							else {
 								player.sendMessage("/town delete <townname>");
