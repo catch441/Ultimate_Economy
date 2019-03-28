@@ -54,12 +54,12 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
-import com.ue.exceptions.town.ChunkAlreadyClaimedException;
-import com.ue.exceptions.town.TownAlreadyExistsException;
+import com.ue.exceptions.townsystem.ChunkAlreadyClaimedException;
+import com.ue.exceptions.townsystem.TownAlreadyExistsException;
+import com.ue.townsystem.TownWorld;
 
 import job.Job;
 import job.JobCenter;
-import regions.TownWorld;
 import shop.AdminShop;
 import shop.PlayerShop;
 import shop.Shop;
@@ -601,7 +601,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 									player.sendMessage(ChatColor.GREEN + args[1] + ChatColor.GOLD + " is no longer a TownWold.");
 								}
 								else {
-									player.sendMessage(ChatColor.RED + "TownWorld is not aenabled in this world!");
+									player.sendMessage(ChatColor.RED + "TownWorld is not enabled in this world!");
 								}
 							}
 							else {
@@ -948,6 +948,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 				if(args.length != 0) {
 					if(isTownWorld(player.getWorld().getName())) {
 						config = YamlConfiguration.loadConfiguration(playerFile);
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						if(args[0].equals("create")) {
 							if(args.length == 2) {
 								int joinedTowns = config.getStringList(player.getName() + ".joinedTowns").size();

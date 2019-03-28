@@ -1,4 +1,4 @@
-package regions;
+package com.ue.townsystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,11 +12,13 @@ import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.ue.exceptions.town.ChunkAlreadyClaimedException;
-import com.ue.exceptions.town.ChunkNotClaimedByThisTownException;
-import com.ue.exceptions.town.PlayerIsAlreadyCitizenException;
-import com.ue.exceptions.town.PlayerIsAlreadyCoOwnerException;
-import com.ue.exceptions.town.PlayerIsNotCitizenException;
+import com.ue.exceptions.townsystem.ChunkAlreadyClaimedException;
+import com.ue.exceptions.townsystem.ChunkNotClaimedByThisTownException;
+import com.ue.exceptions.townsystem.PlayerIsAlreadyCitizenException;
+import com.ue.exceptions.townsystem.PlayerIsAlreadyCoOwnerException;
+import com.ue.exceptions.townsystem.PlayerIsNotCitizenException;
+import com.ue.exceptions.townsystem.PlotIsAlreadyForSaleException;
+import com.ue.exceptions.townsystem.PlotIsNotForSaleException;
 
 public class Town {
 
@@ -25,7 +27,8 @@ public class Town {
 	private ArrayList<String> citizens,coOwners;
 	private ArrayList<String> chunkCoords;
 	private Location townSpawn;
-	private File file;
+	//private File file;
+	private ArrayList<Plot> plots;
 	
 	/**
 	 * <p>
@@ -43,18 +46,17 @@ public class Town {
 		citizens = new ArrayList<>();
 		coOwners = new ArrayList<>();
 		chunkCoords = new ArrayList<>();
-		this.owner = owner;
+		plots = new ArrayList<>();
 		citizens.add(owner);
 		chunkCoords.add(startChunk.getX() + "/" + startChunk.getZ());
-		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-		config.set("Towns." + townName + ".owner", owner);
-		config.set("Towns." + townName + ".coOwners", coOwners);
-		config.set("Towns." + townName + ".citizens", citizens);
-		config.set("Towns." + townName + ".chunks", chunkCoords);
 		if(startChunk != null) {
+			setOwner(file, owner);
+			setCoOwners(coOwners);
+			setCiticens(citizens);
+			setChunkList(chunkCoords);
 			Location spawn = new Location(startChunk.getWorld(), (startChunk.getX() << 4) + 7, 0, (startChunk.getZ() << 4) + 7);
 			spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn));
-			config.set("Towns." + townName + ".townspawn", spawn.getX() + "/" + spawn.getY() + "/" + spawn.getZ());
+			setTownSpawn(file, spawn);
 		}
 		save(file);
 	}
@@ -76,11 +78,55 @@ public class Town {
 	}
 	
 	/**
+	 * 
+	 * @param chunk	(format "X/Z")
+	 * @throws ChunkNotClaimedByThisTownException 
+	 * @throws PlotIsNotForSaleException 
+	 * @throws PlotIsAlreadyForSaleException 
+	 */
+	public void setSlotForSale(File file,double salePrice,int chunkX,int chunkZ) throws ChunkNotClaimedByThisTownException, PlotIsAlreadyForSaleException, PlotIsNotForSaleException {
+		String coords = chunkX + "/" + chunkZ;
+		if(chunkCoords.contains(coords)) {
+			getPlotByChunkCoords(coords).setForSale(file, true, salePrice);
+		}
+		else {
+			throw new ChunkNotClaimedByThisTownException(coords);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param chunk	(format "X/Z")
+	 * @throws ChunkNotClaimedByThisTownException 
+	 * @throws PlotIsNotForSaleException 
+	 * @throws PlotIsAlreadyForSaleException 
+	 */
+	public void removeSlotFromSale(File file,double salePrice,int chunkX,int chunkZ) throws ChunkNotClaimedByThisTownException, PlotIsAlreadyForSaleException, PlotIsNotForSaleException {
+		String coords = chunkX + "/" + chunkZ;
+		if(chunkCoords.contains(coords)) {
+			getPlotByChunkCoords(coords).setForSale(file, false, 0);
+		}
+		else {
+			throw new ChunkNotClaimedByThisTownException(coords);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param citizen
+	 * @param chunk	(format "X/Z")
+	 */
+	public void buySlot(String citizen,String chunk) {
+		//TODO
+		
+	}
+	
+	/**
 	 * <p>
 	 * Adds a chunk to a town
 	 * <p>
 	 * @param file
-	 * @param chunk
+	 * @param chunk	(format "X/Z")
 	 * @throws ChunkAlreadyClaimedException 
 	 */
 	public void addChunk(File file,int chunkX,int chunkZ) throws ChunkAlreadyClaimedException {
@@ -90,6 +136,7 @@ public class Town {
 			chunkCoords.add(coords);
 			config.set("Towns." + townName + ".chunks", chunkCoords);
 			save(file);
+			plots.add(new Plot(file, owner, coords, townName));
 		}
 		else {
 			throw new ChunkAlreadyClaimedException(coords);
@@ -101,7 +148,7 @@ public class Town {
 	 * Removes a chunk from a town
 	 * <p>
 	 * @param file
-	 * @param chunk
+	 * @param chunk	(format "X/Z")
 	 * @throws ChunkNotClaimedByThisTownException 
 	 */
 	@SuppressWarnings("deprecation")
@@ -115,6 +162,16 @@ public class Town {
 			//TODO not for future, find a better solution
 			world.regenerateChunk(chunkX, chunkZ);
 			world.save();
+			int index = -1;
+			for(Plot plot: plots) {
+				if(plot.getChunkCoords().equals(coords)) {
+					index = plots.indexOf(plot);
+					break;
+				}
+			}
+			if(index != -1) {
+				plots.remove(index);
+			}
 		}
 		else {
 			throw new ChunkNotClaimedByThisTownException(coords);
@@ -236,12 +293,22 @@ public class Town {
 	}
 	/**
 	 * <p>
-	 * Set chunklist.
+	 * Set the chunklist.
 	 * <p>
 	 * @param chunkCoords
 	 */
 	public void setChunkList(List<String> chunkCoords) {
 		this.chunkCoords.addAll(chunkCoords);
+	}
+	
+	/**
+	 * <p>
+	 * Set the plotlist
+	 * <p>
+	 * @param list
+	 */
+	public void setPlotList(ArrayList<Plot> list) {
+		plots = list;
 	}
 	
 	/**
@@ -304,13 +371,13 @@ public class Town {
 			save(file);
 		}
 		else {
-			throw new PlayerIsAlreadyCoOwnerException(coOwner);
+			throw new PlayerIsAlreadyCoOwnerException(coOwner,"town");
 		}
 	}
 	
 	private void save(File file) {
 		try {
-			this.file = file;
+			//this.file = file;
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			config.save(file);
 		} catch (IOException e) {
@@ -324,15 +391,15 @@ public class Town {
 	 * <p>
 	 * @return File
 	 */
-	public File getFile() {
+	/*public File getFilea() {
 		return file;
-	}
+	}*/
 	
 	/**
 	 * <p>
 	 * Returns true if the cunk is owned by any town
 	 * <p>
-	 * @param chunk
+	 * @param chunk	(format "X/Z")
 	 * @return
 	 */
 	public boolean isClaimedByTown(Chunk chunk) {
@@ -344,6 +411,27 @@ public class Town {
 	}
 	
 	/**
+	 * 
+	 * @param coords
+	 * @return
+	 * @throws ChunkNotClaimedByThisTownException
+	 */
+	private Plot getPlotByChunkCoords(String coords) throws ChunkNotClaimedByThisTownException {
+		Plot p = null;
+		for(Plot plot:plots) {
+			if(plot.getChunkCoords().equals(coords)) {
+				p = plot;
+			}
+		}
+		if(p != null) {
+			return p;
+		}
+		else {
+			throw new ChunkNotClaimedByThisTownException(coords);
+		}
+	}
+	
+	/**
 	 * <p>
 	 * Static method for loading a existing town by name.
 	 * <p>
@@ -352,12 +440,16 @@ public class Town {
 	 * @return
 	 */
 	public static Town loadTown(File file,String townName) {
-		//TODO 
 		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 		Town town = new Town(file, config.getString("Towns." + townName + ".owner"), townName, null);
 		town.setCoOwners(config.getStringList("Towns." + townName + ".coOwners"));
 		town.setCiticens(config.getStringList("Towns." + townName + ".citizens"));
 		town.setChunkList(config.getStringList("Towns." + townName + ".chunks"));
+		ArrayList<Plot> plotList = new ArrayList<>();
+		for(String coords:town.getChunkList()) {
+			plotList.add(Plot.loadPlot(file, townName, coords));
+		}
+		town.setPlotList(plotList);
 		String locationString = config.getString("Towns." + townName + ".townspawn");
 		town.setTownSpawn(file, new Location(Bukkit.getWorld(config.getString("World")), Integer.valueOf(locationString.substring(0, locationString.indexOf("/"))), Integer.valueOf(locationString.substring(locationString.indexOf("/")+1,locationString.lastIndexOf("/"))), Integer.valueOf(locationString.substring(locationString.lastIndexOf("/")+1))));
 		return town;

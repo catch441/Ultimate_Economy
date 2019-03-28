@@ -1,4 +1,4 @@
-package com.ue.exceptions.town;
+package com.ue.exceptions.townsystem;
 
 public class ChunkAlreadyClaimedException extends Exception {
 

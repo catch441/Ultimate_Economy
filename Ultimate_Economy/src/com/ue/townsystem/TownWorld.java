@@ -1,4 +1,4 @@
-package regions;
+package com.ue.townsystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,10 +10,10 @@ import org.bukkit.Chunk;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.ue.exceptions.town.ChunkAlreadyClaimedException;
-import com.ue.exceptions.town.ChunkNotClaimedByThisTownException;
-import com.ue.exceptions.town.TownAlreadyExistsException;
-import com.ue.exceptions.town.TownDoesNotExistException;
+import com.ue.exceptions.townsystem.ChunkAlreadyClaimedException;
+import com.ue.exceptions.townsystem.ChunkNotClaimedByThisTownException;
+import com.ue.exceptions.townsystem.TownAlreadyExistsException;
+import com.ue.exceptions.townsystem.TownDoesNotExistException;
 
 import ultimate_economy.Ultimate_Economy;
 
@@ -98,7 +98,7 @@ public class TownWorld {
 		else {
 			Town town = new Town(file, owner, name, chunk);
 			towns.add(town);
-			file = town.getFile();
+			//file = town.getFile();
 			config = YamlConfiguration.loadConfiguration(file);
 			townNames.add(name);
 			config.set("TownNames", townNames);
@@ -158,8 +158,9 @@ public class TownWorld {
 		}
 	}
 	
-	public void setTownSpawn() {
+	public Town getTownByName() {
 		//TODO
+		return null;
 	}
 	
 	
