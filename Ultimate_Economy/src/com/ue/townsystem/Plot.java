@@ -8,6 +8,7 @@ import java.util.List;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import com.ue.exceptions.townsystem.ChunkNotClaimedByThisTownException;
 import com.ue.exceptions.townsystem.PlayerIsAlreadyCoOwnerException;
 import com.ue.exceptions.townsystem.PlotIsAlreadyForSaleException;
 import com.ue.exceptions.townsystem.PlotIsNotForSaleException;
@@ -16,10 +17,10 @@ public class Plot {
 
 	private String owner;
 	private List<String> coOwners;
-	private String chunkCoords;
+	private final String chunkCoords;
 	private boolean isForSale;
 	private double salePrice;
-	private String townName;
+	private final String townName;
 	
 	/**
 	 * <p>
@@ -60,7 +61,7 @@ public class Plot {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 		config.set("Town." + townName + ".Plots." + chunkCoords + ".owner", owner);
 		this.owner = owner;
-		save(file);
+		save(file,config);
 	}
 	
 	/**
@@ -80,7 +81,7 @@ public class Plot {
 	 * @param file
 	 * @param coOwners
 	 */
-	public void setCoOwners(File file,List<String> coOwners) {
+	public void setCoOwners(List<String> coOwners) {
 		this.coOwners = coOwners;
 	}
 	
@@ -97,11 +98,21 @@ public class Plot {
 			coOwners.add(citizen);
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			config.set("Town." + townName + ".Plots." + chunkCoords + ".coOwners", coOwners);
-			save(file);
+			save(file,config);
 		}
 		else {
 			throw new PlayerIsAlreadyCoOwnerException(citizen, "plot");
 		}
+	}
+	
+	/**
+	 * <p>
+	 * Set 'isForSale' without saving it in the file.
+	 * <p>
+	 * @param isForSale
+	 */
+	public void setForSale(boolean isForSale) {
+		this.isForSale = isForSale;
 	}
 	
 	/**
@@ -160,7 +171,7 @@ public class Plot {
 	
 	/**
 	 * <p>
-	 * Set this plot for sale.
+	 * Set this plot for sale with saving it in the file.
 	 * <p>
 	 * @param file
 	 * @param isForSale
@@ -173,10 +184,11 @@ public class Plot {
 			throw new PlotIsAlreadyForSaleException(chunkCoords);
 		}
 		else {
+			setForSale(isForSale);
 			this.isForSale = isForSale;
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			config.set("Town." + townName + ".Plots." + chunkCoords + ".isForSale", isForSale);
-			save(file);
+			save(file,config);
 			if(isForSale) {
 				setSalePrice(file, salePrice);
 			}
@@ -206,30 +218,48 @@ public class Plot {
 			throw new PlotIsNotForSaleException(chunkCoords);
 		}
 		else {
-			this.salePrice = salePrice;
+			setSalePrice(salePrice);
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			config.set("Town." + townName + ".Plots." + chunkCoords + ".salePrice", salePrice);
-			save(file);
+			save(file,config);
 		}
 	}
 	
 	/**
 	 * <p>
-	 * Saves a file.
+	 * Set 'salePrice' without saving.
+	 * <p>
+	 * @param salePrice
+	 */
+	public void setSalePrice(double salePrice) {
+		this.salePrice = salePrice;
+	}
+	
+	/**
+	 * <p>
+	 * Saves a config in a file.
 	 * <p>
 	 * @param file
+	 * @param config
 	 */
-	private void save(File file) {
+	private void save(File file,FileConfiguration config) {
 		try {
-			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			config.save(file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public static Plot loadPlot(File file,String townName,String coords) {
-		//TODO
-		return null;
+	public static Plot loadPlot(File file,String townName,String coords) throws ChunkNotClaimedByThisTownException {
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+		if(config.getStringList("Towns." + townName + ".chunks").contains(coords)) {
+			Plot plot = new Plot(file, config.getString("Town." + townName + ".Plots." + coords + ".owner"), coords, townName);
+			plot.setForSale(config.getBoolean("Town." + townName + ".Plots." + coords + ".isForSale"));
+			plot.setCoOwners(config.getStringList("Town." + townName + ".Plots." + coords + ".coOwners"));
+			return plot;
+		}
+		else {
+			throw new ChunkNotClaimedByThisTownException(coords);
+		}
 	}
 }

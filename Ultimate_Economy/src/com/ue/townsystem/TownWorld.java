@@ -10,8 +10,13 @@ import org.bukkit.Chunk;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import com.ue.utils.LimitationUtils;
+import com.ue.utils.PaymentUtils;
+import com.ue.exceptions.banksystem.PlayerDoesNotExistException;
+import com.ue.exceptions.banksystem.PlayerHasNotEnoughtMoneyException;
 import com.ue.exceptions.townsystem.ChunkAlreadyClaimedException;
 import com.ue.exceptions.townsystem.ChunkNotClaimedByThisTownException;
+import com.ue.exceptions.townsystem.PlayerReachedMaxJoinedTownsException;
 import com.ue.exceptions.townsystem.TownAlreadyExistsException;
 import com.ue.exceptions.townsystem.TownDoesNotExistException;
 
@@ -20,7 +25,7 @@ import ultimate_economy.Ultimate_Economy;
 public class TownWorld {
 
 	private double foundationPrice,expandPrice;
-	private static String worldName;
+	private final String worldName;
 	private File file;
 	private FileConfiguration config;
 	private List<String> townNames;
@@ -79,30 +84,45 @@ public class TownWorld {
 	}
 	/**
 	 * <p>
-	 * Creates a new town
+	 * Creates a new town if player has enough money. Player money decreases if player has enough money.
 	 * <p>
-	 * @param name
+	 * @param townName
 	 * @param chunk
 	 * @param owner
+	 * @param playerfile
 	 * @throws TownAlreadyExistsException
 	 * @throws ChunkAlreadyClaimedException
+	 * @throws PlayerDoesNotExistException 
+	 * @throws PlayerHasNotEnoughtMoneyException 
+	 * @throws PlayerReachedMaxJoinedTownsException 
 	 */
-	public void createTown(String name,Chunk chunk,String owner) throws TownAlreadyExistsException, ChunkAlreadyClaimedException {
+	public void createTown(File playerfile,FileConfiguration configFile,String townName,Chunk chunk,String owner) throws TownAlreadyExistsException, ChunkAlreadyClaimedException, PlayerDoesNotExistException, PlayerHasNotEnoughtMoneyException, PlayerReachedMaxJoinedTownsException {
 		config = YamlConfiguration.loadConfiguration(file);
-		if(townNames.contains(name) ) {
-			throw new TownAlreadyExistsException(name);
+		if(townNames.contains(townName) ) {
+			throw new TownAlreadyExistsException(townName);
 		}
 		else if(!chunkIsFree(chunk)) {
 			throw new ChunkAlreadyClaimedException(chunk.getX() + "/" + chunk.getZ());
 		}
+		else if(!PaymentUtils.playerHasEnoughtMoney(playerfile, owner, this.getFoundationPrice())) {
+			throw new PlayerHasNotEnoughtMoneyException(owner,true);
+		}
+		else if(LimitationUtils.playerReachedMaxTowns(playerfile, configFile, owner)) {
+			throw new PlayerReachedMaxJoinedTownsException(owner);
+		}
 		else {
-			Town town = new Town(file, owner, name, chunk);
+			Town town = new Town(file, owner, townName, chunk);
 			towns.add(town);
-			//file = town.getFile();
 			config = YamlConfiguration.loadConfiguration(file);
-			townNames.add(name);
+			townNames.add(townName);
 			config.set("TownNames", townNames);
 			save();
+			FileConfiguration pf = YamlConfiguration.loadConfiguration(playerfile);
+			List<String> list = pf.getStringList(owner + ".joinedTowns");
+			list.add(townName);
+			pf.set(owner + ".joinedTowns", list);
+			save(playerfile, pf);
+			PaymentUtils.decreasePlayerAmount(playerfile, owner, this.getFoundationPrice());
 		}
 	}
 	/**
@@ -115,6 +135,7 @@ public class TownWorld {
 	 * @throws ChunkNotClaimedByThisTownException
 	 */
 	public void dissolveTown(String townname) throws TownDoesNotExistException, NumberFormatException, ChunkNotClaimedByThisTownException {
+		//TODO expand with payment
 		config = YamlConfiguration.loadConfiguration(file);
 		if(!townNames.contains(townname) ) {
 			throw new TownDoesNotExistException(townname);
@@ -141,6 +162,7 @@ public class TownWorld {
 	 * @throws TownDoesNotExistException
 	 */
 	public void expandTown(String townname,Chunk chunk) throws ChunkAlreadyClaimedException, TownDoesNotExistException {
+		//TODO expand with payment
 		config = YamlConfiguration.loadConfiguration(file);
 		if(!townNames.contains(townname)) {
 			throw new TownDoesNotExistException(townname);
@@ -158,11 +180,10 @@ public class TownWorld {
 		}
 	}
 	
-	public Town getTownByName() {
+	public Town getTownByName(String townName) {
 		//TODO
 		return null;
 	}
-	
 	
 	/**
 	 * <p>
@@ -224,6 +245,14 @@ public class TownWorld {
 	}
 	private void save() {
 		try {
+			config.save(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	private void save(File file,FileConfiguration config) {
+		try {
+			config = YamlConfiguration.loadConfiguration(file);
 			config.save(file);
 		} catch (IOException e) {
 			e.printStackTrace();

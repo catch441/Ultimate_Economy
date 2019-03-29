@@ -54,8 +54,12 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
+import com.ue.exceptions.banksystem.PlayerDoesNotExistException;
+import com.ue.exceptions.banksystem.PlayerHasNotEnoughtMoneyException;
 import com.ue.exceptions.townsystem.ChunkAlreadyClaimedException;
+import com.ue.exceptions.townsystem.PlayerReachedMaxJoinedTownsException;
 import com.ue.exceptions.townsystem.TownAlreadyExistsException;
+import com.ue.exceptions.townsystem.TownworldDoesNotExistException;
 import com.ue.townsystem.TownWorld;
 
 import job.Job;
@@ -117,6 +121,14 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 			getConfig().set("ItemList", null);
 			saveConfig();
 		}
+		playerFile = new File(getDataFolder() , "PlayerFile.yml");
+		if(!playerFile.exists()) {
+			try {
+				playerFile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		if(getConfig().getInt("MaxHomes") == 0) {
 			getConfig().set("MaxHomes", 3);
 		}
@@ -145,14 +157,6 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 			jobList.add(s);
 			jobs.add(new Job(this.getDataFolder(), s));
 		}	
-		playerFile = new File(getDataFolder() , "PlayerFile.yml");
-		if(!playerFile.exists()) {
-			try {
-				playerFile.createNewFile();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 		config = YamlConfiguration.loadConfiguration(playerFile);
 		spawner = new File(getDataFolder() , "SpawnerLocations.yml");
 		if(!spawner.exists()) {
@@ -594,15 +598,14 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 						}
 						else if(args[0].equals("disable")) {
 							if(args.length == 2) {
-								if(isTownWorld(args[1])) {
-									worldList.remove(args[1]);
+								worldList.remove(args[1]);
+								try {
 									getTownWorld(args[1]).delete();
 									townWorlds.remove(getTownWorld(args[1]));
-									player.sendMessage(ChatColor.GREEN + args[1] + ChatColor.GOLD + " is no longer a TownWold.");
+								} catch (TownworldDoesNotExistException e) {
+									player.sendMessage(ChatColor.RED + e.getMessage());
 								}
-								else {
-									player.sendMessage(ChatColor.RED + "TownWorld is not enabled in this world!");
-								}
+								player.sendMessage(ChatColor.GREEN + args[1] + ChatColor.GOLD + " is no longer a TownWold.");
 							}
 							else {
 								player.sendMessage("/townWorld deactivate <worldname>");
@@ -610,13 +613,14 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 						}
 						else if(args[0].equals("setFoundationPrice")) {
 							if(args.length == 3) {
-								if(isTownWorld(args[1])) {
+								try {
 									getTownWorld(args[1]).setFoundationPrice(Double.valueOf(args[2]));
-									player.sendMessage(ChatColor.GOLD + "FoundationPrice changed to " + ChatColor.GREEN + args[2]);
+								} catch (NumberFormatException e) {
+									e.printStackTrace();
+								} catch (TownworldDoesNotExistException e) {
+									player.sendMessage(ChatColor.RED + e.getMessage());
 								}
-								else {
-									player.sendMessage(ChatColor.RED + "TownWorld is not enabled in this world!");
-								}
+								player.sendMessage(ChatColor.GOLD + "FoundationPrice changed to " + ChatColor.GREEN + args[2]);
 							}
 							else {
 								player.sendMessage("/townWorld setFoundationPrice <worldname> <price>");
@@ -624,13 +628,14 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 						}
 						else if(args[0].equals("setExpandPrice")) {
 							if(args.length == 3) {
-								if(isTownWorld(args[1])) {
+								try {
 									getTownWorld(args[1]).setExpandPrice(Double.valueOf(args[2]));
-									player.sendMessage(ChatColor.GOLD + "ExpandPrice changed to " + ChatColor.GREEN + args[2]);
+								} catch (NumberFormatException e) {
+									e.printStackTrace();
+								} catch (TownworldDoesNotExistException e) {
+									player.sendMessage(ChatColor.RED + e.getMessage());
 								}
-								else {
-									player.sendMessage(ChatColor.RED + "TownWorld is not enabled in this world!");
-								}
+								player.sendMessage(ChatColor.GOLD + "ExpandPrice changed to " + ChatColor.GREEN + args[2]);
 							}
 							else {
 								player.sendMessage("/townWorld setExpandPrice <worldname> <price per chunk");
@@ -951,31 +956,14 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						if(args[0].equals("create")) {
 							if(args.length == 2) {
-								int joinedTowns = config.getStringList(player.getName() + ".joinedTowns").size();
-								TownWorld tWorld = getTownWorld(player.getWorld().getName());
-								if(joinedTowns < getConfig().getInt("MaxJoinedTowns") && tWorld.getFoundationPrice() <= config.getDouble(player.getName() + ".account amount")) {
-									List<String> towns = getConfig().getStringList("TownList");
-									try {
-										tWorld.createTown(args[1], player.getLocation().getChunk(),player.getName());
-										config.set(player.getName() + ".account amount", config.getDouble(player.getName() + ".account amount") - tWorld.getFoundationPrice());
-										List<String> list = config.getStringList(player.getName() + ".joinedTowns");
-										list.add(args[1]);
-										config.set(player.getName() + ".joinedTowns", list);
-										saveFile(playerFile);
-										towns.add(args[1]);
-										getConfig().set("TownList", towns);
-										saveConfig();
-										updateScoreBoard(player);
-										player.sendMessage(ChatColor.GOLD + "Congratulation! You founded the new city " + ChatColor.GREEN + args[1] + ChatColor.GOLD + "!");
-									} catch (TownAlreadyExistsException | ChunkAlreadyClaimedException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
-								}
-								else if(tWorld.getFoundationPrice() > config.getDouble(player.getName() + ".account amount")){
-									player.sendMessage(ChatColor.RED + "You don't have enough money to found a new city!");
-								}
-								else if(joinedTowns >= getConfig().getInt("MaxJoinedTowns")){
-									player.sendMessage(ChatColor.RED +  "You already reached the maximum joined towns!");
+								try {
+									TownWorld tWorld = getTownWorld(player.getWorld().getName());
+									tWorld.createTown(playerFile,getConfig(),args[1], player.getLocation().getChunk(),player.getName());
+									updateScoreBoard(player);
+									player.sendMessage(ChatColor.GOLD + "Congratulation! You founded the new city " + ChatColor.GREEN + args[1] + ChatColor.GOLD + "!");
+								} catch (TownAlreadyExistsException | ChunkAlreadyClaimedException | PlayerReachedMaxJoinedTownsException | TownworldDoesNotExistException
+										| PlayerDoesNotExistException | PlayerHasNotEnoughtMoneyException e) {
+									player.sendMessage(ChatColor.RED + e.getMessage());
 								}
 							}
 							else {
@@ -2243,7 +2231,12 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 		if(event.getPlayer().getGameMode() == GameMode.SURVIVAL) {
 			config = YamlConfiguration.loadConfiguration(playerFile);
 			if(isTownWorld(event.getBlock().getWorld().getName())) {
-				TownWorld townWorld = getTownWorld(event.getBlock().getWorld().getName());
+				TownWorld townWorld = null;
+				try {
+					townWorld = getTownWorld(event.getBlock().getWorld().getName());
+				} catch (TownworldDoesNotExistException e) {
+					e.printStackTrace();
+				}
 				if(townWorld.chunkIsFree(event.getBlock().getChunk())) {
 					event.setCancelled(true);
 					event.getPlayer().sendMessage(ChatColor.RED + "You are in the wilderness!");
@@ -2572,13 +2565,16 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 	}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	private TownWorld getTownWorld(String arg) {
+	private TownWorld getTownWorld(String arg) throws TownworldDoesNotExistException {
 		TownWorld tWorld = null;
 		for(TownWorld world:townWorlds) {
 			if(world.getWorldName().equals(arg)) {
 				tWorld = world;
 				break;
 			}
+		}
+		if(tWorld == null) {
+			throw new TownworldDoesNotExistException(arg);
 		}
 		return tWorld;
 	}

@@ -12,6 +12,8 @@ import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import com.ue.exceptions.banksystem.PlayerDoesNotExistException;
+import com.ue.exceptions.banksystem.PlayerHasNotEnoughtMoneyException;
 import com.ue.exceptions.townsystem.ChunkAlreadyClaimedException;
 import com.ue.exceptions.townsystem.ChunkNotClaimedByThisTownException;
 import com.ue.exceptions.townsystem.PlayerIsAlreadyCitizenException;
@@ -19,6 +21,8 @@ import com.ue.exceptions.townsystem.PlayerIsAlreadyCoOwnerException;
 import com.ue.exceptions.townsystem.PlayerIsNotCitizenException;
 import com.ue.exceptions.townsystem.PlotIsAlreadyForSaleException;
 import com.ue.exceptions.townsystem.PlotIsNotForSaleException;
+import com.ue.exceptions.townsystem.TownDoesNotExistException;
+import com.ue.utils.PaymentUtils;
 
 public class Town {
 
@@ -27,8 +31,8 @@ public class Town {
 	private ArrayList<String> citizens,coOwners;
 	private ArrayList<String> chunkCoords;
 	private Location townSpawn;
-	//private File file;
 	private ArrayList<Plot> plots;
+	private double tax; //TODO integrate tax system
 	
 	/**
 	 * <p>
@@ -58,7 +62,6 @@ public class Town {
 			spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn));
 			setTownSpawn(file, spawn);
 		}
-		save(file);
 	}
 	
 	public void createTownManagerVillager() {
@@ -78,7 +81,9 @@ public class Town {
 	}
 	
 	/**
-	 * 
+	 * <p>
+	 * 	Set a plot for sale.
+	 * <p>
 	 * @param chunk	(format "X/Z")
 	 * @throws ChunkNotClaimedByThisTownException 
 	 * @throws PlotIsNotForSaleException 
@@ -95,7 +100,9 @@ public class Town {
 	}
 	
 	/**
-	 * 
+	 * <p>
+	 * Remove a slot from sale.
+	 * <p>
 	 * @param chunk	(format "X/Z")
 	 * @throws ChunkNotClaimedByThisTownException 
 	 * @throws PlotIsNotForSaleException 
@@ -112,13 +119,29 @@ public class Town {
 	}
 	
 	/**
-	 * 
+	 * <p>
+	 * Buy a plot in a town if the plot is for sale.
+	 * <p>
 	 * @param citizen
 	 * @param chunk	(format "X/Z")
+	 * @throws ChunkNotClaimedByThisTownException 
+	 * @throws PlayerDoesNotExistException 
+	 * @throws PlotIsNotForSaleException 
+	 * @throws PlayerHasNotEnoughtMoneyException (expect that the buyer is the same as the command/ui executor)
 	 */
-	public void buySlot(String citizen,String chunk) {
-		//TODO
-		
+	public void buyPlot(File townworldfile,File playerfile,String citizen,String chunk) throws ChunkNotClaimedByThisTownException, PlayerDoesNotExistException, PlotIsNotForSaleException, PlayerHasNotEnoughtMoneyException {
+		Plot plot = getPlotByChunkCoords(chunk);
+		if(!plot.isForSale()) {
+			throw new PlotIsNotForSaleException(chunk);
+		}
+		else if(PaymentUtils.playerHasEnoughtMoney(playerfile, citizen, plot.getSalePrice())){
+			throw new PlayerHasNotEnoughtMoneyException(citizen,true);
+		}
+		else {
+			plot.setOwner(townworldfile, citizen);
+			plot.setForSale(false);
+			PaymentUtils.decreasePlayerAmount(playerfile, citizen, plot.getSalePrice());
+		}
 	}
 	
 	/**
@@ -135,7 +158,7 @@ public class Town {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			chunkCoords.add(coords);
 			config.set("Towns." + townName + ".chunks", chunkCoords);
-			save(file);
+			save(file,config);
 			plots.add(new Plot(file, owner, coords, townName));
 		}
 		else {
@@ -158,7 +181,7 @@ public class Town {
 			chunkCoords.remove(coords);
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			config.set("Towns." + townName + ".chunks", chunkCoords);
-			save(file);
+			save(file,config);
 			//TODO not for future, find a better solution
 			world.regenerateChunk(chunkX, chunkZ);
 			world.save();
@@ -199,7 +222,7 @@ public class Town {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 		this.owner = owner;
 		config.set("Towns." + townName + ".owner", owner);
-		save(file);
+		save(file,config);
 	}
 	
 	/**
@@ -234,7 +257,7 @@ public class Town {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			citizens.add(newCitizen);
 			config.set("Towns." + townName + ".citizens", citizens);
-			save(file);
+			save(file,config);
 		}
 		else {
 			throw new PlayerIsAlreadyCitizenException(newCitizen);
@@ -254,7 +277,7 @@ public class Town {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			citizens.remove(citizen);
 			config.set("Towns." + townName + ".citizens", citizens);
-			save(file);
+			save(file,config);
 		}
 		else {
 			throw new PlayerIsNotCitizenException(citizen);
@@ -332,7 +355,7 @@ public class Town {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 		this.townSpawn = townSpawn;
 		config.set("Towns." + townName + ".townspawn", townSpawn.getX() + "/" + townSpawn.getY() + "/" + townSpawn.getZ());
-		save(file);
+		save(file,config);
 	}
 	
 	/**
@@ -368,17 +391,16 @@ public class Town {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			coOwners.add(coOwner);
 			config.set("Towns." + townName + ".coOwners", coOwners);
-			save(file);
+			save(file,config);
 		}
 		else {
 			throw new PlayerIsAlreadyCoOwnerException(coOwner,"town");
 		}
 	}
 	
-	private void save(File file) {
+	private void save(File file,FileConfiguration config) {
 		try {
-			//this.file = file;
-			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+			config = YamlConfiguration.loadConfiguration(file);
 			config.save(file);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -411,7 +433,9 @@ public class Town {
 	}
 	
 	/**
-	 * 
+	 * <p>
+	 * Get a plot with the chunk coords.
+	 * <p>
 	 * @param coords
 	 * @return
 	 * @throws ChunkNotClaimedByThisTownException
@@ -438,20 +462,27 @@ public class Town {
 	 * @param file
 	 * @param townName
 	 * @return
+	 * @throws TownDoesNotExistException 
+	 * @throws ChunkNotClaimedByThisTownException 
 	 */
-	public static Town loadTown(File file,String townName) {
+	public static Town loadTown(File file,String townName) throws TownDoesNotExistException, ChunkNotClaimedByThisTownException {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-		Town town = new Town(file, config.getString("Towns." + townName + ".owner"), townName, null);
-		town.setCoOwners(config.getStringList("Towns." + townName + ".coOwners"));
-		town.setCiticens(config.getStringList("Towns." + townName + ".citizens"));
-		town.setChunkList(config.getStringList("Towns." + townName + ".chunks"));
-		ArrayList<Plot> plotList = new ArrayList<>();
-		for(String coords:town.getChunkList()) {
-			plotList.add(Plot.loadPlot(file, townName, coords));
+		if(config.getStringList("TownNames").contains(townName)) {
+			Town town = new Town(file, config.getString("Towns." + townName + ".owner"), townName, null);
+			town.setCoOwners(config.getStringList("Towns." + townName + ".coOwners"));
+			town.setCiticens(config.getStringList("Towns." + townName + ".citizens"));
+			town.setChunkList(config.getStringList("Towns." + townName + ".chunks"));
+			ArrayList<Plot> plotList = new ArrayList<>();
+			for(String coords:town.getChunkList()) {
+				plotList.add(Plot.loadPlot(file, townName, coords));
+			}
+			town.setPlotList(plotList);
+			String locationString = config.getString("Towns." + townName + ".townspawn");
+			town.setTownSpawn(file, new Location(Bukkit.getWorld(config.getString("World")), Integer.valueOf(locationString.substring(0, locationString.indexOf("/"))), Integer.valueOf(locationString.substring(locationString.indexOf("/")+1,locationString.lastIndexOf("/"))), Integer.valueOf(locationString.substring(locationString.lastIndexOf("/")+1))));
+			return town;
 		}
-		town.setPlotList(plotList);
-		String locationString = config.getString("Towns." + townName + ".townspawn");
-		town.setTownSpawn(file, new Location(Bukkit.getWorld(config.getString("World")), Integer.valueOf(locationString.substring(0, locationString.indexOf("/"))), Integer.valueOf(locationString.substring(locationString.indexOf("/")+1,locationString.lastIndexOf("/"))), Integer.valueOf(locationString.substring(locationString.lastIndexOf("/")+1))));
-		return town;
+		else {
+			throw new TownDoesNotExistException(townName);
+		}
 	}
 }
