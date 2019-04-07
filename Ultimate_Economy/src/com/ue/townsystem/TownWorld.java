@@ -6,19 +6,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.inventory.InventoryClickEvent;
 
 import com.ue.utils.LimitationUtils;
 import com.ue.utils.PaymentUtils;
 import com.ue.exceptions.banksystem.PlayerDoesNotExistException;
 import com.ue.exceptions.banksystem.PlayerHasNotEnoughtMoneyException;
-import com.ue.exceptions.townsystem.ChunkAlreadyClaimedException;
-import com.ue.exceptions.townsystem.ChunkNotClaimedByThisTownException;
-import com.ue.exceptions.townsystem.PlayerReachedMaxJoinedTownsException;
-import com.ue.exceptions.townsystem.TownAlreadyExistsException;
-import com.ue.exceptions.townsystem.TownDoesNotExistException;
+import com.ue.exceptions.banksystem.TownHasNotEnoughMoneyException;
+import com.ue.exceptions.townsystem.TownSystemException;
 
 import ultimate_economy.Ultimate_Economy;
 
@@ -31,17 +30,24 @@ public class TownWorld {
 	private List<String> townNames;
 	private List<Town> towns;
 	
+	/**
+	 * <p>
+	 * Represents a townworld.
+	 * <p>
+	 * @param main
+	 * @param world
+	 */
 	public TownWorld(Ultimate_Economy main,String world) {
 		worldName = world;
 		towns = new ArrayList<>();
 		file = new File(main.getDataFolder() , world + "_TownWorld" + ".yml");
+		config = YamlConfiguration.loadConfiguration(file);
 		if(!file.exists()) {
 			try {
 				file.createNewFile();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-		config = YamlConfiguration.loadConfiguration(file);
 		foundationPrice = 0;
 		expandPrice = 0;
 		config.set("World", world);
@@ -51,34 +57,114 @@ public class TownWorld {
 		save();
 		}
 		else {
-			config = YamlConfiguration.loadConfiguration(file);
-			townNames = config.getStringList("TownList");
+			townNames = config.getStringList("TownNames");
 			foundationPrice = config.getDouble("Config.foundationPrice");
 			expandPrice = config.getDouble("Config.expandPrice");
-			save();
 		}
 	}
+	
+	/**
+	 * <p>
+	 * Delete the save file.
+	 * <p>
+	 */
 	public void delete() {
 		file.delete();
+		despawnAllTownVillagers();
 	}
+	
+	/**
+	 * <p>
+	 * Despawns all town villagers in this townworld.
+	 * <p>
+	 */
+	public void despawnAllTownVillagers() {
+		for(Town town:towns) {
+			town.despawnAllVillagers();
+		}
+	}
+	
+	/**
+	 * <p>
+	 * Returns a list of all townnames in this townworld.
+	 * <p>
+	 * @return List
+	 */
+	public List<String> getTownNameList() {
+		return townNames;
+	}
+	
+	/**
+	 * <p>
+	 * Returns the founding price of this townworld.
+	 * <p>
+	 * @return
+	 */
 	public double getFoundationPrice() {
 		return foundationPrice;
 	}
-	public void setFoundationPrice(double foundationPrice) {
-		this.foundationPrice = foundationPrice;
-		config = YamlConfiguration.loadConfiguration(file);
-		config.set("Config.foundationPrice", foundationPrice);
-		save();
+	
+	/**
+	 * <p>
+	 * Set the town list.
+	 * <p>
+	 * @param towns
+	 */
+	public void setTownList(List<Town> towns) {
+		this.towns.addAll(towns);
 	}
+	
+	/**
+	 * <p>
+	 * Set the FoundationPrice for a town in this townworld.
+	 * Set 'saving' true if the value should be saved in the file.
+	 * <p>
+	 * @param foundationPrice
+	 * @param saving
+	 */
+	public void setFoundationPrice(double foundationPrice,boolean saving) {
+		this.foundationPrice = foundationPrice;
+		if(saving) {
+			config = YamlConfiguration.loadConfiguration(file);
+			config.set("Config.foundationPrice", foundationPrice);
+			save();
+		}
+	}
+	
+	/**
+	 * <p>
+	 * Returns the expand price for a town in this townworld.
+	 * <p>
+	 * @return double
+	 */
 	public double getExpandPrice() {
 		return expandPrice;
 	}
-	public void setExpandPrice(double expandPrice) {
+	
+	/**
+	 * <p>
+	 * Set the ExpandPrice for a town in this townworld.
+	 * Set 'saving' true if the value should be saved in the file.
+	 * <p>
+	 * @param expandPrice
+	 * @param saving
+	 */
+	public void setExpandPrice(double expandPrice,boolean saving) {
 		this.expandPrice = expandPrice;
-		config = YamlConfiguration.loadConfiguration(file);
-		config.set("Config.expandPrice", expandPrice);
-		save();
+		if(saving) {
+			config = YamlConfiguration.loadConfiguration(file);
+			config.set("Config.expandPrice", expandPrice);
+			save();
+		}
 	}
+	
+	
+	/**
+	 * <p>
+	 * Returns the Town World name.
+	 * <p>
+	 * @return String
+	 */
 	public String getWorldName() {
 		return worldName;
 	}
@@ -90,28 +176,28 @@ public class TownWorld {
 	 * @param chunk
 	 * @param owner
 	 * @param playerfile
-	 * @throws TownAlreadyExistsException
-	 * @throws ChunkAlreadyClaimedException
-	 * @throws PlayerDoesNotExistException 
+	 * @return file (playerfile)
+	 * @throws TownSystemException 
 	 * @throws PlayerHasNotEnoughtMoneyException 
-	 * @throws PlayerReachedMaxJoinedTownsException 
+	 * @throws PlayerDoesNotExistException 
 	 */
-	public void createTown(File playerfile,FileConfiguration configFile,String townName,Chunk chunk,String owner) throws TownAlreadyExistsException, ChunkAlreadyClaimedException, PlayerDoesNotExistException, PlayerHasNotEnoughtMoneyException, PlayerReachedMaxJoinedTownsException {
+	public File createTown(File playerfile,FileConfiguration configFile,String townName,Chunk chunk,String owner) throws TownSystemException, PlayerHasNotEnoughtMoneyException, PlayerDoesNotExistException {
 		config = YamlConfiguration.loadConfiguration(file);
 		if(townNames.contains(townName) ) {
-			throw new TownAlreadyExistsException(townName);
+			throw new TownSystemException(TownSystemException.TOWN_ALREADY_EXISTS);
 		}
 		else if(!chunkIsFree(chunk)) {
-			throw new ChunkAlreadyClaimedException(chunk.getX() + "/" + chunk.getZ());
+			throw new TownSystemException(TownSystemException.CHUNK_ALREADY_CLAIMED);
 		}
 		else if(!PaymentUtils.playerHasEnoughtMoney(playerfile, owner, this.getFoundationPrice())) {
 			throw new PlayerHasNotEnoughtMoneyException(owner,true);
 		}
 		else if(LimitationUtils.playerReachedMaxTowns(playerfile, configFile, owner)) {
-			throw new PlayerReachedMaxJoinedTownsException(owner);
+			throw new TownSystemException(TownSystemException.PLAYER_REACHED_MAX_JOINED_TOWNS);
 		}
 		else {
 			Town town = new Town(file, owner, townName, chunk);
+			file = town.getFile();
 			towns.add(town);
 			config = YamlConfiguration.loadConfiguration(file);
 			townNames.add(townName);
@@ -121,34 +207,48 @@ public class TownWorld {
 			List<String> list = pf.getStringList(owner + ".joinedTowns");
 			list.add(townName);
 			pf.set(owner + ".joinedTowns", list);
-			save(playerfile, pf);
-			PaymentUtils.decreasePlayerAmount(playerfile, owner, this.getFoundationPrice());
+			playerfile = save(playerfile, pf);
+			return PaymentUtils.decreasePlayerAmount(playerfile, owner, this.getFoundationPrice(),true);
 		}
 	}
 	/**
 	 * <p>
 	 * Dissolves a hole town and resets the chunks.
 	 * <p>
+	 * @param playerfile
 	 * @param townname
-	 * @throws TownDoesNotExistException
-	 * @throws NumberFormatException
-	 * @throws ChunkNotClaimedByThisTownException
+	 * @param playername
+	 * @return file (playerfile)
+	 * @throws TownSystemException 
 	 */
-	public void dissolveTown(String townname) throws TownDoesNotExistException, NumberFormatException, ChunkNotClaimedByThisTownException {
-		//TODO expand with payment
-		config = YamlConfiguration.loadConfiguration(file);
+	public File dissolveTown(File playerfile,String townname,String playername) throws TownSystemException {
 		if(!townNames.contains(townname) ) {
-			throw new TownDoesNotExistException(townname);
+			throw new TownSystemException(TownSystemException.TOWN_DOES_NOT_EXISTS);
 		}
 		else {
-			for(Town town: towns) {
-				if(town.getTownName().equals(townname)) {
-					for(String coords:town.getChunkList()) {
-						town.removeChunk(file, Integer.valueOf(coords.substring(0,coords.indexOf("/"))), Integer.valueOf(coords.substring(coords.indexOf("/")+1)),Bukkit.getWorld(worldName));
-					}
-					break;
+			Town town = getTownByName(townname);
+			if(town.isTownOwner(playername)) {
+				List<String> cList = new ArrayList<>();
+				cList.addAll(town.getChunkList());
+				for(String coords: cList) {
+					town.removeChunk(file, Integer.valueOf(coords.substring(0,coords.indexOf("/"))), Integer.valueOf(coords.substring(coords.indexOf("/")+1)),Bukkit.getWorld(worldName));
 				}
+				FileConfiguration c = YamlConfiguration.loadConfiguration(playerfile);
+				List<String> tList = new ArrayList<>();
+				tList.addAll(town.getCitizens());
+				for(String citizen:tList) {
+					List<String> list = c.getStringList(citizen + ".joinedTowns");
+					list.remove(townname);
+					c.set(citizen + ".joinedTowns", list);
+				}
+				delete();
+				townNames.remove(townname);
+				return save(playerfile, c);
 			}
+			else {
+				throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
+			}
+			
 		}
 	}
 	
@@ -158,31 +258,54 @@ public class TownWorld {
 	 * <p>
 	 * @param townname
 	 * @param chunk
-	 * @throws ChunkAlreadyClaimedException
-	 * @throws TownDoesNotExistException
+	 * @param player (playername who executed this method)
+	 * @throws TownSystemException 
+	 * @throws TownHasNotEnoughMoneyException 
 	 */
-	public void expandTown(String townname,Chunk chunk) throws ChunkAlreadyClaimedException, TownDoesNotExistException {
-		//TODO expand with payment
+	public void expandTown(String townname,Chunk chunk,String player) throws TownSystemException, TownHasNotEnoughMoneyException {
 		config = YamlConfiguration.loadConfiguration(file);
 		if(!townNames.contains(townname)) {
-			throw new TownDoesNotExistException(townname);
+			throw new TownSystemException(TownSystemException.TOWN_ALREADY_EXISTS);
 		}
 		else if(!chunkIsFree(chunk)) {
-			throw new ChunkAlreadyClaimedException(chunk.getX() + "/" + chunk.getZ());
+			throw new TownSystemException(TownSystemException.CHUNK_ALREADY_CLAIMED);
 		}
 		else {
-			for(Town town: towns) {
-				if(town.getTownName().equals(townname)) {
-					town.addChunk(file, chunk.getX(),chunk.getZ());
-					break;
-				}
+			Town town = getTownByName(townname);
+			if(!town.chunkIsConnectedToTown(chunk.getX(), chunk.getZ())) {
+				throw new TownSystemException(TownSystemException.CHUNK_IS_NOT_CONNECTED_WITH_TOWN);
+			}
+			else if(!town.hasCoOwnerPermission(player)) {
+				throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
+			}
+			else {
+				town.decreaseTownBankAmount(file, this.getExpandPrice());
+				file = town.addChunk(file, chunk.getX(),chunk.getZ(),player);
 			}
 		}
 	}
 	
-	public Town getTownByName(String townName) {
-		//TODO
-		return null;
+	/**
+	 * <p>
+	 * Returns a town by townname.
+	 * <p>
+	 * @param townName
+	 * @return Town
+	 * @throws TownSystemException 
+	 */
+	public Town getTownByName(String townName) throws TownSystemException {
+		Town t = null;
+		for(Town town:towns) {
+			if(town.getTownName().equals(townName)) {
+				t= town;
+			}
+		}
+		if(t != null) {
+			return t;
+		}
+		else {
+			throw new TownSystemException(TownSystemException.TOWN_DOES_NOT_EXISTS);
+		}
 	}
 	
 	/**
@@ -204,45 +327,53 @@ public class TownWorld {
 		}
 		return isFree;
 	}
+	 /**
+	  * <p>
+	  * Returns the townlist.
+	  * <p>
+	  * @return List
+	  */
+	public List<Town> getTownList() {
+		return towns;
+	}
 	
 	/**
 	 * <p>
-	 * Get town name by chunk. Returns null if chunk is not claimed by any town.
+	 * Returns town by chunk.
 	 * <p>
 	 * @param chunk
-	 * @return String
+	 * @return Town
+	 * @throws TownSystemException 
 	 */
-	public String getTownNameByChunk(Chunk chunk) {
+	public Town getTownByChunk(Chunk chunk) throws TownSystemException {
 		config = YamlConfiguration.loadConfiguration(file);
-		String townname = null;
 		for(Town town:towns) {
 			if(town.isClaimedByTown(chunk)) {
-				townname = town.getTownName();
-				break;
+				return town;
 			}
 		}
-		return townname;
+		throw new TownSystemException(TownSystemException.CHUNK_NOT_CLAIMED);
 	}
+	
 	/**
 	 * <p>
-	 * Returns true if player is a citizen of this town.
+	 * Returns the savefile of this townworld.
 	 * <p>
-	 * @param townname
-	 * @param playername
-	 * @return boolean
+	 * @return File
 	 */
-	public boolean isPlayerCitizen(String townname,String playername) {
-		config = YamlConfiguration.loadConfiguration(file);
-		boolean is = false;
-		if(config.getStringList("Towns." + townname + ".citizens").contains(playername)) {
-			is = true;
-		}
-		return is;
+	public File getSaveFile() {
+		return file;
 	}
-	public static TownWorld loadTownWorld(String name) {
-		//TODO
-		return null;
+	
+	/**
+	 * <p>
+	 * Set townworld save file.
+	 * <p>
+	 */
+	public void setSaveFile(File file) {
+		this.file = file;
 	}
+	
 	private void save() {
 		try {
 			config.save(file);
@@ -250,12 +381,74 @@ public class TownWorld {
 			e.printStackTrace();
 		}
 	}
-	private void save(File file,FileConfiguration config) {
+	
+	/**
+	 * <p>
+	 * Handles clicks in a town villager.
+	 * Handles payment too.
+	 * <p>
+	 * @param playerfile
+	 * @param e
+	 * @return file (playerfile)
+	 * @throws PlayerHasNotEnoughtMoneyException 
+	 * @throws PlayerDoesNotExistException 
+	 * @throws TownSystemException 
+	 */
+	public File handleTownVillagerInvClick(File playerfile,InventoryClickEvent e) throws PlayerHasNotEnoughtMoneyException, PlayerDoesNotExistException, TownSystemException {
+		Chunk chunk = e.getWhoClicked().getLocation().getChunk();
+		String playerName = e.getWhoClicked().getName();
+		Town town = getTownByChunk(chunk);
+		Plot plot = town.getPlotByChunkCoords(chunk.getX() + "/" + chunk.getZ());
+		switch(e.getCurrentItem().getItemMeta().getDisplayName()) {
+			case "Buy": 
+				if(!PaymentUtils.playerHasEnoughtMoney(playerfile, playerName, plot.getSalePrice())){
+					throw new PlayerHasNotEnoughtMoneyException(e.getWhoClicked().getName(),true);
+				}
+				else {
+					String reciever = plot.getOwner();
+					playerfile = PaymentUtils.payToOtherPlayer(playerfile, playerName, reciever, plot.getSalePrice(), true);
+					file = town.buyPlot(file, playerName, chunk.getX(), chunk.getZ());
+					if(Bukkit.getPlayer(reciever).isOnline()) {
+						PaymentUtils.updateScoreBoard(playerfile,Bukkit.getPlayer(reciever));
+					}
+					e.getWhoClicked().sendMessage(ChatColor.GOLD + "Congratulation! You bought this plot!");
+				}
+				break;
+			case "Cancel Sale":
+				if(plot.isOwner(playerName)) {
+					file = town.removePlotFromSale(file, chunk.getX(), chunk.getZ(), playerName);
+					e.getWhoClicked().sendMessage(ChatColor.GOLD + "You removed this plot from sale!");
+				}
+				break;
+		}
+		return playerfile;
+	}
+	
+	private File save(File file,FileConfiguration config) {
 		try {
-			config = YamlConfiguration.loadConfiguration(file);
 			config.save(file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return file;
+	}
+	
+	/**
+	 * <p>
+	 * Load a TownWorld.
+	 * <p>
+	 * @param main
+	 * @param worldname the townworld has to exist!
+	 * @return TownWorld
+	 * @throws TownSystemException 
+	 */
+	public static TownWorld loadTownWorld(Ultimate_Economy main,String worldname) throws TownSystemException {
+		TownWorld townWorld = new TownWorld(main, worldname);
+		List<Town> towns = new ArrayList<>();
+		for(String townName: townWorld.getTownNameList()) {
+			towns.add(Town.loadTown(townWorld.getSaveFile(), townName));
+		}
+		townWorld.setTownList(towns);
+		return townWorld;
 	}
 }

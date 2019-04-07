@@ -3,8 +3,13 @@ package com.ue.utils;
 import java.io.File;
 import java.io.IOException;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
 
 import com.ue.exceptions.banksystem.PlayerDoesNotExistException;
 import com.ue.exceptions.banksystem.PlayerHasNotEnoughtMoneyException;
@@ -44,27 +49,20 @@ public abstract class PaymentUtils {
 	 * @param reciever
 	 * @param amount
 	 * @param youAreSender (true if the sender is the command executor)
+	 * @return file (playerfile)
 	 * @throws PlayerDoesNotExistException
 	 * @throws PlayerHasNotEnoughtMoneyException
 	 */
-	public static void payToOtherPlayer(File playerfile,String sender,String reciever,double amount,boolean youAreSender) throws PlayerDoesNotExistException, PlayerHasNotEnoughtMoneyException {
+	public static File payToOtherPlayer(File playerfile,String sender,String reciever,double amount,boolean youAreSender) throws PlayerDoesNotExistException, PlayerHasNotEnoughtMoneyException {
 		if(!playerExists(playerfile, sender)) {
 			throw new PlayerDoesNotExistException(sender);
 		}
 		else if(!playerExists(playerfile, reciever)) {
 			throw new PlayerDoesNotExistException(reciever);
 		}
-		else if(!playerHasEnoughtMoney(playerfile, sender, amount)) {
-			if(youAreSender) {
-				throw new PlayerHasNotEnoughtMoneyException(sender,true);
-			}
-			else {
-				throw new PlayerHasNotEnoughtMoneyException(sender);
-			}
-		}
 		else {
-			increasePlayerAmount(playerfile, reciever, amount);
-			decreasePlayerAmount(playerfile, sender, amount);
+			playerfile = increasePlayerAmount(playerfile, reciever, amount);
+			return decreasePlayerAmount(playerfile, sender, amount,youAreSender);
 		}
 	}
 	 /**
@@ -74,14 +72,19 @@ public abstract class PaymentUtils {
 	  * @param playerfile
 	  * @param player
 	  * @param amount
+	  * @return file (playerfile)
 	  * @throws PlayerDoesNotExistException
 	  */
-	public static void increasePlayerAmount(File playerfile,String player, double amount) throws PlayerDoesNotExistException {
+	public static File increasePlayerAmount(File playerfile,String player, double amount) throws PlayerDoesNotExistException {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(playerfile);
 		Double realAmount = getPlayerBankAmount(playerfile, player);
 		realAmount += amount;
 		config.set(player + ".account amount", realAmount);
-		save(playerfile,config);
+		playerfile = save(playerfile,config);
+		if(Bukkit.getPlayer(player).isOnline()) {
+			updateScoreBoard(playerfile, Bukkit.getPlayer(player));
+		}
+		return playerfile;
 	}
 	
 	/**
@@ -91,15 +94,29 @@ public abstract class PaymentUtils {
 	 * @param playerfile
 	 * @param player
 	 * @param amount
+	 * @return file (playerfile)
 	 * @throws PlayerDoesNotExistException
+	 * @throws PlayerHasNotEnoughtMoneyException 
 	 */
-	public static void decreasePlayerAmount(File playerfile,String player,double amount) throws PlayerDoesNotExistException {
+	public static File decreasePlayerAmount(File playerfile,String player,double amount,boolean personal) throws PlayerDoesNotExistException, PlayerHasNotEnoughtMoneyException {
 		if(playerHasEnoughtMoney(playerfile, player, amount)) {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(playerfile);
 			Double realAmount = getPlayerBankAmount(playerfile, player);
 			realAmount -= amount;
 			config.set(player + ".account amount", realAmount);
-			save(playerfile,config);
+			playerfile = save(playerfile,config);
+			if(Bukkit.getPlayer(player).isOnline()) {
+				updateScoreBoard(playerfile, Bukkit.getPlayer(player));
+			}
+			return playerfile;
+		}
+		else {
+			if(personal) {
+				throw new PlayerHasNotEnoughtMoneyException(player,true);
+			}
+			else {
+				throw new PlayerHasNotEnoughtMoneyException(player);
+			}
 		}
 	}
 	
@@ -140,11 +157,48 @@ public abstract class PaymentUtils {
 		}
 	}
 	
-	private static void save(File file,FileConfiguration config) {
+	private static File save(File file,FileConfiguration config) {
 		try {
 			config.save(file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return file;
+	}
+	
+	/**
+	 * <p>
+	 * Set the bank scoreboard of a player.
+	 * <p>
+	 * @param file
+	 * @param p
+	 * @param score
+	 */
+	public static void setScoreboard(File file,Player p,int score) {
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file); 
+		if(!config.getBoolean(p.getName() + ".bank")) {
+			Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
+			Objective o = board.registerNewObjective("test", "dummy","§6§lBank");
+			o.setDisplaySlot(DisplaySlot.SIDEBAR);
+			o.getScore("§6Money:").setScore(score);
+			p.setScoreboard(board);
+		}
+		else {
+			Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
+			p.setScoreboard(board);
+		}
+	}
+	
+	/**
+	 * <p>
+	 * Update a bank scoreboard of a player.
+	 * <p>
+	 * @param file
+	 * @param p
+	 */
+	public static void updateScoreBoard(File file,Player p) {
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+		int score = (int) config.getDouble(p.getName() + ".account amount");
+		setScoreboard(file,p,score);
 	}
 }

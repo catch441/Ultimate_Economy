@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -12,17 +13,8 @@ import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.ue.exceptions.banksystem.PlayerDoesNotExistException;
-import com.ue.exceptions.banksystem.PlayerHasNotEnoughtMoneyException;
-import com.ue.exceptions.townsystem.ChunkAlreadyClaimedException;
-import com.ue.exceptions.townsystem.ChunkNotClaimedByThisTownException;
-import com.ue.exceptions.townsystem.PlayerIsAlreadyCitizenException;
-import com.ue.exceptions.townsystem.PlayerIsAlreadyCoOwnerException;
-import com.ue.exceptions.townsystem.PlayerIsNotCitizenException;
-import com.ue.exceptions.townsystem.PlotIsAlreadyForSaleException;
-import com.ue.exceptions.townsystem.PlotIsNotForSaleException;
-import com.ue.exceptions.townsystem.TownDoesNotExistException;
-import com.ue.utils.PaymentUtils;
+import com.ue.exceptions.banksystem.TownHasNotEnoughMoneyException;
+import com.ue.exceptions.townsystem.TownSystemException;
 
 public class Town {
 
@@ -32,36 +24,60 @@ public class Town {
 	private ArrayList<String> chunkCoords;
 	private Location townSpawn;
 	private ArrayList<Plot> plots;
+	private File file;
+	private double townBankAmount;
 	private double tax; //TODO integrate tax system
 	
 	/**
 	 * <p>
 	 * Creates a town object.
-	 * Only if you load a existing town, the parameter startChunk should be 'null'
 	 * <p>
-	 * @param file
+	 * @param file 
 	 * @param owner
 	 * @param townName
 	 * @param startChunk
+	 * @throws TownSystemException 
 	 */
-	public Town(File file,String owner,String townName,Chunk startChunk) {
+	public Town(File file,String owner,String townName,Chunk startChunk) throws TownSystemException {
 		this.townName = townName;
 		this.owner = owner;
 		citizens = new ArrayList<>();
 		coOwners = new ArrayList<>();
 		chunkCoords = new ArrayList<>();
 		plots = new ArrayList<>();
-		citizens.add(owner);
-		chunkCoords.add(startChunk.getX() + "/" + startChunk.getZ());
-		if(startChunk != null) {
-			setOwner(file, owner);
-			setCoOwners(coOwners);
-			setCiticens(citizens);
-			setChunkList(chunkCoords);
-			Location spawn = new Location(startChunk.getWorld(), (startChunk.getX() << 4) + 7, 0, (startChunk.getZ() << 4) + 7);
-			spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn));
-			setTownSpawn(file, spawn);
-		}
+		setOwner(file, owner);
+		file = addCitizen(file, owner);
+		file = addChunk(file, startChunk.getX(), startChunk.getZ(),null);
+		file = setTownBankAmount(file,0);
+		Location spawn = new Location(startChunk.getWorld(), (startChunk.getX() << 4) + 7, 0, (startChunk.getZ() << 4) + 7);
+		spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn));
+		this.file = setTownSpawn(file, spawn);
+	}
+	
+	/**
+	 * <p>
+	 * Only for loading.
+	 * <p>
+	 * @param owner
+	 * @param townName
+	 */
+	private Town (String owner,String townName){
+		this.townName = townName;
+		this.owner = owner;
+		citizens = new ArrayList<>();
+		coOwners = new ArrayList<>();
+		chunkCoords = new ArrayList<>();
+		plots = new ArrayList<>();
+	}
+	
+	/**
+	 * <p>
+	 * Returns the FileConfiguration.
+	 * <p>
+	 * @return file
+	 */
+	public File getFile() {
+		return file;
 	}
 	
 	public void createTownManagerVillager() {
@@ -82,65 +98,92 @@ public class Town {
 	
 	/**
 	 * <p>
-	 * 	Set a plot for sale.
+	 * Despawns all town villagers
 	 * <p>
-	 * @param chunk	(format "X/Z")
-	 * @throws ChunkNotClaimedByThisTownException 
-	 * @throws PlotIsNotForSaleException 
-	 * @throws PlotIsAlreadyForSaleException 
 	 */
-	public void setSlotForSale(File file,double salePrice,int chunkX,int chunkZ) throws ChunkNotClaimedByThisTownException, PlotIsAlreadyForSaleException, PlotIsNotForSaleException {
-		String coords = chunkX + "/" + chunkZ;
-		if(chunkCoords.contains(coords)) {
-			getPlotByChunkCoords(coords).setForSale(file, true, salePrice);
-		}
-		else {
-			throw new ChunkNotClaimedByThisTownException(coords);
+	public void despawnAllVillagers() {
+		for(Plot plot:plots) {
+			plot.despawnSaleVillager();
 		}
 	}
 	
 	/**
 	 * <p>
-	 * Remove a slot from sale.
+	 * 	Set a plot for sale.
 	 * <p>
-	 * @param chunk	(format "X/Z")
-	 * @throws ChunkNotClaimedByThisTownException 
-	 * @throws PlotIsNotForSaleException 
-	 * @throws PlotIsAlreadyForSaleException 
+	 * @param file
+	 * @param salePrice
+	 * @param chunkX
+	 * @param chunkZ
+	 * @param player
+	 * @return File
+	 * @throws TownSystemException 
 	 */
-	public void removeSlotFromSale(File file,double salePrice,int chunkX,int chunkZ) throws ChunkNotClaimedByThisTownException, PlotIsAlreadyForSaleException, PlotIsNotForSaleException {
-		String coords = chunkX + "/" + chunkZ;
-		if(chunkCoords.contains(coords)) {
-			getPlotByChunkCoords(coords).setForSale(file, false, 0);
+	public File setPlotForSale(File file,double salePrice,String player,Location location) throws TownSystemException {
+		String coords = location.getChunk().getX() + "/" + location.getChunk().getZ();
+		if(!chunkCoords.contains(coords)) {
+			throw new TownSystemException(TownSystemException.CHUNK_NOT_CLAIMED_BY_TOWN);
 		}
 		else {
-			throw new ChunkNotClaimedByThisTownException(coords);
+			Plot plot = getPlotByChunkCoords(coords);
+			if(plot.isOwner(player)) {
+				return plot.setForSale(file,salePrice,location);
+			}
+			else {
+				throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
+			}
+		}
+	}
+	
+	/**
+	 * <p>
+	 * Remove a plot from sale.
+	 * <p>
+	 * @param file
+	 * @param chunkX
+	 * @param chunkZ
+	 * @param player
+	 * @return File
+	 * @throws TownSystemException
+	 */
+	public File removePlotFromSale(File file,int chunkX,int chunkZ,String player) throws TownSystemException {
+		String coords = chunkX + "/" + chunkZ;
+		if(!isPlayerCitizen(player)) {
+			throw new TownSystemException(TownSystemException.YOU_ARE_NO_CITIZEN);
+		}
+		else if(!chunkCoords.contains(coords)) {
+			throw new TownSystemException(TownSystemException.CHUNK_NOT_CLAIMED_BY_TOWN);
+		}
+		else {
+			return getPlotByChunkCoords(coords).removeFromSale(file, player);
 		}
 	}
 	
 	/**
 	 * <p>
 	 * Buy a plot in a town if the plot is for sale.
+	 * Did not handle payment.
 	 * <p>
+	 * @param townworldfile
 	 * @param citizen
 	 * @param chunk	(format "X/Z")
-	 * @throws ChunkNotClaimedByThisTownException 
-	 * @throws PlayerDoesNotExistException 
-	 * @throws PlotIsNotForSaleException 
-	 * @throws PlayerHasNotEnoughtMoneyException (expect that the buyer is the same as the command/ui executor)
+	 * @return File (townworldfile)
+	 * @throws TownSystemException 
 	 */
-	public void buyPlot(File townworldfile,File playerfile,String citizen,String chunk) throws ChunkNotClaimedByThisTownException, PlayerDoesNotExistException, PlotIsNotForSaleException, PlayerHasNotEnoughtMoneyException {
-		Plot plot = getPlotByChunkCoords(chunk);
+	public File buyPlot(File townworldfile,String citizen,int chunkX,int chunkZ) throws TownSystemException {
+		Plot plot = getPlotByChunkCoords(chunkX + "/" + chunkZ);
 		if(!plot.isForSale()) {
-			throw new PlotIsNotForSaleException(chunk);
+			throw new TownSystemException(TownSystemException.PLOT_IS_NOT_FOR_SALE);
 		}
-		else if(PaymentUtils.playerHasEnoughtMoney(playerfile, citizen, plot.getSalePrice())){
-			throw new PlayerHasNotEnoughtMoneyException(citizen,true);
+		else if(plot.isOwner(citizen)) {
+			throw new TownSystemException(TownSystemException.YOU_ARE_ALREADY_OWNER);
 		}
 		else {
-			plot.setOwner(townworldfile, citizen);
-			plot.setForSale(false);
-			PaymentUtils.decreasePlayerAmount(playerfile, citizen, plot.getSalePrice());
+			if(plot.isCoOwner(citizen)) {
+				townworldfile = plot.removeCoOwner(townworldfile, citizen);
+			}
+			townworldfile = plot.setOwner(townworldfile, citizen);
+			return removePlotFromSale(townworldfile, chunkX, chunkZ, citizen);
 		}
 	}
 	
@@ -149,42 +192,50 @@ public class Town {
 	 * Adds a chunk to a town
 	 * <p>
 	 * @param file
-	 * @param chunk	(format "X/Z")
-	 * @throws ChunkAlreadyClaimedException 
+	 * @param chunkX
+	 * @param chunkZ
+	 * @param player
+	 * @return File
+	 * @throws TownSystemException
 	 */
-	public void addChunk(File file,int chunkX,int chunkZ) throws ChunkAlreadyClaimedException {
+	public File addChunk(File file,int chunkX,int chunkZ,String player) throws TownSystemException {
 		String coords = chunkX + "/" + chunkZ;
-		if(!chunkCoords.contains(coords)) {
-			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-			chunkCoords.add(coords);
-			config.set("Towns." + townName + ".chunks", chunkCoords);
-			save(file,config);
-			plots.add(new Plot(file, owner, coords, townName));
+		if(player != null && !isPlayerCitizen(player)) {
+			throw new TownSystemException(TownSystemException.YOU_ARE_NO_CITIZEN);
+		}
+		else if(chunkCoords.contains(coords)) {
+			throw new TownSystemException(TownSystemException.CHUNK_ALREADY_CLAIMED);
 		}
 		else {
-			throw new ChunkAlreadyClaimedException(coords);
+			Plot plot = new Plot(file, owner, coords, townName);
+			plots.add(plot);
+			file = plot.getSaveFile();
+			chunkCoords.add(coords);
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+			config.set("Towns." + townName + ".chunks", chunkCoords);
+			return save(file,config);
 		}
 	}
 	
 	/**
 	 * <p>
-	 * Removes a chunk from a town
+	 * Removes a chunk from a town.
 	 * <p>
 	 * @param file
 	 * @param chunk	(format "X/Z")
-	 * @throws ChunkNotClaimedByThisTownException 
+	 * @return file
+	 * @throws TownSystemException 
 	 */
-	@SuppressWarnings("deprecation")
-	public void removeChunk(File file,int chunkX,int chunkZ,World world) throws ChunkNotClaimedByThisTownException {
+	public File removeChunk(File file,int chunkX,int chunkZ,World world) throws TownSystemException {
 		String coords = chunkX + "/" + chunkZ;
 		if(chunkCoords.contains(coords)) {
 			chunkCoords.remove(coords);
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			config.set("Towns." + townName + ".chunks", chunkCoords);
-			save(file,config);
+			config.set("Town." + townName + ".Plots." + chunkCoords, null);
 			//TODO not for future, find a better solution
-			world.regenerateChunk(chunkX, chunkZ);
-			world.save();
+			//world.regenerateChunk(chunkX, chunkZ);
+			//world.save();
 			int index = -1;
 			for(Plot plot: plots) {
 				if(plot.getChunkCoords().equals(coords)) {
@@ -195,9 +246,10 @@ public class Town {
 			if(index != -1) {
 				plots.remove(index);
 			}
+			return save(file,config);
 		}
 		else {
-			throw new ChunkNotClaimedByThisTownException(coords);
+			throw new TownSystemException(TownSystemException.CHUNK_NOT_CLAIMED_BY_TOWN);
 		}
 	}
 	
@@ -217,12 +269,13 @@ public class Town {
 	 * <p>
 	 * @param file
 	 * @param owner
+	 * @return file
 	 */
-	public void setOwner(File file,String owner) {
+	public File setOwner(File file,String owner) {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 		this.owner = owner;
 		config.set("Towns." + townName + ".owner", owner);
-		save(file,config);
+		return save(file,config);
 	}
 	
 	/**
@@ -240,7 +293,7 @@ public class Town {
 	 * <p>
 	 * @param citizens
 	 */
-	public void setCiticens(List<String> citizens) {
+	private void setCitizens(List<String> citizens) {
 		this.citizens.addAll(citizens);
 	}
 	
@@ -250,17 +303,18 @@ public class Town {
 	 * <p>
 	 * @param file
 	 * @param newCitizen
-	 * @throws PlayerIsAlreadyCitizenException 
+	 * @return file
+	 * @throws TownSystemException 
 	 */
-	public void addCitizen(File file,String newCitizen) throws PlayerIsAlreadyCitizenException {
-		if(!citizens.contains(newCitizen)) {
+	public File addCitizen(File file,String newCitizen) throws TownSystemException {
+		if(!isPlayerCitizen(newCitizen)) {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			citizens.add(newCitizen);
 			config.set("Towns." + townName + ".citizens", citizens);
-			save(file,config);
+			return save(file,config);
 		}
 		else {
-			throw new PlayerIsAlreadyCitizenException(newCitizen);
+			throw new TownSystemException(TownSystemException.PLAYER_IS_ALREADY_CITIZEN);
 		}
 	}
 	
@@ -270,17 +324,34 @@ public class Town {
 	 * <p>
 	 * @param file
 	 * @param citizen
-	 * @throws PlayerIsNotCitizenException 
+	 * @return file
+	 * @throws TownSystemException 
 	 */
-	public void removeCitizen(File file,String citizen) throws PlayerIsNotCitizenException {
-		if(citizens.contains(citizen)) {
+	public File removeCitizen(File file,String citizen) throws TownSystemException {
+		if(isPlayerCitizen(citizen)) {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			citizens.remove(citizen);
 			config.set("Towns." + townName + ".citizens", citizens);
-			save(file,config);
+			return save(file,config);
 		}
 		else {
-			throw new PlayerIsNotCitizenException(citizen);
+			throw new TownSystemException(TownSystemException.PLAYER_IS_NOT_CITIZEN);
+		}
+	}
+	
+	/**
+	 * <p>
+	 * Returns true if player is a citizen of this town.
+	 * <p>
+	 * @param player
+	 * @return
+	 */
+	public boolean isPlayerCitizen(String player) {
+		if(citizens.contains(player)) {
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
 	
@@ -292,17 +363,6 @@ public class Town {
 	 */
 	public String getTownName() {
 		return townName;
-	}
-	
-	/**
-	 * <p>
-	 * Set town name
-	 * <p>
-	 * @param file
-	 * @param townName
-	 */
-	public void setTownName(File file,String townName) {
-		this.townName = townName;
 	}
 	
 	/**
@@ -320,7 +380,7 @@ public class Town {
 	 * <p>
 	 * @param chunkCoords
 	 */
-	public void setChunkList(List<String> chunkCoords) {
+	private void setChunkList(List<String> chunkCoords) {
 		this.chunkCoords.addAll(chunkCoords);
 	}
 	
@@ -330,13 +390,13 @@ public class Town {
 	 * <p>
 	 * @param list
 	 */
-	public void setPlotList(ArrayList<Plot> list) {
-		plots = list;
+	private void setPlotList(ArrayList<Plot> list) {
+		plots.addAll(list);
 	}
 	
 	/**
 	 * <p>
-	 * Get the town spawn location
+	 * Get the town spawn location.
 	 * <p>
 	 * @return Location
 	 */
@@ -346,35 +406,174 @@ public class Town {
 	
 	/**
 	 * <p>
-	 * Set the town spawn location
+	 * Set the town spawn location.
 	 * <p>
 	 * @param file
 	 * @param townSpawn
+	 * @return file
+	 * @throws TownSystemException 
 	 */
-	public void setTownSpawn(File file,Location townSpawn) {
-		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-		this.townSpawn = townSpawn;
-		config.set("Towns." + townName + ".townspawn", townSpawn.getX() + "/" + townSpawn.getY() + "/" + townSpawn.getZ());
-		save(file,config);
+	public File setTownSpawn(File file,Location townSpawn) throws TownSystemException {
+		if(chunkCoords.contains(townSpawn.getChunk().getX() + "/" + townSpawn.getChunk().getZ())) {
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+			this.townSpawn = townSpawn;
+			config.set("Towns." + townName + ".townspawn", townSpawn.getX() + "/" + townSpawn.getY() + "/" + townSpawn.getZ());
+			return save(file,config);
+		}
+		else {
+			throw new TownSystemException(TownSystemException.LOCATION_NOT_IN_TOWN);
+		}
 	}
 	
 	/**
 	 * <p>
-	 * Get a list of CoOwners of the town
+	 * Set TownSpawn without saving.
+	 * <p>
+	 * @param location
+	 */
+	private void setTownSpawn(Location location) {
+		townSpawn = location;
+	}
+	
+	/**
+	 * <p>
+	 * Get a list of CoOwners of the town.
 	 * <p>
 	 * @return ArrayList
 	 */
 	public ArrayList<String> getCoOwners() {
 		return coOwners;
 	}
+	
 	/**
 	 * <p>
-	 * Set all coOwners.
+	 * Set all coOwners without saving.
 	 * <p>
 	 * @param coOwners
 	 */
-	public void setCoOwners(List<String> coOwners) {
+	private void setCoOwners(List<String> coOwners) {
 		this.coOwners.addAll(coOwners);
+	}
+	
+	/**
+	 * <p>
+	 * Returns the tax  of the town.
+	 * <p>
+	 * @return double
+	 */
+	public double getTax() {
+		return tax;
+	}
+
+	/**
+	 * <p>
+	 * Set tax without saving.
+	 * <p>
+	 * @param tax
+	 */
+	private void setTax(double tax) {
+		this.tax = tax;
+	}
+	
+	/**
+	 * <p>
+	 * Set tax with saving.
+	 * <p>
+	 * @param file
+	 * @param tax
+	 * @return file
+	 */
+	public File setTax(File file,double tax) {
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("Towns." + townName + ".tax", tax);
+		setTax(tax);
+		return save(file, config);
+	}
+	
+	/**
+	 * <p>
+	 * Returns the number of owned plots of a citizen.
+	 * <p>
+	 * @param player
+	 * @return int
+	 * @throws TownSystemException 
+	 */
+	public int getNumberOfPlotsOwned(String player) throws TownSystemException {
+		if(isPlayerCitizen(player)) {
+			int number = 0;
+			for(Plot plot:plots) {
+				if(plot.getOwner().equals(player)) {
+					number++;
+				}
+			}
+			return number;
+		}
+		else {
+			throw new TownSystemException(TownSystemException.PLAYER_IS_NOT_CITIZEN);
+		}
+		
+	}
+	
+	/**
+	 * <p>
+	 * Returns a Plot by chunk coords.
+	 * <p>
+	 * @param chunkX
+	 * @param chunkZ
+	 * @return Plot
+	 * @throws TownSystemException 
+	 */
+	public Plot getPlotByChunk(int chunkX,int chunkZ) throws TownSystemException {
+		for(Plot plot:plots) {
+			if(plot.getChunkCoords().equals(chunkX + "/" + chunkZ)) {
+				return plot;
+			}
+		}
+		throw new TownSystemException(TownSystemException.CHUNK_NOT_CLAIMED_BY_TOWN);
+	}
+	
+	 /**
+	  * <p>
+	  * Returns true if player is townowner.
+	  * <p>
+	  * @param player
+	  * @return boolean
+	 * @throws TownSystemException 
+	  */
+	public boolean isTownOwner(String player) throws TownSystemException {
+		if(isPlayerCitizen(player)) {
+			if(player.equals(owner)) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			throw new TownSystemException(TownSystemException.PLAYER_IS_NOT_CITIZEN);
+		}
+	}
+	
+	/**
+	 * <p>
+	 * 	Returns true if player is coOwner of this town.
+	 * <p>
+	 * @param player
+	 * @return boolean
+	 * @throws TownSystemException 
+	 */
+	public boolean isCoOwner(String player) throws TownSystemException {
+		if(isPlayerCitizen(player)) {
+			if(coOwners.contains(player)) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			throw new TownSystemException(TownSystemException.PLAYER_IS_NOT_CITIZEN);
+		}
 	}
 	
 	/**
@@ -383,39 +582,97 @@ public class Town {
 	 * <p>
 	 * @param file
 	 * @param coOwner
-	 * @return
-	 * @throws PlayerIsAlreadyCoOwnerException 
+	 * @return file
+	 * @throws TownSystemException 
 	 */
-	public void addCoOwner(File file,String coOwner) throws PlayerIsAlreadyCoOwnerException {
+	public File addCoOwner(File file,String coOwner) throws TownSystemException {
 		if(!coOwners.contains(coOwner)) {
+			file = addCitizen(file, coOwner);
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			coOwners.add(coOwner);
 			config.set("Towns." + townName + ".coOwners", coOwners);
-			save(file,config);
+			return save(file,config);
 		}
 		else {
-			throw new PlayerIsAlreadyCoOwnerException(coOwner,"town");
-		}
-	}
-	
-	private void save(File file,FileConfiguration config) {
-		try {
-			config = YamlConfiguration.loadConfiguration(file);
-			config.save(file);
-		} catch (IOException e) {
-			e.printStackTrace();
+			throw new TownSystemException(TownSystemException.PLAYER_IS_ALREADY_COOWNERN);
 		}
 	}
 	
 	/**
 	 * <p>
-	 * Get savefile of townworld with this town
+	 * Returns true if player is townOwner or coOwner
 	 * <p>
-	 * @return File
+	 * @param player
+	 * @return boolean
+	 * @throws TownSystemException 
 	 */
-	/*public File getFilea() {
+	public boolean hasCoOwnerPermission(String player) throws TownSystemException {
+		if(isPlayerCitizen(player)) {
+			if(isCoOwner(player) || isTownOwner(player)) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			throw new TownSystemException(TownSystemException.PLAYER_IS_NOT_CITIZEN);
+		}
+	}
+	
+	/**
+	 * <p>
+	 * Returns true if player is the townOwner, town coOwner, plot owner or plot coOwner.
+	 * <p>
+	 * @param player
+	 * @param chunk (format "X/Z")
+	 * @return boolean
+	 * @throws TownSystemException 
+	 */
+	public boolean hasBuildPermissions(String player,String chunk) throws TownSystemException {
+		if(isPlayerCitizen(player)) {
+			Plot plot = getPlotByChunkCoords(chunk);
+			if(isTownOwner(player) || isCoOwner(player) || plot.isOwner(player) || plot.isCoOwner(player)) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			throw new TownSystemException(TownSystemException.PLAYER_IS_NOT_CITIZEN);
+		}
+	}
+	
+	/**
+	 * <p>
+	 * Return true if chunk is connected to this town.
+	 * <p>
+	 * @param chunkX
+	 * @param chunkZ
+	 * @return
+	 */
+	public boolean chunkIsConnectedToTown(int chunkX,int chunkZ) {
+		for(String coords:chunkCoords) {
+			int x = Integer.valueOf(coords.substring(0,coords.indexOf("/")));
+			int z = Integer.valueOf(coords.substring(coords.indexOf("/")+1));
+			int newX = x-chunkX;
+			int newZ = z-chunkZ;
+			if((newX == 0 && newZ == 1) || (newX == 1 && newZ == 1) || (newX == 0 && newZ == -1) || (newX == -1 && newZ == 0)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private File save(File file,FileConfiguration config) {
+		try {
+			config.save(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return file;
-	}*/
+	}
 	
 	/**
 	 * <p>
@@ -430,6 +687,72 @@ public class Town {
 			is = true;
 		}
 		return is;
+	}	
+
+	/**
+	 * <p>
+	 * Returns the town bank amount.
+	 * <p>
+	 * @return double
+	 */
+	public double getTownBankAmount() {
+		return townBankAmount;
+	}
+
+	/**
+	 * <p>
+	 * Increase the town bank amount.
+	 * <p>
+	 * @param amount
+	 * @return File (townworldfile)
+	 */
+	public File increaseTownBankAmount(File file,double amount) {
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+		townBankAmount += amount;
+		config.set("Towns." + townName + ".bank", townBankAmount);
+		setTownBankAmount(townBankAmount);
+		return save(file, config);
+	}
+	
+	/**
+	 * <p>
+	 * Decrease the town bank amount.
+	 * <p>
+	 * @param file
+	 * @param amount
+	 * @return File (townworldfile)
+	 * @throws TownHasNotEnoughMoneyException
+	 */
+	public File decreaseTownBankAmount(File file,double amount) throws TownHasNotEnoughMoneyException {
+		if(amount > townBankAmount) {
+			throw new TownHasNotEnoughMoneyException(townName);
+		}
+		else {
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+			townBankAmount -= amount;
+			config.set("Towns." + townName + ".bank", townBankAmount);
+			setTownBankAmount(townBankAmount);
+			return save(file, config);
+		}
+	}
+	
+	/**
+	 * <p>
+	 * Set town bank amount with saving.
+	 * <p>
+	 * @param file
+	 * @param amount
+	 * @return
+	 */
+	public File setTownBankAmount(File file,double amount) {
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("Towns." + townName + ".bank", amount);
+		setTownBankAmount(townBankAmount);
+		return save(file, config);
+	}
+	
+	private void setTownBankAmount(double townBankAmount) {
+		this.townBankAmount = townBankAmount;
 	}
 	
 	/**
@@ -437,10 +760,10 @@ public class Town {
 	 * Get a plot with the chunk coords.
 	 * <p>
 	 * @param coords
-	 * @return
-	 * @throws ChunkNotClaimedByThisTownException
+	 * @return Plot
+	 * @throws TownSystemException 
 	 */
-	private Plot getPlotByChunkCoords(String coords) throws ChunkNotClaimedByThisTownException {
+	public Plot getPlotByChunkCoords(String coords) throws TownSystemException {
 		Plot p = null;
 		for(Plot plot:plots) {
 			if(plot.getChunkCoords().equals(coords)) {
@@ -451,7 +774,7 @@ public class Town {
 			return p;
 		}
 		else {
-			throw new ChunkNotClaimedByThisTownException(coords);
+			throw new TownSystemException(TownSystemException.CHUNK_NOT_CLAIMED_BY_TOWN);
 		}
 	}
 	
@@ -462,27 +785,29 @@ public class Town {
 	 * @param file
 	 * @param townName
 	 * @return
-	 * @throws TownDoesNotExistException 
-	 * @throws ChunkNotClaimedByThisTownException 
+	 * @throws TownSystemException 
 	 */
-	public static Town loadTown(File file,String townName) throws TownDoesNotExistException, ChunkNotClaimedByThisTownException {
+	public static Town loadTown(File file,String townName) throws TownSystemException {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 		if(config.getStringList("TownNames").contains(townName)) {
-			Town town = new Town(file, config.getString("Towns." + townName + ".owner"), townName, null);
+			Town town = new Town(config.getString("Towns." + townName + ".owner"), townName);
 			town.setCoOwners(config.getStringList("Towns." + townName + ".coOwners"));
-			town.setCiticens(config.getStringList("Towns." + townName + ".citizens"));
+			town.setCitizens(config.getStringList("Towns." + townName + ".citizens"));
 			town.setChunkList(config.getStringList("Towns." + townName + ".chunks"));
+			town.setTax(config.getDouble("Towns." + townName + ".tax"));
+			town.setTownBankAmount(config.getDouble("Towns." + townName + ".bank"));
+			String locationString = config.getString("Towns." + townName + ".townspawn");
+			town.setTownSpawn(new Location(Bukkit.getWorld(config.getString("World")), Double.valueOf(locationString.substring(0, locationString.indexOf("/"))), Double.valueOf(locationString.substring(locationString.indexOf("/")+1,locationString.lastIndexOf("/"))), Double.valueOf(locationString.substring(locationString.lastIndexOf("/")+1))));
 			ArrayList<Plot> plotList = new ArrayList<>();
 			for(String coords:town.getChunkList()) {
-				plotList.add(Plot.loadPlot(file, townName, coords));
+				Plot plot = Plot.loadPlot(file, townName, coords);
+				plotList.add(plot);		
 			}
 			town.setPlotList(plotList);
-			String locationString = config.getString("Towns." + townName + ".townspawn");
-			town.setTownSpawn(file, new Location(Bukkit.getWorld(config.getString("World")), Integer.valueOf(locationString.substring(0, locationString.indexOf("/"))), Integer.valueOf(locationString.substring(locationString.indexOf("/")+1,locationString.lastIndexOf("/"))), Integer.valueOf(locationString.substring(locationString.lastIndexOf("/")+1))));
 			return town;
 		}
 		else {
-			throw new TownDoesNotExistException(townName);
+			throw new TownSystemException(TownSystemException.TOWN_DOES_NOT_EXISTS);
 		}
 	}
 }

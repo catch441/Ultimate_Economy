@@ -3,15 +3,27 @@ package com.ue.townsystem;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
-import com.ue.exceptions.townsystem.ChunkNotClaimedByThisTownException;
-import com.ue.exceptions.townsystem.PlayerIsAlreadyCoOwnerException;
-import com.ue.exceptions.townsystem.PlotIsAlreadyForSaleException;
-import com.ue.exceptions.townsystem.PlotIsNotForSaleException;
+import com.ue.exceptions.townsystem.TownSystemException;
 
 public class Plot {
 
@@ -21,6 +33,9 @@ public class Plot {
 	private boolean isForSale;
 	private double salePrice;
 	private final String townName;
+	private File file;
+	private Villager villager;
+	private Inventory inventory;
 	
 	/**
 	 * <p>
@@ -33,11 +48,126 @@ public class Plot {
 	 */
 	public Plot(File file,String owner,String chunkCoords,String townName) {
 		this.chunkCoords = chunkCoords;
-		setOwner(file,owner);
 		this.townName = townName;
+		this.file = setOwner(file,owner);
 		isForSale = false;
 		salePrice = 0;
 		coOwners = new ArrayList<>();
+	}
+	
+	private Plot(String chunkCoords,String townName) {
+		this.chunkCoords = chunkCoords;
+		this.townName = townName;
+		coOwners = new ArrayList<>();
+	}
+	
+	/**
+	 * <p>
+	 * Spawns a sale villager with saving.
+	 * <p>
+	 * @param file
+	 * @param location
+	 * @return file
+	 */
+	private File spawnSaleVillager(File file,Location location) {
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.x", location.getX());
+		config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.y", location.getY());
+		config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.z", location.getZ());
+		config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.world", location.getWorld().getName());
+		spawnSaleVillager(location);
+		return save(file, config);
+	}
+	
+	/**
+	 * <p>
+	 * Spawns a sale villager without saving.
+	 * <p>
+	 * @param file
+	 * @param location
+	 */
+	private void spawnSaleVillager(Location location) {
+		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10,1,10);
+		for(Entity entity:entitys) {
+			if(entity.getName().equals("Plot " + location.getChunk().getX() + "/" + location.getChunk().getZ() + " For Sale!")) {
+				entity.remove();
+			}
+		}
+		villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);     
+		villager.setCustomName("Plot " + location.getChunk().getX() + "/" + location.getChunk().getZ() + " For Sale!");
+		villager.setCustomNameVisible(true);
+		villager.setProfession(Villager.Profession.NITWIT);
+		villager.setSilent(true);
+		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000,30000000));             
+		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000,30000000));
+		inventory = Bukkit.createInventory(null, 9,"Plot " + location.getChunk().getX() + "/" + location.getChunk().getZ());
+		ItemStack itemStack = new ItemStack(Material.GREEN_WOOL,1);
+		ItemMeta meta = itemStack.getItemMeta();
+		meta.setDisplayName("Buy");
+		List<String> list = new ArrayList<String>();
+		list.add(ChatColor.GOLD + "Price: " + ChatColor.GREEN + salePrice);
+		list.add(ChatColor.GOLD + "Is sold by " + ChatColor.GREEN + owner);
+		meta.setLore(list);
+		itemStack.setItemMeta(meta);
+		inventory.setItem(0,itemStack);
+		itemStack = new ItemStack(Material.RED_WOOL,1);
+		meta = itemStack.getItemMeta();
+		list.clear();
+		list.add(ChatColor.RED + "Only for plot owner!");
+		meta.setDisplayName("Cancel Sale");
+		meta.setLore(list);
+		itemStack.setItemMeta(meta);
+		inventory.setItem(8, itemStack);
+	}
+	
+	/**
+	 * <p>
+	 * Despawns the sale villager.
+	 * <p>
+	 */
+	public void despawnSaleVillager() {
+		villager.remove();
+	}
+	
+	/**
+	 * <p>
+	 * Moves a sale villager to a new location.
+	 * <p>
+	 * @param file
+	 * @param newLocation
+	 * @return
+	 * @throws TownSystemException 
+	 */
+	public File moveSaleVillager(File file,Location newLocation) throws TownSystemException {
+		if(chunkCoords.equals(newLocation.getChunk().getX() + "/" + newLocation.getChunk().getZ())) {
+			villager.teleport(newLocation);
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+			config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.x", newLocation.getX());
+			config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.y", newLocation.getY());
+			config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.z", newLocation.getZ());
+			config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.world", newLocation.getWorld().getName());
+			return save(file, config);
+		}
+		else {
+			throw new TownSystemException(TownSystemException.OUTSIDE_OF_THE_PLOT);
+		}
+	}
+	
+	/**
+	 * <p>
+	 * Opens the inventory of the saleManager.
+	 * <p>
+	 */
+	public void openSaleVillagerInv(Player player) {
+		player.openInventory(inventory);
+	}
+	
+	/**
+	 * 
+	 * @return file
+	 */
+	public File getSaveFile() {
+		return file;
 	}
 	
 	/**
@@ -56,12 +186,23 @@ public class Plot {
 	 * <p>
 	 * @param file
 	 * @param owner
+	 * @return file
 	 */
-	public void setOwner(File file,String owner) {
+	public File setOwner(File file,String owner) {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-		config.set("Town." + townName + ".Plots." + chunkCoords + ".owner", owner);
+		config.set("Towns." + townName + ".Plots." + chunkCoords + ".owner", owner);
 		this.owner = owner;
-		save(file,config);
+		return save(file,config);
+	}
+	
+	/**
+	 * <p>
+	 * Set owner without saving.
+	 * <p>
+	 * @param owner
+	 */
+	private void setOwner(String owner) {
+		this.owner = owner;
 	}
 	
 	/**
@@ -81,7 +222,7 @@ public class Plot {
 	 * @param file
 	 * @param coOwners
 	 */
-	public void setCoOwners(List<String> coOwners) {
+	private void setCoOwners(List<String> coOwners) {
 		this.coOwners = coOwners;
 	}
 	
@@ -91,17 +232,39 @@ public class Plot {
 	 * <p>
 	 * @param file
 	 * @param citizen
-	 * @throws PlayerIsAlreadyCoOwnerException
+	 * @return file
+	 * @throws TownSystemException 
 	 */
-	public void addCoOwner(File file,String citizen) throws PlayerIsAlreadyCoOwnerException {
+	public File addCoOwner(File file,String citizen) throws TownSystemException {
 		if(!coOwners.contains(citizen)) {
 			coOwners.add(citizen);
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-			config.set("Town." + townName + ".Plots." + chunkCoords + ".coOwners", coOwners);
-			save(file,config);
+			config.set("Towns." + townName + ".Plots." + chunkCoords + ".coOwners", coOwners);
+			return save(file,config);
 		}
 		else {
-			throw new PlayerIsAlreadyCoOwnerException(citizen, "plot");
+			throw new TownSystemException(TownSystemException.PLAYER_IS_ALREADY_COOWNERN);
+		}
+	}
+	
+	/**
+	 * <p>
+	 * Removes a coOwner from this plot.
+	 * <p>
+	 * @param file
+	 * @param citizen
+	 * @return File
+	 * @throws TownSystemException
+	 */
+	public File removeCoOwner(File file,String citizen) throws TownSystemException {
+		if(coOwners.contains(citizen)) {
+			coOwners.remove(citizen);
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+			config.set("Towns." + townName + ".Plots." + chunkCoords + ".coOwners", coOwners);
+			return save(file,config);
+		}
+		else {
+			throw new TownSystemException(TownSystemException.PLAYER_IS_NO_COOWNER);
 		}
 	}
 	
@@ -111,8 +274,22 @@ public class Plot {
 	 * <p>
 	 * @param isForSale
 	 */
-	public void setForSale(boolean isForSale) {
+	private void setIsForSale(boolean isForSale) {
 		this.isForSale = isForSale;
+	}
+	
+	/**
+	 * <p>
+	 * Set 'isForSale' with saving it in the file.
+	 * <p>
+	 * @param isForSale
+	 * @return File
+	 */
+	private File setIsForSale(File file,boolean isForSale) {
+		this.isForSale = isForSale;
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("Towns." + townName + ".Plots." + chunkCoords + ".isForSale", isForSale);
+		return save(file,config);
 	}
 	
 	/**
@@ -171,27 +348,48 @@ public class Plot {
 	
 	/**
 	 * <p>
+	 * Removes a plot from sale. Removes also the saleVillager.
+	 * <p>
+	 * @param file
+	 * @param owner
+	 * @return
+	 * @throws TownSystemException
+	 */
+	public File removeFromSale(File file,String owner) throws TownSystemException {
+		if(isOwner(owner)) {
+			file = setIsForSale(file, false);
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+			config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager", null);
+			World world = villager.getLocation().getWorld();
+			villager.remove();
+			world.save();
+			return save(file, config);
+		}
+		else {
+			throw new TownSystemException(TownSystemException.PLAYER_IS_NOT_OWNER);
+		}
+	}
+	
+	/**
+	 * <p>
 	 * Set this plot for sale with saving it in the file.
+	 * Spawns a SellVillager at playerposition.
 	 * <p>
 	 * @param file
 	 * @param isForSale
 	 * @param salePrice	Ignored if isForSale is 'false'
-	 * @throws PlotIsAlreadyForSaleException
-	 * @throws PlotIsNotForSaleException
+	 * @return file
+	 * @throws TownSystemException 
 	 */
-	public void setForSale(File file,boolean isForSale,double salePrice) throws PlotIsAlreadyForSaleException, PlotIsNotForSaleException {
-		if(this.isForSale && isForSale) {
-			throw new PlotIsAlreadyForSaleException(chunkCoords);
+	public File setForSale(File file,double salePrice,Location location) throws TownSystemException {
+		if(this.isForSale) {
+			throw new TownSystemException(TownSystemException.PLOT_IS_ALREADY_FOR_SALE);
 		}
 		else {
-			setForSale(isForSale);
-			this.isForSale = isForSale;
-			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-			config.set("Town." + townName + ".Plots." + chunkCoords + ".isForSale", isForSale);
-			save(file,config);
-			if(isForSale) {
-				setSalePrice(file, salePrice);
-			}
+			file = spawnSaleVillager(file, location);
+			file = setSalePrice(file, salePrice);
+			file = setIsForSale(file, true);
+			return file;
 		}
 	}
 
@@ -211,18 +409,13 @@ public class Plot {
 	 * <p>
 	 * @param file
 	 * @param salePrice
-	 * @throws PlotIsNotForSaleException
+	 * @return file
 	 */
-	public void setSalePrice(File file,double salePrice) throws PlotIsNotForSaleException {
-		if(!isForSale) {
-			throw new PlotIsNotForSaleException(chunkCoords);
-		}
-		else {
-			setSalePrice(salePrice);
-			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-			config.set("Town." + townName + ".Plots." + chunkCoords + ".salePrice", salePrice);
-			save(file,config);
-		}
+	public File setSalePrice(File file,double salePrice) {
+		setSalePrice(salePrice);
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("Towns." + townName + ".Plots." + chunkCoords + ".salePrice", salePrice);
+		return save(file,config);
 	}
 	
 	/**
@@ -231,7 +424,7 @@ public class Plot {
 	 * <p>
 	 * @param salePrice
 	 */
-	public void setSalePrice(double salePrice) {
+	private void setSalePrice(double salePrice) {
 		this.salePrice = salePrice;
 	}
 	
@@ -241,25 +434,46 @@ public class Plot {
 	 * <p>
 	 * @param file
 	 * @param config
+	 * @return file
 	 */
-	private void save(File file,FileConfiguration config) {
+	private File save(File file,FileConfiguration config) {
 		try {
 			config.save(file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return file;
 	}
 	
-	public static Plot loadPlot(File file,String townName,String coords) throws ChunkNotClaimedByThisTownException {
+	/**
+	 * <p>
+	 * Returns a Plot loaded by the parameters.
+	 * <p>
+	 * @param file
+	 * @param townName
+	 * @param coords
+	 * @return Plot
+	 * @throws TownSystemException 
+	 */
+	public static Plot loadPlot(File file,String townName,String coords) throws TownSystemException {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 		if(config.getStringList("Towns." + townName + ".chunks").contains(coords)) {
-			Plot plot = new Plot(file, config.getString("Town." + townName + ".Plots." + coords + ".owner"), coords, townName);
-			plot.setForSale(config.getBoolean("Town." + townName + ".Plots." + coords + ".isForSale"));
-			plot.setCoOwners(config.getStringList("Town." + townName + ".Plots." + coords + ".coOwners"));
+			Plot plot = new Plot(coords, townName);
+			plot.setIsForSale(config.getBoolean("Towns." + townName + ".Plots." + coords + ".isForSale"));
+			plot.setCoOwners(config.getStringList("Towns." + townName + ".Plots." + coords + ".coOwners"));
+			plot.setOwner(config.getString("Towns." + townName + ".Plots." + coords + ".owner"));
+			plot.setSalePrice(config.getDouble("Towns." + townName + ".Plots." + coords + ".salePrice"));
+			if(plot.isForSale()) {
+				Location location = new Location(Bukkit.getWorld(config.getString("Towns." + townName + ".Plots." + coords + ".SaleVillager.world")),
+						config.getDouble("Towns." + townName + ".Plots." + coords + ".SaleVillager.x"),
+						config.getDouble("Towns." + townName + ".Plots." + coords + ".SaleVillager.y"),
+						config.getDouble("Towns." + townName + ".Plots." + coords + ".SaleVillager.z"));
+				plot.spawnSaleVillager(location);
+			}
 			return plot;
 		}
 		else {
-			throw new ChunkNotClaimedByThisTownException(coords);
+			throw new TownSystemException(TownSystemException.CHUNK_NOT_CLAIMED_BY_TOWN);
 		}
 	}
 }

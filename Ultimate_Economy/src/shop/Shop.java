@@ -100,7 +100,7 @@ public class Shop {
 			config = YamlConfiguration.loadConfiguration(file);
 			load();
 		}
-		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 1,1,1);
+		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10,1,10);
 		for(Entity entity:entitys) {
 			if(entity.getName().equals(name)) {
 				entity.remove();
