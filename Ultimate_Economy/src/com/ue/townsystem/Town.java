@@ -3,15 +3,26 @@ package com.ue.townsystem;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import com.ue.exceptions.banksystem.TownHasNotEnoughMoneyException;
 import com.ue.exceptions.townsystem.TownSystemException;
@@ -27,6 +38,8 @@ public class Town {
 	private File file;
 	private double townBankAmount;
 	private double tax; //TODO integrate tax system
+	private Villager villager;
+	private Inventory inventory;
 	
 	/**
 	 * <p>
@@ -38,7 +51,8 @@ public class Town {
 	 * @param startChunk
 	 * @throws TownSystemException 
 	 */
-	public Town(File file,String owner,String townName,Chunk startChunk) throws TownSystemException {
+	public Town(File file,String owner,String townName,Location location) throws TownSystemException {
+		Chunk startChunk = location.getChunk();
 		this.townName = townName;
 		this.owner = owner;
 		citizens = new ArrayList<>();
@@ -52,6 +66,7 @@ public class Town {
 		Location spawn = new Location(startChunk.getWorld(), (startChunk.getX() << 4) + 7, 0, (startChunk.getZ() << 4) + 7);
 		spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn));
 		this.file = setTownSpawn(file, spawn);
+		this.file = spawnTownManagerVillager(this.file, location);
 	}
 	
 	/**
@@ -61,13 +76,14 @@ public class Town {
 	 * @param owner
 	 * @param townName
 	 */
-	private Town (String owner,String townName){
+	private Town (String owner,String townName,Location location){
 		this.townName = townName;
 		this.owner = owner;
 		citizens = new ArrayList<>();
 		coOwners = new ArrayList<>();
 		chunkCoords = new ArrayList<>();
 		plots = new ArrayList<>();
+		spawnTownManagerVillager(location);
 	}
 	
 	/**
@@ -80,8 +96,64 @@ public class Town {
 		return file;
 	}
 	
-	public void createTownManagerVillager() {
-		//TODO
+	/**
+	 * <p>
+	 * Spawns a town villager with saving.
+	 * <p>
+	 * @param file
+	 * @param location
+	 * @return file
+	 */
+	private File spawnTownManagerVillager(File file, Location location) {
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("Towns." + townName + ".TownManagerVillager.x", location.getX());
+		config.set("Towns." + townName + ".TownManagerVillager.y", location.getY());
+		config.set("Towns." + townName + ".TownManagerVillager.z", location.getZ());
+		config.set("Towns." + townName + ".TownManagerVillager.world", location.getWorld().getName());
+		spawnTownManagerVillager(location);
+		return save(file, config);
+	}
+	
+	/**
+	 * <p>
+	 * Spawns a villager without saving.
+	 * <p>
+	 * @param location
+	 */
+	private void spawnTownManagerVillager(Location location) {
+		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10,1,10);
+		for(Entity entity:entitys) {
+			if(entity.getName().equals(townName + " TownManager")) {
+				entity.remove();
+			}
+		}
+		villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);     
+		villager.setCustomName(townName + " TownManager");
+		villager.setCustomNameVisible(true);
+		villager.setProfession(Villager.Profession.NITWIT);
+		villager.setSilent(true);
+		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000,30000000));             
+		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000,30000000));
+		inventory = Bukkit.createInventory(null, 9, townName + " TownManager");
+		ItemStack itemStack = new ItemStack(Material.GREEN_WOOL,1);
+		ItemMeta meta = itemStack.getItemMeta();
+		meta.setDisplayName("Join");
+		itemStack.setItemMeta(meta);
+		inventory.setItem(0,itemStack);
+		itemStack = new ItemStack(Material.RED_WOOL,1);
+		meta = itemStack.getItemMeta();
+		meta.setDisplayName("Leave");
+		itemStack.setItemMeta(meta);
+		inventory.setItem(1, itemStack);
+	}
+	
+	/**
+	 * <p>
+	 * Opens the inventory of the TownManager.
+	 * <p>
+	 */
+	public void openTownManagerVillagerInv(Player player) {
+		player.openInventory(inventory);
 	}
 	
 	public void moveTownManagerVillager() {
@@ -314,7 +386,7 @@ public class Town {
 			return save(file,config);
 		}
 		else {
-			throw new TownSystemException(TownSystemException.PLAYER_IS_ALREADY_CITIZEN);
+			throw new TownSystemException(TownSystemException.YOU_ARE_ALREADY_CITIZEN);
 		}
 	}
 	
@@ -328,14 +400,28 @@ public class Town {
 	 * @throws TownSystemException 
 	 */
 	public File removeCitizen(File file,String citizen) throws TownSystemException {
-		if(isPlayerCitizen(citizen)) {
+		if(isTownOwner(citizen)) {
+			throw new TownSystemException(TownSystemException.YOU_ARE_THE_OWNER);
+		}
+		else if(!isPlayerCitizen(citizen)) {
+			throw new TownSystemException(TownSystemException.YOU_ARE_NO_CITIZEN);
+		}
+		else {
+			if(isCoOwner(citizen)) {
+				file = removeCoOwner(file, citizen);
+			}
+			for(Plot plot:plots) {
+				if(plot.isCoOwner(citizen)) {
+					file = plot.removeCoOwner(file, citizen);
+				}
+				else if(plot.isOwner(citizen)) {
+					file = plot.setOwner(file, owner);
+				}
+			}
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			citizens.remove(citizen);
 			config.set("Towns." + townName + ".citizens", citizens);
 			return save(file,config);
-		}
-		else {
-			throw new TownSystemException(TownSystemException.PLAYER_IS_NOT_CITIZEN);
 		}
 	}
 	
@@ -600,6 +686,27 @@ public class Town {
 	
 	/**
 	 * <p>
+	 * Removes a coOwner from the town.
+	 * <p>
+	 * @param file
+	 * @param coOwner
+	 * @return File
+	 * @throws TownSystemException
+	 */
+	public File removeCoOwner(File file,String coOwner) throws TownSystemException {
+		if(coOwners.contains(coOwner)) {
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+			coOwners.remove(coOwner);
+			config.set("Towns." + townName + ".coOwners", coOwners);
+			return save(file,config);
+		}
+		else {
+			throw new TownSystemException(TownSystemException.PLAYER_IS_NO_COOWNER);
+		}
+	}
+	
+	/**
+	 * <p>
 	 * Returns true if player is townOwner or coOwner
 	 * <p>
 	 * @param player
@@ -790,7 +897,11 @@ public class Town {
 	public static Town loadTown(File file,String townName) throws TownSystemException {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 		if(config.getStringList("TownNames").contains(townName)) {
-			Town town = new Town(config.getString("Towns." + townName + ".owner"), townName);
+			Location location = new Location(Bukkit.getWorld(config.getString("Towns." + townName + ".TownManagerVillager.world")),
+					config.getDouble("Towns." + townName + ".TownManagerVillager.x"),
+					config.getDouble("Towns." + townName + ".TownManagerVillager.y"),
+					config.getDouble("Towns." + townName + ".TownManagerVillager.z"));
+			Town town = new Town(config.getString("Towns." + townName + ".owner"), townName,location);
 			town.setCoOwners(config.getStringList("Towns." + townName + ".coOwners"));
 			town.setCitizens(config.getStringList("Towns." + townName + ".citizens"));
 			town.setChunkList(config.getStringList("Towns." + townName + ".chunks"));

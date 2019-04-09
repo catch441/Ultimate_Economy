@@ -8,8 +8,10 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import com.ue.utils.LimitationUtils;
@@ -181,12 +183,12 @@ public class TownWorld {
 	 * @throws PlayerHasNotEnoughtMoneyException 
 	 * @throws PlayerDoesNotExistException 
 	 */
-	public File createTown(File playerfile,FileConfiguration configFile,String townName,Chunk chunk,String owner) throws TownSystemException, PlayerHasNotEnoughtMoneyException, PlayerDoesNotExistException {
+	public File createTown(File playerfile,FileConfiguration configFile,String townName,Location location,String owner) throws TownSystemException, PlayerHasNotEnoughtMoneyException, PlayerDoesNotExistException {
 		config = YamlConfiguration.loadConfiguration(file);
 		if(townNames.contains(townName) ) {
 			throw new TownSystemException(TownSystemException.TOWN_ALREADY_EXISTS);
 		}
-		else if(!chunkIsFree(chunk)) {
+		else if(!chunkIsFree(location.getChunk())) {
 			throw new TownSystemException(TownSystemException.CHUNK_ALREADY_CLAIMED);
 		}
 		else if(!PaymentUtils.playerHasEnoughtMoney(playerfile, owner, this.getFoundationPrice())) {
@@ -196,7 +198,7 @@ public class TownWorld {
 			throw new TownSystemException(TownSystemException.PLAYER_REACHED_MAX_JOINED_TOWNS);
 		}
 		else {
-			Town town = new Town(file, owner, townName, chunk);
+			Town town = new Town(file, owner, townName, location);
 			file = town.getFile();
 			towns.add(town);
 			config = YamlConfiguration.loadConfiguration(file);
@@ -283,6 +285,52 @@ public class TownWorld {
 				file = town.addChunk(file, chunk.getX(),chunk.getZ(),player);
 			}
 		}
+	}
+	
+	/**
+	 * <p>
+	 * Joins a player to a town.
+	 * <p>
+	 * @param playerfile
+	 * @param configFile
+	 * @param player
+	 * @return File
+	 * @throws TownSystemException
+	 * @throws PlayerDoesNotExistException
+	 */
+	public File joinTown(File playerfile,FileConfiguration configFile,Player player) throws TownSystemException, PlayerDoesNotExistException {
+		if(LimitationUtils.playerReachedMaxTowns(playerfile, configFile, player.getName())) {
+			throw new TownSystemException(TownSystemException.PLAYER_REACHED_MAX_JOINED_TOWNS);
+		}
+		else {
+			Town town = getTownByChunk(player.getLocation().getChunk());
+			file = town.addCitizen(file, player.getName());
+			FileConfiguration pf = YamlConfiguration.loadConfiguration(playerfile);
+			List<String> list = pf.getStringList(player.getName() + ".joinedTowns");
+			list.add(town.getTownName());
+			pf.set(player.getName() + ".joinedTowns", list);
+			return save(playerfile, pf);
+		}
+	}
+	
+	/**
+	 * <p>
+	 * Leaves a player from a town.
+	 * <p>
+	 * @param playerfile
+	 * @param configFile
+	 * @param player
+	 * @return File
+	 * @throws TownSystemException
+	 */
+	public File leaveTown(File playerfile,FileConfiguration configFile,Player player) throws TownSystemException {
+		Town town = getTownByChunk(player.getLocation().getChunk());
+		file = town.removeCitizen(file, player.getName());
+		FileConfiguration pf = YamlConfiguration.loadConfiguration(playerfile);
+		List<String> list = pf.getStringList(player.getName() + ".joinedTowns");
+		list.remove(town.getTownName());
+		pf.set(player.getName() + ".joinedTowns", list);
+		return save(playerfile, pf);
 	}
 	
 	/**
@@ -394,7 +442,7 @@ public class TownWorld {
 	 * @throws PlayerDoesNotExistException 
 	 * @throws TownSystemException 
 	 */
-	public File handleTownVillagerInvClick(File playerfile,InventoryClickEvent e) throws PlayerHasNotEnoughtMoneyException, PlayerDoesNotExistException, TownSystemException {
+	public File handleTownVillagerInvClick(File playerfile,FileConfiguration configFile,InventoryClickEvent e) throws PlayerHasNotEnoughtMoneyException, PlayerDoesNotExistException, TownSystemException {
 		Chunk chunk = e.getWhoClicked().getLocation().getChunk();
 		String playerName = e.getWhoClicked().getName();
 		Town town = getTownByChunk(chunk);
@@ -419,6 +467,14 @@ public class TownWorld {
 					file = town.removePlotFromSale(file, chunk.getX(), chunk.getZ(), playerName);
 					e.getWhoClicked().sendMessage(ChatColor.GOLD + "You removed this plot from sale!");
 				}
+				break;
+			case "Join":
+				playerfile = joinTown(playerfile, configFile,(Player) e.getWhoClicked());
+				e.getWhoClicked().sendMessage(ChatColor.GOLD + "You joined the town " + town.getTownName() + ".");
+				break;
+			case "Leave":
+				playerfile = leaveTown(playerfile, configFile, (Player) e.getWhoClicked());
+				e.getWhoClicked().sendMessage(ChatColor.GOLD + "You left the town " + town.getTownName() + ".");
 				break;
 		}
 		return playerfile;

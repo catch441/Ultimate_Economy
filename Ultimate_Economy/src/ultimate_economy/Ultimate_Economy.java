@@ -38,6 +38,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -73,10 +74,9 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 	
 	/*
 	 * Lukas Heubach
-	 * buyable regions | stadt joinen/leaven, add coOwner<-
-	 * 	 * kisten dürfen in anderen städten/plots nicht geöffnet werden
+	 * buyable regions | add coOwner<-
+	 * move townManager
 	 * town bank amount in scoreboard für town owner und town coowner
-	 * 		set/break block event anpassen
 	 * maxjobs bug
 	 * job crafter,enchanter
 	 * op should remove playershops (more op commands)
@@ -946,7 +946,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 								if(!townNames.contains(args[1])) {
 									try {
 										TownWorld tWorld = getTownWorld(player.getWorld().getName());
-										playerFile = tWorld.createTown(playerFile,getConfig(),args[1], player.getLocation().getChunk(),player.getName());
+										playerFile = tWorld.createTown(playerFile,getConfig(),args[1], player.getLocation(),player.getName());
 										townNames.add(args[1]);
 										getConfig().set("TownNames", townNames);
 										saveConfig();
@@ -2120,6 +2120,28 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 	//Events
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@EventHandler
+	public void PlayerInteract(PlayerInteractEvent event) {
+		if(event.getPlayer().getGameMode() == GameMode.SURVIVAL && event.getClickedBlock() != null) {
+			Location location = event.getClickedBlock().getLocation();
+			try {
+				TownWorld townWorld = getTownWorld(location.getWorld().getName());
+				if(townWorld.chunkIsFree(location.getChunk())) {
+					event.setCancelled(true);
+					event.getPlayer().sendMessage(ChatColor.RED + "You are in the wilderness!");
+				}
+				else {
+					Town town = townWorld.getTownByChunk(location.getChunk());
+					if(!town.isPlayerCitizen(event.getPlayer().getName()) || !town.hasBuildPermissions(event.getPlayer().getName(), location.getChunk().getX() + "/" + location.getChunk().getZ())) {
+						event.setCancelled(true);
+						event.getPlayer().sendMessage(ChatColor.RED + "You have no permission on this plot!");
+					}
+				}
+			} catch (TownSystemException e) {}
+		}
+	}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	@EventHandler
 	public void NPCOpenInv(PlayerInteractEntityEvent event) {
 		Entity entity = event.getRightClicked();
 		if(entity instanceof Villager && ((Villager) entity).getProfession() == Profession.NITWIT) {
@@ -2156,6 +2178,17 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 					Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 				}
 			}
+			else if(name.contains("TownManager")) {
+				event.setCancelled(true);
+				try {
+					TownWorld townWorld = getTownWorld(entity.getWorld().getName());
+					Town town = townWorld.getTownByChunk(entity.getLocation().getChunk());
+					town.openTownManagerVillagerInv(event.getPlayer());
+				} catch (TownSystemException e) {
+					Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+				}
+				
+			}
 		}
 	}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2180,6 +2213,10 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 			else if(entityname.contains("For Sale!")) {
 				event.setCancelled(true);
 				damager.sendMessage(ChatColor.RED + "You are not allowed to hit a saleVillager!");
+			}
+			else if(entityname.contains("TownManager")) {
+				event.setCancelled(true);
+				damager.sendMessage(ChatColor.RED + "You are not allowed to hit a townManagerVillager!");
 			}
 		}
 	}
@@ -2233,12 +2270,12 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 				}
 			}
 			////////////////////////////////////////////////////////////////////////////saleVillager
-			else if(inventoryname.contains("Plot")) {
+			else if(inventoryname.contains("Plot") || inventoryname.contains("TownManager")) {
 				for(TownWorld townWorld:townWorlds) {
 					if(townWorld.getWorldName().equals(playe.getWorld().getName())) {
 						event.setCancelled(true);
 						try {
-							playerFile = townWorld.handleTownVillagerInvClick(playerFile,event);
+							playerFile = townWorld.handleTownVillagerInvClick(playerFile,getConfig(),event);
 							playe.closeInventory();
 						} catch (PlayerHasNotEnoughtMoneyException | PlayerDoesNotExistException
 								| TownSystemException e) {
@@ -2320,24 +2357,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 	@EventHandler
 	public void setBlockEvent(BlockPlaceEvent event) {
 		if(event.getPlayer().getGameMode() == GameMode.SURVIVAL) {
-			if(isTownWorld(event.getBlock().getWorld().getName())) {
-				try {
-					TownWorld townWorld = getTownWorld(event.getBlock().getWorld().getName());
-					if(townWorld.chunkIsFree(event.getBlock().getChunk())) {
-						event.setCancelled(true);
-						event.getPlayer().sendMessage(ChatColor.RED + "You are in the wilderness!");
-					} 
-					else {
-						if(!townWorld.getTownByChunk(event.getBlock().getChunk()).hasBuildPermissions(event.getPlayer().getName(), event.getBlock().getChunk().getX() + "/" + event.getBlock().getChunk().getZ())) {
-							event.setCancelled(true);
-							event.getPlayer().sendMessage(ChatColor.RED + "You have no permission on this plot!");
-						}
-					}
-				} catch (TownSystemException e) {
-					event.getPlayer().sendMessage(ChatColor.RED + e.getMessage());
-				}
-			}
-			else if(event.getBlock().getBlockData().getMaterial() == Material.SPAWNER) {
+			if(event.getBlock().getBlockData().getMaterial() == Material.SPAWNER) {
 				if(event.getItemInHand().getItemMeta().getDisplayName().contains("-")) {
 					String spawnerowner = event.getItemInHand().getItemMeta().getDisplayName().substring(event.getItemInHand().getItemMeta().getDisplayName().lastIndexOf("-") + 1);
 					if(spawnerowner.equals(event.getPlayer().getName())) {
@@ -2375,81 +2395,62 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 	@EventHandler
 	public void breakBlockEvent(BlockBreakEvent event) {
 		if(event.getPlayer().getGameMode() == GameMode.SURVIVAL) {
-			if(isTownWorld(event.getBlock().getWorld().getName())) {
-				try {
-					TownWorld townWorld = getTownWorld(event.getBlock().getWorld().getName());
-					if(townWorld.chunkIsFree(event.getBlock().getChunk())) {
-						event.setCancelled(true);
-						event.getPlayer().sendMessage(ChatColor.RED + "You are in the wilderness!");
-					} 
-					else {
-						if(!townWorld.getTownByChunk(event.getBlock().getChunk()).hasBuildPermissions(event.getPlayer().getName(), event.getBlock().getChunk().getX() + "/" + event.getBlock().getChunk().getZ())) {
-							event.setCancelled(true);
-							event.getPlayer().sendMessage(ChatColor.RED + "You have no permission on this plot!");
-						}
-					}
-				} catch (TownSystemException e) {
-					event.getPlayer().sendMessage(ChatColor.RED + e.getMessage());
-				}
-			}
-			else {
-				config = YamlConfiguration.loadConfiguration(playerFile);
-				List<String> list = config.getStringList(event.getPlayer().getName() + ".Jobs");
-				if(!list.isEmpty()) {
-					String eventblockname = event.getBlock().getBlockData().getMaterial().toString();
-					for(String job:list) {
-						config = YamlConfiguration.loadConfiguration(new File(getDataFolder() ,job + "-Job.yml"));
-						List<String> itemlist = config.getStringList("Itemlist");
-						if(itemlist.contains(eventblockname)) {
-							Material material = event.getBlock().getBlockData().getMaterial();
-							try {
-								if(material == Material.POTATOES || material == Material.CARROTS ||material == Material.WHEAT || material == Material.NETHER_WART_BLOCK || material == Material.BEETROOTS) {
-									Ageable ageable = (Ageable) event.getBlock().getBlockData();
-									if(ageable.getAge() == ageable.getMaximumAge()) {
-										double d = config.getDouble("JobItems." + eventblockname + ".breakprice");
-										playerFile = PaymentUtils.increasePlayerAmount(playerFile, event.getPlayer().getName(), d);
-									}	
-								}
-								else {
+			config = YamlConfiguration.loadConfiguration(playerFile);
+			List<String> list = config.getStringList(event.getPlayer().getName() + ".Jobs");
+			if(!list.isEmpty()) {
+				String eventblockname = event.getBlock().getBlockData().getMaterial().toString();
+				for(String job:list) {
+					config = YamlConfiguration.loadConfiguration(new File(getDataFolder() ,job + "-Job.yml"));
+					List<String> itemlist = config.getStringList("Itemlist");
+					if(itemlist.contains(eventblockname)) {
+						Material material = event.getBlock().getBlockData().getMaterial();
+						try {
+							if(material == Material.POTATOES || material == Material.CARROTS ||material == Material.WHEAT || material == Material.NETHER_WART_BLOCK || material == Material.BEETROOTS) {
+								Ageable ageable = (Ageable) event.getBlock().getBlockData();
+								if(ageable.getAge() == ageable.getMaximumAge()) {
 									double d = config.getDouble("JobItems." + eventblockname + ".breakprice");
 									playerFile = PaymentUtils.increasePlayerAmount(playerFile, event.getPlayer().getName(), d);
-								}
-							} catch (PlayerDoesNotExistException e) {
-								Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+								}	
 							}
-							break;
+							else {
+								double d = config.getDouble("JobItems." + eventblockname + ".breakprice");
+								playerFile = PaymentUtils.increasePlayerAmount(playerFile, event.getPlayer().getName(), d);
+							}
+						} catch (PlayerDoesNotExistException e) {
+							Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 						}
+						break;
 					}
 				}
-				if(event.getBlock().getBlockData().getMaterial() == Material.SPAWNER) {
-					List<MetadataValue> blockmeta = event.getBlock().getMetadata("name");
-					if(!blockmeta.isEmpty()) {
-						MetadataValue s = blockmeta.get(0);
-						String blockname = s.asString();
-						if(event.getPlayer().getName().equals(blockname)) {
-							if(!event.getBlock().getMetadata("entity").isEmpty()) {
-								config = YamlConfiguration.loadConfiguration(spawner);
-								double x = event.getBlock().getX();
-								double y = event.getBlock().getY();
-								double z = event.getBlock().getZ();
-								String spawnername = String.valueOf(x) + String.valueOf(y) + String.valueOf(z);
-								spawnername = spawnername.replace(".", "-");
-								spawnerlist.remove(spawnername);
-								getConfig().set("Spawnerlist", spawnerlist);
-								saveConfig();
-								config.set(spawnername, null);
-								saveFile(spawner);
-								ItemStack stack = new ItemStack(Material.SPAWNER, 1);
-								ItemMeta meta = stack.getItemMeta();
-								meta.setDisplayName(event.getBlock().getMetadata("entity").get(0).asString() + "-" + event.getPlayer().getName());     
-								stack.setItemMeta(meta);
-								event.getPlayer().getInventory().addItem(stack);
-							}
+			}
+			if(event.getBlock().getBlockData().getMaterial() == Material.SPAWNER) {
+				List<MetadataValue> blockmeta = event.getBlock().getMetadata("name");
+				if(!blockmeta.isEmpty()) {
+					MetadataValue s = blockmeta.get(0);
+					String blockname = s.asString();
+					if(event.getPlayer().getName().equals(blockname)) {
+						if(!event.getBlock().getMetadata("entity").isEmpty()) {
+							config = YamlConfiguration.loadConfiguration(spawner);
+							double x = event.getBlock().getX();
+							double y = event.getBlock().getY();
+							double z = event.getBlock().getZ();
+							String spawnername = String.valueOf(x) + String.valueOf(y) + String.valueOf(z);
+							spawnername = spawnername.replace(".", "-");
+							spawnerlist.remove(spawnername);
+							getConfig().set("Spawnerlist", spawnerlist);
+							saveConfig();
+							config.set(spawnername, null);
+							saveFile(spawner);
+							ItemStack stack = new ItemStack(Material.SPAWNER, 1);
+							ItemMeta meta = stack.getItemMeta();
+							meta.setDisplayName(event.getBlock().getMetadata("entity").get(0).asString() + "-" + event.getPlayer().getName());     
+							stack.setItemMeta(meta);
+							event.getPlayer().getInventory().addItem(stack);
 						}
-						else {
-							event.setCancelled(true);
-							event.getPlayer().sendMessage(ChatColor.RED + "You are not allowed to break this spawner!");
-						}
+					}
+					else {
+						event.setCancelled(true);
+						event.getPlayer().sendMessage(ChatColor.RED + "You are not allowed to break this spawner!");
 					}
 				}
 			}
