@@ -18,10 +18,11 @@ public class TownSystemException extends Exception{
 	public static final String PLAYER_IS_NOT_OWNER = "The player is not the owner of this location!";
 	public static final String PLAYER_REACHED_MAX_JOINED_TOWNS = "You have reached the max number of joined towns!";
 	public static final String PLAYER_IS_ALREADY_OWNER = "The player is already the owner of this location!";
-	public static final String YOU_ARE_NO_CITIZEN = "YOU are not a citizen of this town!";
+	public static final String YOU_ARE_NO_CITIZEN = "You are not a citizen of this town!";
 	public static final String YOU_ARE_ALREADY_CITIZEN = "You are already a citizen in this town!";
 	public static final String YOU_ARE_ALREADY_OWNER = "You are already the owner of this location!";
 	public static final String YOU_ARE_THE_OWNER = "You are the owner of this location!";
+	public static final String YOU_ARE_NOT_OWNER = "You are not the owner of this location!";
 	public static final String PLOT_ALREADY_SOLD = "The plot is already sold!";
 	public static final String PLOT_IS_ALREADY_FOR_SALE = "The plot is already for sale!";
 	public static final String PLOT_IS_NOT_FOR_SALE = "The plot is not for sale!";

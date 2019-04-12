@@ -19,7 +19,7 @@ commands:
     description: Set max jobs.
     
   townWorld:   
-    permission: ultimate_economy.config
+    permission: ultimate_economy.townworld
     permission-message: You don't have the permission.
     description: Activate/deactivate town world.
     

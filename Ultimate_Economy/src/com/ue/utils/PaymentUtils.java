@@ -201,4 +201,14 @@ public abstract class PaymentUtils {
 		int score = (int) config.getDouble(p.getName() + ".account amount");
 		setScoreboard(file,p,score);
 	}
+	
+	/*public static void updateScoreBoardWithTownAmount(String townName,Integer score,Player p) {
+		Scoreboard board = p.getScoreboard();
+		if(board != null) {
+			Objective o = board.registerNewObjective("test", "dummy","§6§l" + townName);
+			o.setDisplaySlot(DisplaySlot.SIDEBAR);
+			o.getScore("§6Money:").setScore(score);
+			p.setScoreboard(board);
+		}
+	}*/	
 }

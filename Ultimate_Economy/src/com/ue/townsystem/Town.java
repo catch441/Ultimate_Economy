@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -156,16 +155,55 @@ public class Town {
 		player.openInventory(inventory);
 	}
 	
-	public void moveTownManagerVillager() {
-		//TODO
+	/**
+	 * 
+	 * @param file
+	 * @param location
+	 * @param player
+	 * @return
+	 * @throws TownSystemException
+	 */
+	public File moveTownManagerVillager(File file,Location location,String player) throws TownSystemException {
+		if(!isClaimedByTown(location.getChunk())) {
+			throw new TownSystemException(TownSystemException.CHUNK_NOT_CLAIMED_BY_TOWN);
+		}
+		else if(isTownOwner(player)) {
+			throw new TownSystemException(TownSystemException.YOU_ARE_NOT_OWNER);
+		}
+		else {
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+			config.set("Towns." + townName + ".TownManagerVillager.x", location.getX());
+			config.set("Towns." + townName + ".TownManagerVillager.y", location.getY());
+			config.set("Towns." + townName + ".TownManagerVillager.z", location.getZ());
+			config.set("Towns." + townName + ".TownManagerVillager.world", location.getWorld().getName());
+			villager.teleport(location);
+			return save(file, config);
+		}
 	}
 	
+	/**
+	 * <p>
+	 * Despawns the town managerVillager.
+	 * <p>
+	 */
 	public void despawnTownManagerVillager() {
-		//TODO
+		villager.remove();
 	}
 	
-	public void removeTownManagerVillager() {
-		//TODO
+	/**
+	 * <p>
+	 * Removes the town managerVillager with saving.
+	 * <p>
+	 * @param file
+	 * @return
+	 */
+	private File removeTownManagerVillager(File file) {
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("Towns." + townName + ".TownManagerVillager", null);
+		World world = villager.getLocation().getWorld();
+		villager.remove();
+		world.save();
+		return save(file, config);
 	}
 	
 	/**
@@ -177,6 +215,21 @@ public class Town {
 		for(Plot plot:plots) {
 			plot.despawnSaleVillager();
 		}
+		despawnTownManagerVillager();
+	}
+	
+	/**
+	 * <p>
+	 * Delets this town in savefile,
+	 * <p>
+	 * @param file
+	 * @return
+	 */
+	public File deleteTown(File file) {
+		file = removeTownManagerVillager(file);
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("Towns." + townName, null);
+		return save(file, config);
 	}
 	
 	/**

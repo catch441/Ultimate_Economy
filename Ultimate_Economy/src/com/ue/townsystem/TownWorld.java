@@ -230,11 +230,6 @@ public class TownWorld {
 		else {
 			Town town = getTownByName(townname);
 			if(town.isTownOwner(playername)) {
-				List<String> cList = new ArrayList<>();
-				cList.addAll(town.getChunkList());
-				for(String coords: cList) {
-					town.removeChunk(file, Integer.valueOf(coords.substring(0,coords.indexOf("/"))), Integer.valueOf(coords.substring(coords.indexOf("/")+1)),Bukkit.getWorld(worldName));
-				}
 				FileConfiguration c = YamlConfiguration.loadConfiguration(playerfile);
 				List<String> tList = new ArrayList<>();
 				tList.addAll(town.getCitizens());
@@ -243,8 +238,11 @@ public class TownWorld {
 					list.remove(townname);
 					c.set(citizen + ".joinedTowns", list);
 				}
-				delete();
+				file = town.deleteTown(file);
+				towns.remove(town);
 				townNames.remove(townname);
+				config.set("TownNames", townNames);
+				save();
 				return save(playerfile, c);
 			}
 			else {

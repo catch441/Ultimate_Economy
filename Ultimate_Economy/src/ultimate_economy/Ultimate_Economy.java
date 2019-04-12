@@ -75,14 +75,12 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 	/*
 	 * Lukas Heubach
 	 * buyable regions | add coOwner<-
-	 * move townManager
 	 * town bank amount in scoreboard für town owner und town coowner
-	 * maxjobs bug
+	 * maxjobs bug ?
 	 * job crafter,enchanter
 	 * op should remove playershops (more op commands)
 	 * limit playershops per player
 	 * check inventory name for right cancel 
-	 * givemoney bugs herausfinden
 	 * 
 	 */
 
@@ -509,6 +507,109 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 				list = getHomeList(args[0],sender.getName());
 			}
 		}
+		else if(command.getName().equalsIgnoreCase("townWorld")) {
+			if(args[0].equals("")) {
+				list.add("enable");
+				list.add("disable");
+				list.add("setFoundationPrice");
+				list.add("setExpandPrice");
+			}
+			else if(args.length == 1){
+				if("enable".contains(args[0])) {
+					list.add("enable");
+				}
+				if("disable".contains(args[0])) {
+					list.add("disable");
+				}
+				if("setFoundationPrice".contains(args[0])) {
+					list.add("setFoundationPrice");
+				}
+				if("setExpandPrice".contains(args[0])) {
+					list.add("setExpandPrice");
+				}
+			}
+			else if(args[0].equals("enable") || args[0].equals("disable") || args[0].equals("setFoundationPrice") || args[0].equals("setExpandPrice")) {
+				if(args[1].equals("")) {
+					for(World world:Bukkit.getWorlds()) {
+						list.add(world.getName());
+					}
+				}
+				else if(args.length == 2){
+					for(World world:Bukkit.getWorlds()) {
+						if(world.getName().contains(args[1])) {
+							list.add(world.getName());
+						}
+					}
+				}
+			}
+		}
+		else if(command.getName().equals("town")) {
+			if(args[0].equals("")) {
+				list.add("create");
+				list.add("delete");
+				list.add("expand");
+				list.add("setTownSpawn");
+				list.add("moveTownManager");
+				list.add("plot");
+				list.add("pay");
+				list.add("tp");
+				list.add("bank");
+			}
+			else if(args.length == 1){
+				if("create".contains(args[0])) {
+					list.add("create");
+				}
+				if("delete".contains(args[0])) {
+					list.add("delete");
+				}
+				if("expand".contains(args[0])) {
+					list.add("expand");
+				}
+				if("setTownSpawn".contains(args[0])) {
+					list.add("setTownSpawn");
+				}
+				if("moveTownManager".contains(args[0])) {
+					list.add("moveTownManager");
+				}
+				if("plot".contains(args[0])) {
+					list.add("plot");
+				}
+				if("pay".contains(args[0])) {
+					list.add("pay");
+				}
+				if("tp".contains(args[0])) {
+					list.add("tp");
+				}
+				if("bank".contains(args[0])) {
+					list.add("bank");
+				}
+			}
+			else if(args[0].equals("delete") || args[0].equals("expand") || args[0].equals("setTownSpawn") || args[0].equals("bank")) {
+				if(args[1].equals("")) {
+					config = YamlConfiguration.loadConfiguration(playerFile);
+					list.addAll(config.getStringList(sender.getName() + ".joinedTowns"));
+				}
+				else if(args.length == 2){
+					config = YamlConfiguration.loadConfiguration(playerFile);
+					List<String> list2 = config.getStringList(sender.getName() + ".joinedTowns");
+					for(String string:list2) {
+						if(string.contains(args[1])) {
+							list.add(string);
+						}
+					}
+				}
+			}
+			else if(args[0].equals("plot")) {
+				if(args[1].equals("")) {
+					list.add("setForSale");
+				}
+				else if(args.length == 2){
+					if("setForSale".contains(args[1])) {
+						list.add("setForSale");
+					}
+				}
+			}
+		}
 		return list;
 	}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -622,7 +723,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 								}
 							}
 							else {
-								player.sendMessage("/townWorld activate <worldname>");
+								player.sendMessage("/townWorld enable <worldname>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -638,7 +739,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 								player.sendMessage(ChatColor.GREEN + args[1] + ChatColor.GOLD + " is no longer a TownWold.");
 							}
 							else {
-								player.sendMessage("/townWorld deactivate <worldname>");
+								player.sendMessage("/townWorld disable <worldname>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -682,16 +783,16 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 					}
 				}
 				else if(args.length == 1 && args[0].equals("enable")){
-					player.sendMessage("/townWorld <enable> <worldname>");
+					player.sendMessage("/townWorld enable <worldname>");
 				}
 				else if(args.length == 1 && args[0].equals("disable")){
-					player.sendMessage("/townWorld <disable> <worldname>");
+					player.sendMessage("/townWorld disable <worldname>");
 				}
 				else if(args.length == 1 && args[0].equals("setFoundationPrice")){
-					player.sendMessage("/townWorld <setFoundationPrice> <price>");
+					player.sendMessage("/townWorld setFoundationPrice <price>");
 				}
 				else if(args.length == 1 && args[0].equals("setExpandPrice")){
-					player.sendMessage("/townWorld <setExpandPrice> <price per chunk>");
+					player.sendMessage("/townWorld setExpandPrice <price per chunk>");
 				}
 				else {
 					player.sendMessage("/townWorld <enable/disable/setFoundationPrice/setExpandPrice>");
@@ -939,180 +1040,212 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////towns
 			else if(label.equalsIgnoreCase("town")) {
 				if(args.length != 0) {
-					if(isTownWorld(player.getWorld().getName())) {
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						if(args[0].equals("create")) {
-							if(args.length == 2) {
-								if(!townNames.contains(args[1])) {
-									try {
-										TownWorld tWorld = getTownWorld(player.getWorld().getName());
-										playerFile = tWorld.createTown(playerFile,getConfig(),args[1], player.getLocation(),player.getName());
-										townNames.add(args[1]);
-										getConfig().set("TownNames", townNames);
-										saveConfig();
-										player.sendMessage(ChatColor.GOLD + "Congratulation! You founded the new town " + ChatColor.GREEN + args[1] + ChatColor.GOLD + "!");
-									} catch (TownSystemException | PlayerHasNotEnoughtMoneyException | PlayerDoesNotExistException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
-								}
-								else {
-									player.sendMessage(ChatColor.RED + "The town " + args[1] + " already exists on this server!");
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					if(args[0].equals("create")) {
+						if(args.length == 2) {
+							if(!townNames.contains(args[1])) {
+								try {
+									TownWorld tWorld = getTownWorld(player.getWorld().getName());
+									playerFile = tWorld.createTown(playerFile,getConfig(),args[1], player.getLocation(),player.getName());
+									townNames.add(args[1]);
+									getConfig().set("TownNames", townNames);
+									saveConfig();
+									player.sendMessage(ChatColor.GOLD + "Congratulation! You founded the new town " + ChatColor.GREEN + args[1] + ChatColor.GOLD + "!");
+								} catch (TownSystemException | PlayerHasNotEnoughtMoneyException | PlayerDoesNotExistException e) {
+									player.sendMessage(ChatColor.RED + e.getMessage());
 								}
 							}
 							else {
-								player.sendMessage("/town create <townname>");
+								player.sendMessage(ChatColor.RED + "The town " + args[1] + " already exists on this server!");
 							}
 						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if(args[0].equals("delete")) {
-							if(args.length == 2) {
-								if(townNames.contains(args[1])) {
+						else {
+							player.sendMessage("/town create <townname>");
+						}
+					}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					else if(args[0].equals("delete")) {
+						if(args.length == 2) {
+							if(townNames.contains(args[1])) {
+								try {
+									TownWorld tWorld = getTownWorld(player.getWorld().getName());
+									playerFile = tWorld.dissolveTown(playerFile,args[1],player.getName());
+									townNames.remove(args[1]);
+									getConfig().set("TownNames", townNames);
+									saveConfig();
+									player.sendMessage(ChatColor.GOLD + "The town " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " was dissolved!");
+								} catch (TownSystemException e) {
+									player.sendMessage(ChatColor.RED + e.getMessage());
+								}
+							}
+							else {
+								player.sendMessage(ChatColor.RED + "The town " + args[1] + " does not exists on this server!");
+							}
+						}
+						else {
+							player.sendMessage("/town delete <townname>");
+						}
+					}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					else if(args[0].equals("expand")) {
+						if(args.length == 2) {
+							try {
+								TownWorld tWorld = getTownWorld(player.getWorld().getName());
+								tWorld.expandTown(args[1], player.getLocation().getChunk(),player.getName());
+								player.sendMessage(ChatColor.GOLD + "Congratulation! You expanded your town with a new chunk!");
+							} catch (TownSystemException | TownHasNotEnoughMoneyException e) {
+								player.sendMessage(ChatColor.RED + e.getMessage());
+							}	
+						}
+						else {
+							player.sendMessage("/town expand <townname>");
+						}
+					}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					else if(args[0].equals("setTownSpawn")) {
+						if(args.length == 2) {
+							try {
+								TownWorld tWorld = getTownWorld(player.getWorld().getName());
+								Town town = tWorld.getTownByName(args[1]);
+								if(town.hasCoOwnerPermission(player.getName())) {
+									File file = town.setTownSpawn(tWorld.getSaveFile(),player.getLocation());
+									tWorld.setSaveFile(file);
+									player.sendMessage(ChatColor.GOLD + "The townspawn was set to " + ChatColor.GREEN + (int) player.getLocation().getX() + "/" + (int) player.getLocation().getY() + "/" + (int) player.getLocation().getZ() + ChatColor.GOLD + ".");
+								}
+							} catch (TownSystemException e) {
+								player.sendMessage(ChatColor.RED + e.getMessage());
+							}							}
+						else {
+							player.sendMessage("/town setTownSpawn <townname>");
+						}
+					}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					else if(args[0].equals("setTax")) {
+						//TODO
+						if(args.length == 3) {
+							
+						}
+						else {
+							
+						}
+					}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					else if(args[0].equalsIgnoreCase("moveTownManager")) {
+						if(args.length == 1) {
+							try {
+								TownWorld townWorld = getTownWorld(player.getWorld().getName());
+								Town town = townWorld.getTownByChunk(player.getLocation().getChunk());
+								File file = town.moveTownManagerVillager(townWorld.getSaveFile(), player.getLocation(), player.getName());
+								townWorld.setSaveFile(file);
+							} catch (TownSystemException e) {
+								player.sendMessage(ChatColor.RED + e.getMessage());
+							}
+						}
+						else {
+							player.sendMessage("/town moveTownManager");
+						}
+					}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					else if(args[0].equals("plot")) {
+						if(args.length > 1) {
+							if(args[1].equals("setForSale")) {
+								if(args.length == 3) {
 									try {
-										TownWorld tWorld = getTownWorld(player.getWorld().getName());
-										playerFile = tWorld.dissolveTown(playerFile,args[1],playerFile.getName());
-										player.sendMessage(ChatColor.GOLD + "The town" + ChatColor.GREEN + args[1] + ChatColor.GOLD + "was dissolved!");
+										TownWorld townWorld = getTownWorld(player.getWorld().getName());
+										Town town = townWorld.getTownByChunk(player.getLocation().getChunk());
+										File file = town.setPlotForSale(townWorld.getSaveFile(), Double.valueOf(args[2]),player.getName(),player.getLocation());
+										townWorld.setSaveFile(file);
+										player.sendMessage(ChatColor.GOLD + "This plot is now for sale!");
+									} catch (TownSystemException e) {
+										player.sendMessage(ChatColor.RED + e.getMessage());
+									}			
+								}
+								else {
+									player.sendMessage("/town plot setForSale <price> ");
+								}
+							}
+							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							else if(args[1].equals("setForRent")) {
+								if(args.length == 4) {
+									//TODO
+								}
+								else {
+									player.sendMessage("/town plot setForRent <townname> <price/24h>");
+								}
+							}
+						}
+						else {
+							player.sendMessage("/town plot <setForSale/setForRent>");
+						}
+					}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					else if(args[0].equals("tp")) {
+						if(args.length == 2) {
+							for(TownWorld townWorld:townWorlds) {
+								if(townWorld.getTownNameList().contains(args[1])) {
+									try {
+										player.teleport(townWorld.getTownByName(args[1]).getTownSpawn());
+									} catch (TownSystemException e) {
+										Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+									}
+									break;
+								}
+							}
+						}
+						else {
+							player.sendMessage("/town tp <townname>");
+						}
+					}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					else if(args[0].equals("pay")) {
+						if(args.length == 3) {
+							double amount = Double.valueOf(args[2]);
+							if(amount > 0) {
+								try {
+									playerFile = PaymentUtils.decreasePlayerAmount(playerFile, player.getName(), amount, true);
+									TownWorld tWorld = getTownWorld(player.getWorld().getName());
+									tWorld.setSaveFile(tWorld.getTownByName(args[1]).increaseTownBankAmount(tWorld.getSaveFile(), amount));
+									player.sendMessage(ChatColor.GOLD + "The town " + args[1] + " got "+ ChatColor.GREEN + amount + " $" + ChatColor.GOLD + " from you!");
+								} catch (TownSystemException | PlayerDoesNotExistException | PlayerHasNotEnoughtMoneyException e) {
+									player.sendMessage(ChatColor.RED + e.getMessage());
+								}
+							}
+							else {
+								player.sendMessage(ChatColor.RED + "The amount have to be above 0!");
+							}
+						}
+						else {
+							player.sendMessage("/town pay <townname> <amount>");
+						}
+					}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					else if(args[0].equals("bank")) {
+						if(args.length == 2) {
+							for(TownWorld townWorld:townWorlds) {
+								if(townWorld.getTownNameList().contains(args[1])) {
+									try {
+										Town town = townWorld.getTownByName(args[1]);
+										if(town.hasCoOwnerPermission(player.getName())) {
+											player.sendMessage(ChatColor.GOLD + "Town money: " + ChatColor.GREEN + town.getTownBankAmount() + ChatColor.GOLD + " $");
+										}
 									} catch (TownSystemException e) {
 										player.sendMessage(ChatColor.RED + e.getMessage());
 									}
-								}
-								else {
-									player.sendMessage(ChatColor.RED + "The town " + args[1] + " does not exists on this server!");
+									break;
 								}
 							}
-							else {
-								player.sendMessage("/town delete <townname>");
-							}
 						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if(args[0].equals("expand")) {
-							if(args.length == 2) {
-								try {
-									TownWorld tWorld = getTownWorld(player.getWorld().getName());
-									tWorld.expandTown(args[1], player.getLocation().getChunk(),player.getName());
-									player.sendMessage(ChatColor.GOLD + "Congratulation! You expanded your town with a new chunk!");
-								} catch (TownSystemException | TownHasNotEnoughMoneyException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}	
-							}
-							else {
-								player.sendMessage("/town expand <townname>");
-							}
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if(args[0].equals("setTownSpawn")) {
-							if(args.length == 2) {
-								try {
-									TownWorld tWorld = getTownWorld(player.getWorld().getName());
-									Town town = tWorld.getTownByName(args[1]);
-									if(town.hasCoOwnerPermission(player.getName())) {
-										town.setTownSpawn(tWorld.getSaveFile(),player.getLocation());;
-										player.sendMessage(ChatColor.GOLD + "The townspawn was set to " + ChatColor.GREEN + (int) player.getLocation().getX() + "/" + (int) player.getLocation().getY() + "/" + (int) player.getLocation().getZ() + ChatColor.GOLD + ".");
-									}
-								} catch (TownSystemException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}							}
-							else {
-								player.sendMessage("/town setTownSpawn <townname>");
-							}
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if(args[0].equals("setTax")) {
-							//TODO
-							if(args.length == 3) {
-								
-							}
-							else {
-								
-							}
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if(args[0].equals("townManager")) {
-							//TODO
-							//spawn town villager things
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if(args[0].equals("plot")) {
-							if(args.length > 1) {
-								if(args[1].equals("setForSale")) {
-									if(args.length == 3) {
-										try {
-											TownWorld townWorld = getTownWorld(player.getWorld().getName());
-											Town town = townWorld.getTownByChunk(player.getLocation().getChunk());
-											town.setPlotForSale(townWorld.getSaveFile(), Double.valueOf(args[2]),player.getName(),player.getLocation());
-											player.sendMessage(ChatColor.GOLD + "This plot is now for sale!");
-										} catch (TownSystemException e) {
-											player.sendMessage(ChatColor.RED + e.getMessage());
-										}			
-									}
-									else {
-										player.sendMessage("/town plot setForSale <price> ");
-									}
-								}
-								//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-								else if(args[1].equals("setForRent")) {
-									if(args.length == 4) {
-										//TODO
-									}
-									else {
-										player.sendMessage("/town plot setForRent <townname> <price/24h>");
-									}
-								}
-							}
-							else {
-								player.sendMessage("/town plot <setForSale/setForRent>");
-							}
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if(args[0].equals("tp")) {
-							if(args.length == 2) {
-								for(TownWorld townWorld:townWorlds) {
-									if(townWorld.getTownNameList().contains(args[1])) {
-										try {
-											player.teleport(townWorld.getTownByName(args[1]).getTownSpawn());
-										} catch (TownSystemException e) {
-											Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
-										}
-										break;
-									}
-								}
-							}
-							else {
-								player.sendMessage("/town tp <townname>");
-							}
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if(args[0].equals("pay")) {
-							if(args.length == 3) {
-								double amount = Double.valueOf(args[2]);
-								if(amount > 0) {
-									try {
-										playerFile = PaymentUtils.decreasePlayerAmount(playerFile, player.getName(), amount, true);
-										TownWorld tWorld = getTownWorld(player.getWorld().getName());
-										tWorld.setSaveFile(tWorld.getTownByName(args[1]).increaseTownBankAmount(tWorld.getSaveFile(), amount));
-										player.sendMessage(ChatColor.GOLD + "The town " + args[1] + " got "+ ChatColor.GREEN + amount + " $" + ChatColor.GOLD + " from you!");
-									} catch (TownSystemException | PlayerDoesNotExistException | PlayerHasNotEnoughtMoneyException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
-								}
-								else {
-									player.sendMessage(ChatColor.RED + "The amount have to be above 0!");
-								}
-							}
-							else {
-								player.sendMessage("/town pay <townname> <amount>");
-							}
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else {
-							player.sendMessage("/town <create/delete/expand/setTownSpawn/setTax/townManager/plot/pay>");
+							player.sendMessage("/town bank <townname>");
 						}
 					}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					else {
-						player.sendMessage(ChatColor.RED + "You are not in a Townworld!");
+						player.sendMessage("/town <create/delete/expand/setTownSpawn/setTax/moveTownManager/plot/pay/tp/bank>");
 					}
 				}
 				else {
-					player.sendMessage("/town <create/delete/expand/setTownSpawn/setTax/townManager/plot/pay>");
+					player.sendMessage("/town <create/delete/expand/setTownSpawn/setTax/moveTownManager/plot/pay/tp/bank>");
 				}
 			}
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
