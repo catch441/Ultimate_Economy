@@ -90,7 +90,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 	private List<String> playershopNames,adminShopNames,playerlist,homeList,spawnerlist,townNames;
 	private List<AdminShop> adminShopList;
 	private List<PlayerShop> playerShopList;
-	private File playerFile,spawner;
+	private File spawner;
 	private FileConfiguration config;
 
 	public void onEnable() {	
@@ -116,14 +116,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 			getConfig().set("ItemList", null);
 			saveConfig();
 		}
-		playerFile = new File(getDataFolder() , "PlayerFile.yml");
-		if(!playerFile.exists()) {
-			try {
-				playerFile.createNewFile();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		
 		if(getConfig().getInt("MaxHomes") == 0) {
 			getConfig().set("MaxHomes", 3);
 		}
