@@ -100,7 +100,7 @@ public class Shop {
 			config = YamlConfiguration.loadConfiguration(file);
 			load();
 		}
-		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10,1,10);
+		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10,10,10);
 		for(Entity entity:entitys) {
 			if(entity.getName().equals(name)) {
 				entity.remove();
@@ -903,14 +903,14 @@ public class Shop {
 			list.add(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile");
 		}
 		else if(sellPrice == 0.0){
-			list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + String.valueOf(buyPrice) + "$");
+			list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + "$");
 		}
 		else if(buyPrice == 0.0) {
-			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + String.valueOf(sellPrice) + "$");
+			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + "$");
 		}
 		else {
-			list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + String.valueOf(buyPrice) + "$");
-			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + String.valueOf(sellPrice) + "$");
+			list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + "$");
+			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + "$");
 		}
 		meta.setLore(list);
 		itemStack.setItemMeta(meta);
@@ -921,4 +921,7 @@ public class Shop {
 			loadItem(item);
 		}
 	}
+	
+	
+	
 }

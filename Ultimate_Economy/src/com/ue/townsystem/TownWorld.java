@@ -16,14 +16,14 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 import com.ue.utils.LimitationUtils;
 import com.ue.utils.PaymentUtils;
+import com.ue.exceptions.TownSystemException;
 import com.ue.exceptions.banksystem.PlayerDoesNotExistException;
 import com.ue.exceptions.banksystem.PlayerHasNotEnoughtMoneyException;
 import com.ue.exceptions.banksystem.TownHasNotEnoughMoneyException;
-import com.ue.exceptions.townsystem.TownSystemException;
-
-import ultimate_economy.Ultimate_Economy;
 
 public class TownWorld {
+	
+	private static List<TownWorld> townWorldList = new ArrayList<>();
 
 	private double foundationPrice,expandPrice;
 	private final String worldName;
@@ -39,10 +39,10 @@ public class TownWorld {
 	 * @param main
 	 * @param world
 	 */
-	public TownWorld(Ultimate_Economy main,String world) {
+	private TownWorld(File mainDataFolder,String world) {
 		worldName = world;
 		towns = new ArrayList<>();
-		file = new File(main.getDataFolder() , world + "_TownWorld" + ".yml");
+		file = new File(mainDataFolder , world + "_TownWorld" + ".yml");
 		config = YamlConfiguration.loadConfiguration(file);
 		if(!file.exists()) {
 			try {
@@ -80,7 +80,7 @@ public class TownWorld {
 	 * Despawns all town villagers in this townworld.
 	 * <p>
 	 */
-	public void despawnAllTownVillagers() {
+	private void despawnAllTownVillagers() {
 		for(Town town:towns) {
 			town.despawnAllVillagers();
 		}
@@ -488,21 +488,115 @@ public class TownWorld {
 	}
 	
 	/**
+	 * This method returns a townworld by it's name,
+	 * 
+	 * @param name
+	 * @return TownWorld
+	 * @throws TownSystemException
+	 */
+	public static TownWorld getTownWorldByName(String name) throws TownSystemException {
+		for(TownWorld townWorld:townWorldList) {
+			if(townWorld.getWorldName().equals(name)) {
+				return townWorld;
+			}
+		}
+		throw new TownSystemException(TownSystemException.TOWNWORLD_DOES_NOT_EXIST);
+	}
+	
+	/**
+	 * This method returns a list of all townworlds.
+	 * 
+	 * @return List of TownWorlds
+	 */
+	public static List<TownWorld> getTownWorldList() {
+		return townWorldList;
+	}
+	
+	/**
+	 * This method despawns all town villager in this townworld.
+	 */
+	public static void despawnAllVillagers() {
+		for(TownWorld townWorld:townWorldList) {
+			townWorld.despawnAllTownVillagers();
+		}
+	}
+	
+	private static List<String> getTownWorldNameList() {
+		List<String> nameList = new ArrayList<>();
+		for(TownWorld townWorld:townWorldList) {
+			nameList.add(townWorld.getWorldName());
+		}
+		return nameList;
+	}
+	
+	/**
+	 * This method returns true, if the world is an townworld.
+	 * 
+	 * @param worldName
+	 * @return boolean
+	 */
+	public static boolean isTownWorld(String worldName) {
+		if(getTownWorldNameList().contains(worldName)) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	/**
+	 * This method should be used to create/enble a new townworld.
+	 * 
+	 * @param mainDataFolder
+	 * @param world
+	 * @throws TownSystemException
+	 */
+	public static void createTownWorld(File mainDataFolder,String world) throws TownSystemException {
+		if(Bukkit.getWorld(world) == null) {
+			throw new TownSystemException(TownSystemException.WORLD_DOES_NOT_EXIST);
+		}
+		else if(isTownWorld(world)) {
+			throw new TownSystemException(TownSystemException.TOWNWORLD_ALREADY_EXIST);
+		}
+		else {
+			townWorldList.add(new TownWorld(mainDataFolder, world));
+		}
+	}
+	
+	/**
+	 * This method should be used to delete/disable a townworld.
+	 * 
+	 * @param world
+	 * @throws TownSystemException
+	 */
+	public static void deleteTownWorld(String world) throws TownSystemException {
+		if(Bukkit.getWorld(world) == null) {
+			throw new TownSystemException(TownSystemException.WORLD_DOES_NOT_EXIST);
+		}
+		else {
+			TownWorld townWorld = getTownWorldByName(world);
+			townWorldList.remove(townWorld);
+			townWorld.delete();
+		}
+	}
+	
+	/**
 	 * <p>
-	 * Load a TownWorld.
+	 * This method loads all townworlds from the save file.
 	 * <p>
 	 * @param main
 	 * @param worldname the townworld has to exist!
-	 * @return TownWorld
 	 * @throws TownSystemException 
 	 */
-	public static TownWorld loadTownWorld(Ultimate_Economy main,String worldname) throws TownSystemException {
-		TownWorld townWorld = new TownWorld(main, worldname);
-		List<Town> towns = new ArrayList<>();
-		for(String townName: townWorld.getTownNameList()) {
-			towns.add(Town.loadTown(townWorld.getSaveFile(), townName));
+	public static void loadAllTownWorlds(File mainDataFolder,FileConfiguration fileConfig) throws TownSystemException {
+		for(String townWorldName:fileConfig.getStringList("TownNames")) {
+			TownWorld townWorld = new TownWorld(mainDataFolder, townWorldName);
+			List<Town> towns = new ArrayList<>();
+			for(String townName: townWorld.getTownNameList()) {
+				towns.add(Town.loadTown(townWorld.getSaveFile(), townName));
+			}
+			townWorld.setTownList(towns);
+			townWorldList.add(townWorld);
 		}
-		townWorld.setTownList(towns);
-		return townWorld;
 	}
 }

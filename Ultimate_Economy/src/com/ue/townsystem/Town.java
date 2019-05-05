@@ -23,8 +23,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import com.ue.exceptions.TownSystemException;
 import com.ue.exceptions.banksystem.TownHasNotEnoughMoneyException;
-import com.ue.exceptions.townsystem.TownSystemException;
 
 public class Town {
 
@@ -120,7 +120,7 @@ public class Town {
 	 * @param location
 	 */
 	private void spawnTownManagerVillager(Location location) {
-		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10,1,10);
+		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10,10,10);
 		for(Entity entity:entitys) {
 			if(entity.getName().equals(townName + " TownManager")) {
 				entity.remove();

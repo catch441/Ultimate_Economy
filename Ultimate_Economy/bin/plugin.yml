@@ -1,10 +1,76 @@
 name: Ultimate_Economy
 main: ultimate_economy.Ultimate_Economy
-version: 1.1.3
+version: 1.1.4d
 
-api-version: 1.13
+api-version: 1.14
 
 softdepend: [Multiverse-Core]
+
+permissions:
+
+  ultimate_economy.wilderness:
+    description: Allows interaction with the wilderness of a townWorld.
+    default: op
+    
+  ultimate_economy.config:
+    description: 
+    default: op
+
+  ultimate_economy.townworld:
+    description: 
+    default: op
+
+  ultimate_economy.town:
+    description: 
+    default: true
+
+  ultimate_economy.adminshop:
+    description: 
+    default: op
+
+  ultimate_economy.playershop:
+    description: 
+    default: true
+
+  ultimate_economy.jobcenter:
+    description: 
+    default: op
+
+  ultimate_economy.home:
+    description: 
+    default: true
+
+  ultimate_economy.pay:
+    description: 
+    default: true
+
+  ultimate_economy.adminpay:
+    description: 
+    default: op
+
+  ultimate_economy.info.bank:
+    description: 
+    default: true
+
+  ultimate_economy.info.money:
+    description: 
+    default: true
+
+  ultimate_economy.info.shoplist:
+    description: 
+    default: true
+
+  ultimate_economy.info.myjobs:
+    description: 
+    default: true
+
+  ultimate_economy.info.jobinfo:
+    description: 
+    default: true
+
+  ultimate_economy.fastshop:
+    description: 
+    default: true
 
 commands:
 

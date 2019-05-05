@@ -54,17 +54,18 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
+import com.ue.exceptions.JobSystemException;
+import com.ue.exceptions.TownSystemException;
 import com.ue.exceptions.banksystem.PlayerDoesNotExistException;
 import com.ue.exceptions.banksystem.PlayerHasNotEnoughtMoneyException;
 import com.ue.exceptions.banksystem.TownHasNotEnoughMoneyException;
-import com.ue.exceptions.townsystem.TownSystemException;
+import com.ue.jobsystem.Job;
+import com.ue.jobsystem.JobCenter;
 import com.ue.townsystem.Plot;
 import com.ue.townsystem.Town;
 import com.ue.townsystem.TownWorld;
 import com.ue.utils.PaymentUtils;
 
-import job.Job;
-import job.JobCenter;
 import shop.AdminShop;
 import shop.PlayerShop;
 import shop.Shop;
@@ -75,8 +76,9 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 	/*
 	 * Lukas Heubach
 	 * buyable regions | add coOwner<-
+	 * leaderboard
+	 * double to String method
 	 * town bank amount in scoreboard für town owner und town coowner
-	 * maxjobs bug ?
 	 * job crafter,enchanter
 	 * op should remove playershops (more op commands)
 	 * limit playershops per player
@@ -85,30 +87,22 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 	 */
 
 	private Player player = null;
-	private List<String> playershopNames,adminShopNames,playerlist,jobCenterNames,homeList,spawnerlist,jobList,townNames;
+	private List<String> playershopNames,adminShopNames,playerlist,homeList,spawnerlist,townNames;
 	private List<AdminShop> adminShopList;
 	private List<PlayerShop> playerShopList;
-	private List<Job> jobs;
-	private List<TownWorld> townWorlds;
 	private File playerFile,spawner;
 	private FileConfiguration config;
-	private List<JobCenter> jobCenterList;
 
 	public void onEnable() {	
 		Bukkit.getPluginManager().registerEvents(this,this);
 		adminShopNames = new ArrayList<>();    
 		adminShopList = new ArrayList<>();
 		playerlist = new ArrayList<>();
-		jobCenterList = new ArrayList<>();
-		jobCenterNames = new ArrayList<>();
 		playerShopList = new ArrayList<>();
 		playershopNames = new ArrayList<>();
 		townNames = new ArrayList<>();
 		homeList = new ArrayList<>();
 		spawnerlist = new ArrayList<>();
-		jobList = new ArrayList<>();
-		jobs = new ArrayList<>();
-		townWorlds = new ArrayList<>();
 
 		if(!getDataFolder().exists()) {
 			getDataFolder().mkdirs();
@@ -140,10 +134,15 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 			getConfig().set("MaxJoinedTowns", 1);
 		}
 		
-		jobCenterNames.addAll(getConfig().getStringList("JobCenterNames"));
-		for(String jobCentername:jobCenterNames) {
-			jobCenterList.add(new JobCenter(this,jobCentername,player,9));
+		
+		try {
+			JobCenter.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
+			Job.loadAllJobs(getDataFolder(), getConfig());
+			TownWorld.loadAllTownWorlds(getDataFolder(), getConfig());
+		} catch (JobSystemException | TownSystemException e) {
+			Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 		}
+		
 		adminShopNames.addAll(getConfig().getStringList("ShopNames"));
 		for(String shopname1:adminShopNames) {
 			adminShopList.add(new AdminShop(this,shopname1,player,"9"));
@@ -151,20 +150,10 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 		playershopNames.addAll(getConfig().getStringList("PlayerShopNames"));
 		for(String shopname1:playershopNames) {
 			playerShopList.add(new PlayerShop(this,shopname1,player,"9"));
-			}
-		jobList.addAll(getConfig().getStringList("JobList"));
-		for(String s:jobList) {
-			jobs.add(new Job(this.getDataFolder(), s));
-		}	
+			}		
+		
 		townNames.addAll(getConfig().getStringList("TownNames"));
-		for(String townworld:getConfig().getStringList("TownWorlds")) {
-			try {
-				townWorlds.add(TownWorld.loadTownWorld(this, townworld));
-			} catch (TownSystemException e) {
-				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
-				e.printStackTrace();
-			}
-		}
+
 		config = YamlConfiguration.loadConfiguration(playerFile);
 		spawner = new File(getDataFolder() , "SpawnerLocations.yml");
 		if(!spawner.exists()) {
@@ -192,12 +181,10 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 		for(PlayerShop s:playerShopList) {
 			s.despawnVillager();
 		}
-		for(JobCenter js: jobCenterList) {
-			js.despawnVillager();
-		}
-		for(TownWorld tw:townWorlds) {
-			tw.despawnAllTownVillagers();
-		}
+		
+		JobCenter.despawnAllVillagers();
+		TownWorld.despawnAllVillagers();
+
 		saveConfig();
 	}
 	
@@ -262,11 +249,11 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 					list.add("addItem");
 					list.add("removeItem");
 					list.add("addFisher");
-					list.add("delFisher");
+					list.add("removeFisher");
 					list.add("addMob");
 					list.add("removeMob");
 				}
-				else if(args[1].equals("addItem") || args[1].equals("removeItem") || args[1].equals("addFisher") || args[1].equals("delFisher") || args[1].equals("removeFisher") || args[1].equals("addMob") || args[1].equals("removeMob")) {
+				else if(args[1].equals("addItem") || args[1].equals("removeItem") || args[1].equals("addFisher") || args[1].equals("removeFisher") || args[1].equals("removeFisher") || args[1].equals("addMob") || args[1].equals("removeMob")) {
 					if(args.length == 3) {
 						list = getJobList(args[2]);
 					}
@@ -280,7 +267,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 							list = getEntityList(args[3]);
 						}
 					}
-					else if(args[1].equals("addFisher") || args[1].equals("delFisher")) {
+					else if(args[1].equals("addFisher") || args[1].equals("removeFisher")) {
 						if(args.length == 4) {
 							if(args[3].equals("")) {
 								list.add("fish");
@@ -705,82 +692,71 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			else if(label.equalsIgnoreCase("townWorld")) {
 				if(args.length > 1) {
-					if(Bukkit.getWorld(args[1]) != null) {
-						List<String> worldList = getConfig().getStringList("TownWorlds");
-						if(worldList == null) {
-							worldList = new ArrayList<>();
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						if(args[0].equals("enable")) {
-							if(args.length == 2) {
-								if(!isTownWorld(args[1]) ) {
-									worldList.add(args[1]);
-									townWorlds.add(new TownWorld(this,args[1]));
-									player.sendMessage(ChatColor.GREEN + args[1] + ChatColor.GOLD + " is now a TownWold.");
-								}
-								else {
-									player.sendMessage(ChatColor.RED + "TownWorld is already enabled in this world!");
-								}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					if(args[0].equals("enable")) {
+						if(args.length == 2) {
+							try {
+								TownWorld.createTownWorld(getDataFolder(), args[1]);
+								player.sendMessage(ChatColor.GREEN + args[1] + ChatColor.GOLD + " is now a TownWold.");
+							} catch (TownSystemException e) {
+								player.sendMessage(ChatColor.RED + e.getMessage());
 							}
-							else {
-								player.sendMessage("/townWorld enable <worldname>");
-							}
+							
 						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if(args[0].equals("disable")) {
-							if(args.length == 2) {
-								worldList.remove(args[1]);
-								try {
-									getTownWorld(args[1]).delete();
-									townWorlds.remove(getTownWorld(args[1]));
-								} catch (TownSystemException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}
+						else {
+							player.sendMessage("/townWorld enable <worldname>");
+						}
+					}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					else if(args[0].equals("disable")) {
+						if(args.length == 2) {
+							try {
+								TownWorld.deleteTownWorld(args[1]);
 								player.sendMessage(ChatColor.GREEN + args[1] + ChatColor.GOLD + " is no longer a TownWold.");
-							}
-							else {
-								player.sendMessage("/townWorld disable <worldname>");
+							} catch (TownSystemException e) {
+								player.sendMessage(ChatColor.RED + e.getMessage());
 							}
 						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if(args[0].equals("setFoundationPrice")) {
-							if(args.length == 3) {
-								try {
-									getTownWorld(args[1]).setFoundationPrice(Double.valueOf(args[2]),true);
-								} catch (NumberFormatException e) {
-									Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
-								} catch (TownSystemException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}
+						else {
+							player.sendMessage("/townWorld disable <worldname>");
+						}
+					}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					else if(args[0].equals("setFoundationPrice")) {
+						if(args.length == 3) {
+							try {
+								TownWorld.getTownWorldByName(args[1]).setFoundationPrice(Double.valueOf(args[2]),true);
 								player.sendMessage(ChatColor.GOLD + "FoundationPrice changed to " + ChatColor.GREEN + args[2]);
-							}
-							else {
-								player.sendMessage("/townWorld setFoundationPrice <worldname> <price>");
+							} catch (NumberFormatException e) {
+								Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+							} catch (TownSystemException e) {
+								player.sendMessage(ChatColor.RED + e.getMessage());
 							}
 						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if(args[0].equals("setExpandPrice")) {
-							if(args.length == 3) {
-								try {
-									getTownWorld(args[1]).setExpandPrice(Double.valueOf(args[2]),true);
-								} catch (NumberFormatException e) {
-									Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
-								} catch (TownSystemException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}
+						else {
+							player.sendMessage("/townWorld setFoundationPrice <worldname> <price>");
+						}
+					}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					else if(args[0].equals("setExpandPrice")) {
+						if(args.length == 3) {
+							try {
+								TownWorld.getTownWorldByName(args[1]).setExpandPrice(Double.valueOf(args[2]),true);
 								player.sendMessage(ChatColor.GOLD + "ExpandPrice changed to " + ChatColor.GREEN + args[2]);
-							}
-							else {
-								player.sendMessage("/townWorld setExpandPrice <worldname> <price per chunk");
+							} catch (NumberFormatException e) {
+								Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+							} catch (TownSystemException e) {
+								player.sendMessage(ChatColor.RED + e.getMessage());
 							}
 						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						getConfig().set("TownWorlds", worldList);
-						saveConfig();
+						else {
+							player.sendMessage("/townWorld setExpandPrice <worldname> <price per chunk");
+						}
 					}
-					else {
-						player.sendMessage(ChatColor.RED + "This world doesn't exist!");
-					}
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					getConfig().set("TownWorlds", TownWorld.getTownWorldList());
+					saveConfig();
+
 				}
 				else if(args.length == 1 && args[0].equals("enable")){
 					player.sendMessage("/townWorld enable <worldname>");
@@ -965,7 +941,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			else if(label.equalsIgnoreCase("jobList")) {
 				String namelist = null;
-				for(String name: jobList) {
+				for(String name: Job.getJobNameList()) {
 					if(namelist == null) {
 						namelist = name;
 					}
@@ -983,30 +959,21 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			else if(label.equalsIgnoreCase("jobInfo")) {
 				if(args.length == 1) {
-					boolean exist = false;
-					List<String> list,entityList,fisherList = null;
-					for(Job job:jobs) {
-						if(job.getName().equals(args[0]) && !exist) {
-							exist = true;
-							list = job.getItemList();
-							entityList = job.getEntityList();
-							fisherList = job.getFisherList();
-							player.sendMessage("");
-							player.sendMessage(ChatColor.GOLD +"Jobinfo for " + ChatColor.GREEN + job.getName() + ChatColor.GOLD + ":");
-							for(String string:list) {
-								player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN + job.getPrice(Material.valueOf(string)) + "$");
-							}
-							for(String string:fisherList) {
-								player.sendMessage(ChatColor.GOLD + "Fishing " + string.toLowerCase() + " " + ChatColor.GREEN + job.getFisherPrice(string) + "$");
-							}
-							for(String string:entityList) {
-								player.sendMessage(ChatColor.GOLD + "Kill " + string.toLowerCase() + " " + ChatColor.GREEN + job.getKillPrice(string) + "$");
-							}
-							break;
+					try {
+						Job job = Job.getJobByName(args[0]);
+						player.sendMessage("");
+						player.sendMessage(ChatColor.GOLD +"Jobinfo for " + ChatColor.GREEN + job.getName() + ChatColor.GOLD + ":");
+						for(String string:job.getItemList()) {
+							player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN + job.getItemPrice(string) + "$");
 						}
-					}
-					if(!exist) {
-						player.sendMessage(ChatColor.RED + "This job doesn't exist!");
+						for(String string:job.getFisherList()) {
+							player.sendMessage(ChatColor.GOLD + "Fishing " + string.toLowerCase() + " " + ChatColor.GREEN + job.getFisherPrice(string) + "$");
+						}
+						for(String string:job.getEntityList()) {
+							player.sendMessage(ChatColor.GOLD + "Kill " + string.toLowerCase() + " " + ChatColor.GREEN + job.getKillPrice(string) + "$");
+						}
+					} catch (JobSystemException e) {
+						player.sendMessage(ChatColor.RED + e.getMessage());
 					}
 				}
 				else {
@@ -1045,7 +1012,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 						if(args.length == 2) {
 							if(!townNames.contains(args[1])) {
 								try {
-									TownWorld tWorld = getTownWorld(player.getWorld().getName());
+									TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 									playerFile = tWorld.createTown(playerFile,getConfig(),args[1], player.getLocation(),player.getName());
 									townNames.add(args[1]);
 									getConfig().set("TownNames", townNames);
@@ -1068,7 +1035,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 						if(args.length == 2) {
 							if(townNames.contains(args[1])) {
 								try {
-									TownWorld tWorld = getTownWorld(player.getWorld().getName());
+									TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 									playerFile = tWorld.dissolveTown(playerFile,args[1],player.getName());
 									townNames.remove(args[1]);
 									getConfig().set("TownNames", townNames);
@@ -1090,7 +1057,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 					else if(args[0].equals("expand")) {
 						if(args.length == 2) {
 							try {
-								TownWorld tWorld = getTownWorld(player.getWorld().getName());
+								TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 								tWorld.expandTown(args[1], player.getLocation().getChunk(),player.getName());
 								player.sendMessage(ChatColor.GOLD + "Congratulation! You expanded your town with a new chunk!");
 							} catch (TownSystemException | TownHasNotEnoughMoneyException e) {
@@ -1105,7 +1072,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 					else if(args[0].equals("setTownSpawn")) {
 						if(args.length == 2) {
 							try {
-								TownWorld tWorld = getTownWorld(player.getWorld().getName());
+								TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 								Town town = tWorld.getTownByName(args[1]);
 								if(town.hasCoOwnerPermission(player.getName())) {
 									File file = town.setTownSpawn(tWorld.getSaveFile(),player.getLocation());
@@ -1133,7 +1100,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 					else if(args[0].equalsIgnoreCase("moveTownManager")) {
 						if(args.length == 1) {
 							try {
-								TownWorld townWorld = getTownWorld(player.getWorld().getName());
+								TownWorld townWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 								Town town = townWorld.getTownByChunk(player.getLocation().getChunk());
 								File file = town.moveTownManagerVillager(townWorld.getSaveFile(), player.getLocation(), player.getName());
 								townWorld.setSaveFile(file);
@@ -1151,7 +1118,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 							if(args[1].equals("setForSale")) {
 								if(args.length == 3) {
 									try {
-										TownWorld townWorld = getTownWorld(player.getWorld().getName());
+										TownWorld townWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 										Town town = townWorld.getTownByChunk(player.getLocation().getChunk());
 										File file = town.setPlotForSale(townWorld.getSaveFile(), Double.valueOf(args[2]),player.getName(),player.getLocation());
 										townWorld.setSaveFile(file);
@@ -1181,15 +1148,11 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					else if(args[0].equals("tp")) {
 						if(args.length == 2) {
-							for(TownWorld townWorld:townWorlds) {
-								if(townWorld.getTownNameList().contains(args[1])) {
-									try {
-										player.teleport(townWorld.getTownByName(args[1]).getTownSpawn());
-									} catch (TownSystemException e) {
-										Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
-									}
-									break;
-								}
+							try {
+								TownWorld townWorld = TownWorld.getTownWorldByName(args[1]);
+								player.teleport(townWorld.getTownByName(args[1]).getTownSpawn());
+							} catch (TownSystemException e) {
+								player.sendMessage(ChatColor.RED + e.getMessage());
 							}
 						}
 						else {
@@ -1203,7 +1166,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 							if(amount > 0) {
 								try {
 									playerFile = PaymentUtils.decreasePlayerAmount(playerFile, player.getName(), amount, true);
-									TownWorld tWorld = getTownWorld(player.getWorld().getName());
+									TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 									tWorld.setSaveFile(tWorld.getTownByName(args[1]).increaseTownBankAmount(tWorld.getSaveFile(), amount));
 									player.sendMessage(ChatColor.GOLD + "The town " + args[1] + " got "+ ChatColor.GREEN + amount + " $" + ChatColor.GOLD + " from you!");
 								} catch (TownSystemException | PlayerDoesNotExistException | PlayerHasNotEnoughtMoneyException e) {
@@ -1221,18 +1184,14 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					else if(args[0].equals("bank")) {
 						if(args.length == 2) {
-							for(TownWorld townWorld:townWorlds) {
-								if(townWorld.getTownNameList().contains(args[1])) {
-									try {
-										Town town = townWorld.getTownByName(args[1]);
-										if(town.hasCoOwnerPermission(player.getName())) {
-											player.sendMessage(ChatColor.GOLD + "Town money: " + ChatColor.GREEN + town.getTownBankAmount() + ChatColor.GOLD + " $");
-										}
-									} catch (TownSystemException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
-									break;
+							try {
+								TownWorld townWorld = TownWorld.getTownWorldByName(args[1]);
+								Town town = townWorld.getTownByName(args[1]);
+								if(town.hasCoOwnerPermission(player.getName())) {
+									player.sendMessage(ChatColor.GOLD + "Town money: " + ChatColor.GREEN + town.getTownBankAmount() + ChatColor.GOLD + " $");
 								}
+							} catch (TownSystemException e) {
+								player.sendMessage(ChatColor.RED + e.getMessage());
 							}
 						}
 						else {
@@ -1814,21 +1773,13 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 					if(args.length != 0) {
 						if(args[0].equals("create")) {
 							if(args.length == 3) {
-								if(jobCenterNames.contains(args[1])) {
-									player.sendMessage(ChatColor.RED + "This jobcenter already exists!");
-								}
-								else {
-									if(Integer.valueOf(args[2])%9 == 0) {
-										JobCenter jobCenter = new JobCenter(this,args[1],player,Integer.parseInt(args[2]));
-										jobCenterNames.add(args[1]);
-										jobCenterList.add(jobCenter);
-										getConfig().set("JobCenterNames", jobCenterNames);
-										saveConfig();
-										player.sendMessage(ChatColor.GOLD + "The shopcenter " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " was created.");
-									}
-									else {
-										player.sendMessage(ChatColor.RED + args[2] + " is not a multiple of 9!");
-									}
+								try {
+									JobCenter.createJobCenter(getServer(), getDataFolder(), args[1], player.getLocation(), Integer.parseInt(args[2]));
+									getConfig().set("JobCenterNames", JobCenter.getJobCenterNameList());
+									saveConfig();
+									player.sendMessage(ChatColor.GOLD + "The shopcenter " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " was created.");
+								} catch (NumberFormatException | JobSystemException e) {
+									player.sendMessage(ChatColor.RED + e.getMessage());
 								}
 							}
 							else {
@@ -1838,22 +1789,14 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if(args[0].equals("delete")) {
 							if(args.length == 2) {
-								Iterator<JobCenter> iter2 = jobCenterList.iterator();
-								if(jobCenterNames.contains(args[1])) {
-									jobCenterNames.remove(args[1]);
-									getConfig().set("JobCenterNames", jobCenterNames);
+								try {
+									playerFile = JobCenter.deleteJobCenter(playerFile,args[1]);
+									getConfig().set("JobCenterNames", JobCenter.getJobCenterNameList());
 									saveConfig();
-									while(iter2.hasNext()) {
-										JobCenter s = iter2.next();
-										if(s.getName().equals(args[1])) {
-											s.deleteShop();
-											iter2.remove();
-											player.sendMessage(ChatColor.GOLD + "The shopcenter " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " was deleted."); break;
-										}
-									}
-								}
-								else {
-									player.sendMessage(ChatColor.RED + "This jobcenter doesn't exist!");
+									player.sendMessage(ChatColor.GOLD + "The shopcenter " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " was deleted.");
+								
+								} catch (JobSystemException e) {
+									player.sendMessage(ChatColor.RED + e.getMessage());
 								}
 							}
 							else {
@@ -1863,15 +1806,11 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if(args[0].equals("move")) {
 							if(args.length == 5) {
-								boolean exists = false;
-								for(JobCenter jobcenter:jobCenterList) {
-									if(jobcenter.getName().equals(args[1])) {
-										exists = true;
-										jobcenter.moveShop(Integer.valueOf(args[2]), Integer.valueOf(args[3]), Integer.valueOf(args[4]));
-									}
-								}
-								if(!exists) {
-									player.sendMessage(ChatColor.RED + "This jobcenter doesn't exist!");
+								try {
+									JobCenter jobCenter = JobCenter.getJobCenterByName(args[1]);
+									jobCenter.moveShop(Integer.valueOf(args[2]), Integer.valueOf(args[3]), Integer.valueOf(args[4]));
+								} catch (JobSystemException e) {
+									player.sendMessage(ChatColor.RED + e.getMessage());
 								}
 							}
 							else {
@@ -1881,29 +1820,13 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if(args[0].equals("addJob")) {
 							if(args.length == 5) {
-								boolean exist = false;
-								for(JobCenter jobcenter:jobCenterList) {
-									if(jobcenter.getName().equals(args[1])) {
-										exist = true;
-										if(!jobcenter.hasJob(args[2])) {
-											if(Integer.valueOf(args[4]) <= 0) {
-												player.sendMessage(ChatColor.RED + "The slot should be higher then 0!");
-											}
-											else if(Material.matchMaterial(args[3].toUpperCase()) == null){
-												player.sendMessage(ChatColor.RED + "Invalid material!");
-											}
-											else {
-												jobcenter.addJob(args[2], Material.valueOf(args[3].toUpperCase()), Integer.valueOf(args[4]),player);
-											}
-										}
-										else {
-											player.sendMessage(ChatColor.RED + "This job already exist in this jobcenter!");
-										}
-										break;
-									}
-								}
-								if(!exist) {
-									player.sendMessage(ChatColor.RED + "This jobcenter doesn't exist!");
+								try {
+									JobCenter jobCenter = JobCenter.getJobCenterByName(args[1]);
+									jobCenter.addJob(args[2], args[3], Integer.valueOf(args[4]));
+									player.sendMessage(ChatColor.GOLD + "The job " + ChatColor.GREEN + args[2] + ChatColor.GOLD + " was added to the JobCenter " + ChatColor.GREEN + args[1] + ".");
+								
+								} catch (JobSystemException e) {
+									player.sendMessage(ChatColor.RED + e.getMessage());
 								}
 							}
 							else {
@@ -1913,65 +1836,12 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if(args[0].equals("removeJob")) {
 							if(args.length == 3) {
-								Iterator<String> iter = jobList.iterator();
-								Iterator<Job> iter2 = jobs.iterator();
-								boolean exists = false;
-								boolean centerExist = false;
-								for(JobCenter jc: jobCenterList) {
-									if(jc.getName().equals(args[1])) {
-										centerExist = true;
-										while(iter.hasNext()) {
-											if(args[2].equals(iter.next())) {
-												exists = true; 
-												int inCenters = 0;
-												for(JobCenter jc2: jobCenterList) {
-													if(jc2.hasJob(args[2])) {
-														inCenters++;
-													}
-												}
-												if(inCenters <= 1) {
-													config = YamlConfiguration.loadConfiguration(playerFile);
-													List<String> pList = config.getStringList("Player");
-													for(String p : pList) {
-														List<String> jobs = config.getStringList(p + ".Jobs");
-														Iterator<String> iter3 = jobs.iterator();
-														while(iter3.hasNext()) {
-															if(iter3.next().equals(args[2])) {
-																jobs.remove(args[2]);
-																config.set(p + ".Jobs", jobs);
-																saveFile(playerFile);
-																break;
-															}
-														}
-													}
-												}
-												while(iter2.hasNext()) {
-													Job s = iter2.next();
-													if(s.getName().equals(args[2])) {
-														for(JobCenter jCenter : jobCenterList) {
-															if(jCenter.getName().equals(args[1])) {
-																if(jCenter.hasJob(args[2])) {
-																	jCenter.removeJob(args[2]);
-																	player.sendMessage(ChatColor.GOLD + "The job " + ChatColor.GREEN + args[2] + ChatColor.GOLD + " was removed.");
-																}
-																else {
-																	player.sendMessage(ChatColor.RED + "This job was not added to this jobcenter!");
-																}
-															}
-														}
-													}
-												}
-												break;
-											}
-										}
-										if(!exists) {		
-											player.sendMessage(ChatColor.RED + "This job doesn't exists!");
-										}
-										break;
-									}
-								}
-								if(!centerExist) {
-									player.sendMessage(ChatColor.RED + "This jobcenter doesn't exists!");
+								try {
+									JobCenter jobCenter = JobCenter.getJobCenterByName(args[1]);
+									playerFile = jobCenter.removeJob(playerFile, args[2]);
+									player.sendMessage(ChatColor.GOLD + "The job " + ChatColor.GREEN + args[2] + ChatColor.GOLD + " was removed.");
+								} catch (JobSystemException e) {
+									player.sendMessage(ChatColor.RED + e.getMessage());
 								}
 							}
 							else {
@@ -1981,21 +1851,18 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if(args[0].equals("job")) {
 							if(args.length == 1) {
-								player.sendMessage("/jobcenter job <createJob/delJob/addItem/removeItem/addMob/removeMob/addFisher/delFisher>");
+								player.sendMessage("/jobcenter job <createJob/delJob/addItem/removeItem/addMob/removeMob/addFisher/removeFisher>");
 							}
 							else {
 								if(args[1].equals("createJob")) {
 									if(args.length == 3) {
-										if(jobList.contains(args[2])) {
-											player.sendMessage(ChatColor.RED + "This job already exists!");
-										}
-										else {
-											jobList.add(args[2]);
-											getConfig().set("JobList", jobList);
+										try {
+											Job.createJob(this.getDataFolder(), args[2]);
+											getConfig().set("JobList", Job.getJobNameList());
 											saveConfig();
-											Job job = new Job(this.getDataFolder(), args[2]);
-											jobs.add(job);
 											player.sendMessage(ChatColor.GOLD + "The job " + ChatColor.GREEN + args[2] + ChatColor.GOLD + " was created.");
+										} catch (JobSystemException e) {
+											player.sendMessage(ChatColor.RED + e.getMessage());
 										}
 									}
 									else {
@@ -2005,37 +1872,13 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 								//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 								else if(args[1].equals("delJob")) {
 									if(args.length == 3) {
-										if(jobList.contains(args[2])) {
-											jobList.remove(args[2]);
-											getConfig().set("JobList", jobList);
-											saveConfig();
-											config = YamlConfiguration.loadConfiguration(playerFile);
-											List<String> pList = config.getStringList("Player");
-											for(String p : pList) {
-												List<String> jobs = config.getStringList(p + ".Jobs");
-												if(jobs.contains(args[2])) {
-													jobs.remove(args[2]);
-													config.set(p + ".Jobs", jobs);
-													saveFile(playerFile);
-												}
-											}
-											Iterator<Job> iter2 = jobs.iterator();
-											while(iter2.hasNext()) {
-												Job s = iter2.next();
-												if(s.getName().equals(args[2])) {
-													s.deleteJob();
-													iter2.remove();
-													for(JobCenter jCenter : jobCenterList) {
-														if(jCenter.hasJob(args[2])) {
-															jCenter.removeJob(args[2]);
-														}
-													}
-													player.sendMessage(ChatColor.GOLD + "The job " + ChatColor.GREEN + args[2] + ChatColor.GOLD + " was deleted.");
-												}
-											}
-										}
-										else {
-											player.sendMessage(ChatColor.RED + "This job doesn't exists!");
+										try {
+											playerFile = Job.deleteJob(args[2],playerFile);
+											getConfig().set("JobList", Job.getJobNameList());
+											saveConfig();		
+											player.sendMessage(ChatColor.GOLD + "The job " + ChatColor.GREEN + args[2] + ChatColor.GOLD + " was deleted.");
+										} catch (JobSystemException e) {
+											player.sendMessage(ChatColor.RED + e.getMessage());
 										}
 									}
 									else {
@@ -2045,31 +1888,12 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 								//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 								else if(args[1].equals("addMob")) {
 									if(args.length == 5) {
-										boolean exist = false;
-										for(Job job:jobs) {
-											if(job.getName().equals(args[2]) && !exist) {
-												exist = true;
-												if(Double.valueOf(args[4]) <= 0) {
-													player.sendMessage(ChatColor.RED + "The price should be heigher then 0");
-												}
-												else {
-													try {
-														boolean success = job.addMob(EntityType.valueOf(args[3].toUpperCase()), Double.valueOf(args[4]));
-														if(success) {
-															player.sendMessage(ChatColor.GOLD + "The entity " + ChatColor.GREEN + args[3] + ChatColor.GOLD + " was added to the job " + ChatColor.GREEN + job.getName() + ".");
-														}
-														else {
-															player.sendMessage(ChatColor.RED + "The entity already exists in this job!");
-														}
-													} catch(IllegalArgumentException e) {
-														player.sendMessage(ChatColor.RED + "Invalid entity!");
-													}
-												}
-												break;
-											}
-										}
-										if(!exist) {
-											player.sendMessage(ChatColor.RED + "This Jobs doesn't exist!");
+										try {
+											Job job = Job.getJobByName(args[2]);
+											job.addMob(args[3], Double.valueOf(args[4]));
+											player.sendMessage(ChatColor.GOLD + "The entity " + ChatColor.GREEN + args[0] + ChatColor.GOLD + " was added to the job.");
+										} catch (JobSystemException e) {
+											player.sendMessage(ChatColor.RED + e.getMessage());
 										}
 									}
 									else {
@@ -2079,26 +1903,13 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 								//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 								else if(args[1].equals("removeMob")) {
 									if(args.length == 4) {
-										boolean exist = false;
-										for(Job job:jobs) {
-											if(job.getName().equals(args[2]) && !exist) {
-												exist = true;
-												try {
-													boolean success = job.deleteMob(EntityType.valueOf(args[3].toUpperCase()));
-													if(success) {
-														player.sendMessage(ChatColor.GOLD + "The entity " + ChatColor.GREEN + args[3] + ChatColor.GOLD + " was deleted from the job " + ChatColor.GREEN + job.getName() + ".");
-													}
-													else {
-														player.sendMessage(ChatColor.RED + "This entity doesn't exist in this job!");
-													}
-												} catch (IllegalArgumentException e) {
-													player.sendMessage(ChatColor.RED + "Invalid entity!");
-												}
-												break;
-											}
-										}
-										if(!exist) {
-											player.sendMessage(ChatColor.RED + "This job doesn't exist!");
+										try {
+											Job job = Job.getJobByName(args[2]);
+											job.deleteMob(args[3]);
+											player.sendMessage(ChatColor.GOLD + "The entity " + ChatColor.GREEN + args[3] + ChatColor.GOLD + " was deleted from the job " + ChatColor.GREEN + job.getName() + ".");
+										
+										} catch (JobSystemException e) {
+											player.sendMessage(ChatColor.RED + e.getMessage());
 										}
 									}
 									else {
@@ -2108,30 +1919,13 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 								//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 								else if(args[1].equals("addItem")) {
 									if(args.length == 5) {
-										boolean exist = false;
-										for(Job job:jobs) {
-											if(job.getName().equals(args[2]) && !exist) {
-												exist = true;
-												if(Double.valueOf(args[4]) <= 0) {
-													player.sendMessage(ChatColor.RED + "The price should be heigher then 0");
-												}
-												else if(Material.matchMaterial(args[3].toUpperCase()) == null){
-													player.sendMessage(ChatColor.RED + "Invalid material!");
-												}
-												else {
-													boolean success = job.addItem(Material.valueOf(args[3].toUpperCase()),Double.valueOf(args[4]));
-													if(success) {
-														player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + args[3] + ChatColor.GOLD + " was added to the job " + ChatColor.GREEN + job.getName() + ".");
-													}
-													else {
-														player.sendMessage(ChatColor.RED + "The item already exists in this job!");
-													}
-												}
-												break;
-											}
-										}
-										if(!exist) {
-											player.sendMessage(ChatColor.RED + "This Jobs doesn't exist!");
+										try {
+											Job job = Job.getJobByName(args[2]);
+											job.addItem(args[3],Double.valueOf(args[4]));
+											player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + args[3] + ChatColor.GOLD + " was added to the job " + ChatColor.GREEN + job.getName() + ".");
+										
+										} catch (JobSystemException e) {
+											player.sendMessage(ChatColor.RED + e.getMessage());
 										}
 									}
 									else {
@@ -2141,27 +1935,13 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 								//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 								else if(args[1].equals("removeItem")) {
 									if(args.length == 4) {
-										boolean exist = false;
-										for(Job job:jobs) {
-											if(job.getName().equals(args[2]) && !exist) {
-												exist = true;
-												if(Material.matchMaterial(args[3].toUpperCase()) != null) {
-													boolean success = job.deleteItem(Material.valueOf(args[3].toUpperCase()));
-													if(success) {
-														player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + args[3] + ChatColor.GOLD + " was deleted from the job " + ChatColor.GREEN + job.getName() + ".");
-													}		
-													else {
-														player.sendMessage(ChatColor.RED + "This item doesn't exist in this job!");
-													}
-												}
-												else {
-													player.sendMessage(ChatColor.RED + "Invalid material!");
-												}
-												break;
-											}
-										}
-										if(!exist) {
-											player.sendMessage(ChatColor.RED + "This job doesn't exist!");
+										try {
+											Job job = Job.getJobByName(args[2]);
+											job.deleteItem(args[3]);
+											player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + args[3] + ChatColor.GOLD + " was deleted from the job " + ChatColor.GREEN + job.getName() + ".");
+										
+										} catch (JobSystemException e) {
+											player.sendMessage(ChatColor.RED + e.getMessage());
 										}
 									}
 									else {
@@ -2171,30 +1951,11 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 								//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 								else if(args[1].equals("addFisher")) {
 									if(args.length == 5) {
-										boolean exist = false;
-										for(Job job:jobs) {
-											if(job.getName().equals(args[2]) && !exist) {
-												exist = true;
-												if(Double.valueOf(args[4]) <= 0) {
-													player.sendMessage(ChatColor.RED + "The price should be heigher then 0!");
-												}
-												else if(!args[3].equals("treasure") && !args[3].equals("junk") && !args[3].equals("fish")){
-													player.sendMessage(ChatColor.RED + "Invalid input -> <fish/treasure/junk>!");
-												}
-												else {
-													boolean success = job.addFisher(args[3], Double.valueOf(args[4]));
-													if(success) {
-														player.sendMessage(ChatColor.GOLD + "The loot " + ChatColor.GREEN + args[3] + ChatColor.GOLD + " was added to the job " + ChatColor.GREEN + job.getName() + ".");
-													}
-													else {
-														player.sendMessage(ChatColor.RED + "This loot already exists in this job!");
-													}
-												}
-												break;
-											}
-										}
-										if(!exist) {
-											player.sendMessage(ChatColor.RED + "This Jobs doesn't exist!");
+										try {
+											Job job = Job.getJobByName(args[2]);
+											job.addFisherLootType(args[3], Double.valueOf(args[4]));
+										} catch (JobSystemException e) {
+											player.sendMessage(ChatColor.RED + e.getMessage());
 										}
 									}
 									else {
@@ -2202,38 +1963,22 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 									}
 								}
 								//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-								else if(args[1].equals("delFisher")) {
+								else if(args[1].equals("removeFisher")) {
 									if(args.length == 4) {
-										boolean exist = false;
-										for(Job job:jobs) {
-											if(job.getName().equals(args[2]) && !exist) {
-												exist = true;
-												if(!args[3].equals("treasure") && !args[3].equals("junk") && !args[3].equals("fish")){
-													player.sendMessage(ChatColor.RED + "Invalid loottable -> <fish/treasure/junk>!");
-												}
-												else {
-													boolean success = job.delFisher(args[3]);
-													if(success) {
-														player.sendMessage(ChatColor.GOLD + "The loottable " + ChatColor.GREEN + args[3] + ChatColor.GOLD + " was removed to the job " + ChatColor.GREEN + job.getName() + ".");
-													}
-													else {
-														player.sendMessage(ChatColor.RED + "This loot doesn't exist in this shop!");
-													}
-												}
-												break;
-											}
-										}
-										if(!exist) {
-											player.sendMessage(ChatColor.RED + "This Jobs doesn't exist!");
+										try {
+											Job job = Job.getJobByName(args[2]);
+											job.delFisherLootType(args[3]);;
+										} catch (JobSystemException e) {
+											player.sendMessage(ChatColor.RED + e.getMessage());
 										}
 									}
 									else {
-										player.sendMessage("/jobcenter job delFisher <jobname> <fish/treasure/junk>");
+										player.sendMessage("/jobcenter job removeFisher <jobname> <fish/treasure/junk>");
 									}
 								}
 								//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 								else {
-									player.sendMessage("/jobcenter job <createJob/delJob/addItem/addFisher/delFisher/removeItem/addMob/removeMob>");
+									player.sendMessage("/jobcenter job <createJob/delJob/addItem/addFisher/removeFisher/removeItem/addMob/removeMob>");
 								}
 							}
 						}
@@ -2254,10 +1999,10 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@EventHandler
 	public void PlayerInteract(PlayerInteractEvent event) {
-		if(event.getPlayer().getGameMode() == GameMode.SURVIVAL && event.getClickedBlock() != null) {
+		if(event.getClickedBlock() != null && !event.getPlayer().hasPermission("ultimate_economy.wilderness")) {
 			Location location = event.getClickedBlock().getLocation();
 			try {
-				TownWorld townWorld = getTownWorld(location.getWorld().getName());
+				TownWorld townWorld = TownWorld.getTownWorldByName(location.getWorld().getName());
 				if(townWorld.chunkIsFree(location.getChunk())) {
 					event.setCancelled(true);
 					event.getPlayer().sendMessage(ChatColor.RED + "You are in the wilderness!");
@@ -2293,33 +2038,31 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 				break;
 				}
 			}
-			for(JobCenter jobcenter:jobCenterList) {
-				if(jobcenter.getName().equals(name)) {
-					event.setCancelled(true);
-					jobcenter.openInv(event.getPlayer());
-					break;
-				}
+			
+			try {
+				JobCenter jobCenter = JobCenter.getJobCenterByName(name);
+				event.setCancelled(true);
+				jobCenter.openInv(event.getPlayer());
+			} catch (JobSystemException e) {
+				//is not a jobcenter villager
 			}
+			
 			if(name.contains("For Sale!")) {
 				event.setCancelled(true);
 				try {
-					TownWorld townWorld = getTownWorld(entity.getWorld().getName());
+					TownWorld townWorld = TownWorld.getTownWorldByName(entity.getWorld().getName());
 					Town town = townWorld.getTownByChunk(entity.getLocation().getChunk());
 					Plot plot = town.getPlotByChunk(entity.getLocation().getChunk().getX(), entity.getLocation().getChunk().getZ());
 					plot.openSaleVillagerInv(event.getPlayer());
-				} catch (TownSystemException e) {
-					Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
-				}
+				} catch (TownSystemException e) {}
 			}
 			else if(name.contains("TownManager")) {
 				event.setCancelled(true);
 				try {
-					TownWorld townWorld = getTownWorld(entity.getWorld().getName());
+					TownWorld townWorld = TownWorld.getTownWorldByName(entity.getWorld().getName());
 					Town town = townWorld.getTownByChunk(entity.getLocation().getChunk());
 					town.openTownManagerVillagerInv(event.getPlayer());
-				} catch (TownSystemException e) {
-					Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
-				}
+				} catch (TownSystemException e) {}
 				
 			}
 		}
@@ -2331,7 +2074,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 		if(event.getDamager() instanceof Player && event.getEntity() instanceof Villager) {
 			String entityname = event.getEntity().getCustomName();
 			Player damager = (Player) event.getDamager();
-			if(jobCenterNames.contains(entityname)) {
+			if(JobCenter.getJobCenterNameList().contains(entityname)) {
 				event.setCancelled(true);
 				damager.sendMessage(ChatColor.RED + "You are not allowed to hit a jobCenterVillager!");
 			}
@@ -2361,20 +2104,15 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 		if(entity.getKiller() instanceof Player) {
 			Player player = entity.getKiller();
 			config = YamlConfiguration.loadConfiguration(playerFile);
-			List<String> list = config.getStringList(player.getName() + ".Jobs");
-			if(!list.isEmpty() && player.getGameMode() == GameMode.SURVIVAL) {
-				for(String job: list) {
-					config = YamlConfiguration.loadConfiguration(new File(getDataFolder() ,job + "-Job.yml"));
-					List<String> entitylist = config.getStringList("Entitylist");
-					if(entitylist.contains(entity.getType().toString())) {
-						double d = config.getDouble("JobEntitys." + entity.getType().toString() + ".killprice");
-						try {
-							playerFile = PaymentUtils.increasePlayerAmount(playerFile, player.getName(), d);
-						} catch (PlayerDoesNotExistException e) {
-							Bukkit.getLogger().log(Level.WARNING,e.getMessage(),e);
-						}
+			List<String> jobList = config.getStringList(player.getName() + ".Jobs");
+			if(!jobList.isEmpty() && player.getGameMode() == GameMode.SURVIVAL) {
+				for(String jobName: jobList) {
+					try {
+						Job job = Job.getJobByName(jobName);
+						double d = job.getKillPrice(entity.getType().toString());
+						playerFile = PaymentUtils.increasePlayerAmount(playerFile, player.getName(), d);
 						break;
-					}
+					} catch (JobSystemException | PlayerDoesNotExistException e) {}
 				}
 			}		
 		}
@@ -2387,7 +2125,11 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 		if(event.getCurrentItem() != null && event.getInventory().getType() == InventoryType.ANVIL && event.getCurrentItem().getType() == Material.SPAWNER) {
 			event.setCancelled(true);
 		}
-		String inventoryname = event.getInventory().getName();
+		event.getView().getTitle();
+		//1.13
+		//String inventoryname = event.getInventory().get;
+		//1.14
+		String inventoryname = event.getView().getTitle();
 		if(event.getInventory().getType() == InventoryType.CHEST && event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
 			ItemMeta meta = event.getCurrentItem().getItemMeta();
 			////////////////////////////////////////////////////////////////////////////editor
@@ -2404,18 +2146,14 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 			}
 			////////////////////////////////////////////////////////////////////////////saleVillager
 			else if(inventoryname.contains("Plot") || inventoryname.contains("TownManager")) {
-				for(TownWorld townWorld:townWorlds) {
-					if(townWorld.getWorldName().equals(playe.getWorld().getName())) {
-						event.setCancelled(true);
-						try {
-							playerFile = townWorld.handleTownVillagerInvClick(playerFile,getConfig(),event);
-							playe.closeInventory();
-						} catch (PlayerHasNotEnoughtMoneyException | PlayerDoesNotExistException
-								| TownSystemException e) {
-							playe.sendMessage(ChatColor.RED + e.getMessage());
-						}
-						break;
-					}
+				event.setCancelled(true);
+				try {
+					TownWorld townWorld = TownWorld.getTownWorldByName(playe.getWorld().getName());
+					playerFile = townWorld.handleTownVillagerInvClick(playerFile,getConfig(),event);
+					playe.closeInventory();
+				} catch (PlayerHasNotEnoughtMoneyException | PlayerDoesNotExistException
+						| TownSystemException e) {
+					playe.sendMessage(ChatColor.RED + e.getMessage());
 				}
 			}
 			////////////////////////////////////////////////////////////////////////////
@@ -2423,7 +2161,8 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 			ClickType clickType = event.getClick();
 			if(event.getCurrentItem().getItemMeta() != null) {
 				////////////////////////////////////////////////////////////////////////////Job
-				for(JobCenter jobCenter:jobCenterList) {
+				try {
+					JobCenter jobCenter = JobCenter.getJobCenterByName(inventoryname);
 					if(jobCenter.getName().equals(inventoryname)) {
 						event.setCancelled(true);
 						String displayname = meta.getDisplayName();
@@ -2471,9 +2210,8 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 								playe.sendMessage(ChatColor.RED + "You have already reached the maximum number of jobs!");				
 							}
 						}
-						break;
 					}
-				}
+				} catch (JobSystemException e) {}
 				////////////////////////////////////////////////////////////////////////////playershop
 				for(PlayerShop playerShop:playerShopList) {
 					handleBuySell(playerShop, event, playe);
@@ -2531,27 +2269,22 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 			config = YamlConfiguration.loadConfiguration(playerFile);
 			List<String> list = config.getStringList(event.getPlayer().getName() + ".Jobs");
 			if(!list.isEmpty()) {
-				String eventblockname = event.getBlock().getBlockData().getMaterial().toString();
-				for(String job:list) {
-					config = YamlConfiguration.loadConfiguration(new File(getDataFolder() ,job + "-Job.yml"));
-					List<String> itemlist = config.getStringList("Itemlist");
-					if(itemlist.contains(eventblockname)) {
-						Material material = event.getBlock().getBlockData().getMaterial();
-						try {
-							if(material == Material.POTATOES || material == Material.CARROTS ||material == Material.WHEAT || material == Material.NETHER_WART_BLOCK || material == Material.BEETROOTS) {
-								Ageable ageable = (Ageable) event.getBlock().getBlockData();
-								if(ageable.getAge() == ageable.getMaximumAge()) {
-									double d = config.getDouble("JobItems." + eventblockname + ".breakprice");
-									playerFile = PaymentUtils.increasePlayerAmount(playerFile, event.getPlayer().getName(), d);
-								}	
-							}
-							else {
-								double d = config.getDouble("JobItems." + eventblockname + ".breakprice");
+				Material blockMaterial = event.getBlock().getBlockData().getMaterial();
+				for(String jobName:list) {
+					try {
+						Job job = Job.getJobByName(jobName);
+						if(blockMaterial == Material.POTATOES || blockMaterial == Material.CARROTS ||blockMaterial == Material.WHEAT || blockMaterial == Material.NETHER_WART_BLOCK || blockMaterial == Material.BEETROOTS) {
+							Ageable ageable = (Ageable) event.getBlock().getBlockData();
+							if(ageable.getAge() == ageable.getMaximumAge()) {
+								double d = job.getItemPrice(blockMaterial.toString());
 								playerFile = PaymentUtils.increasePlayerAmount(playerFile, event.getPlayer().getName(), d);
-							}
-						} catch (PlayerDoesNotExistException e) {
-							Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+							}	
 						}
+						else {
+							double d = job.getItemPrice(blockMaterial.toString());
+							playerFile = PaymentUtils.increasePlayerAmount(playerFile, event.getPlayer().getName(), d);
+						}
+					} catch (JobSystemException | PlayerDoesNotExistException e) {
 						break;
 					}
 				}
@@ -2615,49 +2348,35 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@EventHandler
 	public void FishingEvent(PlayerFishEvent event) {
-		config = YamlConfiguration.loadConfiguration(playerFile);
-		List<String> list = config.getStringList(event.getPlayer().getName() + ".Jobs");
-		if(!list.isEmpty()) {
-			int lootType = 0;
-			Item caught =(Item) event.getCaught();
-			if(caught != null) {
-				switch(caught.getItemStack().getType().toString()) {
-				case "COD": 
-				case "SALMON": 
-				case "TROPICAL_FISH":
-				case "PUFFERFISH": lootType = 1; break;
-				case "BOW": 
-				case "ENCHANTED_BOOK": 
-				case "FISHING_ROD":
-				case "NAME_TAG": 
-				case "NAUTILUS_SHELL": 
-				case "SADDLE":
-				case "LILY_PAD": lootType = 2; break;
-				default: lootType = 3;
-				}
-				for(String job:list) {
-					config = YamlConfiguration.loadConfiguration(new File(getDataFolder() ,job + "-Job.yml"));
-					Double price = null;
-					switch(lootType) {
-					case 1: 
-						price = config.getDouble("Fisher.fish");
-						break;
-					case 2:
-						price = config.getDouble("Fisher.treasure");
-						break;
-					case 3: 
-						price = config.getDouble("Fisher.junk");
-						break;
-					}
-					event.getPlayer().sendMessage("Price: " + price + " Type: " + lootType + " Material: " + caught.getItemStack().getType().toString());
-					if(price != 0.0) {
-						try {
+		if(event.getState().equals(PlayerFishEvent.State.CAUGHT_FISH)) { 
+			config = YamlConfiguration.loadConfiguration(playerFile);
+			List<String> list = config.getStringList(event.getPlayer().getName() + ".Jobs");
+			if(!list.isEmpty()) {
+				String lootType = "";
+				try {
+					Item caught =(Item) event.getCaught();
+					if(caught != null) {
+						switch(caught.getItemStack().getType().toString()) {
+						case "COD": 
+						case "SALMON": 
+						case "TROPICAL_FISH":
+						case "PUFFERFISH": lootType = "fish"; break;
+						case "BOW": 
+						case "ENCHANTED_BOOK": 
+						case "FISHING_ROD":
+						case "NAME_TAG": 
+						case "NAUTILUS_SHELL": 
+						case "SADDLE":
+						case "LILY_PAD": lootType = "treasure"; break;
+						default: lootType = "junk";
+						}
+						for(String jobName:list) {
+							Job job = Job.getJobByName(jobName);
+							Double price = job.getFisherPrice(lootType);
 							playerFile = PaymentUtils.increasePlayerAmount(playerFile, event.getPlayer().getName(), price);
-						} catch (PlayerDoesNotExistException e) {
-							Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 						}
 					}
-				}
+				} catch(ClassCastException | JobSystemException | PlayerDoesNotExistException e) {}
 			}
 		}
 	}
@@ -2813,25 +2532,6 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 	}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	private boolean isTownWorld(String arg) {
-		boolean isTownWorld = false;
-		if(getConfig().getStringList("TownWorlds").contains(arg)) {
-			isTownWorld = true;
-		}
-		return isTownWorld;
-	}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	private TownWorld getTownWorld(String arg) throws TownSystemException {
-		for(TownWorld world:townWorlds) {
-			if(world.getWorldName().equals(arg)) {
-				return world;
-			}
-		}
-		throw new TownSystemException(TownSystemException.TOWNWORLD_DOES_NOT_EXIST);
-	}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private void handleAddPotion(Shop s, String[] args) {
 		if(!args[2].equalsIgnoreCase("potion") && !args[2].equalsIgnoreCase("splash_potion") && !args[2].equalsIgnoreCase("lingering_potion")) {
 			player.sendMessage(ChatColor.RED + "PotionType is not correct! Use potion/splash_potion/lingering_potion");
@@ -2882,7 +2582,10 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 	private void handleEditor(Player playe,Shop shop,InventoryClickEvent event) {
 		ItemMeta meta = event.getCurrentItem().getItemMeta();
 		String command = meta.getDisplayName();
-		String inventoryname = event.getInventory().getName();
+		//1.13
+		//String inventoryname = event.getInventory().get;
+		//1.14
+		String inventoryname = event.getView().getTitle();
 		if(inventoryname.equals(shop.getName() + "-Editor") && meta.getDisplayName().contains("Slot")) {
 			int slot = Integer.valueOf(meta.getDisplayName().substring(5));
 			shop.openSlotEditor(playe, slot);
@@ -2973,7 +2676,10 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 		int damage = 0;
 		String shopOwner = "";
 		ClickType clickType = event.getClick();
-		String inventoryname = event.getInventory().getName();
+		//1.13
+		//String inventoryname = event.getInventory().get;
+		//1.14
+		String inventoryname = event.getView().getTitle();
 		Inventory inventoryplayer = event.getWhoClicked().getInventory();
 		PlayerShop playerShop = null;
 		if(shop instanceof PlayerShop) {
@@ -3248,7 +2954,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 										iStack.setItemMeta(meta);
 										if(inventoryContainsItems(inventoryplayer,iStack,amount) ) {
 											if(!shopOwner.equals(playe.getName()) || !isPlayershop) {
-												if((PaymentUtils.playerHasEnoughtMoney(playerFile, shopOwner, sellprice) && isPlayershop)|| !isPlayershop) {
+												if(!isPlayershop || (isPlayershop && PaymentUtils.playerHasEnoughtMoney(playerFile, shopOwner, sellprice))) {
 													playerFile = PaymentUtils.increasePlayerAmount(playerFile, playe.getName(), sellprice);
 													//only playershop
 													if(isPlayershop) {

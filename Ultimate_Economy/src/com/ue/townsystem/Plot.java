@@ -23,7 +23,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.ue.exceptions.townsystem.TownSystemException;
+import com.ue.exceptions.TownSystemException;
 
 public class Plot {
 
@@ -87,7 +87,7 @@ public class Plot {
 	 * @param location
 	 */
 	private void spawnSaleVillager(Location location) {
-		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10,1,10);
+		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10,10,10);
 		for(Entity entity:entitys) {
 			if(entity.getName().equals("Plot " + location.getChunk().getX() + "/" + location.getChunk().getZ() + " For Sale!")) {
 				entity.remove();
