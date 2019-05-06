@@ -61,6 +61,7 @@ import com.ue.exceptions.banksystem.PlayerHasNotEnoughtMoneyException;
 import com.ue.exceptions.banksystem.TownHasNotEnoughMoneyException;
 import com.ue.jobsystem.Job;
 import com.ue.jobsystem.JobCenter;
+import com.ue.player.EconomyPlayer;
 import com.ue.townsystem.Plot;
 import com.ue.townsystem.Town;
 import com.ue.townsystem.TownWorld;
@@ -87,7 +88,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 	 */
 
 	private Player player = null;
-	private List<String> playershopNames,adminShopNames,playerlist,homeList,spawnerlist,townNames;
+	private List<String> playershopNames,adminShopNames,playerlist,spawnerlist,townNames;
 	private List<AdminShop> adminShopList;
 	private List<PlayerShop> playerShopList;
 	private File spawner;
@@ -101,14 +102,15 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 		playerShopList = new ArrayList<>();
 		playershopNames = new ArrayList<>();
 		townNames = new ArrayList<>();
-		homeList = new ArrayList<>();
 		spawnerlist = new ArrayList<>();
 
 		if(!getDataFolder().exists()) {
 			getDataFolder().mkdirs();
+			//TODO vllt üerflüssig
 			getConfig().set("MaxHomes", 3);
 			getConfig().set("MaxJobs", 2);
 			getConfig().set("MaxJoinedTowns", 1);
+			//
 			saveConfig();
 		}
 		//can be removed in a future update
@@ -117,21 +119,12 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 			saveConfig();
 		}
 		
-		if(getConfig().getInt("MaxHomes") == 0) {
-			getConfig().set("MaxHomes", 3);
-		}
-		if(getConfig().getInt("MaxJobs") == 0) {
-			getConfig().set("MaxJobs", 2);
-		}
-		if(getConfig().getInt("MaxJoinedTowns") == 0) {
-			getConfig().set("MaxJoinedTowns", 1);
-		}
-		
-		
 		try {
 			JobCenter.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
 			Job.loadAllJobs(getDataFolder(), getConfig());
 			TownWorld.loadAllTownWorlds(getDataFolder(), getConfig());
+			EconomyPlayer.loadAllEconomyPlayers(getDataFolder());
+			EconomyPlayer.setupConfig(getConfig());
 		} catch (JobSystemException | TownSystemException e) {
 			Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 		}
@@ -147,7 +140,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 		
 		townNames.addAll(getConfig().getStringList("TownNames"));
 
-		config = YamlConfiguration.loadConfiguration(playerFile);
+		config = YamlConfiguration.loadConfiguration(EconomyPlayer.getPlayerFile());
 		spawner = new File(getDataFolder() , "SpawnerLocations.yml");
 		if(!spawner.exists()) {
 			try {
@@ -2320,6 +2313,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener{
 	@EventHandler
 	public void JoinEvent(PlayerJoinEvent event) {
 		int score = 0;
+		//TODO create economyplayer
 		config = YamlConfiguration.loadConfiguration(playerFile);
 		String playername = event.getPlayer().getName();
 		if(playerlist.contains(playername)) {

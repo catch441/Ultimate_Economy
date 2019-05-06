@@ -87,7 +87,7 @@ public class Town {
 	
 	/**
 	 * <p>
-	 * Returns the FileConfiguration.
+	 * Returns the File.
 	 * <p>
 	 * @return file
 	 */
@@ -810,7 +810,7 @@ public class Town {
 	 * <p>
 	 * @param chunkX
 	 * @param chunkZ
-	 * @return
+	 * @return boolean
 	 */
 	public boolean chunkIsConnectedToTown(int chunkX,int chunkZ) {
 		for(String coords:chunkCoords) {
@@ -944,7 +944,7 @@ public class Town {
 	 * <p>
 	 * @param file
 	 * @param townName
-	 * @return
+	 * @return Town
 	 * @throws TownSystemException 
 	 */
 	public static Town loadTown(File file,String townName) throws TownSystemException {
