@@ -27,6 +27,8 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.exceptions.banksystem.TownHasNotEnoughMoneyException;
 
 public class Town {
+	
+	private static List<String> townNameList = new ArrayList<>();
 
 	private String townName;
 	private String owner;
@@ -58,6 +60,7 @@ public class Town {
 		coOwners = new ArrayList<>();
 		chunkCoords = new ArrayList<>();
 		plots = new ArrayList<>();
+		townNameList.add(townName);
 		setOwner(file, owner);
 		file = addCitizen(file, owner);
 		file = addChunk(file, startChunk.getX(), startChunk.getZ(),null);
@@ -82,6 +85,7 @@ public class Town {
 		coOwners = new ArrayList<>();
 		chunkCoords = new ArrayList<>();
 		plots = new ArrayList<>();
+		townNameList.add(townName);
 		spawnTownManagerVillager(location);
 	}
 	
@@ -226,6 +230,7 @@ public class Town {
 	 * @return
 	 */
 	public File deleteTown(File file) {
+		townNameList.remove(townName);
 		file = removeTownManagerVillager(file);
 		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 		config.set("Towns." + townName, null);
@@ -949,29 +954,33 @@ public class Town {
 	 */
 	public static Town loadTown(File file,String townName) throws TownSystemException {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-		if(config.getStringList("TownNames").contains(townName)) {
-			Location location = new Location(Bukkit.getWorld(config.getString("Towns." + townName + ".TownManagerVillager.world")),
-					config.getDouble("Towns." + townName + ".TownManagerVillager.x"),
-					config.getDouble("Towns." + townName + ".TownManagerVillager.y"),
-					config.getDouble("Towns." + townName + ".TownManagerVillager.z"));
-			Town town = new Town(config.getString("Towns." + townName + ".owner"), townName,location);
-			town.setCoOwners(config.getStringList("Towns." + townName + ".coOwners"));
-			town.setCitizens(config.getStringList("Towns." + townName + ".citizens"));
-			town.setChunkList(config.getStringList("Towns." + townName + ".chunks"));
-			town.setTax(config.getDouble("Towns." + townName + ".tax"));
-			town.setTownBankAmount(config.getDouble("Towns." + townName + ".bank"));
-			String locationString = config.getString("Towns." + townName + ".townspawn");
-			town.setTownSpawn(new Location(Bukkit.getWorld(config.getString("World")), Double.valueOf(locationString.substring(0, locationString.indexOf("/"))), Double.valueOf(locationString.substring(locationString.indexOf("/")+1,locationString.lastIndexOf("/"))), Double.valueOf(locationString.substring(locationString.lastIndexOf("/")+1))));
-			ArrayList<Plot> plotList = new ArrayList<>();
-			for(String coords:town.getChunkList()) {
-				Plot plot = Plot.loadPlot(file, townName, coords);
-				plotList.add(plot);		
-			}
-			town.setPlotList(plotList);
-			return town;
+		Location location = new Location(Bukkit.getWorld(config.getString("Towns." + townName + ".TownManagerVillager.world")),
+				config.getDouble("Towns." + townName + ".TownManagerVillager.x"),
+				config.getDouble("Towns." + townName + ".TownManagerVillager.y"),
+				config.getDouble("Towns." + townName + ".TownManagerVillager.z"));
+		Town town = new Town(config.getString("Towns." + townName + ".owner"), townName,location);
+		town.setCoOwners(config.getStringList("Towns." + townName + ".coOwners"));
+		town.setCitizens(config.getStringList("Towns." + townName + ".citizens"));
+		town.setChunkList(config.getStringList("Towns." + townName + ".chunks"));
+		town.setTax(config.getDouble("Towns." + townName + ".tax"));
+		town.setTownBankAmount(config.getDouble("Towns." + townName + ".bank"));
+		String locationString = config.getString("Towns." + townName + ".townspawn");
+		town.setTownSpawn(new Location(Bukkit.getWorld(config.getString("World")), Double.valueOf(locationString.substring(0, locationString.indexOf("/"))), Double.valueOf(locationString.substring(locationString.indexOf("/")+1,locationString.lastIndexOf("/"))), Double.valueOf(locationString.substring(locationString.lastIndexOf("/")+1))));
+		ArrayList<Plot> plotList = new ArrayList<>();
+		for(String coords:town.getChunkList()) {
+			Plot plot = Plot.loadPlot(file, townName, coords);
+			plotList.add(plot);		
 		}
-		else {
-			throw new TownSystemException(TownSystemException.TOWN_DOES_NOT_EXISTS);
-		}
+		town.setPlotList(plotList);
+		return town;
+	}
+	
+	/**
+	 * This method returns the townNameList.
+	 * 
+	 * @return List of Strings
+	 */
+	public static List<String> getTownNameList() {
+		return townNameList;
 	}
 }

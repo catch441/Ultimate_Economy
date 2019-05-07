@@ -1,7 +1,7 @@
 package shop;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -9,8 +9,8 @@ import ultimate_economy.Ultimate_Economy;
 
 public class AdminShop extends Shop{
 	
-	public AdminShop(Ultimate_Economy main,String name,Player player,String s) {
-		super(main, name, player, s, false);
+	public AdminShop(Ultimate_Economy main,String name,Location spawnLocation,String s) {
+		super(main, name, spawnLocation, s, false);
 		for(String item:itemNames) {
 			loadItem(item);
 		}

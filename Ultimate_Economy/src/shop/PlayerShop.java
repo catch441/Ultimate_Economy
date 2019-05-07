@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -22,8 +22,8 @@ public class PlayerShop extends Shop{
 
 	private boolean mode;
 
-	public PlayerShop(Ultimate_Economy main,String name,Player player,String s) {
-		super(main, name, player, s, true);
+	public PlayerShop(Ultimate_Economy main,String name,Location spawnLocation,String s) {
+		super(main, name, spawnLocation, s, true);
 		mode = true;
 		for(String item:itemNames) {
 			loadItem(item);

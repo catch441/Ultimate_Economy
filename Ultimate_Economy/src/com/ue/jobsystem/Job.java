@@ -370,8 +370,6 @@ public class Job {
 	 */
 	public static void deleteJob(String jobName) throws JobSystemException {
 		Job job = getJobByName(jobName);
-		jobList.remove(job);
-		job.deleteJob();
 		List<JobCenter> jobCenterList = JobCenter.getJobCenterList();
 		for(JobCenter jobCenter:jobCenterList) {
 			try {
@@ -385,6 +383,8 @@ public class Job {
 				} catch (PlayerException e) {}
 			}
 		}
+		jobList.remove(job);
+		job.deleteJob();
 	}
 	
 	/**

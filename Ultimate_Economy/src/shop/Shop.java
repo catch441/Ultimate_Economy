@@ -70,7 +70,7 @@ public class Shop {
 	public boolean isPlayershop;
 	public int slotEditorSlot;
 	
-	public Shop(Ultimate_Economy main,String name,Player player,String s,boolean isPlayershop) {
+	public Shop(Ultimate_Economy main,String name,Location spawnLocation,String s,boolean isPlayershop) {
 		this.isPlayershop = isPlayershop;
 		itemNames = new ArrayList<>();
 		this.main = main;
@@ -86,7 +86,7 @@ public class Shop {
 				}
 			config = YamlConfiguration.loadConfiguration(file);
 			this.name = name;
-			location = player.getLocation();
+			location = spawnLocation;
 			config.set("ShopName", name);
 			config.set("ShopSize", size);
 			config.set("ShopLocation.x", location.getX());

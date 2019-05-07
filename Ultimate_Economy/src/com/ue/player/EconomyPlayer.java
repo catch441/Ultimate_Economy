@@ -18,7 +18,6 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
-import com.ue.exceptions.banksystem.PlayerDoesNotExistException;
 import com.ue.jobsystem.Job;
 
 public class EconomyPlayer {
@@ -188,20 +187,47 @@ public class EconomyPlayer {
 	 * @throws PlayerException
 	 */
 	public void addJoinedTown(String townName) throws PlayerException {
-		if(joinedTowns.size() < maxJoinedTowns) {
+		if(joinedTowns.contains(townName)) {
+			throw new PlayerException(PlayerException.TOWN_ALREADY_JOINED);
+		}
+		else if(!(joinedTowns.size() < maxJoinedTowns)) {
+			throw new PlayerException(PlayerException.MAX_JOINED_TOWNS);
+		}
+		else {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
 			List<String> list = config.getStringList(name + ".joinedTowns");
 			list.add(townName);
 			config.set(name + ".joinedTowns", list);
 			save(config);
 		}
+	}
+	
+	/**
+	 * This method removes a town from the joined town list.
+	 * 
+	 * @param townName
+	 * @throws PlayerException
+	 */
+	public void removeJoinedTown(String townName) throws PlayerException {
+		if(joinedTowns.contains(townName)) {
+			FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+			List<String> list = config.getStringList(name + ".joinedTowns");
+			list.remove(townName);
+			config.set(name + ".joinedTowns", list);
+			save(config);
+		}
 		else {
-			throw new PlayerException(PlayerException.MAX_JOINED_TOWNS);
+			throw new PlayerException(PlayerException.TOWN_NOT_JOINED);
 		}
 	}
 	
-	public void removeJoinedTown(String townName) {
-		//TODO
+	/**
+	 * This method returns the list of joined towns.
+	 * 
+	 * @return List of Strings
+	 */
+	public List<String> getJoinedTownList() {
+		return joinedTowns;
 	}
 	
 	/**
@@ -307,6 +333,8 @@ public class EconomyPlayer {
 	
 	public void setScoreBoardDisabled(boolean scoreBoardDisabled) {
 		this.scoreBoardDisabled = scoreBoardDisabled;
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+		config.set(name + ".bank", scoreBoardDisabled);
 	}
 		
 	/**
@@ -340,7 +368,7 @@ public class EconomyPlayer {
 		}
 		else if(hasEnoughtMoney(amount)) {
 			reciever.increasePlayerAmount(amount);
-			decreasePlayerAmount(amount);
+			decreasePlayerAmount(amount,true);
 		}
 	}
 	 /**
@@ -373,7 +401,7 @@ public class EconomyPlayer {
 	 * @param personal
 	 * @throws PlayerException 
 	 */
-	public void decreasePlayerAmount(double amount) throws PlayerException {
+	public void decreasePlayerAmount(double amount,boolean personal) throws PlayerException {
 		if(amount < 0) {
 			throw new PlayerException(PlayerException.INVALID_NUMBER);
 		}
@@ -387,7 +415,12 @@ public class EconomyPlayer {
 			}
 		}
 		else {
-			throw new PlayerException(PlayerException.NOT_ENOUGH_MONEY);
+			if(personal) {
+				throw new PlayerException(PlayerException.NOT_ENOUGH_MONEY_PERSONAL);
+			}
+			else {
+				throw new PlayerException(PlayerException.NOT_ENOUGH_MONEY_NON_PERSONAL);
+			}
 		}
 	}
 	
@@ -397,7 +430,7 @@ public class EconomyPlayer {
 	 * 
 	 * @return double
 	 */
-	public double getBankAmount() throws PlayerDoesNotExistException {
+	public double getBankAmount() {
 		return account;
 	}
 	

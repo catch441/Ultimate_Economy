@@ -185,7 +185,7 @@ public class TownWorld {
 			throw new TownSystemException(TownSystemException.CHUNK_ALREADY_CLAIMED);
 		}
 		else if(!owner.hasEnoughtMoney(foundationPrice)) {
-			throw new PlayerException(PlayerException.NOT_ENOUGH_MONEY);
+			throw new PlayerException(PlayerException.NOT_ENOUGH_MONEY_PERSONAL);
 		}
 		else if(owner.reachedMaxJoinedTowns()) {
 			throw new PlayerException(PlayerException.MAX_JOINED_TOWNS);
@@ -199,7 +199,7 @@ public class TownWorld {
 			config.set("TownNames", townNames);
 			save();
 			owner.addJoinedTown(townName);
-			owner.decreasePlayerAmount(foundationPrice);
+			owner.decreasePlayerAmount(foundationPrice,true);
 		}
 	}
 	/**
@@ -295,8 +295,9 @@ public class TownWorld {
 	 * @param ecoPlayer
 	 * @return File
 	 * @throws TownSystemException
+	 * @throws PlayerException 
 	 */
-	public void leaveTown(EconomyPlayer ecoPlayer,Town town) throws TownSystemException {
+	public void leaveTown(EconomyPlayer ecoPlayer,Town town) throws TownSystemException, PlayerException {
 		file = town.removeCitizen(file, ecoPlayer.getName());
 		ecoPlayer.removeJoinedTown(town.getTownName());
 	}
@@ -416,7 +417,7 @@ public class TownWorld {
 		switch(e.getCurrentItem().getItemMeta().getDisplayName()) {
 			case "Buy": 
 				if(!ecoPlayer.hasEnoughtMoney(plot.getSalePrice())){
-					throw new PlayerException(PlayerException.NOT_ENOUGH_MONEY);
+					throw new PlayerException(PlayerException.NOT_ENOUGH_MONEY_PERSONAL);
 				}
 				else {
 					String receiverName = plot.getOwner();
