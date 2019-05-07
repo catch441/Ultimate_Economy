@@ -11,9 +11,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
 
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.banksystem.PlayerDoesNotExistException;
 import com.ue.jobsystem.Job;
 
 public class EconomyPlayer {
@@ -27,48 +32,42 @@ public class EconomyPlayer {
 	private Map<String,Location> homes;
 	private double account;
 	private String name;
-	private List<Job> jobs;
+	private List<String> jobs;
 	private List<String> joinedTowns;
+	private List<String> playerShops;
 	private boolean scoreBoardDisabled;
 	
 	/**
-	 * Constructor for creating a new economyPlayer.
+	 * Constructor for creating a new economyPlayer/loading an existing player.
 	 * 
 	 * @param name
+	 * @param isNew
 	 */
-	private EconomyPlayer(String name) {
+	private EconomyPlayer(String name,boolean isNew) {
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
 		jobs = new ArrayList<>();
 		homes = new HashMap<>();
 		this.name = name;
-		scoreBoardDisabled = true;
-		account = 0.0;	
-		config.set(name + ".bank", scoreBoardDisabled);
-		config.set(name + ".account amount", account);
-		save(config);
-	}
-	
-	/**
-	 * Constructor for loading an existing economyPlayer.
-	 * 
-	 * @param name
-	 * @param jobList
-	 */
-	private EconomyPlayer(String name,List<Job> jobList) {
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
-		homes = new HashMap<>();
-		this.name = name;
-		scoreBoardDisabled = config.getBoolean(name + ".bank");
-		account = config.getDouble(name + ".account amount");
-		jobs = jobList;
-		List<String> homeNameList = config.getStringList(name + ".Home.Homelist");
-		for(String homeName:homeNameList) {
-			Location homeLocation = new Location(
-					Bukkit.getWorld(config.getString(name + ".Home." + homeName + ".World")), 
-					config.getDouble(name + ".Home." + homeName + ".X"), 
-					config.getDouble(name + ".Home." + homeName + ".Y"), 
-					config.getDouble(name + ".Home." + homeName + ".Z"));
-			homes.put(homeName, homeLocation);
+		if(isNew) {
+			scoreBoardDisabled = true;
+			account = 0.0;	
+			config.set(name + ".bank", scoreBoardDisabled);
+			config.set(name + ".account amount", account);
+			save(config);
+		}
+		else {
+			scoreBoardDisabled = config.getBoolean(name + ".bank");
+			account = config.getDouble(name + ".account amount");
+			jobs = config.getStringList(name + ".Jobs");
+			List<String> homeNameList = config.getStringList(name + ".Home.Homelist");
+			for(String homeName:homeNameList) {
+				Location homeLocation = new Location(
+						Bukkit.getWorld(config.getString(name + ".Home." + homeName + ".World")), 
+						config.getDouble(name + ".Home." + homeName + ".X"), 
+						config.getDouble(name + ".Home." + homeName + ".Y"), 
+						config.getDouble(name + ".Home." + homeName + ".Z"));
+				homes.put(homeName, homeLocation);
+			}
 		}
 	}
 	
@@ -84,23 +83,24 @@ public class EconomyPlayer {
 	/**
 	 * This method adds a job to this player.
 	 * 
-	 * @param playerFile
-	 * @param job
+	 * @param jobName
 	 * @throws PlayerException
+	 * @throws JobSystemException 
 	 */
-	public void addJob(File playerFile,Job job) throws PlayerException {
-		if(jobs.size() == maxJobs) {
+	public void addJob(String jobName) throws PlayerException, JobSystemException {
+		if(!Job.getJobNameList().contains(jobName)) {
+			throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
+		}
+		else if(jobs.size() == maxJobs) {
 			throw new PlayerException(PlayerException.MAX_JOINED_JOBS);
 		}
-		else if(jobs.contains(job)) {
+		else if(jobs.contains(jobName)) {
 			throw new PlayerException(PlayerException.JOB_ALREADY_JOINED);
 		}
 		else {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
-			List<String> joblist = config.getStringList(name + ".Jobs");
-			joblist.add(job.getName());
-			config.set(name + ".Jobs", joblist);
-			jobs.add(job);
+			jobs.add(jobName);
+			config.set(name + ".Jobs", jobName);
 			save(config);
 		}
 	}
@@ -108,20 +108,21 @@ public class EconomyPlayer {
 	/**
 	 * This method removes a job from this player.
 	 * 
-	 * @param playerFile
-	 * @param job
+	 * @param jobName
 	 * @throws PlayerException
+	 * @throws JobSystemException 
 	 */
-	public void removeJob(File playerFile,Job job) throws PlayerException {
-		if(!jobs.contains(job)) {
+	public void removeJob(String jobName) throws PlayerException, JobSystemException {
+		if(!Job.getJobNameList().contains(jobName)) {
+			throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
+		}
+		else if(!jobs.contains(jobName)) {
 			throw new PlayerException(PlayerException.JOB_NOT_JOINED);
 		}
 		else {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
-			List<String> joblist = config.getStringList(name + ".Jobs");
-			joblist.remove(job.getName());
-			config.set(name + ".Jobs", joblist);
-			jobs.remove(job);
+			jobs.remove(jobName);
+			config.set(name + ".Jobs", jobs);
 			save(config);
 		}
 	}
@@ -129,16 +130,30 @@ public class EconomyPlayer {
 	/**
 	 * This method returns true if the player has this job.
 	 * 
-	 * @param job
+	 * @param jobName
+	 * @throws JobSystemException 
 	 */
-	public boolean hasJob(Job job) {
-		boolean has = false;
-		for(Job j:jobs) {
-			if(job.equals(j)) {
-				has = true;
+	public boolean hasJob(String jobName) throws JobSystemException {
+		if(!Job.getJobNameList().contains(jobName)) {
+			throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
+		}
+		else {
+			if(jobs.contains(jobName)) {
+				return true;
+			}
+			else {
+			 return false;
 			}
 		}
-		return has;
+	}
+	
+	/**
+	 * This method returns the list of joined jobs as string list.
+	 * 
+	 * @return List of Strings
+	 */
+	public List<String> getJobList() {
+		return jobs;
 	}
 	
 	/**
@@ -154,6 +169,80 @@ public class EconomyPlayer {
 		}
 		else {
 			throw new PlayerException(PlayerException.HOME_DOES_NOT_EXIST);
+		}
+	}
+	
+	/**
+	 * This method returns the list of homes as string list.
+	 * 
+	 * @return List of Strings
+	 */
+	public Map<String, Location> getHomeList() {
+		return homes;
+	}
+	
+	/**
+	 * This method adds a town to the joined town list of this player.
+	 * 
+	 * @param townName
+	 * @throws PlayerException
+	 */
+	public void addJoinedTown(String townName) throws PlayerException {
+		if(joinedTowns.size() < maxJoinedTowns) {
+			FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+			List<String> list = config.getStringList(name + ".joinedTowns");
+			list.add(townName);
+			config.set(name + ".joinedTowns", list);
+			save(config);
+		}
+		else {
+			throw new PlayerException(PlayerException.MAX_JOINED_TOWNS);
+		}
+	}
+	
+	public void removeJoinedTown(String townName) {
+		//TODO
+	}
+	
+	/**
+	 * This method return true if this player reached the max number of joined towns.
+	 * 
+	 * @return boolean
+	 */
+	public boolean reachedMaxJoinedTowns() {
+		if(maxJoinedTowns <= joinedTowns.size()) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	/**
+	 * This method return true if this player reached the max number of homes.
+	 * 
+	 * @return boolean
+	 */
+	public boolean reachedMaxHomes() {
+		if(maxHomes <= homes.size()) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	/**
+	 * This method return true if this player reached the max number of joined jobs.
+	 * 
+	 * @return boolean
+	 */
+	public boolean reachedMaxJoinedJobs() {
+		if(maxJobs <= jobs.size()) {
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
 	
@@ -215,12 +304,138 @@ public class EconomyPlayer {
 	public boolean isScoreBoardDisabled() {
 		return scoreBoardDisabled;
 	}
+	
+	public void setScoreBoardDisabled(boolean scoreBoardDisabled) {
+		this.scoreBoardDisabled = scoreBoardDisabled;
+	}
 		
-	public void updateAccount(double amount) {
-		account = amount;
+	/**
+	 * 
+	 * Returns true if the player has at minimum 'amount' on his bank account.
+	 * 
+	 * @param amount
+	 * @return boolean
+	 * @throws PlayerDoesNotExistException
+	 */
+	public boolean hasEnoughtMoney(double amount) {
+		if(account >= amount) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	
-	private void save(YamlConfiguration config) {
+	/**
+	 * 
+	 * Transfers a money amount from this player to another player.
+	 * 
+	 * @param reciever
+	 * @param amount
+	 * @throws PlayerException 
+	 */
+	public void payToOtherPlayer(EconomyPlayer reciever,double amount) throws PlayerException {
+		if(amount < 0) {
+			throw new PlayerException(PlayerException.INVALID_NUMBER);
+		}
+		else if(hasEnoughtMoney(amount)) {
+			reciever.increasePlayerAmount(amount);
+			decreasePlayerAmount(amount);
+		}
+	}
+	 /**
+	  * 
+	  * Increase the bank amount of a player.
+	  * 
+	  * @param amount
+	  * @throws PlayerException 
+	  */
+	public void increasePlayerAmount(double amount) throws PlayerException {
+		if(amount < 0) {
+			throw new PlayerException(PlayerException.INVALID_NUMBER);
+		}
+		else {
+			FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+			account += amount;
+			config.set(name + ".account amount", account);
+			save(config);
+			if(Bukkit.getPlayer(name).isOnline()) {
+				updateScoreBoard(Bukkit.getPlayer(name));
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * Decrease the bank amount of this player.
+	 * 
+	 * @param amount
+	 * @param personal
+	 * @throws PlayerException 
+	 */
+	public void decreasePlayerAmount(double amount) throws PlayerException {
+		if(amount < 0) {
+			throw new PlayerException(PlayerException.INVALID_NUMBER);
+		}
+		else if(hasEnoughtMoney(amount)) {
+			FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+			account -= amount;
+			config.set(name + ".account amount", account);
+			save(config);
+			if(Bukkit.getPlayer(name).isOnline()) {
+				updateScoreBoard(Bukkit.getPlayer(name));
+			}
+		}
+		else {
+			throw new PlayerException(PlayerException.NOT_ENOUGH_MONEY);
+		}
+	}
+	
+	/**
+	 * 
+	 * Get the bank amount of this player.
+	 * 
+	 * @return double
+	 */
+	public double getBankAmount() throws PlayerDoesNotExistException {
+		return account;
+	}
+	
+	/**
+	 * <p>
+	 * Set the bank scoreboard of this player.
+	 * <p>
+	 * @param file
+	 * @param p
+	 * @param score
+	 */
+	private void setScoreboard(Player p,int score) {
+		if(!scoreBoardDisabled) {
+			Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
+			Objective o = board.registerNewObjective("test", "dummy","§6§lBank");
+			o.setDisplaySlot(DisplaySlot.SIDEBAR);
+			o.getScore("§6Money:").setScore(score);
+			p.setScoreboard(board);
+		}
+		else {
+			Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
+			p.setScoreboard(board);
+		}
+	}
+	
+	/**
+	 * <p>
+	 * Update a bank scoreboard of a player.
+	 * <p>
+	 * @param file
+	 * @param p
+	 */
+	public void updateScoreBoard(Player p) {
+		int score = (int) account;
+		setScoreboard(p,score);
+	}
+	
+	private void save(FileConfiguration config) {
 		try {
 			config.save(playerFile);
 		} catch (IOException e) {
@@ -270,6 +485,15 @@ public class EconomyPlayer {
 	}
 	
 	/**
+	 * This method returns all economyPlayers.
+	 * 
+	 * @return List of EcnomyPlayers
+	 */
+	public static List<EconomyPlayer> getAllEconomyPlayers() {
+		return economyPlayers;
+	}
+	
+	/**
 	 * This method should me used to create a new EconomyPlayer.
 	 * 
 	 * @param playerFile
@@ -282,7 +506,7 @@ public class EconomyPlayer {
 		}
 		else {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
-			economyPlayers.add(new EconomyPlayer(name));
+			economyPlayers.add(new EconomyPlayer(name,true));
 			config.set("Player", getEconomyPlayerNameList());
 			try {
 				config.save(playerFile);
@@ -311,13 +535,8 @@ public class EconomyPlayer {
 		else {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
 			List<String> playerList = config.getStringList("Player");
-			List<String> jobNames = new ArrayList<>();
-			List<Job> jobList = new ArrayList<>();
-			for(String jobName:jobNames) {
-				jobList.add(Job.getJobByName(jobName));
-			}
 			for(String player:playerList) {
-				economyPlayers.add(new EconomyPlayer(player, jobList));
+				economyPlayers.add(new EconomyPlayer(player,false));
 			}
 		}
 	}

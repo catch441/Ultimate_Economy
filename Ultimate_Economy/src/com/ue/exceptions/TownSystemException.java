@@ -16,7 +16,6 @@ public class TownSystemException extends Exception{
 	public static final String PLAYER_IS_NO_COOWNER = "The player is no CoOwner of this location!";
 	public static final String PLAYER_IS_NOT_CITIZEN = "The player is not a citizen of this town!";
 	public static final String PLAYER_IS_NOT_OWNER = "The player is not the owner of this location!";
-	public static final String PLAYER_REACHED_MAX_JOINED_TOWNS = "You have reached the max number of joined towns!";
 	public static final String PLAYER_IS_ALREADY_OWNER = "The player is already the owner of this location!";
 	public static final String YOU_ARE_NO_CITIZEN = "You are not a citizen of this town!";
 	public static final String YOU_ARE_ALREADY_CITIZEN = "You are already a citizen in this town!";

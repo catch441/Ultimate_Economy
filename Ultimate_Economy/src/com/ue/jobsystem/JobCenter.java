@@ -26,6 +26,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import com.ue.exceptions.JobSystemException;
+import com.ue.exceptions.PlayerException;
+import com.ue.player.EconomyPlayer;
 
 public class JobCenter {
 	
@@ -161,12 +163,10 @@ public class JobCenter {
 	/**
 	 * This method removes a job from this jobcenter.
 	 * 
-	 * @param playerFile
 	 * @param jobname
-	 * @return List
 	 * @throws JobSystemException
 	 */
-	public File removeJob(File playerFile,String jobname) throws JobSystemException {
+	public void removeJob(String jobname) throws JobSystemException {
 		if(!Job.getJobNameList().contains(jobname)) {
 			throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
 		}
@@ -187,22 +187,14 @@ public class JobCenter {
 				}
 			}
 			if(i==0) {
-				YamlConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
-				List<String> pList = playerConfig.getStringList("Player");
-				for(String p : pList) {
-					List<String> jobs = playerConfig.getStringList(p + ".Jobs");
-					if(jobs.contains(jobname)) {
-						jobs.remove(jobname);
-						playerConfig.set(p + ".Jobs", jobs);
+				for(EconomyPlayer ecoPlayer : EconomyPlayer.getAllEconomyPlayers()) {
+					if(ecoPlayer.hasJob(jobname)) {
+						try {
+							ecoPlayer.removeJob(jobname);
+						} catch (PlayerException e) {}
 					}
 				}
-				try {
-					playerConfig.save(playerFile);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
 			}
-			return playerFile;
 		}
 	}
 	
@@ -353,16 +345,13 @@ public class JobCenter {
 	 * This method should me used to delete a jobcenter.
 	 * 
 	 * @param name
-	 * @return playerFile
 	 * @throws JobSystemException
 	 */
-	public static File deleteJobCenter(File playerFile,String name) throws JobSystemException {
+	public static void deleteJobCenter(String name) throws JobSystemException {
 		JobCenter jobCenter = getJobCenterByName(name);
 		jobCenter.deleteJobCenter();
 		List<String> jobList = jobCenter.getJobNameList();
 		jobCenterList.remove(jobCenter);
-		YamlConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
-		List<String> pList = playerConfig.getStringList("Player");
 		int i = 0;
 		for(String jobName:jobList) {
 			for(JobCenter jobCenter2:jobCenterList) {
@@ -371,21 +360,15 @@ public class JobCenter {
 				}
 			}
 			if(i == 0) {
-				for(String p : pList) {
-					List<String> jobs = playerConfig.getStringList(p + ".Jobs");
-					if(jobs.contains(jobName)) {
-						jobs.remove(jobName);
-						playerConfig.set(p + ".Jobs", jobs);
+				for(EconomyPlayer ecoPlayer : EconomyPlayer.getAllEconomyPlayers()) {
+					if(ecoPlayer.hasJob(jobName)) {
+						try {
+							ecoPlayer.removeJob(jobName);
+						} catch (PlayerException e){} 
 					}
 				}
 			}
 		}
-		try {
-			playerConfig.save(playerFile);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return playerFile;
 	}
 	
 	/**

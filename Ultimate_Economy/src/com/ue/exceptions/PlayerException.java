@@ -12,7 +12,9 @@ public class PlayerException extends Exception{
 	public static final String HOME_DOES_NOT_EXIST = "This home does not exist!";
 	public static final String HOME_ALREAD_EXIST = "This home already exist!";
 	public static final String MAX_JOINED_JOBS = "You already reached the max joined jobs!";
+	public static final String MAX_JOINED_TOWNS = "You already reached the max joined towns!";
 	public static final String MAX_HOMES = "You already reached the max number of homes!";
+	public static final String NOT_ENOUGH_MONEY ="You have not enough money!";
 	
 	public PlayerException(String msg) {
 		super(msg);

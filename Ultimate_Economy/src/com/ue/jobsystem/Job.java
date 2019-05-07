@@ -13,6 +13,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 
 import com.ue.exceptions.JobSystemException;
+import com.ue.exceptions.PlayerException;
+import com.ue.player.EconomyPlayer;
 
 public class Job {
 	
@@ -364,35 +366,25 @@ public class Job {
 	 * This method deletes a job.
 	 * 
 	 * @param jobName
-	 * @param playerFile
-	 * @return playerFile
 	 * @throws JobSystemException
 	 */
-	public static File deleteJob(String jobName,File playerFile) throws JobSystemException {
+	public static void deleteJob(String jobName) throws JobSystemException {
 		Job job = getJobByName(jobName);
 		jobList.remove(job);
 		job.deleteJob();
 		List<JobCenter> jobCenterList = JobCenter.getJobCenterList();
 		for(JobCenter jobCenter:jobCenterList) {
 			try {
-			jobCenter.removeJob(playerFile,jobName);
+			jobCenter.removeJob(jobName);
 			} catch (JobSystemException e) {}
 		}
-		YamlConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
-		List<String> pList = playerConfig.getStringList("Player");
-		for(String p : pList) {
-			List<String> jobs = playerConfig.getStringList(p + ".Jobs");
-			if(jobs.contains(jobName)) {
-				jobs.remove(jobName);
-				playerConfig.set(p + ".Jobs", jobs);
+		for(EconomyPlayer ecoPlayer : EconomyPlayer.getAllEconomyPlayers()) {
+			if(ecoPlayer.hasJob(jobName)) {
+				try {
+					ecoPlayer.removeJob(jobName);
+				} catch (PlayerException e) {}
 			}
 		}
-		try {
-			playerConfig.save(playerFile);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return playerFile;
 	}
 	
 	/**
