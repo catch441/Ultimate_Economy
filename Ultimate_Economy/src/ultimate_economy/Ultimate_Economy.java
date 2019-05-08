@@ -554,7 +554,6 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 		}
 		return list;
 	}
-
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@Override
@@ -901,22 +900,14 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						if (args[0].equals("create")) {
 							if (args.length == 2) {
-								if (!townNames.contains(args[1])) {
 									try {
 										TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 										tWorld.createTown(args[1], player.getLocation(), ecoPlayer);
-										townNames.add(args[1]);
-										getConfig().set("TownNames", townNames);
-										saveConfig();
 										player.sendMessage(ChatColor.GOLD + "Congratulation! You founded the new town "
 												+ ChatColor.GREEN + args[1] + ChatColor.GOLD + "!");
 									} catch (TownSystemException | PlayerException e) {
 										player.sendMessage(ChatColor.RED + e.getMessage());
 									}
-								} else {
-									player.sendMessage(
-											ChatColor.RED + "The town " + args[1] + " already exists on this server!");
-								}
 							} else {
 								player.sendMessage("/town create <townname>");
 							}
@@ -924,22 +915,14 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("delete")) {
 							if (args.length == 2) {
-								if (townNames.contains(args[1])) {
 									try {
 										TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 										tWorld.dissolveTown(args[1], player.getName());
-										townNames.remove(args[1]);
-										getConfig().set("TownNames", townNames);
-										saveConfig();
 										player.sendMessage(ChatColor.GOLD + "The town " + ChatColor.GREEN + args[1]
 												+ ChatColor.GOLD + " was dissolved!");
 									} catch (TownSystemException | PlayerException e) {
 										player.sendMessage(ChatColor.RED + e.getMessage());
 									}
-								} else {
-									player.sendMessage(
-											ChatColor.RED + "The town " + args[1] + " does not exists on this server!");
-								}
 							} else {
 								player.sendMessage("/town delete <townname>");
 							}
@@ -1362,7 +1345,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 									player.sendMessage(
 											"/adminshop editItem <shopname> <slot> <amount> <sellPrice> <buyPrice>");
 									player.sendMessage(
-											"If you didn't want to change one of these values set the value = none");
+											"If you didn't want to change one of these values = none");
 								}
 							}
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////

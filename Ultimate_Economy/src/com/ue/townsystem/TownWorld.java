@@ -178,7 +178,7 @@ public class TownWorld {
 	 */
 	public void createTown(String townName,Location location,EconomyPlayer owner) throws TownSystemException, PlayerException {
 		config = YamlConfiguration.loadConfiguration(file);
-		if(townNames.contains(townName) ) {
+		if(Town.getTownNameList().contains(townName)) {
 			throw new TownSystemException(TownSystemException.TOWN_ALREADY_EXISTS);
 		}
 		else if(!chunkIsFree(location.getChunk())) {
@@ -212,7 +212,7 @@ public class TownWorld {
 	 * @throws PlayerException 
 	 */
 	public void dissolveTown(String townname,String playername) throws TownSystemException, PlayerException {
-		if(!townNames.contains(townname) ) {
+		if(!Town.getTownNameList().contains(townname) ) {
 			throw new TownSystemException(TownSystemException.TOWN_DOES_NOT_EXISTS);
 		}
 		else {

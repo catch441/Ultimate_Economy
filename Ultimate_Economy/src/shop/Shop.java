@@ -42,6 +42,7 @@ import org.bukkit.potion.PotionType;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.ue.exceptions.ShopSystemException;
 
 import ultimate_economy.Ultimate_Economy;
 
@@ -126,7 +127,8 @@ public class Shop {
 		addShopItemToInv(anvil, 1, slot, 0.0, 0.0); 
 		itemNames.add("ANVIL_0");
 	}
-	public void setupSlotEditor() {
+	
+	private void setupSlotEditor() {
 		List<String> list = new ArrayList<String>();
 		list.add(ChatColor.GOLD + "Price: " + 0);
 		ItemStack item = getSkull(PLUS,"plus");
@@ -257,74 +259,102 @@ public class Shop {
 			player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemStack.getType().toString().toLowerCase()+ ChatColor.GOLD + " was added to the shop." );
 		}
 	}
-	public String editItem(int slot, String amount, String sellPrice, String buyPrice) {
-		String itemName = inventory.getItem(slot-1).getType().name();
-		ItemStack stack = inventory.getItem(slot-1);
-		ArrayList<String> newList = new ArrayList<>();
-		boolean isEnchanted = false;
-		boolean isPotion = false;
-		if(stack.getType().toString().equals("ENCHANTED_BOOK")) {
-			isEnchanted = true;
-			EnchantmentStorageMeta meta = (EnchantmentStorageMeta) stack.getItemMeta();
-			itemName = itemName.toLowerCase() + "#Enchanted_";
-			for(Entry<Enchantment, Integer> map: meta.getStoredEnchants().entrySet()) {
-				newList.add(map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
-				newList.sort(String.CASE_INSENSITIVE_ORDER);
-			}
-			itemName = itemName + newList.toString();
+	
+	/**
+	 * This method edits an existing item in this shop.
+	 * 
+	 * @param slot
+	 * @param amount
+	 * @param sellPrice
+	 * @param buyPrice
+	 * @return String
+	 * @throws ShopSystemException
+	 */
+	public String editItem(int slot, String amount, String sellPrice, String buyPrice) throws ShopSystemException {
+		if (slotIsEmpty(slot)) {
+			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_EMPTY);
+		} 
+		else if (!amount.equals("none") || Integer.valueOf(amount) <= 0) {
+			throw new ShopSystemException(ShopSystemException.INVALID_AMOUNT);
+		} 
+		else if (!sellPrice.equals("none") || Integer.valueOf(sellPrice) < 0) {
+			throw new ShopSystemException(ShopSystemException.INVALID_SELL_PRICE);
+		} 
+		else if (!buyPrice.equals("none") || Integer.valueOf(buyPrice) < 0) {
+			throw new ShopSystemException(ShopSystemException.INVALID_BUY_PRICE);
 		}
-		else if(!stack.getEnchantments().isEmpty()){
-			isEnchanted = true;
-			itemName = itemName.toLowerCase() + "#Enchanted_";
-			for(Entry<Enchantment, Integer> map: stack.getEnchantments().entrySet()) {
-				newList.add(map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
-				newList.sort(String.CASE_INSENSITIVE_ORDER);
-			}
-			itemName = itemName + newList.toString();
-		}
-		else if(stack.getType().toString().contains("POTION")) {
-			isPotion = true;
-			boolean extended = false;
-			boolean upgraded = false;
-			String property;
-			PotionMeta meta = (PotionMeta) stack.getItemMeta();
-			String type = meta.getBasePotionData().getType().toString().toLowerCase();
-			if(extended) {
-				property = "extended";
-			}
-			else if(upgraded) {
-				property = "upgraded";
-			}
-			else {
-				property = "none";
-			}
-			
-			itemName = itemName.toLowerCase() + ":" + type + "#" + property;
-		}
-		String message = ChatColor.GOLD + "Updated ";
-		config = YamlConfiguration.loadConfiguration(file);
-		if(!amount.equals("none")) {
-			config.set("ShopItems." + itemName + ".Amount", Integer.valueOf(amount));	
-			message = message + ChatColor.GREEN + "amount ";
-		}
-		if(!sellPrice.equals("none")) {
-			config.set("ShopItems." + itemName + ".sellPrice", Double.valueOf(sellPrice));		
-			message = message + ChatColor.GREEN + "sellPrice ";
-		}
-		if(!buyPrice.equals("none")) {
-			config.set("ShopItems." + itemName + ".buyPrice", Double.valueOf(buyPrice));	
-			message = message + ChatColor.GREEN + "buyPrice ";
-		}
-		save();
-		inventory.clear(slot-1);
-		if(isEnchanted || isPotion) {
-			loadItem(itemName);
+		else if(!buyPrice.equals("none") && !sellPrice.equals("none") && Integer.valueOf(sellPrice) == 0 && Integer.valueOf(buyPrice) == 0) {
+			throw new ShopSystemException(ShopSystemException.INVALID_PRICES);
 		}
 		else {
-			loadItem(itemName.toUpperCase());
+			String itemName = inventory.getItem(slot-1).getType().name();
+			ItemStack stack = inventory.getItem(slot-1);
+			ArrayList<String> newList = new ArrayList<>();
+			boolean isEnchanted = false;
+			boolean isPotion = false;
+			if(stack.getType().toString().equals("ENCHANTED_BOOK")) {
+				isEnchanted = true;
+				EnchantmentStorageMeta meta = (EnchantmentStorageMeta) stack.getItemMeta();
+				itemName = itemName.toLowerCase() + "#Enchanted_";
+				for(Entry<Enchantment, Integer> map: meta.getStoredEnchants().entrySet()) {
+					newList.add(map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
+					newList.sort(String.CASE_INSENSITIVE_ORDER);
+				}
+				itemName = itemName + newList.toString();
+			}
+			else if(!stack.getEnchantments().isEmpty()){
+				isEnchanted = true;
+				itemName = itemName.toLowerCase() + "#Enchanted_";
+				for(Entry<Enchantment, Integer> map: stack.getEnchantments().entrySet()) {
+					newList.add(map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
+					newList.sort(String.CASE_INSENSITIVE_ORDER);
+				}
+				itemName = itemName + newList.toString();
+			}
+			else if(stack.getType().toString().contains("POTION")) {
+				isPotion = true;
+				boolean extended = false;
+				boolean upgraded = false;
+				String property;
+				PotionMeta meta = (PotionMeta) stack.getItemMeta();
+				String type = meta.getBasePotionData().getType().toString().toLowerCase();
+				if(extended) {
+					property = "extended";
+				}
+				else if(upgraded) {
+					property = "upgraded";
+				}
+				else {
+					property = "none";
+				}
+				
+				itemName = itemName.toLowerCase() + ":" + type + "#" + property;
+			}
+			String message = ChatColor.GOLD + "Updated ";
+			config = YamlConfiguration.loadConfiguration(file);
+			if(!amount.equals("none")) {
+				config.set("ShopItems." + itemName + ".Amount", Integer.valueOf(amount));	
+				message = message + ChatColor.GREEN + "amount ";
+			}
+			if(!sellPrice.equals("none")) {
+				config.set("ShopItems." + itemName + ".sellPrice", Double.valueOf(sellPrice));		
+				message = message + ChatColor.GREEN + "sellPrice ";
+			}
+			if(!buyPrice.equals("none")) {
+				config.set("ShopItems." + itemName + ".buyPrice", Double.valueOf(buyPrice));	
+				message = message + ChatColor.GREEN + "buyPrice ";
+			}
+			save();
+			inventory.clear(slot-1);
+			if(isEnchanted || isPotion) {
+				loadItem(itemName);
+			}
+			else {
+				loadItem(itemName.toUpperCase());
+			}
+			message = message + ChatColor.GOLD + "for item " + ChatColor.GREEN + itemName.toLowerCase();
+			return message;
 		}
-		message = message + ChatColor.GOLD + "for item " + ChatColor.GREEN + itemName.toLowerCase();
-		return message;
 	}
 	public void loadItem(String name1) {
 		config = YamlConfiguration.loadConfiguration(file);
@@ -513,13 +543,26 @@ public class Shop {
         head.setItemMeta(headMeta);
         return head;
     }
-	public boolean slotIsEmpty(int slot) {
-		slot--;
-		boolean isEmpty = false;
-		if(inventory.getItem(slot) == null) {
-			isEmpty = true;
+	
+	/**
+	 * This method returns true if the slot is empty.
+	 * 
+	 * @param slot
+	 * @return boolean
+	 * @throws ShopSystemException
+	 */
+	public boolean slotIsEmpty(int slot) throws ShopSystemException {
+		if(slot <= inventory.getSize() && slot > 0) {
+			slot--;
+			boolean isEmpty = false;		
+			if(inventory.getItem(slot) == null) {
+				isEmpty = true;
+			}
+			return isEmpty;
 		}
-		return isEmpty;
+		else {
+			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_INVALID);
+		}
 	}
 	public List<String> getItemList() {
 		return itemNames;
@@ -568,25 +611,30 @@ public class Shop {
 	public int getSlotEditorSlot() {
 		return slotEditorSlot;
 	}
-	public void setupEditor() {
+	
+	private void setupEditor() {
 		int value = 1;
 		if(isPlayershop) {
 			value++;
 		}
 		for(int i=0; i< (size - value); i++) {
-			if(slotIsEmpty(i+1)) {
-				editor.setItem(i, getSkull(SLOTEMPTY,"Slot " + (i+1)));
-			}
-			else {
-				editor.setItem(i, getSkull(SLOTFILLED,"Slot " + (i+1)));
-			}		
+			try {
+				if(slotIsEmpty(i+1)) {
+					editor.setItem(i, getSkull(SLOTEMPTY,"Slot " + (i+1)));
+				}
+				else {
+					editor.setItem(i, getSkull(SLOTFILLED,"Slot " + (i+1)));
+				}
+			} catch (ShopSystemException e) {}		
 		}
 	}
+	
 	public void openEditor(Player p) {
 		setupEditor();
 		p.openInventory(editor);
 	}
-	public void switchPlusMinus(int slot, String state) {
+	
+	private void switchPlusMinus(int slot, String state) {
 		slot--;
 		if(state.equals("plus")) {
 			ItemStack item = getSkull(MINUS,"minus");
@@ -597,7 +645,8 @@ public class Shop {
 			slotEditor.setItem(slot, item);
 		}
 	}
-	public void openSlotEditor(Player player, int slot) {
+	
+	public void openSlotEditor(Player player, int slot) throws IllegalArgumentException, ShopSystemException {
 		setupSlotEditor();
 		ItemStack item;
 		slotEditorSlot = slot;

@@ -4,11 +4,11 @@ public class TownSystemException extends Exception{
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String CHUNK_IS_NOT_CONNECTED_WITH_TOWN = "The chunk is not connected to the town!";
-	public static final String CHUNK_ALREADY_CLAIMED = "The chunk is already claimed!";
-	public static final String CHUNK_NOT_CLAIMED_BY_TOWN = "The chunk is not claimed by this town!";
-	public static final String CHUNK_NOT_CLAIMED = "The chunk is not claimed!";
-	public static final String LOCATION_NOT_IN_TOWN = "The location is not in this town!";
+	public static final String CHUNK_IS_NOT_CONNECTED_WITH_TOWN = "This chunk is not connected to the town!";
+	public static final String CHUNK_ALREADY_CLAIMED = "This chunk is already claimed!";
+	public static final String CHUNK_NOT_CLAIMED_BY_TOWN = "This chunk is not claimed by this town!";
+	public static final String CHUNK_NOT_CLAIMED = "This chunk is not claimed!";
+	public static final String LOCATION_NOT_IN_TOWN = "This location is not in this town!";
 	public static final String OUTSIDE_OF_THE_PLOT = "You are outside the plot!";
 	public static final String PLAYER_HAS_NO_PERMISSION = "You don't have the permission to do that!";
 	public static final String PLAYER_IS_ALREADY_CITIZEN = "The player is already a citizen in this town!";
@@ -22,11 +22,11 @@ public class TownSystemException extends Exception{
 	public static final String YOU_ARE_ALREADY_OWNER = "You are already the owner of this location!";
 	public static final String YOU_ARE_THE_OWNER = "You are the owner of this location!";
 	public static final String YOU_ARE_NOT_OWNER = "You are not the owner of this location!";
-	public static final String PLOT_ALREADY_SOLD = "The plot is already sold!";
+	public static final String PLOT_ALREADY_SOLD = "This plot is already sold!";
 	public static final String PLOT_IS_ALREADY_FOR_SALE = "The plot is already for sale!";
-	public static final String PLOT_IS_NOT_FOR_SALE = "The plot is not for sale!";
-	public static final String TOWN_ALREADY_EXISTS = "The town already exists in this townworld!";
-	public static final String TOWN_DOES_NOT_EXISTS = "The town does not exist in this townworld!";
+	public static final String PLOT_IS_NOT_FOR_SALE = "This plot is not for sale!";
+	public static final String TOWN_ALREADY_EXISTS = "This town already exists!";
+	public static final String TOWN_DOES_NOT_EXISTS = "This town does not exist!";
 	public static final String TOWNWORLD_DOES_NOT_EXIST = "This world is not a townworld!";
 	public static final String TOWNWORLD_ALREADY_EXIST = "This world is already a townworld!";
 	public static final String WORLD_DOES_NOT_EXIST = "This world does not exist on this server!";
