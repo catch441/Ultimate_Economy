@@ -57,6 +57,7 @@ import org.bukkit.potion.PotionType;
 
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.exceptions.banksystem.TownHasNotEnoughMoneyException;
 import com.ue.jobsystem.Job;
@@ -86,19 +87,13 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 	 * 
 	 */
 
-	private List<String> playershopNames, adminShopNames, playerlist, spawnerlist;
-	private List<AdminShop> adminShopList;
-	private List<PlayerShop> playerShopList;
+	private List<String> playerlist, spawnerlist;
 	private File spawner;
 	private FileConfiguration config;
 
 	public void onEnable() {
 		Bukkit.getPluginManager().registerEvents(this, this);
-		adminShopNames = new ArrayList<>();
-		adminShopList = new ArrayList<>();
 		playerlist = new ArrayList<>();
-		playerShopList = new ArrayList<>();
-		playershopNames = new ArrayList<>();
 		spawnerlist = new ArrayList<>();
 
 		if (!getDataFolder().exists()) {
@@ -121,19 +116,12 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 			JobCenter.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
 			Job.loadAllJobs(getDataFolder(), getConfig());
 			TownWorld.loadAllTownWorlds(getDataFolder(), getConfig());
+			AdminShop.loadAllAdminShops(getConfig(), getDataFolder(), getServer());
+			PlayerShop.loadAllPlayerShops(getConfig(), getDataFolder(), getServer());
 			EconomyPlayer.loadAllEconomyPlayers(getDataFolder());
 			EconomyPlayer.setupConfig(getConfig());
-		} catch (JobSystemException | TownSystemException e) {
+		} catch (JobSystemException | TownSystemException | ShopSystemException e) {
 			Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
-		}
-
-		adminShopNames.addAll(getConfig().getStringList("ShopNames"));
-		for (String shopname1 : adminShopNames) {
-			adminShopList.add(new AdminShop(this, shopname1, null, "9"));
-		}
-		playershopNames.addAll(getConfig().getStringList("PlayerShopNames"));
-		for (String shopname1 : playershopNames) {
-			playerShopList.add(new PlayerShop(this, shopname1, null, "9"));
 		}
 
 		config = YamlConfiguration.loadConfiguration(EconomyPlayer.getPlayerFile());
@@ -162,16 +150,10 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 	}
 
 	public void onDisable() {
-		for (AdminShop s : adminShopList) {
-			s.despawnVillager();
-		}
-		for (PlayerShop s : playerShopList) {
-			s.despawnVillager();
-		}
-
 		JobCenter.despawnAllVillagers();
 		TownWorld.despawnAllVillagers();
-
+		AdminShop.despawnAllVillagers();
+		PlayerShop.despawnAllVillagers();
 		saveConfig();
 	}
 
@@ -734,12 +716,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 					if (args.length == 1) {
 						try {
 							if (ecoPlayer.hasJob(args[0])) {
-								for (AdminShop shop5 : adminShopList) {
-									if (shop5.getName().equals(args[0])) {
-										shop5.openInv(player);
-										break;
-									}
-								}
+								AdminShop.getAdminShopByName(args[0]).openInv(player);
 							} else {
 								player.sendMessage(ChatColor.RED + "You not joined this job!");
 							}
@@ -752,18 +729,14 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 				}
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				else if (label.equalsIgnoreCase("ShopList")) {
-					String namelist = null;
-					for (String name : adminShopNames) {
-						if (namelist == null) {
-							namelist = name;
-						} else {
-							namelist = namelist + "," + name;
-						}
-					}
-					if (namelist != null) {
-						player.sendMessage(ChatColor.GOLD + namelist);
+					List<String> shopNames = AdminShop.getAdminShopNameList();
+					String shopString = shopNames.toString();
+					shopString = shopString.replace("[", "");
+					shopString = shopString.replace("]", "");
+					if (shopNames.size() > 0) {
+						player.sendMessage(ChatColor.GOLD + "All available shops: " + ChatColor.GREEN + shopString);
 					} else {
-						player.sendMessage(ChatColor.RED + "No shops exist!");
+						player.sendMessage(ChatColor.GOLD + "No shops exist!");
 					}
 				}
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1083,21 +1056,10 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						if (args.length != 0) {
 							if (args[0].equals("create")) {
 								if (args.length == 3) {
-									if (adminShopNames.contains(args[1])) {
-										player.sendMessage(ChatColor.RED + "This shop already exists");
-									} else {
-										if (Integer.valueOf(args[2]) % 9 == 0) {
-											AdminShop adminShop = new AdminShop(this, args[1], player.getLocation(), args[2]);
-											adminShopNames.add(args[1]);
-											adminShopList.add(adminShop);
-											getConfig().set("ShopNames", adminShopNames);
-											saveConfig();
-											player.sendMessage(ChatColor.GOLD + "The shop " + ChatColor.GREEN + args[1]
-													+ ChatColor.GOLD + " was created.");
-										} else {
-											player.sendMessage(ChatColor.RED + args[2] + " is not a multiple of 9!");
-										}
-									}
+									AdminShop.createAdminShop(getDataFolder(), args[1], player.getLocation(), Integer.valueOf(args[2]));
+									player.sendMessage(ChatColor.GOLD + "The shop " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " was created.");
+									getConfig().set("ShopNames", AdminShop.getAdminShopNameList());
+									saveConfig();
 								} else {
 									player.sendMessage("/adminshop create <shopname> <size (9,18,27...)>");
 								}
@@ -1105,24 +1067,10 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							else if (args[0].equals("delete")) {
 								if (args.length == 2) {
-									if (adminShopNames.contains(args[1])) {
-										adminShopNames.remove(args[1]);
-										getConfig().set("ShopNames", adminShopNames);
-										saveConfig();
-										Iterator<AdminShop> iter2 = adminShopList.iterator();
-										while (iter2.hasNext()) {
-											AdminShop s = iter2.next();
-											if (s.getName().equals(args[1])) {
-												s.deleteShop();
-												iter2.remove();
-												player.sendMessage(ChatColor.GOLD + "The shop " + ChatColor.GREEN
-														+ args[1] + ChatColor.GOLD + " was deleted.");
-												break;
-											}
-										}
-									} else {
-										player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
-									}
+									AdminShop.deleteAdminShop(args[1]);
+									player.sendMessage(ChatColor.GOLD + "The shop " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " was deleted.");
+									getConfig().set("ShopNames", AdminShop.getAdminShopNameList());
+									saveConfig();
 								} else {
 									player.sendMessage("/adminshop delete <shopname>");
 								}
@@ -1130,18 +1078,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							else if (args[0].equals("move")) {
 								if (args.length == 5) {
-									boolean exists = false;
-									for (AdminShop shop : adminShopList) {
-										if (shop.getName().equals(args[1])) {
-											exists = true;
-											shop.moveShop(Integer.valueOf(args[2]), Integer.valueOf(args[3]),
-													Integer.valueOf(args[4]));
-											break;
-										}
-									}
-									if (!exists) {
-										player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
-									}
+									AdminShop.getAdminShopByName(args[1]).moveShop(Integer.valueOf(args[2]), Integer.valueOf(args[3]),Integer.valueOf(args[4]));
 								} else {
 									player.sendMessage("/adminshop move <shopname> <x> <y> <z>");
 								}
@@ -1149,17 +1086,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							else if (args[0].equals("editShop")) {
 								if (args.length == 2) {
-									boolean exists = false;
-									for (AdminShop shop : adminShopList) {
-										if (shop.getName().equals(args[1])) {
-											exists = true;
-											shop.openEditor(player);
-											break;
-										}
-									}
-									if (!exists) {
-										player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
-									}
+									AdminShop.getAdminShopByName(args[1]).openEditor(player);
 								} else {
 									player.sendMessage("/adminshop editShop <shopname>");
 								}
@@ -1167,53 +1094,38 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							else if (args[0].equals("addItem")) {
 								boolean exists = false;
-								if (args.length == 7 && Integer.valueOf(args[3]) <= 64) {
-									for (AdminShop shop5 : adminShopList) {
-										if (shop5.getName().equals(args[1])) {
-											exists = true;
-											if (checkValidation(player, shop5, args[2], args[3], args[4], args[5],
-													args[6])) {
-												ItemStack itemStack = new ItemStack(
-														Material.getMaterial(args[2].toUpperCase()),
-														Integer.valueOf(args[4]));
-												shop5.addItem(player, Integer.valueOf(args[3]) - 1,
-														Double.valueOf(args[5]), Double.valueOf(args[6]), itemStack);
-											}
-											break;
+								if (args.length == 7) {
+									try {
+										if (Material.matchMaterial(args[2].toUpperCase()) == null) {
+											throw new ShopSystemException(ShopSystemException.INVALID_MATERIAL);
 										}
+										else  {
+											ItemStack itemStack = new ItemStack(Material.getMaterial(args[2].toUpperCase()),Integer.valueOf(args[4]));
+											AdminShop.getAdminShopByName(args[1]).addItem(Integer.valueOf(args[3]) - 1, Double.valueOf(args[5]),Double.valueOf(args[6]), itemStack);
+											player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemStack.getType().toString().toLowerCase()+ ChatColor.GOLD + " was added to the shop." );
+										}
+									} catch (ShopSystemException e) {
+										player.sendMessage(ChatColor.RED + e.getMessage());
 									}
-									if (!exists) {
-										player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
-									}
-								} else if (args.length != 7) {
-									player.sendMessage(
-											"/adminshop addItem <shopname> <material> <slot> <amount> <sellPrice> <buyPrice>");
-									player.sendMessage(
-											"If you only want to buy/sell something set sell/buyPrice = 0.0");
 								} else {
-									player.sendMessage(ChatColor.RED + "The item amount is highter then 64!");
+									player.sendMessage("/adminshop addItem <shopname> <material> <slot> <amount> <sellPrice> <buyPrice>");
+									player.sendMessage("If you only want to buy/sell something set sell/buyPrice = 0.0");
 								}
 							}
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							else if (args[0].equals("removeItem")) {
-								if (args.length == 3 && Integer.valueOf(args[2]) >= 0) {
-									boolean shopExists = false;
-									boolean size = false;
-									for (AdminShop s : adminShopList) {
-										if (s.getName().equals(args[1])) {
-											shopExists = true;
-											s.removeItem(Integer.valueOf(args[2]) - 1, player);
-											if (s.getSize() >= Integer.valueOf(args[2])) {
-												size = true;
-											}
-											break;
-										}
+								if (args.length == 3) {
+									AdminShop shop = AdminShop.getAdminShopByName(args[1]);
+									String itemName = shop.getItem(Integer.valueOf(args[2])).getType().toString().toLowerCase();
+									try {
+										shop.removeItem(Integer.valueOf(args[2]) - 1);
+									} catch (NumberFormatException e) {
+										player.sendMessage(ChatColor.RED + "Invalid number!");
+									} catch (ShopSystemException e) {
+										player.sendMessage(ChatColor.RED + e.getMessage());
 									}
-									if (!shopExists) {
-										player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
-									} else if (!size) {
-										player.sendMessage(ChatColor.RED + "This slot doesn't exist in this shop!");
-									}
+									player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemName + ChatColor.GOLD + " was removed from shop." );
+									
 								} else {
 									player.sendMessage("/adminshop removeItem <shopname> <slot (> 0)>");
 								}
@@ -1221,17 +1133,11 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							else if (args[0].equals("addPotion")) {
 								if (args.length == 9) {
-									boolean shopExists = false;
-									for (AdminShop s : adminShopList) {
-										if (s.getName().equals(args[1])) {
-											shopExists = true;
-											handleAddPotion(player,s, args);
-											break;
-										}
-									}
-									if (!shopExists) {
-										player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
-									}
+									try {
+										handleAddPotion(player,AdminShop.getAdminShopByName(args[1]), args);
+									} catch (ShopSystemException e) {
+										player.sendMessage(ChatColor.RED + e.getMessage());
+									}								
 								} else {
 									player.sendMessage(
 											"/adminshop addPotion <shopname> <potionType> <potionEffect> <extended/upgraded/none> <slot> <amount> <sellprice> <buyprice>");
@@ -1240,16 +1146,10 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							else if (args[0].equals("addEnchantedItem")) {
 								if (args.length >= 9) {
-									boolean shopExists = false;
-									for (AdminShop s : adminShopList) {
-										if (s.getName().equals(args[1])) {
-											shopExists = true;
-											handleAddEnchantedItem(player, args, s);
-											break;
-										}
-									}
-									if (!shopExists) {
-										player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
+									try {
+										handleAddEnchantedItem(player, args, AdminShop.getAdminShopByName(args[1]));
+									} catch (ShopSystemException e) {
+										player.sendMessage(ChatColor.RED + e.getMessage());
 									}
 								} else {
 									player.sendMessage(
@@ -1260,30 +1160,18 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 							else if (args[0].equals("addSpawner")) {
 								boolean exists = false;
 								if (args.length == 5) {
-									for (AdminShop shop5 : adminShopList) {
-										if (shop5.getName().equals(args[1])) {
-											exists = true;
-											if (Integer.valueOf(args[3]) <= 0) {
-												player.sendMessage(ChatColor.RED + "The slot should be higher then 0!");
-											} else if (!shop5.slotIsEmpty(Integer.valueOf(args[3]))) {
-												player.sendMessage(ChatColor.RED + "This slot is occupied!");
-											} else if (Double.valueOf(args[4]) <= 0) {
-												player.sendMessage(
-														ChatColor.RED + "The buyPrice should higher then 0!");
-											} else {
-												ItemStack itemStack = new ItemStack(Material.SPAWNER, 1);
-												ItemMeta meta = itemStack.getItemMeta();
-												meta.setDisplayName(args[2].toUpperCase());
-												itemStack.setItemMeta(meta);
-												shop5.addItem(player, Integer.valueOf(args[3]) - 1, 0.0,
-														Double.valueOf(args[4]), itemStack);
-											}
-											break;
-										}
+									ItemStack itemStack = new ItemStack(Material.SPAWNER, 1);
+									ItemMeta meta = itemStack.getItemMeta();
+									meta.setDisplayName(args[2].toUpperCase());
+									itemStack.setItemMeta(meta);
+									try {
+										AdminShop.getAdminShopByName(args[1]).addItem(Integer.valueOf(args[3]) - 1, 0.0,Double.valueOf(args[4]), itemStack);
+									} catch (NumberFormatException e) {
+										player.sendMessage(ChatColor.RED + "Invalid number!");
+									} catch (ShopSystemException e) {
+										player.sendMessage(ChatColor.RED + e.getMessage());
 									}
-									if (!exists) {
-										player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
-									}
+									player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemStack.getType().toString().toLowerCase()+ ChatColor.GOLD + " was added to the shop." );
 								} else {
 									player.sendMessage(
 											"/adminshop addSpawner <shopname> <entity type> <slot> <buyPrice>");
@@ -1292,20 +1180,15 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							else if (args[0].equals("removeSpawner")) {
 								if (args.length == 3) {
-									boolean exists = false;
-									for (AdminShop shop5 : adminShopList) {
-										if (shop5.getName().equals(args[1])) {
-											exists = true;
-											if (Integer.valueOf(args[2]) <= 0) {
-												player.sendMessage(ChatColor.RED + "The slot should be higher then 0!");
-											} else {
-												shop5.removeItem(Integer.valueOf(args[2]) - 1, player);
-											}
-											break;
-										}
-									}
-									if (!exists) {
-										player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
+									try {
+										AdminShop shop = AdminShop.getAdminShopByName(args[1]);
+										String itemName = shop.getItem(Integer.valueOf(args[2])).getType().toString().toLowerCase();
+										shop.removeItem(Integer.valueOf(args[2]) - 1);
+										player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemName + ChatColor.GOLD + " was removed from shop." );
+									} catch (NumberFormatException e) {
+										player.sendMessage(ChatColor.RED + "Invalid number!");
+									} catch (ShopSystemException e) {
+										player.sendMessage(ChatColor.RED + e.getMessage());
 									}
 								} else {
 									player.sendMessage("/adminshop removeSpawner <shopname> <slot>");
@@ -1314,38 +1197,18 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							else if (args[0].equals("editItem")) {
 								if (args.length == 6) {
-									boolean exists = false;
-									for (AdminShop shop5 : adminShopList) {
-										if (shop5.getName().equals(args[1])) {
-											exists = true;
-											if (Integer.valueOf(args[2]) <= 0) {
-												player.sendMessage(ChatColor.RED + "The slot should be higher then 0!");
-											} else if (shop5.slotIsEmpty(Integer.valueOf(args[2]))) {
-												player.sendMessage(ChatColor.RED + "This slot is empty!");
-											} else if (!args[3].equals("none") && Integer.valueOf(args[3]) <= 0) {
-												player.sendMessage(
-														ChatColor.RED + "The amount should be higher then 0!");
-											} else if (!args[4].equals("none") && Integer.valueOf(args[4]) < 0) {
-												player.sendMessage(
-														ChatColor.RED + "The sellPrice should be 0 or highter!");
-											} else if (!args[5].equals("none") && Integer.valueOf(args[5]) < 0) {
-												player.sendMessage(
-														ChatColor.RED + "The buyPrice should be 0 or highter!");
-											} else {
-												player.sendMessage(shop5.editItem(Integer.valueOf(args[2]), args[3],
-														args[4], args[5]));
-											}
-										}
-										break;
-									}
-									if (!exists) {
-										player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
+									try {
+										player.sendMessage(AdminShop.getAdminShopByName(args[1]).editItem(Integer.valueOf(args[2]), args[3],args[4], args[5]));
+									} catch (NumberFormatException e) {
+										player.sendMessage(ChatColor.RED + "Invalid number!");
+									} catch (ShopSystemException e) {
+										player.sendMessage(ChatColor.RED + e.getMessage());
 									}
 								} else {
 									player.sendMessage(
 											"/adminshop editItem <shopname> <slot> <amount> <sellPrice> <buyPrice>");
 									player.sendMessage(
-											"If you didn't want to change one of these values = none");
+											"If you didn't want to change one of these values set value = 'none'");
 								}
 							}
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1365,22 +1228,10 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 					if (args.length != 0) {
 						if (args[0].equals("create")) {
 							if (args.length == 3) {
-								if (playershopNames.contains(args[1] + "_" + player.getName())) {
-									player.sendMessage(ChatColor.RED + "This shop already exist!");
-								} else {
-									if (Integer.valueOf(args[2]) % 9 == 0) {
-										PlayerShop shop = new PlayerShop(this, args[1] + "_" + player.getName(), player.getLocation(),
-												args[2]);
-										playerShopList.add(shop);
-										playershopNames.add(args[1] + "_" + player.getName());
-										getConfig().set("PlayerShopNames", playershopNames);
-										saveConfig();
-										player.sendMessage(ChatColor.GOLD + "The shop " + ChatColor.GREEN + args[1]
-												+ ChatColor.GOLD + " was created.");
-									} else {
-										player.sendMessage(ChatColor.RED + args[2] + " is not a multiple of 9!");
-									}
-								}
+								PlayerShop.createPlayerShop(getDataFolder(), args[1] + "_" + player.getName(), player.getLocation(), Integer.valueOf(args[2]));
+								getConfig().set("PlayerShopNames", PlayerShop.getPlayerShopNameList());
+								saveConfig();
+								player.sendMessage(ChatColor.GOLD + "The shop " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " was created.");
 							} else {
 								player.sendMessage("/playershop create <shopname> <size (9,18,27...)>");
 							}
@@ -1388,24 +1239,8 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("delete")) {
 							if (args.length == 2) {
-								Iterator<PlayerShop> iter2 = playerShopList.iterator();
-								if (playershopNames.contains(args[1] + "_" + player.getName())) {
-									playershopNames.remove(args[1] + "_" + player.getName());
-									getConfig().set("PlayerShopNames", adminShopNames);
-									saveConfig();
-									while (iter2.hasNext()) {
-										PlayerShop s = iter2.next();
-										if (s.getName().equals(args[1] + "_" + player.getName())) {
-											s.deleteShop();
-											iter2.remove();
-											player.sendMessage(ChatColor.GOLD + "The shop " + ChatColor.GREEN + args[1]
-													+ ChatColor.GOLD + " was deleted.");
-											break;
-										}
-									}
-								} else {
-									player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
-								}
+								PlayerShop.deleteAdminShop(args[1] + "_" + player.getName());
+								player.sendMessage(ChatColor.GOLD + "The shop " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " was deleted.");
 							} else {
 								player.sendMessage("/playershop delete <shopname>");
 							}
@@ -1413,18 +1248,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("move")) {
 							if (args.length == 5) {
-								boolean exists = false;
-								for (PlayerShop shop : playerShopList) {
-									if (shop.getName().equals(args[1] + "_" + player.getName())) {
-										exists = true;
-										shop.moveShop(Integer.valueOf(args[2]), Integer.valueOf(args[3]),
-												Integer.valueOf(args[4]));
-										break;
-									}
-								}
-								if (!exists) {
-									player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
-								}
+								PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName()).moveShop(Integer.valueOf(args[2]), Integer.valueOf(args[3]),Integer.valueOf(args[4]));
 							} else {
 								player.sendMessage("/playershop move <shopname> <x> <y> <z>");
 							}
@@ -1432,42 +1256,28 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("changeOwner")) {
 							if (args.length == 3) {
-								boolean exists = false;
-								for (PlayerShop shop : playerShopList) {
-									if (shop.getName().equals(args[1] + "_" + player.getName())) {
-										exists = true;
-										try {
-											EconomyPlayer economyPlayer = EconomyPlayer.getEconomyPlayerByName(args[2]);
-											List<String> psNames = getConfig().getStringList("PlayerShopNames");
-											if (psNames.contains(args[1] + "_" + args[2])) {
-												player.sendMessage(ChatColor.RED + "The player " + ChatColor.GREEN
-														+ args[2] + ChatColor.RED
-														+ " has already a shop with the same name!");
-											} else {
-												playershopNames.remove(shop.getName());
-												shop.setOwner(args[2]);
-												playershopNames.add(shop.getName());
-												getConfig().set("PlayerShopNames", playershopNames);
-												saveConfig();
-												player.sendMessage(ChatColor.GOLD + "The new owner of your shop is "
-														+ ChatColor.GREEN + args[2] + ChatColor.GOLD + ".");
-												for (Player pl : Bukkit.getOnlinePlayers()) {
-													if (pl.getName().equals(args[2])) {
-														pl.sendMessage(ChatColor.GOLD + "You got the shop "
-																+ ChatColor.GREEN + args[1] + ChatColor.GOLD + "from "
-																+ ChatColor.GREEN + player.getName());
-														break;
-													}
-												}
+								try {
+									EconomyPlayer economyPlayer = EconomyPlayer.getEconomyPlayerByName(args[2]);
+									List<String> psNames = getConfig().getStringList("PlayerShopNames");
+									if (psNames.contains(args[1] + "_" + args[2])) {
+										player.sendMessage(ChatColor.RED + "The player " + ChatColor.GREEN + args[2] + ChatColor.RED + " has already a shop with the same name!");
+									} else {
+										PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName()).setOwner(args[2],getDataFolder());
+										getConfig().set("PlayerShopNames", PlayerShop.getPlayerShopNameList());
+										saveConfig();
+										player.sendMessage(ChatColor.GOLD + "The new owner of your shop is "
+												+ ChatColor.GREEN + args[2] + ChatColor.GOLD + ".");
+										for (Player pl : Bukkit.getOnlinePlayers()) {
+											if (pl.getName().equals(args[2])) {
+												pl.sendMessage(ChatColor.GOLD + "You got the shop "
+														+ ChatColor.GREEN + args[1] + ChatColor.GOLD + "from "
+														+ ChatColor.GREEN + player.getName());
+												break;
 											}
-										} catch (PlayerException e) {
-											player.sendMessage(ChatColor.RED + e.getMessage());
 										}
-										break;
 									}
-								}
-								if (!exists) {
-									player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
+								} catch (PlayerException e) {
+									player.sendMessage(ChatColor.RED + e.getMessage());
 								}
 							} else {
 								player.sendMessage("/playershop changeOwner <shopname> <new owner>");
@@ -1476,17 +1286,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("editShop")) {
 							if (args.length == 2) {
-								boolean exists = false;
-								for (PlayerShop shop : playerShopList) {
-									if (shop.getName().equals(args[1] + "_" + player.getName())) {
-										exists = true;
-										shop.openEditor(player);
-										break;
-									}
-								}
-								if (!exists) {
-									player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
-								}
+								PlayerShop.getPlayerShopByName(args[1]).openEditor(player);
 							} else {
 								player.sendMessage("/player editShop <shopname>");
 							}
@@ -1494,30 +1294,22 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("addItem")) {
 							boolean exists = false;
-							if (args.length == 7 && Integer.valueOf(args[3]) <= 64) {
-								for (PlayerShop shop5 : playerShopList) {
-									if (shop5.getName().equals(args[1] + "_" + player.getName())) {
-										exists = true;
-										if (checkValidation(player, shop5, args[2], args[3], args[4], args[5],
-												args[6])) {
-											ItemStack itemStack = new ItemStack(
-													Material.getMaterial(args[2].toUpperCase()),
-													Integer.valueOf(args[4]));
-											shop5.addItem(player, Integer.valueOf(args[3]) - 1, Double.valueOf(args[5]),
-													Double.valueOf(args[6]), itemStack);
-										}
-										break;
+							if (args.length == 7) {
+								try {
+									if (!args[2].toUpperCase().equals("HAND") && Material.matchMaterial(args[2].toUpperCase()) == null) {
+										throw new ShopSystemException(ShopSystemException.INVALID_MATERIAL);
 									}
+									else  {
+										ItemStack itemStack = new ItemStack(Material.getMaterial(args[2].toUpperCase()),Integer.valueOf(args[4]));
+										PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName()).addItem(Integer.valueOf(args[3]) - 1, Double.valueOf(args[5]),Double.valueOf(args[6]), itemStack);
+										player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemStack.getType().toString().toLowerCase()+ ChatColor.GOLD + " was added to the shop." );
+									}
+								} catch (ShopSystemException e) {
+									player.sendMessage(ChatColor.RED + e.getMessage());
 								}
-								if (!exists) {
-									player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
-								}
-							} else if (args.length != 7) {
-								player.sendMessage(
-										"/playershop addItem <shopname> <material> <slot> <amount> <sellPrice> <buyPrice>");
-								player.sendMessage("If you only want to buy/sell something set sell/buyPrice = 0.0");
 							} else {
-								player.sendMessage(ChatColor.RED + "The item amount is highter then 64!");
+								player.sendMessage("/playershop addItem <shopname> <material> <slot> <amount> <sellPrice> <buyPrice>");
+								player.sendMessage("If you only want to buy/sell something set sell/buyPrice = 0.0");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1527,7 +1319,11 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 								for (PlayerShop s : playerShopList) {
 									if (s.getName().equals(args[1] + "_" + player.getName())) {
 										shopExists = true;
-										handleAddPotion(player,s, args);
+										try {
+											handleAddPotion(player,s, args);
+										} catch (ShopSystemException e) {
+											player.sendMessage(ChatColor.RED + e.getMessage());
+										}
 										break;
 									}
 								}
@@ -1546,7 +1342,11 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 								for (PlayerShop s : playerShopList) {
 									if (s.getName().equals(args[1] + "_" + player.getName())) {
 										shopExists = true;
-										handleAddEnchantedItem(player, args, s);
+										try {
+											handleAddEnchantedItem(player, args, s);
+										} catch (ShopSystemException e) {
+											player.sendMessage(ChatColor.RED + e.getMessage());
+										}
 										break;
 									}
 								}
@@ -1560,27 +1360,25 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("removeItem")) {
-							if (args.length == 3 && Integer.valueOf(args[2]) >= 0) {
+							if (args.length == 3) {
 								boolean shopExists = false;
-								boolean size = false;
 								for (PlayerShop s : playerShopList) {
 									if (s.getName().equals(args[1] + "_" + player.getName())) {
 										shopExists = true;
-										if (Integer.valueOf(args[2]) <= 0) {
-											player.sendMessage(ChatColor.RED + "The slot should be higher then 0!");
-										} else {
-											s.removeItem(Integer.valueOf(args[2]) - 1, player);
-											if (s.getSize() >= Integer.valueOf(args[2])) {
-												size = true;
-											}
+										String itemName = s.getItem(Integer.valueOf(args[2])).getType().toString().toLowerCase();
+										try {
+											s.removeItem(Integer.valueOf(args[2]) - 1);
+										} catch (NumberFormatException e) {
+											player.sendMessage(ChatColor.RED + "Invalid number!");
+										} catch (ShopSystemException e) {
+											player.sendMessage(ChatColor.RED + e.getMessage());
 										}
+										player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemName + ChatColor.GOLD + " was removed from shop." );
 										break;
 									}
 								}
 								if (!shopExists) {
 									player.sendMessage(ChatColor.RED + "This shop doesn't exist!");
-								} else if (!size) {
-									player.sendMessage(ChatColor.RED + "This slot doesn't exist in this shop!");
 								}
 							} else {
 								player.sendMessage("/playershop removeItem <shopname> <slot (> 0)>");
@@ -1593,19 +1391,12 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 								for (PlayerShop shop5 : playerShopList) {
 									if (shop5.getName().equals(args[1] + "_" + player.getName())) {
 										exists = true;
-										if (Integer.valueOf(args[2]) <= 0) {
-											player.sendMessage(ChatColor.RED + "The slot should be higher then 0!");
-										} else if (shop5.slotIsEmpty(Integer.valueOf(args[2]))) {
-											player.sendMessage(ChatColor.RED + "This slot is empty!");
-										} else if (!args[3].equals("none") && Integer.valueOf(args[3]) <= 0) {
-											player.sendMessage(ChatColor.RED + "The amount should be higher then 0!");
-										} else if (!args[4].equals("none") && Integer.valueOf(args[4]) < 0) {
-											player.sendMessage(ChatColor.RED + "The sellPrice should be 0 or highter!");
-										} else if (!args[5].equals("none") && Integer.valueOf(args[5]) < 0) {
-											player.sendMessage(ChatColor.RED + "The buyPrice should be 0 or highter!");
-										} else {
-											player.sendMessage(shop5.editItem(Integer.valueOf(args[2]), args[3],
-													args[4], args[5]));
+										try {
+											player.sendMessage(shop5.editItem(Integer.valueOf(args[2]), args[3],args[4], args[5]));
+										} catch (NumberFormatException e) {
+											player.sendMessage(ChatColor.RED + "Invalid number!");
+										} catch (ShopSystemException e) {
+											player.sendMessage(ChatColor.RED + e.getMessage());
 										}
 									}
 									break;
@@ -1899,13 +1690,10 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 		Entity entity = event.getRightClicked();
 		if (entity instanceof Villager && ((Villager) entity).getProfession() == Profession.NITWIT) {
 			String name = entity.getCustomName();
-			for (AdminShop shop4 : adminShopList) {
-				if (shop4.getName().equals(name)) {
-					event.setCancelled(true);
-					shop4.openInv(event.getPlayer());
-					break;
-				}
-			}
+			try {
+				AdminShop.getAdminShopByName(name).openInv(event.getPlayer());
+			} catch (ShopSystemException e1) {}
+
 			for (PlayerShop shop4 : playerShopList) {
 				if (shop4.getName().equals(name)) {
 					event.setCancelled(true);
@@ -1944,7 +1732,6 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 			}
 		}
 	}
-
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@EventHandler
@@ -1955,7 +1742,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 			if (JobCenter.getJobCenterNameList().contains(entityname)) {
 				event.setCancelled(true);
 				damager.sendMessage(ChatColor.RED + "You are not allowed to hit a jobCenterVillager!");
-			} else if (adminShopNames.contains(entityname)) {
+			} else if (AdminShop.getAdminShopNameList().contains(entityname)) {
 				event.setCancelled(true);
 				damager.sendMessage(ChatColor.RED + "You are not allowed to hit a shopVillager!");
 			} else if (playershopNames.contains(entityname)) {
@@ -1970,7 +1757,6 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 			}
 		}
 	}
-
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@EventHandler
@@ -2014,12 +1800,27 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 				if (inventoryname.contains("Editor")) {
 					event.setCancelled(true);
 					if (meta.getDisplayName() != null) {
-						for (AdminShop adminShop : adminShopList) {
-							handleEditor(playe, adminShop, event);
-						}
-						for (PlayerShop playerShop : playerShopList) {
-							handleEditor(playe, playerShop, event);
-						}
+						try {
+							String command = meta.getDisplayName();
+							Shop shop = null;
+							if(AdminShop.getAdminShopNameList().contains(inventoryname)) {
+								shop = AdminShop.getAdminShopByName(inventoryname);
+							}
+							else if(PlayerShop.getPlayerShopNameList().contains(inventoryname)) {
+								shop = PlayerShop.getPlayerShopByName(inventoryname);
+							}
+							if(shop != null) {
+								if (inventoryname.equals(shop.getName() + "-Editor") && meta.getDisplayName().contains("Slot")) {
+									int slot = Integer.valueOf(meta.getDisplayName().substring(5));
+										shop.openSlotEditor(playe, slot);
+								} else if (inventoryname.equals(shop.getName() + "-SlotEditor")) {
+									shop.handleSlotEditor(event);
+									if (command.equals(ChatColor.RED + "remove item") || command.equals(ChatColor.RED + "exit without save") || command.equals(ChatColor.YELLOW + "save changes")) {
+										shop.openEditor(playe);
+									}
+								}
+							}
+						} catch (IllegalArgumentException | ShopSystemException e) {}
 					}
 				}
 				//////////////////////////////////////////////////////////////////////////// saleVillager
@@ -2365,40 +2166,21 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 			e.printStackTrace();
 		}
 	}
-
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	private boolean checkValidation(Player player, Shop s, String material, String slot, String amount,
-			String sellPrice, String buyPrice) {
-		boolean correct = false;
-		if (Integer.valueOf(slot) <= 0) {
-			player.sendMessage(ChatColor.RED + "The slot should be higher then 0!");
-		} else if (!s.slotIsEmpty(Integer.valueOf(slot))) {
-			player.sendMessage(ChatColor.RED + "This slot is occupied!");
-		} else if (Integer.valueOf(amount) <= 0) {
-			player.sendMessage(ChatColor.RED + "The amount should be higher then 0!");
-		} else if (Double.valueOf(sellPrice) < 0) {
-			player.sendMessage(ChatColor.RED + "The sellPrice should be 0 or highter!");
-		} else if (Double.valueOf(buyPrice) < 0) {
-			player.sendMessage(ChatColor.RED + "The buyPrice should be 0 or highter!");
-		} else if (!material.toUpperCase().equals("HAND") && Material.matchMaterial(material.toUpperCase()) == null) {
-			player.sendMessage(ChatColor.RED + "Invalid material!");
-		} else {
-			correct = true;
-		}
-		return correct;
-	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	private void handleAddPotion(Player p,Shop s, String[] args) {
+	private void handleAddPotion(Player p,Shop s, String[] args) throws ShopSystemException {
 		if (!args[2].equalsIgnoreCase("potion") && !args[2].equalsIgnoreCase("splash_potion")
 				&& !args[2].equalsIgnoreCase("lingering_potion")) {
-			p.sendMessage(ChatColor.RED + "PotionType is not correct! Use potion/splash_potion/lingering_potion");
-		} else if (!args[4].equalsIgnoreCase("extended") && !args[4].equalsIgnoreCase("upgraded")
+			throw new ShopSystemException(ShopSystemException.INVALID_POTIONTYPE);
+		} 
+		else if (!args[4].equalsIgnoreCase("extended") && !args[4].equalsIgnoreCase("upgraded")
 				&& !args[4].equalsIgnoreCase("none")) {
-			p.sendMessage(ChatColor.RED + "Use extended/upgraded/none!");
-		} else if (checkValidation(p, s, args[2], args[5], args[6], args[7], args[8])) {
+			throw new ShopSystemException(ShopSystemException.INVALID_POTION_PROPERTY);
+		} 
+		else if (!args[2].toUpperCase().equals("HAND") && Material.matchMaterial(args[2].toUpperCase()) == null) {
+			throw new ShopSystemException(ShopSystemException.INVALID_MATERIAL);
+		}
+		else {
 			ItemStack itemStack = new ItemStack(Material.valueOf(args[2].toUpperCase()), Integer.valueOf(args[6]));
 			PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
 			boolean extended = false;
@@ -2410,15 +2192,18 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 			}
 			meta.setBasePotionData(new PotionData(PotionType.valueOf(args[3].toUpperCase()), extended, upgraded));
 			itemStack.setItemMeta(meta);
-			s.addItem(p, Integer.valueOf(args[5]) - 1, Double.valueOf(args[7]), Double.valueOf(args[8]),
-					itemStack);
+			s.addItem(Integer.valueOf(args[5]) - 1, Double.valueOf(args[7]), Double.valueOf(args[8]),itemStack);
+			p.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemStack.getType().toString().toLowerCase()+ ChatColor.GOLD + " was added to the shop." );
 		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	private void handleAddEnchantedItem(Player p, String[] args, Shop s) {
-		if (checkValidation(p, s, args[2], args[3], args[4], args[5], args[6])) {
+	private void handleAddEnchantedItem(Player p, String[] args, Shop s) throws ShopSystemException {
+		if (!args[2].toUpperCase().equals("HAND") && Material.matchMaterial(args[2].toUpperCase()) == null) {
+			throw new ShopSystemException(ShopSystemException.INVALID_MATERIAL);
+		}
+		else {
 			Integer length = args.length - 7;
 			if (length % 2 == 0) {
 				ArrayList<String> enchantmentList = new ArrayList<>();
@@ -2430,13 +2215,13 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 				if (newEnchantmentList.size() < enchantmentList.size()) {
 					p.sendMessage(ChatColor.RED + "Not all enchantments could be used!");
 				}
-				s.addItem(p, Integer.valueOf(args[3]) - 1, Double.valueOf(args[5]), Double.valueOf(args[6]), iStack);
+				s.addItem(Integer.valueOf(args[3]) - 1, Double.valueOf(args[5]), Double.valueOf(args[6]), iStack);
+				p.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + iStack.getType().toString().toLowerCase()+ ChatColor.GOLD + " was added to the shop." );
 			} else {
 				p.sendMessage(ChatColor.RED + "Your list [<enchantment> <lvl>] is incomplete!");
 			}
 		}
 	}
-
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private void handleEditor(Player playe, Shop shop, InventoryClickEvent event) {
@@ -2446,18 +2231,18 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 		// String inventoryname = event.getInventory().get;
 		// 1.14
 		String inventoryname = event.getView().getTitle();
-		if (inventoryname.equals(shop.getName() + "-Editor") && meta.getDisplayName().contains("Slot")) {
-			int slot = Integer.valueOf(meta.getDisplayName().substring(5));
-			shop.openSlotEditor(playe, slot);
-		} else if (inventoryname.equals(shop.getName() + "-SlotEditor")) {
-			shop.handleSlotEditor(event);
-			if (command.equals(ChatColor.RED + "remove item") || command.equals(ChatColor.RED + "exit without save")
-					|| command.equals(ChatColor.YELLOW + "save changes")) {
-				shop.openEditor(playe);
+		try {
+			if (inventoryname.equals(shop.getName() + "-Editor") && meta.getDisplayName().contains("Slot")) {
+				int slot = Integer.valueOf(meta.getDisplayName().substring(5));
+					shop.openSlotEditor(playe, slot);
+			} else if (inventoryname.equals(shop.getName() + "-SlotEditor")) {
+				shop.handleSlotEditor(event);
+				if (command.equals(ChatColor.RED + "remove item") || command.equals(ChatColor.RED + "exit without save") || command.equals(ChatColor.YELLOW + "save changes")) {
+					shop.openEditor(playe);
+				}
 			}
-		}
+		} catch (IllegalArgumentException | ShopSystemException e) {}
 	}
-
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private boolean inventoryContainsItems(Inventory inventory, ItemStack item, int amount) {
@@ -2485,7 +2270,6 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 		}
 		return bool;
 	}
-
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private void removeItemFromInventory(Inventory inventory, ItemStack item, int amount) {

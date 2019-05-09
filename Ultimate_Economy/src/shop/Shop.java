@@ -19,6 +19,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -44,9 +45,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.ue.exceptions.ShopSystemException;
 
-import ultimate_economy.Ultimate_Economy;
-
-public class Shop {
+public abstract class Shop {
 	
 	//minecraft skull texture links
 	private static final String PLUS = "http://textures.minecraft.net/texture/9a2d891c6ae9f6baa040d736ab84d48344bb6b70d7f1a280dd12cbac4d777";
@@ -65,42 +64,70 @@ public class Shop {
 	public String name;
 	public Location location;
 	public Inventory inventory,editor,slotEditor;
-	public Ultimate_Economy main;
 	public int size;
 	public List<String> itemNames;
 	public boolean isPlayershop;
 	public int slotEditorSlot;
 	
-	public Shop(Ultimate_Economy main,String name,Location spawnLocation,String s,boolean isPlayershop) {
+	/**
+	 * Constructor for creating a new shop.
+	 * 
+	 * @param dataFolder
+	 * @param name
+	 * @param spawnLocation
+	 * @param size
+	 * @param isPlayershop
+	 */
+	public Shop(File dataFolder,String name,Location spawnLocation,int size,boolean isPlayershop) {
 		this.isPlayershop = isPlayershop;
 		itemNames = new ArrayList<>();
-		this.main = main;
-		size = Integer.parseInt(s);
-		file = new File(main.getDataFolder() , name + ".yml");
-		inventory = Bukkit.createInventory(null, size,name);
+		file = new File(dataFolder , name + ".yml");
+		inventory = Bukkit.createInventory(null, this.size,name);
 		slotEditor = Bukkit.createInventory(null, 27,name + "-SlotEditor");
-		if(!file.exists()) {
-				try {
-					file.createNewFile();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			config = YamlConfiguration.loadConfiguration(file);
-			this.name = name;
-			location = spawnLocation;
-			config.set("ShopName", name);
-			config.set("ShopSize", size);
-			config.set("ShopLocation.x", location.getX());
-			config.set("ShopLocation.y", location.getY());
-			config.set("ShopLocation.z", location.getZ());
-			config.set("ShopLocation.World", location.getWorld().getName());
-			config.set("ShopItemList", itemNames);
-			save();
+		try {
+			file.createNewFile();
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
-		else {
-			config = YamlConfiguration.loadConfiguration(file);
-			load();
-		}
+		config = YamlConfiguration.loadConfiguration(file);
+		this.name = name;
+		location = spawnLocation;
+		this.size = size;
+		config.set("ShopName", name);
+		config.set("ShopSize", size);
+		config.set("ShopLocation.x", location.getX());
+		config.set("ShopLocation.y", location.getY());
+		config.set("ShopLocation.z", location.getZ());
+		config.set("ShopLocation.World", location.getWorld().getName());
+		config.set("ShopItemList", itemNames);
+		save();
+		setupShopVillager();
+	}
+	
+	/**
+	 * Construstor for loading an existing shop.
+	 * 
+	 * @param dataFolder
+	 * @param server
+	 * @param name
+	 * @param isPlayershop
+	 */
+	public Shop(File dataFolder,Server server,String name,boolean isPlayershop) {
+		this.isPlayershop = isPlayershop;
+		itemNames = new ArrayList<>();
+		file = new File(dataFolder , name + ".yml");
+		inventory = Bukkit.createInventory(null, this.size,name);
+		slotEditor = Bukkit.createInventory(null, 27,name + "-SlotEditor");
+		config = YamlConfiguration.loadConfiguration(file);
+		name = config.getString("ShopName");
+		size = config.getInt("ShopSize");
+		itemNames = config.getStringList("ShopItemList");
+		inventory = Bukkit.createInventory(villager, size,name);
+		location = new Location(server.getWorld(config.getString("ShopLocation.World")),config.getDouble("ShopLocation.x"),config.getDouble("ShopLocation.y"),config.getDouble("ShopLocation.z"));
+		setupShopVillager();
+	}
+	
+	private void setupShopVillager() {
 		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10,10,10);
 		for(Entity entity:entitys) {
 			if(entity.getName().equals(name)) {
@@ -114,10 +141,14 @@ public class Shop {
 		villager.setSilent(true);
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000,30000000));             
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000,30000000));
-		editor = Bukkit.createInventory(null, size,name + "-Editor");
+		editor = Bukkit.createInventory(null, this.size,name + "-Editor");
 		setupShopItems();
 		setupEditor();
 	}
+	
+	/**
+	 * Only public for child PlayerShop. Not for commercial use.
+	 */
 	public void setupShopItems() {
 		int slot = size - 1;
 		ItemStack anvil = new ItemStack(Material.ANVIL);
@@ -185,52 +216,71 @@ public class Shop {
 		item.setItemMeta(meta);
 		slotEditor.setItem(18, item);
 	}
-	public void addItem(Player player, int slot, double sellPrice, double buyPrice,ItemStack itemStack) {
-		//occupied value only for commands
-		config = YamlConfiguration.loadConfiguration(file);
-		itemNames = config.getStringList("ShopItemList");
-		ItemMeta meta = itemStack.getItemMeta();
-		ArrayList<String> enchantmentList = new ArrayList<>();
-		//is only the real entity name with a spawner
-		String entity = meta.getDisplayName();
-		int damage = 0;
-		String itemType = getItemType(itemStack);
-		switch(itemType) {
-			case "enchanted": 
-				Map<Enchantment, Integer> enchants = null;
-				Damageable damageMeta = (Damageable) itemStack.getItemMeta();
-				if(damageMeta != null) {
-					damage = damageMeta.getDamage();
-				}
-				if(itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
-					EnchantmentStorageMeta enchantMeta = (EnchantmentStorageMeta) meta;
-					enchants = enchantMeta.getStoredEnchants();
-				}
-				else {
-					enchants = meta.getEnchants();
-				}
-				for(Entry<Enchantment, Integer> e: enchants.entrySet()) {
-					enchantmentList.add(e.getKey().getKey().getKey().toLowerCase() + "-" + e.getValue());
-				}
-				enchantmentList.sort(String.CASE_INSENSITIVE_ORDER);
-				break;
-			case "default": 
-				Damageable damageMeta2 = (Damageable) itemStack.getItemMeta();
-				if(damageMeta2 != null) {
-					damage = damageMeta2.getDamage();
-				}
-				break;
-		}
+	
+	/**
+	 * This method adds a item to this shop.
+	 * 
+	 * @param slot
+	 * @param sellPrice
+	 * @param buyPrice
+	 * @param itemStack
+	 * @throws ShopSystemException
+	 */
+	public void addItem(int slot, double sellPrice, double buyPrice,ItemStack itemStack) throws ShopSystemException {
 		String name = getShopItemName(itemStack);
-		if(itemNames.contains(name)) {
-			player.sendMessage(ChatColor.RED + "This item already exists in this shop!");
+		ItemMeta meta = itemStack.getItemMeta();
+		String entity = meta.getDisplayName();
+		if(itemStack.getType() == Material.SPAWNER && !isPlayershop) {
+			name = name + "_" + entity;
 		}
-		else if(!slotIsEmpty(slot+1)) {
-			player.sendMessage(ChatColor.RED + "This slot is occupied!");
+		if(!slotIsEmpty(slot+1)) {
+			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_OCCUPIED);
+		}
+		else if(sellPrice < 0) {
+			throw new ShopSystemException(ShopSystemException.INVALID_SELL_PRICE);
+		}
+		else if(buyPrice < 0) {
+			throw new ShopSystemException(ShopSystemException.INVALID_BUY_PRICE);
+		}
+		else if(buyPrice == 0 && sellPrice == 0) {
+			throw new ShopSystemException(ShopSystemException.INVALID_PRICES);
+		}
+		else if(itemNames.contains(name)) {
+			throw new ShopSystemException(ShopSystemException.ITEM_ALREADY_EXISTS);
 		}
 		else {
-			if(itemStack.getType() == Material.SPAWNER && !isPlayershop) {
-				name = name + "_" + entity;
+			//occupied value only for commands
+			config = YamlConfiguration.loadConfiguration(file);
+			itemNames = config.getStringList("ShopItemList");
+			ArrayList<String> enchantmentList = new ArrayList<>();
+			//is only the real entity name with a spawner
+			int damage = 0;
+			String itemType = getItemType(itemStack);
+			switch(itemType) {
+				case "enchanted": 
+					Map<Enchantment, Integer> enchants = null;
+					Damageable damageMeta = (Damageable) itemStack.getItemMeta();
+					if(damageMeta != null) {
+						damage = damageMeta.getDamage();
+					}
+					if(itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
+						EnchantmentStorageMeta enchantMeta = (EnchantmentStorageMeta) meta;
+						enchants = enchantMeta.getStoredEnchants();
+					}
+					else {
+						enchants = meta.getEnchants();
+					}
+					for(Entry<Enchantment, Integer> e: enchants.entrySet()) {
+						enchantmentList.add(e.getKey().getKey().getKey().toLowerCase() + "-" + e.getValue());
+					}
+					enchantmentList.sort(String.CASE_INSENSITIVE_ORDER);
+					break;
+				case "default": 
+					Damageable damageMeta2 = (Damageable) itemStack.getItemMeta();
+					if(damageMeta2 != null) {
+						damage = damageMeta2.getDamage();
+					}
+					break;
 			}
 			addShopItemToInv(itemStack , itemStack.getAmount(), slot, sellPrice, buyPrice);
 			itemNames.add(name);
@@ -256,7 +306,6 @@ public class Shop {
 			itemNames = removedoubleObjects(itemNames);
 			config.set("ShopItemList", itemNames);
 			save();
-			player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemStack.getType().toString().toLowerCase()+ ChatColor.GOLD + " was added to the shop." );
 		}
 	}
 	
@@ -274,7 +323,7 @@ public class Shop {
 		if (slotIsEmpty(slot)) {
 			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_EMPTY);
 		} 
-		else if (!amount.equals("none") || Integer.valueOf(amount) <= 0) {
+		else if (!amount.equals("none") || Integer.valueOf(amount) <= 0 || Integer.valueOf(amount) > 64) {
 			throw new ShopSystemException(ShopSystemException.INVALID_AMOUNT);
 		} 
 		else if (!sellPrice.equals("none") || Integer.valueOf(sellPrice) < 0) {
@@ -356,7 +405,14 @@ public class Shop {
 			return message;
 		}
 	}
-	public void loadItem(String name1) {
+	
+	/**
+	 * Loads a item by it's name. Not for commercial use.
+	 * 
+	 * @param name1
+	 * @throws ShopSystemException 
+	 */
+	public void loadItem(String name1) throws ShopSystemException {
 		config = YamlConfiguration.loadConfiguration(file);
 		if(config.getString("ShopItems." + name1 + ".Name") != null) {
 			String string = config.getString("ShopItems." + name1 + ".Name");
@@ -412,7 +468,11 @@ public class Shop {
 				addShopItemToInv(itemStack,config.getInt("ShopItems." + name1 + ".Amount"), config.getInt("ShopItems." + name1 + ".Slot"), config.getDouble("ShopItems." + name1 + ".sellPrice"), config.getDouble("ShopItems." + name1 + ".buyPrice"));
 			}
 		}
+		else {
+			throw new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOPITEM);
+		}
 	}
+	
 	private boolean hasCustomName(ItemStack itemStack) {
 		boolean has = true;
 		ItemStack testStack = new ItemStack(itemStack.getType());
@@ -422,71 +482,75 @@ public class Shop {
 		}
 		return has;
 	}
-	public void removeItem(int slot,Player p) {
-		if((slot + 1) != size && (slot + 1) <= size) {
+	
+	/**
+	 * This method removes a item from this shop.
+	 * 
+	 * @param slot
+	 * @throws ShopSystemException 
+	 */
+	public void removeItem(int slot) throws ShopSystemException {
+		if(slotIsEmpty(slot)) {
+			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_EMPTY);
+		}
+		else if((slot + 1) != size && (slot + 1) <= size) {
 			config = YamlConfiguration.loadConfiguration(file);
 			List<String> itemList = config.getStringList("ShopItemList");
 			ItemStack stack = inventory.getItem(slot);
-			if(stack != null) {
-				String itemname = null;
-				itemname = stack.getType().toString();
-				if(!stack.getType().toString().toUpperCase().contains("SPAWNER") && hasCustomName(stack)) {
-					itemname = stack.getItemMeta().getDisplayName() + "|" + itemname;
-				}
-				else if(stack.getType().toString().toUpperCase().contains("SPAWNER")) {
-					itemname = itemname + "_" + stack.getItemMeta().getDisplayName();
-				}
-				if(inventory.getItem(slot).getType().toString().equals("ENCHANTED_BOOK")) {
-					EnchantmentStorageMeta meta = (EnchantmentStorageMeta) stack.getItemMeta();
-					if(!meta.getStoredEnchants().isEmpty()) {
-						itemname = itemname.toLowerCase() + "#Enchanted_";
-						List<String> enchantedList = new ArrayList<>();
-						for(Entry<Enchantment, Integer> map: meta.getStoredEnchants().entrySet()) {
-							enchantedList.add(map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
-							enchantedList.sort(String.CASE_INSENSITIVE_ORDER);
-						}
-						itemname = itemname + enchantedList.toString();
-					}
-				}
-				else if(!stack.getEnchantments().isEmpty()) {
+			String itemname = null;
+			itemname = stack.getType().toString();
+			if(!stack.getType().toString().toUpperCase().contains("SPAWNER") && hasCustomName(stack)) {
+				itemname = stack.getItemMeta().getDisplayName() + "|" + itemname;
+			}
+			else if(stack.getType().toString().toUpperCase().contains("SPAWNER")) {
+				itemname = itemname + "_" + stack.getItemMeta().getDisplayName();
+			}
+			if(inventory.getItem(slot).getType().toString().equals("ENCHANTED_BOOK")) {
+				EnchantmentStorageMeta meta = (EnchantmentStorageMeta) stack.getItemMeta();
+				if(!meta.getStoredEnchants().isEmpty()) {
 					itemname = itemname.toLowerCase() + "#Enchanted_";
 					List<String> enchantedList = new ArrayList<>();
-					for(Entry<Enchantment, Integer> map: inventory.getItem(slot).getEnchantments().entrySet()) {
+					for(Entry<Enchantment, Integer> map: meta.getStoredEnchants().entrySet()) {
 						enchantedList.add(map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
 						enchantedList.sort(String.CASE_INSENSITIVE_ORDER);
 					}
 					itemname = itemname + enchantedList.toString();
 				}
-				else if(stack.getType().toString().contains("POTION")) {
-					boolean extended = false;
-					boolean upgraded = false;
-					String property;
-					PotionMeta meta = (PotionMeta) stack.getItemMeta();
-					String type = meta.getBasePotionData().getType().toString().toLowerCase();
-					if(extended) {
-						property = "extended";
-					}
-					else if(upgraded) {
-						property = "upgraded";
-					}
-					else {
-						property = "none";
-					}
-					itemname = itemname.toLowerCase() + ":" + type + "#" + property;
+			}
+			else if(!stack.getEnchantments().isEmpty()) {
+				itemname = itemname.toLowerCase() + "#Enchanted_";
+				List<String> enchantedList = new ArrayList<>();
+				for(Entry<Enchantment, Integer> map: inventory.getItem(slot).getEnchantments().entrySet()) {
+					enchantedList.add(map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
+					enchantedList.sort(String.CASE_INSENSITIVE_ORDER);
 				}
-				inventory.clear(slot);
-				itemList.remove(itemname);
-				config.set("ShopItemList", itemList);
-				config.set("ShopItems." + itemname, null);
-				save();
-				p.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + stack.getType().toString().toLowerCase() + ChatColor.GOLD + " was removed from shop." );
+				itemname = itemname + enchantedList.toString();
 			}
-			else {
-				p.sendMessage(ChatColor.RED + "Slot is empty!");
+			else if(stack.getType().toString().contains("POTION")) {
+				boolean extended = false;
+				boolean upgraded = false;
+				String property;
+				PotionMeta meta = (PotionMeta) stack.getItemMeta();
+				String type = meta.getBasePotionData().getType().toString().toLowerCase();
+				if(extended) {
+					property = "extended";
+				}
+				else if(upgraded) {
+					property = "upgraded";
+				}
+				else {
+					property = "none";
+				}
+				itemname = itemname.toLowerCase() + ":" + type + "#" + property;
 			}
+			inventory.clear(slot);
+			itemList.remove(itemname);
+			config.set("ShopItemList", itemList);
+			config.set("ShopItems." + itemname, null);
+			save();
 		}
 		else if((slot + 1) == size){
-			p.sendMessage(ChatColor.RED + "You can't delete this slotitem!");
+			throw new ShopSystemException(ShopSystemException.ITEM_CANNOT_BE_DELETED);
 		}
 	}
 	public static ArrayList<String> addEnchantments(ItemStack itemStack, ArrayList<String> enchantmentList) {
@@ -579,13 +643,7 @@ public class Shop {
 			e.printStackTrace();
 		}
 	}
-	public void load() {
-		name = config.getString("ShopName");
-		size = config.getInt("ShopSize");
-		itemNames = config.getStringList("ShopItemList");
-		inventory = Bukkit.createInventory(villager, size,name);
-		location = new Location(main.getServer().getWorld(config.getString("ShopLocation.World")),config.getDouble("ShopLocation.x"),config.getDouble("ShopLocation.y"),config.getDouble("ShopLocation.z"));
-	}
+	
 	public void openInv(Player p) {
 		p.openInventory(inventory);
 	}
@@ -765,7 +823,14 @@ public class Shop {
 		villager.teleport(new Location(Bukkit.getWorld(config.getString("ShopLocation.World")), x, y, z));
 		save();
 	}
-	public void handleSlotEditor(InventoryClickEvent event) {
+	
+	/**
+	 * This method handles the SlotEditor in the InventoryClickEvent.
+	 * 
+	 * @param event
+	 * @throws ShopSystemException
+	 */
+	public void handleSlotEditor(InventoryClickEvent event) throws ShopSystemException {
 		if(event.getCurrentItem().getItemMeta() != null) {
 			Player player = (Player) event.getWhoClicked();
 			ItemStack originStack = null;
@@ -905,7 +970,8 @@ public class Shop {
 								}
 							}
 							if(!existsInOtherSlot) {
-								removeItem(slotEditorSlot-1, player);
+								removeItem(slotEditorSlot-1);
+								player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + originStack.getType().toString().toLowerCase() + ChatColor.GOLD + " was removed from shop." );
 							}
 						}
 						else {
@@ -914,7 +980,8 @@ public class Shop {
 						}
 					}
 					if(isNew && !existsInOtherSlot) {
-						addItem(player, slotEditorSlot - 1, sellPrice, buyPrice, itemStack);
+						addItem(slotEditorSlot - 1, sellPrice, buyPrice, itemStack);
+						player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemStack.getType().toString().toLowerCase()+ ChatColor.GOLD + " was added to the shop." );
 					}
 				}
 				else {
@@ -922,7 +989,8 @@ public class Shop {
 				}
 			}
 			else if(command.equals(ChatColor.RED + "remove item")) {
-				removeItem(slotEditorSlot - 1, player);
+				removeItem(slotEditorSlot - 1);
+				player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + originStack.getType().toString().toLowerCase() + ChatColor.GOLD + " was removed from shop." );
 			}
 			else if(!command.equals("buyprice") && !command.equals("sellprice")) {
 				ItemStack editorItemStack2 = new ItemStack(event.getCurrentItem());
@@ -931,6 +999,16 @@ public class Shop {
 			}
 		}
 	}
+	
+	/**
+	 * This method adds a shopitem to the shop inventory. Not for commercial use.
+	 * 
+	 * @param itemStack
+	 * @param amount
+	 * @param slot
+	 * @param sellPrice
+	 * @param buyPrice
+	 */
 	public void addShopItemToInv(ItemStack itemStack,int amount, int slot, double sellPrice, double buyPrice) {
 		String displayName = itemStack.getItemMeta().getDisplayName();
 		List<String> list = null;
@@ -965,12 +1043,10 @@ public class Shop {
 		itemStack.setItemMeta(meta);
 		inventory.setItem(slot, itemStack);
 	}
-	public void reload() {
+	
+	public void reload() throws ShopSystemException {
 		for(String item:itemNames) {
 			loadItem(item);
 		}
 	}
-	
-	
-	
 }

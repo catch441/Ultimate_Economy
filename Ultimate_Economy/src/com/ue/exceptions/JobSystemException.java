@@ -16,7 +16,7 @@ public class JobSystemException extends Exception{
 	public static final String ENTITY_DOES_NOT_EXIST = "This entity does not in this job!";
 	public static final String ITEM_ALREADY_EXIST = "This item already exists in this job!";
 	public static final String ITEM_DOES_NOT_EXIST = "This item does not exist in this job!";
-	public static final String CANNOT_LOAD_JOB = "This job could not loaded from the save file!";
+	public static final String CANNOT_LOAD_JOB = "This job could not be loaded from the save file!";
 	public static final String CANNOT_LOAD_JOBCENTER = "This jobcenter could not be loaded from the save file!";
 	public static final String JOB_NOT_EXIST_IN_JOBCENTER = "This job does not exist in this jobcenter!";
 	public static final String JOB_ALREADY_EXIST_IN_JOBCENTER = "This job already exists in this jobcenter!";
