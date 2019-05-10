@@ -618,59 +618,40 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						if (args[0].equals("enable")) {
 							if (args.length == 2) {
-								try {
-									TownWorld.createTownWorld(getDataFolder(), args[1]);
-									player.sendMessage(ChatColor.GREEN + args[1] + ChatColor.GOLD + " is now a TownWold.");
-								} catch (TownSystemException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}
-							} else {
+								TownWorld.createTownWorld(getDataFolder(), args[1]);
+								player.sendMessage(ChatColor.GREEN + args[1] + ChatColor.GOLD + " is now a TownWold.");
+							} 
+							else {
 								player.sendMessage("/townWorld enable <worldname>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("disable")) {
 							if (args.length == 2) {
-								try {
-									TownWorld.deleteTownWorld(args[1]);
-									player.sendMessage(ChatColor.GREEN + args[1] + ChatColor.GOLD + " is no longer a TownWold.");
-								} catch (TownSystemException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}
-							} else {
+								TownWorld.deleteTownWorld(args[1]);
+								player.sendMessage(ChatColor.GREEN + args[1] + ChatColor.GOLD + " is no longer a TownWold.");
+							} 
+							else {
 								player.sendMessage("/townWorld disable <worldname>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("setFoundationPrice")) {
 							if (args.length == 3) {
-								try {
-									TownWorld.getTownWorldByName(args[1]).setFoundationPrice(Double.valueOf(args[2]),
-											true);
-									player.sendMessage(
-											ChatColor.GOLD + "FoundationPrice changed to " + ChatColor.GREEN + args[2]);
-								} catch (NumberFormatException e) {
-									Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
-								} catch (TownSystemException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}
-							} else {
+								TownWorld.getTownWorldByName(args[1]).setFoundationPrice(Double.valueOf(args[2]),true);
+								player.sendMessage(ChatColor.GOLD + "FoundationPrice changed to " + ChatColor.GREEN + args[2]);
+							} 
+							else {
 								player.sendMessage("/townWorld setFoundationPrice <worldname> <price>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("setExpandPrice")) {
 							if (args.length == 3) {
-								try {
-									TownWorld.getTownWorldByName(args[1]).setExpandPrice(Double.valueOf(args[2]), true);
-									player.sendMessage(
-											ChatColor.GOLD + "ExpandPrice changed to " + ChatColor.GREEN + args[2]);
-								} catch (NumberFormatException e) {
-									Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
-								} catch (TownSystemException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}
-							} else {
+								TownWorld.getTownWorldByName(args[1]).setExpandPrice(Double.valueOf(args[2]), true);
+								player.sendMessage(ChatColor.GOLD + "ExpandPrice changed to " + ChatColor.GREEN + args[2]);
+							} 
+							else {
 								player.sendMessage("/townWorld setExpandPrice <worldname> <price per chunk");
 							}
 						}
@@ -701,23 +682,23 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						} else {
 							player.sendMessage(ChatColor.GOLD + "No Jobs");
 						}
-					} else {
+					} 
+					
+					else {
 						player.sendMessage("/myJobs");
 					}
 				}
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				else if (label.equalsIgnoreCase("shop")) {
 					if (args.length == 1) {
-						try {
-							if (ecoPlayer.hasJob(args[0])) {
-								AdminShop.getAdminShopByName(args[0]).openInv(player);
-							} else {
-								player.sendMessage(ChatColor.RED + "You not joined this job!");
-							}
-						} catch (JobSystemException | ShopSystemException e) {
-							player.sendMessage(ChatColor.RED + e.getMessage());
+						if (ecoPlayer.hasJob(args[0])) {
+							AdminShop.getAdminShopByName(args[0]).openInv(player);
+						} 
+						else {
+							player.sendMessage(ChatColor.RED + "You not joined this job!");
 						}
-					} else {
+					} 
+					else {
 						player.sendMessage("/shop <shopname>");
 					}
 				}
@@ -735,37 +716,28 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 				}
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				else if (label.equalsIgnoreCase("giveMoney")) {
-					if (player.isOp()) {
-						if (args.length == 2) {
-							double amount = Double.valueOf(args[1]);
-							try {
-								EconomyPlayer receiver = EconomyPlayer.getEconomyPlayerByName(args[0]);
-								Player p = Bukkit.getPlayer(args[0]);
-								if (amount < 0) {
-									receiver.decreasePlayerAmount(-amount, false);
-								} else {
-									receiver.increasePlayerAmount(amount);
-								}
-								if (p.isOnline()) {
-									p.sendMessage(ChatColor.GOLD + "You got " + ChatColor.GREEN + amount + " $");
-								}
-							} catch (PlayerException e) {
-								player.sendMessage(ChatColor.RED + e.getMessage());
-							}
+					if (args.length == 2) {
+						double amount = Double.valueOf(args[1]);
+						EconomyPlayer receiver = EconomyPlayer.getEconomyPlayerByName(args[0]);
+						Player p = Bukkit.getPlayer(args[0]);
+						if (amount < 0) {
+							receiver.decreasePlayerAmount(-amount, false);
 						} else {
-							player.sendMessage("/giveMoney <player> <amount>");
+							receiver.increasePlayerAmount(amount);
 						}
+						if (p.isOnline()) {
+							p.sendMessage(ChatColor.GOLD + "You got " + ChatColor.GREEN + amount + " $");
+						}
+					} 
+					else {
+						player.sendMessage("/giveMoney <player> <amount>");
 					}
 				}
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				else if (label.equalsIgnoreCase("home")) {
 					if (args.length == 1) {
-						try {
-							Location location = ecoPlayer.getHome(args[0]);
-							player.teleport(location);
-						} catch (PlayerException e) {
-							player.sendMessage(ChatColor.RED + e.getMessage());
-						}
+						Location location = ecoPlayer.getHome(args[0]);
+						player.teleport(location);
 					}
 					else {
 						player.sendMessage("/home <homename>");
@@ -777,26 +749,18 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				else if (label.equalsIgnoreCase("sethome")) {
 					if (args.length == 1) {
-						try {
-							ecoPlayer.addHome(args[0], player.getLocation());
-						} catch (PlayerException e) {
-							player.sendMessage(ChatColor.RED + e.getMessage());
-						}
+						ecoPlayer.addHome(args[0], player.getLocation());
 						player.sendMessage(ChatColor.GOLD + "You created the home  " + ChatColor.GREEN + args[0] + ChatColor.GOLD + ".");
-					} else {
+					} 
+					else {
 						player.sendMessage("/sethome <homename>");
 					}
 				}
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				else if (label.equalsIgnoreCase("delhome")) {
 					if (args.length == 1) {
-						try {
-							ecoPlayer.removeHome(args[0]);
-						} catch (PlayerException e) {
-							player.sendMessage(ChatColor.RED + e.getMessage());
-						}
-						player.sendMessage(ChatColor.GOLD + "Your home " + ChatColor.GREEN + args[0] + ChatColor.GOLD
-								+ " was deleted.");
+						ecoPlayer.removeHome(args[0]);
+						player.sendMessage(ChatColor.GOLD + "Your home " + ChatColor.GREEN + args[0] + ChatColor.GOLD + " was deleted.");
 					} 
 					else {
 						player.sendMessage("/deletehome <homename>");
@@ -818,25 +782,20 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				else if (label.equalsIgnoreCase("jobInfo")) {
 					if (args.length == 1) {
-						try {
-							Job job = Job.getJobByName(args[0]);
-							player.sendMessage("");
-							player.sendMessage(ChatColor.GOLD + "Jobinfo for " + ChatColor.GREEN + job.getName()
-									+ ChatColor.GOLD + ":");
-							for (String string : job.getItemList()) {
-								player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN + job.getItemPrice(string) + "$");
-							}
-							for (String string : job.getFisherList()) {
-								player.sendMessage(ChatColor.GOLD + "Fishing " + string.toLowerCase() + " " + ChatColor.GREEN + job.getFisherPrice(string) + "$");
-							}
-							for (String string : job.getEntityList()) {
-								player.sendMessage(ChatColor.GOLD + "Kill " + string.toLowerCase() + " "
-										+ ChatColor.GREEN + job.getKillPrice(string) + "$");
-							}
-						} catch (JobSystemException e) {
-							player.sendMessage(ChatColor.RED + e.getMessage());
+						Job job = Job.getJobByName(args[0]);
+						player.sendMessage("");
+						player.sendMessage(ChatColor.GOLD + "Jobinfo for " + ChatColor.GREEN + job.getName() + ChatColor.GOLD + ":");
+						for (String string : job.getItemList()) {
+							player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN + job.getItemPrice(string) + "$");
 						}
-					} else {
+						for (String string : job.getFisherList()) {
+							player.sendMessage(ChatColor.GOLD + "Fishing " + string.toLowerCase() + " " + ChatColor.GREEN + job.getFisherPrice(string) + "$");
+						}
+						for (String string : job.getEntityList()) {
+							player.sendMessage(ChatColor.GOLD + "Kill " + string.toLowerCase() + " " + ChatColor.GREEN + job.getKillPrice(string) + "$");
+						}
+					} 
+					else {
 						player.sendMessage("/jobInfo <jobname>");
 					}
 				}
@@ -844,19 +803,14 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 				else if (label.equalsIgnoreCase("pay")) {
 					if (args.length == 2) {
 						double money = Double.valueOf(args[1]);
-						try {
-							ecoPlayer.payToOtherPlayer(EconomyPlayer.getEconomyPlayerByName(args[0]), money);
-						} catch (PlayerException e) {
-							player.sendMessage(ChatColor.RED + e.getMessage());
-						}
+						ecoPlayer.payToOtherPlayer(EconomyPlayer.getEconomyPlayerByName(args[0]), money);
 						Player p = Bukkit.getPlayer(args[0]);
 						if (p.isOnline()) {
-							p.sendMessage(ChatColor.GOLD + "You got " + ChatColor.GREEN + " " + money + " $ "
-									+ ChatColor.GOLD + "from " + ChatColor.GREEN + player.getName());
+							p.sendMessage(ChatColor.GOLD + "You got " + ChatColor.GREEN + " " + money + " $ " + ChatColor.GOLD + "from " + ChatColor.GREEN + player.getName());
 						}
-						player.sendMessage(
-								ChatColor.GOLD + "You gave " + ChatColor.GREEN + args[0] + " " + money + " $ ");
-					} else {
+						player.sendMessage(ChatColor.GOLD + "You gave " + ChatColor.GREEN + args[0] + " " + money + " $ ");
+					} 
+					else {
 						player.sendMessage("/pay <name> <amount>");
 					}
 				}
@@ -867,66 +821,48 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						if (args[0].equals("create")) {
 							if (args.length == 2) {
-								try {
-									TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
-									tWorld.createTown(args[1], player.getLocation(), ecoPlayer);
-									player.sendMessage(ChatColor.GOLD + "Congratulation! You founded the new town "
-											+ ChatColor.GREEN + args[1] + ChatColor.GOLD + "!");
-								} catch (TownSystemException | PlayerException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}
-							} else {
+								TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
+								tWorld.createTown(args[1], player.getLocation(), ecoPlayer);
+								player.sendMessage(ChatColor.GOLD + "Congratulation! You founded the new town " + ChatColor.GREEN + args[1] + ChatColor.GOLD + "!");
+							} 
+							else {
 								player.sendMessage("/town create <townname>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("delete")) {
 							if (args.length == 2) {
-								try {
-									TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
-									tWorld.dissolveTown(args[1], player.getName());
-									player.sendMessage(ChatColor.GOLD + "The town " + ChatColor.GREEN + args[1]
-											+ ChatColor.GOLD + " was dissolved!");
-								} catch (TownSystemException | PlayerException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}
-							} else {
+								TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
+								tWorld.dissolveTown(args[1], player.getName());
+								player.sendMessage(ChatColor.GOLD + "The town " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " was dissolved!");
+							} 
+							else {
 								player.sendMessage("/town delete <townname>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("expand")) {
 							if (args.length == 2) {
-								try {
-									TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
-									tWorld.expandTown(args[1], player.getLocation().getChunk(), player.getName());
-									player.sendMessage(ChatColor.GOLD
-											+ "Congratulation! You expanded your town with a new chunk!");
-								} catch (TownSystemException | TownHasNotEnoughMoneyException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}
-							} else {
+								TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
+								tWorld.expandTown(args[1], player.getLocation().getChunk(), player.getName());
+								player.sendMessage(ChatColor.GOLD + "Congratulation! You expanded your town with a new chunk!");
+							} 
+							else {
 								player.sendMessage("/town expand <townname>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("setTownSpawn")) {
 							if (args.length == 2) {
-								try {
-									TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
-									Town town = tWorld.getTownByName(args[1]);
-									if (town.hasCoOwnerPermission(player.getName())) {
-										File file = town.setTownSpawn(tWorld.getSaveFile(), player.getLocation());
-										tWorld.setSaveFile(file);
-										player.sendMessage(ChatColor.GOLD + "The townspawn was set to "
-												+ ChatColor.GREEN + (int) player.getLocation().getX() + "/"
-												+ (int) player.getLocation().getY() + "/"
-												+ (int) player.getLocation().getZ() + ChatColor.GOLD + ".");
-									}
-								} catch (TownSystemException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
+								TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
+								Town town = tWorld.getTownByName(args[1]);
+								if (town.hasCoOwnerPermission(player.getName())) {
+									File file = town.setTownSpawn(tWorld.getSaveFile(), player.getLocation());
+									tWorld.setSaveFile(file);
+									player.sendMessage(ChatColor.GOLD + "The townspawn was set to " + ChatColor.GREEN + (int) player.getLocation().getX() + "/" + (int) player.getLocation().getY() + "/" + (int) player.getLocation().getZ() + ChatColor.GOLD + ".");
 								}
-							} else {
+							} 
+							else {
 								player.sendMessage("/town setTownSpawn <townname>");
 							}
 						}
@@ -934,21 +870,18 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						else if (args[0].equals("setTax")) {
 							// TODO
 							if (args.length == 3) {
-							} else {
+							} 
+							else {
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equalsIgnoreCase("moveTownManager")) {
 							if (args.length == 1) {
-								try {
-									TownWorld townWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
-									Town town = townWorld.getTownByChunk(player.getLocation().getChunk());
-									File file = town.moveTownManagerVillager(townWorld.getSaveFile(),
-											player.getLocation(), player.getName());
-									townWorld.setSaveFile(file);
-								} catch (TownSystemException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}
+								TownWorld townWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
+								Town town = townWorld.getTownByChunk(player.getLocation().getChunk());
+								File file = town.moveTownManagerVillager(townWorld.getSaveFile(),
+								player.getLocation(), player.getName());
+								townWorld.setSaveFile(file);
 							} else {
 								player.sendMessage("/town moveTownManager");
 							}
@@ -958,18 +891,14 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 							if (args.length > 1) {
 								if (args[1].equals("setForSale")) {
 									if (args.length == 3) {
-										try {
-											TownWorld townWorld = TownWorld
-													.getTownWorldByName(player.getWorld().getName());
-											Town town = townWorld.getTownByChunk(player.getLocation().getChunk());
-											File file = town.setPlotForSale(townWorld.getSaveFile(),
-													Double.valueOf(args[2]), player.getName(), player.getLocation());
-											townWorld.setSaveFile(file);
-											player.sendMessage(ChatColor.GOLD + "This plot is now for sale!");
-										} catch (TownSystemException e) {
-											player.sendMessage(ChatColor.RED + e.getMessage());
-										}
-									} else {
+										TownWorld townWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
+										Town town = townWorld.getTownByChunk(player.getLocation().getChunk());
+										File file = town.setPlotForSale(townWorld.getSaveFile(),
+										Double.valueOf(args[2]), player.getName(), player.getLocation());
+										townWorld.setSaveFile(file);
+										player.sendMessage(ChatColor.GOLD + "This plot is now for sale!");
+									} 
+									else {
 										player.sendMessage("/town plot setForSale <price> ");
 									}
 								}
@@ -977,23 +906,21 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 								else if (args[1].equals("setForRent")) {
 									if (args.length == 4) {
 										// TODO
-									} else {
+									} 
+									else {
 										player.sendMessage("/town plot setForRent <townname> <price/24h>");
 									}
 								}
-							} else {
+							} 
+							else {
 								player.sendMessage("/town plot <setForSale/setForRent>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("tp")) {
 							if (args.length == 2) {
-								try {
-									TownWorld townWorld = TownWorld.getTownWorldByName(args[1]);
-									player.teleport(townWorld.getTownByName(args[1]).getTownSpawn());
-								} catch (TownSystemException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}
+								TownWorld townWorld = TownWorld.getTownWorldByName(args[1]);
+								player.teleport(townWorld.getTownByName(args[1]).getTownSpawn());
 							} else {
 								player.sendMessage("/town tp <townname>");
 							}
@@ -1002,34 +929,25 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						else if (args[0].equals("pay")) {
 							if (args.length == 3) {
 								double amount = Double.valueOf(args[2]);
-								try {
-									ecoPlayer.decreasePlayerAmount(amount, true);
-									TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
-									tWorld.setSaveFile(tWorld.getTownByName(args[1])
-											.increaseTownBankAmount(tWorld.getSaveFile(), amount));
-									player.sendMessage(ChatColor.GOLD + "The town " + args[1] + " got "
-											+ ChatColor.GREEN + amount + " $" + ChatColor.GOLD + " from you!");
-								} catch (PlayerException | TownSystemException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
-								}
-							} else {
+								ecoPlayer.decreasePlayerAmount(amount, true);
+								TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
+								tWorld.setSaveFile(tWorld.getTownByName(args[1]).increaseTownBankAmount(tWorld.getSaveFile(), amount));
+								player.sendMessage(ChatColor.GOLD + "The town " + args[1] + " got " + ChatColor.GREEN + amount + " $" + ChatColor.GOLD + " from you!");
+							} 
+							else {
 								player.sendMessage("/town pay <townname> <amount>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("bank")) {
 							if (args.length == 2) {
-								try {
-									TownWorld townWorld = TownWorld.getTownWorldByName(args[1]);
-									Town town = townWorld.getTownByName(args[1]);
-									if (town.hasCoOwnerPermission(player.getName())) {
-										player.sendMessage(ChatColor.GOLD + "Town money: " + ChatColor.GREEN
-												+ town.getTownBankAmount() + ChatColor.GOLD + " $");
-									}
-								} catch (TownSystemException e) {
-									player.sendMessage(ChatColor.RED + e.getMessage());
+								TownWorld townWorld = TownWorld.getTownWorldByName(args[1]);
+								Town town = townWorld.getTownByName(args[1]);
+								if (town.hasCoOwnerPermission(player.getName())) {
+									player.sendMessage(ChatColor.GOLD + "Town money: " + ChatColor.GREEN + town.getTownBankAmount() + ChatColor.GOLD + " $");
 								}
-							} else {
+							} 
+							else {
 								player.sendMessage("/town bank <townname>");
 							}
 						}
@@ -1045,196 +963,137 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// adminshop
 				else if (label.equalsIgnoreCase("adminshop")) {
-					if (player.isOp()) {
-						if (args.length != 0) {
-							if (args[0].equals("create")) {
-								if (args.length == 3) {
-									try {
-										AdminShop.createAdminShop(getDataFolder(), args[1], player.getLocation(),Integer.valueOf(args[2]));
-										player.sendMessage(ChatColor.GOLD + "The shop " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " was created.");
-										getConfig().set("ShopNames", AdminShop.getAdminShopNameList());
-										saveConfig();
-									} catch (NumberFormatException e) {
-										player.sendMessage(ChatColor.RED + "Invalid number!");
-									} catch (ShopSystemException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
+					if (args.length != 0) {
+						if (args[0].equals("create")) {
+							if (args.length == 3) {
+								AdminShop.createAdminShop(getDataFolder(), args[1], player.getLocation(),Integer.valueOf(args[2]));
+								player.sendMessage(ChatColor.GOLD + "The shop " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " was created.");
+								getConfig().set("ShopNames", AdminShop.getAdminShopNameList());
+								saveConfig();
+							} 
+							else {
+								player.sendMessage("/adminshop create <shopname> <size (9,18,27...)>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("delete")) {
+							if (args.length == 2) {
+								AdminShop.deleteAdminShop(args[1]);
+								player.sendMessage(ChatColor.GOLD + "The shop " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " was deleted.");
+								getConfig().set("ShopNames", AdminShop.getAdminShopNameList());
+								saveConfig();
+							} 
+							else {
+								player.sendMessage("/adminshop delete <shopname>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("move")) {
+							if (args.length == 5) {
+								AdminShop.getAdminShopByName(args[1]).moveShop(Integer.valueOf(args[2]),Integer.valueOf(args[3]), Integer.valueOf(args[4]));
+							} 
+							else {
+								player.sendMessage("/adminshop move <shopname> <x> <y> <z>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("editShop")) {
+							if (args.length == 2) {
+								AdminShop.getAdminShopByName(args[1]).openEditor(player);
+							} 
+							else {
+								player.sendMessage("/adminshop editShop <shopname>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("addItem")) {
+							if (args.length == 7) {
+								if (Material.matchMaterial(args[2].toUpperCase()) == null) {
+									throw new ShopSystemException(ShopSystemException.INVALID_MATERIAL);
 								} 
 								else {
-									player.sendMessage("/adminshop create <shopname> <size (9,18,27...)>");
-								}
-							}
-							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							else if (args[0].equals("delete")) {
-								if (args.length == 2) {
-									try {
-										AdminShop.deleteAdminShop(args[1]);
-									} catch (ShopSystemException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
-									player.sendMessage(ChatColor.GOLD + "The shop " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " was deleted.");
-									getConfig().set("ShopNames", AdminShop.getAdminShopNameList());
-									saveConfig();
-								} 
-								else {
-									player.sendMessage("/adminshop delete <shopname>");
-								}
-							}
-							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							else if (args[0].equals("move")) {
-								if (args.length == 5) {
-									try {
-										AdminShop.getAdminShopByName(args[1]).moveShop(Integer.valueOf(args[2]),Integer.valueOf(args[3]), Integer.valueOf(args[4]));
-									} catch (NumberFormatException e) {
-										player.sendMessage(ChatColor.RED + "Invalid number!");
-									} catch (ShopSystemException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
-								} 
-								else {
-									player.sendMessage("/adminshop move <shopname> <x> <y> <z>");
-								}
-							}
-							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							else if (args[0].equals("editShop")) {
-								if (args.length == 2) {
-									try {
-										AdminShop.getAdminShopByName(args[1]).openEditor(player);
-									} catch (ShopSystemException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
-								} 
-								else {
-									player.sendMessage("/adminshop editShop <shopname>");
-								}
-							}
-							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							else if (args[0].equals("addItem")) {
-								if (args.length == 7) {
-									try {
-										if (Material.matchMaterial(args[2].toUpperCase()) == null) {
-											throw new ShopSystemException(ShopSystemException.INVALID_MATERIAL);
-										} 
-										else {
-											ItemStack itemStack = new ItemStack(Material.getMaterial(args[2].toUpperCase()),Integer.valueOf(args[4]));
-											AdminShop.getAdminShopByName(args[1]).addItem(Integer.valueOf(args[3]) - 1,Double.valueOf(args[5]), Double.valueOf(args[6]), itemStack);
-											player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemStack.getType().toString().toLowerCase() + ChatColor.GOLD + " was added to the shop.");
-										}
-									} catch (ShopSystemException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
-								} 
-								else {
-									player.sendMessage("/adminshop addItem <shopname> <material> <slot> <amount> <sellPrice> <buyPrice>");
-									player.sendMessage("If you only want to buy/sell something set sell/buyPrice = 0.0");
-								}
-							}
-							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							else if (args[0].equals("removeItem")) {
-								if (args.length == 3) {
-									try {
-										AdminShop shop = AdminShop.getAdminShopByName(args[1]);
-										String itemName = shop.getItem(Integer.valueOf(args[2])).getType().toString().toLowerCase();
-										shop.removeItem(Integer.valueOf(args[2]) - 1);
-										player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemName + ChatColor.GOLD + " was removed from shop.");
-									} catch (NumberFormatException e) {
-										player.sendMessage(ChatColor.RED + "Invalid number!");
-									} catch (ShopSystemException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
-								} 
-								else {
-									player.sendMessage("/adminshop removeItem <shopname> <slot (> 0)>");
-								}
-							}
-							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							else if (args[0].equals("addPotion")) {
-								if (args.length == 9) {
-									try {
-										handleAddPotion(player, AdminShop.getAdminShopByName(args[1]), args);
-									} catch (ShopSystemException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
-								} 
-								else {
-									player.sendMessage("/adminshop addPotion <shopname> <potionType> <potionEffect> <extended/upgraded/none> <slot> <amount> <sellprice> <buyprice>");
-								}
-							}
-							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							else if (args[0].equals("addEnchantedItem")) {
-								if (args.length >= 9) {
-									try {
-										handleAddEnchantedItem(player, args, AdminShop.getAdminShopByName(args[1]));
-									} catch (ShopSystemException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
-								} 
-								else {
-									player.sendMessage("/adminshop addEnchantedItem <shopname> <material> <slot> <amount> <sellPrice> <buyPrice> [<enchantment> <lvl>]");
-								}
-							}
-							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							else if (args[0].equals("addSpawner")) {
-								if (args.length == 5) {
-									ItemStack itemStack = new ItemStack(Material.SPAWNER, 1);
-									ItemMeta meta = itemStack.getItemMeta();
-									meta.setDisplayName(args[2].toUpperCase());
-									itemStack.setItemMeta(meta);
-									try {
-										AdminShop.getAdminShopByName(args[1]).addItem(Integer.valueOf(args[3]) - 1, 0.0,Double.valueOf(args[4]), itemStack);
-									} catch (NumberFormatException e) {
-										player.sendMessage(ChatColor.RED + "Invalid number!");
-									} catch (ShopSystemException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
+									ItemStack itemStack = new ItemStack(Material.getMaterial(args[2].toUpperCase()),Integer.valueOf(args[4]));
+									AdminShop.getAdminShopByName(args[1]).addItem(Integer.valueOf(args[3]) - 1,Double.valueOf(args[5]), Double.valueOf(args[6]), itemStack);
 									player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemStack.getType().toString().toLowerCase() + ChatColor.GOLD + " was added to the shop.");
 								}
-								else {
-									player.sendMessage("/adminshop addSpawner <shopname> <entity type> <slot> <buyPrice>");
-								}
-							}
-							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							else if (args[0].equals("removeSpawner")) {
-								if (args.length == 3) {
-									try {
-										AdminShop shop = AdminShop.getAdminShopByName(args[1]);
-										String itemName = shop.getItem(Integer.valueOf(args[2])).getType().toString().toLowerCase();
-										shop.removeItem(Integer.valueOf(args[2]) - 1);
-										player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemName + ChatColor.GOLD + " was removed from shop.");
-									} catch (NumberFormatException e) {
-										player.sendMessage(ChatColor.RED + "Invalid number!");
-									} catch (ShopSystemException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
-								} 
-								else {
-									player.sendMessage("/adminshop removeSpawner <shopname> <slot>");
-								}
-							}
-							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							else if (args[0].equals("editItem")) {
-								if (args.length == 6) {
-									try {
-										player.sendMessage(AdminShop.getAdminShopByName(args[1]).editItem(Integer.valueOf(args[2]), args[3], args[4], args[5]));
-									} catch (NumberFormatException e) {
-										player.sendMessage(ChatColor.RED + "Invalid number!");
-									} catch (ShopSystemException e) {
-										player.sendMessage(ChatColor.RED + e.getMessage());
-									}
-								} 
-								else {
-									player.sendMessage("/adminshop editItem <shopname> <slot> <amount> <sellPrice> <buyPrice>");
-									player.sendMessage("If you didn't want to change one of these values set value = 'none'");
-								}
-							}
-							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							} 
 							else {
-								player.sendMessage("/adminshop <create/delete/move/editShop/addItem/addEnchantedItem/addPotion/editItem/removeItem/addSpawner/removeSpawner>");
+								player.sendMessage("/adminshop addItem <shopname> <material> <slot> <amount> <sellPrice> <buyPrice>");
+								player.sendMessage("If you only want to buy/sell something set sell/buyPrice = 0.0");
 							}
-						} 
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("removeItem")) {
+							if (args.length == 3) {
+								AdminShop shop = AdminShop.getAdminShopByName(args[1]);
+								String itemName = shop.getItem(Integer.valueOf(args[2])).getType().toString().toLowerCase();
+								shop.removeItem(Integer.valueOf(args[2]) - 1);
+								player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemName + ChatColor.GOLD + " was removed from shop.");
+							} 
+							else {
+								player.sendMessage("/adminshop removeItem <shopname> <slot (> 0)>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("addPotion")) {
+							if (args.length == 9) {
+								handleAddPotion(player, AdminShop.getAdminShopByName(args[1]), args);
+							} 
+							else {
+								player.sendMessage("/adminshop addPotion <shopname> <potionType> <potionEffect> <extended/upgraded/none> <slot> <amount> <sellprice> <buyprice>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("addEnchantedItem")) {
+							if (args.length >= 9) {
+								handleAddEnchantedItem(player, args, AdminShop.getAdminShopByName(args[1]));
+							} 
+							else {
+								player.sendMessage("/adminshop addEnchantedItem <shopname> <material> <slot> <amount> <sellPrice> <buyPrice> [<enchantment> <lvl>]");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("addSpawner")) {
+							if (args.length == 5) {
+								ItemStack itemStack = new ItemStack(Material.SPAWNER, 1);
+								ItemMeta meta = itemStack.getItemMeta();
+								meta.setDisplayName(args[2].toUpperCase());
+								itemStack.setItemMeta(meta);
+								player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemStack.getType().toString().toLowerCase() + ChatColor.GOLD + " was added to the shop.");
+							}
+							else {
+								player.sendMessage("/adminshop addSpawner <shopname> <entity type> <slot> <buyPrice>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("removeSpawner")) {
+							if (args.length == 3) {
+								AdminShop shop = AdminShop.getAdminShopByName(args[1]);
+								String itemName = shop.getItem(Integer.valueOf(args[2])).getType().toString().toLowerCase();
+								shop.removeItem(Integer.valueOf(args[2]) - 1);
+								player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemName + ChatColor.GOLD + " was removed from shop.");
+							} 
+							else {
+								player.sendMessage("/adminshop removeSpawner <shopname> <slot>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("editItem")) {
+							if (args.length == 6) {
+								player.sendMessage(AdminShop.getAdminShopByName(args[1]).editItem(Integer.valueOf(args[2]), args[3], args[4], args[5]));
+							} 
+							else {
+								player.sendMessage("/adminshop editItem <shopname> <slot> <amount> <sellPrice> <buyPrice>");
+								player.sendMessage("If you didn't want to change one of these values set value = 'none'");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else {
 							player.sendMessage("/adminshop <create/delete/move/editShop/addItem/addEnchantedItem/addPotion/editItem/removeItem/addSpawner/removeSpawner>");
 						}
+					} 
+					else {
+						player.sendMessage("/adminshop <create/delete/move/editShop/addItem/addEnchantedItem/addPotion/editItem/removeItem/addSpawner/removeSpawner>");
 					}
 				}
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1274,8 +1133,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("changeOwner")) {
 							if (args.length == 3) {
-								List<String> psNames = getConfig().getStringList("PlayerShopNames");
-								if (psNames.contains(args[1] + "_" + args[2])) {
+								if (EconomyPlayer.getEconomyPlayerNameList().contains(args[1] + "_" + args[2])) {
 									player.sendMessage(ChatColor.RED + "The player " + ChatColor.GREEN + args[2] + ChatColor.RED + " has already a shop with the same name!");
 								} 
 								else {
@@ -1541,7 +1399,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						player.sendMessage("/jobcenter <create/delete/move/job/addjob>");
 					}
 				}
-			} catch (PlayerException | ShopSystemException |JobSystemException e1) {
+			} catch (PlayerException | ShopSystemException | TownSystemException | JobSystemException | TownHasNotEnoughMoneyException e1) {
 				player.sendMessage(ChatColor.RED + e1.getMessage());
 			} catch (NumberFormatException e2) {
 				player.sendMessage(ChatColor.RED + "Invalid number!");
@@ -2372,7 +2230,8 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 													}
 													break;
 												}
-											} else {
+											}
+											else {
 												playe.sendMessage(ChatColor.RED + "There is no free slot in your inventory!");
 											}
 										}
@@ -2380,7 +2239,8 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 										else if (isPlayershop) {
 											playe.sendMessage(ChatColor.GOLD + "This item is unavailable!");
 										}
-									} else if (!ecoPlayer.hasEnoughtMoney(buyprice) && !alreadysay) {
+									} 
+									else if (!ecoPlayer.hasEnoughtMoney(buyprice) && !alreadysay) {
 										playe.sendMessage(ChatColor.RED + "You don't have enough money!");
 										alreadysay = true;
 									}
@@ -2405,10 +2265,12 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 									if (isEnchanted) {
 										if (metaEnchanted != null) {
 											iStack.setItemMeta(metaEnchanted);
-										} else {
+										} 
+										else {
 											iStack.addEnchantments(event.getCurrentItem().getEnchantments());
 										}
-									} else if (isPotion) {
+									} 
+									else if (isPotion) {
 										if (metaPotion != null) {
 											iStack.setItemMeta(metaPotion);
 										}
@@ -2446,13 +2308,9 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 										// only playershop
 										else if (isPlayershop) {
 											if (amount > 1) {
-												playe.sendMessage(ChatColor.GOLD + "You added " + ChatColor.GREEN
-														+ String.valueOf(amount) + ChatColor.GOLD
-														+ " Items to your shop.");
+												playe.sendMessage(ChatColor.GOLD + "You added " + ChatColor.GREEN + String.valueOf(amount) + ChatColor.GOLD + " Items to your shop.");
 											} else {
-												playe.sendMessage(ChatColor.GOLD + "You added " + ChatColor.GREEN
-														+ String.valueOf(amount) + ChatColor.GOLD
-														+ " Item to your shop.");
+												playe.sendMessage(ChatColor.GOLD + "You added " + ChatColor.GREEN + String.valueOf(amount) + ChatColor.GOLD + " Item to your shop.");
 											}
 										}
 										removeItemFromInventory(inventoryplayer, iStack, amount);

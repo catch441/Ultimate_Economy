@@ -478,7 +478,12 @@ public class EconomyPlayer {
 		}
 	}
 	
-	private static List<String> getEconomyPlayerNameList() {
+	/**
+	 * This method returns a list of all player names.
+	 * 
+	 * @return
+	 */
+	public static List<String> getEconomyPlayerNameList() {
 		List<String> list = new ArrayList<>();
 		for(EconomyPlayer economyPlayer:economyPlayers) {
 			list.add(economyPlayer.getName());
