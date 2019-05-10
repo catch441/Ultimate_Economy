@@ -47,13 +47,13 @@ public class TownWorld {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-		foundationPrice = 0;
-		expandPrice = 0;
-		config.set("World", world);
-		config.set("Config.foundationPrice", 0);
-		config.set("Config.expandPrice", 0);
-		townNames = new ArrayList<>();
-		save();
+			foundationPrice = 0;
+			expandPrice = 0;
+			config.set("World", world);
+			config.set("Config.foundationPrice", 0);
+			config.set("Config.expandPrice", 0);
+			townNames = new ArrayList<>();
+			save();
 		}
 		else {
 			townNames = config.getStringList("TownNames");
@@ -481,7 +481,7 @@ public class TownWorld {
 		}
 	}
 	
-	private static List<String> getTownWorldNameList() {
+	public static List<String> getTownWorldNameList() {
 		List<String> nameList = new ArrayList<>();
 		for(TownWorld townWorld:townWorldList) {
 			nameList.add(townWorld.getWorldName());
@@ -549,7 +549,7 @@ public class TownWorld {
 	 * @throws TownSystemException 
 	 */
 	public static void loadAllTownWorlds(File mainDataFolder,FileConfiguration fileConfig) throws TownSystemException {
-		for(String townWorldName:fileConfig.getStringList("TownNames")) {
+		for(String townWorldName:fileConfig.getStringList("TownWorlds")) {
 			TownWorld townWorld = new TownWorld(mainDataFolder, townWorldName);
 			List<Town> towns = new ArrayList<>();
 			for(String townName: townWorld.getTownNameList()) {

@@ -82,7 +82,7 @@ public abstract class Shop {
 		this.isPlayershop = isPlayershop;
 		itemNames = new ArrayList<>();
 		file = new File(dataFolder , name + ".yml");
-		inventory = Bukkit.createInventory(null, this.size,name);
+		inventory = Bukkit.createInventory(null, size,name);
 		slotEditor = Bukkit.createInventory(null, 27,name + "-SlotEditor");
 		try {
 			file.createNewFile();
@@ -113,14 +113,15 @@ public abstract class Shop {
 	 * @param isPlayershop
 	 */
 	public Shop(File dataFolder,Server server,String name,boolean isPlayershop) {
+		
 		this.isPlayershop = isPlayershop;
 		itemNames = new ArrayList<>();
 		file = new File(dataFolder , name + ".yml");
+		config = YamlConfiguration.loadConfiguration(file);
+		size = config.getInt("ShopSize");
 		inventory = Bukkit.createInventory(null, this.size,name);
 		slotEditor = Bukkit.createInventory(null, 27,name + "-SlotEditor");
-		config = YamlConfiguration.loadConfiguration(file);
-		name = config.getString("ShopName");
-		size = config.getInt("ShopSize");
+		this.name = name;
 		itemNames = config.getStringList("ShopItemList");
 		inventory = Bukkit.createInventory(villager, size,name);
 		location = new Location(server.getWorld(config.getString("ShopLocation.World")),config.getDouble("ShopLocation.x"),config.getDouble("ShopLocation.y"),config.getDouble("ShopLocation.z"));
@@ -468,8 +469,8 @@ public abstract class Shop {
 				addShopItemToInv(itemStack,config.getInt("ShopItems." + name1 + ".Amount"), config.getInt("ShopItems." + name1 + ".Slot"), config.getDouble("ShopItems." + name1 + ".sellPrice"), config.getDouble("ShopItems." + name1 + ".buyPrice"));
 			}
 		}
-		else {
-			throw new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOPITEM);
+		else if(!name1.equals("ANVIL_0") && !name1.equals("CRAFTING_TABLE_0")){
+			throw new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOPITEM + " |" + name1 + "|");
 		}
 	}
 	
@@ -553,6 +554,92 @@ public abstract class Shop {
 			throw new ShopSystemException(ShopSystemException.ITEM_CANNOT_BE_DELETED);
 		}
 	}
+	
+	/**
+	 * This method returns the sellprice of a item.
+	 * 
+	 * @param itemName
+	 * @return double
+	 * @throws ShopSystemException
+	 */
+	public double getItemSellPrice(String itemName) throws ShopSystemException {
+		config = YamlConfiguration.loadConfiguration(file);
+		if(itemNames.contains(itemName)) {
+			return config.getDouble("ShopItems." + itemName + ".sellPrice");
+		}
+		else {
+			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
+		}
+	}
+	
+	/**
+	 * This method returns the amount of a item.
+	 * 
+	 * @param itemName
+	 * @return int
+	 * @throws ShopSystemException
+	 */
+	public int getItemAmount(String itemName) throws ShopSystemException {
+		config = YamlConfiguration.loadConfiguration(file);
+		if(itemNames.contains(itemName)) {
+			return config.getInt("ShopItems." + itemName + ".Amount");
+		}
+		else {
+			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
+		}
+	}
+	
+	/**
+	 * This method returns the buyprice of a item.
+	 * 
+	 * @param itemName
+	 * @return double
+	 * @throws ShopSystemException
+	 */
+	public double getItemBuyPrice(String itemName) throws ShopSystemException {
+		config = YamlConfiguration.loadConfiguration(file);
+		if(itemNames.contains(itemName)) {
+			return config.getDouble("ShopItems." + itemName + ".buyPrice");
+		}
+		else {
+			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
+		}
+	}
+	
+	/**
+	 * This method returns the lore of a item.
+	 * 
+	 * @param itemName
+	 * @return List of Strings
+	 * @throws ShopSystemException
+	 */
+	public List<String> getItemLore(String itemName) throws ShopSystemException {
+		config = YamlConfiguration.loadConfiguration(file);
+		if(itemNames.contains(itemName)) {
+			return config.getStringList("ShopItems." + itemName + ".lore");
+		}
+		else {
+			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
+		}
+	}
+	
+	/**
+	 * This method returns the damage of a item.
+	 * 
+	 * @param itemName
+	 * @return int
+	 * @throws ShopSystemException
+	 */
+	public int getItemDamage(String itemName) throws ShopSystemException {
+		config = YamlConfiguration.loadConfiguration(file);
+		if(itemNames.contains(itemName)) {
+			return config.getInt("ShopItems." + itemName + ".damage");
+		}
+		else {
+			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
+		}
+	}
+	
 	public static ArrayList<String> addEnchantments(ItemStack itemStack, ArrayList<String> enchantmentList) {
 		Enchantment e = null;
 		int lvl = 0;
@@ -865,13 +952,14 @@ public abstract class Shop {
 			}
 			else if(command.equals("one")) {
 				switch(slot) {
-				case 5: if(editorItemStack != null && operator.equals("plus")) {
+				case 5: if(editorItemStack != null && operator.equals("plus") && (editorItemStack.getAmount()+1 <= 64)) {
 							editorItemStack.setAmount(editorItemStack.getAmount() + 1);
 						}
-						else if(editorItemStack != null){
-							if(editorItemStack.getAmount() > 1) {
-								editorItemStack.setAmount(editorItemStack.getAmount() - 1);
-							}
+						else if(editorItemStack != null && operator.equals("plus") && (editorItemStack.getAmount()+1 > 64)) {
+							editorItemStack.setAmount(64);
+						}
+						else if(editorItemStack != null && editorItemStack.getAmount() > 1){
+							editorItemStack.setAmount(editorItemStack.getAmount() - 1);
 						} 
 						break;
 				case 14: if(price >= 1 && operator.equals("minus")) {
@@ -891,13 +979,14 @@ public abstract class Shop {
 			else if(command.equals("ten")) {
 				
 				switch(slot) {
-				case 6: if(editorItemStack != null && operator.equals("plus")) {
+				case 6: if(editorItemStack != null && operator.equals("plus") && (editorItemStack.getAmount()+10 <= 64)) {
 							editorItemStack.setAmount(editorItemStack.getAmount() + 10);
 						}
-						else if(editorItemStack != null){
-							if(editorItemStack.getAmount() > 10) {
-								editorItemStack.setAmount(editorItemStack.getAmount() - 10);
-							}
+						else if(editorItemStack != null && operator.equals("plus") && (editorItemStack.getAmount()+10 > 64)) {
+							editorItemStack.setAmount(64);
+						}
+						else if(editorItemStack != null && editorItemStack.getAmount() > 10){
+							editorItemStack.setAmount(editorItemStack.getAmount() - 10);
 						} 
 						break;
 				case 15: if(price >= 10 && operator.equals("minus")) {
@@ -916,13 +1005,14 @@ public abstract class Shop {
 			}
 			else if(command.equals("twenty")) {
 				switch(slot) {
-				case 7: if(editorItemStack != null && operator.equals("plus")) {
+				case 7: if(editorItemStack != null && operator.equals("plus") && (editorItemStack.getAmount()+20 <= 64)) {
 							editorItemStack.setAmount(editorItemStack.getAmount() + 20);
 						}
-						else if(editorItemStack != null){
-							if(editorItemStack.getAmount() > 20) {
-								editorItemStack.setAmount(editorItemStack.getAmount() - 20);
-							}
+						else if(editorItemStack != null && operator.equals("plus") && (editorItemStack.getAmount()+20 > 64)) {
+							editorItemStack.setAmount(64);
+						}
+						else if(editorItemStack != null && editorItemStack.getAmount() > 20){
+							editorItemStack.setAmount(editorItemStack.getAmount() - 20);
 						} 
 						break;
 				case 16: if(price >= 20 && operator.equals("minus")) {

@@ -111,7 +111,10 @@ public class AdminShop extends Shop {
 	 * @throws ShopSystemException
 	 */
 	public static void createAdminShop(File dataFolder,String name,Location spawnLocation,int size) throws ShopSystemException {
-		if(getAdminShopNameList().contains(name)) {
+		if(name.equals("Spawner") || name.contains("-") || name.contains("_")) {
+			throw new ShopSystemException(ShopSystemException.INVALID_SHOP_NAME);
+		}
+		else if(getAdminShopNameList().contains(name)) {
 			throw new ShopSystemException(ShopSystemException.SHOP_ALREADY_EXISTS);
 		}
 		else if(size%9 != 0) {

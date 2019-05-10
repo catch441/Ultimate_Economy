@@ -4,6 +4,8 @@ public class ShopSystemException extends Exception{
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final String INVALID_SHOP_NAME = "This shopname is invalid! Use a name without '_','-' and not equals 'Spawner'.";
+	public static final String INVALID_CHAR_IN_SHOP_NAME = "This shopname is invalid! Use a name without '_','-'.";
 	public static final String INVALID_SELL_PRICE = "This sellprice is invalid!";
 	public static final String INVALID_BUY_PRICE = "This buyprice is invalid!";
 	public static final String INVALID_PRICES = "One of the prices have to be above 0!";
@@ -21,6 +23,7 @@ public class ShopSystemException extends Exception{
 	public static final String SHOP_DOES_NOT_EXIST = "This shop does not exist!";
 	public static final String SHOP_ALREADY_EXISTS = "This shop already exists!";
 	public static final String INVALID_INVENTORY_SIZE = "The size is not a multiple of 9!";
+	public static final String ITEM_DOES_NOT_EXIST = "This item does not exist!";
 
 	
 	public ShopSystemException (String msg) {

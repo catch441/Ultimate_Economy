@@ -46,6 +46,7 @@ public class EconomyPlayer {
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
 		jobs = new ArrayList<>();
 		homes = new HashMap<>();
+		joinedTowns = new ArrayList<>();
 		this.name = name;
 		if(isNew) {
 			scoreBoardDisabled = true;
@@ -58,6 +59,7 @@ public class EconomyPlayer {
 			scoreBoardDisabled = config.getBoolean(name + ".bank");
 			account = config.getDouble(name + ".account amount");
 			jobs = config.getStringList(name + ".Jobs");
+			joinedTowns = config.getStringList(name + "joinedTowns");
 			List<String> homeNameList = config.getStringList(name + ".Home.Homelist");
 			for(String homeName:homeNameList) {
 				Location homeLocation = new Location(
@@ -195,10 +197,10 @@ public class EconomyPlayer {
 		}
 		else {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
-			List<String> list = config.getStringList(name + ".joinedTowns");
-			list.add(townName);
-			config.set(name + ".joinedTowns", list);
+			joinedTowns.add(townName);
+			config.set(name + ".joinedTowns", joinedTowns);
 			save(config);
+			
 		}
 	}
 	

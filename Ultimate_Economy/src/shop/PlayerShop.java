@@ -266,7 +266,10 @@ public class PlayerShop extends Shop {
 	 * @throws ShopSystemException
 	 */
 	public static void createPlayerShop(File dataFolder,String name,Location spawnLocation,int size) throws ShopSystemException {
-		if(getPlayerShopNameList().contains(name)) {
+		if(name.contains("-") || name.contains("_")) {
+			throw new ShopSystemException(ShopSystemException.INVALID_CHAR_IN_SHOP_NAME);
+		}
+		else if(getPlayerShopNameList().contains(name)) {
 			throw new ShopSystemException(ShopSystemException.SHOP_ALREADY_EXISTS);
 		}
 		else if(size%9 != 0) {
@@ -307,7 +310,7 @@ public class PlayerShop extends Shop {
 	 * @throws ShopSystemException
 	 */
 	public static void loadAllPlayerShops(FileConfiguration fileConfig,File dataFolder,Server server) throws ShopSystemException {
-		for(String shopName:fileConfig.getStringList("ShopNames")) {
+		for(String shopName:fileConfig.getStringList("PlayerShopNames")) {
 			File file = new File(dataFolder, shopName + ".yml");
 			if(file.exists()) {
 				playerShopList.add(new PlayerShop(dataFolder,server, shopName));
