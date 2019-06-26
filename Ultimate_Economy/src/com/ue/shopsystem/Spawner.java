@@ -1,4 +1,4 @@
-package shop;
+package com.ue.shopsystem;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;

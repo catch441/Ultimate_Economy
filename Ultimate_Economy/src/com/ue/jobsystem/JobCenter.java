@@ -90,6 +90,7 @@ public class JobCenter {
 		jobnames = config.getStringList("Jobnames");
 		inventory = Bukkit.createInventory(villager, config.getInt("JobCenterSize"),name);
 		for(String string:jobnames) {
+			Bukkit.getLogger().info("Jobname: " + string + " | " + config.getString("Jobs." + string + ".ItemMaterial"));
 			ItemStack jobItem = new ItemStack(Material.valueOf(config.getString("Jobs." + string + ".ItemMaterial")));
 			ItemMeta meta = jobItem.getItemMeta();
 			meta.setDisplayName(string);
@@ -104,6 +105,7 @@ public class JobCenter {
 	}
 	
 	private void setupVillager() {
+		location.getChunk().load();
 		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10,10,10);
 		for(Entity e:entitys) {
 			if(e.getName().equals(name)) {
@@ -214,7 +216,7 @@ public class JobCenter {
 	 * @param y
 	 * @param z
 	 */
-	public void moveShop(int x,int y,int z) {
+	public void moveShop(double x,double y,double z) {
 		config = YamlConfiguration.loadConfiguration(file);
 		config.set("ShopLocation.x", x);
 		config.set("ShopLocation.y", y);

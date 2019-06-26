@@ -1,4 +1,4 @@
-package shop;
+package com.ue.shopsystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,8 +46,8 @@ import com.mojang.authlib.properties.Property;
 import com.ue.exceptions.ShopSystemException;
 
 public abstract class Shop {
-	
-	//minecraft skull texture links
+
+	// minecraft skull texture links
 	private static final String PLUS = "http://textures.minecraft.net/texture/9a2d891c6ae9f6baa040d736ab84d48344bb6b70d7f1a280dd12cbac4d777";
 	private static final String MINUS = "http://textures.minecraft.net/texture/935e4e26eafc11b52c11668e1d6634e7d1d0d21c411cb085f9394268eb4cdfba";
 	private static final String ONE = "http://textures.minecraft.net/texture/d2a6f0e84daefc8b21aa99415b16ed5fdaa6d8dc0c3cd591f49ca832b575";
@@ -57,18 +57,18 @@ public abstract class Shop {
 	private static final String TWENTY = "http://textures.minecraft.net/texture/f7b29a1bb25b2ad8ff3a7a38228189c9461f457a4da98dae29384c5c25d85";
 	private static final String BUY = "http://textures.minecraft.net/texture/e5da4847272582265bdaca367237c96122b139f4e597fbc6667d3fb75fea7cf6";
 	private static final String SELL = "http://textures.minecraft.net/texture/abae89e92ac362635ba3e9fb7c12b7ddd9b38adb11df8aa1aff3e51ac428a4";
-	
+
 	public Villager villager;
 	public FileConfiguration config;
 	public File file;
 	public String name;
 	public Location location;
-	public Inventory inventory,editor,slotEditor;
+	public Inventory inventory, editor, slotEditor;
 	public int size;
 	public List<String> itemNames;
 	public boolean isPlayershop;
 	public int slotEditorSlot;
-	
+
 	/**
 	 * Constructor for creating a new shop.
 	 * 
@@ -78,12 +78,12 @@ public abstract class Shop {
 	 * @param size
 	 * @param isPlayershop
 	 */
-	public Shop(File dataFolder,String name,Location spawnLocation,int size,boolean isPlayershop) {
+	public Shop(File dataFolder, String name, Location spawnLocation, int size, boolean isPlayershop) {
 		this.isPlayershop = isPlayershop;
 		itemNames = new ArrayList<>();
-		file = new File(dataFolder , name + ".yml");
-		inventory = Bukkit.createInventory(null, size,name);
-		slotEditor = Bukkit.createInventory(null, 27,name + "-SlotEditor");
+		file = new File(dataFolder, name + ".yml");
+		inventory = Bukkit.createInventory(null, size, name);
+		slotEditor = Bukkit.createInventory(null, 27, name + "-SlotEditor");
 		try {
 			file.createNewFile();
 		} catch (IOException e1) {
@@ -103,7 +103,7 @@ public abstract class Shop {
 		save();
 		setupShopVillager();
 	}
-	
+
 	/**
 	 * Construstor for loading an existing shop.
 	 * 
@@ -112,41 +112,44 @@ public abstract class Shop {
 	 * @param name
 	 * @param isPlayershop
 	 */
-	public Shop(File dataFolder,Server server,String name,boolean isPlayershop) {
-		
+	public Shop(File dataFolder, Server server, String name, boolean isPlayershop) {
+
 		this.isPlayershop = isPlayershop;
 		itemNames = new ArrayList<>();
-		file = new File(dataFolder , name + ".yml");
+		file = new File(dataFolder, name + ".yml");
 		config = YamlConfiguration.loadConfiguration(file);
 		size = config.getInt("ShopSize");
-		inventory = Bukkit.createInventory(null, this.size,name);
-		slotEditor = Bukkit.createInventory(null, 27,name + "-SlotEditor");
+		inventory = Bukkit.createInventory(null, this.size, name);
+		slotEditor = Bukkit.createInventory(null, 27, name + "-SlotEditor");
 		this.name = name;
 		itemNames = config.getStringList("ShopItemList");
-		inventory = Bukkit.createInventory(villager, size,name);
-		location = new Location(server.getWorld(config.getString("ShopLocation.World")),config.getDouble("ShopLocation.x"),config.getDouble("ShopLocation.y"),config.getDouble("ShopLocation.z"));
+		inventory = Bukkit.createInventory(villager, size, name);
+		location = new Location(server.getWorld(config.getString("ShopLocation.World")),
+				config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
+				config.getDouble("ShopLocation.z"));
 		setupShopVillager();
 	}
-	
+
 	private void setupShopVillager() {
-		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10,10,10);
-		for(Entity entity:entitys) {
-			if(entity.getName().equals(name)) {
+		location.getChunk().load();
+		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10, 10, 10);
+		for (Entity entity : entitys) {
+			if (entity.getName().equals(name)) {
 				entity.remove();
 			}
 		}
-		villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);     
+		villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
 		villager.setCustomName(name);
 		villager.setCustomNameVisible(true);
 		villager.setProfession(Villager.Profession.NITWIT);
 		villager.setSilent(true);
-		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000,30000000));             
-		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000,30000000));
-		editor = Bukkit.createInventory(null, this.size,name + "-Editor");
+		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
+		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
+		editor = Bukkit.createInventory(null, this.size, name + "-Editor");
 		setupShopItems();
 		setupEditor();
 	}
-	
+
 	/**
 	 * Only public for child PlayerShop. Not for commercial use.
 	 */
@@ -156,14 +159,14 @@ public abstract class Shop {
 		ItemMeta meta = anvil.getItemMeta();
 		meta.setDisplayName("Info");
 		anvil.setItemMeta(meta);
-		addShopItemToInv(anvil, 1, slot, 0.0, 0.0); 
+		addShopItemToInv(anvil, 1, slot, 0.0, 0.0);
 		itemNames.add("ANVIL_0");
 	}
-	
+
 	private void setupSlotEditor() {
 		List<String> list = new ArrayList<String>();
 		list.add(ChatColor.GOLD + "Price: " + 0);
-		ItemStack item = getSkull(PLUS,"plus");
+		ItemStack item = getSkull(PLUS, "plus");
 		slotEditor.setItem(2, item);
 		ItemMeta meta = item.getItemMeta();
 		meta.setLore(list);
@@ -204,7 +207,8 @@ public abstract class Shop {
 		item = new ItemStack(Material.BARRIER);
 		meta = item.getItemMeta();
 		meta.setDisplayName(ChatColor.RED + "remove item");
-		item.setItemMeta(meta);;
+		item.setItemMeta(meta);
+		;
 		slotEditor.setItem(26, item);
 		item = getSkull(BUY, "buyprice");
 		meta = item.getItemMeta();
@@ -217,7 +221,7 @@ public abstract class Shop {
 		item.setItemMeta(meta);
 		slotEditor.setItem(18, item);
 	}
-	
+
 	/**
 	 * This method adds a item to this shop.
 	 * 
@@ -227,63 +231,57 @@ public abstract class Shop {
 	 * @param itemStack
 	 * @throws ShopSystemException
 	 */
-	public void addItem(int slot, double sellPrice, double buyPrice,ItemStack itemStack) throws ShopSystemException {
+	public void addItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack) throws ShopSystemException {
 		String name = getShopItemName(itemStack);
 		ItemMeta meta = itemStack.getItemMeta();
 		String entity = meta.getDisplayName();
-		if(itemStack.getType() == Material.SPAWNER && !isPlayershop) {
+		if (itemStack.getType() == Material.SPAWNER && !isPlayershop) {
 			name = name + "_" + entity;
 		}
-		if(!slotIsEmpty(slot+1)) {
+		if (!slotIsEmpty(slot + 1)) {
 			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_OCCUPIED);
-		}
-		else if(sellPrice < 0) {
+		} else if (sellPrice < 0) {
 			throw new ShopSystemException(ShopSystemException.INVALID_SELL_PRICE);
-		}
-		else if(buyPrice < 0) {
+		} else if (buyPrice < 0) {
 			throw new ShopSystemException(ShopSystemException.INVALID_BUY_PRICE);
-		}
-		else if(buyPrice == 0 && sellPrice == 0) {
+		} else if (buyPrice == 0 && sellPrice == 0) {
 			throw new ShopSystemException(ShopSystemException.INVALID_PRICES);
-		}
-		else if(itemNames.contains(name)) {
+		} else if (itemNames.contains(name)) {
 			throw new ShopSystemException(ShopSystemException.ITEM_ALREADY_EXISTS);
-		}
-		else {
-			//occupied value only for commands
+		} else {
+			// occupied value only for commands
 			config = YamlConfiguration.loadConfiguration(file);
 			itemNames = config.getStringList("ShopItemList");
 			ArrayList<String> enchantmentList = new ArrayList<>();
-			//is only the real entity name with a spawner
+			// is only the real entity name with a spawner
 			int damage = 0;
 			String itemType = getItemType(itemStack);
-			switch(itemType) {
-				case "enchanted": 
+			switch (itemType) {
+				case "enchanted":
 					Map<Enchantment, Integer> enchants = null;
 					Damageable damageMeta = (Damageable) itemStack.getItemMeta();
-					if(damageMeta != null) {
+					if (damageMeta != null) {
 						damage = damageMeta.getDamage();
 					}
-					if(itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
+					if (itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
 						EnchantmentStorageMeta enchantMeta = (EnchantmentStorageMeta) meta;
 						enchants = enchantMeta.getStoredEnchants();
-					}
-					else {
+					} else {
 						enchants = meta.getEnchants();
 					}
-					for(Entry<Enchantment, Integer> e: enchants.entrySet()) {
+					for (Entry<Enchantment, Integer> e : enchants.entrySet()) {
 						enchantmentList.add(e.getKey().getKey().getKey().toLowerCase() + "-" + e.getValue());
 					}
 					enchantmentList.sort(String.CASE_INSENSITIVE_ORDER);
 					break;
-				case "default": 
+				case "default":
 					Damageable damageMeta2 = (Damageable) itemStack.getItemMeta();
-					if(damageMeta2 != null) {
+					if (damageMeta2 != null) {
 						damage = damageMeta2.getDamage();
 					}
 					break;
 			}
-			addShopItemToInv(itemStack , itemStack.getAmount(), slot, sellPrice, buyPrice);
+			addShopItemToInv(itemStack, itemStack.getAmount(), slot, sellPrice, buyPrice);
 			itemNames.add(name);
 			config = YamlConfiguration.loadConfiguration(file);
 			config.set("ShopItems." + name + ".Name", name);
@@ -291,17 +289,17 @@ public abstract class Shop {
 			config.set("ShopItems." + name + ".Slot", slot);
 			config.set("ShopItems." + name + ".sellPrice", sellPrice);
 			config.set("ShopItems." + name + ".buyPrice", buyPrice);
-			if(isPlayershop) {
+			if (isPlayershop) {
 				config.set("ShopItems." + name + ".stock", 0);
 			}
-			if(meta.getLore() != null) {
+			if (meta.getLore() != null) {
 				config.set("ShopItems." + name + ".lore", meta.getLore());
 			}
-			//for enchanted and default
-			if(damage > 0) {
+			// for enchanted and default
+			if (damage > 0) {
 				config.set("ShopItems." + name + ".damage", damage);
 			}
-			if(itemType.equals("enchanted")) {
+			if (itemType.equals("enchanted")) {
 				config.set("ShopItems." + name + ".enchantments", enchantmentList);
 			}
 			itemNames = removedoubleObjects(itemNames);
@@ -309,7 +307,7 @@ public abstract class Shop {
 			save();
 		}
 	}
-	
+
 	/**
 	 * This method edits an existing item in this shop.
 	 * 
@@ -323,238 +321,234 @@ public abstract class Shop {
 	public String editItem(int slot, String amount, String sellPrice, String buyPrice) throws ShopSystemException {
 		if (slotIsEmpty(slot)) {
 			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_EMPTY);
-		} 
-		else if (!amount.equals("none") || Integer.valueOf(amount) <= 0 || Integer.valueOf(amount) > 64) {
+		} else if (!amount.equals("none") && (Integer.valueOf(amount) <= 0 || Integer.valueOf(amount) > 64)) {
 			throw new ShopSystemException(ShopSystemException.INVALID_AMOUNT);
-		} 
-		else if (!sellPrice.equals("none") || Integer.valueOf(sellPrice) < 0) {
+		}
+		if (!sellPrice.equals("none") && Double.valueOf(sellPrice) < 0) {
 			throw new ShopSystemException(ShopSystemException.INVALID_SELL_PRICE);
 		} 
-		else if (!buyPrice.equals("none") || Integer.valueOf(buyPrice) < 0) {
+		if (!buyPrice.equals("none") && Double.valueOf(buyPrice) < 0) {
 			throw new ShopSystemException(ShopSystemException.INVALID_BUY_PRICE);
-		}
-		else if(!buyPrice.equals("none") && !sellPrice.equals("none") && Integer.valueOf(sellPrice) == 0 && Integer.valueOf(buyPrice) == 0) {
+		} else if (!sellPrice.equals("none") && !buyPrice.equals("none") && Double.valueOf(sellPrice) == 0
+				&& Double.valueOf(buyPrice) == 0) {
 			throw new ShopSystemException(ShopSystemException.INVALID_PRICES);
-		}
-		else {
-			String itemName = inventory.getItem(slot-1).getType().name();
-			ItemStack stack = inventory.getItem(slot-1);
+		} else {
+			String itemName = inventory.getItem(slot - 1).getType().name();
+			ItemStack stack = inventory.getItem(slot - 1);
 			ArrayList<String> newList = new ArrayList<>();
 			boolean isEnchanted = false;
 			boolean isPotion = false;
-			if(stack.getType().toString().equals("ENCHANTED_BOOK")) {
+			if (stack.getType().toString().equals("ENCHANTED_BOOK")) {
 				isEnchanted = true;
 				EnchantmentStorageMeta meta = (EnchantmentStorageMeta) stack.getItemMeta();
 				itemName = itemName.toLowerCase() + "#Enchanted_";
-				for(Entry<Enchantment, Integer> map: meta.getStoredEnchants().entrySet()) {
-					newList.add(map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
+				for (Entry<Enchantment, Integer> map : meta.getStoredEnchants().entrySet()) {
+					newList.add(map.getKey().getKey().toString().substring(
+							map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
 					newList.sort(String.CASE_INSENSITIVE_ORDER);
 				}
 				itemName = itemName + newList.toString();
-			}
-			else if(!stack.getEnchantments().isEmpty()){
+			} else if (!stack.getEnchantments().isEmpty()) {
 				isEnchanted = true;
 				itemName = itemName.toLowerCase() + "#Enchanted_";
-				for(Entry<Enchantment, Integer> map: stack.getEnchantments().entrySet()) {
-					newList.add(map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
+				for (Entry<Enchantment, Integer> map : stack.getEnchantments().entrySet()) {
+					newList.add(map.getKey().getKey().toString().substring(
+							map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
 					newList.sort(String.CASE_INSENSITIVE_ORDER);
 				}
 				itemName = itemName + newList.toString();
-			}
-			else if(stack.getType().toString().contains("POTION")) {
+			} else if (stack.getType().toString().contains("POTION")) {
 				isPotion = true;
 				boolean extended = false;
 				boolean upgraded = false;
 				String property;
 				PotionMeta meta = (PotionMeta) stack.getItemMeta();
 				String type = meta.getBasePotionData().getType().toString().toLowerCase();
-				if(extended) {
+				if (extended) {
 					property = "extended";
-				}
-				else if(upgraded) {
+				} else if (upgraded) {
 					property = "upgraded";
-				}
-				else {
+				} else {
 					property = "none";
 				}
-				
+
 				itemName = itemName.toLowerCase() + ":" + type + "#" + property;
 			}
 			String message = ChatColor.GOLD + "Updated ";
 			config = YamlConfiguration.loadConfiguration(file);
-			if(!amount.equals("none")) {
-				config.set("ShopItems." + itemName + ".Amount", Integer.valueOf(amount));	
+			if (!amount.equals("none")) {
+				config.set("ShopItems." + itemName + ".Amount", Integer.valueOf(amount));
 				message = message + ChatColor.GREEN + "amount ";
 			}
-			if(!sellPrice.equals("none")) {
-				config.set("ShopItems." + itemName + ".sellPrice", Double.valueOf(sellPrice));		
+			if (!sellPrice.equals("none")) {
+				config.set("ShopItems." + itemName + ".sellPrice", Double.valueOf(sellPrice));
 				message = message + ChatColor.GREEN + "sellPrice ";
 			}
-			if(!buyPrice.equals("none")) {
-				config.set("ShopItems." + itemName + ".buyPrice", Double.valueOf(buyPrice));	
+			if (!buyPrice.equals("none")) {
+				config.set("ShopItems." + itemName + ".buyPrice", Double.valueOf(buyPrice));
 				message = message + ChatColor.GREEN + "buyPrice ";
 			}
 			save();
-			inventory.clear(slot-1);
-			if(isEnchanted || isPotion) {
+			inventory.clear(slot - 1);
+			if (isEnchanted || isPotion) {
 				loadItem(itemName);
-			}
-			else {
+			} else {
 				loadItem(itemName.toUpperCase());
 			}
 			message = message + ChatColor.GOLD + "for item " + ChatColor.GREEN + itemName.toLowerCase();
 			return message;
 		}
 	}
-	
+
 	/**
 	 * Loads a item by it's name. Not for commercial use.
 	 * 
 	 * @param name1
-	 * @throws ShopSystemException 
+	 * @throws ShopSystemException
 	 */
 	public void loadItem(String name1) throws ShopSystemException {
 		config = YamlConfiguration.loadConfiguration(file);
-		if(config.getString("ShopItems." + name1 + ".Name") != null) {
+		if (config.getString("ShopItems." + name1 + ".Name") != null) {
 			String string = config.getString("ShopItems." + name1 + ".Name");
 			List<String> lore = config.getStringList("ShopItems." + name1 + ".lore");
 			int damage = config.getInt("ShopItems." + name1 + ".damage");
 			String displayName = "default";
-			if(string.contains("|")) {
-				displayName = string.substring(0,string.indexOf("|"));
-				string = string.substring(string.indexOf("|")+1);
-			} 
-			ItemStack itemStack = null;
-			//enchanted
-			if(string.contains("#Enchanted_")) {
-				itemStack = new ItemStack(Material.valueOf(string.substring(0, string.indexOf("#")).toUpperCase()), config.getInt("ShopItems." + name1 + ".Amount"));
-				addEnchantments(itemStack, new ArrayList<String>(config.getStringList("ShopItems." + name1 + ".enchantments")));		
+			if (string.contains("|")) {
+				displayName = string.substring(0, string.indexOf("|"));
+				string = string.substring(string.indexOf("|") + 1);
 			}
-			//potion
-			else if(string.contains("potion:")) {
+			ItemStack itemStack = null;
+			// enchanted
+			if (string.contains("#Enchanted_")) {
+				itemStack = new ItemStack(Material.valueOf(string.substring(0, string.indexOf("#")).toUpperCase()),
+						config.getInt("ShopItems." + name1 + ".Amount"));
+				addEnchantments(itemStack,
+						new ArrayList<String>(config.getStringList("ShopItems." + name1 + ".enchantments")));
+			}
+			// potion
+			else if (string.contains("potion:")) {
 				String name = config.getString("ShopItems." + name1 + ".Name");
-				itemStack = new ItemStack(Material.valueOf(string.substring(0,string.indexOf(":")).toUpperCase()), config.getInt("ShopItems." + name1 + ".Amount"));
+				itemStack = new ItemStack(Material.valueOf(string.substring(0, string.indexOf(":")).toUpperCase()),
+						config.getInt("ShopItems." + name1 + ".Amount"));
 				PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
 				boolean extended = false;
 				boolean upgraded = false;
 				String property = name.substring(name.indexOf("#") + 1);
-				if(property.equalsIgnoreCase("extended")) {
+				if (property.equalsIgnoreCase("extended")) {
 					extended = true;
-				}
-				else if(property.equalsIgnoreCase("upgraded")) {
+				} else if (property.equalsIgnoreCase("upgraded")) {
 					upgraded = true;
 				}
-				meta.setBasePotionData(new PotionData(PotionType.valueOf(name.substring(name.indexOf(":") + 1,name.indexOf("#")).toUpperCase()),extended,upgraded));
+				meta.setBasePotionData(new PotionData(
+						PotionType.valueOf(name.substring(name.indexOf(":") + 1, name.indexOf("#")).toUpperCase()),
+						extended, upgraded));
 				itemStack.setItemMeta(meta);
 			}
-			//all other
-			else if(!string.contains("SPAWNER")) {
-				itemStack = new ItemStack(Material.getMaterial(string),config.getInt("ShopItems." + name1 + ".Amount"));
+			// all other
+			else if (!string.contains("SPAWNER")) {
+				itemStack = new ItemStack(Material.getMaterial(string),
+						config.getInt("ShopItems." + name1 + ".Amount"));
 			}
-			if(itemStack != null) {
+			if (itemStack != null) {
 				ItemMeta meta2 = itemStack.getItemMeta();
-				if(lore != null && !lore.isEmpty()) {
+				if (lore != null && !lore.isEmpty()) {
 					meta2.setLore(lore);
-					
+
 				}
-				if(!displayName.equals("default")) {
+				if (!displayName.equals("default")) {
 					meta2.setDisplayName(displayName);
 				}
-				if(damage > 0) {
+				if (damage > 0) {
 					Damageable damageMeta = (Damageable) meta2;
 					damageMeta.setDamage(damage);
 					meta2 = (ItemMeta) damageMeta;
 				}
-				itemStack.setItemMeta(meta2);	//
-				addShopItemToInv(itemStack,config.getInt("ShopItems." + name1 + ".Amount"), config.getInt("ShopItems." + name1 + ".Slot"), config.getDouble("ShopItems." + name1 + ".sellPrice"), config.getDouble("ShopItems." + name1 + ".buyPrice"));
+				itemStack.setItemMeta(meta2); //
+				addShopItemToInv(itemStack, config.getInt("ShopItems." + name1 + ".Amount"),
+						config.getInt("ShopItems." + name1 + ".Slot"),
+						config.getDouble("ShopItems." + name1 + ".sellPrice"),
+						config.getDouble("ShopItems." + name1 + ".buyPrice"));
 			}
-		}
-		else if(!name1.equals("ANVIL_0") && !name1.equals("CRAFTING_TABLE_0")){
+		} else if (!name1.equals("ANVIL_0") && !name1.equals("CRAFTING_TABLE_0")) {
 			throw new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOPITEM + " |" + name1 + "|");
 		}
 	}
-	
+
 	private boolean hasCustomName(ItemStack itemStack) {
 		boolean has = true;
 		ItemStack testStack = new ItemStack(itemStack.getType());
 		ItemMeta testMeta = testStack.getItemMeta();
-		if(itemStack.getItemMeta().getDisplayName().equals(testMeta.getDisplayName())) {
+		if (itemStack.getItemMeta().getDisplayName().equals(testMeta.getDisplayName())) {
 			has = false;
 		}
 		return has;
 	}
-	
+
 	/**
 	 * This method removes a item from this shop.
 	 * 
 	 * @param slot
-	 * @throws ShopSystemException 
+	 * @throws ShopSystemException
 	 */
 	public void removeItem(int slot) throws ShopSystemException {
-		if(slotIsEmpty(slot)) {
+		if (slotIsEmpty(slot + 1)) {
 			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_EMPTY);
-		}
-		else if((slot + 1) != size && (slot + 1) <= size) {
-			config = YamlConfiguration.loadConfiguration(file);
-			List<String> itemList = config.getStringList("ShopItemList");
+		} else if ((slot + 1) != size && (slot + 1) <= size) {
 			ItemStack stack = inventory.getItem(slot);
 			String itemname = null;
 			itemname = stack.getType().toString();
-			if(!stack.getType().toString().toUpperCase().contains("SPAWNER") && hasCustomName(stack)) {
+			if (!stack.getType().toString().toUpperCase().contains("SPAWNER") && hasCustomName(stack)) {
 				itemname = stack.getItemMeta().getDisplayName() + "|" + itemname;
-			}
-			else if(stack.getType().toString().toUpperCase().contains("SPAWNER")) {
+			} else if (stack.getType().toString().toUpperCase().contains("SPAWNER")) {
 				itemname = itemname + "_" + stack.getItemMeta().getDisplayName();
 			}
-			if(inventory.getItem(slot).getType().toString().equals("ENCHANTED_BOOK")) {
+			if (inventory.getItem(slot).getType().toString().equals("ENCHANTED_BOOK")) {
 				EnchantmentStorageMeta meta = (EnchantmentStorageMeta) stack.getItemMeta();
-				if(!meta.getStoredEnchants().isEmpty()) {
+				if (!meta.getStoredEnchants().isEmpty()) {
 					itemname = itemname.toLowerCase() + "#Enchanted_";
 					List<String> enchantedList = new ArrayList<>();
-					for(Entry<Enchantment, Integer> map: meta.getStoredEnchants().entrySet()) {
-						enchantedList.add(map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
+					for (Entry<Enchantment, Integer> map : meta.getStoredEnchants().entrySet()) {
+						enchantedList.add(map.getKey().getKey().toString().substring(
+								map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
 						enchantedList.sort(String.CASE_INSENSITIVE_ORDER);
 					}
 					itemname = itemname + enchantedList.toString();
 				}
-			}
-			else if(!stack.getEnchantments().isEmpty()) {
+			} else if (!stack.getEnchantments().isEmpty()) {
 				itemname = itemname.toLowerCase() + "#Enchanted_";
 				List<String> enchantedList = new ArrayList<>();
-				for(Entry<Enchantment, Integer> map: inventory.getItem(slot).getEnchantments().entrySet()) {
-					enchantedList.add(map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
+				for (Entry<Enchantment, Integer> map : inventory.getItem(slot).getEnchantments().entrySet()) {
+					enchantedList.add(map.getKey().getKey().toString().substring(
+							map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
 					enchantedList.sort(String.CASE_INSENSITIVE_ORDER);
 				}
 				itemname = itemname + enchantedList.toString();
-			}
-			else if(stack.getType().toString().contains("POTION")) {
+			} else if (stack.getType().toString().contains("POTION")) {
 				boolean extended = false;
 				boolean upgraded = false;
 				String property;
 				PotionMeta meta = (PotionMeta) stack.getItemMeta();
 				String type = meta.getBasePotionData().getType().toString().toLowerCase();
-				if(extended) {
+				if (extended) {
 					property = "extended";
-				}
-				else if(upgraded) {
+				} else if (upgraded) {
 					property = "upgraded";
-				}
-				else {
+				} else {
 					property = "none";
 				}
 				itemname = itemname.toLowerCase() + ":" + type + "#" + property;
 			}
+			config = YamlConfiguration.loadConfiguration(file);
 			inventory.clear(slot);
-			itemList.remove(itemname);
-			config.set("ShopItemList", itemList);
+			itemNames.remove(itemname);
+			config.set("ShopItemList", itemNames);
 			config.set("ShopItems." + itemname, null);
 			save();
-		}
-		else if((slot + 1) == size){
+		} else if ((slot + 1) == size) {
 			throw new ShopSystemException(ShopSystemException.ITEM_CANNOT_BE_DELETED);
 		}
 	}
-	
+
 	/**
 	 * This method returns the sellprice of a item.
 	 * 
@@ -564,14 +558,13 @@ public abstract class Shop {
 	 */
 	public double getItemSellPrice(String itemName) throws ShopSystemException {
 		config = YamlConfiguration.loadConfiguration(file);
-		if(itemNames.contains(itemName)) {
+		if (itemNames.contains(itemName)) {
 			return config.getDouble("ShopItems." + itemName + ".sellPrice");
-		}
-		else {
+		} else {
 			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
 		}
 	}
-	
+
 	/**
 	 * This method returns the amount of a item.
 	 * 
@@ -581,14 +574,13 @@ public abstract class Shop {
 	 */
 	public int getItemAmount(String itemName) throws ShopSystemException {
 		config = YamlConfiguration.loadConfiguration(file);
-		if(itemNames.contains(itemName)) {
+		if (itemNames.contains(itemName)) {
 			return config.getInt("ShopItems." + itemName + ".Amount");
-		}
-		else {
+		} else {
 			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
 		}
 	}
-	
+
 	/**
 	 * This method returns the buyprice of a item.
 	 * 
@@ -598,14 +590,13 @@ public abstract class Shop {
 	 */
 	public double getItemBuyPrice(String itemName) throws ShopSystemException {
 		config = YamlConfiguration.loadConfiguration(file);
-		if(itemNames.contains(itemName)) {
+		if (itemNames.contains(itemName)) {
 			return config.getDouble("ShopItems." + itemName + ".buyPrice");
-		}
-		else {
+		} else {
 			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
 		}
 	}
-	
+
 	/**
 	 * This method returns the lore of a item.
 	 * 
@@ -615,14 +606,13 @@ public abstract class Shop {
 	 */
 	public List<String> getItemLore(String itemName) throws ShopSystemException {
 		config = YamlConfiguration.loadConfiguration(file);
-		if(itemNames.contains(itemName)) {
+		if (itemNames.contains(itemName)) {
 			return config.getStringList("ShopItems." + itemName + ".lore");
-		}
-		else {
+		} else {
 			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
 		}
 	}
-	
+
 	/**
 	 * This method returns the damage of a item.
 	 * 
@@ -632,69 +622,73 @@ public abstract class Shop {
 	 */
 	public int getItemDamage(String itemName) throws ShopSystemException {
 		config = YamlConfiguration.loadConfiguration(file);
-		if(itemNames.contains(itemName)) {
+		if (itemNames.contains(itemName)) {
 			return config.getInt("ShopItems." + itemName + ".damage");
-		}
-		else {
+		} else {
 			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
 		}
 	}
-	
+
 	public static ArrayList<String> addEnchantments(ItemStack itemStack, ArrayList<String> enchantmentList) {
 		Enchantment e = null;
 		int lvl = 0;
 		ArrayList<String> newList = new ArrayList<>();
-		for(String enchantment:enchantmentList) {
-			e = Enchantment.getByKey(NamespacedKey.minecraft(enchantment.substring(0, enchantment.indexOf("-")))); 
+		for (String enchantment : enchantmentList) {
+			e = Enchantment.getByKey(NamespacedKey.minecraft(enchantment.substring(0, enchantment.indexOf("-"))));
 			lvl = Integer.valueOf(enchantment.substring(enchantment.indexOf("-") + 1));
-			if(e.getMaxLevel() < lvl) {
+			if (e.getMaxLevel() < lvl) {
 				lvl = e.getMaxLevel();
-				enchantment = enchantment.substring(0,enchantment.indexOf("-") + 1) + String.valueOf(lvl);
+				enchantment = enchantment.substring(0, enchantment.indexOf("-") + 1) + String.valueOf(lvl);
 			}
-			if(itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
+			if (itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
 				EnchantmentStorageMeta meta = (EnchantmentStorageMeta) itemStack.getItemMeta();
 				meta.addStoredEnchant(e, lvl, true);
 				itemStack.setItemMeta(meta);
-			}
-			else if(e.canEnchantItem(itemStack)) {	
+			} else if (e.canEnchantItem(itemStack)) {
 				itemStack.addEnchantment(e, lvl);
-			}	
+			}
 		}
-		if(itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
+		if (itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
 			EnchantmentStorageMeta meta = (EnchantmentStorageMeta) itemStack.getItemMeta();
-			for(Entry<Enchantment, Integer> map: meta.getStoredEnchants().entrySet()) {
-				newList.add(map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
+			for (Entry<Enchantment, Integer> map : meta.getStoredEnchants().entrySet()) {
+				newList.add(
+						map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1)
+								+ "-" + map.getValue().intValue());
 				newList.sort(String.CASE_INSENSITIVE_ORDER);
 			}
-		}
-		else {
-			for(Entry<Enchantment, Integer> map: itemStack.getEnchantments().entrySet()) {
-				newList.add(map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
+		} else {
+			for (Entry<Enchantment, Integer> map : itemStack.getEnchantments().entrySet()) {
+				newList.add(
+						map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1)
+								+ "-" + map.getValue().intValue());
 				newList.sort(String.CASE_INSENSITIVE_ORDER);
 			}
 		}
 		return newList;
 	}
-	public ItemStack getSkull(String url,String name) {
-        ItemStack head = new ItemStack(Material.PLAYER_HEAD,1);
-        if(url.isEmpty())return head;
-        SkullMeta headMeta = (SkullMeta) head.getItemMeta();
-        GameProfile profile = new GameProfile(UUID.randomUUID(), null);
-        byte[] encodedData = Base64.getEncoder().encode((String.format("{textures:{SKIN:{url:\"%s\"}}}", url).getBytes()));
-        profile.getProperties().put("textures", new Property("textures", new String(encodedData)));
-        Field profileField = null;
-        try {
-            profileField = headMeta.getClass().getDeclaredField("profile");
-            profileField.setAccessible(true);
-            profileField.set(headMeta, profile);
-        } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e1) {
-            e1.printStackTrace();
-        }
-        headMeta.setDisplayName(name);
-        head.setItemMeta(headMeta);
-        return head;
-    }
-	
+
+	public ItemStack getSkull(String url, String name) {
+		ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
+		if (url.isEmpty())
+			return head;
+		SkullMeta headMeta = (SkullMeta) head.getItemMeta();
+		GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+		byte[] encodedData = Base64.getEncoder()
+				.encode((String.format("{textures:{SKIN:{url:\"%s\"}}}", url).getBytes()));
+		profile.getProperties().put("textures", new Property("textures", new String(encodedData)));
+		Field profileField = null;
+		try {
+			profileField = headMeta.getClass().getDeclaredField("profile");
+			profileField.setAccessible(true);
+			profileField.set(headMeta, profile);
+		} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e1) {
+			e1.printStackTrace();
+		}
+		headMeta.setDisplayName(name);
+		head.setItemMeta(headMeta);
+		return head;
+	}
+
 	/**
 	 * This method returns true if the slot is empty.
 	 * 
@@ -703,26 +697,28 @@ public abstract class Shop {
 	 * @throws ShopSystemException
 	 */
 	public boolean slotIsEmpty(int slot) throws ShopSystemException {
-		if(slot <= inventory.getSize() && slot > 0) {
+		if (slot <= inventory.getSize() && slot > 0) {
 			slot--;
-			boolean isEmpty = false;		
-			if(inventory.getItem(slot) == null) {
+			boolean isEmpty = false;
+			if (inventory.getItem(slot) == null) {
 				isEmpty = true;
 			}
 			return isEmpty;
-		}
-		else {
+		} else {
 			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_INVALID);
 		}
 	}
+
 	public List<String> getItemList() {
 		return itemNames;
 	}
+
 	public List<String> removedoubleObjects(List<String> list) {
 		Set<String> set = new LinkedHashSet<String>(list);
 		list = new ArrayList<String>(set);
 		return list;
 	}
+
 	public void save() {
 		try {
 			config.save(file);
@@ -730,91 +726,95 @@ public abstract class Shop {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void openInv(Player p) {
 		p.openInventory(inventory);
 	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void despawnVillager() {
 		villager.remove();
 	}
+
 	public void deleteShop() {
 		file.delete();
 		World world = villager.getLocation().getWorld();
 		villager.remove();
 		world.save();
 	}
+
 	public int getSize() {
 		return size;
 	}
+
 	public ItemStack getItem(int slot) {
 		slot--;
 		return inventory.getItem(slot);
 	}
+
 	public int getSlotEditorSlot() {
 		return slotEditorSlot;
 	}
-	
+
 	private void setupEditor() {
 		int value = 1;
-		if(isPlayershop) {
+		if (isPlayershop) {
 			value++;
 		}
-		for(int i=0; i< (size - value); i++) {
+		for (int i = 0; i < (size - value); i++) {
 			try {
-				if(slotIsEmpty(i+1)) {
-					editor.setItem(i, getSkull(SLOTEMPTY,"Slot " + (i+1)));
+				if (slotIsEmpty(i + 1)) {
+					editor.setItem(i, getSkull(SLOTEMPTY, "Slot " + (i + 1)));
+				} else {
+					editor.setItem(i, getSkull(SLOTFILLED, "Slot " + (i + 1)));
 				}
-				else {
-					editor.setItem(i, getSkull(SLOTFILLED,"Slot " + (i+1)));
-				}
-			} catch (ShopSystemException e) {}		
+			} catch (ShopSystemException e) {
+			}
 		}
 	}
-	
+
 	public void openEditor(Player p) {
 		setupEditor();
 		p.openInventory(editor);
 	}
-	
+
 	private void switchPlusMinus(int slot, String state) {
 		slot--;
-		if(state.equals("plus")) {
-			ItemStack item = getSkull(MINUS,"minus");
+		if (state.equals("plus")) {
+			ItemStack item = getSkull(MINUS, "minus");
 			slotEditor.setItem(slot, item);
-		}
-		else {
-			ItemStack item = getSkull(PLUS,"plus");
+		} else {
+			ItemStack item = getSkull(PLUS, "plus");
 			slotEditor.setItem(slot, item);
 		}
 	}
-	
+
 	public void openSlotEditor(Player player, int slot) throws IllegalArgumentException, ShopSystemException {
 		setupSlotEditor();
 		ItemStack item;
 		slotEditorSlot = slot;
-		if(slotIsEmpty(slot)) {
+		if (slotIsEmpty(slot)) {
 			item = new ItemStack(Material.BARRIER);
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName(ChatColor.GREEN + "select item");
 			item.setItemMeta(meta);
 			slotEditor.setItem(0, item);
-		}
-		else {
+		} else {
 			slot--;
 			item = new ItemStack(inventory.getItem(slot));
 			ItemMeta meta = item.getItemMeta();
 			List<String> lore = meta.getLore();
-			if(lore != null) {
+			if (lore != null) {
 				Iterator<String> iterator = lore.iterator();
-				while(iterator.hasNext()) {
+				while (iterator.hasNext()) {
 					String string = iterator.next();
-					if(string.contains("buy for") || string.contains("sell for")) {
+					if (string.contains("buy for") || string.contains("sell for")) {
 						iterator.remove();
 					}
-				}	
+				}
 			}
 			meta.setLore(lore);
 			item.setItemMeta(meta);
@@ -822,7 +822,8 @@ public abstract class Shop {
 		}
 		player.openInventory(slotEditor);
 	}
-	private void updateEditorPrice(int a, int b, int c,int d, int e, int price) {
+
+	private void updateEditorPrice(int a, int b, int c, int d, int e, int price) {
 		List<String> list = new ArrayList<>();
 		list.add(ChatColor.GOLD + "Price: " + price);
 		ItemMeta meta = slotEditor.getItem(a).getItemMeta();
@@ -841,68 +842,68 @@ public abstract class Shop {
 		meta.setLore(list);
 		slotEditor.getItem(e).setItemMeta(meta);
 	}
+
 	private String getShopItemName(ItemStack itemStack) {
 		String name = "";
 		ItemMeta meta = itemStack.getItemMeta();
 		String material = itemStack.getType().name();
 		ArrayList<String> enchantmentList = new ArrayList<>();
-		if(hasCustomName(itemStack) && !material.equals("SPAWNER")) {
+		if (hasCustomName(itemStack) && !material.equals("SPAWNER")) {
 			name = meta.getDisplayName() + "|";
 		}
-		switch(getItemType(itemStack)) {
-			case "potion": 
+		switch (getItemType(itemStack)) {
+			case "potion":
 				String property = "none";
 				PotionMeta potionMeta = (PotionMeta) meta;
-				if(potionMeta.getBasePotionData().isExtended()) {
+				if (potionMeta.getBasePotionData().isExtended()) {
 					property = "extended";
-				}
-				else if(potionMeta.getBasePotionData().isUpgraded()) {
+				} else if (potionMeta.getBasePotionData().isUpgraded()) {
 					property = "upgraded";
-				}
-				else {
+				} else {
 					property = "none";
 				}
-				name = name + itemStack.getType().toString().toLowerCase() + ":" + potionMeta.getBasePotionData().getType().toString().toLowerCase() + "#" + property;
+				name = name + itemStack.getType().toString().toLowerCase() + ":"
+						+ potionMeta.getBasePotionData().getType().toString().toLowerCase() + "#" + property;
 				break;
-			case "enchanted": 
+			case "enchanted":
 				Map<Enchantment, Integer> enchants = null;
-				if(itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
+				if (itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
 					EnchantmentStorageMeta enchantMeta = (EnchantmentStorageMeta) meta;
 					enchants = enchantMeta.getStoredEnchants();
-				}
-				else {
+				} else {
 					enchants = meta.getEnchants();
 				}
-				for(Entry<Enchantment, Integer> e: enchants.entrySet()) {
+				for (Entry<Enchantment, Integer> e : enchants.entrySet()) {
 					enchantmentList.add(e.getKey().getKey().getKey().toLowerCase() + "-" + e.getValue());
 				}
 				enchantmentList.sort(String.CASE_INSENSITIVE_ORDER);
 				name = name + itemStack.getType().toString().toLowerCase() + "#Enchanted_" + enchantmentList.toString();
 				break;
-			case "default": 
+			case "default":
 				name = name + material;
 				break;
 		}
 		return name;
 	}
+
 	private String getItemType(ItemStack itemStack) {
 		String type = null;
 		EnchantmentStorageMeta meta = null;
-		if(itemStack.getType() == Material.ENCHANTED_BOOK) {
+		if (itemStack.getType() == Material.ENCHANTED_BOOK) {
 			meta = (EnchantmentStorageMeta) itemStack.getItemMeta();
 		}
-		if(itemStack.getType().toString().toLowerCase().contains("potion")) {
+		if (itemStack.getType().toString().toLowerCase().contains("potion")) {
 			type = "potion";
-		}
-		else if(itemStack.hasItemMeta() && !itemStack.getEnchantments().isEmpty() || meta != null && !meta.getStoredEnchants().isEmpty()){
+		} else if (itemStack.hasItemMeta() && !itemStack.getEnchantments().isEmpty()
+				|| meta != null && !meta.getStoredEnchants().isEmpty()) {
 			type = "enchanted";
-		}
-		else {
+		} else {
 			type = "default";
 		}
 		return type;
 	}
-	public void moveShop(int x,int y,int z) {
+
+	public void moveShop(double x, double y, double z) {
 		config = YamlConfiguration.loadConfiguration(file);
 		config.set("ShopLocation.x", x);
 		config.set("ShopLocation.y", y);
@@ -910,7 +911,7 @@ public abstract class Shop {
 		villager.teleport(new Location(Bukkit.getWorld(config.getString("ShopLocation.World")), x, y, z));
 		save();
 	}
-	
+
 	/**
 	 * This method handles the SlotEditor in the InventoryClickEvent.
 	 * 
@@ -918,131 +919,143 @@ public abstract class Shop {
 	 * @throws ShopSystemException
 	 */
 	public void handleSlotEditor(InventoryClickEvent event) throws ShopSystemException {
-		if(event.getCurrentItem().getItemMeta() != null) {
+		if (event.getCurrentItem().getItemMeta() != null) {
 			Player player = (Player) event.getWhoClicked();
 			ItemStack originStack = null;
-			if(inventory.getItem(slotEditorSlot-1) != null) {
-				originStack = new ItemStack(inventory.getItem(slotEditorSlot-1));
+			if (inventory.getItem(slotEditorSlot - 1) != null) {
+				originStack = new ItemStack(inventory.getItem(slotEditorSlot - 1));
 			}
 			int slot = event.getSlot() + 1;
 			String command = event.getCurrentItem().getItemMeta().getDisplayName();
 			String operator = null;
 			int price = 0;
-			switch(slot) {
-			case 5: 
-			case 6:
-			case 7: operator = event.getInventory().getItem(2).getItemMeta().getDisplayName(); break;
-			case 14:
-			case 15:
-			case 16: operator = event.getInventory().getItem(11).getItemMeta().getDisplayName(); 
-					 price = Integer.valueOf(event.getInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
-					 break;
-			case 23:
-			case 24:
-			case 25: operator = event.getInventory().getItem(20).getItemMeta().getDisplayName(); 
-					 price = Integer.valueOf(event.getInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
-					 break;
+			switch (slot) {
+				case 5:
+				case 6:
+				case 7:
+					operator = event.getInventory().getItem(2).getItemMeta().getDisplayName();
+					break;
+				case 14:
+				case 15:
+				case 16:
+					operator = event.getInventory().getItem(11).getItemMeta().getDisplayName();
+					price = Integer
+							.valueOf(event.getInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
+					break;
+				case 23:
+				case 24:
+				case 25:
+					operator = event.getInventory().getItem(20).getItemMeta().getDisplayName();
+					price = Integer
+							.valueOf(event.getInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
+					break;
 			}
 			ItemStack editorItemStack = slotEditor.getItem(0);
-			if(command.equals("plus")) {
+			if (command.equals("plus")) {
 				switchPlusMinus(slot, "plus");
-			}
-			else if(command.equals("minus")) {
+			} else if (command.equals("minus")) {
 				switchPlusMinus(slot, "minus");
-			}
-			else if(command.equals("one")) {
-				switch(slot) {
-				case 5: if(editorItemStack != null && operator.equals("plus") && (editorItemStack.getAmount()+1 <= 64)) {
+			} else if (command.equals("one")) {
+				switch (slot) {
+					case 5:
+						if (editorItemStack != null && operator.equals("plus")
+								&& (editorItemStack.getAmount() + 1 <= 64)) {
 							editorItemStack.setAmount(editorItemStack.getAmount() + 1);
-						}
-						else if(editorItemStack != null && operator.equals("plus") && (editorItemStack.getAmount()+1 > 64)) {
+						} else if (editorItemStack != null && operator.equals("plus")
+								&& (editorItemStack.getAmount() + 1 > 64)) {
 							editorItemStack.setAmount(64);
-						}
-						else if(editorItemStack != null && editorItemStack.getAmount() > 1){
+						} else if (editorItemStack != null && editorItemStack.getAmount() > 1) {
 							editorItemStack.setAmount(editorItemStack.getAmount() - 1);
-						} 
+						}
 						break;
-				case 14: if(price >= 1 && operator.equals("minus")) {
-							updateEditorPrice(9, 11, 13, 14, 15, price-1);
-						 }
-						 else if(operator.equals("plus")){
-							 updateEditorPrice(9, 11, 13, 14, 15, price+1);
-						 } break;
-				case 23: if(price >= 1 && operator.equals("minus")) {
-							 updateEditorPrice(18, 20, 22, 23, 24, price-1);
-				 		 }
-				 		 else if(operator.equals("plus")){
-				 			 updateEditorPrice(18, 20, 22, 23, 24, price+1);
-				 		 } break;
+					case 14:
+						if (price >= 1 && operator.equals("minus")) {
+							updateEditorPrice(9, 11, 13, 14, 15, price - 1);
+						} else if (operator.equals("plus")) {
+							updateEditorPrice(9, 11, 13, 14, 15, price + 1);
+						}
+						break;
+					case 23:
+						if (price >= 1 && operator.equals("minus")) {
+							updateEditorPrice(18, 20, 22, 23, 24, price - 1);
+						} else if (operator.equals("plus")) {
+							updateEditorPrice(18, 20, 22, 23, 24, price + 1);
+						}
+						break;
 				}
-			}
-			else if(command.equals("ten")) {
-				
-				switch(slot) {
-				case 6: if(editorItemStack != null && operator.equals("plus") && (editorItemStack.getAmount()+10 <= 64)) {
+			} else if (command.equals("ten")) {
+
+				switch (slot) {
+					case 6:
+						if (editorItemStack != null && operator.equals("plus")
+								&& (editorItemStack.getAmount() + 10 <= 64)) {
 							editorItemStack.setAmount(editorItemStack.getAmount() + 10);
-						}
-						else if(editorItemStack != null && operator.equals("plus") && (editorItemStack.getAmount()+10 > 64)) {
+						} else if (editorItemStack != null && operator.equals("plus")
+								&& (editorItemStack.getAmount() + 10 > 64)) {
 							editorItemStack.setAmount(64);
-						}
-						else if(editorItemStack != null && editorItemStack.getAmount() > 10){
+						} else if (editorItemStack != null && editorItemStack.getAmount() > 10) {
 							editorItemStack.setAmount(editorItemStack.getAmount() - 10);
-						} 
+						}
 						break;
-				case 15: if(price >= 10 && operator.equals("minus")) {
-							updateEditorPrice(9, 11, 13, 14, 15, price-10);
-				 		 }
-				 		 else if(operator.equals("plus")){
-				 			 updateEditorPrice(9, 11, 13, 14, 15, price+10);
-				 		 } break;
-				case 24: if(price >= 10 && operator.equals("minus")) {
-					 		updateEditorPrice(18, 20, 22, 23, 24, price-10);
-		 		 		 }
-		 		 		 else if(operator.equals("plus")){
-		 		 			 updateEditorPrice(18, 20, 22, 23, 24, price+10);
-		 		 		 } break;
+					case 15:
+						if (price >= 10 && operator.equals("minus")) {
+							updateEditorPrice(9, 11, 13, 14, 15, price - 10);
+						} else if (operator.equals("plus")) {
+							updateEditorPrice(9, 11, 13, 14, 15, price + 10);
+						}
+						break;
+					case 24:
+						if (price >= 10 && operator.equals("minus")) {
+							updateEditorPrice(18, 20, 22, 23, 24, price - 10);
+						} else if (operator.equals("plus")) {
+							updateEditorPrice(18, 20, 22, 23, 24, price + 10);
+						}
+						break;
 				}
-			}
-			else if(command.equals("twenty")) {
-				switch(slot) {
-				case 7: if(editorItemStack != null && operator.equals("plus") && (editorItemStack.getAmount()+20 <= 64)) {
+			} else if (command.equals("twenty")) {
+				switch (slot) {
+					case 7:
+						if (editorItemStack != null && operator.equals("plus")
+								&& (editorItemStack.getAmount() + 20 <= 64)) {
 							editorItemStack.setAmount(editorItemStack.getAmount() + 20);
-						}
-						else if(editorItemStack != null && operator.equals("plus") && (editorItemStack.getAmount()+20 > 64)) {
+						} else if (editorItemStack != null && operator.equals("plus")
+								&& (editorItemStack.getAmount() + 20 > 64)) {
 							editorItemStack.setAmount(64);
-						}
-						else if(editorItemStack != null && editorItemStack.getAmount() > 20){
+						} else if (editorItemStack != null && editorItemStack.getAmount() > 20) {
 							editorItemStack.setAmount(editorItemStack.getAmount() - 20);
-						} 
+						}
 						break;
-				case 16: if(price >= 20 && operator.equals("minus")) {
-							updateEditorPrice(9, 11, 13, 14, 15, price-20);
-						 }
-				 		 else if(operator.equals("plus")){
-				 			 updateEditorPrice(9, 11, 13, 14, 15, price+20);
-				 		 } break;
-				case 25: if(price >= 20 && operator.equals("minus")) {
-					 		updateEditorPrice(18, 20, 22, 23, 24, price-20);
-		 		 		 }
-		 		 		 else if(operator.equals("plus")){
-		 		 			 updateEditorPrice(18, 20, 22, 23, 24, price+20);
-		 		 		 } break;
+					case 16:
+						if (price >= 20 && operator.equals("minus")) {
+							updateEditorPrice(9, 11, 13, 14, 15, price - 20);
+						} else if (operator.equals("plus")) {
+							updateEditorPrice(9, 11, 13, 14, 15, price + 20);
+						}
+						break;
+					case 25:
+						if (price >= 20 && operator.equals("minus")) {
+							updateEditorPrice(18, 20, 22, 23, 24, price - 20);
+						} else if (operator.equals("plus")) {
+							updateEditorPrice(18, 20, 22, 23, 24, price + 20);
+						}
+						break;
 				}
-			}
-			else if(command.equals(ChatColor.YELLOW + "save changes")) {
-				double buyPrice = Double.valueOf(event.getInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
-				double sellPrice = Double.valueOf(event.getInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
-				if(buyPrice != 0 || sellPrice != 0) {
+			} else if (command.equals(ChatColor.YELLOW + "save changes")) {
+				double buyPrice = Double
+						.valueOf(event.getInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
+				double sellPrice = Double
+						.valueOf(event.getInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
+				if (buyPrice != 0 || sellPrice != 0) {
 					ItemStack itemStack = event.getInventory().getItem(0);
 					Boolean isNew = true;
 					Boolean existsInOtherSlot = false;
-					if(originStack != null) {
-						if(originStack.getItemMeta().getLore() != null) {
+					if (originStack != null) {
+						if (originStack.getItemMeta().getLore() != null) {
 							List<String> loreList = originStack.getItemMeta().getLore();
 							Iterator<String> iterator = loreList.iterator();
-							while(iterator.hasNext()) {
+							while (iterator.hasNext()) {
 								String lore = iterator.next();
-								if(lore.contains("buy for") || lore.contains("sell for")) {
+								if (lore.contains("buy for") || lore.contains("sell for")) {
 									iterator.remove();
 								}
 							}
@@ -1052,44 +1065,46 @@ public abstract class Shop {
 						}
 						Integer amount = itemStack.getAmount();
 						itemStack.setAmount(originStack.getAmount());
-						if(!itemStack.toString().equals(originStack.toString())) {
-							for(String itemName: itemNames) {
-								if(itemName.equals(getShopItemName(itemStack))) {
+						if (!itemStack.toString().equals(originStack.toString())) {
+							for (String itemName : itemNames) {
+								if (itemName.equals(getShopItemName(itemStack))) {
 									existsInOtherSlot = true;
 									player.sendMessage(ChatColor.RED + "This item exists in a other slot!");
 								}
 							}
-							if(!existsInOtherSlot) {
-								removeItem(slotEditorSlot-1);
-								player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + originStack.getType().toString().toLowerCase() + ChatColor.GOLD + " was removed from shop." );
+							if (!existsInOtherSlot) {
+								removeItem(slotEditorSlot - 1);
+								player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN
+										+ originStack.getType().toString().toLowerCase() + ChatColor.GOLD
+										+ " was removed from shop.");
 							}
-						}
-						else {
+						} else {
 							isNew = false;
-							editItem(slotEditorSlot, String.valueOf(amount), String.valueOf(sellPrice), String.valueOf(buyPrice));
+							editItem(slotEditorSlot, String.valueOf(amount), String.valueOf(sellPrice),
+									String.valueOf(buyPrice));
 						}
 					}
-					if(isNew && !existsInOtherSlot) {
+					if (isNew && !existsInOtherSlot) {
 						addItem(slotEditorSlot - 1, sellPrice, buyPrice, itemStack);
-						player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + itemStack.getType().toString().toLowerCase()+ ChatColor.GOLD + " was added to the shop." );
+						player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN
+								+ itemStack.getType().toString().toLowerCase() + ChatColor.GOLD
+								+ " was added to the shop.");
 					}
-				}
-				else {
+				} else {
 					player.sendMessage(ChatColor.RED + "The sellprice and the buyprice are both 0!");
 				}
-			}
-			else if(command.equals(ChatColor.RED + "remove item")) {
+			} else if (command.equals(ChatColor.RED + "remove item")) {
 				removeItem(slotEditorSlot - 1);
-				player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN + originStack.getType().toString().toLowerCase() + ChatColor.GOLD + " was removed from shop." );
-			}
-			else if(!command.equals("buyprice") && !command.equals("sellprice")) {
+				player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN
+						+ originStack.getType().toString().toLowerCase() + ChatColor.GOLD + " was removed from shop.");
+			} else if (!command.equals("buyprice") && !command.equals("sellprice")) {
 				ItemStack editorItemStack2 = new ItemStack(event.getCurrentItem());
 				editorItemStack2.setAmount(1);
 				slotEditor.setItem(0, editorItemStack2);
 			}
 		}
 	}
-	
+
 	/**
 	 * This method adds a shopitem to the shop inventory. Not for commercial use.
 	 * 
@@ -1099,33 +1114,28 @@ public abstract class Shop {
 	 * @param sellPrice
 	 * @param buyPrice
 	 */
-	public void addShopItemToInv(ItemStack itemStack,int amount, int slot, double sellPrice, double buyPrice) {
+	public void addShopItemToInv(ItemStack itemStack, int amount, int slot, double sellPrice, double buyPrice) {
 		String displayName = itemStack.getItemMeta().getDisplayName();
 		List<String> list = null;
-		if(itemStack.getItemMeta().getLore() != null) {
+		if (itemStack.getItemMeta().getLore() != null) {
 			list = itemStack.getItemMeta().getLore();
-		}
-		else {
+		} else {
 			list = new ArrayList<>();
 		}
 		ItemMeta meta = itemStack.getItemMeta();
-		if(displayName.equals("Info")) {
-		meta.setDisplayName("Info");
-		list.add(ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "sell specified amount");
-		list.add(ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "sell all");
-		list.add(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "buy");
-		}
-		else if(displayName.equals("Stock")) {
+		if (displayName.equals("Info")) {
+			meta.setDisplayName("Info");
+			list.add(ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "sell specified amount");
+			list.add(ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "sell all");
+			list.add(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "buy");
+		} else if (displayName.equals("Stock")) {
 			list.add(ChatColor.RED + "Only for Shopowner");
 			list.add(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile");
-		}
-		else if(sellPrice == 0.0){
+		} else if (sellPrice == 0.0) {
 			list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + "$");
-		}
-		else if(buyPrice == 0.0) {
+		} else if (buyPrice == 0.0) {
 			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + "$");
-		}
-		else {
+		} else {
 			list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + "$");
 			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + "$");
 		}
@@ -1133,9 +1143,9 @@ public abstract class Shop {
 		itemStack.setItemMeta(meta);
 		inventory.setItem(slot, itemStack);
 	}
-	
+
 	public void reload() throws ShopSystemException {
-		for(String item:itemNames) {
+		for (String item : itemNames) {
 			loadItem(item);
 		}
 	}

@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -177,7 +179,7 @@ public class Job {
 			throw new JobSystemException(JobSystemException.ITEM_IS_INVALID);
 		}
 		else if(itemList.contains(material)){
-			throw new JobSystemException(JobSystemException.ITEM_ALREADY_EXIST);
+			throw new JobSystemException(JobSystemException.ITEM_ALREADY_EXISTS);
 		}
 		else {
 			itemList.add(material);
@@ -283,7 +285,6 @@ public class Job {
 			double price2 = config.getDouble("JobEntitys." + entityName + ".killprice");
 			return price2;
 		}
-		
 	}	
 	
 	private void save() {
@@ -374,13 +375,17 @@ public class Job {
 		for(JobCenter jobCenter:jobCenterList) {
 			try {
 			jobCenter.removeJob(jobName);
-			} catch (JobSystemException e) {}
+			} catch (JobSystemException e) {
+				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+			}
 		}
 		for(EconomyPlayer ecoPlayer : EconomyPlayer.getAllEconomyPlayers()) {
 			if(ecoPlayer.hasJob(jobName)) {
 				try {
 					ecoPlayer.removeJob(jobName);
-				} catch (PlayerException e) {}
+				} catch (PlayerException e) {
+					Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+				}
 			}
 		}
 		jobList.remove(job);
