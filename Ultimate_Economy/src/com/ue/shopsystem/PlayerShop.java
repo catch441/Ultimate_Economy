@@ -82,25 +82,43 @@ public class PlayerShop extends Shop {
 		itemNames.add("CRAFTING_TABLE_0");
 	}
 
-	public boolean available(String material) {
+	/**
+	 * This method returns true, if the stock of this item is positiv.
+	 * 
+	 * @param itemString
+	 * @return booelan
+	 */
+	public boolean available(String itemString) {
 		boolean available = false;
 		config = YamlConfiguration.loadConfiguration(file);
-		if (config.getInt("ShopItems." + material + ".stock") >= config.getInt("ShopItems." + material + ".Amount")) {
+		if (config.getInt("ShopItems." + itemString + ".stock") >= config.getInt("ShopItems." + itemString + ".Amount")) {
 			available = true;
 		}
 		return available;
 	}
 
-	public void increaseStock(String material, int stock) {
+	/**
+	 * This method increases the stock of an shopitem in a playershop.
+	 * 
+	 * @param itemString
+	 * @param stock
+	 */
+	public void increaseStock(String itemString, int stock) {
 		config = YamlConfiguration.loadConfiguration(file);
-		config.set("ShopItems." + material + ".stock", (config.getInt("ShopItems." + material + ".stock") + stock));
+		config.set("ShopItems." + itemString + ".stock", (config.getInt("ShopItems." + itemString + ".stock") + stock));
 		save();
 	}
 
-	public void decreaseStock(String material, int stock) {
+	/**
+	 * This method decreases the stock of an shopitem in a playershop.
+	 * 
+	 * @param itemString
+	 * @param stock
+	 */
+	public void decreaseStock(String itemString, int stock) {
 		config = YamlConfiguration.loadConfiguration(file);
-		if ((config.getInt("ShopItems." + material + ".stock") - stock) >= 0) {
-			config.set("ShopItems." + material + ".stock", (config.getInt("ShopItems." + material + ".stock") - stock));
+		if ((config.getInt("ShopItems." + itemString + ".stock") - stock) >= 0) {
+			config.set("ShopItems." + itemString + ".stock", (config.getInt("ShopItems." + itemString + ".stock") - stock));
 		}
 		save();
 	}

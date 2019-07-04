@@ -105,7 +105,7 @@ public abstract class Shop {
 	}
 
 	/**
-	 * Construstor for loading an existing shop.
+	 * Constructor for loading an existing shop.
 	 * 
 	 * @param dataFolder
 	 * @param server
@@ -232,11 +232,11 @@ public abstract class Shop {
 	 * @throws ShopSystemException
 	 */
 	public void addItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack) throws ShopSystemException {
-		String name = getShopItemName(itemStack);
-		ItemMeta meta = itemStack.getItemMeta();
-		String entity = meta.getDisplayName();
+		String itemString = itemStack.toString();
 		if (itemStack.getType() == Material.SPAWNER && !isPlayershop) {
-			name = name + "_" + entity;
+			ItemMeta meta = itemStack.getItemMeta();
+			String entity = meta.getDisplayName();
+			itemString = itemString + "_" + entity;
 		}
 		if (!slotIsEmpty(slot + 1)) {
 			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_OCCUPIED);
@@ -246,63 +246,27 @@ public abstract class Shop {
 			throw new ShopSystemException(ShopSystemException.INVALID_BUY_PRICE);
 		} else if (buyPrice == 0 && sellPrice == 0) {
 			throw new ShopSystemException(ShopSystemException.INVALID_PRICES);
-		} else if (itemNames.contains(name)) {
+		} else if (itemNames.contains(itemString)) {
 			throw new ShopSystemException(ShopSystemException.ITEM_ALREADY_EXISTS);
 		} else {
-			// occupied value only for commands
+			
 			config = YamlConfiguration.loadConfiguration(file);
-			itemNames = config.getStringList("ShopItemList");
-			ArrayList<String> enchantmentList = new ArrayList<>();
-			// is only the real entity name with a spawner
-			int damage = 0;
-			String itemType = getItemType(itemStack);
-			switch (itemType) {
-				case "enchanted":
-					Map<Enchantment, Integer> enchants = null;
-					Damageable damageMeta = (Damageable) itemStack.getItemMeta();
-					if (damageMeta != null) {
-						damage = damageMeta.getDamage();
-					}
-					if (itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
-						EnchantmentStorageMeta enchantMeta = (EnchantmentStorageMeta) meta;
-						enchants = enchantMeta.getStoredEnchants();
-					} else {
-						enchants = meta.getEnchants();
-					}
-					for (Entry<Enchantment, Integer> e : enchants.entrySet()) {
-						enchantmentList.add(e.getKey().getKey().getKey().toLowerCase() + "-" + e.getValue());
-					}
-					enchantmentList.sort(String.CASE_INSENSITIVE_ORDER);
-					break;
-				case "default":
-					Damageable damageMeta2 = (Damageable) itemStack.getItemMeta();
-					if (damageMeta2 != null) {
-						damage = damageMeta2.getDamage();
-					}
-					break;
-			}
+			
+			//new savesystem
+			
+			int amount = itemStack.getAmount();
+			itemStack.setAmount(1);
 			addShopItemToInv(itemStack, itemStack.getAmount(), slot, sellPrice, buyPrice);
-			itemNames.add(name);
-			config = YamlConfiguration.loadConfiguration(file);
-			config.set("ShopItems." + name + ".Name", name);
-			config.set("ShopItems." + name + ".Amount", itemStack.getAmount());
-			config.set("ShopItems." + name + ".Slot", slot);
-			config.set("ShopItems." + name + ".sellPrice", sellPrice);
-			config.set("ShopItems." + name + ".buyPrice", buyPrice);
+			itemNames.add(itemString);
+			config.set("ShopItems." + itemString + ".Name", itemString);
+			config.set("ShopItems." + itemString + ".Amount", amount);
+			config.set("ShopItems." + itemString + ".Slot", slot);
+			config.set("ShopItems." + itemString + ".sellPrice", sellPrice);
+			config.set("ShopItems." + itemString + ".buyPrice", buyPrice);
+			config.set("ShopItems." + itemString + ".newSaveMethod", "true");
 			if (isPlayershop) {
-				config.set("ShopItems." + name + ".stock", 0);
+				config.set("ShopItems." + itemString + ".stock", 0);
 			}
-			if (meta.getLore() != null) {
-				config.set("ShopItems." + name + ".lore", meta.getLore());
-			}
-			// for enchanted and default
-			if (damage > 0) {
-				config.set("ShopItems." + name + ".damage", damage);
-			}
-			if (itemType.equals("enchanted")) {
-				config.set("ShopItems." + name + ".enchantments", enchantmentList);
-			}
-			itemNames = removedoubleObjects(itemNames);
 			config.set("ShopItemList", itemNames);
 			save();
 		}
@@ -333,69 +297,38 @@ public abstract class Shop {
 				&& Double.valueOf(buyPrice) == 0) {
 			throw new ShopSystemException(ShopSystemException.INVALID_PRICES);
 		} else {
-			String itemName = inventory.getItem(slot - 1).getType().name();
-			ItemStack stack = inventory.getItem(slot - 1);
-			ArrayList<String> newList = new ArrayList<>();
-			boolean isEnchanted = false;
-			boolean isPotion = false;
-			if (stack.getType().toString().equals("ENCHANTED_BOOK")) {
-				isEnchanted = true;
-				EnchantmentStorageMeta meta = (EnchantmentStorageMeta) stack.getItemMeta();
-				itemName = itemName.toLowerCase() + "#Enchanted_";
-				for (Entry<Enchantment, Integer> map : meta.getStoredEnchants().entrySet()) {
-					newList.add(map.getKey().getKey().toString().substring(
-							map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
-					newList.sort(String.CASE_INSENSITIVE_ORDER);
+			ItemStack itemStack = inventory.getItem(slot - 1);
+			itemStack.setAmount(1);
+			ItemMeta itemMeta = itemStack.getItemMeta();
+			List<String> loreList = itemMeta.getLore();
+			Iterator<String> loreIter = loreList.iterator();
+			while(loreIter.hasNext()) {
+				String lore = loreIter.next();
+				if(lore.contains(" buy for ") || lore.contains(" sell for ")) {
+					loreIter.remove();
 				}
-				itemName = itemName + newList.toString();
-			} else if (!stack.getEnchantments().isEmpty()) {
-				isEnchanted = true;
-				itemName = itemName.toLowerCase() + "#Enchanted_";
-				for (Entry<Enchantment, Integer> map : stack.getEnchantments().entrySet()) {
-					newList.add(map.getKey().getKey().toString().substring(
-							map.getKey().getKey().toString().indexOf(":") + 1) + "-" + map.getValue().intValue());
-					newList.sort(String.CASE_INSENSITIVE_ORDER);
-				}
-				itemName = itemName + newList.toString();
-			} else if (stack.getType().toString().contains("POTION")) {
-				isPotion = true;
-				boolean extended = false;
-				boolean upgraded = false;
-				String property;
-				PotionMeta meta = (PotionMeta) stack.getItemMeta();
-				String type = meta.getBasePotionData().getType().toString().toLowerCase();
-				if (extended) {
-					property = "extended";
-				} else if (upgraded) {
-					property = "upgraded";
-				} else {
-					property = "none";
-				}
-
-				itemName = itemName.toLowerCase() + ":" + type + "#" + property;
 			}
+			itemMeta.setLore(loreList);
+			itemStack.setItemMeta(itemMeta);
+			String itemString =  itemStack.toString();
+			
 			String message = ChatColor.GOLD + "Updated ";
 			config = YamlConfiguration.loadConfiguration(file);
 			if (!amount.equals("none")) {
-				config.set("ShopItems." + itemName + ".Amount", Integer.valueOf(amount));
+				config.set("ShopItems." + itemString + ".Amount", Integer.valueOf(amount));
 				message = message + ChatColor.GREEN + "amount ";
 			}
 			if (!sellPrice.equals("none")) {
-				config.set("ShopItems." + itemName + ".sellPrice", Double.valueOf(sellPrice));
+				config.set("ShopItems." + itemString + ".sellPrice", Double.valueOf(sellPrice));
 				message = message + ChatColor.GREEN + "sellPrice ";
 			}
 			if (!buyPrice.equals("none")) {
-				config.set("ShopItems." + itemName + ".buyPrice", Double.valueOf(buyPrice));
+				config.set("ShopItems." + itemString + ".buyPrice", Double.valueOf(buyPrice));
 				message = message + ChatColor.GREEN + "buyPrice ";
 			}
 			save();
-			inventory.clear(slot - 1);
-			if (isEnchanted || isPotion) {
-				loadItem(itemName);
-			} else {
-				loadItem(itemName.toUpperCase());
-			}
-			message = message + ChatColor.GOLD + "for item " + ChatColor.GREEN + itemName.toLowerCase();
+			loadItem(itemString);
+			message = message + ChatColor.GOLD + "for item " + ChatColor.GREEN + itemStack.getType().name().toLowerCase();
 			return message;
 		}
 	}
@@ -403,74 +336,99 @@ public abstract class Shop {
 	/**
 	 * Loads a item by it's name. Not for commercial use.
 	 * 
-	 * @param name1
+	 * @param itemString
 	 * @throws ShopSystemException
 	 */
-	public void loadItem(String name1) throws ShopSystemException {
+	public void loadItem(String itemString) throws ShopSystemException {
 		config = YamlConfiguration.loadConfiguration(file);
-		if (config.getString("ShopItems." + name1 + ".Name") != null) {
-			String string = config.getString("ShopItems." + name1 + ".Name");
-			List<String> lore = config.getStringList("ShopItems." + name1 + ".lore");
-			int damage = config.getInt("ShopItems." + name1 + ".damage");
-			String displayName = "default";
-			if (string.contains("|")) {
-				displayName = string.substring(0, string.indexOf("|"));
-				string = string.substring(string.indexOf("|") + 1);
-			}
-			ItemStack itemStack = null;
-			// enchanted
-			if (string.contains("#Enchanted_")) {
-				itemStack = new ItemStack(Material.valueOf(string.substring(0, string.indexOf("#")).toUpperCase()),
-						config.getInt("ShopItems." + name1 + ".Amount"));
-				addEnchantments(itemStack,
-						new ArrayList<String>(config.getStringList("ShopItems." + name1 + ".enchantments")));
-			}
-			// potion
-			else if (string.contains("potion:")) {
-				String name = config.getString("ShopItems." + name1 + ".Name");
-				itemStack = new ItemStack(Material.valueOf(string.substring(0, string.indexOf(":")).toUpperCase()),
-						config.getInt("ShopItems." + name1 + ".Amount"));
-				PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
-				boolean extended = false;
-				boolean upgraded = false;
-				String property = name.substring(name.indexOf("#") + 1);
-				if (property.equalsIgnoreCase("extended")) {
-					extended = true;
-				} else if (property.equalsIgnoreCase("upgraded")) {
-					upgraded = true;
+		//new loading method for new save method
+		if(!itemString.equals("ANVIL_0") && !itemString.equals("CRAFTING_TABLE_0") && config.getString("ShopItems." + itemString + "newSaveMethod") != null) {
+			ItemStack itemStack = config.getItemStack(itemString);
+			addShopItemToInv(itemStack, config.getInt("ShopItems." + itemString + ".Amount"),
+					config.getInt("ShopItems." + itemString + ".Slot"),
+					config.getDouble("ShopItems." + itemString + ".sellPrice"),
+					config.getDouble("ShopItems." + itemString + ".buyPrice"));
+		}
+		//old loading method, only for old saved items, converts to the new save method
+		else {
+			if (config.getString("ShopItems." + itemString + ".Name") != null) {
+				String string = config.getString("ShopItems." + itemString + ".Name");
+				List<String> lore = config.getStringList("ShopItems." + itemString + ".lore");
+				int damage = config.getInt("ShopItems." + itemString + ".damage");
+				String displayName = "default";
+				if (string.contains("|")) {
+					displayName = string.substring(0, string.indexOf("|"));
+					string = string.substring(string.indexOf("|") + 1);
 				}
-				meta.setBasePotionData(new PotionData(
-						PotionType.valueOf(name.substring(name.indexOf(":") + 1, name.indexOf("#")).toUpperCase()),
-						extended, upgraded));
-				itemStack.setItemMeta(meta);
-			}
-			// all other
-			else if (!string.contains("SPAWNER")) {
-				itemStack = new ItemStack(Material.getMaterial(string),
-						config.getInt("ShopItems." + name1 + ".Amount"));
-			}
-			if (itemStack != null) {
-				ItemMeta meta2 = itemStack.getItemMeta();
-				if (lore != null && !lore.isEmpty()) {
-					meta2.setLore(lore);
+				ItemStack itemStack = null;
+				// enchanted
+				if (string.contains("#Enchanted_")) {
+					itemStack = new ItemStack(Material.valueOf(string.substring(0, string.indexOf("#")).toUpperCase()),
+							config.getInt("ShopItems." + itemString + ".Amount"));
+					addEnchantments(itemStack,
+							new ArrayList<String>(config.getStringList("ShopItems." + itemString + ".enchantments")));
+				}
+				// potion
+				else if (string.contains("potion:")) {
+					String name = config.getString("ShopItems." + itemString + ".Name");
+					itemStack = new ItemStack(Material.valueOf(string.substring(0, string.indexOf(":")).toUpperCase()),
+							config.getInt("ShopItems." + itemString + ".Amount"));
+					PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
+					boolean extended = false;
+					boolean upgraded = false;
+					String property = name.substring(name.indexOf("#") + 1);
+					if (property.equalsIgnoreCase("extended")) {
+						extended = true;
+					} else if (property.equalsIgnoreCase("upgraded")) {
+						upgraded = true;
+					}
+					meta.setBasePotionData(new PotionData(
+							PotionType.valueOf(name.substring(name.indexOf(":") + 1, name.indexOf("#")).toUpperCase()),
+							extended, upgraded));
+					itemStack.setItemMeta(meta);
+				}
+				// all other
+				else if (!string.contains("SPAWNER")) {
+					itemStack = new ItemStack(Material.getMaterial(string),
+							config.getInt("ShopItems." + itemString + ".Amount"));
+				}
+				if (itemStack != null) {
+					ItemMeta meta2 = itemStack.getItemMeta();
+					if (lore != null && !lore.isEmpty()) {
+						meta2.setLore(lore);
 
+					}
+					if (!displayName.equals("default")) {
+						meta2.setDisplayName(displayName);
+					}
+					if (damage > 0) {
+						Damageable damageMeta = (Damageable) meta2;
+						damageMeta.setDamage(damage);
+						meta2 = (ItemMeta) damageMeta;
+					}
+					itemStack.setItemMeta(meta2);
+					
+					//convert to new save method 
+					itemStack.setAmount(config.getInt("ShopItems." + itemString + ".Amount"));
+					double sell = config.getDouble("ShopItems." + itemString + ".sellPrice");
+					double buy = config.getDouble("ShopItems." + itemString + ".buyPrice");
+					int slot = config.getInt("ShopItems." + itemString + ".Slot");
+					removeItem(config.getInt("ShopItems." + itemString + ".Slot"));
+					addItem(slot, sell , buy , itemStack);
 				}
-				if (!displayName.equals("default")) {
-					meta2.setDisplayName(displayName);
-				}
-				if (damage > 0) {
-					Damageable damageMeta = (Damageable) meta2;
-					damageMeta.setDamage(damage);
-					meta2 = (ItemMeta) damageMeta;
-				}
-				itemStack.setItemMeta(meta2); //
-				addShopItemToInv(itemStack, config.getInt("ShopItems." + name1 + ".Amount"),
-						config.getInt("ShopItems." + name1 + ".Slot"),
-						config.getDouble("ShopItems." + name1 + ".sellPrice"),
-						config.getDouble("ShopItems." + name1 + ".buyPrice"));
+			} else if (!itemString.equals("ANVIL_0") && !itemString.equals("CRAFTING_TABLE_0")) {
+				throw new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOPITEM + " |" + itemString + "|");
 			}
-		} else if (!name1.equals("ANVIL_0") && !name1.equals("CRAFTING_TABLE_0")) {
-			throw new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOPITEM + " |" + name1 + "|");
+		}
+	}
+	
+	public ItemStack getItemStack(String itemString) throws ShopSystemException {
+		if(!itemNames.contains(itemString)) {
+			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
+		}
+		else {
+			config = YamlConfiguration.loadConfiguration(file);
+			return config.getItemStack("ShopItems." + itemString + ".Name");
 		}
 	}
 

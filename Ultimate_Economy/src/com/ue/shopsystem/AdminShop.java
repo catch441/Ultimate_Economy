@@ -47,7 +47,8 @@ public class AdminShop extends Shop {
 	 */
 	private AdminShop(File dataFolder, Server server, String name) {
 		super(dataFolder, server, name, false);
-		for (String item : itemNames) {
+		ArrayList<String> tempList = new ArrayList<>(itemNames);
+		for (String item : tempList) {
 			try {
 				loadItem(item);
 			} catch (ShopSystemException e) {
@@ -61,7 +62,7 @@ public class AdminShop extends Shop {
 		super.loadItem(name1);
 		if (config.getString("ShopItems." + name1 + ".Name") != null) {
 			String string = config.getString("ShopItems." + name1 + ".Name");
-			if (string.contains("SPAWNER")) {
+			if (string.contains("SPAWNER_")) {
 				String entityname = string.substring(8);
 				ItemStack itemStack = new ItemStack(Material.SPAWNER);
 				ItemMeta meta = itemStack.getItemMeta();

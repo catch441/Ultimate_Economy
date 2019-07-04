@@ -20,6 +20,8 @@ import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.Job;
 
+import ultimate_economy.Ultimate_Economy;
+
 public class EconomyPlayer {
 
 	private static List<EconomyPlayer> economyPlayers = new ArrayList<>();
@@ -420,9 +422,9 @@ public class EconomyPlayer {
 	private void setScoreboard(Player p, int score) {
 		if (!scoreBoardDisabled) {
 			Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
-			Objective o = board.registerNewObjective("bank", "dummy", "§6§lBank");
+			Objective o = board.registerNewObjective("bank", "dummy", "§6§l" + Ultimate_Economy.messages.getString("bank"));
 			o.setDisplaySlot(DisplaySlot.SIDEBAR);
-			o.getScore("§6Money:").setScore(score);
+			o.getScore("§6" + Ultimate_Economy.messages.getString("money_info")).setScore(score);
 			/*
 			 * if(leaderboard) { Objective o2 = board.registerNewObjective("leaderboard",
 			 * "dummy","§6§lLeaderBoard"); o2.setDisplaySlot(DisplaySlot.PLAYER_LIST);

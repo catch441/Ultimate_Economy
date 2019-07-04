@@ -90,7 +90,6 @@ public class JobCenter {
 		jobnames = config.getStringList("Jobnames");
 		inventory = Bukkit.createInventory(villager, config.getInt("JobCenterSize"),name);
 		for(String string:jobnames) {
-			Bukkit.getLogger().info("Jobname: " + string + " | " + config.getString("Jobs." + string + ".ItemMaterial"));
 			ItemStack jobItem = new ItemStack(Material.valueOf(config.getString("Jobs." + string + ".ItemMaterial")));
 			ItemMeta meta = jobItem.getItemMeta();
 			meta.setDisplayName(string);

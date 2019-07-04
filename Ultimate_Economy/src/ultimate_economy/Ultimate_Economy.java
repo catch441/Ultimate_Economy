@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.Level;
@@ -46,8 +45,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.Repairable;
@@ -111,7 +108,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 			getConfig().set("TownNames", null);
 			saveConfig();
 		}
-		
+
 		// load language file
 		Locale currentLocale;
 		if (getConfig().getString("localeLanguage") == null) {
@@ -189,7 +186,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 		playerlist = config.getStringList("Player");
 		getConfig().options().copyDefaults(true);
 		saveConfig();
-		
+
 		// setup metrics for bstats
 		@SuppressWarnings("unused")
 		Metrics metrics = new Metrics(this);
@@ -248,8 +245,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 						list.add("removeJob");
 					}
 				}
-			} 
-			else if (args[0].equals("delete") || args[0].equals("move") || args[0].equals("removeJob")
+			} else if (args[0].equals("delete") || args[0].equals("move") || args[0].equals("removeJob")
 					|| args[0].equals("addJob")) {
 				if (args.length == 2) {
 					List<String> temp = getConfig().getStringList("JobCenterNames");
@@ -342,24 +338,22 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 					}
 				}
 			}
-		} 
-		else if(command.getName().equals("ue-language")) {
-			if(args[0].equals("")) {
+		} else if (command.getName().equals("ue-language")) {
+			if (args[0].equals("")) {
 				list.add("de");
 				list.add("en");
 				list.add("cs");
-			}
-			else if(args[0].equals("de")) {
+				list.add("dn");
+			} else if (args[0].equals("de")) {
 				list.add("DE");
-			}
-			else if(args[0].equals("en")) {
+			} else if (args[0].equals("en")) {
 				list.add("US");
-			}
-			else if(args[0].equals("cs")) {
+			} else if (args[0].equals("cs")) {
 				list.add("CZ");
+			} else if (args[0].equals("dn")) {
+				list.add("FR");
 			}
-		}
-		else if (command.getName().equals("adminshop") || command.getName().equals("playershop")) {
+		} else if (command.getName().equals("adminshop") || command.getName().equals("playershop")) {
 			if (args[0].equals("")) {
 				list.add("create");
 				list.add("delete");
@@ -663,22 +657,21 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 					}
 				}
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if(label.equalsIgnoreCase("ue-language")) {
-					if( args.length == 2) {
-						if(!args[0].equals("cs") && !args[0].equals("de") && !args[0].equals("en")) {
+				else if (label.equalsIgnoreCase("ue-language")) {
+					if (args.length == 2) {
+						if (!args[0].equals("cs") && !args[0].equals("de") && !args[0].equals("en")
+								&& !args[0].equals("dn")) {
 							player.sendMessage(ChatColor.RED + messages.getString("invalid_language"));
-						} 
-						else if(!args[0].equals("CZ") && !args[0].equals("DE") && args[0].equals("US")) {
+						} else if (!args[1].equals("CZ") && !args[1].equals("DE") && !args[1].equals("US")
+								&& !args[1].equals("FR")) {
 							player.sendMessage(ChatColor.RED + messages.getString("invalid_country"));
-						}
-						else {
+						} else {
 							getConfig().set("localeLanguage", args[0]);
 							getConfig().set("localeCountry", args[1]);
 							saveConfig();
 							player.sendMessage(ChatColor.GOLD + messages.getString("restart"));
 						}
-					}
-					else {
+					} else {
 						player.sendMessage("/ue-language <language> <country>");
 					}
 				}
@@ -1557,10 +1550,10 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 										Job.deleteJob(args[2]);
 										getConfig().set("JobList", Job.getJobNameList());
 										saveConfig();
-										player.sendMessage(
-												ChatColor.GOLD + Ultimate_Economy.messages.getString("jobcenter_delJob1") + " "
-														+ ChatColor.GREEN + args[2] + ChatColor.GOLD + " "
-														+ Ultimate_Economy.messages.getString("jobcenter_delJob2"));
+										player.sendMessage(ChatColor.GOLD
+												+ Ultimate_Economy.messages.getString("jobcenter_delJob1") + " "
+												+ ChatColor.GREEN + args[2] + ChatColor.GOLD + " "
+												+ Ultimate_Economy.messages.getString("jobcenter_delJob2"));
 									} else {
 										player.sendMessage("/jobcenter job delJob <jobname>");
 									}
@@ -1698,7 +1691,6 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 					}
 				}
 			} catch (TownSystemException e) {
-				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 			}
 		}
 	}
@@ -1808,7 +1800,7 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 					&& event.getCurrentItem().getItemMeta() != null) {
 				ItemMeta meta = event.getCurrentItem().getItemMeta();
 				//////////////////////////////////////////////////////////////////////////// editor
-				if (inventoryname.contains("Editor") && meta.getDisplayName() != null) {
+				if (inventoryname.contains("-Editor") && meta.getDisplayName() != null) {
 					event.setCancelled(true);
 					String command = meta.getDisplayName();
 					String shopName = inventoryname.substring(0, inventoryname.indexOf("-"));
@@ -1874,7 +1866,6 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 				}
 			}
 		} catch (TownSystemException | JobSystemException | ShopSystemException | IllegalArgumentException e) {
-			Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 		} catch (PlayerException e) {
 			playe.sendMessage(ChatColor.RED + e.getMessage());
 		}
@@ -2056,7 +2047,6 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 					}
 				}
 			} catch (ClassCastException | JobSystemException | PlayerException e) {
-				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 			}
 		}
 	}
@@ -2318,13 +2308,8 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private void handleBuySell(Shop shop, InventoryClickEvent event, Player playe) {
 		event.setCancelled(true);
-		double sellprice;
-		double buyprice;
-		int amount;
 		boolean isPlayershop = false;
 		boolean alreadysay = false;
-		List<String> lore = new ArrayList<>();
-		int damage = 0;
 		ClickType clickType = event.getClick();
 		Inventory inventoryplayer = event.getWhoClicked().getInventory();
 		PlayerShop playerShop = null;
@@ -2332,474 +2317,274 @@ public class Ultimate_Economy extends JavaPlugin implements Listener {
 			isPlayershop = true;
 			playerShop = (PlayerShop) shop;
 		}
-		List<String> itemlist = shop.getItemList();
-		String item3;
 		// Playershop
 		if (isPlayershop && clickType == ClickType.MIDDLE && playerShop.getOwner().equals(playe.getName())) {
 			playerShop.switchStockpile();
 		} //
 		else {
-			for (String shopItemString : itemlist) {
-				String s = event.getCurrentItem().getType().toString();
+			for (String itemString : shop.getItemList()) {
 				// only relevant for adminshop
 				boolean isSpawner = false;
-				if (shopItemString.contains("SPAWNER")) {
-					item3 = "SPAWNER";
+				// standardize the itemstack for the string
+				ItemStack clickedItem = event.getCurrentItem();
+				ItemMeta itemMeta = clickedItem.getItemMeta();
+				List<String> loreList = itemMeta.getLore();
+				Iterator<String> loreIter = loreList.iterator();
+				while (loreIter.hasNext()) {
+					String lore = loreIter.next();
+					if (lore.contains(" buy for ") || lore.contains(" sell for ")) {
+						loreIter.remove();
+					}
+				}
+				itemMeta.setLore(loreList);
+				clickedItem.setItemMeta(itemMeta);
+				clickedItem.setAmount(1);
+				String clickedItemString = clickedItem.toString();
+				if (itemString.contains("SPAWNER_")) {
 					isSpawner = true;
-				} else {
-					item3 = shopItemString;
+					clickedItemString = "SPAWNER_" + event.getCurrentItem().getItemMeta().getDisplayName();
 				}
-				EnchantmentStorageMeta metaEnchanted = null;
-				PotionMeta metaPotion = null;
-				if (event.getCurrentItem().getType().toString().equals("ENCHANTED_BOOK")) {
-					metaEnchanted = (EnchantmentStorageMeta) event.getCurrentItem().getItemMeta();
-					if (!metaEnchanted.getStoredEnchants().isEmpty()) {
-						List<String> list = new ArrayList<>();
-						for (Entry<Enchantment, Integer> map : metaEnchanted.getStoredEnchants().entrySet()) {
-							list.add(map.getKey().getKey().toString()
-									.substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-"
-									+ map.getValue().intValue());
-							list.sort(String.CASE_INSENSITIVE_ORDER);
+				if (itemString.equals(clickedItemString)) {
+					try {
+						double sellprice = shop.getItemSellPrice(itemString);
+						double buyprice = shop.getItemBuyPrice(itemString);
+						int amount = shop.getItemAmount(itemString);
+						EconomyPlayer playerShopOwner = null;
+						if (isPlayershop) {
+							playerShopOwner = EconomyPlayer.getEconomyPlayerByName(playerShop.getOwner());
 						}
-						s = event.getCurrentItem().getType().toString().toLowerCase() + "#Enchanted_" + list.toString();
-					}
-				} else if (item3.contains("#Enchanted_")) {
-					if (!event.getCurrentItem().getEnchantments().isEmpty()) {
-						List<String> list = new ArrayList<>();
-						for (Entry<Enchantment, Integer> map : event.getCurrentItem().getEnchantments().entrySet()) {
-							list.add(map.getKey().getKey().toString()
-									.substring(map.getKey().getKey().toString().indexOf(":") + 1) + "-"
-									+ map.getValue().intValue());
-							list.sort(String.CASE_INSENSITIVE_ORDER);
-						}
-						s = event.getCurrentItem().getType().toString().toLowerCase() + "#Enchanted_" + list.toString();
-					}
-				} else if (item3.contains("potion:")) {
-					if (event.getCurrentItem().getType().toString().contains("POTION")) {
-						metaPotion = (PotionMeta) event.getCurrentItem().getItemMeta();
-						String type = metaPotion.getBasePotionData().getType().toString().toLowerCase();
-						String property;
-						if (metaPotion.getBasePotionData().isExtended()) {
-							property = "extended";
-						} else if (metaPotion.getBasePotionData().isUpgraded()) {
-							property = "upgraded";
-						} else {
-							property = "none";
-						}
-						s = event.getCurrentItem().getType().toString().toLowerCase() + ":" + type + "#" + property;
-					}
-				} else if (!item3.contains("SPAWNER")) {
-					s = event.getCurrentItem().getType().name();
-				}
-				ItemMeta meta2 = event.getCurrentItem().getItemMeta();
-				ItemStack testStack = new ItemStack(event.getCurrentItem().getType());
-				ItemMeta testMeta = testStack.getItemMeta();
-				if (!isSpawner
-						&& !event.getCurrentItem().getItemMeta().getDisplayName().equals(testMeta.getDisplayName())) {
-					s = meta2.getDisplayName() + "|" + s;
-				}
-				if (item3.equals(s)) {
-					String materialName = null;
-					// only relevant for adminshop
-					if (isSpawner) {
-						materialName = "SPAWNER";
-					} else {
-						materialName = shopItemString;
-					}
-					if (materialName.equals(item3)) {
-						try {
-							sellprice = shop.getItemSellPrice(shopItemString);
-							buyprice = shop.getItemBuyPrice(shopItemString);
-							amount = shop.getItemAmount(shopItemString);
-							lore = shop.getItemLore(shopItemString);
-							damage = shop.getItemDamage(shopItemString);
-							List<String> loreRealItem = event.getCurrentItem().getItemMeta().getLore();
-							if (loreRealItem != null) {
-								Iterator<String> iterator = loreRealItem.iterator();
-								while (iterator.hasNext()) {
-									String string = iterator.next();
-									if (string.contains("buy for") || string.contains("sell for")) {
-										iterator.remove();
-									}
-								}
-							} else {
-								loreRealItem = new ArrayList<>();
-							}
-							Damageable damageMeta = (Damageable) event.getCurrentItem().getItemMeta();
-							int realDamage = 0;
-							if (damageMeta != null) {
-								realDamage = damageMeta.getDamage();
-							}
-							if (lore.equals(loreRealItem) && damage == realDamage) {
-								EconomyPlayer playerShopOwner = null;
-								if (isPlayershop) {
-									playerShopOwner = EconomyPlayer.getEconomyPlayerByName(playerShop.getOwner());
-								}
-								EconomyPlayer ecoPlayer = EconomyPlayer.getEconomyPlayerByName(playe.getName());
-								if (clickType == ClickType.LEFT) {
-									if (buyprice != 0.0 && ecoPlayer.hasEnoughtMoney(buyprice)
-											|| (isPlayershop && playe.getName().equals(playerShopOwner.getName()))) {
-										if (!isPlayershop || playerShop.available(materialName)) {
-											if (inventoryplayer.firstEmpty() != -1) {
-												// only adminshop
-												if (isSpawner && event.getCurrentItem().getItemMeta().getDisplayName()
-														.equals(shopItemString.substring(8))) {
-													ItemStack stack = new ItemStack(Material.getMaterial(materialName),
-															amount);
-													ItemMeta meta = stack.getItemMeta();
-													meta.setDisplayName(
-															shopItemString.substring(8) + "-" + playe.getName());
-													stack.setItemMeta(meta);
-													inventoryplayer.addItem(stack);
-													ecoPlayer.decreasePlayerAmount(buyprice, true);
-													if (amount > 1) {
-														playe.sendMessage(ChatColor.GREEN + String.valueOf(amount) + " "
-																+ ChatColor.GOLD
-																+ Ultimate_Economy.messages.getString("shop_buy_plural")
-																+ " " + ChatColor.GREEN + buyprice + ChatColor.GREEN
-																+ "$" + ChatColor.GOLD + ".");
-													} else {
-														playe.sendMessage(ChatColor.GREEN + String.valueOf(amount) + " "
-																+ ChatColor.GOLD
-																+ Ultimate_Economy.messages
-																		.getString("shop_buy_singular")
-																+ " " + ChatColor.GREEN + buyprice + ChatColor.GREEN
-																+ "$" + ChatColor.GOLD + ".");
-													}
-												} //
-												else if (!isSpawner) {
-													String displayName = "default";
-													if (materialName.contains("|")) {
-														displayName = materialName.substring(0,
-																materialName.indexOf("|"));
-														materialName = materialName
-																.substring(materialName.indexOf("|") + 1);
-													}
-													boolean isEnchanted = false;
-													boolean isPotion = false;
-													if (materialName.contains("#Enchanted_")) {
-														isEnchanted = true;
-														materialName = materialName
-																.substring(0, materialName.indexOf("#")).toUpperCase();
-													} else if (materialName.contains("potion:")) {
-														isPotion = true;
-														materialName = materialName
-																.substring(0, materialName.indexOf(":")).toUpperCase();
-													}
-													ItemStack stack = new ItemStack(Material.getMaterial(materialName),
-															amount);
-													if (isEnchanted) {
-														if (metaEnchanted != null) {
-															metaEnchanted.setLore(lore);
-															stack.setItemMeta(metaEnchanted);
-														} else {
-															stack.addEnchantments(
-																	event.getCurrentItem().getEnchantments());
-														}
-														if (isPlayershop) {
-															playerShop.decreaseStock(s, amount);
-														}
-													} else if (isPotion) {
-														if (metaPotion != null) {
-															metaPotion.setLore(lore);
-															stack.setItemMeta(metaPotion);
-														}
-														// only playershop
-														if (isPlayershop) {
-															playerShop.decreaseStock(s, amount);
-														}
-													}
-													// only playershop
-													else if (isPlayershop) {
-														playerShop.decreaseStock(s, amount);
-													} //
-													ItemMeta meta = stack.getItemMeta();
-													meta.setLore(lore);
-													if (!displayName.equals("default")) {
-														meta.setDisplayName(displayName);
-													}
-													if (damage > 0) {
-														Damageable damageMeta2 = (Damageable) meta;
-														damageMeta2.setDamage(damage);
-														meta = (ItemMeta) damageMeta2;
-													}
-													stack.setItemMeta(meta);
-													inventoryplayer.addItem(stack);
-													if (!isPlayershop
-															|| !playerShopOwner.getName().equals(playe.getName())) {
-														ecoPlayer.decreasePlayerAmount(buyprice, true);
-														// only playershop
-														if (isPlayershop) {
-															playerShopOwner.increasePlayerAmount(buyprice);
-														}
-														if (amount > 1) {
-															playe.sendMessage(ChatColor.GREEN + String.valueOf(amount)
-																	+ " " + ChatColor.GOLD
-																	+ Ultimate_Economy.messages
-																			.getString("shop_buy_plural")
-																	+ " " + ChatColor.GREEN + buyprice + ChatColor.GREEN
-																	+ "$" + ChatColor.GOLD + ".");
-														} else {
-															playe.sendMessage(ChatColor.GREEN + String.valueOf(amount)
-																	+ " " + ChatColor.GOLD
-																	+ Ultimate_Economy.messages
-																			.getString("shop_buy_singular")
-																	+ " " + ChatColor.GREEN + buyprice + ChatColor.GREEN
-																	+ "$" + ChatColor.GOLD + ".");
-														}
-													}
-													// only playershop
-													else if (isPlayershop
-															&& playerShopOwner.getName().equals(playe.getName())) {
-														if (amount > 1) {
-															playe.sendMessage(ChatColor.GOLD
-																	+ Ultimate_Economy.messages
-																			.getString("shop_got_item_plural1")
-																	+ " " + ChatColor.GREEN + String.valueOf(amount)
-																	+ ChatColor.GOLD + " " + Ultimate_Economy.messages
-																			.getString("shop_got_item_plural2"));
-														} else {
-															playe.sendMessage(ChatColor.GOLD
-																	+ Ultimate_Economy.messages
-																			.getString("shop_got_item_singular1")
-																	+ " " + ChatColor.GREEN + String.valueOf(amount)
-																	+ ChatColor.GOLD + " " + Ultimate_Economy.messages
-																			.getString("shop_got_item_singular2"));
-														}
-													}
-													// only playershop
-													if (isPlayershop) {
-														playerShop.refreshStockpile();
-													}
-													break;
-												}
+						EconomyPlayer ecoPlayer = EconomyPlayer.getEconomyPlayerByName(playe.getName());
+						if (clickType == ClickType.LEFT) {
+							if (buyprice != 0.0 && ecoPlayer.hasEnoughtMoney(buyprice)
+									|| (isPlayershop && playe.getName().equals(playerShopOwner.getName()))) {
+								if (!isPlayershop || playerShop.available(clickedItemString)) {
+									if (inventoryplayer.firstEmpty() != -1) {
+										// only adminshop
+										if (isSpawner && event.getCurrentItem().getItemMeta().getDisplayName()
+												.equals(itemString.substring(8))) {
+											ItemStack stack = new ItemStack(Material.SPAWNER, amount);
+											ItemMeta meta = stack.getItemMeta();
+											meta.setDisplayName(itemString.substring(8) + "-" + playe.getName());
+											stack.setItemMeta(meta);
+											inventoryplayer.addItem(stack);
+											ecoPlayer.decreasePlayerAmount(buyprice, true);
+											if (amount > 1) {
+												playe.sendMessage(ChatColor.GREEN + String.valueOf(amount) + " "
+														+ ChatColor.GOLD
+														+ Ultimate_Economy.messages.getString("shop_buy_plural")
+														+ " " + ChatColor.GREEN + buyprice + ChatColor.GREEN + "$"
+														+ ChatColor.GOLD + ".");
 											} else {
-												playe.sendMessage(ChatColor.RED
-														+ Ultimate_Economy.messages.getString("inventory_full"));
+												playe.sendMessage(ChatColor.GREEN + String.valueOf(amount) + " "
+														+ ChatColor.GOLD
+														+ Ultimate_Economy.messages.getString("shop_buy_singular")
+														+ " " + ChatColor.GREEN + buyprice + ChatColor.GREEN + "$"
+														+ ChatColor.GOLD + ".");
 											}
-										}
-										// only playershop
-										else if (isPlayershop) {
-											playe.sendMessage(ChatColor.GOLD
-													+ Ultimate_Economy.messages.getString("item_unavailable"));
-										}
-									} else if (!ecoPlayer.hasEnoughtMoney(buyprice) && !alreadysay) {
-										playe.sendMessage(ChatColor.RED
-												+ Ultimate_Economy.messages.getString("not_enough_money_personal"));
-										alreadysay = true;
-									}
-								} else if (clickType == ClickType.RIGHT && !materialName.contains("ANVIL_0")
-										&& !materialName.contains("CRAFTING_TABLE_0") && sellprice != 0.0
-										|| clickType == ClickType.RIGHT && isPlayershop
-												&& playe.getName().equals(playerShopOwner.getName())
-												&& inventoryplayer.containsAtLeast(
-														new ItemStack(Material.getMaterial(materialName), 1), amount)) {
-									String displayName = "default";
-									if (materialName.contains("|")) {
-										displayName = materialName.substring(0, materialName.indexOf("|"));
-										materialName = materialName.substring(materialName.indexOf("|") + 1);
-									}
-									boolean isEnchanted = false;
-									boolean isPotion = false;
-									if (materialName.contains("#Enchanted_")) {
-										isEnchanted = true;
-										materialName = materialName.substring(0, materialName.indexOf("#"))
-												.toUpperCase();
-									}
-									if (materialName.contains("potion:")) {
-										isPotion = true;
-										materialName = materialName.substring(0, materialName.indexOf(":"))
-												.toUpperCase();
-									}
-									ItemStack iStack = new ItemStack(Material.getMaterial(materialName), amount);
-									if (isEnchanted) {
-										if (metaEnchanted != null) {
-											iStack.setItemMeta(metaEnchanted);
-										} else {
-											iStack.addEnchantments(event.getCurrentItem().getEnchantments());
-										}
-									} else if (isPotion) {
-										if (metaPotion != null) {
-											iStack.setItemMeta(metaPotion);
-										}
-									}
-									ItemMeta meta = iStack.getItemMeta();
-									meta.setLore(lore);
-									if (!displayName.equals("default")) {
-										meta.setDisplayName(displayName);
-									}
-									Damageable damageMeta2 = (Damageable) meta;
-									if (damage > 0) {
-										damageMeta2.setDamage(damage);
-										meta = (ItemMeta) damageMeta2;
-									}
-									iStack.setItemMeta(meta);
-									if (inventoryContainsItems(inventoryplayer, iStack, amount)) {
-										if (isPlayershop && !playerShopOwner.getName().equals(playe.getName())
-												|| !isPlayershop) {
+										} //
+										else if (!isSpawner) {
+											ItemStack itemStack = shop.getItemStack(itemString);
+											if (isPlayershop) {
+												playerShop.decreaseStock(itemString, amount);
+												playerShop.refreshStockpile();
+											}
+											itemStack.setAmount(amount);
+											inventoryplayer.addItem(itemStack);
+
 											if (!isPlayershop
-													|| (isPlayershop && playerShopOwner.hasEnoughtMoney(sellprice))) {
-												ecoPlayer.increasePlayerAmount(sellprice);
+													|| !playerShopOwner.getName().equals(playe.getName())) {
+												ecoPlayer.decreasePlayerAmount(buyprice, true);
 												// only playershop
 												if (isPlayershop) {
-													playerShopOwner.decreasePlayerAmount(sellprice, false);
+													playerShopOwner.increasePlayerAmount(buyprice);
 												}
 												if (amount > 1) {
 													playe.sendMessage(ChatColor.GREEN + String.valueOf(amount) + " "
-															+ ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_sell_plural") + " " + ChatColor.GREEN + sellprice
-															+ ChatColor.GREEN + "$" + ChatColor.GOLD + ".");
+															+ ChatColor.GOLD
+															+ Ultimate_Economy.messages.getString("shop_buy_plural")
+															+ " " + ChatColor.GREEN + buyprice + ChatColor.GREEN
+															+ "$" + ChatColor.GOLD + ".");
 												} else {
 													playe.sendMessage(ChatColor.GREEN + String.valueOf(amount) + " "
-															+ ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_sell_singular") + " " + ChatColor.GREEN + sellprice
-															+ ChatColor.GREEN + "$" + ChatColor.GOLD + ".");
+															+ ChatColor.GOLD
+															+ Ultimate_Economy.messages
+																	.getString("shop_buy_singular")
+															+ " " + ChatColor.GREEN + buyprice + ChatColor.GREEN
+															+ "$" + ChatColor.GOLD + ".");
 												}
 											}
 											// only playershop
-											else if (isPlayershop) {
-												playe.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("shopowner_not_enough_money"));
-											}
-										}
-										// only playershop
-										else if (isPlayershop) {
-											if (amount > 1) {
-												playe.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_added_item_plural1") + " " + ChatColor.GREEN
-														+ String.valueOf(amount) + ChatColor.GOLD
-														+ " " + Ultimate_Economy.messages.getString("shop_added_item_plural2"));
-											} else {
-												playe.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_added_item_singular1") + " " + ChatColor.GREEN
-														+ String.valueOf(amount) + ChatColor.GOLD
-														+ " " + Ultimate_Economy.messages.getString("shop_added_item_singular2"));
-											}
-										}
-										removeItemFromInventory(inventoryplayer, iStack, amount);
-										// only playershop
-										if (isPlayershop) {
-											playerShop.increaseStock(s, amount);
-											playerShop.refreshStockpile();
-										}
-										break;
-									}
-								} else if (clickType == ClickType.SHIFT_RIGHT && sellprice != 0.0
-										|| clickType == ClickType.SHIFT_RIGHT
-												&& playe.getName().equals(playerShopOwner.getName())
-												&& inventoryplayer.containsAtLeast(
-														new ItemStack(Material.getMaterial(materialName), 1), amount)) {
-									String displayName = "default";
-									if (materialName.contains("|")) {
-										displayName = materialName.substring(0, materialName.indexOf("|"));
-										materialName = materialName.substring(materialName.indexOf("|") + 1);
-									}
-									boolean isEnchanted = false;
-									boolean isPotion = false;
-									if (materialName.contains("#Enchanted_")) {
-										isEnchanted = true;
-										materialName = materialName.substring(0, materialName.indexOf("#"))
-												.toUpperCase();
-									}
-									if (materialName.contains("potion:")) {
-										isPotion = true;
-										materialName = materialName.substring(0, materialName.indexOf(":"))
-												.toUpperCase();
-									}
-									ItemStack iStack = new ItemStack(Material.getMaterial(materialName));
-									if (isEnchanted) {
-										if (metaEnchanted != null) {
-											iStack.setItemMeta(metaEnchanted);
-										} else {
-											iStack.addEnchantments(event.getCurrentItem().getEnchantments());
-										}
-									} else if (isPotion) {
-										if (metaPotion != null) {
-											iStack.setItemMeta(metaPotion);
-										}
-									}
-									ItemMeta meta = iStack.getItemMeta();
-									meta.setLore(lore);
-									if (!displayName.equals("default")) {
-										meta.setDisplayName(displayName);
-									}
-									if (damage > 0) {
-										Damageable damageMeta2 = (Damageable) meta;
-										damageMeta2.setDamage(damage);
-										meta = (ItemMeta) damageMeta2;
-									}
-									iStack.setItemMeta(meta);
-									if (inventoryContainsItems(inventoryplayer, iStack, 1)) {
-										ItemStack[] i = inventoryplayer.getContents();
-										int itemAmount = 0;
-										double iA = 0.0;
-										double newprice = 0;
-										Repairable repairable = (Repairable) iStack.getItemMeta();
-										if (repairable != null) {
-											repairable.setRepairCost(0);
-											iStack.setItemMeta((ItemMeta) repairable);
-										}
-										for (ItemStack is1 : i) {
-											if (is1 != null) {
-												ItemStack is = new ItemStack(is1);
-												Repairable repairable2 = (Repairable) is.getItemMeta();
-												if (repairable2 != null) {
-													repairable2.setRepairCost(0);
-													is.setItemMeta((ItemMeta) repairable2);
-												}
-												iStack.setAmount(is.getAmount());
-												if (is.toString().equals(iStack.toString())) {
-													itemAmount = itemAmount + is.getAmount();
-												}
-											}
-										}
-										iA = Double.valueOf(String.valueOf(itemAmount));
-										newprice = sellprice / amount * iA;
-										if (isPlayershop && !playerShopOwner.getName().equals(playe.getName())
-												|| !isPlayershop) {
-											if ((isPlayershop && playerShopOwner.hasEnoughtMoney(newprice))
-													|| !isPlayershop) {
-												if (itemAmount > 1) {
-													playe.sendMessage(ChatColor.GREEN + String.valueOf(itemAmount) + " "
-															+ ChatColor.GOLD  + Ultimate_Economy.messages.getString("shop_sell_plural") + " " + ChatColor.GREEN + newprice
-															+ ChatColor.GREEN + "$" + ChatColor.GOLD + ".");
+											else if (isPlayershop
+													&& playerShopOwner.getName().equals(playe.getName())) {
+												if (amount > 1) {
+													playe.sendMessage(ChatColor.GOLD
+															+ Ultimate_Economy.messages
+																	.getString("shop_got_item_plural1")
+															+ " " + ChatColor.GREEN + String.valueOf(amount)
+															+ ChatColor.GOLD + " " + Ultimate_Economy.messages
+																	.getString("shop_got_item_plural2"));
 												} else {
-													playe.sendMessage(ChatColor.GREEN + String.valueOf(itemAmount) + " "
-															+ ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_sell_singular") + " " + ChatColor.GREEN + newprice
-															+ ChatColor.GREEN + "$" + ChatColor.GOLD + ".");
-												}
-												ecoPlayer.increasePlayerAmount(newprice);
-												// only playershop
-												if (isPlayershop) {
-													playerShopOwner.decreasePlayerAmount(newprice, false);
+													playe.sendMessage(ChatColor.GOLD
+															+ Ultimate_Economy.messages
+																	.getString("shop_got_item_singular1")
+															+ " " + ChatColor.GREEN + String.valueOf(amount)
+															+ ChatColor.GOLD + " " + Ultimate_Economy.messages
+																	.getString("shop_got_item_singular2"));
 												}
 											}
-											// only playershop
-											else if (isPlayershop) {
-												playe.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("shopowner_not_enough_money"));
-											}
+											break;
 										}
-										// only playershop
-										else if (isPlayershop) {
-											if (itemAmount > 1) {
-												playe.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_added_item_plural1") + " " + ChatColor.GREEN
-														+ String.valueOf(itemAmount) + ChatColor.GOLD
-														+ " " + Ultimate_Economy.messages.getString("shop_added_item_plural2"));
-											} else {
-												playe.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_added_item_singular1") + " " + ChatColor.GREEN
-														+ String.valueOf(itemAmount) + ChatColor.GOLD
-														+ " " + Ultimate_Economy.messages.getString("shop_added_item_singular2"));
-											}
-										}
-										iStack.setAmount(itemAmount);
-										removeItemFromInventory(inventoryplayer, iStack, itemAmount);
-										// only playershop
-										if (isPlayershop) {
-											playerShop.increaseStock(s, itemAmount);
-											playerShop.refreshStockpile();
-										}
-										break;
+									} else {
+										playe.sendMessage(ChatColor.RED
+												+ Ultimate_Economy.messages.getString("inventory_full"));
 									}
 								}
+								// only playershop
+								else if (isPlayershop) {
+									playe.sendMessage(ChatColor.GOLD
+											+ Ultimate_Economy.messages.getString("item_unavailable"));
+								}
+							} else if (!ecoPlayer.hasEnoughtMoney(buyprice) && !alreadysay) {
+								playe.sendMessage(ChatColor.RED
+										+ Ultimate_Economy.messages.getString("not_enough_money_personal"));
+								alreadysay = true;
 							}
-						} catch (PlayerException | ShopSystemException e) {
-							Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+						} else if (clickType == ClickType.RIGHT && !itemString.contains("ANVIL_0")
+								&& !itemString.contains("CRAFTING_TABLE_0") && sellprice != 0.0
+								|| clickType == ClickType.RIGHT && isPlayershop
+										&& playe.getName().equals(playerShopOwner.getName())
+										&& inventoryplayer.containsAtLeast(clickedItem, amount)) {
+							
+							ItemStack itemStack = shop.getItemStack(itemString);
+							itemStack.setAmount(amount);
+							if (inventoryContainsItems(inventoryplayer, itemStack, amount)) {
+								if (isPlayershop && !playerShopOwner.getName().equals(playe.getName())
+										|| !isPlayershop) {
+									if (!isPlayershop
+											|| (isPlayershop && playerShopOwner.hasEnoughtMoney(sellprice))) {
+										ecoPlayer.increasePlayerAmount(sellprice);
+										// only playershop
+										if (isPlayershop) {
+											playerShopOwner.decreasePlayerAmount(sellprice, false);
+										}
+										if (amount > 1) {
+											playe.sendMessage(
+													ChatColor.GREEN + String.valueOf(amount) + " " + ChatColor.GOLD
+															+ Ultimate_Economy.messages
+																	.getString("shop_sell_plural")
+															+ " " + ChatColor.GREEN + sellprice + ChatColor.GREEN
+															+ "$" + ChatColor.GOLD + ".");
+										} else {
+											playe.sendMessage(
+													ChatColor.GREEN + String.valueOf(amount) + " " + ChatColor.GOLD
+															+ Ultimate_Economy.messages
+																	.getString("shop_sell_singular")
+															+ " " + ChatColor.GREEN + sellprice + ChatColor.GREEN
+															+ "$" + ChatColor.GOLD + ".");
+										}
+									}
+									// only playershop
+									else if (isPlayershop) {
+										playe.sendMessage(ChatColor.RED + Ultimate_Economy.messages
+												.getString("shopowner_not_enough_money"));
+									}
+								}
+								// only playershop
+								else if (isPlayershop) {
+									if (amount > 1) {
+										playe.sendMessage(ChatColor.GOLD
+												+ Ultimate_Economy.messages.getString("shop_added_item_plural1")
+												+ " " + ChatColor.GREEN + String.valueOf(amount) + ChatColor.GOLD
+												+ " "
+												+ Ultimate_Economy.messages.getString("shop_added_item_plural2"));
+									} else {
+										playe.sendMessage(ChatColor.GOLD
+												+ Ultimate_Economy.messages.getString("shop_added_item_singular1")
+												+ " " + ChatColor.GREEN + String.valueOf(amount) + ChatColor.GOLD
+												+ " "
+												+ Ultimate_Economy.messages.getString("shop_added_item_singular2"));
+									}
+									playerShop.increaseStock(clickedItemString, amount);
+									playerShop.refreshStockpile();
+								}
+								removeItemFromInventory(inventoryplayer, itemStack, amount);
+								break;
+							}
+						} else if (clickType == ClickType.SHIFT_RIGHT && sellprice != 0.0
+								|| clickType == ClickType.SHIFT_RIGHT
+										&& playe.getName().equals(playerShopOwner.getName())
+										&& inventoryplayer.containsAtLeast(clickedItem, amount)) {
+							ItemStack itemStack = shop.getItemStack(itemString);
+							if (inventoryContainsItems(inventoryplayer, itemStack, 1)) {
+								ItemStack[] i = inventoryplayer.getContents();
+								int itemAmount = 0;
+								double iA = 0.0;
+								double newprice = 0;
+								for (ItemStack is1 : i) {
+									if (is1 != null) {
+										ItemStack is = new ItemStack(is1);
+										itemStack.setAmount(is.getAmount());
+										if (is.toString().equals(itemStack.toString())) {
+											itemAmount = itemAmount + is.getAmount();
+										}
+									}
+								}
+								iA = Double.valueOf(String.valueOf(itemAmount));
+								newprice = sellprice / amount * iA;
+								if (isPlayershop && !playerShopOwner.getName().equals(playe.getName())
+										|| !isPlayershop) {
+									if ((isPlayershop && playerShopOwner.hasEnoughtMoney(newprice))
+											|| !isPlayershop) {
+										if (itemAmount > 1) {
+											playe.sendMessage(ChatColor.GREEN + String.valueOf(itemAmount) + " "
+													+ ChatColor.GOLD
+													+ Ultimate_Economy.messages.getString("shop_sell_plural") + " "
+													+ ChatColor.GREEN + newprice + ChatColor.GREEN + "$"
+													+ ChatColor.GOLD + ".");
+										} else {
+											playe.sendMessage(ChatColor.GREEN + String.valueOf(itemAmount) + " "
+													+ ChatColor.GOLD
+													+ Ultimate_Economy.messages.getString("shop_sell_singular")
+													+ " " + ChatColor.GREEN + newprice + ChatColor.GREEN + "$"
+													+ ChatColor.GOLD + ".");
+										}
+										ecoPlayer.increasePlayerAmount(newprice);
+										// only playershop
+										if (isPlayershop) {
+											playerShopOwner.decreasePlayerAmount(newprice, false);
+										}
+									}
+									// only playershop
+									else if (isPlayershop) {
+										playe.sendMessage(ChatColor.RED + Ultimate_Economy.messages
+												.getString("shopowner_not_enough_money"));
+									}
+								}
+								// only playershop
+								else if (isPlayershop) {
+									if (itemAmount > 1) {
+										playe.sendMessage(ChatColor.GOLD
+												+ Ultimate_Economy.messages.getString("shop_added_item_plural1")
+												+ " " + ChatColor.GREEN + String.valueOf(itemAmount)
+												+ ChatColor.GOLD + " "
+												+ Ultimate_Economy.messages.getString("shop_added_item_plural2"));
+									} else {
+										playe.sendMessage(ChatColor.GOLD
+												+ Ultimate_Economy.messages.getString("shop_added_item_singular1")
+												+ " " + ChatColor.GREEN + String.valueOf(itemAmount)
+												+ ChatColor.GOLD + " "
+												+ Ultimate_Economy.messages.getString("shop_added_item_singular2"));
+									}
+									playerShop.increaseStock(clickedItemString, itemAmount);
+									playerShop.refreshStockpile();
+								}
+								itemStack.setAmount(itemAmount);
+								removeItemFromInventory(inventoryplayer, itemStack, itemAmount);
+								break;
+							}
 						}
+					} catch (PlayerException | ShopSystemException e) {
+						Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 					}
 				}
 			}
