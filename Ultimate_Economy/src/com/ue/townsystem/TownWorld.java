@@ -82,6 +82,9 @@ public class TownWorld {
 				}
 			}
 		}
+		for (String townName : townNames) {
+			Town.getTownNameList().remove(townName);
+		}
 	}
 
 	/**
@@ -92,6 +95,7 @@ public class TownWorld {
 	private void despawnAllTownVillagers() {
 		for (Town town : towns) {
 			town.despawnAllVillagers();
+			town.deleteTown(file);
 		}
 	}
 

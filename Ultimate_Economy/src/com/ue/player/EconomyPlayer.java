@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -422,14 +423,9 @@ public class EconomyPlayer {
 	private void setScoreboard(Player p, int score) {
 		if (!scoreBoardDisabled) {
 			Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
-			Objective o = board.registerNewObjective("bank", "dummy", "§6§l" + Ultimate_Economy.messages.getString("bank"));
+			Objective o = board.registerNewObjective("bank", "dummy", ChatColor.GOLD + Ultimate_Economy.messages.getString("bank"));
 			o.setDisplaySlot(DisplaySlot.SIDEBAR);
-			o.getScore("§6" + Ultimate_Economy.messages.getString("money_info")).setScore(score);
-			/*
-			 * if(leaderboard) { Objective o2 = board.registerNewObjective("leaderboard",
-			 * "dummy","§6§lLeaderBoard"); o2.setDisplaySlot(DisplaySlot.PLAYER_LIST);
-			 * o2.getScore(p.getName()).setScore(score); }
-			 */
+			o.getScore(ChatColor.GOLD + Ultimate_Economy.messages.getString("money_info")).setScore(score);
 			p.setScoreboard(board);
 		} else {
 			Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();

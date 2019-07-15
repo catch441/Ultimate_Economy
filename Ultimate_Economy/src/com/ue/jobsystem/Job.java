@@ -151,6 +151,7 @@ public class Job {
 		} catch(IllegalArgumentException e) {
 			throw new JobSystemException(JobSystemException.ENTITY_IS_INVALID);
 		}
+		entity = entity.toUpperCase();
 		if(entityList.contains(entity)) {
 			entityList.remove(entity);
 			config = YamlConfiguration.loadConfiguration(file);
@@ -198,7 +199,8 @@ public class Job {
 	 * @throws JobSystemException
 	 */
 	public void deleteItem(String material) throws JobSystemException {
-		if(Material.matchMaterial(material.toUpperCase()) == null) {
+		material = material.toUpperCase();
+		if(Material.matchMaterial(material) == null) {
 			throw new JobSystemException(JobSystemException.ITEM_IS_INVALID);
 		}
 		else if(!itemList.contains(material)) {

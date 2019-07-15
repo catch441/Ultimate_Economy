@@ -15,9 +15,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionData;
-import org.bukkit.potion.PotionType;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
@@ -155,55 +152,22 @@ public class PlayerShop extends Shop {
 	}
 
 	private void stockpileBuild(String item) {
-		List<String> list = config.getStringList("ShopItems." + item + ".lore");
+		config = YamlConfiguration.loadConfiguration(file);
+		ItemStack itemStack = config.getItemStack("ShopItems." + item + ".Name");
 		int slot = config.getInt("ShopItems." + item + ".Slot");
 		int stock = config.getInt("ShopItems." + item + ".stock");
-		boolean isEnchanted = false;
-		boolean isPotion = false;
-		String realName = item;
-		String displayName = "default";
-		if (item.contains("|")) {
-			displayName = item.substring(0, item.indexOf("|"));
-			item = item.substring(item.indexOf("|") + 1);
+		ItemMeta meta = itemStack.getItemMeta();
+		List<String> list = new ArrayList<>();
+		if(meta.hasLore()) {
+			list.addAll(meta.getLore());
 		}
-		if (item.contains("#Enchanted_")) {
-			isEnchanted = true;
-			item = item.substring(0, item.indexOf("#")).toUpperCase();
-		} else if (item.contains("potion:")) {
-			isPotion = true;
-			item = item.substring(0, item.indexOf(":")).toUpperCase();
-		}
-		ItemStack itemStack = new ItemStack(Material.valueOf(item), 1);
-		if (isEnchanted) {
-			addEnchantments(itemStack,
-					new ArrayList<String>(config.getStringList("ShopItems." + realName + ".enchantments")));
-		} else if (isPotion) {
-			String property = realName.substring(realName.indexOf("#") + 1);
-			boolean extended = false;
-			boolean upgraded = false;
-			if (property.equalsIgnoreCase("extended")) {
-				extended = true;
-			} else if (property.equalsIgnoreCase("upgraded")) {
-				upgraded = true;
-			}
-			PotionMeta potionMeta = (PotionMeta) itemStack.getItemMeta();
-			potionMeta.setBasePotionData(new PotionData(
-					PotionType.valueOf(
-							realName.substring(realName.indexOf(":") + 1, realName.indexOf("#")).toUpperCase()),
-					extended, upgraded));
-			itemStack.setItemMeta(potionMeta);
-		}
-		ItemMeta meta2 = itemStack.getItemMeta();
 		if (stock != 1) {
 			list.add(ChatColor.GREEN + String.valueOf(stock) + ChatColor.GOLD + " Items");
 		} else {
 			list.add(ChatColor.GREEN + String.valueOf(stock) + ChatColor.GOLD + " Item");
 		}
-		meta2.setLore(list);
-		if (!displayName.equals("default")) {
-			meta2.setDisplayName(displayName);
-		}
-		itemStack.setItemMeta(meta2);
+		meta.setLore(list);
+		itemStack.setItemMeta(meta);
 		inventory.setItem(slot, itemStack);
 	}
 
@@ -234,6 +198,7 @@ public class PlayerShop extends Shop {
 			stack2.setItemMeta(meta);
 			inventory.setItem(size - 1, stack2);
 		} else {
+			Bukkit.getLogger().info("test");
 			mode = true;
 			inventory.clear();
 			for (String item : itemNames) {
@@ -241,6 +206,7 @@ public class PlayerShop extends Shop {
 					try {
 						loadItem(item);
 					} catch (ShopSystemException e) {
+						Bukkit.getLogger().info(e.getMessage());
 					}
 				}
 			}
