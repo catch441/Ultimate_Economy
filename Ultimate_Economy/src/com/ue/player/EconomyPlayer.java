@@ -10,6 +10,9 @@ import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -38,6 +41,7 @@ public class EconomyPlayer {
 	private List<String> jobs;
 	private List<String> joinedTowns;
 	private boolean scoreBoardDisabled;
+	private BossBar bossBar;
 
 	/**
 	 * Constructor for creating a new economyPlayer/loading an existing player.
@@ -72,6 +76,16 @@ public class EconomyPlayer {
 				homes.put(homeName, homeLocation);
 			}
 		}
+		bossBar = Bukkit.createBossBar("", BarColor.GREEN, BarStyle.SOLID);
+		bossBar.setVisible(false);
+	}
+	
+	/**
+	 * Returns the bossbar of this player.
+	 * @return
+	 */
+	public BossBar getBossBar() {
+		return bossBar;
 	}
 
 	/**

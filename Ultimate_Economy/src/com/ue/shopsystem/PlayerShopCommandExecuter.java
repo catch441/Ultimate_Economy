@@ -7,10 +7,12 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
+import com.ue.exceptions.TownSystemException;
 import com.ue.player.EconomyPlayer;
 
 import ultimate_economy.Ultimate_Economy;
@@ -32,8 +34,8 @@ public class PlayerShopCommandExecuter implements CommandExecutor {
 					if (args.length != 0) {
 						if (args[0].equals("create")) {
 							if (args.length == 3) {
-								PlayerShop.createPlayerShop(plugin.getDataFolder(), args[1] + "_" + player.getName(),
-										player.getLocation(), Integer.valueOf(args[2]));
+								PlayerShop.createPlayerShop(plugin.getDataFolder(), args[1],
+										player.getLocation(), Integer.valueOf(args[2]), player.getName());
 								plugin.getConfig().set("PlayerShopNames", PlayerShop.getPlayerShopNameList());
 								plugin.saveConfig();
 								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_create1")
@@ -57,12 +59,48 @@ public class PlayerShopCommandExecuter implements CommandExecutor {
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("move")) {
-							if (args.length == 5) {
-								PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName()).moveShop(
-										Double.valueOf(args[2]), Double.valueOf(args[3]), Double.valueOf(args[4]));
+						else if (player.hasPermission("ultimate_economy.adminshop") && args[0].equals("deleteOther")) {
+							if (args.length == 2) {
+								PlayerShop.deletePlayerShop(args[1]);
+								plugin.getConfig().set("PlayerShopNames", PlayerShop.getPlayerShopNameList());
+								plugin.saveConfig();
+								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_delete1")
+								+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
+								+ Ultimate_Economy.messages.getString("shop_delete2"));
 							} else {
-								player.sendMessage("/playershop move <shopname> <x> <y> <z>");
+								player.sendMessage("/playershop deleteOther <shopname>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("rename")) {
+							if (args.length == 3) {
+								PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName()).renameShop(plugin.getDataFolder(), args[2], player.getName());
+								plugin.getConfig().set("PlayerShopNames", PlayerShop.getPlayerShopNameList());
+								plugin.saveConfig();
+								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_rename1")
+										+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
+										+ Ultimate_Economy.messages.getString("shop_rename2") + " " + ChatColor.GREEN
+										+ args[2] + ChatColor.GOLD + ".");
+							} else {
+								player.sendMessage("/playershop rename <oldName> <newName>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("resize")) {
+							if (args.length == 3) {
+								PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName()).resize(Integer.valueOf(args[2]));
+								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_resize")
+								+ " " + ChatColor.GREEN + args[2] + ChatColor.GOLD + ".");
+							} else {
+								player.sendMessage("/playershop resize <shopname> <new size>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("move")) {
+							if (args.length == 2) {
+								PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName()).moveShop(player.getLocation(),player.getName());
+							} else {
+								player.sendMessage("/playershop move <shopname>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,6 +132,22 @@ public class PlayerShopCommandExecuter implements CommandExecutor {
 								}
 							} else {
 								player.sendMessage("/playershop changeOwner <shopname> <new owner>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("changeProfession")) {
+							if (args.length == 3) {
+								try {
+									PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName())
+									.changeProfession(Profession.valueOf(args[2].toUpperCase()));
+									player.sendMessage(
+											ChatColor.GOLD + Ultimate_Economy.messages.getString("profession_changed"));
+								} catch (IllegalArgumentException e) {
+									player.sendMessage(
+											ChatColor.RED + Ultimate_Economy.messages.getString("invalid_profession"));
+								}
+							} else {
+								player.sendMessage("/adminshop changeProfession <shopname> <profession>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,14 +231,14 @@ public class PlayerShopCommandExecuter implements CommandExecutor {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else {
 							player.sendMessage(
-									"/playershop <create/delete/move/editShop/addItem/addEnchantedItem/addPotion/removeItem/editItem>");
+									"/playershop <create/delete/move/rename/resize/editShop/addItem/addEnchantedItem/addPotion/removeItem/editItem>");
 						}
 					} else {
 						player.sendMessage(
-								"/playershop <create/delete/move/editShop/addItem/addEnchantedItem/addPotion/removeItem/editItem>");
+								"/playershop <create/delete/move/rename/resize/editShop/addItem/addEnchantedItem/addPotion/removeItem/editItem>");
 					}
 				}
-			} catch(PlayerException | ShopSystemException e) {
+			} catch(TownSystemException | PlayerException | ShopSystemException e) {
 				player.sendMessage(ChatColor.RED + e.getMessage());
 			} catch (NumberFormatException e2) {
 				player.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("invalid_number"));

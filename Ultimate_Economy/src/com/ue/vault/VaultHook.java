@@ -1,11 +1,12 @@
 package com.ue.vault;
 
-import net.milkbowl.vault.economy.Economy;
 import ultimate_economy.Ultimate_Economy;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.ServicePriority;
+
+import net.milkbowl.vault.economy.Economy;
 
 public class VaultHook {
 

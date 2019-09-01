@@ -787,6 +787,22 @@ public class Town {
 			throw new TownSystemException(TownSystemException.PLAYER_IS_NO_COOWNER);
 		}
 	}
+	
+	/**
+	 * <p>
+	 * Returns true, if the town has enough money.
+	 * <p>
+	 * 
+	 * @param amount
+	 * @return
+	 */
+	public boolean hasEnoughMoney(double amount) {
+		if(townBankAmount >= amount) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	/**
 	 * <p>

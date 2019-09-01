@@ -1,17 +1,22 @@
 name: Ultimate_Economy
 main: ultimate_economy.Ultimate_Economy
-version: 1.1.9c
+author: catch441
+version: 1.2.2
 
-api-version: 1.13
+api-version: 1.14
 
 softdepend: [Multiverse-Core,Vault]
-loadbefore: [Quests,GriefPrevention,ChestCommands]
+loadbefore: [Quests,GriefPrevention,ChestCommands,WorldEdit,Essentials,PlotSquared]
 
 permissions:
 
+  ultimate_economy.towninteract:
+    description: Allows interaction with all towns.
+    default: false
+
   ultimate_economy.wilderness:
     description: Allows interaction with the wilderness of a townWorld.
-    default: op
+    default: false
     
   ultimate_economy.config:
     description: 
@@ -75,6 +80,11 @@ permissions:
 
 commands:
 
+  ue-homes:   
+    permission: ultimate_economy.config
+    permission-message: You don't have the permission
+    description: Enable/disable the homes feature.
+    
   ue-language:   
     permission: ultimate_economy.config
     permission-message: You don't have the permission
@@ -103,7 +113,7 @@ commands:
   town:   
     permission: ultimate_economy.town
     permission-message: You don't have the permission.
-    description: Set max homes.
+    description: Manage towns.
     
   adminshop:   
     permission: ultimate_economy.adminshop

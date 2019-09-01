@@ -26,6 +26,8 @@ public class ShopSystemException extends Exception{
 	public static final String SHOP_ALREADY_EXISTS = Ultimate_Economy.messages.getString("shop_already_exists");
 	public static final String INVALID_INVENTORY_SIZE = Ultimate_Economy.messages.getString("invalid_inventory_size");
 	public static final String ITEM_DOES_NOT_EXIST = Ultimate_Economy.messages.getString("item_does_not_exist_in_shop");
+	public static final String ERROR_ON_RENAMING = Ultimate_Economy.messages.getString("error_on_rename");
+	public static final String RESIZING_FAILED = Ultimate_Economy.messages.getString("resizing_failed");
 
 	
 	public ShopSystemException (String msg) {

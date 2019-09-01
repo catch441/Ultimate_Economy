@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -30,9 +31,9 @@ import com.ue.exceptions.PlayerException;
 import com.ue.player.EconomyPlayer;
 
 public class JobCenter {
-	
+
 	private static List<JobCenter> jobCenterList = new ArrayList<>();
-	
+
 	private FileConfiguration config;
 	private File file;
 	private Villager villager;
@@ -51,10 +52,11 @@ public class JobCenter {
 	 * @param size
 	 * @throws JobSystemException
 	 */
-	private JobCenter(Server server,File dataFolder,String name,Location spawnLocation,int size) throws JobSystemException {
+	private JobCenter(Server server, File dataFolder, String name, Location spawnLocation, int size)
+			throws JobSystemException {
 		jobnames = new ArrayList<>();
 		this.name = name;
-		inventory = Bukkit.createInventory(null, size,name);
+		inventory = Bukkit.createInventory(null, size, name);
 		file = new File(dataFolder, name + "-JobCenter.yml");
 		try {
 			file.createNewFile();
@@ -74,7 +76,7 @@ public class JobCenter {
 		setupVillager();
 		setupJobCenter();
 	}
-	
+
 	/**
 	 * Constructor for loading an existing jobcenter from the save file.
 	 * 
@@ -82,14 +84,14 @@ public class JobCenter {
 	 * @param dataFolder
 	 * @param name
 	 */
-	private JobCenter(Server server,File dataFolder,String name) {
+	private JobCenter(Server server, File dataFolder, String name) {
 		jobnames = new ArrayList<>();
 		this.name = name;
 		file = new File(dataFolder, name + "-JobCenter.yml");
 		config = YamlConfiguration.loadConfiguration(file);
 		jobnames = config.getStringList("Jobnames");
-		inventory = Bukkit.createInventory(villager, config.getInt("JobCenterSize"),name);
-		for(String string:jobnames) {
+		inventory = Bukkit.createInventory(villager, config.getInt("JobCenterSize"), name);
+		for (String string : jobnames) {
 			ItemStack jobItem = new ItemStack(Material.valueOf(config.getString("Jobs." + string + ".ItemMaterial")));
 			ItemMeta meta = jobItem.getItemMeta();
 			meta.setDisplayName(string);
@@ -98,28 +100,30 @@ public class JobCenter {
 			inventory.setItem(config.getInt("Jobs." + string + ".ItemSlot") - 1, jobItem);
 		}
 		name = config.getString("JobCenterName");
-		location = new Location(server.getWorld(config.getString("ShopLocation.World")),config.getDouble("ShopLocation.x"),config.getDouble("ShopLocation.y"),config.getDouble("ShopLocation.z"));
+		location = new Location(server.getWorld(config.getString("ShopLocation.World")),
+				config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
+				config.getDouble("ShopLocation.z"));
 		setupVillager();
 		setupJobCenter();
 	}
-	
+
 	private void setupVillager() {
 		location.getChunk().load();
-		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10,10,10);
-		for(Entity e:entitys) {
-			if(e.getName().equals(name)) {
+		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10, 10, 10);
+		for (Entity e : entitys) {
+			if (e.getName().equals(name)) {
 				e.remove();
 			}
 		}
-		villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);     
+		villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
 		villager.setCustomName(name);
 		villager.setCustomNameVisible(true);
 		villager.setProfession(Villager.Profession.NITWIT);
 		villager.setSilent(true);
-		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000,30000000));             
-		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000,30000000));
+		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
+		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
 	}
-	
+
 	/**
 	 * This method adds a job to this jobcenter.
 	 * 
@@ -128,24 +132,19 @@ public class JobCenter {
 	 * @param slot
 	 * @throws JobSystemException
 	 */
-	public void addJob(String jobname,String itemMaterial,int slot) throws JobSystemException {
+	public void addJob(String jobname, String itemMaterial, int slot) throws JobSystemException {
 		itemMaterial = itemMaterial.toUpperCase();
-		if(slot < 0 || slot > inventory.getSize()) {
+		if (slot < 0 || slot > inventory.getSize()) {
 			throw new JobSystemException(JobSystemException.INVENTORY_SLOT_INVALID);
-		}
-		else if(!slotIsEmpty(slot)) {
+		} else if (!slotIsEmpty(slot)) {
 			throw new JobSystemException(JobSystemException.INVENTORY_SLOT_OCCUPIED);
-		}
-		else if(!Job.getJobNameList().contains(jobname)) {
+		} else if (!Job.getJobNameList().contains(jobname)) {
 			throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
-		}
-		else if(jobnames.contains(jobname)) {
+		} else if (jobnames.contains(jobname)) {
 			throw new JobSystemException(JobSystemException.JOB_ALREADY_EXIST_IN_JOBCENTER);
-		}
-		else if(Material.matchMaterial(itemMaterial) == null) {
+		} else if (Material.matchMaterial(itemMaterial) == null) {
 			throw new JobSystemException(JobSystemException.ITEM_IS_INVALID);
-		}
-		else {
+		} else {
 			config = YamlConfiguration.loadConfiguration(file);
 			jobnames.add(jobname);
 			config.set("Jobnames", jobnames);
@@ -160,7 +159,7 @@ public class JobCenter {
 			inventory.setItem(slot - 1, jobItem);
 		}
 	}
-	
+
 	/**
 	 * This method removes a job from this jobcenter.
 	 * 
@@ -168,13 +167,11 @@ public class JobCenter {
 	 * @throws JobSystemException
 	 */
 	public void removeJob(String jobname) throws JobSystemException {
-		if(!Job.getJobNameList().contains(jobname)) {
+		if (!Job.getJobNameList().contains(jobname)) {
 			throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
-		}
-		else if(!jobnames.contains(jobname)) {
+		} else if (!jobnames.contains(jobname)) {
 			throw new JobSystemException(JobSystemException.JOB_NOT_EXIST_IN_JOBCENTER);
-		}	
-		else {
+		} else {
 			config = YamlConfiguration.loadConfiguration(file);
 			inventory.clear(config.getInt("Jobs." + jobname + ".ItemSlot") - 1);
 			config.set("Jobs." + jobname, null);
@@ -182,23 +179,24 @@ public class JobCenter {
 			config.set("Jobnames", jobnames);
 			save();
 			int i = 0;
-			for(JobCenter jobCenter:jobCenterList) {
-				if(jobCenter.hasJob(jobname)) {
+			for (JobCenter jobCenter : jobCenterList) {
+				if (jobCenter.hasJob(jobname)) {
 					i++;
 				}
 			}
-			if(i==0) {
-				for(EconomyPlayer ecoPlayer : EconomyPlayer.getAllEconomyPlayers()) {
-					if(ecoPlayer.hasJob(jobname)) {
+			if (i == 0) {
+				for (EconomyPlayer ecoPlayer : EconomyPlayer.getAllEconomyPlayers()) {
+					if (ecoPlayer.hasJob(jobname)) {
 						try {
 							ecoPlayer.removeJob(jobname);
-						} catch (PlayerException e) {}
+						} catch (PlayerException e) {
+						}
 					}
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * This method returns a list of all jobnames in this jobcenter.
 	 * 
@@ -207,7 +205,7 @@ public class JobCenter {
 	public List<String> getJobNameList() {
 		return jobnames;
 	}
-	
+
 	/**
 	 * This method moves a jobcenter villager to a other location.
 	 * 
@@ -215,7 +213,7 @@ public class JobCenter {
 	 * @param y
 	 * @param z
 	 */
-	public void moveShop(double x,double y,double z) {
+	public void moveShop(double x, double y, double z) {
 		config = YamlConfiguration.loadConfiguration(file);
 		config.set("ShopLocation.x", x);
 		config.set("ShopLocation.y", y);
@@ -223,7 +221,7 @@ public class JobCenter {
 		villager.teleport(new Location(Bukkit.getWorld(config.getString("ShopLocation.World")), x, y, z));
 		save();
 	}
-	
+
 	/**
 	 * This method returns the name of this jobcenter.
 	 * 
@@ -232,7 +230,7 @@ public class JobCenter {
 	public String getName() {
 		return name;
 	}
-	
+
 	private void save() {
 		try {
 			config.save(file);
@@ -240,14 +238,14 @@ public class JobCenter {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * This method despawns the jobcenter villager.
 	 */
 	public void despawnVillager() {
 		villager.remove();
 	}
-	
+
 	private void setupJobCenter() {
 		int slot = config.getInt("JobCenterSize") - 1;
 		ItemStack info = new ItemStack(Material.ANVIL);
@@ -260,14 +258,14 @@ public class JobCenter {
 		info.setItemMeta(meta);
 		inventory.setItem(slot, info);
 	}
-	
+
 	private void deleteJobCenter() {
 		file.delete();
 		World world = villager.getLocation().getWorld();
 		villager.remove();
 		world.save();
 	}
-	
+
 	/**
 	 * This method opens the jobcenter inventory.
 	 * 
@@ -276,7 +274,7 @@ public class JobCenter {
 	public void openInv(Player player) {
 		player.openInventory(inventory);
 	}
-	
+
 	/**
 	 * This method returns true if this jobcenter contains this job.
 	 * 
@@ -284,26 +282,26 @@ public class JobCenter {
 	 * @return boolean
 	 * @throws JobSystemException
 	 */
-	public boolean hasJob (String jobname) throws JobSystemException {
-		if(!Job.getJobNameList().contains(jobname)) {
+	public boolean hasJob(String jobname) throws JobSystemException {
+		if (!Job.getJobNameList().contains(jobname)) {
 			throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
 		}
 		boolean exist = false;
-		if(jobnames.contains(jobname)) {
+		if (jobnames.contains(jobname)) {
 			exist = true;
 		}
 		return exist;
 	}
-	
+
 	private boolean slotIsEmpty(int slot) {
 		slot--;
 		boolean isEmpty = false;
-		if(inventory.getItem(slot) == null) {
+		if (inventory.getItem(slot) == null) {
 			isEmpty = true;
 		}
 		return isEmpty;
 	}
-	
+
 	/**
 	 * This method returns a jobcenter by it's name.
 	 * 
@@ -312,14 +310,14 @@ public class JobCenter {
 	 * @throws JobSystemException
 	 */
 	public static JobCenter getJobCenterByName(String name) throws JobSystemException {
-		for(JobCenter jobCenter:jobCenterList) {
-			if(jobCenter.getName().equals(name)) {
+		for (JobCenter jobCenter : jobCenterList) {
+			if (jobCenter.getName().equals(name)) {
 				return jobCenter;
 			}
 		}
 		throw new JobSystemException(JobSystemException.JOBCENTER_DOES_NOT_EXIST);
 	}
-	
+
 	/**
 	 * This method returns a namelist of all jobcenters.
 	 * 
@@ -327,12 +325,12 @@ public class JobCenter {
 	 */
 	public static List<String> getJobCenterNameList() {
 		List<String> jobCenterNames = new ArrayList<>();
-		for(JobCenter jobCenter:jobCenterList) {
+		for (JobCenter jobCenter : jobCenterList) {
 			jobCenterNames.add(jobCenter.getName());
 		}
 		return jobCenterNames;
 	}
-	
+
 	/**
 	 * This method returns a list of all existing jobcenters.
 	 * 
@@ -341,7 +339,7 @@ public class JobCenter {
 	public static List<JobCenter> getJobCenterList() {
 		return jobCenterList;
 	}
-	
+
 	/**
 	 * This method should me used to delete a jobcenter.
 	 * 
@@ -354,24 +352,25 @@ public class JobCenter {
 		List<String> jobList = jobCenter.getJobNameList();
 		jobCenterList.remove(jobCenter);
 		int i = 0;
-		for(String jobName:jobList) {
-			for(JobCenter jobCenter2:jobCenterList) {
-				if(jobCenter2.hasJob(jobName)) {
+		for (String jobName : jobList) {
+			for (JobCenter jobCenter2 : jobCenterList) {
+				if (jobCenter2.hasJob(jobName)) {
 					i++;
 				}
 			}
-			if(i == 0) {
-				for(EconomyPlayer ecoPlayer : EconomyPlayer.getAllEconomyPlayers()) {
-					if(ecoPlayer.hasJob(jobName)) {
+			if (i == 0) {
+				for (EconomyPlayer ecoPlayer : EconomyPlayer.getAllEconomyPlayers()) {
+					if (ecoPlayer.hasJob(jobName)) {
 						try {
 							ecoPlayer.removeJob(jobName);
-						} catch (PlayerException e){} 
+						} catch (PlayerException e) {
+						}
 					}
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * This method should be used to create a new jobcenter.
 	 * 
@@ -382,43 +381,41 @@ public class JobCenter {
 	 * @param size
 	 * @throws JobSystemException
 	 */
-	public static void createJobCenter(Server server,File dataFolder,String name,Location spawnLocation,int size) throws JobSystemException {
-		if(getJobCenterNameList().contains(name)) {
+	public static void createJobCenter(Server server, File dataFolder, String name, Location spawnLocation, int size)
+			throws JobSystemException {
+		if (getJobCenterNameList().contains(name)) {
 			throw new JobSystemException(JobSystemException.JOBCENTER_ALREADY_EXIST);
-		}
-		else if(size%9 != 0) {
+		} else if (size % 9 != 0) {
 			throw new JobSystemException(JobSystemException.INVALID_INVENTORY_SIZE);
-		}
-		else {
+		} else {
 			jobCenterList.add(new JobCenter(server, dataFolder, name, spawnLocation, size));
 		}
 	}
-	
+
 	/**
 	 * This method loads all jobcenters from the save files.
 	 * 
 	 * @param server
 	 * @param fileConfig
 	 * @param dataFolder
-	 * @throws JobSystemException
 	 */
-	public static void loadAllJobCenters(Server server,FileConfiguration fileConfig,File dataFolder) throws JobSystemException {
-		for(String jobCenterName:fileConfig.getStringList("JobCenterNames")) {
+	public static void loadAllJobCenters(Server server, FileConfiguration fileConfig, File dataFolder) {
+		for (String jobCenterName : fileConfig.getStringList("JobCenterNames")) {
 			File file = new File(dataFolder, jobCenterName + "-JobCenter.yml");
-			if(file.exists()) {
+			if (file.exists()) {
 				jobCenterList.add(new JobCenter(server, dataFolder, jobCenterName));
-			}
-			else {
-				throw new JobSystemException(JobSystemException.CANNOT_LOAD_JOBCENTER);
+			} else {
+				Bukkit.getLogger().log(Level.WARNING, JobSystemException.CANNOT_LOAD_JOBCENTER,
+						new JobSystemException(JobSystemException.CANNOT_LOAD_JOBCENTER));
 			}
 		}
 	}
-	
+
 	/**
 	 * This method despawns all jobcenter villager.
 	 */
 	public static void despawnAllVillagers() {
-		for(JobCenter jobCenter:jobCenterList) {
+		for (JobCenter jobCenter : jobCenterList) {
 			jobCenter.despawnVillager();
 		}
 	}

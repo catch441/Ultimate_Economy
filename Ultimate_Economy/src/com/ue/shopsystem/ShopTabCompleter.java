@@ -10,6 +10,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Villager.Profession;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
@@ -32,6 +33,9 @@ public class ShopTabCompleter implements TabCompleter{
 				list.add("editShop");
 				list.add("addItem");
 				list.add("removeItem");
+				list.add("rename");
+				list.add("resize");
+				list.add("changeProfession");
 				list.add("editItem");
 				list.add("addEnchantedItem");
 				list.add("addPotion");
@@ -39,17 +43,25 @@ public class ShopTabCompleter implements TabCompleter{
 					list.add("addSpawner");
 					list.add("removeSpawner");
 				} else {
+					if(sender.hasPermission("ultimate_economy.adminshop")) {
+						list.add("deleteOther");
+					}
 					list.add("changeOwner");
 				}
 			} else if (args[0].equals("delete") || args[0].equals("addItem") || args[0].equals("removeItem")
 					|| args[0].equals("addSpawner") || args[0].equals("removeSpawner") || args[0].equals("editShop")
 					|| args[0].equals("addEnchantedItem") || args[0].equals("addPotion")
-					|| args[0].equals("changeOwner")) {
+					|| args[0].equals("changeOwner") || args[0].equals("rename") || args[0].equals("resize")
+					|| args[0].equals("changeProfession") || args[0].equals("deleteOther")) {
 				if (args.length == 2) {
 					if (command.getName().equals("adminshop")) {
 						list = getAdminShopList(config, args[1]);
 					} else {
-						list = getPlayerShopList(config, args[1], sender.getName());
+						if(args[0].equals("deleteOther")) {
+							list = PlayerShop.getPlayerShopNameList();
+						} else {
+							list = getPlayerShopList(config, args[1], sender.getName());
+						}
 					}
 				} else if (args.length == 3) {
 					if (args[0].equals("addItem") || args[0].equals("addEnchantedItem")) {
@@ -68,6 +80,18 @@ public class ShopTabCompleter implements TabCompleter{
 						}
 					} else if (args[0].equals("addSpawner")) {
 						list = getEntityList(args[2]);
+					} else if(args[0].equals("changeProfession")) {
+						if (args[2].equals("")) {
+							for(Profession profession : Profession.values()) {
+								list.add(profession.name().toLowerCase());
+							}
+						} else {
+							for (Profession profession : Profession.values()) {
+								if (profession.name().toLowerCase().contains(args[2])) {
+									list.add(profession.name().toLowerCase());
+								}
+							}
+						}
 					}
 				} else if (args.length == 4 && args[0].equals("addPotion")) {
 					if (args[3].equals("")) {
@@ -130,6 +154,15 @@ public class ShopTabCompleter implements TabCompleter{
 				if ("removeItem".contains(args[0])) {
 					list.add("removeItem");
 				}
+				if ("rename".contains(args[0])) {
+					list.add("rename");
+				}
+				if ("changeProfession".contains(args[0])) {
+					list.add("changeProfession");
+				}
+				if("resize".contains(args[0])) {
+					list.add("resize");
+				}
 				if ("editItem".contains(args[0])) {
 					list.add("editItem");
 				}
@@ -152,6 +185,9 @@ public class ShopTabCompleter implements TabCompleter{
 				} else {
 					if ("changeOwner".contains(args[0])) {
 						list.add("changeOwner");
+					}
+					if (sender.hasPermission("ultimate_economy.adminshop") && "deleteOther".contains(args[0])) {
+						list.add("deleteOther");
 					}
 				}
 			}

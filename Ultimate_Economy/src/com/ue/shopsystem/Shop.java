@@ -28,6 +28,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
+import org.bukkit.entity.Villager.Profession;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -44,6 +45,9 @@ import org.bukkit.potion.PotionType;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.ue.exceptions.ShopSystemException;
+import com.ue.exceptions.TownSystemException;
+import com.ue.townsystem.Town;
+import com.ue.townsystem.TownWorld;
 
 public abstract class Shop {
 
@@ -57,6 +61,9 @@ public abstract class Shop {
 	private static final String TWENTY = "http://textures.minecraft.net/texture/f7b29a1bb25b2ad8ff3a7a38228189c9461f457a4da98dae29384c5c25d85";
 	private static final String BUY = "http://textures.minecraft.net/texture/e5da4847272582265bdaca367237c96122b139f4e597fbc6667d3fb75fea7cf6";
 	private static final String SELL = "http://textures.minecraft.net/texture/abae89e92ac362635ba3e9fb7c12b7ddd9b38adb11df8aa1aff3e51ac428a4";
+	
+	private static final String K_ON = "http://textures.minecraft.net/texture/d42a4802b6b2deb49cfbb4b7e267e2f9ad45da24c73286f97bef91d21616496";
+	private static final String K_OFF = "http://textures.minecraft.net/texture/e883b5beb4e601c3cbf50505c8bd552e81b996076312cffe27b3cc1a29e3";
 
 	public Villager villager;
 	public FileConfiguration config;
@@ -141,10 +148,16 @@ public abstract class Shop {
 		villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
 		villager.setCustomName(name);
 		villager.setCustomNameVisible(true);
-		villager.setProfession(Villager.Profession.NITWIT);
 		villager.setSilent(true);
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
+		villager.setVillagerLevel(2);
+		config = YamlConfiguration.loadConfiguration(file);
+		if(config.isSet("Profession")) {
+			villager.setProfession(Profession.valueOf(config.getString("Profession")));
+		} else {
+			villager.setProfession(Profession.NITWIT);
+		}
 		editor = Bukkit.createInventory(null, this.size, name + "-Editor");
 		setupShopItems();
 		setupEditor();
@@ -163,36 +176,78 @@ public abstract class Shop {
 		itemNames.add("ANVIL_0");
 	}
 
-	private void setupSlotEditor() {
-		List<String> list = new ArrayList<String>();
-		list.add(ChatColor.GOLD + "Price: " + 0);
+	private void setupSlotEditor(int slot) {
+		double buyPrice = 0;
+		double sellPrice = 0;
+		try {
+			if(!slotIsEmpty(slot)) {
+				ItemStack itemStack = new ItemStack(inventory.getItem(slot - 1));
+				itemStack.setAmount(1);
+				ItemMeta itemMeta = itemStack.getItemMeta();
+				List<String> loreList = itemMeta.getLore();
+				Iterator<String> loreIter = loreList.iterator();
+				while(loreIter.hasNext()) {
+					String lore = loreIter.next();
+					if(lore.contains(" buy for ") || lore.contains(" sell for ")) {
+						loreIter.remove();
+					}
+				}
+				itemMeta.setLore(loreList);
+				itemStack.setItemMeta(itemMeta);
+				String itemString =  itemStack.toString();
+				buyPrice = getItemBuyPrice(itemString);
+				sellPrice = getItemSellPrice(itemString);
+			}
+		} catch (ShopSystemException e) {}
+		
+		List<String> listBuy = new ArrayList<String>();
+		List<String> listSell = new ArrayList<String>();
+		listBuy.add(ChatColor.GOLD + "Price: " + buyPrice);
+		listSell.add(ChatColor.GOLD + "Price: " + sellPrice);
 		ItemStack item = getSkull(PLUS, "plus");
 		slotEditor.setItem(2, item);
 		ItemMeta meta = item.getItemMeta();
-		meta.setLore(list);
+		meta.setLore(listBuy);
 		item.setItemMeta(meta);
 		slotEditor.setItem(11, item);
+		meta = item.getItemMeta();
+		meta.setLore(listSell);
+		item.setItemMeta(meta);
 		slotEditor.setItem(20, item);
+		
+		item = getSkull(K_OFF, "factor off");
+		slotEditor.setItem(12, item);
+		slotEditor.setItem(21, item);
+		
 		item = getSkull(ONE, "one");
 		slotEditor.setItem(4, item);
 		meta = item.getItemMeta();
-		meta.setLore(list);
+		meta.setLore(listBuy);
 		item.setItemMeta(meta);
 		slotEditor.setItem(13, item);
+		meta = item.getItemMeta();
+		meta.setLore(listSell);
+		item.setItemMeta(meta);
 		slotEditor.setItem(22, item);
 		item = getSkull(TEN, "ten");
 		slotEditor.setItem(5, item);
 		meta = item.getItemMeta();
-		meta.setLore(list);
+		meta.setLore(listBuy);
 		item.setItemMeta(meta);
 		slotEditor.setItem(14, item);
+		meta = item.getItemMeta();
+		meta.setLore(listSell);
+		item.setItemMeta(meta);
 		slotEditor.setItem(23, item);
 		item = getSkull(TWENTY, "twenty");
 		slotEditor.setItem(6, item);
 		meta = item.getItemMeta();
-		meta.setLore(list);
+		meta.setLore(listBuy);
 		item.setItemMeta(meta);
 		slotEditor.setItem(15, item);
+		meta = item.getItemMeta();
+		meta.setLore(listSell);
+		item.setItemMeta(meta);
 		slotEditor.setItem(24, item);
 		item = new ItemStack(Material.GREEN_WOOL);
 		meta = item.getItemMeta();
@@ -208,18 +263,77 @@ public abstract class Shop {
 		meta = item.getItemMeta();
 		meta.setDisplayName(ChatColor.RED + "remove item");
 		item.setItemMeta(meta);
-		;
 		slotEditor.setItem(26, item);
 		item = getSkull(BUY, "buyprice");
 		meta = item.getItemMeta();
-		meta.setLore(list);
+		meta.setLore(listBuy);
 		item.setItemMeta(meta);
 		slotEditor.setItem(9, item);
 		item = getSkull(SELL, "sellprice");
 		meta = item.getItemMeta();
-		meta.setLore(list);
+		meta.setLore(listSell);
 		item.setItemMeta(meta);
 		slotEditor.setItem(18, item);
+	}
+	
+	/**
+	 * Change the profession of a shopvillager
+	 * 
+	 * @param profession
+	 */
+	public void changeProfession(Profession profession) {
+		villager.setProfession(profession);
+		config = YamlConfiguration.loadConfiguration(file);
+		config.set("Profession", profession.name());
+		save();
+	}
+	
+	/**
+	 * This method renames a shop.
+	 * 
+	 * @param newName
+	 * @param player
+	 * @throws ShopSystemException thrown, when a shop with this name already exists
+	 */
+	public abstract void renameShop(File dataFolder, String newName, String player) throws ShopSystemException;
+
+	/**
+	 * This method allows you to resize a shop.
+	 * 
+	 * @param newSize - size in slots
+	 * @throws ShopSystemException 
+	 */
+	public void resize(int newSize) throws ShopSystemException {
+		if(newSize % 9 != 0) {
+			throw new ShopSystemException(ShopSystemException.INVALID_INVENTORY_SIZE);
+		} else {
+			boolean possible = true;
+			int diff = size - newSize;
+			int temp = 1;
+			if(isPlayershop) {
+				temp = 2;
+			}
+			if(inventory.getSize() > newSize) {
+				for(int i = 1;i<=diff;i++) {
+					ItemStack stack = inventory.getItem(size-i-temp);
+					if(stack != null) {
+						possible = false;
+					}
+				}
+			}
+			if(possible) {
+				config = YamlConfiguration.loadConfiguration(file);
+				size = newSize;
+				config.set("ShopSize", size);
+				save();
+				inventory = Bukkit.createInventory(null, size, name);
+				reload();
+				setupShopItems();
+			} else {
+				Bukkit.getLogger().info("test");
+				throw new ShopSystemException(ShopSystemException.RESIZING_FAILED);
+			}
+		}
 	}
 
 	/**
@@ -731,9 +845,20 @@ public abstract class Shop {
 			slotEditor.setItem(slot, item);
 		}
 	}
+	
+	private void switchFactor(int slot, String state) {
+		slot--;
+		if (state.equals("factor off")) {
+			ItemStack item = getSkull(K_OFF, "factor off");
+			slotEditor.setItem(slot, item);
+		} else {
+			ItemStack item = getSkull(K_ON, "factor on");
+			slotEditor.setItem(slot, item);
+		}
+	}
 
 	public void openSlotEditor(Player player, int slot) throws IllegalArgumentException, ShopSystemException {
-		setupSlotEditor();
+		setupSlotEditor(slot);
 		ItemStack item;
 		slotEditorSlot = slot;
 		if (slotIsEmpty(slot)) {
@@ -763,7 +888,7 @@ public abstract class Shop {
 		player.openInventory(slotEditor);
 	}
 
-	private void updateEditorPrice(int a, int b, int c, int d, int e, int price) {
+	private void updateEditorPrice(int a, int b, int c, int d, int e, Double price) {
 		List<String> list = new ArrayList<>();
 		list.add(ChatColor.GOLD + "Price: " + price);
 		ItemMeta meta = slotEditor.getItem(a).getItemMeta();
@@ -843,12 +968,37 @@ public abstract class Shop {
 		return type;
 	}
 
-	public void moveShop(double x, double y, double z) {
+	/**
+	 * This method moves a shop to a new location.
+	 * 
+	 * @param location
+	 * @throws TownSystemException 
+	 * @Param player (only playershop)
+	 */
+	public void moveShop(Location location, String player) throws TownSystemException {
+		if(isPlayershop && TownWorld.isTownWorld(location.getWorld().getName())) {
+			TownWorld townWorld = null;
+			try {
+				townWorld = TownWorld.getTownWorldByName(location.getWorld().getName());
+			} catch (TownSystemException e) {
+				//should never happen
+			}
+				if(townWorld.chunkIsFree(location.getChunk())) {
+					throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
+				} else {
+					Town town = townWorld.getTownByChunk(location.getChunk());
+					if(!town.hasBuildPermissions(player, location.getChunk().getX() + "/" + location.getChunk().getZ())) {
+						throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
+					}
+				}
+			
+		}
 		config = YamlConfiguration.loadConfiguration(file);
-		config.set("ShopLocation.x", x);
-		config.set("ShopLocation.y", y);
-		config.set("ShopLocation.z", z);
-		villager.teleport(new Location(Bukkit.getWorld(config.getString("ShopLocation.World")), x, y, z));
+		config.set("ShopLocation.x", location.getBlockX());
+		config.set("ShopLocation.y", location.getBlockY());
+		config.set("ShopLocation.z", location.getBlockZ());
+		config.set("ShopLocation.World", location.getWorld().getName());
+		villager.teleport(location);
 		save();
 	}
 
@@ -868,7 +1018,11 @@ public abstract class Shop {
 			int slot = event.getSlot() + 1;
 			String command = event.getCurrentItem().getItemMeta().getDisplayName();
 			String operator = null;
-			int price = 0;
+			int factor = 1;
+			if(event.getInventory().getItem(12).getItemMeta().getDisplayName().equals("factor on")) {
+				factor = 1000;
+			}
+			double price = 0.0;
 			switch (slot) {
 				case 5:
 				case 6:
@@ -879,14 +1033,14 @@ public abstract class Shop {
 				case 15:
 				case 16:
 					operator = event.getInventory().getItem(11).getItemMeta().getDisplayName();
-					price = Integer
+					price = Double
 							.valueOf(event.getInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
 					break;
 				case 23:
 				case 24:
 				case 25:
 					operator = event.getInventory().getItem(20).getItemMeta().getDisplayName();
-					price = Integer
+					price = Double
 							.valueOf(event.getInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
 					break;
 			}
@@ -895,6 +1049,10 @@ public abstract class Shop {
 				switchPlusMinus(slot, "plus");
 			} else if (command.equals("minus")) {
 				switchPlusMinus(slot, "minus");
+			} else if(command.equals("factor off")) {
+				switchFactor(slot, "factor on");
+			} else if(command.equals("factor on")) {
+				switchFactor(slot, "factor off");
 			} else if (command.equals("one")) {
 				switch (slot) {
 					case 5:
@@ -910,21 +1068,20 @@ public abstract class Shop {
 						break;
 					case 14:
 						if (price >= 1 && operator.equals("minus")) {
-							updateEditorPrice(9, 11, 13, 14, 15, price - 1);
+							updateEditorPrice(9, 11, 13, 14, 15, price - 1*factor);
 						} else if (operator.equals("plus")) {
-							updateEditorPrice(9, 11, 13, 14, 15, price + 1);
+							updateEditorPrice(9, 11, 13, 14, 15, price + 1*factor);
 						}
 						break;
 					case 23:
 						if (price >= 1 && operator.equals("minus")) {
-							updateEditorPrice(18, 20, 22, 23, 24, price - 1);
+							updateEditorPrice(18, 20, 22, 23, 24, price - 1*factor);
 						} else if (operator.equals("plus")) {
-							updateEditorPrice(18, 20, 22, 23, 24, price + 1);
+							updateEditorPrice(18, 20, 22, 23, 24, price + 1*factor);
 						}
 						break;
 				}
 			} else if (command.equals("ten")) {
-
 				switch (slot) {
 					case 6:
 						if (editorItemStack != null && operator.equals("plus")
@@ -939,16 +1096,16 @@ public abstract class Shop {
 						break;
 					case 15:
 						if (price >= 10 && operator.equals("minus")) {
-							updateEditorPrice(9, 11, 13, 14, 15, price - 10);
+							updateEditorPrice(9, 11, 13, 14, 15, price - 10*factor);
 						} else if (operator.equals("plus")) {
-							updateEditorPrice(9, 11, 13, 14, 15, price + 10);
+							updateEditorPrice(9, 11, 13, 14, 15, price + 10*factor);
 						}
 						break;
 					case 24:
 						if (price >= 10 && operator.equals("minus")) {
-							updateEditorPrice(18, 20, 22, 23, 24, price - 10);
+							updateEditorPrice(18, 20, 22, 23, 24, price - 10*factor);
 						} else if (operator.equals("plus")) {
-							updateEditorPrice(18, 20, 22, 23, 24, price + 10);
+							updateEditorPrice(18, 20, 22, 23, 24, price + 10*factor);
 						}
 						break;
 				}
@@ -967,16 +1124,16 @@ public abstract class Shop {
 						break;
 					case 16:
 						if (price >= 20 && operator.equals("minus")) {
-							updateEditorPrice(9, 11, 13, 14, 15, price - 20);
+							updateEditorPrice(9, 11, 13, 14, 15, price - 20*factor);
 						} else if (operator.equals("plus")) {
-							updateEditorPrice(9, 11, 13, 14, 15, price + 20);
+							updateEditorPrice(9, 11, 13, 14, 15, price + 20*factor);
 						}
 						break;
 					case 25:
 						if (price >= 20 && operator.equals("minus")) {
-							updateEditorPrice(18, 20, 22, 23, 24, price - 20);
+							updateEditorPrice(18, 20, 22, 23, 24, price - 20*factor);
 						} else if (operator.equals("plus")) {
-							updateEditorPrice(18, 20, 22, 23, 24, price + 20);
+							updateEditorPrice(18, 20, 22, 23, 24, price + 20*factor);
 						}
 						break;
 				}

@@ -34,7 +34,7 @@ public class TownCommandExecutor implements CommandExecutor {
 							} else {
 								player.sendMessage("/town create <townname>");
 							}
-						}
+						}	
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("delete")) {
 							if (args.length == 2) {
@@ -56,10 +56,6 @@ public class TownCommandExecutor implements CommandExecutor {
 							} else {
 								player.sendMessage("/town expand <townname>");
 							}
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if(args[0].equals("border")) {
-							//TODO
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("setTownSpawn")) {
@@ -190,15 +186,37 @@ public class TownCommandExecutor implements CommandExecutor {
 								for (TownWorld townWorld : TownWorld.getTownWorldList()) {
 									if (townWorld.getTownNameList().contains(args[1])) {
 										double amount = Double.valueOf(args[2]);
+										ecoPlayer.decreasePlayerAmount(amount, true);
 										townWorld.setSaveFile(townWorld.getTownByName(args[1])
 												.increaseTownBankAmount(townWorld.getSaveFile(), amount));
-										ecoPlayer.decreasePlayerAmount(amount, true);
 										player.sendMessage(
 												ChatColor.GOLD + Ultimate_Economy.messages.getString("town_pay1") + " "
-														+ ChatColor.GREEN + args[1] + ChatColor.GOLD
+														+ ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
 														+ Ultimate_Economy.messages.getString("town_pay2") + " "
 														+ ChatColor.GREEN + amount + " $" + ChatColor.GOLD + " "
 														+ Ultimate_Economy.messages.getString("town_pay3"));
+										break;
+									}
+								}
+							} else {
+								player.sendMessage("/town pay <townname> <amount>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if(args[0].equals("withdraw")) {
+							if (args.length == 3) {
+								for (TownWorld townWorld : TownWorld.getTownWorldList()) {
+									if (townWorld.getTownNameList().contains(args[1])) {
+										Town town = townWorld.getTownByName(args[1]);
+										if(town.hasCoOwnerPermission(player.getName())) {
+											double amount = Double.valueOf(args[2]);
+											townWorld.setSaveFile(town.decreaseTownBankAmount(townWorld.getSaveFile(), amount));
+											ecoPlayer.increasePlayerAmount(amount);
+											player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("got_money") + " "
+													+ ChatColor.GREEN + amount + " $");
+										} else {
+											player.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("player_has_no_permission"));
+										}
 										break;
 									}
 								}

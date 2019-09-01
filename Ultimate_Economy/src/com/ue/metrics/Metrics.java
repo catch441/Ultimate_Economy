@@ -1,4 +1,4 @@
-package metrics;
+package com.ue.metrics;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;

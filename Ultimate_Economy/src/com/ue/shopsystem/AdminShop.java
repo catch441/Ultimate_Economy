@@ -1,6 +1,7 @@
 package com.ue.shopsystem;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -10,6 +11,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -73,6 +76,42 @@ public class AdminShop extends Shop {
 						config.getDouble("ShopItems." + name1 + ".sellPrice"),
 						config.getDouble("ShopItems." + name1 + ".buyPrice"));
 			}
+		}
+	}
+	
+	@Override
+	public void renameShop(File dataFolder, String newName, String player) throws ShopSystemException {
+		String nameTemp = null;
+		if(!AdminShop.getAdminShopNameList().contains(newName)) {
+			nameTemp = newName;
+		} else {
+			throw new ShopSystemException(ShopSystemException.SHOP_ALREADY_EXISTS);
+		}
+		File newFile = new File(dataFolder, nameTemp + ".yml");
+		if(!newFile.exists()) {
+			config = YamlConfiguration.loadConfiguration(file);
+			name = nameTemp;
+			Bukkit.getLogger().info(config.getInt("ShopSize") + "");
+			config.set("ShopName", name);
+			try {
+				config.save(newFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			file.delete();
+			file = newFile;
+			villager.setCustomName(name);
+			Inventory inventoryNew = Bukkit.createInventory(null, size, name);
+			inventoryNew.setContents(inventory.getContents());
+			inventory = inventoryNew;
+			Inventory editorNew = Bukkit.createInventory(null, this.size, name + "-Editor");
+			editorNew.setContents(editor.getContents());
+			editor = editorNew;
+			Inventory slotEditorNew = Bukkit.createInventory(null, 27, name + "-SlotEditor");
+			slotEditorNew.setContents(slotEditor.getContents());
+			slotEditor = slotEditorNew;
+		} else {
+			throw new ShopSystemException(ShopSystemException.ERROR_ON_RENAMING);
 		}
 	}
 
@@ -155,16 +194,15 @@ public class AdminShop extends Shop {
 	 * @param fileConfig
 	 * @param dataFolder
 	 * @param server
-	 * @throws ShopSystemException
 	 */
-	public static void loadAllAdminShops(FileConfiguration fileConfig, File dataFolder, Server server)
-			throws ShopSystemException {
+	public static void loadAllAdminShops(FileConfiguration fileConfig, File dataFolder, Server server) {
 		for (String shopName : fileConfig.getStringList("ShopNames")) {
 			File file = new File(dataFolder, shopName + ".yml");
 			if (file.exists()) {
 				adminShopList.add(new AdminShop(dataFolder, server, shopName));
 			} else {
-				throw new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOP);
+				Bukkit.getLogger().log(Level.WARNING, ShopSystemException.CANNOT_LOAD_SHOP,
+						new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOP));
 			}
 		}
 	}

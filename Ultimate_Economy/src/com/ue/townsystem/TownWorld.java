@@ -95,7 +95,6 @@ public class TownWorld {
 	private void despawnAllTownVillagers() {
 		for (Town town : towns) {
 			town.despawnAllVillagers();
-			town.deleteTown(file);
 		}
 	}
 

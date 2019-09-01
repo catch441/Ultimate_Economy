@@ -1,6 +1,7 @@
 package com.ue.shopsystem;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -18,7 +19,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
+import com.ue.exceptions.TownSystemException;
 import com.ue.player.EconomyPlayer;
+import com.ue.townsystem.Town;
+import com.ue.townsystem.TownWorld;
 
 public class PlayerShop extends Shop {
 
@@ -79,6 +83,41 @@ public class PlayerShop extends Shop {
 		itemNames.add("CRAFTING_TABLE_0");
 	}
 
+	@Override
+	public void renameShop(File dataFolder, String newName, String player) throws ShopSystemException {
+		String nameTemp = null;
+		if(!PlayerShop.getPlayerShopNameList().contains(newName + "_" + player)) {
+			nameTemp = newName + "_" + player;				
+		} else {
+			throw new ShopSystemException(ShopSystemException.SHOP_ALREADY_EXISTS);
+		}
+		File newFile = new File(dataFolder, nameTemp + ".yml");
+		if(!newFile.exists()) {
+			config = YamlConfiguration.loadConfiguration(file);
+			name = nameTemp;
+			config.set("ShopName", name);
+			try {
+				config.save(newFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			file.delete();
+			file = newFile;
+			villager.setCustomName(name);
+			Inventory inventoryNew = Bukkit.createInventory(null, size, name);
+			inventoryNew.setContents(inventory.getContents());
+			inventory = inventoryNew;
+			Inventory editorNew = Bukkit.createInventory(null, this.size, name + "-Editor");
+			editorNew.setContents(editor.getContents());
+			editor = editorNew;
+			Inventory slotEditorNew = Bukkit.createInventory(null, 27, name + "-SlotEditor");
+			slotEditorNew.setContents(slotEditor.getContents());
+			slotEditor = slotEditorNew;
+		} else {
+			throw new ShopSystemException(ShopSystemException.ERROR_ON_RENAMING);
+		}
+	}
+	
 	/**
 	 * This method returns true, if the stock of this item is positiv.
 	 * 
@@ -88,7 +127,8 @@ public class PlayerShop extends Shop {
 	public boolean available(String itemString) {
 		boolean available = false;
 		config = YamlConfiguration.loadConfiguration(file);
-		if (config.getInt("ShopItems." + itemString + ".stock") >= config.getInt("ShopItems." + itemString + ".Amount")) {
+		if (config.getInt("ShopItems." + itemString + ".stock") >= config
+				.getInt("ShopItems." + itemString + ".Amount")) {
 			available = true;
 		}
 		return available;
@@ -115,7 +155,8 @@ public class PlayerShop extends Shop {
 	public void decreaseStock(String itemString, int stock) {
 		config = YamlConfiguration.loadConfiguration(file);
 		if ((config.getInt("ShopItems." + itemString + ".stock") - stock) >= 0) {
-			config.set("ShopItems." + itemString + ".stock", (config.getInt("ShopItems." + itemString + ".stock") - stock));
+			config.set("ShopItems." + itemString + ".stock",
+					(config.getInt("ShopItems." + itemString + ".stock") - stock));
 		}
 		save();
 	}
@@ -158,7 +199,7 @@ public class PlayerShop extends Shop {
 		int stock = config.getInt("ShopItems." + item + ".stock");
 		ItemMeta meta = itemStack.getItemMeta();
 		List<String> list = new ArrayList<>();
-		if(meta.hasLore()) {
+		if (meta.hasLore()) {
 			list.addAll(meta.getLore());
 		}
 		if (stock != 1) {
@@ -260,18 +301,38 @@ public class PlayerShop extends Shop {
 	 * @param name
 	 * @param spawnLocation
 	 * @param size
+	 * @param playerName
 	 * @throws ShopSystemException
+	 * @throws TownSystemException 
 	 */
-	public static void createPlayerShop(File dataFolder, String name, Location spawnLocation, int size)
-			throws ShopSystemException {
-		if (name.contains("-")) {
+	public static void createPlayerShop(File dataFolder, String name, Location spawnLocation, int size, String playerName)
+			throws ShopSystemException, TownSystemException {
+		String shopname = name + "_" + playerName;
+		if(TownWorld.isTownWorld(spawnLocation.getWorld().getName())) {
+			TownWorld townWorld = null;
+			try {
+				townWorld = TownWorld.getTownWorldByName(spawnLocation.getWorld().getName());
+			} catch (TownSystemException e) {
+				//should never happen
+			}
+				if(townWorld.chunkIsFree(spawnLocation.getChunk())) {
+					throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
+				} else {
+					Town town = townWorld.getTownByChunk(spawnLocation.getChunk());
+					if(!town.hasBuildPermissions(playerName, spawnLocation.getChunk().getX() + "/" + spawnLocation.getChunk().getZ())) {
+						throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
+					}
+				}
+			
+		}
+		if (shopname.contains("-")) {
 			throw new ShopSystemException(ShopSystemException.INVALID_CHAR_IN_SHOP_NAME);
-		} else if (getPlayerShopNameList().contains(name)) {
+		} else if (getPlayerShopNameList().contains(shopname)) {
 			throw new ShopSystemException(ShopSystemException.SHOP_ALREADY_EXISTS);
 		} else if (size % 9 != 0) {
 			throw new ShopSystemException(ShopSystemException.INVALID_INVENTORY_SIZE);
 		} else {
-			playerShopList.add(new PlayerShop(dataFolder, name, spawnLocation, size));
+			playerShopList.add(new PlayerShop(dataFolder, shopname, spawnLocation, size));
 		}
 	}
 
@@ -302,16 +363,15 @@ public class PlayerShop extends Shop {
 	 * @param fileConfig
 	 * @param dataFolder
 	 * @param server
-	 * @throws ShopSystemException
 	 */
-	public static void loadAllPlayerShops(FileConfiguration fileConfig, File dataFolder, Server server)
-			throws ShopSystemException {
+	public static void loadAllPlayerShops(FileConfiguration fileConfig, File dataFolder, Server server) {
 		for (String shopName : fileConfig.getStringList("PlayerShopNames")) {
 			File file = new File(dataFolder, shopName + ".yml");
 			if (file.exists()) {
 				playerShopList.add(new PlayerShop(dataFolder, server, shopName));
 			} else {
-				throw new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOP);
+				Bukkit.getLogger().log(Level.WARNING, ShopSystemException.CANNOT_LOAD_SHOP,
+						new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOP));
 			}
 		}
 	}

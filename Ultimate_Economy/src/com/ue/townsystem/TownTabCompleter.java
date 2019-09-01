@@ -30,6 +30,7 @@ public class TownTabCompleter implements TabCompleter{
 				list.add("pay");
 				list.add("tp");
 				list.add("bank");
+				list.add("withdraw");
 			} else if (args.length == 1) {
 				if ("create".contains(args[0])) {
 					list.add("create");
@@ -64,8 +65,11 @@ public class TownTabCompleter implements TabCompleter{
 				if ("bank".contains(args[0])) {
 					list.add("bank");
 				}
+				if("withdraw".contains(args[0])) {
+					list.add("withdraw");
+				}
 			} else if (args[0].equals("delete") || args[0].equals("expand") || args[0].equals("setTownSpawn")
-					|| args[0].equals("bank") || args[0].equals("addCoOwner") || args[0].equals("removeCoOwner")) {
+					|| args[0].equals("bank") || args[0].equals("addCoOwner") || args[0].equals("removeCoOwner") || args[0].equals("withdraw")) {
 				try {
 					if (args[1].equals("")) {
 						list.addAll(EconomyPlayer.getEconomyPlayerByName(sender.getName()).getJoinedTownList());
@@ -80,7 +84,7 @@ public class TownTabCompleter implements TabCompleter{
 				} catch (PlayerException e) {
 					Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 				}
-			} else if (args[0].equals("pay") || args[0].equals("tp")) {
+			} else if (args[0].equals("pay") || args[0].equals("tp")|| args[0].equals("withdraw")) {
 				if (args[1].equals("")) {
 					list.addAll(Town.getTownNameList());
 				} else if (args.length == 2) {

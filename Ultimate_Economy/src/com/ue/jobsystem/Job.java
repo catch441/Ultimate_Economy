@@ -19,21 +19,21 @@ import com.ue.exceptions.PlayerException;
 import com.ue.player.EconomyPlayer;
 
 public class Job {
-	
+
 	private static List<Job> jobList = new ArrayList<>();
 
-	private List<String> itemList,entityList,fisherList;
+	private List<String> itemList, entityList, fisherList;
 	private File file;
 	private FileConfiguration config;
 	private String name;
-	
+
 	private Job(File dataFolder, String name) {
 		itemList = new ArrayList<>();
 		entityList = new ArrayList<>();
 		fisherList = new ArrayList<>();
 		this.name = name;
-		file = new File(dataFolder , name + "-Job.yml");
-		if(!file.exists()) {
+		file = new File(dataFolder, name + "-Job.yml");
+		if (!file.exists()) {
 			try {
 				file.createNewFile();
 			} catch (IOException e) {
@@ -42,39 +42,35 @@ public class Job {
 			config = YamlConfiguration.loadConfiguration(file);
 			config.set("Jobname", name);
 			save();
-		}
-		else {
+		} else {
 			config = YamlConfiguration.loadConfiguration(file);
 			load();
 		}
 	}
-    
-	private  void load() {
+
+	private void load() {
 		config = YamlConfiguration.loadConfiguration(file);
 		itemList = config.getStringList("Itemlist");
 		entityList = config.getStringList("Entitylist");
 		fisherList = config.getStringList("Fisherlist");
 	}
-	
+
 	/**
-	 * This method adds a loottype with a price to this job. The loottype is for a fisherJob.
-	 * It should be "treasure", "junk" or "fish".
+	 * This method adds a loottype with a price to this job. The loottype is for a
+	 * fisherJob. It should be "treasure", "junk" or "fish".
 	 * 
 	 * @param lootType
 	 * @param price
-	 * @throws JobSystemException 
+	 * @throws JobSystemException
 	 */
 	public void addFisherLootType(String lootType, double price) throws JobSystemException {
-		if(!lootType.equals("treasure") && !lootType.equals("junk") && !lootType.equals("fish")) {
+		if (!lootType.equals("treasure") && !lootType.equals("junk") && !lootType.equals("fish")) {
 			throw new JobSystemException(JobSystemException.LOOTTYPE_IS_INVALID);
-		}
-		else if(price <= 0) {
+		} else if (price <= 0) {
 			throw new JobSystemException(JobSystemException.PRICE_IS_INVALID);
-		}
-		else if(fisherList.contains(lootType)) {
+		} else if (fisherList.contains(lootType)) {
 			throw new JobSystemException(JobSystemException.LOOTTYPE_ALREADY_EXISTS);
-		}
-		else {
+		} else {
 			config = YamlConfiguration.loadConfiguration(file);
 			config.set("Fisher." + lootType, price);
 			fisherList.add(lootType);
@@ -83,32 +79,30 @@ public class Job {
 			save();
 		}
 	}
-	
+
 	/**
-	 * This method removes a loottype from this job. The loottype is for a fisherJob.
-	 * It should be "treasure", "junk" or "fish".
+	 * This method removes a loottype from this job. The loottype is for a
+	 * fisherJob. It should be "treasure", "junk" or "fish".
 	 * 
 	 * @param lootType
-	 * @throws JobSystemException 
+	 * @throws JobSystemException
 	 */
 	public void delFisherLootType(String lootType) throws JobSystemException {
-		if(!lootType.equals("treasure") && !lootType.equals("junk") && !lootType.equals("fish")) {
+		if (!lootType.equals("treasure") && !lootType.equals("junk") && !lootType.equals("fish")) {
 			throw new JobSystemException(JobSystemException.LOOTTYPE_IS_INVALID);
-		}
-		else if(!fisherList.contains(lootType)) {
+		} else if (!fisherList.contains(lootType)) {
 			throw new JobSystemException(JobSystemException.LOOTTYPE_DOES_NOT_EXISTS);
-		}
-		else {
+		} else {
 			config = YamlConfiguration.loadConfiguration(file);
-			config.set("Fisher." + lootType,null);
+			config.set("Fisher." + lootType, null);
 			fisherList.remove(lootType);
 			removedoubleObjects(entityList);
 			config.set("Fisherlist", fisherList);
 			save();
 		}
-		
+
 	}
-	
+
 	/**
 	 * This method adds a mob to a job.
 	 * 
@@ -116,20 +110,18 @@ public class Job {
 	 * @param price
 	 * @throws JobSystemException
 	 */
-	public void addMob(String entity,double price) throws JobSystemException {
+	public void addMob(String entity, double price) throws JobSystemException {
 		entity = entity.toUpperCase();
 		try {
 			EntityType.valueOf(entity);
-		} catch(IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			throw new JobSystemException(JobSystemException.ENTITY_IS_INVALID);
 		}
-		if(entityList.contains(entity)) {
+		if (entityList.contains(entity)) {
 			throw new JobSystemException(JobSystemException.ENTITY_ALREADY_EXISTS);
-		}
-		else if(price <= 0.0) {
+		} else if (price <= 0.0) {
 			throw new JobSystemException(JobSystemException.PRICE_IS_INVALID);
-		}
-		else {
+		} else {
 			entityList.add(entity);
 			config = YamlConfiguration.loadConfiguration(file);
 			config.set("JobEntitys." + entity + ".killprice", price);
@@ -138,7 +130,7 @@ public class Job {
 			save();
 		}
 	}
-	
+
 	/**
 	 * This method removes a mob from a job.
 	 * 
@@ -148,22 +140,21 @@ public class Job {
 	public void deleteMob(String entity) throws JobSystemException {
 		try {
 			EntityType.valueOf(entity.toUpperCase());
-		} catch(IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			throw new JobSystemException(JobSystemException.ENTITY_IS_INVALID);
 		}
 		entity = entity.toUpperCase();
-		if(entityList.contains(entity)) {
+		if (entityList.contains(entity)) {
 			entityList.remove(entity);
 			config = YamlConfiguration.loadConfiguration(file);
 			config.set("JobEntitys." + entity, null);
 			config.set("Entitylist", entityList);
 			save();
-		}
-		else {
+		} else {
 			throw new JobSystemException(JobSystemException.ENTITY_DOES_NOT_EXIST);
 		}
 	}
-	
+
 	/**
 	 * This method adds a item to a job.
 	 * 
@@ -171,18 +162,16 @@ public class Job {
 	 * @param price
 	 * @throws JobSystemException
 	 */
-	public void addItem(String material,double price) throws JobSystemException {
-		material = material.toUpperCase();;
-		if(price <= 0.0) {
+	public void addItem(String material, double price) throws JobSystemException {
+		material = material.toUpperCase();
+		;
+		if (price <= 0.0) {
 			throw new JobSystemException(JobSystemException.PRICE_IS_INVALID);
-		}
-		else if(Material.matchMaterial(material) == null) {
+		} else if (Material.matchMaterial(material) == null) {
 			throw new JobSystemException(JobSystemException.ITEM_IS_INVALID);
-		}
-		else if(itemList.contains(material)){
+		} else if (itemList.contains(material)) {
 			throw new JobSystemException(JobSystemException.ITEM_ALREADY_EXISTS);
-		}
-		else {
+		} else {
 			itemList.add(material);
 			config = YamlConfiguration.loadConfiguration(file);
 			config.set("JobItems." + material + ".breakprice", price);
@@ -191,7 +180,7 @@ public class Job {
 			save();
 		}
 	}
-	
+
 	/**
 	 * This method removes a item from a job.
 	 * 
@@ -200,13 +189,11 @@ public class Job {
 	 */
 	public void deleteItem(String material) throws JobSystemException {
 		material = material.toUpperCase();
-		if(Material.matchMaterial(material) == null) {
+		if (Material.matchMaterial(material) == null) {
 			throw new JobSystemException(JobSystemException.ITEM_IS_INVALID);
-		}
-		else if(!itemList.contains(material)) {
+		} else if (!itemList.contains(material)) {
 			throw new JobSystemException(JobSystemException.ITEM_DOES_NOT_EXIST);
-		}
-		else {
+		} else {
 			itemList.remove(material);
 			config = YamlConfiguration.loadConfiguration(file);
 			config.set("JobItems." + material, null);
@@ -214,7 +201,7 @@ public class Job {
 			save();
 		}
 	}
-	
+
 	/**
 	 * This method returns the name of this job.
 	 * 
@@ -223,7 +210,7 @@ public class Job {
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
 	 * This method returns the price of a item in this job.
 	 * 
@@ -232,19 +219,17 @@ public class Job {
 	 * @throws JobSystemException
 	 */
 	public double getItemPrice(String material) throws JobSystemException {
-		if(Material.matchMaterial(material.toUpperCase()) == null) {
+		if (Material.matchMaterial(material.toUpperCase()) == null) {
 			throw new JobSystemException(JobSystemException.ITEM_IS_INVALID);
-		}
-		else if(!itemList.contains(material)) {
+		} else if (!itemList.contains(material)) {
 			throw new JobSystemException(JobSystemException.ITEM_DOES_NOT_EXIST);
-		}
-		else {
+		} else {
 			config = YamlConfiguration.loadConfiguration(file);
 			double price = config.getDouble("JobItems." + material + ".breakprice");
 			return price;
 		}
 	}
-	
+
 	/**
 	 * This method returns the price of a fisher lootType.
 	 * 
@@ -253,19 +238,17 @@ public class Job {
 	 * @throws JobSystemException
 	 */
 	public double getFisherPrice(String lootType) throws JobSystemException {
-		if(!lootType.equals("treasure") && !lootType.equals("junk") && !lootType.equals("fish")) {
+		if (!lootType.equals("treasure") && !lootType.equals("junk") && !lootType.equals("fish")) {
 			throw new JobSystemException(JobSystemException.LOOTTYPE_IS_INVALID);
-		}
-		else if(!fisherList.contains(lootType)) {
+		} else if (!fisherList.contains(lootType)) {
 			throw new JobSystemException(JobSystemException.LOOTTYPE_DOES_NOT_EXISTS);
-		}
-		else {
+		} else {
 			config = YamlConfiguration.loadConfiguration(file);
 			double price1 = config.getDouble("Fisher." + lootType);
 			return price1;
 		}
 	}
-	
+
 	/**
 	 * This method returns the price for killing a entity.
 	 * 
@@ -276,19 +259,18 @@ public class Job {
 	public double getKillPrice(String entityName) throws JobSystemException {
 		try {
 			EntityType.valueOf(entityName.toUpperCase());
-		} catch(IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			throw new JobSystemException(JobSystemException.ENTITY_IS_INVALID);
 		}
-		if(!entityList.contains(entityName)) {
+		if (!entityList.contains(entityName)) {
 			throw new JobSystemException(JobSystemException.ENTITY_DOES_NOT_EXIST);
-		}
-		else {
+		} else {
 			config = YamlConfiguration.loadConfiguration(file);
 			double price2 = config.getDouble("JobEntitys." + entityName + ".killprice");
 			return price2;
 		}
-	}	
-	
+	}
+
 	private void save() {
 		try {
 			config.save(file);
@@ -296,20 +278,20 @@ public class Job {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private List<String> removedoubleObjects(List<String> list) {
 		Set<String> set = new LinkedHashSet<String>(list);
 		list = new ArrayList<String>(set);
 		return list;
 	}
-	
+
 	/**
 	 * This method deletes the job saveFile.
 	 */
 	private void deleteJob() {
 		file.delete();
 	}
-	
+
 	/**
 	 * This method returns the itemList.
 	 * 
@@ -318,7 +300,7 @@ public class Job {
 	public List<String> getItemList() {
 		return itemList;
 	}
-	
+
 	/**
 	 * This method returns the entityList.
 	 * 
@@ -327,7 +309,7 @@ public class Job {
 	public List<String> getEntityList() {
 		return entityList;
 	}
-	
+
 	/**
 	 * This method returns the fisherList.
 	 * 
@@ -336,19 +318,19 @@ public class Job {
 	public List<String> getFisherList() {
 		return fisherList;
 	}
-	
+
 	public static List<Job> getJobList() {
 		return jobList;
 	}
-	
+
 	public static List<String> getJobNameList() {
 		List<String> jobNames = new ArrayList<>();
-		for(Job job:jobList) {
+		for (Job job : jobList) {
 			jobNames.add(job.getName());
 		}
 		return jobNames;
 	}
-	
+
 	/**
 	 * This method returns a job by it's name.
 	 * 
@@ -357,14 +339,14 @@ public class Job {
 	 * @throws JobSystemException
 	 */
 	public static Job getJobByName(String jobName) throws JobSystemException {
-		for(Job job:jobList) {
-			if(job.getName().equals(jobName)) {
+		for (Job job : jobList) {
+			if (job.getName().equals(jobName)) {
 				return job;
 			}
 		}
 		throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
 	}
-	
+
 	/**
 	 * This method deletes a job.
 	 * 
@@ -374,15 +356,15 @@ public class Job {
 	public static void deleteJob(String jobName) throws JobSystemException {
 		Job job = getJobByName(jobName);
 		List<JobCenter> jobCenterList = JobCenter.getJobCenterList();
-		for(JobCenter jobCenter:jobCenterList) {
+		for (JobCenter jobCenter : jobCenterList) {
 			try {
-			jobCenter.removeJob(jobName);
+				jobCenter.removeJob(jobName);
 			} catch (JobSystemException e) {
 				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 			}
 		}
-		for(EconomyPlayer ecoPlayer : EconomyPlayer.getAllEconomyPlayers()) {
-			if(ecoPlayer.hasJob(jobName)) {
+		for (EconomyPlayer ecoPlayer : EconomyPlayer.getAllEconomyPlayers()) {
+			if (ecoPlayer.hasJob(jobName)) {
 				try {
 					ecoPlayer.removeJob(jobName);
 				} catch (PlayerException e) {
@@ -393,7 +375,7 @@ public class Job {
 		jobList.remove(job);
 		job.deleteJob();
 	}
-	
+
 	/**
 	 * This method should be used to create a new Job.
 	 * 
@@ -401,32 +383,30 @@ public class Job {
 	 * @param jobName
 	 * @throws JobSystemException
 	 */
-	public static void createJob(File dataFolder,String jobName) throws JobSystemException {
-		if(getJobNameList().contains(jobName)) {
+	public static void createJob(File dataFolder, String jobName) throws JobSystemException {
+		if (getJobNameList().contains(jobName)) {
 			throw new JobSystemException(JobSystemException.JOB_ALREADY_EXIST);
-		}
-		else {
+		} else {
 			jobList.add(new Job(dataFolder, jobName));
 		}
 	}
-	
+
 	/**
 	 * This method loads all Jobs from the save files.
 	 * 
 	 * @param dataFolder
 	 * @param fileConfig
-	 * @throws JobSystemException
 	 */
-	public static void loadAllJobs(File dataFolder,FileConfiguration fileConfig) throws JobSystemException {
-		for(String jobName:fileConfig.getStringList("JobList")) {
-			File file = new File(dataFolder , jobName + "-Job.yml");
-			if(file.exists()) {
+	public static void loadAllJobs(File dataFolder, FileConfiguration fileConfig) {
+		for (String jobName : fileConfig.getStringList("JobList")) {
+			File file = new File(dataFolder, jobName + "-Job.yml");
+			if (file.exists()) {
 				jobList.add(new Job(dataFolder, jobName));
+			} else {
+				Bukkit.getLogger().log(Level.WARNING, JobSystemException.CANNOT_LOAD_JOB,
+						new JobSystemException(JobSystemException.CANNOT_LOAD_JOB));
 			}
-			else {
-				throw new JobSystemException(JobSystemException.CANNOT_LOAD_JOB);
-			}
-			
+
 		}
 	}
 }
