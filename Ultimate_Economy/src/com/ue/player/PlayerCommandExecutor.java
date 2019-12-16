@@ -50,11 +50,10 @@ public class PlayerCommandExecutor implements CommandExecutor {
 					if (args.length == 1) {
 						if (args[0].equals("on") || args[0].equals("off")) {
 							if (args[0].equals("on")) {
-								ecoPlayer.setScoreBoardDisabled(false);
+								ecoPlayer.setScoreBoardDisabled(false,player);
 							} else {
-								ecoPlayer.setScoreBoardDisabled(true);
+								ecoPlayer.setScoreBoardDisabled(true,player);
 							}
-							ecoPlayer.updateScoreBoard(player);
 						} else {
 							player.sendMessage(ChatColor.RED + "/bank on/off");
 						}
@@ -101,8 +100,7 @@ public class PlayerCommandExecutor implements CommandExecutor {
 					if (args.length == 1) {
 						Location location = ecoPlayer.getHome(args[0]);
 						player.teleport(location);
-					} else {
-						player.sendMessage("/home <homename>");
+					} else if(args.length == 2) {
 						Set<String> homes = ecoPlayer.getHomeList().keySet();
 						String homeString = String.join(",", homes);
 						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("home_info") + " "

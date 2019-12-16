@@ -6,7 +6,6 @@ public class ShopSystemException extends Exception{
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String INVALID_SHOP_NAME = Ultimate_Economy.messages.getString("invalid_shop_name");
 	public static final String INVALID_CHAR_IN_SHOP_NAME = Ultimate_Economy.messages.getString("invalid_char_in_shop_name");
 	public static final String INVALID_SELL_PRICE = Ultimate_Economy.messages.getString("invalid_sell_price");
 	public static final String INVALID_BUY_PRICE = Ultimate_Economy.messages.getString("invalid_buy_price");
@@ -28,7 +27,7 @@ public class ShopSystemException extends Exception{
 	public static final String ITEM_DOES_NOT_EXIST = Ultimate_Economy.messages.getString("item_does_not_exist_in_shop");
 	public static final String ERROR_ON_RENAMING = Ultimate_Economy.messages.getString("error_on_rename");
 	public static final String RESIZING_FAILED = Ultimate_Economy.messages.getString("resizing_failed");
-
+	public static final String RENTED = Ultimate_Economy.messages.getString("rent_rented");
 	
 	public ShopSystemException (String msg) {
 		super(msg);

@@ -54,37 +54,43 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.jobsystem.Job;
 import com.ue.jobsystem.JobCenter;
 import com.ue.player.EconomyPlayer;
-import com.ue.shopsystem.AdminShop;
-import com.ue.shopsystem.PlayerShop;
 import com.ue.shopsystem.Shop;
 import com.ue.shopsystem.Spawner;
+import com.ue.shopsystem.adminshop.AdminShop;
+import com.ue.shopsystem.playershop.PlayerShop;
+import com.ue.shopsystem.rentshop.RentShop;
 import com.ue.townsystem.Plot;
 import com.ue.townsystem.Town;
 import com.ue.townsystem.TownWorld;
 import com.ue.updater.Updater;
 import com.ue.updater.Updater.UpdateResult;
 
-public class Ultimate_EconomyEventHandler implements Listener{
-	
+public class Ultimate_EconomyEventHandler implements Listener {
+
 	private Ultimate_Economy plugin;
 	private List<String> playerlist;
 	private UpdateResult updateResult;
 	private List<String> spawnerlist;
 	private File spawner;
-	
-	public Ultimate_EconomyEventHandler(Ultimate_Economy plugin,List<String> spawnerlist,File spawner) {
+
+	public Ultimate_EconomyEventHandler(Ultimate_Economy plugin, List<String> spawnerlist, File spawner) {
 		this.plugin = plugin;
 		playerlist = YamlConfiguration.loadConfiguration(EconomyPlayer.getPlayerFile()).getStringList("Player");
-		//version check
+		// version check
 		updateResult = Updater.checkForUpdate(plugin.getDescription().getVersion());
 		this.spawnerlist = spawnerlist;
 		this.spawner = spawner;
 	}
-	
+
 	@EventHandler
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
-		handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(),event.getTo().getChunk(), event.getPlayer().getName());
+		handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(), event.getTo().getChunk(),
+				event.getPlayer().getName());
 	}
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@EventHandler
@@ -120,30 +126,44 @@ public class Ultimate_EconomyEventHandler implements Listener{
 	@EventHandler
 	public void onNPCOpenInv(PlayerInteractEntityEvent event) {
 		Entity entity = event.getRightClicked();
-		if (entity instanceof Villager) {
-			String name = entity.getCustomName();
+		if (entity instanceof Villager && entity.hasMetadata("ue-type")) {
+			String shopId = "";
+			if(entity.hasMetadata("ue-id")) {
+				shopId = (String) entity.getMetadata("ue-id").get(0).value();
+			}
+			UEVillagerType type = (UEVillagerType) entity.getMetadata("ue-type").get(0).value();
+			event.setCancelled(true);
 			try {
-				if (name.contains("For Sale!")) {
-					event.setCancelled(true);
-					TownWorld townWorld = TownWorld.getTownWorldByName(entity.getWorld().getName());
-					Town town = townWorld.getTownByChunk(entity.getLocation().getChunk());
-					Plot plot = town.getPlotByChunk(entity.getLocation().getChunk().getX(),
-							entity.getLocation().getChunk().getZ());
-					plot.openSaleVillagerInv(event.getPlayer());
-				} else if (name.contains("TownManager")) {
-					event.setCancelled(true);
-					TownWorld townWorld = TownWorld.getTownWorldByName(entity.getWorld().getName());
-					Town town = townWorld.getTownByChunk(entity.getLocation().getChunk());
-					town.openTownManagerVillagerInv(event.getPlayer());
-				} else if (AdminShop.getAdminShopNameList().contains(name)) {
-					event.setCancelled(true);
-					AdminShop.getAdminShopByName(name).openInv(event.getPlayer());
-				} else if (PlayerShop.getPlayerShopNameList().contains(name)) {
-					event.setCancelled(true);
-					PlayerShop.getPlayerShopByName(name).openInv(event.getPlayer());
-				} else if (JobCenter.getJobCenterNameList().contains(name)) {
-					event.setCancelled(true);
-					JobCenter.getJobCenterByName(name).openInv(event.getPlayer());
+				switch (type) {
+					case PLOTSALE:
+						TownWorld townWorld = TownWorld.getTownWorldByName(entity.getWorld().getName());
+						Town town = townWorld.getTownByChunk(entity.getLocation().getChunk());
+						Plot plot = town.getPlotByChunk(entity.getLocation().getChunk().getX(),
+								entity.getLocation().getChunk().getZ());
+						plot.openSaleVillagerInv(event.getPlayer());
+						break;
+					case TOWNMANAGER:
+						TownWorld townWorld2 = TownWorld.getTownWorldByName(entity.getWorld().getName());
+						Town town2 = townWorld2.getTownByChunk(entity.getLocation().getChunk());
+						town2.openTownManagerVillagerInv(event.getPlayer());
+						break;
+					case ADMINSHOP:
+						AdminShop.getAdminShopById(shopId).openInv(event.getPlayer());
+						break;
+					case PLAYERSHOP:
+						PlayerShop.getPlayerShopById(shopId).openInv(event.getPlayer());
+						break;
+					case JOBCENTER:
+						JobCenter.getJobCenterByName(entity.getCustomName()).openInv(event.getPlayer());
+						break;
+					case PLAYERSHOP_RENTABLE:
+						RentShop shop = RentShop.getRentShopById(shopId);
+						if(shop.isRentable()) {
+							shop.openRentGUI(event.getPlayer());;
+						} else {
+							shop.openInv(event.getPlayer());
+						}
+						break;
 				}
 			} catch (TownSystemException | ShopSystemException | JobSystemException e) {
 				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
@@ -155,25 +175,29 @@ public class Ultimate_EconomyEventHandler implements Listener{
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@EventHandler
 	public void onHitVillagerEvent(EntityDamageByEntityEvent event) {
-		if (event.getDamager() instanceof Player && event.getEntity() instanceof Villager) {
-			String entityname = event.getEntity().getCustomName();
+		if (event.getDamager() instanceof Player && event.getEntity() instanceof Villager
+				&& event.getEntity().hasMetadata("ue-type")) {
 			Player damager = (Player) event.getDamager();
-			if (JobCenter.getJobCenterNameList().contains(entityname)) {
-				event.setCancelled(true);
-				damager.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("jobcenter_villager_hitevent"));
-			} else if (AdminShop.getAdminShopNameList().contains(entityname)) {
-				event.setCancelled(true);
-				damager.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("shop_villager_hitevent"));
-			} else if (PlayerShop.getPlayerShopNameList().contains(entityname)) {
-				event.setCancelled(true);
-				damager.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("shop_villager_hitevent"));
-			} else if (entityname.contains("For Sale!")) {
-				event.setCancelled(true);
-				damager.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("sale_villager_hitevent"));
-			} else if (entityname.contains("TownManager")) {
-				event.setCancelled(true);
-				damager.sendMessage(
-						ChatColor.RED + Ultimate_Economy.messages.getString("townManager_villager_hitevent"));
+			UEVillagerType type = (UEVillagerType) event.getEntity().getMetadata("ue-type").get(0).value();
+			event.setCancelled(true);
+
+			switch (type) {
+				case PLOTSALE:
+					damager.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("sale_villager_hitevent"));
+					break;
+				case TOWNMANAGER:
+					damager.sendMessage(
+							ChatColor.RED + Ultimate_Economy.messages.getString("townManager_villager_hitevent"));
+					break;
+				case ADMINSHOP:
+				case PLAYERSHOP_RENTABLE:
+				case PLAYERSHOP:
+					damager.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("shop_villager_hitevent"));
+					break;
+				case JOBCENTER:
+					damager.sendMessage(
+							ChatColor.RED + Ultimate_Economy.messages.getString("jobcenter_villager_hitevent"));
+					break;
 			}
 		}
 	}
@@ -199,8 +223,7 @@ public class Ultimate_EconomyEventHandler implements Listener{
 						}
 					}
 				}
-			} catch (PlayerException e1) {
-			}
+			} catch (PlayerException e1) {}
 		}
 	}
 
@@ -208,86 +231,69 @@ public class Ultimate_EconomyEventHandler implements Listener{
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@EventHandler
 	public void onInvClickEvent(InventoryClickEvent event) {
-		Player playe = (Player) event.getWhoClicked();
-		try {
-			EconomyPlayer ecoPlayer = EconomyPlayer.getEconomyPlayerByName(playe.getName());
-			if (event.getCurrentItem() != null && event.getInventory().getType() == InventoryType.ANVIL
-					&& event.getCurrentItem().getType() == Material.SPAWNER) {
-				event.setCancelled(true);
+		Player player = (Player) event.getWhoClicked();
+		Entity entity = (Entity) event.getInventory().getHolder();
+		// prevents that spawners can be renamed in a anvil
+		if (event.getCurrentItem() != null && event.getInventory().getType() == InventoryType.ANVIL
+				&& event.getCurrentItem().getType() == Material.SPAWNER) {
+			event.setCancelled(true);
+		}
+		
+		else if(entity.hasMetadata("ue-type") && event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
+			String shopId = "";
+			if(entity.hasMetadata("ue-id")) {
+				shopId = (String) entity.getMetadata("ue-id").get(0).value();
 			}
-			String inventoryname = event.getView().getTitle();
-			if (event.getInventory().getType() == InventoryType.CHEST && event.getCurrentItem() != null
-					&& event.getCurrentItem().getItemMeta() != null) {
-				ItemMeta meta = event.getCurrentItem().getItemMeta();
-				//////////////////////////////////////////////////////////////////////////// editor
-				if (inventoryname.contains("Editor") && meta.getDisplayName() != null) {
-					event.setCancelled(true);
-					String command = meta.getDisplayName();
-					String shopName = inventoryname.substring(0, inventoryname.indexOf("-"));
-					Shop shop = null;
-					if (AdminShop.getAdminShopNameList().contains(shopName)) {
-						shop = AdminShop.getAdminShopByName(shopName);
-					} else if (PlayerShop.getPlayerShopNameList().contains(shopName)) {
-						shop = PlayerShop.getPlayerShopByName(shopName);
-					}
-					if (shop != null) {
-						if (inventoryname.equals(shop.getName() + "-Editor")
-								&& meta.getDisplayName().contains("Slot")) {
-							int slot = Integer.valueOf(meta.getDisplayName().substring(5));
-							shop.openSlotEditor(playe, slot);
-						} else if (inventoryname.equals(shop.getName() + "-SlotEditor")) {
-							shop.handleSlotEditor(event);
-							if (command.equals(ChatColor.RED + "remove item")
-									|| command.equals(ChatColor.RED + "exit without save")
-									|| command.equals(ChatColor.YELLOW + "save changes")) {
-								shop.openEditor(playe);
+			UEVillagerType ueVillagerType = (UEVillagerType) entity.getMetadata("ue-type").get(0).value();	
+			ClickType clickType = event.getClick();
+			ItemStack clickedItem = event.getCurrentItem();
+			event.setCancelled(true);
+			try {			
+				switch(ueVillagerType) {
+					case PLOTSALE:
+					case TOWNMANAGER:
+						TownWorld.getTownWorldByName(player.getWorld().getName()).handleTownVillagerInvClick(event);
+						player.closeInventory();
+						break;
+					case JOBCENTER:
+						EconomyPlayer ecoPlayer = EconomyPlayer.getEconomyPlayerByName(player.getName());
+						String displayname = clickedItem.getItemMeta().getDisplayName();
+						if (clickType == ClickType.RIGHT && displayname != null) {
+							if (!ecoPlayer.getJobList().isEmpty()) {
+								ecoPlayer.removeJob(displayname);
+								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("job_left")
+										+ " " + ChatColor.GREEN + displayname);
+							} else if (!displayname.equals("Info")) {
+								player.sendMessage(
+										ChatColor.RED + Ultimate_Economy.messages.getString("no_job_joined"));
 							}
+						} else if (clickType == ClickType.LEFT && displayname != null) {
+							ecoPlayer.addJob(displayname);
+							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("job_join") + " "
+									+ ChatColor.GREEN + displayname);
 						}
-					}
+						break;
+					case PLAYERSHOP:
+						PlayerShop playerShop = PlayerShop.getPlayerShopById(shopId);
+						handleShopInvClickEvent(playerShop, player,event);
+						break;
+					case ADMINSHOP:
+						AdminShop adminShop = AdminShop.getAdminShopById(shopId);
+						handleShopInvClickEvent(adminShop, player, event);
+						break;
+					case PLAYERSHOP_RENTABLE:
+						RentShop rentShop = RentShop.getRentShopById(shopId);
+						if(rentShop.isRentable()) {
+							rentShop.handleRentShopGUIClick(event);
+						} else {
+							handleShopInvClickEvent(rentShop, player, event);
+						}
+						break;
 				}
-				//////////////////////////////////////////////////////////////////////////// saleVillager
-				else if (inventoryname.contains("Plot") || inventoryname.contains("TownManager")) {
-					event.setCancelled(true);
-					TownWorld.getTownWorldByName(playe.getWorld().getName()).handleTownVillagerInvClick(event);
-					playe.closeInventory();
-				} else {
-					////////////////////////////////////////////////////////////////////////////
-					////////////////////////////////////////////////////////////////////////////
-					ClickType clickType = event.getClick();
-					if (event.getCurrentItem().getItemMeta() != null) {
-						//////////////////////////////////////////////////////////////////////////// Job
-						if (JobCenter.getJobCenterNameList().contains(inventoryname)) {
-							event.setCancelled(true);
-							String displayname = meta.getDisplayName();
-							if (clickType == ClickType.RIGHT && displayname != null) {
-								if (!ecoPlayer.getJobList().isEmpty()) {
-									ecoPlayer.removeJob(displayname);
-									playe.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("job_left")
-											+ " " + ChatColor.GREEN + displayname);
-								} else if (!displayname.equals("Info")) {
-									playe.sendMessage(
-											ChatColor.RED + Ultimate_Economy.messages.getString("no_job_joined"));
-								}
-							} else if (clickType == ClickType.LEFT && displayname != null) {
-								ecoPlayer.addJob(displayname);
-								playe.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("job_join") + " "
-										+ ChatColor.GREEN + displayname);
-							}
-						}
-						//////////////////////////////////////////////////////////////////////////// shops
-						if (PlayerShop.getPlayerShopNameList().contains(inventoryname)) {
-							PlayerShop shop = PlayerShop.getPlayerShopByName(inventoryname);
-							handleBuySell(shop, event, playe);
-						} else if (AdminShop.getAdminShopNameList().contains(inventoryname)) {
-							AdminShop shop = AdminShop.getAdminShopByName(inventoryname);
-							handleBuySell(shop, event, playe);
-						}
-					}
-				}
+			} catch (TownSystemException | JobSystemException | ShopSystemException | IllegalArgumentException e) {
+			} catch (PlayerException e) {
+				player.sendMessage(ChatColor.RED + e.getMessage());
 			}
-		} catch (TownSystemException | JobSystemException | ShopSystemException | IllegalArgumentException e) {
-		} catch (PlayerException e) {
-			playe.sendMessage(ChatColor.RED + e.getMessage());
 		}
 	}
 
@@ -322,7 +328,7 @@ public class Ultimate_EconomyEventHandler implements Listener{
 				config.set(spawnername + ".World", event.getBlock().getWorld().getName());
 				config.set(spawnername + ".player", string.substring(string.lastIndexOf("-") + 1));
 				config.set(spawnername + ".EntityType", string.substring(0, string.lastIndexOf("-")));
-				saveFile(spawner,config);
+				saveFile(spawner, config);
 			} else {
 				event.getPlayer()
 						.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("no_permision_set_spawner"));
@@ -379,7 +385,11 @@ public class Ultimate_EconomyEventHandler implements Listener{
 					if (!blockmeta.isEmpty()) {
 						MetadataValue s = blockmeta.get(0);
 						String blockname = s.asString();
-						if (event.getPlayer().getName().equals(blockname)) {
+						if (event.getPlayer().getInventory().firstEmpty() == -1) {
+							event.setCancelled(true);
+							event.getPlayer().sendMessage(
+									ChatColor.RED + Ultimate_Economy.messages.getString("no_permision_break_spawner"));
+						} else if (event.getPlayer().getName().equals(blockname)) {
 							if (!event.getBlock().getMetadata("entity").isEmpty()) {
 								YamlConfiguration config = YamlConfiguration.loadConfiguration(spawner);
 								double x = event.getBlock().getX();
@@ -391,7 +401,7 @@ public class Ultimate_EconomyEventHandler implements Listener{
 								plugin.getConfig().set("Spawnerlist", spawnerlist);
 								plugin.saveConfig();
 								config.set(spawnername, null);
-								saveFile(spawner,config);
+								saveFile(spawner, config);
 								ItemStack stack = new ItemStack(Material.SPAWNER, 1);
 								ItemMeta meta = stack.getItemMeta();
 								meta.setDisplayName(event.getBlock().getMetadata("entity").get(0).asString() + "-"
@@ -423,14 +433,16 @@ public class Ultimate_EconomyEventHandler implements Listener{
 			EconomyPlayer economyPlayer = EconomyPlayer.getEconomyPlayerByName(playername);
 			economyPlayer.updateScoreBoard(event.getPlayer());
 			economyPlayer.getBossBar().addPlayer(event.getPlayer());
-			handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(),event.getPlayer().getLocation().getChunk(), event.getPlayer().getName());
-			
+			handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
+					event.getPlayer().getLocation().getChunk(), event.getPlayer().getName());
+
 		} catch (PlayerException e) {
 			Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 		}
-		if(event.getPlayer().isOp()) {
-			if(updateResult == UpdateResult.UPDATE_AVAILABLE) {
-				event.getPlayer().sendMessage(ChatColor.GOLD + "There is a newer version of " + ChatColor.GREEN + "Ultimate_Economy " + ChatColor.GOLD + "available!");
+		if (event.getPlayer().isOp()) {
+			if (updateResult == UpdateResult.UPDATE_AVAILABLE) {
+				event.getPlayer().sendMessage(ChatColor.GOLD + "There is a newer version of " + ChatColor.GREEN
+						+ "Ultimate_Economy " + ChatColor.GOLD + "available!");
 			}
 		}
 	}
@@ -486,34 +498,53 @@ public class Ultimate_EconomyEventHandler implements Listener{
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@EventHandler()
 	public void onEntityTransform(EntityTransformEvent event) {
-		if (event.getEntityType() == EntityType.VILLAGER) {
-			if (event.getEntity().getCustomName() != null
-					&& (PlayerShop.getPlayerShopNameList().contains(event.getEntity().getCustomName())
-							|| AdminShop.getAdminShopNameList().contains(event.getEntity().getCustomName())
-							|| JobCenter.getJobCenterNameList().contains(event.getEntity().getCustomName())
-							|| event.getEntity().getCustomName().contains("TownManager")
-							|| event.getEntity().getCustomName().contains("For Sale!"))) {
-				event.setCancelled(true);
-			}
+		if (event.getEntity() instanceof Villager && event.getEntity().hasMetadata("ue-type")) {
+			event.setCancelled(true);
 		}
 	}
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@EventHandler()
 	public void onPlayerMoveEvent(PlayerMoveEvent event) {
-		//check, if player positions changed the chunk
-		if(event.getFrom().getChunk().getX() != event.getTo().getChunk().getX() ||
-				event.getFrom().getChunk().getZ() != event.getTo().getChunk().getZ()) {
-			handleTownWorldLocationCheck(event.getTo().getWorld().getName(),event.getTo().getChunk(), event.getPlayer().getName());
+		// check, if player positions changed the chunk
+		if (event.getFrom().getChunk().getX() != event.getTo().getChunk().getX()
+				|| event.getFrom().getChunk().getZ() != event.getTo().getChunk().getZ()) {
+			handleTownWorldLocationCheck(event.getTo().getWorld().getName(), event.getTo().getChunk(),
+					event.getPlayer().getName());
 		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Methods
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	private void handleShopInvClickEvent(Shop shop,Player player,InventoryClickEvent event) {
+		ItemMeta clickedItemMeta = event.getCurrentItem().getItemMeta();
+		try {
+			if (event.getView().getTitle().equals(shop.getName() + "-Editor")
+					&& clickedItemMeta.getDisplayName().contains("Slot")) {
+				int slot = Integer.valueOf(clickedItemMeta.getDisplayName().substring(5));
+				shop.openSlotEditor(player, slot);
+			} else if (event.getView().getTitle().equals(shop.getName() + "-SlotEditor")) {
+				shop.handleSlotEditor(event);
+				String command = clickedItemMeta.getDisplayName();
+				if (command.equals(ChatColor.RED + "remove item")
+						|| command.equals(ChatColor.RED + "exit without save")
+						|| command.equals(ChatColor.YELLOW + "save changes")) {
+					shop.openEditor(player);
+				}
+			} else {
+				handleBuySell(shop, event, player);
+			}
+		} catch(IllegalArgumentException | ShopSystemException e) {}
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Methods
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	private void handleBuySell(Shop shop, InventoryClickEvent event, Player playe) {
 		event.setCancelled(true);
 		boolean isPlayershop = false;
@@ -598,7 +629,8 @@ public class Ultimate_EconomyEventHandler implements Listener{
 											ItemStack itemStack = shop.getItemStack(itemString);
 											if (isPlayershop) {
 												playerShop.decreaseStock(itemString, amount);
-												playerShop.refreshStockpile();
+												// if the player is in stockpile mode, then the stockpile gets refreshed
+												playerShop.setupStockpile();
 											}
 											itemStack.setAmount(amount);
 											inventoryplayer.addItem(itemStack);
@@ -712,13 +744,14 @@ public class Ultimate_EconomyEventHandler implements Listener{
 												+ Ultimate_Economy.messages.getString("shop_added_item_singular2"));
 									}
 									playerShop.increaseStock(clickedItemString, amount);
-									playerShop.refreshStockpile();
+									// if the player is in stockpile mode, then the stockpile gets refreshed
+									playerShop.setupStockpile();
 									removeItemFromInventory(inventoryplayer, itemStack, amount);
 								}
 								break;
 							}
 						} else if (clickType == ClickType.SHIFT_RIGHT && sellprice != 0.0
-								|| clickType == ClickType.SHIFT_RIGHT
+								|| clickType == ClickType.SHIFT_RIGHT && isPlayershop
 										&& playe.getName().equals(playerShopOwner.getName())
 										&& inventoryplayer.containsAtLeast(clickedItem, amount)) {
 							ItemStack itemStack = shop.getItemStack(itemString);
@@ -783,7 +816,8 @@ public class Ultimate_EconomyEventHandler implements Listener{
 												+ Ultimate_Economy.messages.getString("shop_added_item_singular2"));
 									}
 									playerShop.increaseStock(clickedItemString, itemAmount);
-									playerShop.refreshStockpile();
+									// if the player is in stockpile mode, then the stockpile gets refreshed
+									playerShop.setupStockpile();
 									itemStack.setAmount(itemAmount);
 									removeItemFromInventory(inventoryplayer, itemStack, itemAmount);
 								}
@@ -798,7 +832,7 @@ public class Ultimate_EconomyEventHandler implements Listener{
 			}
 		}
 	}
-	
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private void removeItemFromInventory(Inventory inventory, ItemStack item, int amount) {
@@ -810,17 +844,11 @@ public class Ultimate_EconomyEventHandler implements Listener{
 			if (s != null) {
 				ItemStack stack = new ItemStack(s);
 				Repairable repairable = (Repairable) stack.getItemMeta();
-				if (repairable != null) {
-					repairCosts = repairable.getRepairCost();
-					repairable.setRepairCost(0);
-					stack.setItemMeta((ItemMeta) repairable);
-					isRepairable = true;
-				}
 				item.setAmount(1);
 				amountStack = stack.getAmount();
 				stack.setAmount(1);
 				if (item.equals(stack) && amount2 != 0) {
-					
+
 					if (isRepairable) {
 						repairable.setRepairCost(repairCosts);
 						stack.setItemMeta((ItemMeta) repairable);
@@ -848,11 +876,6 @@ public class Ultimate_EconomyEventHandler implements Listener{
 		for (ItemStack s : inventory.getStorageContents()) {
 			if (s != null) {
 				ItemStack stack = new ItemStack(s);
-				Repairable repairable = (Repairable) stack.getItemMeta();
-				if (repairable != null) {
-					repairable.setRepairCost(0);
-					stack.setItemMeta((ItemMeta) repairable);
-				}
 				item.setAmount(1);
 				amountStack = stack.getAmount();
 				stack.setAmount(1);
@@ -866,10 +889,10 @@ public class Ultimate_EconomyEventHandler implements Listener{
 		}
 		return bool;
 	}
-	
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	private void handleTownWorldLocationCheck(String worldname,Chunk chunk, String playername) {
+	private void handleTownWorldLocationCheck(String worldname, Chunk chunk, String playername) {
 		try {
 			BossBar bossbar = EconomyPlayer.getEconomyPlayerByName(playername).getBossBar();
 			try {
@@ -880,22 +903,23 @@ public class Ultimate_EconomyEventHandler implements Listener{
 					bossbar.setColor(BarColor.RED);
 					bossbar.setVisible(true);
 				} catch (TownSystemException e1) {
-					//if chunk is in the wilderness
+					// if chunk is in the wilderness
 					bossbar.setTitle("Wilderness");
 					bossbar.setColor(BarColor.GREEN);
 					bossbar.setVisible(true);
 				}
 			} catch (TownSystemException e) {
-				//disable bossbar in other worlds
+				// disable bossbar in other worlds
 				bossbar.setVisible(false);
 			}
 		} catch (PlayerException e2) {
-			//should never happen
+			// should never happen
 		}
 	}
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	private void saveFile(File file,FileConfiguration config) {
+	private void saveFile(File file, FileConfiguration config) {
 		try {
 			config.save(file);
 		} catch (IOException e) {

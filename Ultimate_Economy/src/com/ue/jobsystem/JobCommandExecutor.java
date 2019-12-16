@@ -55,12 +55,11 @@ public class JobCommandExecutor implements CommandExecutor{
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("move")) {
-							if (args.length == 5) {
+							if (args.length == 2) {
 								JobCenter jobCenter = JobCenter.getJobCenterByName(args[1]);
-								jobCenter.moveShop(Double.valueOf(args[2]), Double.valueOf(args[3]),
-										Double.valueOf(args[4]));
+								jobCenter.moveJobCenter(player.getLocation());
 							} else {
-								player.sendMessage("/jobcenter move <name> <x> <y> <z>");
+								player.sendMessage("/jobcenter move <name>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////

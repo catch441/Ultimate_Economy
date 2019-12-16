@@ -7,25 +7,144 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
-public class ShopTabCompleter implements TabCompleter{
-	
-	private FileConfiguration config;
-	
-	public ShopTabCompleter(FileConfiguration config) {
-		this.config = config;
-	}
+import com.ue.shopsystem.adminshop.AdminShop;
+import com.ue.shopsystem.playershop.PlayerShop;
+import com.ue.shopsystem.rentshop.RentShop;
+
+public class ShopTabCompleter implements TabCompleter {
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		List<String> list = new ArrayList<>();
-		if (command.getName().equals("adminshop") || command.getName().equals("playershop")) {
+		if (command.getName().equals("rentshop")) {
+			if (sender.hasPermission("ultimate_economy.rentshop.admin")) {
+				if (args[0].equals("")) {
+					list.add("create");
+					list.add("delete");
+					list.add("move");
+					list.add("resize");
+				} else if (args.length == 1) {
+					if ("create".contains(args[0])) {
+						list.add("create");
+					}
+					if ("delete".contains(args[0])) {
+						list.add("delete");
+					}
+					if ("move".contains(args[0])) {
+						list.add("move");
+					}
+					if ("resize".contains(args[0])) {
+						list.add("resize");
+					}
+				} else if (args.length == 2
+						&& (args[0].equals("delete") || args[0].equals("move") || args[0].equals("resize"))) {
+					list = RentShop.getRentShopUniqueNameList();
+				}
+			}
+			if (args[0].equals("")) {
+				list.add("rename");
+				list.add("editShop");
+				list.add("changeProfession");
+			} else if (args.length == 1) {
+				if ("rename".contains(args[0])) {
+					list.add("rename");
+				}
+				if ("editShop".contains(args[0])) {
+					list.add("editShop");
+				}
+				if ("changeProfession".contains(args[0])) {
+					list.add("changeProfession");
+				}
+			} else if (args.length == 2
+					&& (args[0].equals("rename") || args[0].equals("editShop") || args[0].equals("changeProfession"))) {
+				list = getRentedShopsForPlayer(args[1], sender.getName());
+			} else if (args.length == 3 && args[0].equals("changeProfession")) {
+				if (args[2].equals("")) {
+					for (Profession profession : Profession.values()) {
+						list.add(profession.name().toLowerCase());
+					}
+				} else {
+					for (Profession profession : Profession.values()) {
+						if (profession.name().toLowerCase().contains(args[2])) {
+							list.add(profession.name().toLowerCase());
+						}
+					}
+				}
+			}
+		} 
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		else if (command.getName().equals("playershop")) {
+			if (sender.hasPermission("ultimate_economy.adminshop")) {
+				list.add("deleteOther");
+			} else if (args.length == 1) {
+				if ("deleteOther".contains(args[0])) {
+					list.add("deleteOther");
+				}
+			}
+			if (args[0].equals("")) {
+				list.add("create");
+				list.add("delete");
+				list.add("move");
+				list.add("editShop");
+				list.add("rename");
+				list.add("resize");
+				list.add("changeProfession");
+				list.add("changeOwner");
+			} else if (args.length == 1) {
+				if ("create".contains(args[0])) {
+					list.add("create");
+				}
+				if ("delete".contains(args[0])) {
+					list.add("delete");
+				}
+				if ("move".contains(args[0])) {
+					list.add("move");
+				}
+				if ("editShop".contains(args[0])) {
+					list.add("editShop");
+				}
+				if ("rename".contains(args[0])) {
+					list.add("rename");
+				}
+				if ("resize".contains(args[0])) {
+					list.add("resize");
+				}
+				if ("changeProfession".contains(args[0])) {
+					list.add("changeProfession");
+				}
+				if ("changeOwner".contains(args[0])) {
+					list.add("changeOwner");
+				}
+			} else if (args.length == 2 && (args[0].equals("rename") || args[0].equals("editShop")
+					|| args[0].equals("changeProfession") || args[0].equals("deleteOther") || args[0].equals("resize")
+					|| args[0].equals("move") || args[0].equals("delete") || args[0].equals("changeOwner"))) {
+				if (args[0].equals("deleteOther")) {
+					list = PlayerShop.getPlayerShopUniqueNameList();
+				} else {
+					list = getPlayerShopList(args[1], sender.getName());
+				}
+			} else if (args.length == 3 && args[0].equals("changeProfession")) {
+				if (args[2].equals("")) {
+					for (Profession profession : Profession.values()) {
+						list.add(profession.name().toLowerCase());
+					}
+				} else {
+					for (Profession profession : Profession.values()) {
+						if (profession.name().toLowerCase().contains(args[2])) {
+							list.add(profession.name().toLowerCase());
+						}
+					}
+				}
+			}
+		}
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		else if (command.getName().equals("adminshop")) {
 			if (args[0].equals("")) {
 				list.add("create");
 				list.add("delete");
@@ -39,29 +158,17 @@ public class ShopTabCompleter implements TabCompleter{
 				list.add("editItem");
 				list.add("addEnchantedItem");
 				list.add("addPotion");
-				if (command.getName().equals("adminshop")) {
-					list.add("addSpawner");
-					list.add("removeSpawner");
-				} else {
-					if(sender.hasPermission("ultimate_economy.adminshop")) {
-						list.add("deleteOther");
-					}
-					list.add("changeOwner");
-				}
+				list.add("addSpawner");
+				list.add("removeSpawner");
 			} else if (args[0].equals("delete") || args[0].equals("addItem") || args[0].equals("removeItem")
 					|| args[0].equals("addSpawner") || args[0].equals("removeSpawner") || args[0].equals("editShop")
 					|| args[0].equals("addEnchantedItem") || args[0].equals("addPotion")
-					|| args[0].equals("changeOwner") || args[0].equals("rename") || args[0].equals("resize")
-					|| args[0].equals("changeProfession") || args[0].equals("deleteOther")) {
+					|| args[0].equals("rename") || args[0].equals("resize")
+					|| args[0].equals("changeProfession") || args[0].equals("editItem")
+					|| args[0].equals("move")) {
 				if (args.length == 2) {
 					if (command.getName().equals("adminshop")) {
-						list = getAdminShopList(config, args[1]);
-					} else {
-						if(args[0].equals("deleteOther")) {
-							list = PlayerShop.getPlayerShopNameList();
-						} else {
-							list = getPlayerShopList(config, args[1], sender.getName());
-						}
+						list = getAdminShopList(args[1]);
 					}
 				} else if (args.length == 3) {
 					if (args[0].equals("addItem") || args[0].equals("addEnchantedItem")) {
@@ -80,9 +187,9 @@ public class ShopTabCompleter implements TabCompleter{
 						}
 					} else if (args[0].equals("addSpawner")) {
 						list = getEntityList(args[2]);
-					} else if(args[0].equals("changeProfession")) {
+					} else if (args[0].equals("changeProfession")) {
 						if (args[2].equals("")) {
-							for(Profession profession : Profession.values()) {
+							for (Profession profession : Profession.values()) {
 								list.add(profession.name().toLowerCase());
 							}
 						} else {
@@ -160,7 +267,7 @@ public class ShopTabCompleter implements TabCompleter{
 				if ("changeProfession".contains(args[0])) {
 					list.add("changeProfession");
 				}
-				if("resize".contains(args[0])) {
+				if ("resize".contains(args[0])) {
 					list.add("resize");
 				}
 				if ("editItem".contains(args[0])) {
@@ -175,28 +282,19 @@ public class ShopTabCompleter implements TabCompleter{
 				if ("addPotion".contains(args[0])) {
 					list.add("addPotion");
 				}
-				if (command.getName().equals("adminshop")) {
-					if ("addSpawner".contains(args[0])) {
-						list.add("addSpawner");
-					}
-					if ("removeSpawner".contains(args[0])) {
-						list.add("removeSpawner");
-					}
-				} else {
-					if ("changeOwner".contains(args[0])) {
-						list.add("changeOwner");
-					}
-					if (sender.hasPermission("ultimate_economy.adminshop") && "deleteOther".contains(args[0])) {
-						list.add("deleteOther");
-					}
+				if ("addSpawner".contains(args[0])) {
+					list.add("addSpawner");
+				}
+				if ("removeSpawner".contains(args[0])) {
+					list.add("removeSpawner");
 				}
 			}
 		}
 		return list;
 	}
-	
-	private List<String> getPlayerShopList(FileConfiguration config, String arg, String playerName) {
-		List<String> temp = config.getStringList("PlayerShopNames");
+
+	private List<String> getPlayerShopList(String arg, String playerName) {
+		List<String> temp = PlayerShop.getPlayerShopUniqueNameList();
 		List<String> list = new ArrayList<>();
 		if (arg.equals("")) {
 			for (String shopName : temp) {
@@ -215,8 +313,8 @@ public class ShopTabCompleter implements TabCompleter{
 		return list;
 	}
 
-	private List<String> getAdminShopList(FileConfiguration config,  String arg) {
-		List<String> temp = config.getStringList("ShopNames");
+	private List<String> getAdminShopList(String arg) {
+		List<String> temp = AdminShop.getAdminshopNameList();
 		List<String> list = new ArrayList<>();
 		if (arg.equals("")) {
 			list = temp;
@@ -229,7 +327,19 @@ public class ShopTabCompleter implements TabCompleter{
 		}
 		return list;
 	}
-	
+
+	private List<String> getRentedShopsForPlayer(String arg, String player) {
+		List<String> list = new ArrayList<>();
+		for (RentShop shop : RentShop.getRentShops()) {
+			if (!shop.isRentable() && shop.getOwner().equals(player)) {
+				if (arg.equals("") || shop.getName().contains(arg)) {
+					list.add(shop.getName());
+				}
+			}
+		}
+		return list;
+	}
+
 	public static List<String> getMaterialList(String arg) {
 		Material[] materials = Material.values();
 		List<String> list = new ArrayList<>();

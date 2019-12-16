@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
@@ -37,6 +36,7 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -46,18 +46,19 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.Town;
-import com.ue.townsystem.TownWorld;
+
+import ultimate_economy.Ultimate_Economy;
 
 public abstract class Shop {
 
 	// minecraft skull texture links
-	private static final String PLUS = "http://textures.minecraft.net/texture/9a2d891c6ae9f6baa040d736ab84d48344bb6b70d7f1a280dd12cbac4d777";
-	private static final String MINUS = "http://textures.minecraft.net/texture/935e4e26eafc11b52c11668e1d6634e7d1d0d21c411cb085f9394268eb4cdfba";
-	private static final String ONE = "http://textures.minecraft.net/texture/d2a6f0e84daefc8b21aa99415b16ed5fdaa6d8dc0c3cd591f49ca832b575";
+	protected static final String PLUS = "http://textures.minecraft.net/texture/9a2d891c6ae9f6baa040d736ab84d48344bb6b70d7f1a280dd12cbac4d777";
+	protected static final String MINUS = "http://textures.minecraft.net/texture/935e4e26eafc11b52c11668e1d6634e7d1d0d21c411cb085f9394268eb4cdfba";
+	protected static final String ONE = "http://textures.minecraft.net/texture/d2a6f0e84daefc8b21aa99415b16ed5fdaa6d8dc0c3cd591f49ca832b575";
+	protected static final String SEVEN = "http://textures.minecraft.net/texture/9e198fd831cb61f3927f21cf8a7463af5ea3c7e43bd3e8ec7d2948631cce879";
 	private static final String TEN = "http://textures.minecraft.net/texture/b0cf9794fbc089dab037141f67875ab37fadd12f3b92dba7dd2288f1e98836";
-	private static final String SLOTFILLED = "http://textures.minecraft.net/texture/9e42f682e430b55b61204a6f8b76d5227d278ed9ec4d98bda4a7a4830a4b6";
-	private static final String SLOTEMPTY = "http://textures.minecraft.net/texture/b55d5019c8d55bcb9dc3494ccc3419757f89c3384cf3c9abec3f18831f35b0";
+	protected static final String SLOTFILLED = "http://textures.minecraft.net/texture/9e42f682e430b55b61204a6f8b76d5227d278ed9ec4d98bda4a7a4830a4b6";
+	protected static final String SLOTEMPTY = "http://textures.minecraft.net/texture/b55d5019c8d55bcb9dc3494ccc3419757f89c3384cf3c9abec3f18831f35b0";
 	private static final String TWENTY = "http://textures.minecraft.net/texture/f7b29a1bb25b2ad8ff3a7a38228189c9461f457a4da98dae29384c5c25d85";
 	private static final String BUY = "http://textures.minecraft.net/texture/e5da4847272582265bdaca367237c96122b139f4e597fbc6667d3fb75fea7cf6";
 	private static final String SELL = "http://textures.minecraft.net/texture/abae89e92ac362635ba3e9fb7c12b7ddd9b38adb11df8aa1aff3e51ac428a4";
@@ -68,80 +69,89 @@ public abstract class Shop {
 	public Villager villager;
 	public FileConfiguration config;
 	public File file;
-	public String name;
+	private String name;
+	private final String shopId;
 	public Location location;
 	public Inventory inventory, editor, slotEditor;
+	// size 9 = slots 0 - 8
 	public int size;
 	public List<String> itemNames;
-	public boolean isPlayershop;
 	public int slotEditorSlot;
 
 	/**
 	 * Constructor for creating a new shop.
+	 * No validation, if the shopId is unique.
 	 * 
 	 * @param dataFolder
 	 * @param name
+	 * @param shopIs
 	 * @param spawnLocation
 	 * @param size
-	 * @param isPlayershop
 	 */
-	public Shop(File dataFolder, String name, Location spawnLocation, int size, boolean isPlayershop) {
-		this.isPlayershop = isPlayershop;
+	public Shop(File dataFolder, String name,String shopId, Location spawnLocation, int size) {
 		itemNames = new ArrayList<>();
-		file = new File(dataFolder, name + ".yml");
-		inventory = Bukkit.createInventory(null, size, name);
-		slotEditor = Bukkit.createInventory(null, 27, name + "-SlotEditor");
+		file = new File(dataFolder, shopId + ".yml");
 		try {
 			file.createNewFile();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
 		config = YamlConfiguration.loadConfiguration(file);
-		this.name = name;
-		location = spawnLocation;
-		this.size = size;
-		config.set("ShopName", name);
-		config.set("ShopSize", size);
-		config.set("ShopLocation.x", location.getX());
-		config.set("ShopLocation.y", location.getY());
-		config.set("ShopLocation.z", location.getZ());
-		config.set("ShopLocation.World", location.getWorld().getName());
 		config.set("ShopItemList", itemNames);
 		save();
+		this.shopId = shopId;
+		saveLocationToFile(spawnLocation);
+		saveShopNameToFile(name);
+		saveShopSizeToFile(size);
 		setupShopVillager();
 	}
 
 	/**
 	 * Constructor for loading an existing shop.
+	 * No validation, if the shopId is unique.
+	 * If name != null then use old loading otherwise use new loading
 	 * 
 	 * @param dataFolder
 	 * @param server
-	 * @param name
-	 * @param isPlayershop
+	 * @param name //deprecated
+	 * @param shopId
 	 */
-	public Shop(File dataFolder, Server server, String name, boolean isPlayershop) {
-
-		this.isPlayershop = isPlayershop;
+	public Shop(File dataFolder, Server server, String name,String shopId) {
 		itemNames = new ArrayList<>();
-		file = new File(dataFolder, name + ".yml");
-		config = YamlConfiguration.loadConfiguration(file);
+		//old loading with names, can be deleted in the future
+		if(name != null) {
+			file = new File(dataFolder, name + ".yml");
+			config = YamlConfiguration.loadConfiguration(file);
+			this.name = name;
+			try {
+				changeSavefileName(dataFolder, shopId);
+			} catch (ShopSystemException e) {
+				//should never happen
+			}
+		} 
+		//new loading with ids
+		else {
+			file = new File(dataFolder, shopId + ".yml");
+			config = YamlConfiguration.loadConfiguration(file);
+			loadShopName();
+		}
+		this.shopId = shopId;
 		size = config.getInt("ShopSize");
-		inventory = Bukkit.createInventory(null, this.size, name);
-		slotEditor = Bukkit.createInventory(null, 27, name + "-SlotEditor");
-		this.name = name;
 		itemNames = config.getStringList("ShopItemList");
-		inventory = Bukkit.createInventory(villager, size, name);
 		location = new Location(server.getWorld(config.getString("ShopLocation.World")),
 				config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
 				config.getDouble("ShopLocation.z"));
 		setupShopVillager();
 	}
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////Setup Methods
 
 	private void setupShopVillager() {
 		location.getChunk().load();
 		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10, 10, 10);
 		for (Entity entity : entitys) {
-			if (entity.getName().equals(name)) {
+			if (entity.getName().contains(name)) {
 				entity.remove();
 			}
 		}
@@ -152,21 +162,28 @@ public abstract class Shop {
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
 		villager.setVillagerLevel(2);
+		villager.setMetadata("ue-id", new FixedMetadataValue(Ultimate_Economy.getInstance,shopId));
 		config = YamlConfiguration.loadConfiguration(file);
 		if(config.isSet("Profession")) {
 			villager.setProfession(Profession.valueOf(config.getString("Profession")));
 		} else {
 			villager.setProfession(Profession.NITWIT);
 		}
-		editor = Bukkit.createInventory(null, this.size, name + "-Editor");
+		inventory = Bukkit.createInventory(villager, size, name);
+		slotEditor = Bukkit.createInventory(villager, 27, name + "-SlotEditor");
+		editor = Bukkit.createInventory(villager, size, name + "-Editor");
 		setupShopItems();
-		setupEditor();
 	}
 
 	/**
-	 * Only public for child PlayerShop. Not for commercial use.
+	 * --Setup method--
+	 * <p>
+	 * Not for commercial use.
+	 * <p>
+	 * Setup the info slot of the shop.
+	 * 
 	 */
-	public void setupShopItems() {
+	protected void setupShopItems() {
 		int slot = size - 1;
 		ItemStack anvil = new ItemStack(Material.ANVIL);
 		ItemMeta meta = anvil.getItemMeta();
@@ -276,43 +293,358 @@ public abstract class Shop {
 		slotEditor.setItem(18, item);
 	}
 	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////// Save file edit methods
+	
 	/**
-	 * Change the profession of a shopvillager
+	 * --Save file edit method--
+	 * <p>
+	 * Not for commercial use.
+	 * <p>
+	 * Save this location to the savefile of the shop.
+	 * 
+	 * @param location
+	 */
+	protected void saveLocationToFile(Location location) {
+		this.location = location;
+		config = YamlConfiguration.loadConfiguration(file);
+		config.set("ShopLocation.x", location.getBlockX());
+		config.set("ShopLocation.y", location.getBlockY());
+		config.set("ShopLocation.z", location.getBlockZ());
+		config.set("ShopLocation.World", location.getWorld().getName());
+		save();
+	}
+	
+	/**
+	 * --Save file edit method--
+	 * <p>
+	 * Not for commercial use.
+	 * <p>
+	 * Save this profession of the shop to the savefile.
 	 * 
 	 * @param profession
 	 */
-	public void changeProfession(Profession profession) {
-		villager.setProfession(profession);
+	protected void saveProfessionToFile(Profession profession) {
 		config = YamlConfiguration.loadConfiguration(file);
 		config.set("Profession", profession.name());
 		save();
 	}
 	
 	/**
-	 * This method renames a shop.
+	 * --Save file edit method--
+	 * <p>
+	 * Not for commercial use.
+	 * <p>
+	 * Save this name of the shop to the savefile.
 	 * 
-	 * @param newName
-	 * @param player
-	 * @throws ShopSystemException thrown, when a shop with this name already exists
+	 * @param name
 	 */
-	public abstract void renameShop(File dataFolder, String newName, String player) throws ShopSystemException;
+	protected void saveShopNameToFile(String name) {
+		this.name = name;
+		config = YamlConfiguration.loadConfiguration(file);
+		config.set("ShopName", name);
+		save();
+	}
+	
+	/**
+	 * --Save file edit method--
+	 * <p>
+	 * Not for commercial use.
+	 * <p>
+	 * Save this size of the shop to the savefile.
+	 * 
+	 * @param size
+	 */
+	protected void saveShopSizeToFile(int size) {
+		this.size = size;
+		config = YamlConfiguration.loadConfiguration(file);
+		config.set("ShopSize", size);
+		save();
+	}
+	
+	/**
+	 * --Save file edit method--
+	 * <p>
+	 * Not for commercial use.
+	 * Only to convert old save files to the new save system
+	 * <p>
+	 * Changes the name of the savefile
+	 * 
+	 * @param dataFolder
+	 * @param newName
+	 * @throws ShopSystemException
+	 */
+	private void changeSavefileName(File dataFolder, String newName) throws ShopSystemException {
+		File newFile = new File(dataFolder, newName + ".yml");
+		if(!newFile.exists()) {
+			config = YamlConfiguration.loadConfiguration(file);
+			file.delete();
+			file = newFile;
+			save();
+		} else {
+			throw new ShopSystemException(ShopSystemException.ERROR_ON_RENAMING);
+		}
+	}
+	
+	/**
+	 * --Save fileedit method--
+	 * <p>
+	 * Not for commercial use.
+	 * <p>
+	 * Saves a item to the savefile.
+	 * 
+	 * @param stack
+	 * @param slot
+	 * @param sellPrice
+	 * @param buyPrice
+	 */
+	protected void saveShopItemToFile(ItemStack stack,int slot, double sellPrice, double buyPrice) {
+		//create a new ItemStack to avoid changes to the original stack
+		ItemStack itemStackCopy = new ItemStack(stack);
+		int amount = itemStackCopy.getAmount();
+		itemStackCopy.setAmount(1);
+		String itemString = itemStackCopy.toString();
+		config = YamlConfiguration.loadConfiguration(file);
+		itemNames.add(itemString);
+		removedoubleObjects(itemNames);
+		config.set("ShopItems." + itemString + ".Name", itemStackCopy);
+		config.set("ShopItems." + itemString + ".Amount", amount);
+		config.set("ShopItems." + itemString + ".Slot", slot);
+		config.set("ShopItems." + itemString + ".sellPrice", sellPrice);
+		config.set("ShopItems." + itemString + ".buyPrice", buyPrice);
+		config.set("ShopItems." + itemString + ".newSaveMethod", "true");
+		config.set("ShopItemList", itemNames);
+		save();
+	}
+	
+	/**
+	 * --Save file edit method--
+	 * <p>
+	 * Not for commercial use.
+	 * <p>
+	 * Deletes a shop item from the save file.
+	 * 
+	 * @param itemString
+	 */
+	protected void removeShopItemFromFile(String itemString) {
+		if(itemNames.contains(itemString)) {
+			config = YamlConfiguration.loadConfiguration(file);
+			itemNames.remove(itemString);
+			config.set("ShopItemList", itemNames);
+			config.set("ShopItems." + itemString, null);
+			save();
+		}
+	}
+	
+	/**
+	 * --Save file edit method--
+	 * <p>
+	 * Saved the config into the savefile.
+	 */
+	protected void save() {
+		try {
+			config.save(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////// Save file read / get methods
+	
+	/**
+	 * --Save file read method--
+	 * <p>
+	 * This method returns the sellprice of a item.
+	 * 
+	 * @param itemName
+	 * @return double
+	 * @throws ShopSystemException
+	 */
+	public double getItemSellPrice(String itemName) throws ShopSystemException {
+		if (itemNames.contains(itemName)) {
+			config = YamlConfiguration.loadConfiguration(file);
+			return config.getDouble("ShopItems." + itemName + ".sellPrice");
+		} else {
+			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
+		}
+	}
+	
+	/**
+	 * --Save file read method--
+	 * <p>
+	 * This method returns the amount of a item.
+	 * 
+	 * @param itemName
+	 * @return int
+	 * @throws ShopSystemException
+	 */
+	public int getItemAmount(String itemName) throws ShopSystemException {
+		config = YamlConfiguration.loadConfiguration(file);
+		if (itemNames.contains(itemName)) {
+			return config.getInt("ShopItems." + itemName + ".Amount");
+		} else {
+			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
+		}
+	}
+	
+	/**
+	 * --Save file read method--
+	 * <p>
+	 * This method returns the buyprice of a item.
+	 * 
+	 * @param itemName
+	 * @return double
+	 * @throws ShopSystemException
+	 */
+	public double getItemBuyPrice(String itemName) throws ShopSystemException {
+		config = YamlConfiguration.loadConfiguration(file);
+		if (itemNames.contains(itemName)) {
+			return config.getDouble("ShopItems." + itemName + ".buyPrice");
+		} else {
+			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
+		}
+	}
+	
+	/**
+	 * --Get Method--
+	 * <p>
+	 * Returns the itemslist of this shop.
+	 * 
+	 * @return itemNames
+	 */
+	public List<String> getItemList() {
+		return itemNames;
+	}
+	
+	/**
+	 * --Save file read method--
+	 * <p>
+	 * This method loads the shop name from the save file.
+	 */
+	private void loadShopName() {
+		config = YamlConfiguration.loadConfiguration(file);
+		name = config.getString("ShopName");
+	}
+	
+	/**
+	 * --Get Method--
+	 * <p>
+	 * Returns the name of this shop.
+	 * 
+	 * @return name
+	 */
+	public String getName() {
+		return name;
+	}
+	
+	/**
+	 * --Get Method--
+	 * <p>
+	 * Returns the shopId.
+	 * 
+	 * @return shopId
+	 */
+	public String getShopId() {
+		return shopId;
+	}
 
 	/**
-	 * This method allows you to resize a shop.
+	 * --Get Method--
+	 * <p>
+	 * Returns a itemstack by a given slot.
 	 * 
-	 * @param newSize - size in slots
+	 * @param slot
+	 * @return
+	 */
+	public ItemStack getItem(int slot) {
+		slot--;
+		return inventory.getItem(slot);
+	}
+	
+	/**
+	 * --Save file read method--
+	 * <p>
+	 * Returns a itemstack from a itemstring.
+	 * 
+	 * @param itemString
+	 * @return
+	 * @throws ShopSystemException
+	 */
+	public ItemStack getItemStack(String itemString) throws ShopSystemException {
+		if(!itemNames.contains(itemString)) {
+			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
+		}
+		else {
+			config = YamlConfiguration.loadConfiguration(file);
+			return config.getItemStack("ShopItems." + itemString + ".Name");
+		}
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////// change methods
+	
+	/**
+	 * --Change Methode--
+	 * <p>
+	 * Change the profession of a shopvillager
+	 * 
+	 * @param profession
+	 */
+	public void changeProfession(Profession profession) {
+		villager.setProfession(profession);
+		saveProfessionToFile(profession);
+	}
+	
+	/**
+	 * --Change Methode--
+	 * <p>
+	 * Change the name of a shop. Name gets checked, if a shop with this name already exists.
+	 * 
+	 * @param name Forbidden char is "_"
+	 * @throws ShopSystemException thrown, when a shop with this name already exists or the name contains "_"
+	 */
+	public abstract void changeShopName(String name) throws ShopSystemException;
+	
+	/**
+	 * --Change Methode--
+	 * <p>
+	 * Not for commercial use
+	 * <p>
+	 * Change the name of the inventory, shot editor and editor
+	 * 
+	 * @param name
+	 */
+	protected void changeInventoryNames(String name) {
+		Inventory inventoryNew = Bukkit.createInventory(villager, size, name);
+		inventoryNew.setContents(inventory.getContents());
+		inventory = inventoryNew;
+		Inventory editorNew = Bukkit.createInventory(villager, this.size, name + "-Editor");
+		editorNew.setContents(editor.getContents());
+		editor = editorNew;
+		Inventory slotEditorNew = Bukkit.createInventory(villager, 27, name + "-SlotEditor");
+		slotEditorNew.setContents(slotEditor.getContents());
+		slotEditor = slotEditorNew;
+	}
+	
+	/**
+	 * --Change Methode--
+	 * <p>
+	 * Change the size of the shop. Size gets validated.
+	 * With only the info slot in the shop. Have to be overridden, if
+	 * you have more then one reserved shot in your shop.
+	 * 
+	 * @param newSize
 	 * @throws ShopSystemException 
 	 */
-	public void resize(int newSize) throws ShopSystemException {
+	public void changeShopSize(int newSize) throws ShopSystemException {
 		if(newSize % 9 != 0) {
 			throw new ShopSystemException(ShopSystemException.INVALID_INVENTORY_SIZE);
 		} else {
 			boolean possible = true;
 			int diff = size - newSize;
+			// number of reserved slots
 			int temp = 1;
-			if(isPlayershop) {
-				temp = 2;
-			}
 			if(inventory.getSize() > newSize) {
 				for(int i = 1;i<=diff;i++) {
 					ItemStack stack = inventory.getItem(size-i-temp);
@@ -323,20 +655,22 @@ public abstract class Shop {
 			}
 			if(possible) {
 				config = YamlConfiguration.loadConfiguration(file);
-				size = newSize;
-				config.set("ShopSize", size);
-				save();
+				saveShopSizeToFile(newSize);
 				inventory = Bukkit.createInventory(null, size, name);
 				reload();
 				setupShopItems();
 			} else {
-				Bukkit.getLogger().info("test");
 				throw new ShopSystemException(ShopSystemException.RESIZING_FAILED);
 			}
 		}
 	}
-
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////// shopitem methods
+	
 	/**
+	 * --ShopItem Methode--
+	 * <p>
 	 * This method adds a item to this shop.
 	 * 
 	 * @param slot
@@ -345,11 +679,10 @@ public abstract class Shop {
 	 * @param itemStack
 	 * @throws ShopSystemException
 	 */
-	public void addItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack) throws ShopSystemException {
+	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack) throws ShopSystemException {
 		int amount = itemStack.getAmount();
-		itemStack.setAmount(1);
 		String itemString = itemStack.toString();
-		if (itemStack.getType() == Material.SPAWNER && !isPlayershop) {
+		if (itemStack.getType() == Material.SPAWNER) {
 			ItemMeta meta = itemStack.getItemMeta();
 			String entity = meta.getDisplayName();
 			itemString = "SPAWNER_" + entity;
@@ -365,25 +698,14 @@ public abstract class Shop {
 		} else if (itemNames.contains(itemString)) {
 			throw new ShopSystemException(ShopSystemException.ITEM_ALREADY_EXISTS);
 		} else {
-			config = YamlConfiguration.loadConfiguration(file);
-			//new savesystem
-			itemNames.add(itemString);
-			config.set("ShopItems." + itemString + ".Name", itemStack);
-			config.set("ShopItems." + itemString + ".Amount", amount);
-			config.set("ShopItems." + itemString + ".Slot", slot);
-			config.set("ShopItems." + itemString + ".sellPrice", sellPrice);
-			config.set("ShopItems." + itemString + ".buyPrice", buyPrice);
-			config.set("ShopItems." + itemString + ".newSaveMethod", "true");
-			if (isPlayershop) {
-				config.set("ShopItems." + itemString + ".stock", 0);
-			}
-			config.set("ShopItemList", itemNames);
-			save();
+			saveShopItemToFile(itemStack, slot, sellPrice, buyPrice);
 			addShopItemToInv(new ItemStack(itemStack), amount, slot, sellPrice, buyPrice);
 		}
 	}
 
 	/**
+	 * --ShopItem Methode--
+	 * <p>
 	 * This method edits an existing item in this shop.
 	 * 
 	 * @param slot
@@ -393,7 +715,7 @@ public abstract class Shop {
 	 * @return String
 	 * @throws ShopSystemException
 	 */
-	public String editItem(int slot, String amount, String sellPrice, String buyPrice) throws ShopSystemException {
+	public String editShopItem(int slot, String amount, String sellPrice, String buyPrice) throws ShopSystemException {
 		if (slotIsEmpty(slot)) {
 			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_EMPTY);
 		} else if (!amount.equals("none") && (Integer.valueOf(amount) <= 0 || Integer.valueOf(amount) > 64)) {
@@ -438,29 +760,44 @@ public abstract class Shop {
 				message = message + ChatColor.GREEN + "buyPrice ";
 			}
 			save();
-			loadItem(itemString);
+			loadShopItem(itemString);
 			message = message + ChatColor.GOLD + "for item " + ChatColor.GREEN + itemStack.getType().name().toLowerCase();
 			return message;
 		}
 	}
 
 	/**
+	 * --ShopItem Methode--
+	 * <p>
 	 * Loads a item by it's name. Not for commercial use.
 	 * 
 	 * @param itemString
 	 * @throws ShopSystemException
 	 */
-	public void loadItem(String itemString) throws ShopSystemException {
+	public void loadShopItem(String itemString) throws ShopSystemException {
 		config = YamlConfiguration.loadConfiguration(file);
 		//new loading method for new save method
-		if(!itemString.equals("ANVIL_0") && !itemString.equals("CRAFTING_TABLE_0") && config.getString("ShopItems." + itemString + ".newSaveMethod") != null) {
+		if(!itemString.contains("SPAWNER_") && !itemString.equals("ANVIL_0") && !itemString.equals("CRAFTING_TABLE_0") && config.getString("ShopItems." + itemString + ".newSaveMethod") != null) {
 			ItemStack itemStack = config.getItemStack("ShopItems." + itemString + ".Name");
 			addShopItemToInv(itemStack, config.getInt("ShopItems." + itemString + ".Amount"),
 					config.getInt("ShopItems." + itemString + ".Slot"),
 					config.getDouble("ShopItems." + itemString + ".sellPrice"),
 					config.getDouble("ShopItems." + itemString + ".buyPrice"));
+		} 
+		//load spawner
+		else if(itemString.contains("SPAWNER_")) {
+			String entityname = itemString.substring(8);
+			ItemStack itemStack = new ItemStack(Material.SPAWNER);
+			ItemMeta meta = itemStack.getItemMeta();
+			meta.setDisplayName(entityname);
+			itemStack.setItemMeta(meta);
+			addShopItemToInv(itemStack, config.getInt("ShopItems." + itemString + ".Amount"),
+					config.getInt("ShopItems." + itemString + ".Slot"),
+					config.getDouble("ShopItems." + itemString + ".sellPrice"),
+					config.getDouble("ShopItems." + itemString + ".buyPrice"));
 		}
-		//old loading method, only for old saved items, converts to the new save method
+		// old loading method, only for old saved items, converts to the new save method
+		// can be deleted in the future
 		else if(!itemString.equals("ANVIL_0") && !itemString.equals("CRAFTING_TABLE_0")){
 			if (config.getString("ShopItems." + itemString + ".Name") != null) {
 				String string = config.getString("ShopItems." + itemString + ".Name");
@@ -531,7 +868,7 @@ public abstract class Shop {
 					config.set("ShopItems." + itemString, null);
 					save();
 					//add new item
-					addItem(slot, sell , buy , itemStack);
+					addShopItem(slot, sell , buy , itemStack);
 				}
 			} else if (!itemString.equals("ANVIL_0") && !itemString.equals("CRAFTING_TABLE_0")) {
 				throw new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOPITEM + " |" + itemString + "|");
@@ -539,33 +876,15 @@ public abstract class Shop {
 		}
 	}
 	
-	public ItemStack getItemStack(String itemString) throws ShopSystemException {
-		if(!itemNames.contains(itemString)) {
-			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
-		}
-		else {
-			config = YamlConfiguration.loadConfiguration(file);
-			return config.getItemStack("ShopItems." + itemString + ".Name");
-		}
-	}
-
-	private boolean hasCustomName(ItemStack itemStack) {
-		boolean has = true;
-		ItemStack testStack = new ItemStack(itemStack.getType());
-		ItemMeta testMeta = testStack.getItemMeta();
-		if (itemStack.getItemMeta().getDisplayName().equals(testMeta.getDisplayName())) {
-			has = false;
-		}
-		return has;
-	}
-
 	/**
+	 * --ShopItem Methode--
+	 * <p>
 	 * This method removes a item from this shop.
 	 * 
 	 * @param slot
 	 * @throws ShopSystemException
 	 */
-	public void removeItem(int slot) throws ShopSystemException {
+	public void removeShopItem(int slot) throws ShopSystemException {
 		if (slotIsEmpty(slot + 1)) {
 			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_EMPTY);
 		} else if ((slot + 1) != size && (slot + 1) <= size) {
@@ -589,235 +908,72 @@ public abstract class Shop {
 				stack.setAmount(1);
 				itemString = stack.toString();
 			}
-			
-			config = YamlConfiguration.loadConfiguration(file);
 			inventory.clear(slot);
-			if(itemNames.contains(itemString)) {
-				itemNames.remove(itemString);
-				config.set("ShopItemList", itemNames);
-				config.set("ShopItems." + itemString, null);
-				save();
-			}
+			removeShopItemFromFile(itemString);
 		} else if ((slot + 1) == size) {
 			throw new ShopSystemException(ShopSystemException.ITEM_CANNOT_BE_DELETED);
 		}
 	}
-
+	
 	/**
-	 * This method returns the sellprice of a item.
+	 * --ShopItem Methode--
+	 * <p>
+	 * Not for commercial use.
+	 * <p>
+	 * This method adds a shopitem to the shop inventory.
 	 * 
-	 * @param itemName
-	 * @return double
-	 * @throws ShopSystemException
-	 */
-	public double getItemSellPrice(String itemName) throws ShopSystemException {
-		config = YamlConfiguration.loadConfiguration(file);
-		if (itemNames.contains(itemName)) {
-			return config.getDouble("ShopItems." + itemName + ".sellPrice");
-		} else {
-			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
-		}
-	}
-
-	/**
-	 * This method returns the amount of a item.
-	 * 
-	 * @param itemName
-	 * @return int
-	 * @throws ShopSystemException
-	 */
-	public int getItemAmount(String itemName) throws ShopSystemException {
-		config = YamlConfiguration.loadConfiguration(file);
-		if (itemNames.contains(itemName)) {
-			return config.getInt("ShopItems." + itemName + ".Amount");
-		} else {
-			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
-		}
-	}
-
-	/**
-	 * This method returns the buyprice of a item.
-	 * 
-	 * @param itemName
-	 * @return double
-	 * @throws ShopSystemException
-	 */
-	public double getItemBuyPrice(String itemName) throws ShopSystemException {
-		config = YamlConfiguration.loadConfiguration(file);
-		if (itemNames.contains(itemName)) {
-			return config.getDouble("ShopItems." + itemName + ".buyPrice");
-		} else {
-			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
-		}
-	}
-
-	/**
-	 * This method returns the lore of a item.
-	 * 
-	 * @param itemName
-	 * @return List of Strings
-	 * @throws ShopSystemException
-	 */
-	public List<String> getItemLore(String itemName) throws ShopSystemException {
-		config = YamlConfiguration.loadConfiguration(file);
-		if (itemNames.contains(itemName)) {
-			return config.getStringList("ShopItems." + itemName + ".lore");
-		} else {
-			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
-		}
-	}
-
-	/**
-	 * This method returns the damage of a item.
-	 * 
-	 * @param itemName
-	 * @return int
-	 * @throws ShopSystemException
-	 */
-	public int getItemDamage(String itemName) throws ShopSystemException {
-		config = YamlConfiguration.loadConfiguration(file);
-		if (itemNames.contains(itemName)) {
-			return config.getInt("ShopItems." + itemName + ".damage");
-		} else {
-			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
-		}
-	}
-
-	public static ArrayList<String> addEnchantments(ItemStack itemStack, ArrayList<String> enchantmentList) {
-		Enchantment e = null;
-		int lvl = 0;
-		ArrayList<String> newList = new ArrayList<>();
-		for (String enchantment : enchantmentList) {
-			e = Enchantment.getByKey(NamespacedKey.minecraft(enchantment.substring(0, enchantment.indexOf("-"))));
-			lvl = Integer.valueOf(enchantment.substring(enchantment.indexOf("-") + 1));
-			if (e.getMaxLevel() < lvl) {
-				lvl = e.getMaxLevel();
-				enchantment = enchantment.substring(0, enchantment.indexOf("-") + 1) + String.valueOf(lvl);
-			}
-			if (itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
-				EnchantmentStorageMeta meta = (EnchantmentStorageMeta) itemStack.getItemMeta();
-				meta.addStoredEnchant(e, lvl, true);
-				itemStack.setItemMeta(meta);
-			} else if (e.canEnchantItem(itemStack)) {
-				itemStack.addEnchantment(e, lvl);
-			}
-		}
-		if (itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
-			EnchantmentStorageMeta meta = (EnchantmentStorageMeta) itemStack.getItemMeta();
-			for (Entry<Enchantment, Integer> map : meta.getStoredEnchants().entrySet()) {
-				newList.add(
-						map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1)
-								+ "-" + map.getValue().intValue());
-				newList.sort(String.CASE_INSENSITIVE_ORDER);
-			}
-		} else {
-			for (Entry<Enchantment, Integer> map : itemStack.getEnchantments().entrySet()) {
-				newList.add(
-						map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1)
-								+ "-" + map.getValue().intValue());
-				newList.sort(String.CASE_INSENSITIVE_ORDER);
-			}
-		}
-		return newList;
-	}
-
-	public ItemStack getSkull(String url, String name) {
-		ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
-		if (url.isEmpty())
-			return head;
-		SkullMeta headMeta = (SkullMeta) head.getItemMeta();
-		GameProfile profile = new GameProfile(UUID.randomUUID(), null);
-		byte[] encodedData = Base64.getEncoder()
-				.encode((String.format("{textures:{SKIN:{url:\"%s\"}}}", url).getBytes()));
-		profile.getProperties().put("textures", new Property("textures", new String(encodedData)));
-		Field profileField = null;
-		try {
-			profileField = headMeta.getClass().getDeclaredField("profile");
-			profileField.setAccessible(true);
-			profileField.set(headMeta, profile);
-		} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e1) {
-			e1.printStackTrace();
-		}
-		headMeta.setDisplayName(name);
-		head.setItemMeta(headMeta);
-		return head;
-	}
-
-	/**
-	 * This method returns true if the slot is empty.
-	 * 
+	 * @param itemStack
+	 * @param amount
 	 * @param slot
-	 * @return boolean
-	 * @throws ShopSystemException
+	 * @param sellPrice
+	 * @param buyPrice
 	 */
-	public boolean slotIsEmpty(int slot) throws ShopSystemException {
-		if (slot <= inventory.getSize() && slot > 0) {
-			slot--;
-			boolean isEmpty = false;
-			if (inventory.getItem(slot) == null) {
-				isEmpty = true;
-			}
-			return isEmpty;
+	protected void addShopItemToInv(ItemStack itemStack, int amount, int slot, double sellPrice, double buyPrice) {
+		String displayName = itemStack.getItemMeta().getDisplayName();
+		List<String> list = null;
+		if (itemStack.getItemMeta().getLore() != null) {
+			list = itemStack.getItemMeta().getLore();
 		} else {
-			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_INVALID);
+			list = new ArrayList<>();
 		}
-	}
-
-	public List<String> getItemList() {
-		return itemNames;
-	}
-
-	public List<String> removedoubleObjects(List<String> list) {
-		Set<String> set = new LinkedHashSet<String>(list);
-		list = new ArrayList<String>(set);
-		return list;
-	}
-
-	public void save() {
-		try {
-			config.save(file);
-		} catch (IOException e) {
-			e.printStackTrace();
+		ItemMeta meta = itemStack.getItemMeta();
+		if (displayName.equals("Info")) {
+			meta.setDisplayName("Info");
+			list.add(ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "sell specified amount");
+			list.add(ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "sell all");
+			list.add(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "buy");
+		} else if (displayName.equals("Stock")) {
+			list.add(ChatColor.RED + "Only for Shopowner");
+			list.add(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile");
+		} else if (sellPrice == 0.0) {
+			list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + "$");
+		} else if (buyPrice == 0.0) {
+			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + "$");
+		} else {
+			list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + "$");
+			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + "$");
 		}
+		meta.setLore(list);
+		itemStack.setItemMeta(meta);
+		itemStack.setAmount(amount);
+		inventory.setItem(slot, itemStack);
 	}
-
-	public void openInv(Player p) {
-		p.openInventory(inventory);
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void despawnVillager() {
-		villager.remove();
-	}
-
-	public void deleteShop() {
-		file.delete();
-		World world = villager.getLocation().getWorld();
-		villager.remove();
-		world.save();
-	}
-
-	public int getSize() {
-		return size;
-	}
-
-	public ItemStack getItem(int slot) {
-		slot--;
-		return inventory.getItem(slot);
-	}
-
-	public int getSlotEditorSlot() {
-		return slotEditorSlot;
-	}
-
-	private void setupEditor() {
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////// editor methods
+	
+	/**
+	 * --Editor Method-- 
+	 * <p>
+	 * Opens the editor GUI with occupied and free slots
+	 * The 2 last slots are not used. If you need more then 2 slots for
+	 * other usage, then override this method.
+	 * 
+	 * @param player
+	 */
+	public void openEditor(Player player) {
+		// value = slots for other usage - 1
 		int value = 1;
-		if (isPlayershop) {
-			value++;
-		}
 		for (int i = 0; i < (size - value); i++) {
 			try {
 				if (slotIsEmpty(i + 1)) {
@@ -828,35 +984,19 @@ public abstract class Shop {
 			} catch (ShopSystemException e) {
 			}
 		}
-	}
-
-	public void openEditor(Player p) {
-		setupEditor();
-		p.openInventory(editor);
-	}
-
-	private void switchPlusMinus(int slot, String state) {
-		slot--;
-		if (state.equals("plus")) {
-			ItemStack item = getSkull(MINUS, "minus");
-			slotEditor.setItem(slot, item);
-		} else {
-			ItemStack item = getSkull(PLUS, "plus");
-			slotEditor.setItem(slot, item);
-		}
+		player.openInventory(editor);
 	}
 	
-	private void switchFactor(int slot, String state) {
-		slot--;
-		if (state.equals("factor off")) {
-			ItemStack item = getSkull(K_OFF, "factor off");
-			slotEditor.setItem(slot, item);
-		} else {
-			ItemStack item = getSkull(K_ON, "factor on");
-			slotEditor.setItem(slot, item);
-		}
-	}
-
+	/**
+	 * --Editor Method-- 
+	 * <p>
+	 * Opens the slot editor GUI.
+	 * 
+	 * @param player
+	 * @param slot
+	 * @throws IllegalArgumentException
+	 * @throws ShopSystemException
+	 */
 	public void openSlotEditor(Player player, int slot) throws IllegalArgumentException, ShopSystemException {
 		setupSlotEditor(slot);
 		ItemStack item;
@@ -887,123 +1027,13 @@ public abstract class Shop {
 		}
 		player.openInventory(slotEditor);
 	}
-
-	private void updateEditorPrice(int a, int b, int c, int d, int e, Double price) {
-		List<String> list = new ArrayList<>();
-		list.add(ChatColor.GOLD + "Price: " + price);
-		ItemMeta meta = slotEditor.getItem(a).getItemMeta();
-		meta.setLore(list);
-		slotEditor.getItem(a).setItemMeta(meta);
-		meta = slotEditor.getItem(b).getItemMeta();
-		meta.setLore(list);
-		slotEditor.getItem(b).setItemMeta(meta);
-		meta = slotEditor.getItem(c).getItemMeta();
-		meta.setLore(list);
-		slotEditor.getItem(c).setItemMeta(meta);
-		meta = slotEditor.getItem(d).getItemMeta();
-		meta.setLore(list);
-		slotEditor.getItem(d).setItemMeta(meta);
-		meta = slotEditor.getItem(e).getItemMeta();
-		meta.setLore(list);
-		slotEditor.getItem(e).setItemMeta(meta);
-	}
-
-	private String getShopItemName(ItemStack itemStack) {
-		String name = "";
-		ItemMeta meta = itemStack.getItemMeta();
-		String material = itemStack.getType().name();
-		ArrayList<String> enchantmentList = new ArrayList<>();
-		if (hasCustomName(itemStack) && !material.equals("SPAWNER")) {
-			name = meta.getDisplayName() + "|";
-		}
-		switch (getItemType(itemStack)) {
-			case "potion":
-				String property = "none";
-				PotionMeta potionMeta = (PotionMeta) meta;
-				if (potionMeta.getBasePotionData().isExtended()) {
-					property = "extended";
-				} else if (potionMeta.getBasePotionData().isUpgraded()) {
-					property = "upgraded";
-				} else {
-					property = "none";
-				}
-				name = name + itemStack.getType().toString().toLowerCase() + ":"
-						+ potionMeta.getBasePotionData().getType().toString().toLowerCase() + "#" + property;
-				break;
-			case "enchanted":
-				Map<Enchantment, Integer> enchants = null;
-				if (itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
-					EnchantmentStorageMeta enchantMeta = (EnchantmentStorageMeta) meta;
-					enchants = enchantMeta.getStoredEnchants();
-				} else {
-					enchants = meta.getEnchants();
-				}
-				for (Entry<Enchantment, Integer> e : enchants.entrySet()) {
-					enchantmentList.add(e.getKey().getKey().getKey().toLowerCase() + "-" + e.getValue());
-				}
-				enchantmentList.sort(String.CASE_INSENSITIVE_ORDER);
-				name = name + itemStack.getType().toString().toLowerCase() + "#Enchanted_" + enchantmentList.toString();
-				break;
-			case "default":
-				name = name + material;
-				break;
-		}
-		return name;
-	}
-
-	private String getItemType(ItemStack itemStack) {
-		String type = null;
-		EnchantmentStorageMeta meta = null;
-		if (itemStack.getType() == Material.ENCHANTED_BOOK) {
-			meta = (EnchantmentStorageMeta) itemStack.getItemMeta();
-		}
-		if (itemStack.getType().toString().toLowerCase().contains("potion")) {
-			type = "potion";
-		} else if (itemStack.hasItemMeta() && !itemStack.getEnchantments().isEmpty()
-				|| meta != null && !meta.getStoredEnchants().isEmpty()) {
-			type = "enchanted";
-		} else {
-			type = "default";
-		}
-		return type;
-	}
-
+	
 	/**
-	 * This method moves a shop to a new location.
-	 * 
-	 * @param location
-	 * @throws TownSystemException 
-	 * @Param player (only playershop)
-	 */
-	public void moveShop(Location location, String player) throws TownSystemException {
-		if(isPlayershop && TownWorld.isTownWorld(location.getWorld().getName())) {
-			TownWorld townWorld = null;
-			try {
-				townWorld = TownWorld.getTownWorldByName(location.getWorld().getName());
-			} catch (TownSystemException e) {
-				//should never happen
-			}
-				if(townWorld.chunkIsFree(location.getChunk())) {
-					throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
-				} else {
-					Town town = townWorld.getTownByChunk(location.getChunk());
-					if(!town.hasBuildPermissions(player, location.getChunk().getX() + "/" + location.getChunk().getZ())) {
-						throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
-					}
-				}
-			
-		}
-		config = YamlConfiguration.loadConfiguration(file);
-		config.set("ShopLocation.x", location.getBlockX());
-		config.set("ShopLocation.y", location.getBlockY());
-		config.set("ShopLocation.z", location.getBlockZ());
-		config.set("ShopLocation.World", location.getWorld().getName());
-		villager.teleport(location);
-		save();
-	}
-
-	/**
-	 * This method handles the SlotEditor in the InventoryClickEvent.
+	 * --Editor Method-- 
+	 * <p>
+	 * Not for commercial use.
+	 * <p>
+	 * This method handles the SlotEditor for the InventoryClickEvent.
 	 * 
 	 * @param event
 	 * @throws ShopSystemException
@@ -1144,11 +1174,13 @@ public abstract class Shop {
 						.valueOf(event.getInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
 				if (buyPrice != 0 || sellPrice != 0) {
 					ItemStack itemStack = event.getInventory().getItem(0);
-					Boolean isNew = true;
-					Boolean existsInOtherSlot = false;
+					String originalStackString = "";
+					// make a copy of the edited/created item
+					ItemStack newItemStackCopy = new ItemStack(itemStack);
 					if (originStack != null) {
-						if (originStack.getItemMeta().getLore() != null) {
-							List<String> loreList = originStack.getItemMeta().getLore();
+						ItemStack originalItemStackCopy = new ItemStack(originStack);
+						if (originalItemStackCopy.getItemMeta().getLore() != null) {
+							List<String> loreList = originalItemStackCopy.getItemMeta().getLore();
 							Iterator<String> iterator = loreList.iterator();
 							while (iterator.hasNext()) {
 								String lore = iterator.next();
@@ -1156,44 +1188,51 @@ public abstract class Shop {
 									iterator.remove();
 								}
 							}
-							ItemMeta meta2 = originStack.getItemMeta();
+							ItemMeta meta2 = originalItemStackCopy.getItemMeta();
 							meta2.setLore(loreList);
-							originStack.setItemMeta(meta2);
+							originalItemStackCopy.setItemMeta(meta2);
 						}
-						Integer amount = itemStack.getAmount();
-						itemStack.setAmount(originStack.getAmount());
-						if (!itemStack.toString().equals(originStack.toString())) {
-							for (String itemName : itemNames) {
-								if (itemName.equals(getShopItemName(itemStack))) {
-									existsInOtherSlot = true;
-									player.sendMessage(ChatColor.RED + "This item exists in a other slot!");
-								}
-							}
-							if (!existsInOtherSlot) {
-								removeItem(slotEditorSlot - 1);
-								player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN
-										+ originStack.getType().toString().toLowerCase() + ChatColor.GOLD
-										+ " was removed from shop.");
-							}
-						} else {
-							isNew = false;
-							editItem(slotEditorSlot, String.valueOf(amount), String.valueOf(sellPrice),
-									String.valueOf(buyPrice));
-						}
+						originalStackString = originalItemStackCopy.toString();
+						newItemStackCopy.setAmount(originStack.getAmount());
 					}
-					if (isNew && !existsInOtherSlot) {
-						addItem(slotEditorSlot - 1, sellPrice, buyPrice, itemStack);
-						player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN
-								+ itemStack.getType().toString().toLowerCase() + ChatColor.GOLD
-								+ " was added to the shop.");
+					// if the item changed
+					if (!newItemStackCopy.toString().equals(originalStackString)) {
+						newItemStackCopy.setAmount(1);
+						// check, if this item already exists in a other slot
+						if(itemNames.contains(newItemStackCopy.toString())) {
+							player.sendMessage(ChatColor.RED + ShopSystemException.ITEM_ALREADY_EXISTS);
+						} 
+						else {
+							// the old item in the selected slot gets deleted
+							if(originStack != null) {
+								removeShopItem(slotEditorSlot - 1);
+								player.sendMessage(
+										ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_removeItem1") + " "
+										+ ChatColor.GREEN + originStack.getType().toString().toLowerCase() + ChatColor.GOLD + " "
+										+ Ultimate_Economy.messages.getString("shop_removeItem2"));
+							}
+							addShopItem(slotEditorSlot - 1, sellPrice, buyPrice, itemStack);
+							player.sendMessage(
+									ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_addItem1") + " "
+											+ ChatColor.GREEN + itemStack.getType().toString().toLowerCase()
+											+ ChatColor.GOLD + " "
+											+ Ultimate_Economy.messages.getString("shop_addItem2"));
+						}
+					} 
+					// if the item doesn't changed
+					else {
+						player.sendMessage(editShopItem(slotEditorSlot, String.valueOf(itemStack.getAmount()), String.valueOf(sellPrice),
+								String.valueOf(buyPrice)));
 					}
 				} else {
 					player.sendMessage(ChatColor.RED + "The sellprice and the buyprice are both 0!");
 				}
 			} else if (command.equals(ChatColor.RED + "remove item")) {
-				removeItem(slotEditorSlot - 1);
-				player.sendMessage(ChatColor.GOLD + "The item " + ChatColor.GREEN
-						+ originStack.getType().toString().toLowerCase() + ChatColor.GOLD + " was removed from shop.");
+				removeShopItem(slotEditorSlot - 1);
+				player.sendMessage(
+						ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_removeItem1") + " "
+						+ ChatColor.GREEN + originStack.getType().toString().toLowerCase() + ChatColor.GOLD + " "
+						+ Ultimate_Economy.messages.getString("shop_removeItem2"));
 			} else if (!command.equals("buyprice") && !command.equals("sellprice")) {
 				ItemStack editorItemStack2 = new ItemStack(event.getCurrentItem());
 				editorItemStack2.setAmount(1);
@@ -1201,50 +1240,228 @@ public abstract class Shop {
 			}
 		}
 	}
-
-	/**
-	 * This method adds a shopitem to the shop inventory. Not for commercial use.
-	 * 
-	 * @param itemStack
-	 * @param amount
-	 * @param slot
-	 * @param sellPrice
-	 * @param buyPrice
-	 */
-	public void addShopItemToInv(ItemStack itemStack, int amount, int slot, double sellPrice, double buyPrice) {
-		String displayName = itemStack.getItemMeta().getDisplayName();
-		List<String> list = null;
-		if (itemStack.getItemMeta().getLore() != null) {
-			list = itemStack.getItemMeta().getLore();
+	
+	private void switchPlusMinus(int slot, String state) {
+		slot--;
+		if (state.equals("plus")) {
+			ItemStack item = getSkull(MINUS, "minus");
+			slotEditor.setItem(slot, item);
 		} else {
-			list = new ArrayList<>();
+			ItemStack item = getSkull(PLUS, "plus");
+			slotEditor.setItem(slot, item);
 		}
-		ItemMeta meta = itemStack.getItemMeta();
-		if (displayName.equals("Info")) {
-			meta.setDisplayName("Info");
-			list.add(ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "sell specified amount");
-			list.add(ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "sell all");
-			list.add(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "buy");
-		} else if (displayName.equals("Stock")) {
-			list.add(ChatColor.RED + "Only for Shopowner");
-			list.add(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile");
-		} else if (sellPrice == 0.0) {
-			list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + "$");
-		} else if (buyPrice == 0.0) {
-			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + "$");
+	}
+	
+	private void switchFactor(int slot, String state) {
+		slot--;
+		if (state.equals("factor off")) {
+			ItemStack item = getSkull(K_OFF, "factor off");
+			slotEditor.setItem(slot, item);
 		} else {
-			list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + "$");
-			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + "$");
+			ItemStack item = getSkull(K_ON, "factor on");
+			slotEditor.setItem(slot, item);
 		}
+	}
+	
+	private void updateEditorPrice(int a, int b, int c, int d, int e, Double price) {
+		List<String> list = new ArrayList<>();
+		list.add(ChatColor.GOLD + "Price: " + price);
+		ItemMeta meta = slotEditor.getItem(a).getItemMeta();
 		meta.setLore(list);
-		itemStack.setItemMeta(meta);
-		itemStack.setAmount(amount);
-		inventory.setItem(slot, itemStack);
+		slotEditor.getItem(a).setItemMeta(meta);
+		meta = slotEditor.getItem(b).getItemMeta();
+		meta.setLore(list);
+		slotEditor.getItem(b).setItemMeta(meta);
+		meta = slotEditor.getItem(c).getItemMeta();
+		meta.setLore(list);
+		slotEditor.getItem(c).setItemMeta(meta);
+		meta = slotEditor.getItem(d).getItemMeta();
+		meta.setLore(list);
+		slotEditor.getItem(d).setItemMeta(meta);
+		meta = slotEditor.getItem(e).getItemMeta();
+		meta.setLore(list);
+		slotEditor.getItem(e).setItemMeta(meta);
 	}
 
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////shop methods
+	
+	/**
+	 * --Shop Method--
+	 * <p>
+	 * This method deletes this shop.
+	 * 
+	 */
+	public void deleteShop() {
+		file.delete();
+		World world = villager.getLocation().getWorld();
+		villager.remove();
+		world.save();
+	}
+	
+	/**
+	 * --Shop Method--
+	 * <p>
+	 * This method reloads all shopitems.
+	 * 
+	 * @throws ShopSystemException
+	 */
 	public void reload() throws ShopSystemException {
 		for (String item : itemNames) {
-			loadItem(item);
+			loadShopItem(item);
 		}
 	}
+	
+	/**
+	 * --Shop Method--
+	 * <p>
+	 * Despawns the shop villager.
+	 */
+	public void despawnVillager() {
+		villager.remove();
+	}
+	
+	/**
+	 * --Shop Method--
+	 * <p>
+	 * Opens the shop inventory.
+	 * 
+	 * @param p
+	 */
+	public void openInv(Player p) {
+		p.openInventory(inventory);
+	}
+	
+	/**
+	 * --Shop Method--
+	 * <p>
+	 * This method moves a shop to a new location.
+	 * 
+	 * @param location
+	 * @throws TownSystemException 
+	 */
+	public void moveShop(Location location) throws TownSystemException {
+		saveLocationToFile(location);
+		villager.teleport(location);
+	};
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////utils methods
+	
+	/**
+	 * --Utils Method--
+	 * <p>
+	 * This method returns true if the slot is empty.
+	 * 
+	 * @param slot
+	 * @return boolean
+	 * @throws ShopSystemException
+	 */
+	protected boolean slotIsEmpty(int slot) throws ShopSystemException {
+		if (slot <= inventory.getSize() && slot > 0) {
+			slot--;
+			boolean isEmpty = false;
+			if (inventory.getItem(slot) == null) {
+				isEmpty = true;
+			}
+			return isEmpty;
+		} else {
+			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_INVALID);
+		}
+	}
+	
+	/**
+	 * --Utils Method--
+	 * <p>
+	 * This Method adds a list of enchantments to a given itemstack and returns a list
+	 * of all valid used enchantments.
+	 * 
+	 * @param itemStack
+	 * @param enchantmentList
+	 * @return
+	 */
+	public static ArrayList<String> addEnchantments(ItemStack itemStack, ArrayList<String> enchantmentList) {
+		Enchantment e = null;
+		int lvl = 0;
+		ArrayList<String> newList = new ArrayList<>();
+		for (String enchantment : enchantmentList) {
+			e = Enchantment.getByKey(NamespacedKey.minecraft(enchantment.substring(0, enchantment.indexOf("-"))));
+			lvl = Integer.valueOf(enchantment.substring(enchantment.indexOf("-") + 1));
+			if (e.getMaxLevel() < lvl) {
+				lvl = e.getMaxLevel();
+				enchantment = enchantment.substring(0, enchantment.indexOf("-") + 1) + String.valueOf(lvl);
+			}
+			if (itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
+				EnchantmentStorageMeta meta = (EnchantmentStorageMeta) itemStack.getItemMeta();
+				meta.addStoredEnchant(e, lvl, true);
+				itemStack.setItemMeta(meta);
+			} else if (e.canEnchantItem(itemStack)) {
+				itemStack.addEnchantment(e, lvl);
+			}
+		}
+		if (itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
+			EnchantmentStorageMeta meta = (EnchantmentStorageMeta) itemStack.getItemMeta();
+			for (Entry<Enchantment, Integer> map : meta.getStoredEnchants().entrySet()) {
+				newList.add(
+						map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1)
+								+ "-" + map.getValue().intValue());
+				newList.sort(String.CASE_INSENSITIVE_ORDER);
+			}
+		} else {
+			for (Entry<Enchantment, Integer> map : itemStack.getEnchantments().entrySet()) {
+				newList.add(
+						map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1)
+								+ "-" + map.getValue().intValue());
+				newList.sort(String.CASE_INSENSITIVE_ORDER);
+			}
+		}
+		return newList;
+	}
+	
+	/**
+	 * --Utils Method--
+	 * <p>
+	 * Returns a custom playerhead
+	 * 
+	 * @param url
+	 * @param name
+	 * @return
+	 */
+	protected ItemStack getSkull(String url, String name) {
+		ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
+		if (url.isEmpty())
+			return head;
+		SkullMeta headMeta = (SkullMeta) head.getItemMeta();
+		GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+		byte[] encodedData = Base64.getEncoder()
+				.encode((String.format("{textures:{SKIN:{url:\"%s\"}}}", url).getBytes()));
+		profile.getProperties().put("textures", new Property("textures", new String(encodedData)));
+		Field profileField = null;
+		try {
+			profileField = headMeta.getClass().getDeclaredField("profile");
+			profileField.setAccessible(true);
+			profileField.set(headMeta, profile);
+		} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e1) {
+			e1.printStackTrace();
+		}
+		headMeta.setDisplayName(name);
+		head.setItemMeta(headMeta);
+		return head;
+	}
+	
+	/**
+	 * --Utils Method--
+	 * <p>
+	 * Removes double objects from a list.
+	 * 
+	 * @param list
+	 * @return
+	 */
+	protected List<String> removedoubleObjects(List<String> list) {
+		Set<String> set = new LinkedHashSet<String>(list);
+		list = new ArrayList<String>(set);
+		return list;
+	}
+
 }

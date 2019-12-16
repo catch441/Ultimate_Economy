@@ -1,12 +1,12 @@
 name: Ultimate_Economy
 main: ultimate_economy.Ultimate_Economy
 author: catch441
-version: 1.2.2
+version: 1.2.3
 
 api-version: 1.14
 
 softdepend: [Multiverse-Core,Vault]
-loadbefore: [Quests,GriefPrevention,ChestCommands,WorldEdit,Essentials,PlotSquared]
+loadbefore: [Quests,GriefPrevention,ChestCommands,WorldEdit,Essentials,PlotSquared,MysqlEconomyBank,RepairGui,CommandSigns,DragonSlayer]
 
 permissions:
 
@@ -37,6 +37,14 @@ permissions:
   ultimate_economy.playershop:
     description: 
     default: true
+    
+  ultimate_economy.rentshop.player:
+    description: 
+    default: true
+    
+  ultimate_economy.rentshop.admin:
+    description: 
+    default: op
 
   ultimate_economy.jobcenter:
     description: 
@@ -94,6 +102,11 @@ commands:
     permission: ultimate_economy.config
     permission-message: You don't have the permission.
     description: Set max homes.
+    
+  maxRentedDays:   
+    permission: ultimate_economy.config
+    permission-message: You don't have the permission.
+    description: Set max rented days.
     
   maxjobs:   
     permission: ultimate_economy.config
@@ -179,6 +192,11 @@ commands:
     permission: ultimate_economy.playershop
     permission-message: You don't have the permission.
     description: Manage playershops.
+    
+  rentshop:   
+    permission: ultimate_economy.rentshop.player
+    permission-message: You don't have the permission.
+    description: Manage rentshops.
     
   money:   
     permission: ultimate_economy.info.money

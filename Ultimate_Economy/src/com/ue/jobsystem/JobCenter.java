@@ -23,12 +23,16 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.player.EconomyPlayer;
+
+import ultimate_economy.UEVillagerType;
+import ultimate_economy.Ultimate_Economy;
 
 public class JobCenter {
 
@@ -56,7 +60,6 @@ public class JobCenter {
 			throws JobSystemException {
 		jobnames = new ArrayList<>();
 		this.name = name;
-		inventory = Bukkit.createInventory(null, size, name);
 		file = new File(dataFolder, name + "-JobCenter.yml");
 		try {
 			file.createNewFile();
@@ -74,6 +77,7 @@ public class JobCenter {
 		config.set("ShopLocation.World", location.getWorld().getName());
 		save();
 		setupVillager();
+		inventory = Bukkit.createInventory(villager, size, name);
 		setupJobCenter();
 	}
 
@@ -90,6 +94,11 @@ public class JobCenter {
 		file = new File(dataFolder, name + "-JobCenter.yml");
 		config = YamlConfiguration.loadConfiguration(file);
 		jobnames = config.getStringList("Jobnames");
+		name = config.getString("JobCenterName");
+		location = new Location(server.getWorld(config.getString("ShopLocation.World")),
+				config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
+				config.getDouble("ShopLocation.z"));
+		setupVillager();
 		inventory = Bukkit.createInventory(villager, config.getInt("JobCenterSize"), name);
 		for (String string : jobnames) {
 			ItemStack jobItem = new ItemStack(Material.valueOf(config.getString("Jobs." + string + ".ItemMaterial")));
@@ -99,11 +108,6 @@ public class JobCenter {
 			jobItem.setItemMeta(meta);
 			inventory.setItem(config.getInt("Jobs." + string + ".ItemSlot") - 1, jobItem);
 		}
-		name = config.getString("JobCenterName");
-		location = new Location(server.getWorld(config.getString("ShopLocation.World")),
-				config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
-				config.getDouble("ShopLocation.z"));
-		setupVillager();
 		setupJobCenter();
 	}
 
@@ -117,6 +121,7 @@ public class JobCenter {
 		}
 		villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
 		villager.setCustomName(name);
+		villager.setMetadata("ue-type", new FixedMetadataValue(Ultimate_Economy.getInstance, UEVillagerType.JOBCENTER));
 		villager.setCustomNameVisible(true);
 		villager.setProfession(Villager.Profession.NITWIT);
 		villager.setSilent(true);
@@ -209,16 +214,14 @@ public class JobCenter {
 	/**
 	 * This method moves a jobcenter villager to a other location.
 	 * 
-	 * @param x
-	 * @param y
-	 * @param z
+	 * @param location
 	 */
-	public void moveShop(double x, double y, double z) {
+	public void moveJobCenter(Location location) {
 		config = YamlConfiguration.loadConfiguration(file);
-		config.set("ShopLocation.x", x);
-		config.set("ShopLocation.y", y);
-		config.set("ShopLocation.z", z);
-		villager.teleport(new Location(Bukkit.getWorld(config.getString("ShopLocation.World")), x, y, z));
+		config.set("ShopLocation.x", location.getX());
+		config.set("ShopLocation.y", location.getY());
+		config.set("ShopLocation.z", location.getZ());
+		villager.teleport(new Location(Bukkit.getWorld(config.getString("ShopLocation.World")), location.getX(), location.getY(), location.getZ()));
 		save();
 	}
 

@@ -1,4 +1,4 @@
-package com.ue.shopsystem;
+package com.ue.shopsystem.adminshop;
 
 import java.util.ArrayList;
 
@@ -18,6 +18,7 @@ import org.bukkit.potion.PotionType;
 
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.shopsystem.Shop;
 
 import ultimate_economy.Ultimate_Economy;
 
@@ -46,7 +47,7 @@ public class AdminShopCommandExecutor implements CommandExecutor {
 											ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_create1") + " "
 													+ ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
 													+ Ultimate_Economy.messages.getString("shop_create2"));
-									plugin.getConfig().set("ShopNames", AdminShop.getAdminShopNameList());
+									plugin.getConfig().set("AdminShopIds", AdminShop.getAdminshopIdList());
 									plugin.saveConfig();
 								} else {
 									player.sendMessage("/adminshop create <shopname> <size (9,18,27...)>");
@@ -60,7 +61,7 @@ public class AdminShopCommandExecutor implements CommandExecutor {
 											ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_delete1") + " "
 													+ ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
 													+ Ultimate_Economy.messages.getString("shop_delete2"));
-									plugin.getConfig().set("ShopNames", AdminShop.getAdminShopNameList());
+									plugin.getConfig().set("AdminShopIds", AdminShop.getAdminshopIdList());
 									plugin.saveConfig();
 								} else {
 									player.sendMessage("/adminshop delete <shopname>");
@@ -69,10 +70,7 @@ public class AdminShopCommandExecutor implements CommandExecutor {
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							case "rename":
 								if (args.length == 3) {
-									AdminShop.getAdminShopByName(args[1]).renameShop(plugin.getDataFolder(), args[2],
-											null);
-									plugin.getConfig().set("PlayerShopNames", PlayerShop.getPlayerShopNameList());
-									plugin.saveConfig();
+									AdminShop.getAdminShopByName(args[1]).changeShopName(args[2]);
 									player.sendMessage(
 											ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_rename1") + " "
 													+ ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
@@ -85,7 +83,7 @@ public class AdminShopCommandExecutor implements CommandExecutor {
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							case "resize":
 								if (args.length == 3) {
-									AdminShop.getAdminShopByName(args[1]).resize(Integer.valueOf(args[2]));
+									AdminShop.getAdminShopByName(args[1]).changeShopSize(Integer.valueOf(args[2]));
 									player.sendMessage(
 											ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_resize") + " "
 													+ ChatColor.GREEN + args[2] + ChatColor.GOLD + ".");
@@ -96,7 +94,7 @@ public class AdminShopCommandExecutor implements CommandExecutor {
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							case "move":
 								if (args.length == 2) {
-									AdminShop.getAdminShopByName(args[1]).moveShop(player.getLocation(),null);
+									AdminShop.getAdminShopByName(args[1]).moveShop(player.getLocation());
 								} else {
 									player.sendMessage("/adminshop move <shopname>");
 								}
@@ -133,7 +131,7 @@ public class AdminShopCommandExecutor implements CommandExecutor {
 									} else {
 										ItemStack itemStack = new ItemStack(Material.getMaterial(args[2].toUpperCase()),
 												Integer.valueOf(args[4]));
-										AdminShop.getAdminShopByName(args[1]).addItem(Integer.valueOf(args[3]) - 1,
+										AdminShop.getAdminShopByName(args[1]).addShopItem(Integer.valueOf(args[3]) - 1,
 												Double.valueOf(args[5]), Double.valueOf(args[6]), itemStack);
 										player.sendMessage(
 												ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_addItem1")
@@ -153,7 +151,7 @@ public class AdminShopCommandExecutor implements CommandExecutor {
 									AdminShop shop = AdminShop.getAdminShopByName(args[1]);
 									String itemName = shop.getItem(Integer.valueOf(args[2])).getType().toString()
 											.toLowerCase();
-									shop.removeItem(Integer.valueOf(args[2]) - 1);
+									shop.removeShopItem(Integer.valueOf(args[2]) - 1);
 									player.sendMessage(
 											ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_removeItem1")
 													+ " " + ChatColor.GREEN + itemName + ChatColor.GOLD + " "
@@ -187,7 +185,7 @@ public class AdminShopCommandExecutor implements CommandExecutor {
 									ItemMeta meta = itemStack.getItemMeta();
 									meta.setDisplayName(args[2].toUpperCase());
 									itemStack.setItemMeta(meta);
-									AdminShop.getAdminShopByName(args[1]).addItem(Integer.valueOf(args[3]) - 1, 0.0,
+									AdminShop.getAdminShopByName(args[1]).addShopItem(Integer.valueOf(args[3]) - 1, 0.0,
 											Double.valueOf(args[4]), itemStack);
 									player.sendMessage(
 											ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_addSpawner1") + " "
@@ -203,7 +201,7 @@ public class AdminShopCommandExecutor implements CommandExecutor {
 									AdminShop shop = AdminShop.getAdminShopByName(args[1]);
 									String itemName = shop.getItem(Integer.valueOf(args[2])).getType().toString()
 											.toLowerCase();
-									shop.removeItem(Integer.valueOf(args[2]) - 1);
+									shop.removeShopItem(Integer.valueOf(args[2]) - 1);
 									player.sendMessage(
 											ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_removeSpawner1")
 													+ " " + ChatColor.GREEN + itemName + ChatColor.GOLD + " "
@@ -216,7 +214,7 @@ public class AdminShopCommandExecutor implements CommandExecutor {
 							case "editItem":
 								if (args.length == 6) {
 									player.sendMessage(AdminShop.getAdminShopByName(args[1])
-											.editItem(Integer.valueOf(args[2]), args[3], args[4], args[5]));
+											.editShopItem(Integer.valueOf(args[2]), args[3], args[4], args[5]));
 								} else {
 									player.sendMessage(
 											"/adminshop editItem <shopname> <slot> <amount> <sellPrice> <buyPrice>");
@@ -242,7 +240,7 @@ public class AdminShopCommandExecutor implements CommandExecutor {
 		return false;
 	}
 
-	static void handleAddPotion(Player p, Shop s, String[] args) throws ShopSystemException {
+	public static void handleAddPotion(Player p, Shop s, String[] args) throws ShopSystemException {
 		if (!args[2].equalsIgnoreCase("potion") && !args[2].equalsIgnoreCase("splash_potion")
 				&& !args[2].equalsIgnoreCase("lingering_potion")) {
 			throw new ShopSystemException(ShopSystemException.INVALID_POTIONTYPE);
@@ -263,14 +261,14 @@ public class AdminShopCommandExecutor implements CommandExecutor {
 			}
 			meta.setBasePotionData(new PotionData(PotionType.valueOf(args[3].toUpperCase()), extended, upgraded));
 			itemStack.setItemMeta(meta);
-			s.addItem(Integer.valueOf(args[5]) - 1, Double.valueOf(args[7]), Double.valueOf(args[8]), itemStack);
+			s.addShopItem(Integer.valueOf(args[5]) - 1, Double.valueOf(args[7]), Double.valueOf(args[8]), itemStack);
 			p.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_addItem1") + " " + ChatColor.GREEN
 					+ itemStack.getType().toString().toLowerCase() + ChatColor.GOLD + " "
 					+ Ultimate_Economy.messages.getString("shop_addItem2"));
 		}
 	}
 
-	static void handleAddEnchantedItem(Player p, String[] args, Shop s) throws ShopSystemException {
+	public static void handleAddEnchantedItem(Player p, String[] args, Shop s) throws ShopSystemException {
 		if (!args[2].toUpperCase().equals("HAND") && Material.matchMaterial(args[2].toUpperCase()) == null) {
 			throw new ShopSystemException(ShopSystemException.INVALID_MATERIAL);
 		} else {
@@ -285,7 +283,7 @@ public class AdminShopCommandExecutor implements CommandExecutor {
 				if (newEnchantmentList.size() < enchantmentList.size()) {
 					p.sendMessage(ChatColor.RED + "Not all enchantments could be used!");
 				}
-				s.addItem(Integer.valueOf(args[3]) - 1, Double.valueOf(args[5]), Double.valueOf(args[6]), iStack);
+				s.addShopItem(Integer.valueOf(args[3]) - 1, Double.valueOf(args[5]), Double.valueOf(args[6]), iStack);
 				p.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_addItem1") + " "
 						+ ChatColor.GREEN + iStack.getType().toString().toLowerCase() + ChatColor.GOLD + " "
 						+ Ultimate_Economy.messages.getString("shop_addItem2"));

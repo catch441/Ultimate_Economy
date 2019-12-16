@@ -1,27 +1,24 @@
-package com.ue.shopsystem;
+package com.ue.shopsystem.playershop;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
-import org.bukkit.inventory.ItemStack;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.player.EconomyPlayer;
 
 import ultimate_economy.Ultimate_Economy;
 
-public class PlayerShopCommandExecuter implements CommandExecutor {
+public class PlayerShopCommandExecutor implements CommandExecutor {
 	
 	private Ultimate_Economy plugin;
 
-	public PlayerShopCommandExecuter(Ultimate_Economy plugin) {
+	public PlayerShopCommandExecutor(Ultimate_Economy plugin) {
 		this.plugin = plugin;
 	}
 
@@ -36,7 +33,7 @@ public class PlayerShopCommandExecuter implements CommandExecutor {
 							if (args.length == 3) {
 								PlayerShop.createPlayerShop(plugin.getDataFolder(), args[1],
 										player.getLocation(), Integer.valueOf(args[2]), player.getName());
-								plugin.getConfig().set("PlayerShopNames", PlayerShop.getPlayerShopNameList());
+								plugin.getConfig().set("PlayerShopIds", PlayerShop.getPlayershopIdList());
 								plugin.saveConfig();
 								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_create1")
 										+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
@@ -49,7 +46,7 @@ public class PlayerShopCommandExecuter implements CommandExecutor {
 						else if (args[0].equals("delete")) {
 							if (args.length == 2) {
 								PlayerShop.deletePlayerShop(args[1] + "_" + player.getName());
-								plugin.getConfig().set("PlayerShopNames", PlayerShop.getPlayerShopNameList());
+								plugin.getConfig().set("PlayerShopIds", PlayerShop.getPlayershopIdList());
 								plugin.saveConfig();
 								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_delete1")
 										+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
@@ -62,7 +59,7 @@ public class PlayerShopCommandExecuter implements CommandExecutor {
 						else if (player.hasPermission("ultimate_economy.adminshop") && args[0].equals("deleteOther")) {
 							if (args.length == 2) {
 								PlayerShop.deletePlayerShop(args[1]);
-								plugin.getConfig().set("PlayerShopNames", PlayerShop.getPlayerShopNameList());
+								plugin.getConfig().set("PlayerShopIds", PlayerShop.getPlayerShopUniqueNameList());
 								plugin.saveConfig();
 								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_delete1")
 								+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
@@ -74,9 +71,7 @@ public class PlayerShopCommandExecuter implements CommandExecutor {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("rename")) {
 							if (args.length == 3) {
-								PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName()).renameShop(plugin.getDataFolder(), args[2], player.getName());
-								plugin.getConfig().set("PlayerShopNames", PlayerShop.getPlayerShopNameList());
-								plugin.saveConfig();
+								PlayerShop.getPlayerShopByUniqueName(args[1] + "_" + player.getName()).changeShopName(args[2]);
 								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_rename1")
 										+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
 										+ Ultimate_Economy.messages.getString("shop_rename2") + " " + ChatColor.GREEN
@@ -88,7 +83,7 @@ public class PlayerShopCommandExecuter implements CommandExecutor {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("resize")) {
 							if (args.length == 3) {
-								PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName()).resize(Integer.valueOf(args[2]));
+								PlayerShop.getPlayerShopByUniqueName(args[1] + "_" + player.getName()).changeShopSize(Integer.valueOf(args[2]));
 								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_resize")
 								+ " " + ChatColor.GREEN + args[2] + ChatColor.GOLD + ".");
 							} else {
@@ -98,7 +93,7 @@ public class PlayerShopCommandExecuter implements CommandExecutor {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("move")) {
 							if (args.length == 2) {
-								PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName()).moveShop(player.getLocation(),player.getName());
+								PlayerShop.getPlayerShopByUniqueName(args[1] + "_" + player.getName()).moveShop(player.getLocation());
 							} else {
 								player.sendMessage("/playershop move <shopname>");
 							}
@@ -106,16 +101,7 @@ public class PlayerShopCommandExecuter implements CommandExecutor {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("changeOwner")) {
 							if (args.length == 3) {
-								if (EconomyPlayer.getEconomyPlayerNameList().contains(args[1] + "_" + args[2])) {
-									player.sendMessage(
-											ChatColor.RED + Ultimate_Economy.messages.getString("shop_changeOwner1")
-													+ " " + ChatColor.GREEN + args[2] + ChatColor.RED + " "
-													+ Ultimate_Economy.messages.getString("shop_changeOwner2"));
-								} else {
-									PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName()).setOwner(args[2],
-											plugin.getDataFolder());
-									plugin.getConfig().set("PlayerShopNames", PlayerShop.getPlayerShopNameList());
-									plugin.saveConfig();
+									PlayerShop.getPlayerShopByUniqueName(args[1] + "_" + player.getName()).changeOwner(args[2]);
 									player.sendMessage(
 											ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_changeOwner3")
 													+ " " + ChatColor.GREEN + args[2] + ChatColor.GOLD + ".");
@@ -129,7 +115,6 @@ public class PlayerShopCommandExecuter implements CommandExecutor {
 											break;
 										}
 									}
-								}
 							} else {
 								player.sendMessage("/playershop changeOwner <shopname> <new owner>");
 							}
@@ -138,7 +123,7 @@ public class PlayerShopCommandExecuter implements CommandExecutor {
 						else if (args[0].equals("changeProfession")) {
 							if (args.length == 3) {
 								try {
-									PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName())
+									PlayerShop.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
 									.changeProfession(Profession.valueOf(args[2].toUpperCase()));
 									player.sendMessage(
 											ChatColor.GOLD + Ultimate_Economy.messages.getString("profession_changed"));
@@ -147,95 +132,25 @@ public class PlayerShopCommandExecuter implements CommandExecutor {
 											ChatColor.RED + Ultimate_Economy.messages.getString("invalid_profession"));
 								}
 							} else {
-								player.sendMessage("/adminshop changeProfession <shopname> <profession>");
+								player.sendMessage("/playershop changeProfession <shopname> <profession>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("editShop")) {
 							if (args.length == 2) {
-								PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName()).openEditor(player);
+								PlayerShop.getPlayerShopByUniqueName(args[1] + "_" + player.getName()).openEditor(player);
 							} else {
-								player.sendMessage("/player editShop <shopname>");
-							}
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("addItem")) {
-							if (args.length == 7) {
-								if (!args[2].toUpperCase().equals("HAND")
-										&& Material.matchMaterial(args[2].toUpperCase()) == null) {
-									throw new ShopSystemException(ShopSystemException.INVALID_MATERIAL);
-								} else {
-									ItemStack itemStack = new ItemStack(Material.getMaterial(args[2].toUpperCase()),
-											Integer.valueOf(args[4]));
-									PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName()).addItem(
-											Integer.valueOf(args[3]) - 1, Double.valueOf(args[5]),
-											Double.valueOf(args[6]), itemStack);
-									player.sendMessage(
-											ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_addItem1") + " "
-													+ ChatColor.GREEN + itemStack.getType().toString().toLowerCase()
-													+ ChatColor.GOLD + " "
-													+ Ultimate_Economy.messages.getString("shop_addItem2"));
-								}
-							} else {
-								player.sendMessage(
-										"/playershop addItem <shopname> <material> <slot> <amount> <sellPrice> <buyPrice>");
-								player.sendMessage(Ultimate_Economy.messages.getString("shop_addItem_errorinfo"));
-							}
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("addPotion")) {
-							if (args.length == 9) {
-								PlayerShop shop = PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName());
-								AdminShopCommandExecutor.handleAddPotion(player, shop, args);
-							} else {
-								player.sendMessage(
-										"/playershop addPotion <shopname> <potionType> <potionEffect> <extended/upgraded/none> <slot> <amount> <sellprice> <buyprice>");
-							}
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("addEnchantedItem")) {
-							if (args.length >= 9) {
-								PlayerShop shop = PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName());
-								AdminShopCommandExecutor.handleAddEnchantedItem(player, args, shop);
-							} else {
-								player.sendMessage(
-										"/playershop addEnchantedItem <shopname> <material> <slot> <amount> <sellPrice> <buyPrice> [<enchantment> <lvl>]");
-							}
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("removeItem")) {
-							if (args.length == 3) {
-								PlayerShop shop = PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName());
-								String itemName = shop.getItem(Integer.valueOf(args[2])).getType().toString()
-										.toLowerCase();
-								shop.removeItem(Integer.valueOf(args[2]) - 1);
-								player.sendMessage(
-										ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_removeItem1") + " "
-												+ ChatColor.GREEN + itemName + ChatColor.GOLD + " "
-												+ Ultimate_Economy.messages.getString("shop_removeItem2"));
-							} else {
-								player.sendMessage("/playershop removeItem <shopname> <slot (> 0)>");
-							}
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("editItem")) {
-							if (args.length == 6) {
-								PlayerShop shop = PlayerShop.getPlayerShopByName(args[1] + "_" + player.getName());
-								player.sendMessage(shop.editItem(Integer.valueOf(args[2]), args[3], args[4], args[5]));
-							} else {
-								player.sendMessage(
-										"/playershop editItem <shopname> <slot> <amount> <sellPrice> <buyPrice>");
-								player.sendMessage(Ultimate_Economy.messages.getString("shop_editItem_errorinfo"));
+								player.sendMessage("/playershop editShop <shopname>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else {
 							player.sendMessage(
-									"/playershop <create/delete/move/rename/resize/editShop/addItem/addEnchantedItem/addPotion/removeItem/editItem>");
+									"/playershop <create/delete/move/rename/resize/editShop>");
 						}
 					} else {
 						player.sendMessage(
-								"/playershop <create/delete/move/rename/resize/editShop/addItem/addEnchantedItem/addPotion/removeItem/editItem>");
+								"/playershop <create/delete/move/rename/resize/editShop>");
 					}
 				}
 			} catch(TownSystemException | PlayerException | ShopSystemException e) {

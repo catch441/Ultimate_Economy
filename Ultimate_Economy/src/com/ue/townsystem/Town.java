@@ -21,12 +21,16 @@ import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.player.EconomyPlayer;
+
+import ultimate_economy.UEVillagerType;
+import ultimate_economy.Ultimate_Economy;
 
 public class Town {
 
@@ -142,11 +146,13 @@ public class Town {
 		villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
 		villager.setCustomName(townName + " TownManager");
 		villager.setCustomNameVisible(true);
+		// set the tye of the villager
+		villager.setMetadata("ue-type", new FixedMetadataValue(Ultimate_Economy.getInstance, UEVillagerType.TOWNMANAGER));
 		villager.setProfession(Villager.Profession.NITWIT);
 		villager.setSilent(true);
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
-		inventory = Bukkit.createInventory(null, 9, townName + " TownManager");
+		inventory = Bukkit.createInventory(villager, 9, townName + " TownManager");
 		ItemStack itemStack = new ItemStack(Material.GREEN_WOOL, 1);
 		ItemMeta meta = itemStack.getItemMeta();
 		meta.setDisplayName("Join");

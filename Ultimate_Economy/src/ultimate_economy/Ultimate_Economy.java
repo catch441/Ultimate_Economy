@@ -36,11 +36,14 @@ import com.ue.metrics.Metrics;
 import com.ue.player.EconomyPlayer;
 import com.ue.player.PlayerCommandExecutor;
 import com.ue.player.PlayerTabCompleter;
-import com.ue.shopsystem.AdminShop;
-import com.ue.shopsystem.AdminShopCommandExecutor;
-import com.ue.shopsystem.PlayerShop;
-import com.ue.shopsystem.PlayerShopCommandExecuter;
 import com.ue.shopsystem.ShopTabCompleter;
+import com.ue.shopsystem.adminshop.AdminShop;
+import com.ue.shopsystem.adminshop.AdminShopCommandExecutor;
+import com.ue.shopsystem.playershop.PlayerShop;
+import com.ue.shopsystem.playershop.PlayerShopCommandExecutor;
+import com.ue.shopsystem.rentshop.RentDailyTask;
+import com.ue.shopsystem.rentshop.RentShop;
+import com.ue.shopsystem.rentshop.RentShopCommandExecutor;
 import com.ue.townsystem.TownCommandExecutor;
 import com.ue.townsystem.TownTabCompleter;
 import com.ue.townsystem.TownWorld;
@@ -62,6 +65,8 @@ public class Ultimate_Economy extends JavaPlugin {
 	private VaultHook vaultHook;
 
 	public void onEnable() {
+		
+		getInstance = this;
 
 		if (!getDataFolder().exists()) {
 			getDataFolder().mkdirs();
@@ -72,7 +77,7 @@ public class Ultimate_Economy extends JavaPlugin {
 			getConfig().set("TownNames", null);
 			saveConfig();
 		}
-
+		
 		// config to disable/enable homes feature
 		boolean homesFeature = true;
 		if (getConfig().contains("homes") && !getConfig().getBoolean("homes")) {
@@ -111,6 +116,7 @@ public class Ultimate_Economy extends JavaPlugin {
 		Job.loadAllJobs(getDataFolder(), getConfig());
 		AdminShop.loadAllAdminShops(getConfig(), getDataFolder(), getServer());
 		PlayerShop.loadAllPlayerShops(getConfig(), getDataFolder(), getServer());
+		RentShop.loadAllRentShops(getConfig(), getDataFolder(), getServer());
 
 		try {
 			TownWorld.loadAllTownWorlds(getDataFolder(), getConfig(), getServer());
@@ -125,6 +131,7 @@ public class Ultimate_Economy extends JavaPlugin {
 		}
 
 		EconomyPlayer.setupConfig(getConfig());
+		RentShop.setupConfig(getConfig());
 		saveConfig();
 
 		File spawner = new File(getDataFolder(), "SpawnerLocations.yml");
@@ -137,6 +144,7 @@ public class Ultimate_Economy extends JavaPlugin {
 		}
 
 		// setup command executors and tab completer
+		ShopTabCompleter shopTabCompleter = new ShopTabCompleter();
 		getCommand("jobcenter").setExecutor(new JobCommandExecutor(this));
 		getCommand("jobcenter").setTabCompleter(new JobTabCompleter(getConfig()));
 		getCommand("town").setExecutor(new TownCommandExecutor());
@@ -144,10 +152,11 @@ public class Ultimate_Economy extends JavaPlugin {
 		getCommand("townworld").setExecutor(new TownworldCommandExecutor(this));
 		getCommand("townworld").setTabCompleter(new TownworldTabCompleter());
 		getCommand("adminshop").setExecutor(new AdminShopCommandExecutor(this));
-		getCommand("adminshop").setTabCompleter(new ShopTabCompleter(getConfig()));
-		getCommand("playershop").setTabCompleter(new ShopTabCompleter(getConfig()));
-		getCommand("playershop").setExecutor(new PlayerShopCommandExecuter(this));
-		getCommand("playershop").setExecutor(new PlayerShopCommandExecuter(this));
+		getCommand("adminshop").setTabCompleter(shopTabCompleter);
+		getCommand("playershop").setTabCompleter(shopTabCompleter);
+		getCommand("playershop").setExecutor(new PlayerShopCommandExecutor(this));
+		getCommand("rentshop").setExecutor(new RentShopCommandExecutor(this));
+		getCommand("rentshop").setTabCompleter(shopTabCompleter);
 		PlayerCommandExecutor playerCommandExecutor = new PlayerCommandExecutor();
 		PlayerTabCompleter playerTabCompleter = new PlayerTabCompleter();
 		getCommand("bank").setExecutor(playerCommandExecutor);
@@ -183,6 +192,9 @@ public class Ultimate_Economy extends JavaPlugin {
 		
 		//setup eventhandler
 		getServer().getPluginManager().registerEvents(new Ultimate_EconomyEventHandler(this,spawnerlist,spawner), this);
+		
+		//setup and start RentDailyTask
+		new RentDailyTask().runTaskTimerAsynchronously(this, 1, 1000);
 
 		// setup metrics for bstats
 		@SuppressWarnings("unused")
@@ -190,7 +202,6 @@ public class Ultimate_Economy extends JavaPlugin {
 
 		// vault setup
 		if (Bukkit.getServer().getPluginManager().getPlugin("Vault") != null) {
-			getInstance = this;
 			economyImplementer = new Economy_UltimateEconomy();
 			vaultHook = new VaultHook();
 			vaultHook.hook();
@@ -202,6 +213,7 @@ public class Ultimate_Economy extends JavaPlugin {
 		TownWorld.despawnAllVillagers();
 		AdminShop.despawnAllVillagers();
 		PlayerShop.despawnAllVillagers();
+		RentShop.despawnAllVillagers();
 		saveConfig();
 		// vault
 		if (Bukkit.getServer().getPluginManager().getPlugin("Vault") != null) {
@@ -220,6 +232,7 @@ public class Ultimate_Economy extends JavaPlugin {
 				list.add("fr");
 				list.add("zh");
 				list.add("ru");
+				list.add("es");
 			} else if (args[0].equals("de")) {
 				list.add("DE");
 			} else if (args[0].equals("en")) {
@@ -232,6 +245,8 @@ public class Ultimate_Economy extends JavaPlugin {
 				list.add("CN");
 			} else if (args[0].equals("ru")) {
 				list.add("RU");
+			} else if (args[0].equals("es")) {
+				list.add("ES");
 			}
 		} else if (command.getName().equals("shop")) {
 			if (args.length <= 1) {
@@ -268,10 +283,12 @@ public class Ultimate_Economy extends JavaPlugin {
 				if (label.equalsIgnoreCase("ue-language")) {
 					if (args.length == 2) {
 						if (!args[0].equals("cs") && !args[0].equals("de") && !args[0].equals("en")
-								&& !args[0].equals("fr") && !args[0].equals("zh") && !args[0].equals("ru")) {
+								&& !args[0].equals("fr") && !args[0].equals("zh") && !args[0].equals("ru")
+								&& !args[0].equals("es")) {
 							player.sendMessage(ChatColor.RED + messages.getString("invalid_language"));
 						} else if (!args[1].equals("CZ") && !args[1].equals("DE") && !args[1].equals("US")
-								&& !args[1].equals("FR") && !args[1].equals("CN") && !args[1].equals("RU")) {
+								&& !args[1].equals("FR") && !args[1].equals("CN") && !args[1].equals("RU")
+								&& !args[1].equals("ES")) {
 							player.sendMessage(ChatColor.RED + messages.getString("invalid_country"));
 						} else {
 							getConfig().set("localeLanguage", args[0]);
@@ -292,6 +309,17 @@ public class Ultimate_Economy extends JavaPlugin {
 								+ " " + ChatColor.GREEN + args[0] + ChatColor.GOLD + ".");
 					} else {
 						player.sendMessage("/maxHomes <number>");
+					}
+				}
+				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				else if (label.equalsIgnoreCase("maxRentedDays")) {
+					if (args.length == 1) {
+						RentShop.setMaxRentedDays(getConfig(), Integer.valueOf(args[0]));
+						saveConfig();
+						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("max_rented_days")
+						+ " " + ChatColor.GREEN + args[0] + ChatColor.GOLD + ".");
+					} else {
+						player.sendMessage("/maxRentedDays <number>");
 					}
 				}
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -346,7 +374,7 @@ public class Ultimate_Economy extends JavaPlugin {
 				}
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				else if (label.equalsIgnoreCase("ShopList")) {
-					List<String> shopNames = AdminShop.getAdminShopNameList();
+					List<String> shopNames = AdminShop.getAdminshopNameList();
 					String shopString = shopNames.toString();
 					shopString = shopString.replace("[", "");
 					shopString = shopString.replace("]", "");

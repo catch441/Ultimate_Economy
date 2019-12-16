@@ -332,10 +332,16 @@ public class EconomyPlayer {
 		return scoreBoardDisabled;
 	}
 
-	public void setScoreBoardDisabled(boolean scoreBoardDisabled) {
+	public void setScoreBoardDisabled(boolean scoreBoardDisabled,Player player) {
 		this.scoreBoardDisabled = scoreBoardDisabled;
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
 		config.set(name + ".bank", scoreBoardDisabled);
+		if(scoreBoardDisabled) {
+			Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
+			player.setScoreboard(board);
+		} else {
+			updateScoreBoard(player);
+		}
 	}
 
 	/**
@@ -440,9 +446,6 @@ public class EconomyPlayer {
 			Objective o = board.registerNewObjective("bank", "dummy", ChatColor.GOLD + Ultimate_Economy.messages.getString("bank"));
 			o.setDisplaySlot(DisplaySlot.SIDEBAR);
 			o.getScore(ChatColor.GOLD + Ultimate_Economy.messages.getString("money_info")).setScore(score);
-			p.setScoreboard(board);
-		} else {
-			Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
 			p.setScoreboard(board);
 		}
 	}
@@ -589,25 +592,7 @@ public class EconomyPlayer {
 		} else {
 			maxJoinedTowns = fileConfig.getInt("MaxJoinedTowns");
 		}
-		/*
-		 * if(!fileConfig.isSet("LeaderBoard")) { fileConfig.set("LeaderBoard", false);
-		 * leaderboard = false; } else { leaderboard =
-		 * fileConfig.getBoolean("LeaderBoard"); }
-		 */
 	}
-
-	/**
-	 * This method sets the leaderboard boolean value.
-	 * 
-	 * @param config
-	 * @param value
-	 * @throws PlayerException
-	 */
-	/*
-	 * public static void setLeaderboardBoolean(FileConfiguration config,boolean
-	 * value) throws PlayerException { config.set("LeaderBoard", value); leaderboard
-	 * = value; }
-	 */
 
 	/**
 	 * This method sets the maxHomes value.
