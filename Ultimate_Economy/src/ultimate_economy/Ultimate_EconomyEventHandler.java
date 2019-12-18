@@ -41,6 +41,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
@@ -232,67 +233,70 @@ public class Ultimate_EconomyEventHandler implements Listener {
 	@EventHandler
 	public void onInvClickEvent(InventoryClickEvent event) {
 		Player player = (Player) event.getWhoClicked();
-		Entity entity = (Entity) event.getInventory().getHolder();
-		// prevents that spawners can be renamed in a anvil
-		if (event.getCurrentItem() != null && event.getInventory().getType() == InventoryType.ANVIL
-				&& event.getCurrentItem().getType() == Material.SPAWNER) {
-			event.setCancelled(true);
-		}
-		
-		else if(entity.hasMetadata("ue-type") && event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
-			String shopId = "";
-			if(entity.hasMetadata("ue-id")) {
-				shopId = (String) entity.getMetadata("ue-id").get(0).value();
+		InventoryHolder holder = event.getInventory().getHolder();
+		if(holder instanceof Entity) {
+			Entity entity = (Entity) holder;
+			// prevents that spawners can be renamed in a anvil
+			if (event.getCurrentItem() != null && event.getInventory().getType() == InventoryType.ANVIL
+					&& event.getCurrentItem().getType() == Material.SPAWNER) {
+				event.setCancelled(true);
 			}
-			UEVillagerType ueVillagerType = (UEVillagerType) entity.getMetadata("ue-type").get(0).value();	
-			ClickType clickType = event.getClick();
-			ItemStack clickedItem = event.getCurrentItem();
-			event.setCancelled(true);
-			try {			
-				switch(ueVillagerType) {
-					case PLOTSALE:
-					case TOWNMANAGER:
-						TownWorld.getTownWorldByName(player.getWorld().getName()).handleTownVillagerInvClick(event);
-						player.closeInventory();
-						break;
-					case JOBCENTER:
-						EconomyPlayer ecoPlayer = EconomyPlayer.getEconomyPlayerByName(player.getName());
-						String displayname = clickedItem.getItemMeta().getDisplayName();
-						if (clickType == ClickType.RIGHT && displayname != null) {
-							if (!ecoPlayer.getJobList().isEmpty()) {
-								ecoPlayer.removeJob(displayname);
-								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("job_left")
-										+ " " + ChatColor.GREEN + displayname);
-							} else if (!displayname.equals("Info")) {
-								player.sendMessage(
-										ChatColor.RED + Ultimate_Economy.messages.getString("no_job_joined"));
-							}
-						} else if (clickType == ClickType.LEFT && displayname != null) {
-							ecoPlayer.addJob(displayname);
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("job_join") + " "
-									+ ChatColor.GREEN + displayname);
-						}
-						break;
-					case PLAYERSHOP:
-						PlayerShop playerShop = PlayerShop.getPlayerShopById(shopId);
-						handleShopInvClickEvent(playerShop, player,event);
-						break;
-					case ADMINSHOP:
-						AdminShop adminShop = AdminShop.getAdminShopById(shopId);
-						handleShopInvClickEvent(adminShop, player, event);
-						break;
-					case PLAYERSHOP_RENTABLE:
-						RentShop rentShop = RentShop.getRentShopById(shopId);
-						if(rentShop.isRentable()) {
-							rentShop.handleRentShopGUIClick(event);
-						} else {
-							handleShopInvClickEvent(rentShop, player, event);
-						}
-						break;
+			
+			else if(entity.hasMetadata("ue-type") && event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
+				String shopId = "";
+				if(entity.hasMetadata("ue-id")) {
+					shopId = (String) entity.getMetadata("ue-id").get(0).value();
 				}
-			} catch (TownSystemException | JobSystemException | ShopSystemException | IllegalArgumentException e) {
-			} catch (PlayerException e) {
-				player.sendMessage(ChatColor.RED + e.getMessage());
+				UEVillagerType ueVillagerType = (UEVillagerType) entity.getMetadata("ue-type").get(0).value();	
+				ClickType clickType = event.getClick();
+				ItemStack clickedItem = event.getCurrentItem();
+				event.setCancelled(true);
+				try {			
+					switch(ueVillagerType) {
+						case PLOTSALE:
+						case TOWNMANAGER:
+							TownWorld.getTownWorldByName(player.getWorld().getName()).handleTownVillagerInvClick(event);
+							player.closeInventory();
+							break;
+						case JOBCENTER:
+							EconomyPlayer ecoPlayer = EconomyPlayer.getEconomyPlayerByName(player.getName());
+							String displayname = clickedItem.getItemMeta().getDisplayName();
+							if (clickType == ClickType.RIGHT && displayname != null) {
+								if (!ecoPlayer.getJobList().isEmpty()) {
+									ecoPlayer.removeJob(displayname);
+									player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("job_left")
+											+ " " + ChatColor.GREEN + displayname);
+								} else if (!displayname.equals("Info")) {
+									player.sendMessage(
+											ChatColor.RED + Ultimate_Economy.messages.getString("no_job_joined"));
+								}
+							} else if (clickType == ClickType.LEFT && displayname != null) {
+								ecoPlayer.addJob(displayname);
+								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("job_join") + " "
+										+ ChatColor.GREEN + displayname);
+							}
+							break;
+						case PLAYERSHOP:
+							PlayerShop playerShop = PlayerShop.getPlayerShopById(shopId);
+							handleShopInvClickEvent(playerShop, player,event);
+							break;
+						case ADMINSHOP:
+							AdminShop adminShop = AdminShop.getAdminShopById(shopId);
+							handleShopInvClickEvent(adminShop, player, event);
+							break;
+						case PLAYERSHOP_RENTABLE:
+							RentShop rentShop = RentShop.getRentShopById(shopId);
+							if(rentShop.isRentable()) {
+								rentShop.handleRentShopGUIClick(event);
+							} else {
+								handleShopInvClickEvent(rentShop, player, event);
+							}
+							break;
+					}
+				} catch (TownSystemException | JobSystemException | ShopSystemException | IllegalArgumentException e) {
+				} catch (PlayerException e) {
+					player.sendMessage(ChatColor.RED + e.getMessage());
+				}
 			}
 		}
 	}

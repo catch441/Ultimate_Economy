@@ -230,11 +230,14 @@ public class AdminShop extends Shop {
 			}
 			//convert to new shopId save system
 			fileConfig.set("ShopNames", null);
-			fileConfig.set("AdminshopIds", AdminShop.getAdminshopIdList());
+			fileConfig.set("AdminShopIds", AdminShop.getAdminshopIdList());
 		} 
 		//new load system
 		else {
-			for (String shopId : fileConfig.getStringList("AdminshopIds")) {
+			if(fileConfig.contains("AdminshopIds")) {
+				fileConfig.set("AdminShopIds", fileConfig.get("AdminshopIds"));
+			}
+			for (String shopId : fileConfig.getStringList("AdminShopIds")) {
 				File file = new File(dataFolder, shopId + ".yml");
 				if (file.exists()) {
 					adminShopList.add(new AdminShop(dataFolder, server,null, shopId));

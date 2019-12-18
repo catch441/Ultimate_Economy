@@ -111,7 +111,6 @@ public class Ultimate_Economy extends JavaPlugin {
 			Bukkit.getLogger().info("Loaded language file: '" + lang + "' '" + country + "'");
 		}
 		messages = ResourceBundle.getBundle("lang.MessagesBundle", currentLocale, new UTF8Control());
-
 		JobCenter.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
 		Job.loadAllJobs(getDataFolder(), getConfig());
 		AdminShop.loadAllAdminShops(getConfig(), getDataFolder(), getServer());
