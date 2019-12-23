@@ -16,6 +16,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
@@ -340,7 +341,7 @@ public class EconomyPlayer {
 			Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
 			player.setScoreboard(board);
 		} else {
-			updateScoreBoard(player);
+			new UpdateScoreboardRunnable(Bukkit.getPlayer(name)).runTask(Ultimate_Economy.getInstance);
 		}
 	}
 
@@ -390,7 +391,7 @@ public class EconomyPlayer {
 			config.set(name + ".account amount", account);
 			save(config);
 			if (Bukkit.getPlayer(name) != null && Bukkit.getPlayer(name).isOnline()) {
-				updateScoreBoard(Bukkit.getPlayer(name));
+				new UpdateScoreboardRunnable(Bukkit.getPlayer(name)).runTask(Ultimate_Economy.getInstance);
 			}
 		}
 	}
@@ -411,7 +412,7 @@ public class EconomyPlayer {
 			config.set(name + ".account amount", account);
 			save(config);
 			if (Bukkit.getPlayer(name) != null && Bukkit.getPlayer(name).isOnline()) {
-				updateScoreBoard(Bukkit.getPlayer(name));
+				new UpdateScoreboardRunnable(Bukkit.getPlayer(name)).runTask(Ultimate_Economy.getInstance);
 			}
 		} else {
 			if (personal) {
@@ -641,4 +642,20 @@ public class EconomyPlayer {
 			maxJoinedTowns = value;
 		}
 	}
+	
+	private class UpdateScoreboardRunnable extends BukkitRunnable {
+		
+		private Player player;
+		
+		private UpdateScoreboardRunnable(Player player) {
+			this.player = player;
+		}
+
+		@Override
+		public void run() {
+			updateScoreBoard(player);
+		}
+	}
 }
+
+
