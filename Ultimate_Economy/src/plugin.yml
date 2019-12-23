@@ -162,21 +162,6 @@ commands:
     permission: ultimate_economy.info.myjobs
     permission-message: You don't have the permission.
     description: Shows up all Jobs you already joined.
- 
-  home:   
-    permission: ultimate_economy.home
-    permission-message: You don't have the permission.
-    description: Teleports you to a homepoint.
-    
-  setHome:   
-    permission: ultimate_economy.home
-    permission-message: You don't have the permission.
-    description: Set a homepoint.
-    
-  delHome:   
-    permission: ultimate_economy.home
-    permission-message: You don't have the permission.
-    description: Remove a homepoint.
     
   pay:   
     permission: ultimate_economy.pay

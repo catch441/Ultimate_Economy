@@ -100,7 +100,7 @@ public class PlayerCommandExecutor implements CommandExecutor {
 					if (args.length == 1) {
 						Location location = ecoPlayer.getHome(args[0]);
 						player.teleport(location);
-					} else if(args.length == 2) {
+					} else if(args.length == 0) {
 						Set<String> homes = ecoPlayer.getHomeList().keySet();
 						String homeString = String.join(",", homes);
 						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("home_info") + " "

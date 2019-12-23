@@ -79,21 +79,11 @@ public class Ultimate_Economy extends JavaPlugin {
 		}
 		
 		// config to disable/enable homes feature
-		boolean homesFeature = true;
+		boolean homesFeature = false;
 		if (getConfig().contains("homes") && !getConfig().getBoolean("homes")) {
-			Field commandMapField;
-			try {
-				commandMapField = SimplePluginManager.class.getDeclaredField("commandMap");
-				commandMapField.setAccessible(true);
-				CommandMap map = (CommandMap) commandMapField.get(Bukkit.getServer().getPluginManager());
-				getCommand("home").unregister(map);
-				getCommand("delHome").unregister(map);
-				getCommand("setHome").unregister(map);
-				homesFeature = false;
-			} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-				Bukkit.getLogger().warning("Error on disable homes feature.");
-			}
-		} else if (!getConfig().contains("homes")) {
+			
+		} else {
+			homesFeature = true;
 			getConfig().set("homes", true);
 		}
 
@@ -161,11 +151,40 @@ public class Ultimate_Economy extends JavaPlugin {
 		getCommand("bank").setExecutor(playerCommandExecutor);
 		getCommand("bank").setTabCompleter(playerTabCompleter);
 		if (homesFeature) {
-			getCommand("home").setExecutor(playerCommandExecutor);
-			getCommand("home").setTabCompleter(playerTabCompleter);
-			getCommand("delHome").setExecutor(playerCommandExecutor);
-			getCommand("delHome").setTabCompleter(playerTabCompleter);
-			getCommand("setHome").setExecutor(playerCommandExecutor);
+			try {
+				Field commandMapField = SimplePluginManager.class.getDeclaredField("commandMap");
+				commandMapField.setAccessible(true);
+				CommandMap map = (CommandMap) commandMapField.get(Bukkit.getServer().getPluginManager());
+				
+				UltimateEconomyCommand home = new UltimateEconomyCommand("home", this);
+				home.setDescription("Teleports you to a homepoint.");
+				home.setPermission("ultimate_economy.home");
+				home.setLabel("home");
+				home.setPermissionMessage("You don't have the permission.");
+				map.register("ultimate_economy", home);
+				
+				UltimateEconomyCommand setHome = new UltimateEconomyCommand("sethome", this);
+				setHome.setDescription("Sets a homepoint.");
+				setHome.setPermission("ultimate_economy.home");
+				setHome.setLabel("sethome");
+				setHome.setPermissionMessage("You don't have the permission.");
+				map.register("ultimate_economy", setHome);
+				
+				UltimateEconomyCommand delHome = new UltimateEconomyCommand("delhome", this);
+				delHome.setDescription("Remove a homepoint.");
+				delHome.setPermission("ultimate_economy.home");
+				delHome.setLabel("delhome");
+				delHome.setPermissionMessage("You don't have the permission.");
+				map.register("ultimate_economy", delHome);
+				
+				home.setExecutor(playerCommandExecutor);
+				home.setTabCompleter(playerTabCompleter);
+				delHome.setExecutor(playerCommandExecutor);
+				delHome.setTabCompleter(playerTabCompleter);
+				setHome.setExecutor(playerCommandExecutor);
+			} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
+				Bukkit.getLogger().warning("Error on enable homes feature.");
+			}
 		}
 		getCommand("giveMoney").setExecutor(playerCommandExecutor);
 		getCommand("pay").setExecutor(playerCommandExecutor);
@@ -315,8 +334,8 @@ public class Ultimate_Economy extends JavaPlugin {
 					if (args.length == 1) {
 						RentShop.setMaxRentedDays(getConfig(), Integer.valueOf(args[0]));
 						saveConfig();
-						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("max_rented_days")
-						+ " " + ChatColor.GREEN + args[0] + ChatColor.GOLD + ".");
+						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("max_rented_days") + " "
+								+ ChatColor.GREEN + args[0] + ChatColor.GOLD + ".");
 					} else {
 						player.sendMessage("/maxRentedDays <number>");
 					}
@@ -432,6 +451,7 @@ public class Ultimate_Economy extends JavaPlugin {
 		}
 		return false;
 	}
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Methoden
