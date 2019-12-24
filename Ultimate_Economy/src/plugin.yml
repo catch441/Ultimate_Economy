@@ -1,12 +1,12 @@
 name: Ultimate_Economy
 main: ultimate_economy.Ultimate_Economy
 author: catch441
-version: 1.2.3b
+version: 1.2.4
 
 api-version: 1.14
 
 softdepend: [Multiverse-Core,Vault]
-loadbefore: [Quests,GriefPrevention,ChestCommands,WorldEdit,Essentials,PlotSquared,MysqlEconomyBank,RepairGui,CommandSigns,DragonSlayer]
+loadbefore: [MobArena,Quests,GriefPrevention,ChestCommands,WorldEdit,Essentials,PlotSquared,MysqlEconomyBank,RepairGui,CommandSigns,DragonSlayer]
 
 permissions:
 
