@@ -28,100 +28,102 @@ public class RentShopCommandExecutor implements CommandExecutor {
 			Player player = (Player) sender;
 			try {
 				if (label.equalsIgnoreCase("rentshop")) {
-					if (player.hasPermission("ultimate_economy.rentshop.admin") && args[0].equals("create")) {
-						if (args.length == 3) {
-							RentShop shop = RentShop.createRentShop(plugin.getDataFolder(), player.getLocation(),
-									Integer.valueOf(args[1]), Double.valueOf(args[2]));
-							plugin.getConfig().set("RentShopIds", RentShop.getRentShopIdList());
-							plugin.saveConfig();
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_create1")
-									+ " " + ChatColor.GREEN + shop.getName() + ChatColor.GOLD + " "
-									+ Ultimate_Economy.messages.getString("shop_create2"));
-						} else {
-							player.sendMessage("/rentshop create <size 9,18,27...> <rentalFee per 24h>");
-						}
-					}
-					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					else if (player.hasPermission("ultimate_economy.rentshop.admin") && args[0].equals("delete")) {
-						if (args.length == 2) {
-							RentShop.deleteRentShop(args[1]);
-							plugin.getConfig().set("RentShopIds", RentShop.getRentShopIdList());
-							plugin.saveConfig();
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_delete1")
-									+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
-									+ Ultimate_Economy.messages.getString("shop_delete2"));
-						} else {
-							player.sendMessage("/rentshop delete <shopname>");
-						}
-					}
-					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					else if (player.hasPermission("ultimate_economy.rentshop.admin") && args[0].equals("move")) {
-						if (args.length == 2) {
-							RentShop.getRentShopByUniqueName(args[1]).moveShop(player.getLocation());
-						} else {
-							player.sendMessage("/rentshop move <shopname>");
-						}
-					}
-					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					else if (player.hasPermission("ultimate_economy.rentshop.admin") && args[0].equals("resize")) {
-						if (args.length == 3) {
-							RentShop.getRentShopByUniqueName(args[1]).changeShopSize(Integer.valueOf(args[2]));
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_resize")
-										+ " " + ChatColor.GREEN + args[2] + ChatColor.GOLD + ".");
-						} else {
-							player.sendMessage("/rentshop resize <shopname> <new size>");
-						}
-					}
-					// Player commands
-					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					else if (args[0].equals("changeProfession")) {
-						if (args.length == 3) {
-							try {
-								RentShop.getRentShopByUniqueName(args[1] + "_" + player.getName())
-										.changeProfession(Profession.valueOf(args[2].toUpperCase()));
-								player.sendMessage(
-										ChatColor.GOLD + Ultimate_Economy.messages.getString("profession_changed"));
-							} catch (IllegalArgumentException e) {
-								player.sendMessage(
-										ChatColor.RED + Ultimate_Economy.messages.getString("invalid_profession"));
+					if (args.length != 0) {
+						if (player.hasPermission("ultimate_economy.rentshop.admin") && args[0].equals("create")) {
+							if (args.length == 3) {
+								RentShop shop = RentShop.createRentShop(plugin.getDataFolder(), player.getLocation(),
+										Integer.valueOf(args[1]), Double.valueOf(args[2]));
+								plugin.getConfig().set("RentShopIds", RentShop.getRentShopIdList());
+								plugin.saveConfig();
+								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_create1")
+										+ " " + ChatColor.GREEN + shop.getName() + ChatColor.GOLD + " "
+										+ Ultimate_Economy.messages.getString("shop_create2"));
+							} else {
+								player.sendMessage("/rentshop create <size 9,18,27...> <rentalFee per 24h>");
 							}
-						} else {
-							player.sendMessage("/rentshop changeProfession <shopname> <profession>");
 						}
-					}
-					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					else if (args[0].equals("rename")) {
-						if (args.length == 3) {
-							RentShop.getRentShopByUniqueName(args[1] + "_" + player.getName()).changeShopName(args[2]);
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_rename1")
-									+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
-									+ Ultimate_Economy.messages.getString("shop_rename2") + " " + ChatColor.GREEN
-									+ args[2] + ChatColor.GOLD + ".");
-						} else {
-							player.sendMessage("/rentshop rename <oldName> <newName>");
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (player.hasPermission("ultimate_economy.rentshop.admin") && args[0].equals("delete")) {
+							if (args.length == 2) {
+								RentShop.deleteRentShop(args[1]);
+								plugin.getConfig().set("RentShopIds", RentShop.getRentShopIdList());
+								plugin.saveConfig();
+								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_delete1")
+										+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
+										+ Ultimate_Economy.messages.getString("shop_delete2"));
+							} else {
+								player.sendMessage("/rentshop delete <shopname>");
+							}
 						}
-					}
-					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					else if (args[0].equals("editShop")) {
-						if (args.length == 2) {
-							RentShop.getRentShopByUniqueName(args[1] + "_" + player.getName()).openEditor(player);
-						} else {
-							player.sendMessage("/rentshop editShop <shopname>");
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (player.hasPermission("ultimate_economy.rentshop.admin") && args[0].equals("move")) {
+							if (args.length == 2) {
+								RentShop.getRentShopByUniqueName(args[1]).moveShop(player.getLocation());
+							} else {
+								player.sendMessage("/rentshop move <shopname>");
+							}
 						}
-					}
-					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					else {
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (player.hasPermission("ultimate_economy.rentshop.admin") && args[0].equals("resize")) {
+							if (args.length == 3) {
+								RentShop.getRentShopByUniqueName(args[1]).changeShopSize(Integer.valueOf(args[2]));
+								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_resize")
+											+ " " + ChatColor.GREEN + args[2] + ChatColor.GOLD + ".");
+							} else {
+								player.sendMessage("/rentshop resize <shopname> <new size>");
+							}
+						}
+						// Player commands
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("changeProfession")) {
+							if (args.length == 3) {
+								try {
+									RentShop.getRentShopByUniqueName(args[1] + "_" + player.getName())
+											.changeProfession(Profession.valueOf(args[2].toUpperCase()));
+									player.sendMessage(
+											ChatColor.GOLD + Ultimate_Economy.messages.getString("profession_changed"));
+								} catch (IllegalArgumentException e) {
+									player.sendMessage(
+											ChatColor.RED + Ultimate_Economy.messages.getString("invalid_profession"));
+								}
+							} else {
+								player.sendMessage("/rentshop changeProfession <shopname> <profession>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("rename")) {
+							if (args.length == 3) {
+								RentShop.getRentShopByUniqueName(args[1] + "_" + player.getName()).changeShopName(args[2]);
+								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_rename1")
+										+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
+										+ Ultimate_Economy.messages.getString("shop_rename2") + " " + ChatColor.GREEN
+										+ args[2] + ChatColor.GOLD + ".");
+							} else {
+								player.sendMessage("/rentshop rename <oldName> <newName>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("editShop")) {
+							if (args.length == 2) {
+								RentShop.getRentShopByUniqueName(args[1] + "_" + player.getName()).openEditor(player);
+							} else {
+								player.sendMessage("/rentshop editShop <shopname>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else {
+							if(player.hasPermission("ultimate_economy.rentshop.admin")) {
+								player.sendMessage("/rentshop <create/delete/move/resize/editShop>");
+							} else {
+								player.sendMessage("/rentshop <editShop>");
+							}
+						}
+					} else {
 						if(player.hasPermission("ultimate_economy.rentshop.admin")) {
 							player.sendMessage("/rentshop <create/delete/move/resize/editShop>");
 						} else {
 							player.sendMessage("/rentshop <editShop>");
 						}
-					}
-				} else {
-					if(player.hasPermission("ultimate_economy.rentshop.admin")) {
-						player.sendMessage("/rentshop <create/delete/move/resize/editShop>");
-					} else {
-						player.sendMessage("/rentshop <editShop>");
 					}
 				}
 			} catch (IllegalArgumentException e) {
