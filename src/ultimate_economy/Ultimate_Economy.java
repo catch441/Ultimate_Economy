@@ -93,14 +93,14 @@ public class Ultimate_Economy extends JavaPlugin {
 			getConfig().set("localeLanguage", "en");
 			getConfig().set("localeCountry", "US");
 			currentLocale = new Locale("en", "US");
-			Bukkit.getLogger().info("Loaded default language file: 'en' 'US'");
+			Bukkit.getLogger().info("Loading default language file: 'en' 'US'");
 		} else {
 			String lang = getConfig().getString("localeLanguage");
 			String country = getConfig().getString("localeCountry");
 			currentLocale = new Locale(lang, country);
-			Bukkit.getLogger().info("Loaded language file: '" + lang + "' '" + country + "'");
+			Bukkit.getLogger().info("Loading language file: '" + lang + "' '" + country + "'");
 		}
-		messages = ResourceBundle.getBundle("lang.MessagesBundle", currentLocale, new UTF8Control());
+		messages = ResourceBundle.getBundle("src.lang.MessagesBundle", currentLocale, new UTF8Control());
 		JobCenter.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
 		Job.loadAllJobs(getDataFolder(), getConfig());
 		AdminShop.loadAllAdminShops(getConfig(), getDataFolder(), getServer());

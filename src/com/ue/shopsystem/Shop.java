@@ -163,6 +163,7 @@ public abstract class Shop {
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
 		villager.setVillagerLevel(2);
 		villager.setMetadata("ue-id", new FixedMetadataValue(Ultimate_Economy.getInstance,shopId));
+		villager.setCollidable(false);
 		config = YamlConfiguration.loadConfiguration(file);
 		if(config.isSet("Profession")) {
 			villager.setProfession(Profession.valueOf(config.getString("Profession")));
