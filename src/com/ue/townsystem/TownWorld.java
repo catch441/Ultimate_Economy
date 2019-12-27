@@ -10,6 +10,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Server;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -84,6 +86,33 @@ public class TownWorld {
 		}
 		for (String townName : townNames) {
 			Town.getTownNameList().remove(townName);
+		}
+	}
+	
+	/**
+	 * Renames a town.
+	 * 
+	 * @param player have to be the townowner
+	 * @param oldName
+	 * @param newName
+	 * @throws TownSystemException
+	 * @throws PlayerException 
+	 */
+	public void renameTown(String player,String oldName, String newName) throws TownSystemException, PlayerException {
+		if(!Town.getTownNameList().contains(oldName)) {
+			throw new TownSystemException(TownSystemException.TOWN_DOES_NOT_EXIST);
+		} else {
+			Town town = getTownByName(oldName);
+			if(!town.isTownOwner(player)) {
+				throw new TownSystemException(TownSystemException.YOU_ARE_NOT_OWNER);
+			} else {
+				town.renameTown(file, newName);
+				config = YamlConfiguration.loadConfiguration(file);
+				townNames.remove(oldName);
+				townNames.add(newName);
+				config.set("TownNames", townNames);
+				save();
+			}
 		}
 	}
 
@@ -516,6 +545,32 @@ public class TownWorld {
 			return false;
 		}
 	}
+	
+	public static void handleTownWorldLocationCheck(String worldname, Chunk chunk, String playername) {
+		try {
+			BossBar bossbar = EconomyPlayer.getEconomyPlayerByName(playername).getBossBar();
+			try {
+				TownWorld townWorld = TownWorld.getTownWorldByName(worldname);
+				try {
+					Town town = townWorld.getTownByChunk(chunk);
+					bossbar.setTitle(town.getTownName());
+					bossbar.setColor(BarColor.RED);
+					bossbar.setVisible(true);
+				} catch (TownSystemException e1) {
+					// if chunk is in the wilderness
+					bossbar.setTitle("Wilderness");
+					bossbar.setColor(BarColor.GREEN);
+					bossbar.setVisible(true);
+				}
+			} catch (TownSystemException e) {
+				// disable bossbar in other worlds
+				bossbar.setVisible(false);
+			}
+		} catch (PlayerException e2) {
+			// should never happen
+		}
+	}
+
 
 	/**
 	 * This method should be used to create/enble a new townworld.

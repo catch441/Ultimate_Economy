@@ -164,6 +164,43 @@ public class Town {
 		itemStack.setItemMeta(meta);
 		inventory.setItem(1, itemStack);
 	}
+	
+	/**
+	 * Renames this town.
+	 * 
+	 * @param newName
+	 * @param file townworld savefile
+	 * @throws TownSystemException 
+	 * @throws PlayerException 
+	 */
+	public void renameTown(File file,String newName) throws TownSystemException, PlayerException {
+		if(Town.getTownNameList().contains(newName)) {
+			throw new TownSystemException(TownSystemException.TOWN_ALREADY_EXIST);
+		} else {
+			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+			
+			config.set("Towns." + newName + ".TownManagerVillager.x", villager.getLocation().getBlockX());
+			config.set("Towns." + newName + ".TownManagerVillager.y", villager.getLocation().getY());
+			config.set("Towns." + newName + ".TownManagerVillager.z", villager.getLocation().getZ());
+			config.set("Towns." + newName + ".TownManagerVillager.world", villager.getLocation().getWorld().getName());
+			config.set("Towns." + newName + ".townspawn",
+					townSpawn.getX() + "/" + townSpawn.getY() + "/" + townSpawn.getZ());
+			config.set("Towns." + newName + ".citizens", citizens);
+			config.set("Towns." + newName + ".chunks", chunkCoords);
+			config.set("Towns." + newName + ".owner", owner);
+			config.set("Towns." + newName + ".coOwners", coOwners);
+			
+			config.set("Towns." + townName, null);
+			save(file, config);
+			for(String citizen: citizens) {
+				EconomyPlayer economyPlayer = EconomyPlayer.getEconomyPlayerByName(citizen);
+				economyPlayer.removeJoinedTown(townName);
+				economyPlayer.addJoinedTown(newName);
+			}
+			townName = newName;
+			villager.setCustomName(townName + " TownManager");
+		}
+	}
 
 	/**
 	 * <p>
@@ -376,9 +413,6 @@ public class Town {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 			config.set("Towns." + townName + ".chunks", chunkCoords);
 			config.set("Town." + townName + ".Plots." + chunkCoords, null);
-			// TODO not for future, find a better solution
-			// world.regenerateChunk(chunkX, chunkZ);
-			// world.save();
 			int index = -1;
 			for (Plot plot : plots) {
 				if (plot.getChunkCoords().equals(coords)) {

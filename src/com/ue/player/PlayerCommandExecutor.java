@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.ue.exceptions.PlayerException;
+import com.ue.townsystem.TownWorld;
 
 import ultimate_economy.Ultimate_Economy;
 
@@ -100,6 +101,8 @@ public class PlayerCommandExecutor implements CommandExecutor {
 					if (args.length == 1) {
 						Location location = ecoPlayer.getHome(args[0]);
 						player.teleport(location);
+						TownWorld.handleTownWorldLocationCheck(player.getWorld().getName(),
+								player.getLocation().getChunk(), player.getName());
 					} else if(args.length == 0) {
 						Set<String> homes = ecoPlayer.getHomeList().keySet();
 						String homeString = String.join(",", homes);

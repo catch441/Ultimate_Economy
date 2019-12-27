@@ -8,13 +8,10 @@ import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.data.Ageable;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
@@ -85,12 +82,9 @@ public class Ultimate_EconomyEventHandler implements Listener {
 
 	@EventHandler
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
-		handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(), event.getTo().getChunk(),
+		TownWorld.handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(), event.getTo().getChunk(),
 				event.getPlayer().getName());
 	}
-	
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,9 +160,7 @@ public class Ultimate_EconomyEventHandler implements Listener {
 						}
 						break;
 				}
-			} catch (TownSystemException | ShopSystemException | JobSystemException e) {
-				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
-			}
+			} catch (TownSystemException | ShopSystemException | JobSystemException e) {}
 		}
 	}
 
@@ -437,7 +429,7 @@ public class Ultimate_EconomyEventHandler implements Listener {
 			EconomyPlayer economyPlayer = EconomyPlayer.getEconomyPlayerByName(playername);
 			economyPlayer.updateScoreBoard(event.getPlayer());
 			economyPlayer.getBossBar().addPlayer(event.getPlayer());
-			handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
+			TownWorld.handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
 					event.getPlayer().getLocation().getChunk(), event.getPlayer().getName());
 
 		} catch (PlayerException e) {
@@ -514,7 +506,7 @@ public class Ultimate_EconomyEventHandler implements Listener {
 		// check, if player positions changed the chunk
 		if (event.getFrom().getChunk().getX() != event.getTo().getChunk().getX()
 				|| event.getFrom().getChunk().getZ() != event.getTo().getChunk().getZ()) {
-			handleTownWorldLocationCheck(event.getTo().getWorld().getName(), event.getTo().getChunk(),
+			TownWorld.handleTownWorldLocationCheck(event.getTo().getWorld().getName(), event.getTo().getChunk(),
 					event.getPlayer().getName());
 		}
 	}
@@ -892,33 +884,6 @@ public class Ultimate_EconomyEventHandler implements Listener {
 			bool = true;
 		}
 		return bool;
-	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	private void handleTownWorldLocationCheck(String worldname, Chunk chunk, String playername) {
-		try {
-			BossBar bossbar = EconomyPlayer.getEconomyPlayerByName(playername).getBossBar();
-			try {
-				TownWorld townWorld = TownWorld.getTownWorldByName(worldname);
-				try {
-					Town town = townWorld.getTownByChunk(chunk);
-					bossbar.setTitle(town.getTownName());
-					bossbar.setColor(BarColor.RED);
-					bossbar.setVisible(true);
-				} catch (TownSystemException e1) {
-					// if chunk is in the wilderness
-					bossbar.setTitle("Wilderness");
-					bossbar.setColor(BarColor.GREEN);
-					bossbar.setVisible(true);
-				}
-			} catch (TownSystemException e) {
-				// disable bossbar in other worlds
-				bossbar.setVisible(false);
-			}
-		} catch (PlayerException e2) {
-			// should never happen
-		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////

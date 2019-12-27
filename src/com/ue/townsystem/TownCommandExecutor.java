@@ -34,7 +34,7 @@ public class TownCommandExecutor implements CommandExecutor {
 							} else {
 								player.sendMessage("/town create <townname>");
 							}
-						}	
+						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else if (args[0].equals("delete")) {
 							if (args.length == 2) {
@@ -55,6 +55,21 @@ public class TownCommandExecutor implements CommandExecutor {
 								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("town_expand"));
 							} else {
 								player.sendMessage("/town expand <townname>");
+							}
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						else if (args[0].equals("rename")) {
+							if (args.length == 3) {
+								TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
+								tWorld.renameTown(ecoPlayer.getName(), args[1], args[2]);
+								TownWorld.handleTownWorldLocationCheck(player.getWorld().getName(),
+										player.getLocation().getChunk(), player.getName());
+								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("town_rename1")
+										+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
+										+ Ultimate_Economy.messages.getString("town_rename2") + " " + ChatColor.GREEN
+										+ args[2] + ChatColor.GOLD + ".");
+							} else {
+								player.sendMessage("/town rename <old name> <new name>");
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -203,19 +218,22 @@ public class TownCommandExecutor implements CommandExecutor {
 							}
 						}
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if(args[0].equals("withdraw")) {
+						else if (args[0].equals("withdraw")) {
 							if (args.length == 3) {
 								for (TownWorld townWorld : TownWorld.getTownWorldList()) {
 									if (townWorld.getTownNameList().contains(args[1])) {
 										Town town = townWorld.getTownByName(args[1]);
-										if(town.hasCoOwnerPermission(player.getName())) {
+										if (town.hasCoOwnerPermission(player.getName())) {
 											double amount = Double.valueOf(args[2]);
-											townWorld.setSaveFile(town.decreaseTownBankAmount(townWorld.getSaveFile(), amount));
+											townWorld.setSaveFile(
+													town.decreaseTownBankAmount(townWorld.getSaveFile(), amount));
 											ecoPlayer.increasePlayerAmount(amount);
-											player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("got_money") + " "
-													+ ChatColor.GREEN + amount + " $");
+											player.sendMessage(
+													ChatColor.GOLD + Ultimate_Economy.messages.getString("got_money")
+															+ " " + ChatColor.GREEN + amount + " $");
 										} else {
-											player.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("player_has_no_permission"));
+											player.sendMessage(ChatColor.RED
+													+ Ultimate_Economy.messages.getString("player_has_no_permission"));
 										}
 										break;
 									}
@@ -246,11 +264,11 @@ public class TownCommandExecutor implements CommandExecutor {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						else {
 							player.sendMessage(
-									"/town <create/delete/expand/setTownSpawn/setTax/moveTownManager/plot/pay/tp/bank>");
+									"/town <create/delete/rename/expand/setTownSpawn/setTax/moveTownManager/plot/pay/tp/bank>");
 						}
 					} else {
 						player.sendMessage(
-								"/town <create/delete/expand/setTownSpawn/setTax/moveTownManager/plot/pay/tp/bank>");
+								"/town <create/delete/rename/expand/setTownSpawn/setTax/moveTownManager/plot/pay/tp/bank>");
 					}
 				}
 			} catch (PlayerException | TownSystemException e) {
