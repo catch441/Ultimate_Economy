@@ -12,7 +12,7 @@ import org.bukkit.command.TabCompleter;
 import com.ue.exceptions.PlayerException;
 import com.ue.player.EconomyPlayer;
 
-public class TownTabCompleter implements TabCompleter{
+public class TownTabCompleter implements TabCompleter {
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -31,6 +31,7 @@ public class TownTabCompleter implements TabCompleter{
 				list.add("tp");
 				list.add("bank");
 				list.add("withdraw");
+				list.add("rename");
 			} else if (args.length == 1) {
 				if ("create".contains(args[0])) {
 					list.add("create");
@@ -65,11 +66,15 @@ public class TownTabCompleter implements TabCompleter{
 				if ("bank".contains(args[0])) {
 					list.add("bank");
 				}
-				if("withdraw".contains(args[0])) {
+				if ("withdraw".contains(args[0])) {
 					list.add("withdraw");
 				}
+				if ("rename".contains(args[0])) {
+					list.add("rename");
+				}
 			} else if (args[0].equals("delete") || args[0].equals("expand") || args[0].equals("setTownSpawn")
-					|| args[0].equals("bank") || args[0].equals("addCoOwner") || args[0].equals("removeCoOwner") || args[0].equals("withdraw")) {
+					|| args[0].equals("bank") || args[0].equals("addCoOwner") || args[0].equals("removeCoOwner")
+					|| args[0].equals("withdraw") || args[0].equals("rename")) {
 				try {
 					if (args[1].equals("")) {
 						list.addAll(EconomyPlayer.getEconomyPlayerByName(sender.getName()).getJoinedTownList());
@@ -84,7 +89,7 @@ public class TownTabCompleter implements TabCompleter{
 				} catch (PlayerException e) {
 					Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 				}
-			} else if (args[0].equals("pay") || args[0].equals("tp")|| args[0].equals("withdraw")) {
+			} else if (args[0].equals("pay") || args[0].equals("tp") || args[0].equals("withdraw")) {
 				if (args[1].equals("")) {
 					list.addAll(Town.getTownNameList());
 				} else if (args.length == 2) {

@@ -2,6 +2,7 @@ package com.ue.townsystem;
 
 import java.io.File;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -62,8 +63,10 @@ public class TownCommandExecutor implements CommandExecutor {
 							if (args.length == 3) {
 								TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 								tWorld.renameTown(ecoPlayer.getName(), args[1], args[2]);
-								TownWorld.handleTownWorldLocationCheck(player.getWorld().getName(),
-										player.getLocation().getChunk(), player.getName());
+								for(Player p:Bukkit.getOnlinePlayers()) {
+									TownWorld.handleTownWorldLocationCheck(p.getWorld().getName(),
+											p.getLocation().getChunk(), p.getName());
+								}
 								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("town_rename1")
 										+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
 										+ Ultimate_Economy.messages.getString("town_rename2") + " " + ChatColor.GREEN
