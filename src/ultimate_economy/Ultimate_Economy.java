@@ -24,6 +24,8 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.ue.config.ConfigCommandExecutor;
+import com.ue.config.ConfigTabCompleter;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
@@ -190,6 +192,8 @@ public class Ultimate_Economy extends JavaPlugin {
 		getCommand("pay").setExecutor(playerCommandExecutor);
 		getCommand("money").setExecutor(playerCommandExecutor);
 		getCommand("myJobs").setExecutor(playerCommandExecutor);
+		getCommand("ue-config").setExecutor(new ConfigCommandExecutor(this));
+		getCommand("ue-config").setTabCompleter(new ConfigTabCompleter());
 
 		// spawn all spawners
 		List<String> spawnerlist = new ArrayList<>();
@@ -242,46 +246,13 @@ public class Ultimate_Economy extends JavaPlugin {
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		List<String> list = new ArrayList<>();
-		if (command.getName().equals("ue-language")) {
-			if (args[0].equals("")) {
-				list.add("de");
-				list.add("en");
-				list.add("cs");
-				list.add("fr");
-				list.add("zh");
-				list.add("ru");
-				list.add("es");
-			} else if (args[0].equals("de")) {
-				list.add("DE");
-			} else if (args[0].equals("en")) {
-				list.add("US");
-			} else if (args[0].equals("cs")) {
-				list.add("CZ");
-			} else if (args[0].equals("fr")) {
-				list.add("FR");
-			} else if (args[0].equals("zh")) {
-				list.add("CN");
-			} else if (args[0].equals("ru")) {
-				list.add("RU");
-			} else if (args[0].equals("es")) {
-				list.add("ES");
-			}
-		} else if (command.getName().equals("shop")) {
+		if (command.getName().equals("shop")) {
 			if (args.length <= 1) {
 				list = getAdminShopList(args[0]);
 			}
 		} else if (command.getName().equals("jobInfo")) {
 			if (args.length <= 1) {
 				list = getJobList(args[0]);
-			}
-		} else if (command.getName().equals("ue-homes")) {
-			if (args[0].equals("")) {
-				list.add("true");
-				list.add("false");
-			} else if (args[0].equals("true")) {
-				list.add("true");
-			} else if (args[0].equals("false")) {
-				list.add("false");
 			}
 		}
 		return list;
@@ -298,88 +269,7 @@ public class Ultimate_Economy extends JavaPlugin {
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				// Commands
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				if (label.equalsIgnoreCase("ue-language")) {
-					if (args.length == 2) {
-						if (!args[0].equals("cs") && !args[0].equals("de") && !args[0].equals("en")
-								&& !args[0].equals("fr") && !args[0].equals("zh") && !args[0].equals("ru")
-								&& !args[0].equals("es")) {
-							player.sendMessage(ChatColor.RED + messages.getString("invalid_language"));
-						} else if (!args[1].equals("CZ") && !args[1].equals("DE") && !args[1].equals("US")
-								&& !args[1].equals("FR") && !args[1].equals("CN") && !args[1].equals("RU")
-								&& !args[1].equals("ES")) {
-							player.sendMessage(ChatColor.RED + messages.getString("invalid_country"));
-						} else {
-							getConfig().set("localeLanguage", args[0]);
-							getConfig().set("localeCountry", args[1]);
-							saveConfig();
-							player.sendMessage(ChatColor.GOLD + messages.getString("restart"));
-						}
-					} else {
-						player.sendMessage("/ue-language <language> <country>");
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("maxHomes")) {
-					if (args.length == 1) {
-						EconomyPlayer.setMaxHomes(getConfig(), Integer.valueOf(args[0]));
-						saveConfig();
-						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("max_homes_change")
-								+ " " + ChatColor.GREEN + args[0] + ChatColor.GOLD + ".");
-					} else {
-						player.sendMessage("/maxHomes <number>");
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("maxRentedDays")) {
-					if (args.length == 1) {
-						RentShop.setMaxRentedDays(getConfig(), Integer.valueOf(args[0]));
-						saveConfig();
-						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("max_rented_days") + " "
-								+ ChatColor.GREEN + args[0] + ChatColor.GOLD + ".");
-					} else {
-						player.sendMessage("/maxRentedDays <number>");
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("maxJobs")) {
-					if (args.length == 1) {
-						EconomyPlayer.setMaxJobs(getConfig(), Integer.valueOf(args[0]));
-						saveConfig();
-						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("max_jobs_change") + " "
-								+ ChatColor.GREEN + args[0] + ChatColor.GOLD + ".");
-					} else {
-						player.sendMessage("/maxJobs <number>");
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("maxJoinedTowns")) {
-					if (args.length == 1) {
-						EconomyPlayer.setMaxJoinedTowns(getConfig(), Integer.valueOf(args[0]));
-						saveConfig();
-						player.sendMessage(
-								ChatColor.GOLD + Ultimate_Economy.messages.getString("max_joined_towns_change") + " "
-										+ ChatColor.GREEN + args[0] + ChatColor.GOLD + ".");
-					} else {
-						player.sendMessage("/maxJoinedTowns <number>");
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("ue-homes")) {
-					if (args.length == 1) {
-						if (args[0].equals("true") || args[0].equals("false")) {
-							getConfig().set("homes", Boolean.valueOf(args[0]));
-							saveConfig();
-							player.sendMessage(ChatColor.GOLD + messages.getString("ue_homes") + " " + ChatColor.GREEN
-									+ args[0] + ChatColor.GOLD + ".");
-						} else {
-							player.sendMessage("/ue-homes <true/false>");
-						}
-					} else {
-						player.sendMessage("/ue-homes <true/false>");
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("shop")) {
+				if (label.equalsIgnoreCase("shop")) {
 					if (args.length == 1) {
 						if (ecoPlayer.hasJob(args[0])) {
 							AdminShop.getAdminShopByName(args[0]).openInv(player);
@@ -445,8 +335,6 @@ public class Ultimate_Economy extends JavaPlugin {
 
 			} catch (PlayerException | ShopSystemException | JobSystemException e1) {
 				player.sendMessage(ChatColor.RED + e1.getMessage());
-			} catch (NumberFormatException e2) {
-				player.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("invalid_number"));
 			}
 		}
 		return false;

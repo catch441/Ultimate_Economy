@@ -88,40 +88,15 @@ permissions:
 
 commands:
 
-  ue-homes:   
+  ue-config:   
     permission: ultimate_economy.config
     permission-message: You don't have the permission
-    description: Enable/disable the homes feature.
-    
-  ue-language:   
-    permission: ultimate_economy.config
-    permission-message: You don't have the permission
-    description: Change the language of the plugin.
-
-  maxhomes:   
-    permission: ultimate_economy.config
-    permission-message: You don't have the permission.
-    description: Set max homes.
-    
-  maxRentedDays:   
-    permission: ultimate_economy.config
-    permission-message: You don't have the permission.
-    description: Set max rented days.
-    
-  maxjobs:   
-    permission: ultimate_economy.config
-    permission-message: You don't have the permission.
-    description: Set max jobs.
+    description: Handles the configuration of the plugin.
     
   townWorld:   
     permission: ultimate_economy.townworld
     permission-message: You don't have the permission.
     description: Activate/deactivate town world.
-    
-  maxJoinedTowns:   
-    permission: ultimate_economy.config
-    permission-message: You don't have the permission.
-    description: Set max number of towns you can join.
     
   town:   
     permission: ultimate_economy.town
