@@ -1,5 +1,7 @@
 package com.ue.player;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Set;
 
@@ -64,13 +66,16 @@ public class PlayerCommandExecutor implements CommandExecutor {
 				}
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				else if (label.equalsIgnoreCase("money")) {
+					DecimalFormat dFormat = new DecimalFormat(".##");
+					dFormat.setRoundingMode(RoundingMode.DOWN);
 					if (args.length == 0) {
+						
 						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("money_info") + " "
-								+ ChatColor.GREEN + ecoPlayer.getBankAmount());
+								+ ChatColor.GREEN + dFormat.format(ecoPlayer.getBankAmount()));
 					} else if(args.length == 1 && player.hasPermission("Ultimate_Economy.adminpay")) {
 						EconomyPlayer otherPlayer = EconomyPlayer.getEconomyPlayerByName(args[0]);
 						player.sendMessage(ChatColor.GREEN + args[0] + " " + ChatColor.GOLD + Ultimate_Economy.messages.getString("money_info") + " "
-								+ ChatColor.GREEN + otherPlayer.getBankAmount());
+								+ ChatColor.GREEN + dFormat.format(otherPlayer.getBankAmount()));
 					} else if(player.hasPermission("Ultimate_Economy.adminpay")) {
 						player.sendMessage("/money or /money <player>");
 					} else {
