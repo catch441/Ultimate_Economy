@@ -716,7 +716,7 @@ public class RentShop extends PlayerShop {
 	public static void setupConfig(FileConfiguration fileConfig) {
 		if (!fileConfig.isSet("MaxRentedDays")) {
 			fileConfig.set("MaxRentedDays", 14);
-			maxRentedDays = 3;
+			maxRentedDays = 14;
 		} else {
 			maxRentedDays = fileConfig.getInt("MaxRentedDays");
 		}
