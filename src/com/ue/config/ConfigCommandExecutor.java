@@ -29,12 +29,12 @@ public class ConfigCommandExecutor implements CommandExecutor {
 							if (args.length == 3) {
 								if (!args[1].equals("cs") && !args[1].equals("de") && !args[1].equals("en")
 										&& !args[1].equals("fr") && !args[1].equals("zh") && !args[1].equals("ru")
-										&& !args[1].equals("es")) {
+										&& !args[1].equals("es") && !args[1].equals("lt")) {
 									sender.sendMessage(
 											ChatColor.RED + Ultimate_Economy.messages.getString("invalid_language"));
 								} else if (!args[2].equals("CZ") && !args[2].equals("DE") && !args[2].equals("US")
 										&& !args[2].equals("FR") && !args[2].equals("CN") && !args[2].equals("RU")
-										&& !args[2].equals("ES")) {
+										&& !args[2].equals("ES") && !args[2].equals("LT")) {
 									sender.sendMessage(
 											ChatColor.RED + Ultimate_Economy.messages.getString("invalid_country"));
 								} else {

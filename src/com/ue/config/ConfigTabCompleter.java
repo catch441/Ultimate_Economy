@@ -59,7 +59,28 @@ public class ConfigTabCompleter implements TabCompleter {
 						list.add("zh");
 						list.add("ru");
 						list.add("es");
-					} else if (args[1].equals("de")) {
+						list.add("lt");
+					} else if ("de".contains(args[1])) {
+						list.add("de");
+					} else if ("en".contains(args[1])) {
+						list.add("us");
+					} else if ("cs".contains(args[1])) {
+						list.add("cz");
+					} else if ("fr".contains(args[1])) {
+						list.add("fr");
+					} else if ("zh".contains(args[1])) {
+						list.add("cn");
+					} else if ("ru".contains(args[1])) {
+						list.add("ru");
+					} else if ("es".contains(args[1])) {
+						list.add("es");
+					} else if ("lt".contains(args[1])) {
+						list.add("lt");
+					}
+				}
+			} else if(args.length == 3) {
+				if(args[0].equals("language")) {
+					if (args[1].equals("de")) {
 						list.add("DE");
 					} else if (args[1].equals("en")) {
 						list.add("US");
@@ -73,6 +94,8 @@ public class ConfigTabCompleter implements TabCompleter {
 						list.add("RU");
 					} else if (args[1].equals("es")) {
 						list.add("ES");
+					} else if (args[1].equals("lt")) {
+						list.add("LT");
 					}
 				}
 			}
