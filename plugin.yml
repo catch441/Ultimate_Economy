@@ -87,8 +87,8 @@ permissions:
     default: true
 
   ultimate_economy.info.joblist:
-   	description:
-   	default: true
+    description:
+    default: true
 
 commands:
 
