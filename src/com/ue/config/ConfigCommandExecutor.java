@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.player.EconomyPlayer;
-import com.ue.shopsystem.rentshop.RentShop;
+import com.ue.shopsystem.rentshop.Rentshop;
 
 import ultimate_economy.Ultimate_Economy;
 
@@ -61,7 +61,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					case "maxRentedDays":
 						if (args.length == 2) {
-							RentShop.setMaxRentedDays(plugin.getConfig(), Integer.valueOf(args[1]));
+							Rentshop.setMaxRentedDays(plugin.getConfig(), Integer.valueOf(args[1]));
 							plugin.saveConfig();
 							sender.sendMessage(
 									ChatColor.GOLD + Ultimate_Economy.messages.getString("max_rented_days") + " "

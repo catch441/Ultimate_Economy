@@ -25,14 +25,14 @@ import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.player.EconomyPlayer;
-import com.ue.shopsystem.playershop.PlayerShop;
+import com.ue.shopsystem.playershop.Playershop;
 
 import ultimate_economy.UEVillagerType;
 import ultimate_economy.Ultimate_Economy;
 
-public class RentShop extends PlayerShop {
+public class Rentshop extends Playershop {
 	
-	private static List<RentShop> rentShopList = new ArrayList<>();
+	private static List<Rentshop> rentShopList = new ArrayList<>();
 	private static int maxRentedDays;
 
 	private double rentalFee;
@@ -50,7 +50,7 @@ public class RentShop extends PlayerShop {
 	 * @param shopId
 	 * @param rentalFee
 	 */
-	private RentShop(File dataFolder, Location spawnLocation, int size, String shopId, double rentalFee) {
+	private Rentshop(File dataFolder, Location spawnLocation, int size, String shopId, double rentalFee) {
 		super(dataFolder, "RentShop#" + shopId,"", shopId, spawnLocation, size);
 		saveRentalFeeToFile(rentalFee);
 		this.rentalFee = rentalFee;
@@ -67,7 +67,7 @@ public class RentShop extends PlayerShop {
 	 * @param server
 	 * @param shopId
 	 */
-	private RentShop(File dataFolder, Server server, String shopId) {
+	private Rentshop(File dataFolder, Server server, String shopId) {
 		super(dataFolder, server, null,shopId);
 		loadRentalFee();
 		loadRentable();
@@ -554,7 +554,7 @@ public class RentShop extends PlayerShop {
 	 */
 	public static List<String> getRentShopIdList() {
 		List<String> list = new ArrayList<>();
-		for (RentShop shop : rentShopList) {
+		for (Rentshop shop : rentShopList) {
 			list.add(shop.getShopId());
 		}
 		return list;
@@ -567,8 +567,8 @@ public class RentShop extends PlayerShop {
 	 * @return RentShop
 	 * @throws ShopSystemException
 	 */
-	public static RentShop getRentShopById(String id) throws ShopSystemException {
-		for (RentShop shop : rentShopList) {
+	public static Rentshop getRentShopById(String id) throws ShopSystemException {
+		for (Rentshop shop : rentShopList) {
 			if (shop.getShopId().equals(id)) {
 				return shop;
 			}
@@ -587,8 +587,8 @@ public class RentShop extends PlayerShop {
 	 * @return RentShop
 	 * @throws ShopSystemException
 	 */
-	public static RentShop getRentShopByUniqueName(String name) throws ShopSystemException {
-		for (RentShop shop : rentShopList) {
+	public static Rentshop getRentShopByUniqueName(String name) throws ShopSystemException {
+		for (Rentshop shop : rentShopList) {
 			if(shop.isRentable()) {
 				if (name.equals("RentShop#" + shop.getShopId())) {
 					return shop;
@@ -610,7 +610,7 @@ public class RentShop extends PlayerShop {
 	 */
 	public static List<String> getRentShopUniqueNameList() {
 		List<String> list = new ArrayList<>();
-		for (RentShop shop : rentShopList) {
+		for (Rentshop shop : rentShopList) {
 			if(shop.isRentable()) {
 				list.add("RentShop#" + shop.getShopId());
 			} else {
@@ -624,7 +624,7 @@ public class RentShop extends PlayerShop {
 	 * Returns all rentshops
 	 * @return List<RentShop>
 	 */
-	public static List<RentShop> getRentShops() {
+	public static List<Rentshop> getRentShops() {
 		return rentShopList;
 	}
 
@@ -639,14 +639,14 @@ public class RentShop extends PlayerShop {
 	 * @throws ShopSystemException
 	 * @throws TownSystemException 
 	 */
-	public static RentShop createRentShop(File dataFolder, Location spawnLocation, int size, double rentalFee)
+	public static Rentshop createRentShop(File dataFolder, Location spawnLocation, int size, double rentalFee)
 			throws ShopSystemException, TownSystemException {		
 		if (size % 9 != 0) {
 			throw new ShopSystemException(ShopSystemException.INVALID_INVENTORY_SIZE);
 		} else if(rentalFee < 0) {
 			throw new ShopSystemException(PlayerException.INVALID_NUMBER);
 		} else {
-			RentShop shop = new RentShop(dataFolder, spawnLocation, size, generateFreeRentShopId(), rentalFee);
+			Rentshop shop = new Rentshop(dataFolder, spawnLocation, size, generateFreeRentShopId(), rentalFee);
 			rentShopList.add(shop);
 			return shop;
 		}
@@ -659,7 +659,7 @@ public class RentShop extends PlayerShop {
 	 * @throws ShopSystemException
 	 */
 	public static void deleteRentShop(String name) throws ShopSystemException {
-		RentShop shop = getRentShopByUniqueName(name);
+		Rentshop shop = getRentShopByUniqueName(name);
 		rentShopList.remove(shop);
 		shop.deleteShop();
 	}
@@ -668,7 +668,7 @@ public class RentShop extends PlayerShop {
 	 * This method despawns all rentshop villager.
 	 */
 	public static void despawnAllVillagers() {
-		for (RentShop shop : rentShopList) {
+		for (Rentshop shop : rentShopList) {
 			shop.despawnVillager();
 		}
 	}
@@ -684,7 +684,7 @@ public class RentShop extends PlayerShop {
 		for (String shopId : fileConfig.getStringList("RentShopIds")) {
 			File file = new File(dataFolder, shopId + ".yml");
 			if (file.exists()) {
-				rentShopList.add(new RentShop(dataFolder, server, shopId));
+				rentShopList.add(new Rentshop(dataFolder, server, shopId));
 			} else {
 				Bukkit.getLogger().log(Level.WARNING, ShopSystemException.CANNOT_LOAD_SHOP,
 						new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOP));
@@ -744,15 +744,15 @@ public class RentShop extends PlayerShop {
 	/**
 	 * HIDDEN, NO FUNCTIONALITY
 	 */
-	public static List<PlayerShop> getPlayerShops() {return null;}
+	public static List<Playershop> getPlayerShops() {return null;}
 	/**
 	 * HIDDEN, NO FUNCTIONALITY
 	 */
-	public static PlayerShop getPlayerShopById(String id) throws ShopSystemException {return null;}
+	public static Playershop getPlayerShopById(String id) throws ShopSystemException {return null;}
 	/**
 	 * HIDDEN, NO FUNCTIONALITY
 	 */
-	public static PlayerShop getPlayerShopByUniqueName(String name) throws ShopSystemException {return null;}
+	public static Playershop getPlayerShopByUniqueName(String name) throws ShopSystemException {return null;}
 	/**
 	 * HIDDEN, NO FUNCTIONALITY
 	 */

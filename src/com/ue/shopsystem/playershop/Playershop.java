@@ -28,9 +28,9 @@ import com.ue.townsystem.TownWorld;
 import ultimate_economy.UEVillagerType;
 import ultimate_economy.Ultimate_Economy;
 
-public class PlayerShop extends Shop {
+public class Playershop extends Shop {
 
-	private static List<PlayerShop> playerShopList = new ArrayList<>();
+	private static List<Playershop> playerShopList = new ArrayList<>();
 
 	// true = shop, false = stock
 	private boolean shopMode;
@@ -49,7 +49,7 @@ public class PlayerShop extends Shop {
 	 * @param spawnLocation
 	 * @param size
 	 */
-	protected PlayerShop(File dataFolder, String name, String owner, String shopId, Location spawnLocation, int size) {
+	protected Playershop(File dataFolder, String name, String owner, String shopId, Location spawnLocation, int size) {
 		super(dataFolder, name, shopId, spawnLocation, size);
 		shopMode = true;
 		saveOwnerToFile(owner);
@@ -68,7 +68,7 @@ public class PlayerShop extends Shop {
 	 * @param name
 	 * @param shopId
 	 */
-	protected PlayerShop(File dataFolder, Server server, String name, String shopId) {
+	protected Playershop(File dataFolder, Server server, String name, String shopId) {
 		super(dataFolder, server, name, shopId);
 		shopMode = true;
 		//old loading, can be deleted in the future
@@ -165,9 +165,9 @@ public class PlayerShop extends Shop {
 	 */
 	@Override
 	public void changeShopName(String name) throws ShopSystemException {
-		if(PlayerShop.getPlayerShopUniqueNameList().contains(name + owner)) {
+		if(Playershop.getPlayerShopUniqueNameList().contains(name + owner)) {
 			throw new ShopSystemException(ShopSystemException.SHOP_ALREADY_EXISTS);
-		} else if(PlayerShop.getPlayerShopUniqueNameList().contains(name)) {
+		} else if(Playershop.getPlayerShopUniqueNameList().contains(name)) {
 			throw new ShopSystemException(ShopSystemException.SHOP_ALREADY_EXISTS);
 		} else if(name.contains("_")) {
 			throw new ShopSystemException(ShopSystemException.INVALID_CHAR_IN_SHOP_NAME);
@@ -324,7 +324,7 @@ public class PlayerShop extends Shop {
 			throw new PlayerException(PlayerException.PLAYER_DOES_NOT_EXIST);
 		} else {
 			// validation, check if the new owner has already a shop with this name.
-			if (PlayerShop.getPlayerShopUniqueNameList().contains(getName() + "_" + newOwner)) {
+			if (Playershop.getPlayerShopUniqueNameList().contains(getName() + "_" + newOwner)) {
 				throw new ShopSystemException(ChatColor.RED + Ultimate_Economy.messages.getString("shop_changeOwner1")
 													+ " " + ChatColor.GREEN + newOwner + ChatColor.RED + " "
 													+ Ultimate_Economy.messages.getString("shop_changeOwner2"));
@@ -457,7 +457,7 @@ public class PlayerShop extends Shop {
 	 */
 	public static List<String> getPlayerShopUniqueNameList() {
 		List<String> list = new ArrayList<>();
-		for (PlayerShop shop : playerShopList) {
+		for (Playershop shop : playerShopList) {
 			list.add(shop.getName() + "_" + shop.getOwner());
 		}
 		return list;
@@ -473,8 +473,8 @@ public class PlayerShop extends Shop {
 	 * @return PlayerShop
 	 * @throws ShopSystemException
 	 */
-	public static PlayerShop getPlayerShopByUniqueName(String name) throws ShopSystemException {
-		for (PlayerShop shop : playerShopList) {
+	public static Playershop getPlayerShopByUniqueName(String name) throws ShopSystemException {
+		for (Playershop shop : playerShopList) {
 			if (name.equals(shop.getName() + "_" + shop.getOwner())) {
 				return shop;
 			}
@@ -489,8 +489,8 @@ public class PlayerShop extends Shop {
 	 * @return PlayerShop
 	 * @throws ShopSystemException
 	 */
-	public static PlayerShop getPlayerShopById(String id) throws ShopSystemException {
-		for (PlayerShop shop : playerShopList) {
+	public static Playershop getPlayerShopById(String id) throws ShopSystemException {
+		for (Playershop shop : playerShopList) {
 			if (shop.getShopId().equals(id)) {
 				return shop;
 			}
@@ -502,7 +502,7 @@ public class PlayerShop extends Shop {
 	 * Returns all player shops
 	 * @return List<PlayerShop>
 	 */
-	public static List<PlayerShop> getPlayerShops() {
+	public static List<Playershop> getPlayerShops() {
 		return playerShopList;
 	}
 	
@@ -513,7 +513,7 @@ public class PlayerShop extends Shop {
 	 */
 	public static List<String> getPlayershopIdList() {
 		List<String> list = new ArrayList<>();
-		for (PlayerShop shop : playerShopList) {
+		for (Playershop shop : playerShopList) {
 			list.add(shop.getShopId());
 		}
 		return list;
@@ -557,7 +557,7 @@ public class PlayerShop extends Shop {
 		} else if (size % 9 != 0) {
 			throw new ShopSystemException(ShopSystemException.INVALID_INVENTORY_SIZE);
 		} else {
-			playerShopList.add(new PlayerShop(dataFolder, name,playerName, generateFreePlayerShopId(), spawnLocation, size));
+			playerShopList.add(new Playershop(dataFolder, name,playerName, generateFreePlayerShopId(), spawnLocation, size));
 		}
 	}
 
@@ -568,7 +568,7 @@ public class PlayerShop extends Shop {
 	 * @throws ShopSystemException
 	 */
 	public static void deletePlayerShop(String name) throws ShopSystemException {
-		PlayerShop shop = getPlayerShopByUniqueName(name);
+		Playershop shop = getPlayerShopByUniqueName(name);
 		playerShopList.remove(shop);
 		shop.deleteShop();
 	}
@@ -577,7 +577,7 @@ public class PlayerShop extends Shop {
 	 * This method despawns all playershop villager.
 	 */
 	public static void despawnAllVillagers() {
-		for (PlayerShop shop : playerShopList) {
+		for (Playershop shop : playerShopList) {
 			shop.despawnVillager();
 		}
 	}
@@ -596,7 +596,7 @@ public class PlayerShop extends Shop {
 				File file = new File(dataFolder, shopName + ".yml");
 				if (file.exists()) {
 					String shopId = generateFreePlayerShopId();
-					playerShopList.add(new PlayerShop(dataFolder, server, shopName, shopId));
+					playerShopList.add(new Playershop(dataFolder, server, shopName, shopId));
 				} else {
 					Bukkit.getLogger().log(Level.WARNING, ShopSystemException.CANNOT_LOAD_SHOP,
 							new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOP));
@@ -604,14 +604,14 @@ public class PlayerShop extends Shop {
 			}
 			//convert to new shopId save system
 			fileConfig.set("PlayerShopNames", null);
-			fileConfig.set("PlayerShopIds", PlayerShop.getPlayershopIdList());
+			fileConfig.set("PlayerShopIds", Playershop.getPlayershopIdList());
 		} 
 		//new load system
 		else {
 			for (String shopId : fileConfig.getStringList("PlayerShopIds")) {
 				File file = new File(dataFolder, shopId + ".yml");
 				if (file.exists()) {
-					playerShopList.add(new PlayerShop(dataFolder, server, null, shopId));
+					playerShopList.add(new Playershop(dataFolder, server, null, shopId));
 				} else {
 					Bukkit.getLogger().log(Level.WARNING, ShopSystemException.CANNOT_LOAD_SHOP,
 							new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOP));

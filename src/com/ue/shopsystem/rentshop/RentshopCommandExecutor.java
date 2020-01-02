@@ -12,11 +12,11 @@ import com.ue.exceptions.TownSystemException;
 
 import ultimate_economy.Ultimate_Economy;
 
-public class RentShopCommandExecutor implements CommandExecutor {
+public class RentshopCommandExecutor implements CommandExecutor {
 
 	private Ultimate_Economy plugin;
 
-	public RentShopCommandExecutor(Ultimate_Economy plugin) {
+	public RentshopCommandExecutor(Ultimate_Economy plugin) {
 		this.plugin = plugin;
 	}
 
@@ -30,9 +30,9 @@ public class RentShopCommandExecutor implements CommandExecutor {
 				if (args.length != 0) {
 					if (player.hasPermission("ultimate_economy.rentshop.admin") && args[0].equals("create")) {
 						if (args.length == 3) {
-							RentShop shop = RentShop.createRentShop(plugin.getDataFolder(), player.getLocation(),
+							Rentshop shop = Rentshop.createRentShop(plugin.getDataFolder(), player.getLocation(),
 									Integer.valueOf(args[1]), Double.valueOf(args[2]));
-							plugin.getConfig().set("RentShopIds", RentShop.getRentShopIdList());
+							plugin.getConfig().set("RentShopIds", Rentshop.getRentShopIdList());
 							plugin.saveConfig();
 							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_create1")
 									+ " " + ChatColor.GREEN + shop.getName() + ChatColor.GOLD + " "
@@ -44,8 +44,8 @@ public class RentShopCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					else if (player.hasPermission("ultimate_economy.rentshop.admin") && args[0].equals("delete")) {
 						if (args.length == 2) {
-							RentShop.deleteRentShop(args[1]);
-							plugin.getConfig().set("RentShopIds", RentShop.getRentShopIdList());
+							Rentshop.deleteRentShop(args[1]);
+							plugin.getConfig().set("RentShopIds", Rentshop.getRentShopIdList());
 							plugin.saveConfig();
 							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_delete1")
 									+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
@@ -57,7 +57,7 @@ public class RentShopCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					else if (player.hasPermission("ultimate_economy.rentshop.admin") && args[0].equals("move")) {
 						if (args.length == 2) {
-							RentShop.getRentShopByUniqueName(args[1]).moveShop(player.getLocation());
+							Rentshop.getRentShopByUniqueName(args[1]).moveShop(player.getLocation());
 						} else {
 							player.sendMessage("/" + label + " move <shopname>");
 						}
@@ -65,7 +65,7 @@ public class RentShopCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					else if (player.hasPermission("ultimate_economy.rentshop.admin") && args[0].equals("resize")) {
 						if (args.length == 3) {
-							RentShop.getRentShopByUniqueName(args[1]).changeShopSize(Integer.valueOf(args[2]));
+							Rentshop.getRentShopByUniqueName(args[1]).changeShopSize(Integer.valueOf(args[2]));
 							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_resize")
 										+ " " + ChatColor.GREEN + args[2] + ChatColor.GOLD + ".");
 						} else {
@@ -77,7 +77,7 @@ public class RentShopCommandExecutor implements CommandExecutor {
 					else if (args[0].equals("changeProfession")) {
 						if (args.length == 3) {
 							try {
-								RentShop.getRentShopByUniqueName(args[1] + "_" + player.getName())
+								Rentshop.getRentShopByUniqueName(args[1] + "_" + player.getName())
 										.changeProfession(Profession.valueOf(args[2].toUpperCase()));
 								player.sendMessage(
 										ChatColor.GOLD + Ultimate_Economy.messages.getString("profession_changed"));
@@ -92,7 +92,7 @@ public class RentShopCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					else if (args[0].equals("rename")) {
 						if (args.length == 3) {
-							RentShop.getRentShopByUniqueName(args[1] + "_" + player.getName()).changeShopName(args[2]);
+							Rentshop.getRentShopByUniqueName(args[1] + "_" + player.getName()).changeShopName(args[2]);
 							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_rename1")
 									+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
 									+ Ultimate_Economy.messages.getString("shop_rename2") + " " + ChatColor.GREEN
@@ -104,7 +104,7 @@ public class RentShopCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					else if (args[0].equals("editShop")) {
 						if (args.length == 2) {
-							RentShop.getRentShopByUniqueName(args[1] + "_" + player.getName()).openEditor(player);
+							Rentshop.getRentShopByUniqueName(args[1] + "_" + player.getName()).openEditor(player);
 						} else {
 							player.sendMessage("/" + label + " editShop <shopname>");
 						}

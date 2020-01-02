@@ -6,7 +6,7 @@ public class RentDailyTask extends BukkitRunnable {
 
 	@Override
 	public void run() {
-		for(RentShop shop: RentShop.getRentShops()) {
+		for(Rentshop shop: Rentshop.getRentShops()) {
 			shop.handleDaily();
 		}
 	}

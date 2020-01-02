@@ -54,9 +54,9 @@ import com.ue.jobsystem.JobCenter;
 import com.ue.player.EconomyPlayer;
 import com.ue.shopsystem.Shop;
 import com.ue.shopsystem.Spawner;
-import com.ue.shopsystem.adminshop.AdminShop;
-import com.ue.shopsystem.playershop.PlayerShop;
-import com.ue.shopsystem.rentshop.RentShop;
+import com.ue.shopsystem.adminshop.Adminshop;
+import com.ue.shopsystem.playershop.Playershop;
+import com.ue.shopsystem.rentshop.Rentshop;
 import com.ue.townsystem.Plot;
 import com.ue.townsystem.Town;
 import com.ue.townsystem.TownWorld;
@@ -143,16 +143,16 @@ public class Ultimate_EconomyEventHandler implements Listener {
 						town2.openTownManagerVillagerInv(event.getPlayer());
 						break;
 					case ADMINSHOP:
-						AdminShop.getAdminShopById(shopId).openInv(event.getPlayer());
+						Adminshop.getAdminShopById(shopId).openInv(event.getPlayer());
 						break;
 					case PLAYERSHOP:
-						PlayerShop.getPlayerShopById(shopId).openInv(event.getPlayer());
+						Playershop.getPlayerShopById(shopId).openInv(event.getPlayer());
 						break;
 					case JOBCENTER:
 						JobCenter.getJobCenterByName(entity.getCustomName()).openInv(event.getPlayer());
 						break;
 					case PLAYERSHOP_RENTABLE:
-						RentShop shop = RentShop.getRentShopById(shopId);
+						Rentshop shop = Rentshop.getRentShopById(shopId);
 						if(shop.isRentable()) {
 							shop.openRentGUI(event.getPlayer());;
 						} else {
@@ -269,19 +269,19 @@ public class Ultimate_EconomyEventHandler implements Listener {
 							}
 							break;
 						case PLAYERSHOP:
-							PlayerShop playerShop = PlayerShop.getPlayerShopById(shopId);
-							handleShopInvClickEvent(playerShop, player,event);
+							Playershop playershop = Playershop.getPlayerShopById(shopId);
+							handleShopInvClickEvent(playershop, player,event);
 							break;
 						case ADMINSHOP:
-							AdminShop adminShop = AdminShop.getAdminShopById(shopId);
-							handleShopInvClickEvent(adminShop, player, event);
+							Adminshop adminshop = Adminshop.getAdminShopById(shopId);
+							handleShopInvClickEvent(adminshop, player, event);
 							break;
 						case PLAYERSHOP_RENTABLE:
-							RentShop rentShop = RentShop.getRentShopById(shopId);
-							if(rentShop.isRentable()) {
-								rentShop.handleRentShopGUIClick(event);
+							Rentshop rentshop = Rentshop.getRentShopById(shopId);
+							if(rentshop.isRentable()) {
+								rentshop.handleRentShopGUIClick(event);
 							} else {
-								handleShopInvClickEvent(rentShop, player, event);
+								handleShopInvClickEvent(rentshop, player, event);
 							}
 							break;
 					}
@@ -563,14 +563,14 @@ public class Ultimate_EconomyEventHandler implements Listener {
 		boolean alreadysay = false;
 		ClickType clickType = event.getClick();
 		Inventory inventoryplayer = event.getWhoClicked().getInventory();
-		PlayerShop playerShop = null;
-		if (shop instanceof PlayerShop) {
+		Playershop playershop = null;
+		if (shop instanceof Playershop) {
 			isPlayershop = true;
-			playerShop = (PlayerShop) shop;
+			playershop = (Playershop) shop;
 		}
 		// Playershop
-		if (isPlayershop && clickType == ClickType.MIDDLE && playerShop.getOwner().equals(playe.getName())) {
-			playerShop.switchStockpile();
+		if (isPlayershop && clickType == ClickType.MIDDLE && playershop.getOwner().equals(playe.getName())) {
+			playershop.switchStockpile();
 		} //
 		else {
 			for (String itemString : shop.getItemList()) {
@@ -604,13 +604,13 @@ public class Ultimate_EconomyEventHandler implements Listener {
 						int amount = shop.getItemAmount(itemString);
 						EconomyPlayer playerShopOwner = null;
 						if (isPlayershop) {
-							playerShopOwner = EconomyPlayer.getEconomyPlayerByName(playerShop.getOwner());
+							playerShopOwner = EconomyPlayer.getEconomyPlayerByName(playershop.getOwner());
 						}
 						EconomyPlayer ecoPlayer = EconomyPlayer.getEconomyPlayerByName(playe.getName());
 						if (clickType == ClickType.LEFT) {
 							if (buyprice != 0.0 && ecoPlayer.hasEnoughtMoney(buyprice)
 									|| (isPlayershop && playe.getName().equals(playerShopOwner.getName()))) {
-								if (!isPlayershop || playerShop.available(clickedItemString)) {
+								if (!isPlayershop || playershop.available(clickedItemString)) {
 									if (inventoryplayer.firstEmpty() != -1) {
 										// only adminshop
 										if (isSpawner) {
@@ -638,9 +638,9 @@ public class Ultimate_EconomyEventHandler implements Listener {
 										else if (!isSpawner) {
 											ItemStack itemStack = shop.getItemStack(itemString);
 											if (isPlayershop) {
-												playerShop.decreaseStock(itemString, amount);
+												playershop.decreaseStock(itemString, amount);
 												// if the player is in stockpile mode, then the stockpile gets refreshed
-												playerShop.setupStockpile();
+												playershop.setupStockpile();
 											}
 											itemStack.setAmount(amount);
 											inventoryplayer.addItem(itemStack);
@@ -717,7 +717,7 @@ public class Ultimate_EconomyEventHandler implements Listener {
 										// only playershop
 										if (isPlayershop) {
 											playerShopOwner.decreasePlayerAmount(sellprice, false);
-											playerShop.increaseStock(clickedItemString, amount);
+											playershop.increaseStock(clickedItemString, amount);
 										}
 										if (amount > 1) {
 											playe.sendMessage(
@@ -753,9 +753,9 @@ public class Ultimate_EconomyEventHandler implements Listener {
 												+ ChatColor.GREEN + String.valueOf(amount) + ChatColor.GOLD + " "
 												+ Ultimate_Economy.messages.getString("shop_added_item_singular2"));
 									}
-									playerShop.increaseStock(clickedItemString, amount);
+									playershop.increaseStock(clickedItemString, amount);
 									// if the player is in stockpile mode, then the stockpile gets refreshed
-									playerShop.setupStockpile();
+									playershop.setupStockpile();
 									removeItemFromInventory(inventoryplayer, itemStack, amount);
 								}
 								break;
@@ -801,7 +801,7 @@ public class Ultimate_EconomyEventHandler implements Listener {
 										// only playershop
 										if (isPlayershop) {
 											playerShopOwner.decreasePlayerAmount(newprice, false);
-											playerShop.increaseStock(clickedItemString, amount);
+											playershop.increaseStock(clickedItemString, amount);
 										}
 										itemStack.setAmount(itemAmount);
 										removeItemFromInventory(inventoryplayer, itemStack, itemAmount);
@@ -825,9 +825,9 @@ public class Ultimate_EconomyEventHandler implements Listener {
 												+ ChatColor.GREEN + String.valueOf(itemAmount) + ChatColor.GOLD + " "
 												+ Ultimate_Economy.messages.getString("shop_added_item_singular2"));
 									}
-									playerShop.increaseStock(clickedItemString, itemAmount);
+									playershop.increaseStock(clickedItemString, itemAmount);
 									// if the player is in stockpile mode, then the stockpile gets refreshed
-									playerShop.setupStockpile();
+									playershop.setupStockpile();
 									itemStack.setAmount(itemAmount);
 									removeItemFromInventory(inventoryplayer, itemStack, itemAmount);
 								}

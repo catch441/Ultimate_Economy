@@ -17,9 +17,9 @@ import com.ue.shopsystem.Shop;
 import ultimate_economy.UEVillagerType;
 import ultimate_economy.Ultimate_Economy;
 
-public class AdminShop extends Shop {
+public class Adminshop extends Shop {
 
-	private static List<AdminShop> adminShopList = new ArrayList<>();
+	private static List<Adminshop> adminShopList = new ArrayList<>();
 
 	/**
 	 * Constructor for creating a new adminShop.
@@ -31,7 +31,7 @@ public class AdminShop extends Shop {
 	 * @param spawnLocation
 	 * @param size
 	 */
-	private AdminShop(File dataFolder, String name, String shopId, Location spawnLocation, int size) {
+	private Adminshop(File dataFolder, String name, String shopId, Location spawnLocation, int size) {
 		super(dataFolder, name, shopId, spawnLocation, size);
 		// set the tye of the villager
 		villager.setMetadata("ue-type", new FixedMetadataValue(Ultimate_Economy.getInstance, UEVillagerType.ADMINSHOP));
@@ -53,7 +53,7 @@ public class AdminShop extends Shop {
 	 * @param server
 	 * @param name
 	 */
-	private AdminShop(File dataFolder, Server server, String name, String shopId) {
+	private Adminshop(File dataFolder, Server server, String name, String shopId) {
 		super(dataFolder, server, name, shopId);
 		// set the tye of the villager
 		villager.setMetadata("ue-type", new FixedMetadataValue(Ultimate_Economy.getInstance, UEVillagerType.ADMINSHOP));
@@ -89,8 +89,8 @@ public class AdminShop extends Shop {
 	 * @return
 	 * @throws ShopSystemException
 	 */
-	public static AdminShop getAdminShopByName(String name) throws ShopSystemException {
-		for (AdminShop shop : adminShopList) {
+	public static Adminshop getAdminShopByName(String name) throws ShopSystemException {
+		for (Adminshop shop : adminShopList) {
 			if (shop.getName().equals(name)) {
 				return shop;
 			}
@@ -105,8 +105,8 @@ public class AdminShop extends Shop {
 	 * @return
 	 * @throws ShopSystemException
 	 */
-	public static AdminShop getAdminShopById(String id) throws ShopSystemException {
-		for (AdminShop shop : adminShopList) {
+	public static Adminshop getAdminShopById(String id) throws ShopSystemException {
+		for (Adminshop shop : adminShopList) {
 			if (shop.getShopId().equals(id)) {
 				return shop;
 			}
@@ -121,7 +121,7 @@ public class AdminShop extends Shop {
 	 */
 	public static List<String> getAdminshopIdList() {
 		List<String> list = new ArrayList<>();
-		for(AdminShop shop: adminShopList) {
+		for(Adminshop shop: adminShopList) {
 			list.add(shop.getShopId());
 		}
 		return list;
@@ -134,7 +134,7 @@ public class AdminShop extends Shop {
 	 */
 	public static List<String> getAdminshopNameList() {
 		List<String> list = new ArrayList<>();
-		for(AdminShop shop: AdminShop.getAdminshopList()) {
+		for(Adminshop shop: Adminshop.getAdminshopList()) {
 			list.add(shop.getName());
 		}
 		return list;
@@ -144,7 +144,7 @@ public class AdminShop extends Shop {
 	 * Returns the adminshop list.
 	 * @return
 	 */
-	public static List<AdminShop> getAdminshopList() {
+	public static List<Adminshop> getAdminshopList() {
 		return adminShopList;
 	}
 	
@@ -184,7 +184,7 @@ public class AdminShop extends Shop {
 		} else if (size % 9 != 0) {
 			throw new ShopSystemException(ShopSystemException.INVALID_INVENTORY_SIZE);
 		} else {
-			adminShopList.add(new AdminShop(dataFolder, name, generateFreeAdminShopId(), spawnLocation, size));
+			adminShopList.add(new Adminshop(dataFolder, name, generateFreeAdminShopId(), spawnLocation, size));
 		}
 	}
 
@@ -195,7 +195,7 @@ public class AdminShop extends Shop {
 	 * @throws ShopSystemException
 	 */
 	public static void deleteAdminShop(String name) throws ShopSystemException {
-		AdminShop shop = getAdminShopByName(name);
+		Adminshop shop = getAdminShopByName(name);
 		adminShopList.remove(shop);
 		shop.deleteShop();
 	}
@@ -204,7 +204,7 @@ public class AdminShop extends Shop {
 	 * This method despawns all adminshop villager.
 	 */
 	public static void despawnAllVillagers() {
-		for (AdminShop shop : adminShopList) {
+		for (Adminshop shop : adminShopList) {
 			shop.despawnVillager();
 		}
 	}
@@ -222,7 +222,7 @@ public class AdminShop extends Shop {
 			for (String shopName : fileConfig.getStringList("ShopNames")) {
 				File file = new File(dataFolder, shopName + ".yml");
 				if (file.exists()) {
-					adminShopList.add(new AdminShop(dataFolder, server, shopName, generateFreeAdminShopId()));
+					adminShopList.add(new Adminshop(dataFolder, server, shopName, generateFreeAdminShopId()));
 				} else {
 					Bukkit.getLogger().log(Level.WARNING, ShopSystemException.CANNOT_LOAD_SHOP,
 							new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOP));
@@ -230,7 +230,7 @@ public class AdminShop extends Shop {
 			}
 			//convert to new shopId save system
 			fileConfig.set("ShopNames", null);
-			fileConfig.set("AdminShopIds", AdminShop.getAdminshopIdList());
+			fileConfig.set("AdminShopIds", Adminshop.getAdminshopIdList());
 		} 
 		//new load system
 		else {
@@ -240,7 +240,7 @@ public class AdminShop extends Shop {
 			for (String shopId : fileConfig.getStringList("AdminShopIds")) {
 				File file = new File(dataFolder, shopId + ".yml");
 				if (file.exists()) {
-					adminShopList.add(new AdminShop(dataFolder, server,null, shopId));
+					adminShopList.add(new Adminshop(dataFolder, server,null, shopId));
 				} else {
 					Bukkit.getLogger().log(Level.WARNING, ShopSystemException.CANNOT_LOAD_SHOP,
 							new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOP));

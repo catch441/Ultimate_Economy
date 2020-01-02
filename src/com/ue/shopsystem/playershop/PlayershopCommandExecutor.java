@@ -14,11 +14,11 @@ import com.ue.exceptions.TownSystemException;
 
 import ultimate_economy.Ultimate_Economy;
 
-public class PlayerShopCommandExecutor implements CommandExecutor {
+public class PlayershopCommandExecutor implements CommandExecutor {
 
 	private Ultimate_Economy plugin;
 
-	public PlayerShopCommandExecutor(Ultimate_Economy plugin) {
+	public PlayershopCommandExecutor(Ultimate_Economy plugin) {
 		this.plugin = plugin;
 	}
 
@@ -31,9 +31,9 @@ public class PlayerShopCommandExecutor implements CommandExecutor {
 					switch (args[0]) {
 						case "create":
 							if (args.length == 3) {
-								PlayerShop.createPlayerShop(plugin.getDataFolder(), args[1], player.getLocation(),
+								Playershop.createPlayerShop(plugin.getDataFolder(), args[1], player.getLocation(),
 										Integer.valueOf(args[2]), player.getName());
-								plugin.getConfig().set("PlayerShopIds", PlayerShop.getPlayershopIdList());
+								plugin.getConfig().set("PlayerShopIds", Playershop.getPlayershopIdList());
 								plugin.saveConfig();
 								player.sendMessage(
 										ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_create1") + " "
@@ -46,8 +46,8 @@ public class PlayerShopCommandExecutor implements CommandExecutor {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						case "delete":
 							if (args.length == 2) {
-								PlayerShop.deletePlayerShop(args[1] + "_" + player.getName());
-								plugin.getConfig().set("PlayerShopIds", PlayerShop.getPlayershopIdList());
+								Playershop.deletePlayerShop(args[1] + "_" + player.getName());
+								plugin.getConfig().set("PlayerShopIds", Playershop.getPlayershopIdList());
 								plugin.saveConfig();
 								player.sendMessage(
 										ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_delete1") + " "
@@ -61,9 +61,9 @@ public class PlayerShopCommandExecutor implements CommandExecutor {
 						case "deleteOther":
 							if (player.hasPermission("ultimate_economy.adminshop")) {
 								if (args.length == 2) {
-									PlayerShop.deletePlayerShop(args[1]);
+									Playershop.deletePlayerShop(args[1]);
 									plugin.getConfig().set("PlayerShopIds",
-											PlayerShop.getPlayerShopUniqueNameList());
+											Playershop.getPlayerShopUniqueNameList());
 									plugin.saveConfig();
 									player.sendMessage(
 											ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_delete1")
@@ -77,7 +77,7 @@ public class PlayerShopCommandExecutor implements CommandExecutor {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						case "rename":
 							if (args.length == 3) {
-								PlayerShop.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
+								Playershop.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
 										.changeShopName(args[2]);
 								player.sendMessage(
 										ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_rename1") + " "
@@ -91,7 +91,7 @@ public class PlayerShopCommandExecutor implements CommandExecutor {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						case "resize":
 							if (args.length == 3) {
-								PlayerShop.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
+								Playershop.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
 										.changeShopSize(Integer.valueOf(args[2]));
 								player.sendMessage(
 										ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_resize") + " "
@@ -103,7 +103,7 @@ public class PlayerShopCommandExecutor implements CommandExecutor {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						case "move": 
 							if (args.length == 2) {
-								PlayerShop.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
+								Playershop.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
 										.moveShop(player.getLocation());
 							} else {
 								player.sendMessage("/" + label + " move <shop>");
@@ -112,7 +112,7 @@ public class PlayerShopCommandExecutor implements CommandExecutor {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						case "changeOwner": 
 							if (args.length == 3) {
-								PlayerShop.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
+								Playershop.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
 										.changeOwner(args[2]);
 								player.sendMessage(
 										ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_changeOwner3") + " "
@@ -135,7 +135,7 @@ public class PlayerShopCommandExecutor implements CommandExecutor {
 						case "changeProfession": 
 							if (args.length == 3) {
 								try {
-									PlayerShop.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
+									Playershop.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
 											.changeProfession(Profession.valueOf(args[2].toUpperCase()));
 									player.sendMessage(
 											ChatColor.GOLD + Ultimate_Economy.messages.getString("profession_changed"));
@@ -150,7 +150,7 @@ public class PlayerShopCommandExecutor implements CommandExecutor {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						case "editShop": 
 							if (args.length == 2) {
-								PlayerShop.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
+								Playershop.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
 										.openEditor(player);
 							} else {
 								player.sendMessage("/" + label + " editShop <shop>");

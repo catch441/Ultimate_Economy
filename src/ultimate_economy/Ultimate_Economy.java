@@ -38,14 +38,16 @@ import com.ue.metrics.Metrics;
 import com.ue.player.EconomyPlayer;
 import com.ue.player.PlayerCommandExecutor;
 import com.ue.player.PlayerTabCompleter;
-import com.ue.shopsystem.ShopTabCompleter;
-import com.ue.shopsystem.adminshop.AdminShop;
-import com.ue.shopsystem.adminshop.AdminShopCommandExecutor;
-import com.ue.shopsystem.playershop.PlayerShop;
-import com.ue.shopsystem.playershop.PlayerShopCommandExecutor;
+import com.ue.shopsystem.adminshop.Adminshop;
+import com.ue.shopsystem.adminshop.AdminshopCommandExecutor;
+import com.ue.shopsystem.adminshop.AdminshopTabCompleter;
+import com.ue.shopsystem.playershop.Playershop;
+import com.ue.shopsystem.playershop.PlayershopCommandExecutor;
+import com.ue.shopsystem.playershop.PlayershopTabCompleter;
 import com.ue.shopsystem.rentshop.RentDailyTask;
-import com.ue.shopsystem.rentshop.RentShop;
-import com.ue.shopsystem.rentshop.RentShopCommandExecutor;
+import com.ue.shopsystem.rentshop.Rentshop;
+import com.ue.shopsystem.rentshop.RentshopCommandExecutor;
+import com.ue.shopsystem.rentshop.RentshopTabCompleter;
 import com.ue.townsystem.TownCommandExecutor;
 import com.ue.townsystem.TownTabCompleter;
 import com.ue.townsystem.TownWorld;
@@ -105,9 +107,9 @@ public class Ultimate_Economy extends JavaPlugin {
 		messages = ResourceBundle.getBundle("src.lang.MessagesBundle", currentLocale, new UTF8Control());
 		JobCenter.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
 		Job.loadAllJobs(getDataFolder(), getConfig());
-		AdminShop.loadAllAdminShops(getConfig(), getDataFolder(), getServer());
-		PlayerShop.loadAllPlayerShops(getConfig(), getDataFolder(), getServer());
-		RentShop.loadAllRentShops(getConfig(), getDataFolder(), getServer());
+		Adminshop.loadAllAdminShops(getConfig(), getDataFolder(), getServer());
+		Playershop.loadAllPlayerShops(getConfig(), getDataFolder(), getServer());
+		Rentshop.loadAllRentShops(getConfig(), getDataFolder(), getServer());
 
 		try {
 			TownWorld.loadAllTownWorlds(getDataFolder(), getConfig(), getServer());
@@ -122,7 +124,7 @@ public class Ultimate_Economy extends JavaPlugin {
 		}
 
 		EconomyPlayer.setupConfig(getConfig());
-		RentShop.setupConfig(getConfig());
+		Rentshop.setupConfig(getConfig());
 		saveConfig();
 
 		File spawner = new File(getDataFolder(), "SpawnerLocations.yml");
@@ -135,19 +137,18 @@ public class Ultimate_Economy extends JavaPlugin {
 		}
 
 		// setup command executors and tab completer
-		ShopTabCompleter shopTabCompleter = new ShopTabCompleter();
 		getCommand("jobcenter").setExecutor(new JobCommandExecutor(this));
 		getCommand("jobcenter").setTabCompleter(new JobTabCompleter(getConfig()));
 		getCommand("town").setExecutor(new TownCommandExecutor());
 		getCommand("town").setTabCompleter(new TownTabCompleter());
 		getCommand("townworld").setExecutor(new TownworldCommandExecutor(this));
 		getCommand("townworld").setTabCompleter(new TownworldTabCompleter());
-		getCommand("adminshop").setExecutor(new AdminShopCommandExecutor(this));
-		getCommand("adminshop").setTabCompleter(shopTabCompleter);
-		getCommand("playershop").setTabCompleter(shopTabCompleter);
-		getCommand("playershop").setExecutor(new PlayerShopCommandExecutor(this));
-		getCommand("rentshop").setExecutor(new RentShopCommandExecutor(this));
-		getCommand("rentshop").setTabCompleter(shopTabCompleter);
+		getCommand("adminshop").setExecutor(new AdminshopCommandExecutor(this));
+		getCommand("adminshop").setTabCompleter(new AdminshopTabCompleter());
+		getCommand("playershop").setTabCompleter(new PlayershopTabCompleter());
+		getCommand("playershop").setExecutor(new PlayershopCommandExecutor(this));
+		getCommand("rentshop").setExecutor(new RentshopCommandExecutor(this));
+		getCommand("rentshop").setTabCompleter(new RentshopTabCompleter());
 		PlayerCommandExecutor playerCommandExecutor = new PlayerCommandExecutor();
 		PlayerTabCompleter playerTabCompleter = new PlayerTabCompleter();
 		getCommand("bank").setExecutor(playerCommandExecutor);
@@ -235,9 +236,9 @@ public class Ultimate_Economy extends JavaPlugin {
 	public void onDisable() {
 		JobCenter.despawnAllVillagers();
 		TownWorld.despawnAllVillagers();
-		AdminShop.despawnAllVillagers();
-		PlayerShop.despawnAllVillagers();
-		RentShop.despawnAllVillagers();
+		Adminshop.despawnAllVillagers();
+		Playershop.despawnAllVillagers();
+		Rentshop.despawnAllVillagers();
 		saveConfig();
 		// vault
 		if (Bukkit.getServer().getPluginManager().getPlugin("Vault") != null) {
@@ -275,7 +276,7 @@ public class Ultimate_Economy extends JavaPlugin {
 					case "shop": 
 						if (args.length == 1) {
 							if (ecoPlayer.hasJob(args[0])) {
-								AdminShop.getAdminShopByName(args[0]).openInv(player);
+								Adminshop.getAdminShopByName(args[0]).openInv(player);
 							} else {
 								player.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("shop_info"));
 							}
@@ -285,7 +286,7 @@ public class Ultimate_Economy extends JavaPlugin {
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					case "shoplist": 
-						List<String> shopNames = AdminShop.getAdminshopNameList();
+						List<String> shopNames = Adminshop.getAdminshopNameList();
 						String shopString = shopNames.toString();
 						shopString = shopString.replace("[", "");
 						shopString = shopString.replace("]", "");
