@@ -2,7 +2,6 @@ package com.ue.shopsystem.adminshop;
 
 import java.util.ArrayList;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -40,7 +39,6 @@ public class AdminShopCommandExecutor implements CommandExecutor {
 						switch (args[0]) {
 							case "create":
 								if (args.length == 3) {
-									Bukkit.getLogger().info("test");
 									AdminShop.createAdminShop(plugin.getDataFolder(), args[1], player.getLocation(),
 											Integer.valueOf(args[2]));
 									player.sendMessage(
