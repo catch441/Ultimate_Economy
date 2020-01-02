@@ -22,7 +22,7 @@ public class PlayerCommandExecutor implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (label.equalsIgnoreCase("giveMoney")) {
+		if (label.equals("givemoney")) {
 			try {
 				if (args.length == 2) {
 					double amount = Double.valueOf(args[1]);
@@ -38,10 +38,12 @@ public class PlayerCommandExecutor implements CommandExecutor {
 								+ ChatColor.GREEN + amount + " $");
 					}
 				} else {
-					sender.sendMessage("/giveMoney <player> <amount>");
+					return false;
 				}
 			} catch (PlayerException e) {
 				sender.sendMessage(ChatColor.RED + e.getMessage());
+			} catch (NumberFormatException e2) {
+				sender.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("invalid_number"));
 			}
 		}
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,110 +51,109 @@ public class PlayerCommandExecutor implements CommandExecutor {
 			Player player = (Player) sender;
 			try {
 				EconomyPlayer ecoPlayer = EconomyPlayer.getEconomyPlayerByName(player.getName());
-				if (label.equalsIgnoreCase("bank")) {
-					if (args.length == 1) {
-						if (args[0].equals("on") || args[0].equals("off")) {
-							if (args[0].equals("on")) {
-								ecoPlayer.setScoreBoardDisabled(false,player);
+				switch(label) {
+					case "bank":
+						if (args.length == 1) {
+							if (args[0].equals("on") || args[0].equals("off")) {
+								if (args[0].equals("on")) {
+									ecoPlayer.setScoreBoardDisabled(false,player);
+								} else {
+									ecoPlayer.setScoreBoardDisabled(true,player);
+								}
 							} else {
-								ecoPlayer.setScoreBoardDisabled(true,player);
+								return false;
 							}
 						} else {
-							player.sendMessage(ChatColor.RED + "/bank on/off");
+							return false;
 						}
-					} else {
-						player.sendMessage("/bank <on/off>");
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("money")) {
-					DecimalFormat dFormat = new DecimalFormat(".##");
-					dFormat.setRoundingMode(RoundingMode.DOWN);
-					if (args.length == 0) {
-						
-						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("money_info") + " "
-								+ ChatColor.GREEN + dFormat.format(ecoPlayer.getBankAmount()));
-					} else if(args.length == 1 && player.hasPermission("Ultimate_Economy.adminpay")) {
-						EconomyPlayer otherPlayer = EconomyPlayer.getEconomyPlayerByName(args[0]);
-						player.sendMessage(ChatColor.GREEN + args[0] + " " + ChatColor.GOLD + Ultimate_Economy.messages.getString("money_info") + " "
-								+ ChatColor.GREEN + dFormat.format(otherPlayer.getBankAmount()));
-					} else if(player.hasPermission("Ultimate_Economy.adminpay")) {
-						player.sendMessage("/money or /money <player>");
-					} else {
-						player.sendMessage("/money");
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("myJobs")) {
-					if (args.length == 0) {
-						List<String> jobNames = ecoPlayer.getJobList();
-						String jobString = jobNames.toString();
-						jobString = jobString.replace("[", "");
-						jobString = jobString.replace("]", "");
-						if (jobNames.size() > 0) {
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("myjobs_info1")
-									+ " " + ChatColor.GREEN + jobString);
+						break;
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					case "money": 
+						DecimalFormat dFormat = new DecimalFormat(".##");
+						dFormat.setRoundingMode(RoundingMode.DOWN);
+						if (args.length == 0) {
+							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("money_info") + " "
+									+ ChatColor.GREEN + dFormat.format(ecoPlayer.getBankAmount()));
+						} else if(args.length == 1 && player.hasPermission("Ultimate_Economy.adminpay")) {
+							EconomyPlayer otherPlayer = EconomyPlayer.getEconomyPlayerByName(args[0]);
+							player.sendMessage(ChatColor.GREEN + args[0] + " " + ChatColor.GOLD + Ultimate_Economy.messages.getString("money_info") + " "
+									+ ChatColor.GREEN + dFormat.format(otherPlayer.getBankAmount()));
+						} else if(player.hasPermission("Ultimate_Economy.adminpay")) {
+							player.sendMessage("/money or /money <player>");
 						} else {
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("myjobs_info2"));
+							return false;
 						}
-					}
-
-					else {
-						player.sendMessage("/myJobs");
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("home")) {
-					if (args.length == 1) {
-						Location location = ecoPlayer.getHome(args[0]);
-						player.teleport(location);
-						TownWorld.handleTownWorldLocationCheck(player.getWorld().getName(),
-								player.getLocation().getChunk(), player.getName());
-					} else if(args.length == 0) {
-						Set<String> homes = ecoPlayer.getHomeList().keySet();
-						String homeString = String.join(",", homes);
-						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("home_info") + " "
-								+ ChatColor.GREEN + homeString);
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("sethome")) {
-					if (args.length == 1) {
-						ecoPlayer.addHome(args[0], player.getLocation());
-						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("sethome") + " "
-								+ ChatColor.GREEN + args[0] + ChatColor.GOLD + ".");
-					} else {
-						player.sendMessage("/sethome <homename>");
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("delhome")) {
-					if (args.length == 1) {
-						ecoPlayer.removeHome(args[0]);
-						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("delhome1") + " "
-								+ ChatColor.GREEN + args[0] + ChatColor.GOLD + " "
-								+ Ultimate_Economy.messages.getString("delhome2") + ".");
-					} else {
-						player.sendMessage("/deletehome <homename>");
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("pay")) {
-					if (args.length == 2) {
-						double money = Double.valueOf(args[1]);
-						ecoPlayer.payToOtherPlayer(EconomyPlayer.getEconomyPlayerByName(args[0]), money);
-						Player p = Bukkit.getPlayer(args[0]);
-						if (p != null && p.isOnline()) {
-							p.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("got_money") + " "
-									+ ChatColor.GREEN + " " + money + " $ " + ChatColor.GOLD
-									+ Ultimate_Economy.messages.getString("got_money_from") + " " + ChatColor.GREEN
-									+ player.getName());
+						break;
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					case "myjobs": 
+						if (args.length == 0) {
+							List<String> jobNames = ecoPlayer.getJobList();
+							String jobString = jobNames.toString();
+							jobString = jobString.replace("[", "");
+							jobString = jobString.replace("]", "");
+							if (jobNames.size() > 0) {
+								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("myjobs_info1")
+										+ " " + ChatColor.GREEN + jobString);
+							} else {
+								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("myjobs_info2"));
+							}
+						} else {
+							return false;
 						}
-						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("gave_money") + " "
-								+ ChatColor.GREEN + args[0] + " " + money + " $ ");
-					} else {
-						player.sendMessage("/pay <name> <amount>");
-					}
+						break;
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					case "home": 
+						if (args.length == 1) {
+							Location location = ecoPlayer.getHome(args[0]);
+							player.teleport(location);
+							TownWorld.handleTownWorldLocationCheck(player.getWorld().getName(),
+									player.getLocation().getChunk(), player.getName());
+						} else if(args.length == 0) {
+							Set<String> homes = ecoPlayer.getHomeList().keySet();
+							String homeString = String.join(",", homes);
+							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("home_info") + " "
+									+ ChatColor.GREEN + homeString);
+						}
+						break;
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					case "sethome": 
+						if (args.length == 1) {
+							ecoPlayer.addHome(args[0], player.getLocation());
+							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("sethome") + " "
+									+ ChatColor.GREEN + args[0] + ChatColor.GOLD + ".");
+						} else {
+							return false;
+						}
+						break;
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					case "delhome": 
+						if (args.length == 1) {
+							ecoPlayer.removeHome(args[0]);
+							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("delhome1") + " "
+									+ ChatColor.GREEN + args[0] + ChatColor.GOLD + " "
+									+ Ultimate_Economy.messages.getString("delhome2") + ".");
+						} else {
+							return false;
+						}
+						break;
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					case "pay": 
+						if (args.length == 2) {
+							double money = Double.valueOf(args[1]);
+							ecoPlayer.payToOtherPlayer(EconomyPlayer.getEconomyPlayerByName(args[0]), money);
+							Player p = Bukkit.getPlayer(args[0]);
+							if (p != null && p.isOnline()) {
+								p.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("got_money") + " "
+										+ ChatColor.GREEN + " " + money + " $ " + ChatColor.GOLD
+										+ Ultimate_Economy.messages.getString("got_money_from") + " " + ChatColor.GREEN
+										+ player.getName());
+							}
+							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("gave_money") + " "
+									+ ChatColor.GREEN + args[0] + " " + money + " $ ");
+						} else {
+							return false;
+						}
+						break;
 				}
 			} catch (PlayerException e) {
 				player.sendMessage(ChatColor.RED + e.getMessage());
@@ -160,6 +161,6 @@ public class PlayerCommandExecutor implements CommandExecutor {
 				player.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("invalid_number"));
 			}
 		}
-		return false;
+		return true;
 	}
 }

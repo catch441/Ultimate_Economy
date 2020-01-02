@@ -97,7 +97,7 @@ commands:
     permission-message: You don't have the permission
     description: Handles the configuration of the plugin.
     
-  townWorld:   
+  townworld:   
     permission: ultimate_economy.townworld
     permission-message: You don't have the permission.
     description: Activate/deactivate town world.
@@ -106,51 +106,60 @@ commands:
     permission: ultimate_economy.town
     permission-message: You don't have the permission.
     description: Manage towns.
+    usage:
     
   adminshop:   
     permission: ultimate_economy.adminshop
     permission-message: You don't have the permission.
     description: Manage adminshops.
     
-  giveMoney:   
+  givemoney:   
     permission: ultimate_economy.adminpay
     permission-message: You don't have the permission.
     description: Gives a player money without taking it from other players.
+    usage: /<command> <player> <amount>
     
-  ShopList:   
+  shoplist:   
     permission: ultimate_economy.info.shoplist
     permission-message: You don't have the permission.
     description: Shows up a list of all shops.
+    usage: /<command>
 
   jobcenter:   
     permission: ultimate_economy.jobcenter
     permission-message: You don't have the permission.
     description: Manage jobcenter.
+    usage: /<command> [create/delete/move/job/addjob]
     
-  jobList:   
+  joblist:   
     permission: ultimate_economy.info.joblist
     permission-message: You don't have the permission.
     description: Shows up a list of all jobs.
+    usage: /<command>
     
-  jobInfo:   
+  jobinfo:   
     permission: ultimate_economy.info.jobinfo
     permission-message: You don't have the permission.
     description: Shows up information about this job.
+    usage: /<command> <job>
  
-  myJobs:   
+  myjobs:   
     permission: ultimate_economy.info.myjobs
     permission-message: You don't have the permission.
     description: Shows up all Jobs you already joined.
+    usage: /<command>
     
   pay:   
     permission: ultimate_economy.pay
     permission-message: You don't have the permission.
     description: Pay a other player some money.
+    usage: /<command> <player> <amount>
     
   shop:   
     permission: ultimate_economy.fastshop
     permission-message: You don't have the permission.
     description: Opens a specific shop.
+    usage: /<command>
     
   playershop:   
     permission: ultimate_economy.playershop
@@ -166,10 +175,12 @@ commands:
     permission: ultimate_economy.info.money
     permission-message: You don't have the permission.
     description: Shows up your money.
+    usage: /<command>
     
   bank:   
     permission: ultimate_economy.info.bank
     permission-message: You don't have the permission.
     description: Enables/disables scoreboard.
+    usage: /<command> [on/off]
     
     

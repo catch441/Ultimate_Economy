@@ -170,6 +170,7 @@ public class Ultimate_Economy extends JavaPlugin {
 				setHome.setPermission("ultimate_economy.home");
 				setHome.setLabel("sethome");
 				setHome.setPermissionMessage("You don't have the permission.");
+				setHome.setUsage("/<command> [home]");
 				map.register("ultimate_economy", setHome);
 				
 				UltimateEconomyCommand delHome = new UltimateEconomyCommand("delhome", this);
@@ -177,6 +178,7 @@ public class Ultimate_Economy extends JavaPlugin {
 				delHome.setPermission("ultimate_economy.home");
 				delHome.setLabel("delhome");
 				delHome.setPermissionMessage("You don't have the permission.");
+				delHome.setUsage("/<command> [home]");
 				map.register("ultimate_economy", delHome);
 				
 				home.setExecutor(playerCommandExecutor);
@@ -188,10 +190,10 @@ public class Ultimate_Economy extends JavaPlugin {
 				Bukkit.getLogger().warning("Error on enable homes feature.");
 			}
 		}
-		getCommand("giveMoney").setExecutor(playerCommandExecutor);
+		getCommand("givemoney").setExecutor(playerCommandExecutor);
 		getCommand("pay").setExecutor(playerCommandExecutor);
 		getCommand("money").setExecutor(playerCommandExecutor);
-		getCommand("myJobs").setExecutor(playerCommandExecutor);
+		getCommand("myjobs").setExecutor(playerCommandExecutor);
 		getCommand("ue-config").setExecutor(new ConfigCommandExecutor(this));
 		getCommand("ue-config").setTabCompleter(new ConfigTabCompleter());
 
@@ -250,7 +252,7 @@ public class Ultimate_Economy extends JavaPlugin {
 			if (args.length <= 1) {
 				list = getAdminShopList(args[0]);
 			}
-		} else if (command.getName().equals("jobInfo")) {
+		} else if (command.getName().equals("jobinfo")) {
 			if (args.length <= 1) {
 				list = getJobList(args[0]);
 			}
@@ -269,75 +271,75 @@ public class Ultimate_Economy extends JavaPlugin {
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				// Commands
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				if (label.equalsIgnoreCase("shop")) {
-					if (args.length == 1) {
-						if (ecoPlayer.hasJob(args[0])) {
-							AdminShop.getAdminShopByName(args[0]).openInv(player);
+				switch(label) {
+					case "shop": 
+						if (args.length == 1) {
+							if (ecoPlayer.hasJob(args[0])) {
+								AdminShop.getAdminShopByName(args[0]).openInv(player);
+							} else {
+								player.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("shop_info"));
+							}
 						} else {
-							player.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("shop_info"));
+							return false;
 						}
-					} else {
-						player.sendMessage("/shop <shopname>");
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("ShopList")) {
-					List<String> shopNames = AdminShop.getAdminshopNameList();
-					String shopString = shopNames.toString();
-					shopString = shopString.replace("[", "");
-					shopString = shopString.replace("]", "");
-					if (shopNames.size() > 0) {
-						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shoplist_info1") + " "
-								+ ChatColor.GREEN + shopString);
-					} else {
-						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shoplist_info2"));
-					}
-				}
-
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("jobList")) {
-					List<String> jobNames = Job.getJobNameList();
-					String jobString = jobNames.toString();
-					jobString = jobString.replace("[", "");
-					jobString = jobString.replace("]", "");
-					if (jobNames.size() > 0) {
-						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("joblist_info1") + " "
-								+ ChatColor.GREEN + jobString);
-					} else {
-						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("joblist_info2"));
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				else if (label.equalsIgnoreCase("jobInfo")) {
-					if (args.length == 1) {
-						Job job = Job.getJobByName(args[0]);
-						player.sendMessage("");
-						player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("jobinfo_info1") + " "
-								+ ChatColor.GREEN + job.getName() + ChatColor.GOLD + ":");
-						for (String string : job.getItemList()) {
-							player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN
-									+ job.getItemPrice(string) + "$");
+						break;
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					case "shoplist": 
+						List<String> shopNames = AdminShop.getAdminshopNameList();
+						String shopString = shopNames.toString();
+						shopString = shopString.replace("[", "");
+						shopString = shopString.replace("]", "");
+						if (shopNames.size() > 0) {
+							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shoplist_info1") + " "
+									+ ChatColor.GREEN + shopString);
+						} else {
+							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shoplist_info2"));
 						}
-						for (String string : job.getFisherList()) {
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("jobinfo_info2")
-									+ " " + string.toLowerCase() + " " + ChatColor.GREEN + job.getFisherPrice(string)
-									+ "$");
+						break;
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					case "joblist": 
+						List<String> jobNames = Job.getJobNameList();
+						String jobString = jobNames.toString();
+						jobString = jobString.replace("[", "");
+						jobString = jobString.replace("]", "");
+						if (jobNames.size() > 0) {
+							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("joblist_info1") + " "
+									+ ChatColor.GREEN + jobString);
+						} else {
+							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("joblist_info2"));
 						}
-						for (String string : job.getEntityList()) {
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("jobinfo_info3")
-									+ " " + string.toLowerCase() + " " + ChatColor.GREEN + job.getKillPrice(string)
-									+ "$");
+						break;
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					case "jobinfo": 
+						if (args.length == 1) {
+							Job job = Job.getJobByName(args[0]);
+							player.sendMessage("");
+							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("jobinfo_info1") + " "
+									+ ChatColor.GREEN + job.getName() + ChatColor.GOLD + ":");
+							for (String string : job.getItemList()) {
+								player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN
+										+ job.getItemPrice(string) + "$");
+							}
+							for (String string : job.getFisherList()) {
+								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("jobinfo_info2")
+										+ " " + string.toLowerCase() + " " + ChatColor.GREEN + job.getFisherPrice(string)
+										+ "$");
+							}
+							for (String string : job.getEntityList()) {
+								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("jobinfo_info3")
+										+ " " + string.toLowerCase() + " " + ChatColor.GREEN + job.getKillPrice(string)
+										+ "$");
+							}
+						} else {
+							return false;
 						}
-					} else {
-						player.sendMessage("/jobInfo <jobname>");
-					}
+						break;
 				}
-
 			} catch (PlayerException | ShopSystemException | JobSystemException e1) {
 				player.sendMessage(ChatColor.RED + e1.getMessage());
 			}
 		}
-		return false;
+		return true;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -28,7 +28,7 @@ public class PlayerTabCompleter implements TabCompleter {
 					list.add("off");
 				}
 			}
-		} else if (command.getName().equals("delHome") || command.getName().equals("home")) {
+		} else if (command.getName().equals("delhome") || command.getName().equals("home")) {
 				if (args.length <= 1) {
 					list = getHomeList(args[0], sender.getName());
 				}
