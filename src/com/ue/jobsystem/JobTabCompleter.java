@@ -72,8 +72,8 @@ public class JobTabCompleter implements TabCompleter{
 				}
 			} else if (args[0].equals("job")) {
 				if (args[1].equals("")) {
-					list.add("createJob");
-					list.add("delJob");
+					list.add("create");
+					list.add("delete");
 					list.add("addItem");
 					list.add("removeItem");
 					list.add("addFisher");
@@ -112,15 +112,15 @@ public class JobTabCompleter implements TabCompleter{
 							}
 						}
 					}
-				} else if (args[1].equals("delJob")) {
+				} else if (args[1].equals("delete")) {
 					if (args.length == 3) {
 						list = getJobList(args[2]);
 					}
 				} else if (args.length == 2) {
-					if ("createJob".contains(args[1])) {
+					if ("create".contains(args[1])) {
 						list.add("createJob");
 					}
-					if ("delJob".contains(args[1])) {
+					if ("delete".contains(args[1])) {
 						list.add("delJob");
 					}
 					if ("addItem".contains(args[1])) {
