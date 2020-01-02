@@ -412,6 +412,22 @@ public class Ultimate_EconomyEventHandler implements Listener {
 						}
 					}
 				}
+			} else {
+				if (event.getBlock().getBlockData().getMaterial() == Material.SPAWNER) {
+					if (!event.getBlock().getMetadata("entity").isEmpty()) {
+						YamlConfiguration config = YamlConfiguration.loadConfiguration(spawner);
+						double x = event.getBlock().getX();
+						double y = event.getBlock().getY();
+						double z = event.getBlock().getZ();
+						String spawnername = String.valueOf(x) + String.valueOf(y) + String.valueOf(z);
+						spawnername = spawnername.replace(".", "-");
+						spawnerlist.remove(spawnername);
+						plugin.getConfig().set("Spawnerlist", spawnerlist);
+						plugin.saveConfig();
+						config.set(spawnername, null);
+						saveFile(spawner, config);
+					}
+				}
 			}
 		}
 	}
@@ -578,9 +594,8 @@ public class Ultimate_EconomyEventHandler implements Listener {
 				}
 				clickedItem.setAmount(1);
 				String clickedItemString = clickedItem.toString();
-				if (itemString.contains("SPAWNER_")) {
+				if (itemString.contains("blockMaterial=SPAWNER")) {
 					isSpawner = true;
-					clickedItemString = "SPAWNER_" + event.getCurrentItem().getItemMeta().getDisplayName();
 				}
 				if (itemString.equals(clickedItemString)) {
 					try {
@@ -598,11 +613,10 @@ public class Ultimate_EconomyEventHandler implements Listener {
 								if (!isPlayershop || playerShop.available(clickedItemString)) {
 									if (inventoryplayer.firstEmpty() != -1) {
 										// only adminshop
-										if (isSpawner && event.getCurrentItem().getItemMeta().getDisplayName()
-												.equals(itemString.substring(8))) {
+										if (isSpawner) {
 											ItemStack stack = new ItemStack(Material.SPAWNER, amount);
 											ItemMeta meta = stack.getItemMeta();
-											meta.setDisplayName(itemString.substring(8) + "-" + playe.getName());
+											meta.setDisplayName(clickedItem.getItemMeta().getDisplayName() + "-" + playe.getName());
 											stack.setItemMeta(meta);
 											inventoryplayer.addItem(stack);
 											ecoPlayer.decreasePlayerAmount(buyprice, true);
