@@ -23,21 +23,20 @@ public class TownCommandExecutor implements CommandExecutor {
 			Player player = (Player) sender;
 			try {
 				EconomyPlayer ecoPlayer = EconomyPlayer.getEconomyPlayerByName(player.getName());
-				if (label.equalsIgnoreCase("town")) {
-					if (args.length != 0) {
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						if (args[0].equals("create")) {
+				if (args.length != 0) {
+					switch(args[0]) {
+						case "create": 
 							if (args.length == 2) {
 								TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 								tWorld.createTown(args[1], player.getLocation(), ecoPlayer);
 								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("town_create")
 										+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + "!");
 							} else {
-								player.sendMessage("/town create <townname>");
+								player.sendMessage("/" + label + " create <town>");
 							}
-						}
+							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("delete")) {
+						case "delete": 
 							if (args.length == 2) {
 								TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 								tWorld.dissolveTown(args[1], player.getName());
@@ -45,21 +44,21 @@ public class TownCommandExecutor implements CommandExecutor {
 										+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
 										+ Ultimate_Economy.messages.getString("town_delete2"));
 							} else {
-								player.sendMessage("/town delete <townname>");
+								player.sendMessage("/" + label + " delete <town>");
 							}
-						}
+							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("expand")) {
+						case "expand": 
 							if (args.length == 2) {
 								TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 								tWorld.expandTown(args[1], player.getLocation().getChunk(), player.getName());
 								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("town_expand"));
 							} else {
-								player.sendMessage("/town expand <townname>");
+								player.sendMessage("/" + label + " expand <town>");
 							}
-						}
+							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("rename")) {
+						case "rename": 
 							if (args.length == 3) {
 								TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 								tWorld.renameTown(ecoPlayer.getName(), args[1], args[2]);
@@ -72,11 +71,11 @@ public class TownCommandExecutor implements CommandExecutor {
 										+ Ultimate_Economy.messages.getString("town_rename2") + " " + ChatColor.GREEN
 										+ args[2] + ChatColor.GOLD + ".");
 							} else {
-								player.sendMessage("/town rename <old name> <new name>");
+								player.sendMessage("/" + label + " rename <old name> <new name>");
 							}
-						}
+							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("setTownSpawn")) {
+						case "setTownSpawn": 
 							if (args.length == 2) {
 								TownWorld tWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 								Town town = tWorld.getTownByName(args[1]);
@@ -89,18 +88,11 @@ public class TownCommandExecutor implements CommandExecutor {
 											+ (int) player.getLocation().getZ() + ChatColor.GOLD + ".");
 								}
 							} else {
-								player.sendMessage("/town setTownSpawn <townname>");
+								player.sendMessage("/" + label + " setTownSpawn <town>");
 							}
-						}
+							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("setTax")) {
-							// TODO
-							if (args.length == 3) {
-							} else {
-							}
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("addCoOwner")) {
+						case "addCoOwner": 
 							if (args.length == 3) {
 								for (TownWorld townWorld : TownWorld.getTownWorldList()) {
 									if (townWorld.getTownNameList().contains(args[1])) {
@@ -119,11 +111,11 @@ public class TownCommandExecutor implements CommandExecutor {
 									}
 								}
 							} else {
-								player.sendMessage("/town addCoOwner <town> <playername>");
+								player.sendMessage("/" + label + " addCoOwner <town> <player>");
 							}
-						}
+							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("removeCoOwner")) {
+						case "removeCoOwner": 
 							if (args.length == 3) {
 								for (TownWorld townWorld : TownWorld.getTownWorldList()) {
 									if (townWorld.getTownNameList().contains(args[1])) {
@@ -142,11 +134,11 @@ public class TownCommandExecutor implements CommandExecutor {
 									}
 								}
 							} else {
-								player.sendMessage("/town removeCoOwner <town> <playername>");
+								player.sendMessage("/" + label + " removeCoOwner <town> <player>");
 							}
-						}
+							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equalsIgnoreCase("moveTownManager")) {
+						case "moveTownManager": 
 							if (args.length == 1) {
 								TownWorld townWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
 								Town town = townWorld.getTownByChunk(player.getLocation().getChunk());
@@ -154,39 +146,11 @@ public class TownCommandExecutor implements CommandExecutor {
 										player.getName());
 								townWorld.setSaveFile(file);
 							} else {
-								player.sendMessage("/town moveTownManager");
+								player.sendMessage("/" + label + " moveTownManager");
 							}
-						}
+							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("plot")) {
-							if (args.length > 1) {
-								if (args[1].equals("setForSale")) {
-									if (args.length == 3) {
-										TownWorld townWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
-										Town town = townWorld.getTownByChunk(player.getLocation().getChunk());
-										File file = town.setPlotForSale(townWorld.getSaveFile(),
-												Double.valueOf(args[2]), player.getName(), player.getLocation());
-										townWorld.setSaveFile(file);
-										player.sendMessage(ChatColor.GOLD
-												+ Ultimate_Economy.messages.getString("town_plot_setForSale"));
-									} else {
-										player.sendMessage("/town plot setForSale <price> ");
-									}
-								}
-								//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-								else if (args[1].equals("setForRent")) {
-									if (args.length == 4) {
-										// TODO
-									} else {
-										player.sendMessage("/town plot setForRent <townname> <price/24h>");
-									}
-								}
-							} else {
-								player.sendMessage("/town plot <setForSale/setForRent>");
-							}
-						}
-						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("tp")) {
+						case "tp": 
 							if (args.length == 2) {
 								for (TownWorld townWorld : TownWorld.getTownWorldList()) {
 									if (townWorld.getTownNameList().contains(args[1])) {
@@ -195,11 +159,11 @@ public class TownCommandExecutor implements CommandExecutor {
 									}
 								}
 							} else {
-								player.sendMessage("/town tp <townname>");
+								player.sendMessage("/" + label + " tp <town>");
 							}
-						}
+							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("pay")) {
+						case "pay":
 							if (args.length == 3) {
 								for (TownWorld townWorld : TownWorld.getTownWorldList()) {
 									if (townWorld.getTownNameList().contains(args[1])) {
@@ -217,11 +181,11 @@ public class TownCommandExecutor implements CommandExecutor {
 									}
 								}
 							} else {
-								player.sendMessage("/town pay <townname> <amount>");
+								player.sendMessage("/" + label + " pay <town> <amount>");
 							}
-						}
+							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("withdraw")) {
+						case "withdraw": 
 							if (args.length == 3) {
 								for (TownWorld townWorld : TownWorld.getTownWorldList()) {
 									if (townWorld.getTownNameList().contains(args[1])) {
@@ -242,11 +206,11 @@ public class TownCommandExecutor implements CommandExecutor {
 									}
 								}
 							} else {
-								player.sendMessage("/town pay <townname> <amount>");
+								player.sendMessage("/" + label + " pay <town> <amount>");
 							}
-						}
+							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else if (args[0].equals("bank")) {
+						case "bank": 
 							if (args.length == 2) {
 								for (TownWorld townWorld : TownWorld.getTownWorldList()) {
 									if (townWorld.getTownNameList().contains(args[1])) {
@@ -261,24 +225,47 @@ public class TownCommandExecutor implements CommandExecutor {
 									}
 								}
 							} else {
-								player.sendMessage("/town bank <townname>");
+								player.sendMessage("/" + label + " bank <town>");
 							}
-						}
+							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						else {
-							player.sendMessage(
-									"/town <create/delete/rename/expand/setTownSpawn/setTax/moveTownManager/plot/pay/tp/bank>");
-						}
-					} else {
-						player.sendMessage(
-								"/town <create/delete/rename/expand/setTownSpawn/setTax/moveTownManager/plot/pay/tp/bank>");
+						case "plot": 
+							if (args.length > 1) {
+								if (args[1].equals("setForSale")) {
+									if (args.length == 3) {
+										TownWorld townWorld = TownWorld.getTownWorldByName(player.getWorld().getName());
+										Town town = townWorld.getTownByChunk(player.getLocation().getChunk());
+										File file = town.setPlotForSale(townWorld.getSaveFile(),
+												Double.valueOf(args[2]), player.getName(), player.getLocation());
+										townWorld.setSaveFile(file);
+										player.sendMessage(ChatColor.GOLD
+												+ Ultimate_Economy.messages.getString("town_plot_setForSale"));
+									} else {
+										player.sendMessage("/" + label + " plot setForSale <price>");
+									}
+								}
+								//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+								else if (args[1].equals("setForRent")) {
+									if (args.length == 4) {
+										// TODO
+									} else {
+										player.sendMessage("/" + label + " plot setForRent <town> <price/24h>");
+									}
+								}
+							} else {
+								player.sendMessage("/" + label + " plot [setForSale/setForRent]");
+							}
+							break;
+						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						default: return false;
 					}
+				} else {
+					return false;
 				}
 			} catch (PlayerException | TownSystemException e) {
 				player.sendMessage(ChatColor.RED + e.getMessage());
 			}
 		}
-		return false;
+		return true;
 	}
-
 }
