@@ -85,7 +85,7 @@ permissions:
   ultimate_economy.fastshop:
     description: 
     default: true
-    
+
   ultimate_economy.info.joblist:
    	description:
    	default: true
