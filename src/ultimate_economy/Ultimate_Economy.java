@@ -30,24 +30,25 @@ import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.jobsystem.Job;
-import com.ue.jobsystem.JobCenter;
-import com.ue.jobsystem.JobCommandExecutor;
-import com.ue.jobsystem.JobTabCompleter;
+import com.ue.jobsystem.api.Job;
+import com.ue.jobsystem.api.JobController;
+import com.ue.jobsystem.api.JobcenterController;
+import com.ue.jobsystem.impl.JobCommandExecutor;
+import com.ue.jobsystem.impl.JobTabCompleter;
 import com.ue.metrics.Metrics;
 import com.ue.player.EconomyPlayer;
 import com.ue.player.PlayerCommandExecutor;
 import com.ue.player.PlayerTabCompleter;
-import com.ue.shopsystem.adminshop.Adminshop;
-import com.ue.shopsystem.adminshop.AdminshopCommandExecutor;
-import com.ue.shopsystem.adminshop.AdminshopTabCompleter;
-import com.ue.shopsystem.playershop.Playershop;
-import com.ue.shopsystem.playershop.PlayershopCommandExecutor;
-import com.ue.shopsystem.playershop.PlayershopTabCompleter;
-import com.ue.shopsystem.rentshop.RentDailyTask;
-import com.ue.shopsystem.rentshop.Rentshop;
-import com.ue.shopsystem.rentshop.RentshopCommandExecutor;
-import com.ue.shopsystem.rentshop.RentshopTabCompleter;
+import com.ue.shopsystem.adminshop.api.AdminshopController;
+import com.ue.shopsystem.adminshop.impl.AdminshopCommandExecutor;
+import com.ue.shopsystem.adminshop.impl.AdminshopTabCompleterImpl;
+import com.ue.shopsystem.playershop.api.PlayershopController;
+import com.ue.shopsystem.playershop.impl.PlayershopCommandExecutor;
+import com.ue.shopsystem.playershop.impl.PlayershopTabCompleter;
+import com.ue.shopsystem.rentshop.api.RentshopController;
+import com.ue.shopsystem.rentshop.impl.RentDailyTask;
+import com.ue.shopsystem.rentshop.impl.RentshopCommandExecutor;
+import com.ue.shopsystem.rentshop.impl.RentshopTabCompleter;
 import com.ue.townsystem.TownCommandExecutor;
 import com.ue.townsystem.TownTabCompleter;
 import com.ue.townsystem.TownWorld;
@@ -105,11 +106,11 @@ public class Ultimate_Economy extends JavaPlugin {
 			Bukkit.getLogger().info("Loading language file: '" + lang + "' '" + country + "'");
 		}
 		messages = ResourceBundle.getBundle("src.lang.MessagesBundle", currentLocale, new UTF8Control());
-		JobCenter.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
-		Job.loadAllJobs(getDataFolder(), getConfig());
-		Adminshop.loadAllAdminShops(getConfig(), getDataFolder(), getServer());
-		Playershop.loadAllPlayerShops(getConfig(), getDataFolder(), getServer());
-		Rentshop.loadAllRentShops(getConfig(), getDataFolder(), getServer());
+		JobcenterController.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
+		JobController.loadAllJobs(getDataFolder(), getConfig());
+		AdminshopController.loadAllAdminShops(getConfig(), getDataFolder(), getServer());
+		PlayershopController.loadAllPlayerShops(getConfig(), getDataFolder(), getServer());
+		RentshopController.loadAllRentShops(getConfig(), getDataFolder(), getServer());
 
 		try {
 			TownWorld.loadAllTownWorlds(getDataFolder(), getConfig(), getServer());
@@ -124,7 +125,7 @@ public class Ultimate_Economy extends JavaPlugin {
 		}
 
 		EconomyPlayer.setupConfig(getConfig());
-		Rentshop.setupConfig(getConfig());
+		RentshopController.setupConfig(getConfig());
 		saveConfig();
 
 		File spawner = new File(getDataFolder(), "SpawnerLocations.yml");
@@ -144,7 +145,7 @@ public class Ultimate_Economy extends JavaPlugin {
 		getCommand("townworld").setExecutor(new TownworldCommandExecutor(this));
 		getCommand("townworld").setTabCompleter(new TownworldTabCompleter());
 		getCommand("adminshop").setExecutor(new AdminshopCommandExecutor(this));
-		getCommand("adminshop").setTabCompleter(new AdminshopTabCompleter());
+		getCommand("adminshop").setTabCompleter(new AdminshopTabCompleterImpl());
 		getCommand("playershop").setTabCompleter(new PlayershopTabCompleter());
 		getCommand("playershop").setExecutor(new PlayershopCommandExecutor(this));
 		getCommand("rentshop").setExecutor(new RentshopCommandExecutor(this));
@@ -234,11 +235,11 @@ public class Ultimate_Economy extends JavaPlugin {
 	}
 
 	public void onDisable() {
-		JobCenter.despawnAllVillagers();
+		JobcenterController.despawnAllVillagers();
 		TownWorld.despawnAllVillagers();
-		Adminshop.despawnAllVillagers();
-		Playershop.despawnAllVillagers();
-		Rentshop.despawnAllVillagers();
+		AdminshopController.despawnAllVillagers();
+		PlayershopController.despawnAllVillagers();
+		RentshopController.despawnAllVillagers();
 		saveConfig();
 		// vault
 		if (Bukkit.getServer().getPluginManager().getPlugin("Vault") != null) {
@@ -276,7 +277,7 @@ public class Ultimate_Economy extends JavaPlugin {
 					case "shop": 
 						if (args.length == 1) {
 							if (ecoPlayer.hasJob(args[0])) {
-								Adminshop.getAdminShopByName(args[0]).openInv(player);
+								AdminshopController.getAdminShopByName(args[0]).openInv(player);
 							} else {
 								player.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("shop_info"));
 							}
@@ -286,7 +287,7 @@ public class Ultimate_Economy extends JavaPlugin {
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					case "shoplist": 
-						List<String> shopNames = Adminshop.getAdminshopNameList();
+						List<String> shopNames = AdminshopController.getAdminshopNameList();
 						String shopString = shopNames.toString();
 						shopString = shopString.replace("[", "");
 						shopString = shopString.replace("]", "");
@@ -299,7 +300,7 @@ public class Ultimate_Economy extends JavaPlugin {
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					case "joblist": 
-						List<String> jobNames = Job.getJobNameList();
+						List<String> jobNames = JobController.getJobNameList();
 						String jobString = jobNames.toString();
 						jobString = jobString.replace("[", "");
 						jobString = jobString.replace("]", "");
@@ -313,7 +314,7 @@ public class Ultimate_Economy extends JavaPlugin {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					case "jobinfo": 
 						if (args.length == 1) {
-							Job job = Job.getJobByName(args[0]);
+							Job job = JobController.getJobByName(args[0]);
 							player.sendMessage("");
 							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("jobinfo_info1") + " "
 									+ ChatColor.GREEN + job.getName() + ChatColor.GOLD + ":");
@@ -349,7 +350,7 @@ public class Ultimate_Economy extends JavaPlugin {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private List<String> getJobList(String arg) {
-		List<String> temp = Job.getJobNameList();
+		List<String> temp = JobController.getJobNameList();
 		List<String> list = new ArrayList<>();
 		if (arg.equals("")) {
 			list = temp;

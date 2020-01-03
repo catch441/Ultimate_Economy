@@ -23,7 +23,7 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
-import com.ue.jobsystem.Job;
+import com.ue.jobsystem.api.JobController;
 
 import ultimate_economy.Ultimate_Economy;
 
@@ -106,7 +106,7 @@ public class EconomyPlayer {
 	 * @throws JobSystemException
 	 */
 	public void addJob(String jobName) throws PlayerException, JobSystemException {
-		if (!Job.getJobNameList().contains(jobName)) {
+		if (!JobController.getJobNameList().contains(jobName)) {
 			throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
 		} else if (jobs.size() == maxJobs) {
 			throw new PlayerException(PlayerException.MAX_JOINED_JOBS);
@@ -128,7 +128,7 @@ public class EconomyPlayer {
 	 * @throws JobSystemException
 	 */
 	public void removeJob(String jobName) throws PlayerException, JobSystemException {
-		if (!Job.getJobNameList().contains(jobName)) {
+		if (!JobController.getJobNameList().contains(jobName)) {
 			throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
 		} else if (!jobs.contains(jobName)) {
 			throw new PlayerException(PlayerException.JOB_NOT_JOINED);
@@ -147,7 +147,7 @@ public class EconomyPlayer {
 	 * @throws JobSystemException
 	 */
 	public boolean hasJob(String jobName) throws JobSystemException {
-		if (!Job.getJobNameList().contains(jobName)) {
+		if (!JobController.getJobNameList().contains(jobName)) {
 			throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
 		} else {
 			if (jobs.contains(jobName)) {
