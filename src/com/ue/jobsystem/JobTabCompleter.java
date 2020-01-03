@@ -3,12 +3,12 @@ package com.ue.jobsystem;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
-
-import com.ue.shopsystem.adminshop.AdminshopTabCompleter;
+import org.bukkit.entity.EntityType;
 
 public class JobTabCompleter implements TabCompleter{
 	
@@ -67,7 +67,7 @@ public class JobTabCompleter implements TabCompleter{
 					if (args.length == 3) {
 						list = getJobList(args[2]);
 					} else if (args.length == 4 && args[0].equals("addJob")) {
-						list = AdminshopTabCompleter.getMaterialList(args[3]);
+						list = getMaterialList(args[3]);
 					}
 				}
 			} else if (args[0].equals("job")) {
@@ -87,11 +87,11 @@ public class JobTabCompleter implements TabCompleter{
 						list = getJobList(args[2]);
 					} else if (args[1].equals("addItem") || args[1].equals("removeItem") || args[1].equals("addItem")) {
 						if (args.length == 4) {
-							list = AdminshopTabCompleter.getMaterialList(args[3]);
+							list = getMaterialList(args[3]);
 						}
 					} else if (args[1].equals("addMob") || args[1].equals("removeMob")) {
 						if (args.length == 4) {
-							list = AdminshopTabCompleter.getEntityList(args[3]);
+							list = getEntityList(args[3]);
 						}
 					} else if (args[1].equals("addFisher") || args[1].equals("removeFisher")) {
 						if (args.length == 4) {
@@ -118,10 +118,10 @@ public class JobTabCompleter implements TabCompleter{
 					}
 				} else if (args.length == 2) {
 					if ("create".contains(args[1])) {
-						list.add("createJob");
+						list.add("create");
 					}
 					if ("delete".contains(args[1])) {
-						list.add("delJob");
+						list.add("delete");
 					}
 					if ("addItem".contains(args[1])) {
 						list.add("addItem");
@@ -156,6 +156,40 @@ public class JobTabCompleter implements TabCompleter{
 			for (String jobname : temp) {
 				if (jobname.contains(arg)) {
 					list.add(jobname);
+				}
+			}
+		}
+		return list;
+	}
+	
+	private static List<String> getMaterialList(String arg) {
+		Material[] materials = Material.values();
+		List<String> list = new ArrayList<>();
+		if (arg.equals("")) {
+			for (Material material : materials) {
+				list.add(material.name().toLowerCase());
+			}
+		} else {
+			for (Material material : materials) {
+				if (material.name().toLowerCase().contains(arg)) {
+					list.add(material.name().toLowerCase());
+				}
+			}
+		}
+		return list;
+	}
+
+	private static List<String> getEntityList(String arg) {
+		List<String> list = new ArrayList<>();
+		EntityType[] entityTypes = EntityType.values();
+		if (arg.equals("")) {
+			for (EntityType entityname : entityTypes) {
+				list.add(entityname.name().toLowerCase());
+			}
+		} else {
+			for (EntityType entityname : entityTypes) {
+				if (entityname.name().toLowerCase().contains(arg)) {
+					list.add(entityname.name().toLowerCase());
 				}
 			}
 		}

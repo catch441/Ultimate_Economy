@@ -52,11 +52,14 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.jobsystem.Job;
 import com.ue.jobsystem.JobCenter;
 import com.ue.player.EconomyPlayer;
-import com.ue.shopsystem.Shop;
-import com.ue.shopsystem.Spawner;
-import com.ue.shopsystem.adminshop.Adminshop;
-import com.ue.shopsystem.playershop.Playershop;
-import com.ue.shopsystem.rentshop.Rentshop;
+import com.ue.shopsystem.adminshop.api.Adminshop;
+import com.ue.shopsystem.adminshop.api.AdminshopController;
+import com.ue.shopsystem.api.Shop;
+import com.ue.shopsystem.impl.Spawner;
+import com.ue.shopsystem.playershop.api.Playershop;
+import com.ue.shopsystem.playershop.api.PlayershopController;
+import com.ue.shopsystem.rentshop.api.Rentshop;
+import com.ue.shopsystem.rentshop.api.RentshopController;
 import com.ue.townsystem.Plot;
 import com.ue.townsystem.Town;
 import com.ue.townsystem.TownWorld;
@@ -143,16 +146,16 @@ public class Ultimate_EconomyEventHandler implements Listener {
 						town2.openTownManagerVillagerInv(event.getPlayer());
 						break;
 					case ADMINSHOP:
-						Adminshop.getAdminShopById(shopId).openInv(event.getPlayer());
+						AdminshopController.getAdminShopById(shopId).openInv(event.getPlayer());
 						break;
 					case PLAYERSHOP:
-						Playershop.getPlayerShopById(shopId).openInv(event.getPlayer());
+						PlayershopController.getPlayerShopById(shopId).openInv(event.getPlayer());
 						break;
 					case JOBCENTER:
 						JobCenter.getJobCenterByName(entity.getCustomName()).openInv(event.getPlayer());
 						break;
 					case PLAYERSHOP_RENTABLE:
-						Rentshop shop = Rentshop.getRentShopById(shopId);
+						Rentshop shop = RentshopController.getRentShopById(shopId);
 						if(shop.isRentable()) {
 							shop.openRentGUI(event.getPlayer());;
 						} else {
@@ -269,15 +272,15 @@ public class Ultimate_EconomyEventHandler implements Listener {
 							}
 							break;
 						case PLAYERSHOP:
-							Playershop playershop = Playershop.getPlayerShopById(shopId);
+							Playershop playershop = PlayershopController.getPlayerShopById(shopId);
 							handleShopInvClickEvent(playershop, player,event);
 							break;
 						case ADMINSHOP:
-							Adminshop adminshop = Adminshop.getAdminShopById(shopId);
+							Adminshop adminshop = AdminshopController.getAdminShopById(shopId);
 							handleShopInvClickEvent(adminshop, player, event);
 							break;
 						case PLAYERSHOP_RENTABLE:
-							Rentshop rentshop = Rentshop.getRentShopById(shopId);
+							Rentshop rentshop = RentshopController.getRentShopById(shopId);
 							if(rentshop.isRentable()) {
 								rentshop.handleRentShopGUIClick(event);
 							} else {
@@ -610,7 +613,7 @@ public class Ultimate_EconomyEventHandler implements Listener {
 						if (clickType == ClickType.LEFT) {
 							if (buyprice != 0.0 && ecoPlayer.hasEnoughtMoney(buyprice)
 									|| (isPlayershop && playe.getName().equals(playerShopOwner.getName()))) {
-								if (!isPlayershop || playershop.available(clickedItemString)) {
+								if (!isPlayershop || playershop.isAvailable(clickedItemString)) {
 									if (inventoryplayer.firstEmpty() != -1) {
 										// only adminshop
 										if (isSpawner) {
