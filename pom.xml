@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>Ultimate_Economy</groupId>
   <artifactId>Ultimate_Economy</artifactId>
-  <version>1.2.3c</version>
+  <version>1.2.4</version>
   <name>Ultimate_Economy</name>
     <repositories>
     <!-- This adds the Spigot Maven repository to the build -->
@@ -26,16 +26,22 @@
            <version>1.15.1-R0.1-SNAPSHOT</version>
            <scope>provided</scope>
     </dependency>
+    
+    <dependency>
+		  <groupId>spigot</groupId>
+		  <artifactId>spigot</artifactId>
+		  <version>1.15.1</version>
+	 </dependency>
 
   </dependencies>
   <build>
-    <sourceDirectory>src</sourceDirectory>
+  	<defaultGoal>clean package</defaultGoal>
+  	<finalName>Ultimate_Economy-${project.version}</finalName>
+    <sourceDirectory>src/main/java</sourceDirectory>
     <resources>
       <resource>
-        <directory>src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
+        <directory>${basedir}/src/main/resources</directory>
+        <filtering>true</filtering>
       </resource>
     </resources>
     <plugins>
@@ -46,6 +52,14 @@
           <source>1.8</source>
           <target>1.8</target>
         </configuration>
+      </plugin>
+      <plugin>
+      	<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-jar-plugin</artifactId>
+		<version>3.0.0</version>
+		<configuration>
+			<outputDirectory>D:\Programme\bukkitserver\spigot-1.15.1\plugins\</outputDirectory>
+		</configuration>
       </plugin>
     </plugins>
   </build>

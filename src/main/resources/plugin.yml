@@ -1,0 +1,190 @@
+name: Ultimate_Economy
+main: ultimate_economy.Ultimate_Economy
+author: catch441
+version: 1.2.4
+
+api-version: 1.14
+
+softdepend: [Multiverse-Core,Vault]
+loadbefore: [Civs,Towny,MobArena,Quests,GriefPrevention,ChestCommands,WorldEdit,Essentials,PlotSquared,MysqlEconomyBank,RepairGui,CommandSigns,DragonSlayer]
+
+permissions:
+
+  ultimate_economy.towninteract:
+    description: Allows interaction with all towns.
+    default: false
+
+  ultimate_economy.wilderness:
+    description: Allows interaction with the wilderness of a townWorld.
+    default: false
+    
+  ultimate_economy.config:
+    description: 
+    default: op
+
+  ultimate_economy.townworld:
+    description: 
+    default: op
+
+  ultimate_economy.town:
+    description: 
+    default: true
+
+  ultimate_economy.adminshop:
+    description: 
+    default: op
+
+  ultimate_economy.playershop:
+    description: 
+    default: true
+    
+  ultimate_economy.rentshop.player:
+    description: 
+    default: true
+    
+  ultimate_economy.rentshop.admin:
+    description: 
+    default: op
+
+  ultimate_economy.jobcenter:
+    description: 
+    default: op
+
+  ultimate_economy.home:
+    description: 
+    default: true
+
+  ultimate_economy.pay:
+    description: 
+    default: true
+
+  ultimate_economy.adminpay:
+    description: 
+    default: op
+
+  ultimate_economy.info.bank:
+    description: 
+    default: true
+
+  ultimate_economy.info.money:
+    description: 
+    default: true
+
+  ultimate_economy.info.shoplist:
+    description: 
+    default: true
+
+  ultimate_economy.info.myjobs:
+    description: 
+    default: true
+
+  ultimate_economy.info.jobinfo:
+    description: 
+    default: true
+
+  ultimate_economy.fastshop:
+    description: 
+    default: true
+
+  ultimate_economy.info.joblist:
+    description:
+    default: true
+
+commands:
+
+  ue-config:   
+    permission: ultimate_economy.config
+    permission-message: You don't have the permission
+    description: Handles the configuration of the plugin.
+    usage: /<command> [language/maxHomes/homes/maxRentedDays/maxJobs/maxJoinedTowns]
+    
+  townworld:   
+    permission: ultimate_economy.townworld
+    permission-message: You don't have the permission.
+    description: Activate/deactivate townworld.
+    usage: /<command> [enable/disable/setFoundationPrice/setExpandPrice]
+    
+  town:   
+    permission: ultimate_economy.town
+    permission-message: You don't have the permission.
+    description: Manage towns.
+    usage: /<command> [create/delete/rename/expand/setTownSpawn/moveTownManager/plot/pay/tp/bank]
+    
+  adminshop:   
+    permission: ultimate_economy.adminshop
+    permission-message: You don't have the permission.
+    description: Manage adminshops.
+    usage: /<command> [create/delete/move/rename/resize/editShop/changeProfession/addItem/addEnchantedItem/addPotion/editItem/removeItem/addSpawner/removeSpawner]
+    
+  givemoney:   
+    permission: ultimate_economy.adminpay
+    permission-message: You don't have the permission.
+    description: Gives a player money without taking it from other players.
+    usage: /<command> <player> <amount>
+    
+  shoplist:   
+    permission: ultimate_economy.info.shoplist
+    permission-message: You don't have the permission.
+    description: Shows up a list of all shops.
+    usage: /<command>
+
+  jobcenter:   
+    permission: ultimate_economy.jobcenter
+    permission-message: You don't have the permission.
+    description: Manage jobcenter.
+    usage: /<command> [create/delete/move/job/addjob]
+    
+  joblist:   
+    permission: ultimate_economy.info.joblist
+    permission-message: You don't have the permission.
+    description: Shows up a list of all jobs.
+    usage: /<command>
+    
+  jobinfo:   
+    permission: ultimate_economy.info.jobinfo
+    permission-message: You don't have the permission.
+    description: Shows up information about this job.
+    usage: /<command> <job>
+ 
+  myjobs:   
+    permission: ultimate_economy.info.myjobs
+    permission-message: You don't have the permission.
+    description: Shows up all Jobs you already joined.
+    usage: /<command>
+    
+  pay:   
+    permission: ultimate_economy.pay
+    permission-message: You don't have the permission.
+    description: Pay a other player some money.
+    usage: /<command> <player> <amount>
+    
+  shop:   
+    permission: ultimate_economy.fastshop
+    permission-message: You don't have the permission.
+    description: Opens a specific shop.
+    usage: /<command>
+    
+  playershop:   
+    permission: ultimate_economy.playershop
+    permission-message: You don't have the permission.
+    description: Manage playershops.
+    usage: /playershop [create/delete/move/rename/resize/editShop]
+    
+  rentshop:   
+    permission: ultimate_economy.rentshop.player
+    permission-message: You don't have the permission.
+    description: Manage rentshops.
+    
+  money:   
+    permission: ultimate_economy.info.money
+    permission-message: You don't have the permission.
+    description: Shows up your money.
+    usage: /<command>
+    
+  bank:   
+    permission: ultimate_economy.info.bank
+    permission-message: You don't have the permission.
+    description: Enables/disables scoreboard.
+    usage: /<command> [on/off]
+    
+    
