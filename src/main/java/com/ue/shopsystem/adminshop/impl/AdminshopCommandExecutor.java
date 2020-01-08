@@ -20,8 +20,7 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.adminshop.api.Adminshop;
 import com.ue.shopsystem.adminshop.api.AdminshopController;
 import com.ue.shopsystem.impl.ShopImpl;
-
-import ultimate_economy.Ultimate_Economy;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class AdminshopCommandExecutor implements CommandExecutor {
 
@@ -55,7 +54,7 @@ public class AdminshopCommandExecutor implements CommandExecutor {
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						case "delete":
 							if (args.length == 2) {
-								AdminshopController.deleteAdminShop(args[1]);
+								AdminshopController.deleteAdminShop(AdminshopController.getAdminShopByName(args[1]));
 								player.sendMessage(
 										ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_delete1") + " "
 												+ ChatColor.GREEN + args[1] + ChatColor.GOLD + " "

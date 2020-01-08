@@ -154,13 +154,16 @@ public class RentshopController {
 	/**
 	 * This method should be used to delete a rentshop.
 	 * 
-	 * @param id
+	 * @param rentshop
 	 * @throws ShopSystemException
 	 */
-	public static void deleteRentShop(String name) throws ShopSystemException {
-		RentshopImpl shop = getRentShopByUniqueName(name);
-		rentShopList.remove(shop);
-		shop.deleteShop();
+	public static void deleteRentShop(Rentshop rentshop) throws ShopSystemException {
+		rentShopList.remove(rentshop);
+		rentshop.despawnVillager();
+		rentshop.getWorld().save();
+		rentshop.getSaveFile().delete();
+		// to make sure that all references are no more available
+		rentshop = null;
 	}
 
 	/**

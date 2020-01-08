@@ -124,13 +124,16 @@ public class AdminshopController {
 	/**
 	 * This method should be used to delete a adminshop.
 	 * 
-	 * @param name
+	 * @param adminshop
 	 * @throws ShopSystemException
 	 */
-	public static void deleteAdminShop(String name) throws ShopSystemException {
-		Adminshop shop = getAdminShopByName(name);
-		adminShopList.remove(shop);
-		shop.deleteShop();
+	public static void deleteAdminShop(Adminshop adminshop) throws ShopSystemException {
+		adminShopList.remove(adminshop);
+		adminshop.despawnVillager();
+		adminshop.getSaveFile().delete();
+		adminshop.getWorld().save();
+		// to make sure that all references are no more available
+		adminshop = null;
 	}
 
 	/**

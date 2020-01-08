@@ -19,16 +19,15 @@ import org.bukkit.metadata.FixedMetadataValue;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.player.EconomyPlayer;
+import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.impl.ShopImpl;
 import com.ue.shopsystem.playershop.api.Playershop;
 import com.ue.shopsystem.playershop.api.PlayershopController;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.townworld.api.Townworld;
 import com.ue.townsystem.townworld.api.TownworldController;
-
-import ultimate_economy.UEVillagerType;
-import ultimate_economy.Ultimate_Economy;
+import com.ue.ultimate_economy.UEVillagerType;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class PlayershopImpl extends ShopImpl implements Playershop {
 
@@ -283,7 +282,7 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////change methods
 	
 	public void changeOwner(String newOwner) throws PlayerException, ShopSystemException {
-		if (!EconomyPlayer.getEconomyPlayerNameList().contains(newOwner)) {
+		if (!EconomyPlayerController.getEconomyPlayerNameList().contains(newOwner)) {
 			throw new PlayerException(PlayerException.PLAYER_DOES_NOT_EXIST);
 		} else {
 			// validation, check if the new owner has already a shop with this name.

@@ -1,8 +1,10 @@
 package com.ue.shopsystem.api;
 
+import java.io.File;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -30,6 +32,20 @@ public abstract interface Shop {
 	 * @return shopId
 	 */
 	public String getShopId();
+	
+	/**
+	 * Returns the world in which the shop is.
+	 * 
+	 * @return World
+	 */
+	public World getWorld();
+	
+	/**
+	 * Returns the savefile of this shop.
+	 * 
+	 * @return File
+	 */
+	public File getSaveFile();
 	
 	/**
 	 * --Get Method--
@@ -171,14 +187,6 @@ public abstract interface Shop {
 	 * @throws TownSystemException 
 	 */
 	public void moveShop(Location location) throws TownSystemException;
-	
-	/**
-	 * --Shop Method--
-	 * <p>
-	 * This method deletes this shop.
-	 * 
-	 */
-	public void deleteShop();
 	
 	/**
 	 * --Shop Method--

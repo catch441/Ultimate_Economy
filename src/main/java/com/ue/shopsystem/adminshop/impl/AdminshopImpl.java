@@ -13,9 +13,8 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.adminshop.api.Adminshop;
 import com.ue.shopsystem.adminshop.api.AdminshopController;
 import com.ue.shopsystem.impl.ShopImpl;
-
-import ultimate_economy.UEVillagerType;
-import ultimate_economy.Ultimate_Economy;
+import com.ue.ultimate_economy.UEVillagerType;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class AdminshopImpl extends ShopImpl implements Adminshop{
 

@@ -1,10 +1,10 @@
 package com.ue.vault;
 
-import ultimate_economy.Ultimate_Economy;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.ServicePriority;
+
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 import net.milkbowl.vault.economy.Economy;
 

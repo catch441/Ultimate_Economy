@@ -13,7 +13,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.player.EconomyPlayer;
+import com.ue.player.api.EconomyPlayer;
+import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.town.api.Plot;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.town.api.TownController;
@@ -61,7 +62,7 @@ public class TownworldImpl implements Townworld {
 	public void delete() {
 		file.delete();
 		despawnAllTownVillagers();
-		for (EconomyPlayer ecoPlayer : EconomyPlayer.getAllEconomyPlayers()) {
+		for (EconomyPlayer ecoPlayer : EconomyPlayerController.getAllEconomyPlayers()) {
 			if (!ecoPlayer.getJoinedTownList().isEmpty()) {
 				for (String townName : townNames) {
 					if (ecoPlayer.getJoinedTownList().contains(townName)) {
@@ -208,7 +209,7 @@ public class TownworldImpl implements Townworld {
 	public void handleTownVillagerInvClick(InventoryClickEvent event) throws TownSystemException, PlayerException {
 		Chunk chunk = event.getWhoClicked().getLocation().getChunk();
 		String playerName = event.getWhoClicked().getName();
-		EconomyPlayer ecoPlayer = EconomyPlayer.getEconomyPlayerByName(playerName);
+		EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(playerName);
 		Town town = getTownByChunk(chunk);
 		Plot plot = town.getPlotByChunk(chunk.getX() + "/" + chunk.getZ());
 		switch (event.getCurrentItem().getItemMeta().getDisplayName()) {
@@ -217,8 +218,8 @@ public class TownworldImpl implements Townworld {
 					throw new PlayerException(PlayerException.NOT_ENOUGH_MONEY_PERSONAL);
 				} else {
 					String receiverName = plot.getOwner();
-					EconomyPlayer receiver = EconomyPlayer.getEconomyPlayerByName(receiverName);
-					ecoPlayer.payToOtherPlayer(receiver, plot.getSalePrice());
+					EconomyPlayer receiver = EconomyPlayerController.getEconomyPlayerByName(receiverName);
+					ecoPlayer.payToOtherPlayer(receiver, plot.getSalePrice(), false);
 					town.buyPlot(playerName, chunk.getX(), chunk.getZ());
 					event.getWhoClicked().sendMessage(ChatColor.GOLD + "Congratulation! You bought this plot!");
 				}

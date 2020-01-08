@@ -1,6 +1,6 @@
 package com.ue.exceptions;
 
-import ultimate_economy.Ultimate_Economy;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class ShopSystemException extends Exception{
 

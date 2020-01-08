@@ -47,10 +47,9 @@ import com.mojang.authlib.properties.Property;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.api.Shop;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
-import ultimate_economy.Ultimate_Economy;
-
-public abstract class ShopImpl implements Shop{
+public abstract class ShopImpl implements Shop {
 
 	// minecraft skull texture links
 	protected static final String PLUS = "http://textures.minecraft.net/texture/9a2d891c6ae9f6baa040d736ab84d48344bb6b70d7f1a280dd12cbac4d777";
@@ -502,6 +501,14 @@ public abstract class ShopImpl implements Shop{
 	public String getShopId() {
 		return shopId;
 	}
+
+	public World getWorld() {
+		return villager.getWorld();
+	};
+	
+	public File getSaveFile() {
+		return file;
+	};
 
 	public ItemStack getItem(int slot) {
 		slot--;
@@ -1132,17 +1139,9 @@ public abstract class ShopImpl implements Shop{
 		meta.setLore(list);
 		slotEditor.getItem(e).setItemMeta(meta);
 	}
-
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////shop methods
-	
-	public void deleteShop() {
-		file.delete();
-		World world = villager.getLocation().getWorld();
-		villager.remove();
-		world.save();
-	}
 	
 	/**
 	 * --Shop Method--

@@ -22,13 +22,13 @@ import org.bukkit.metadata.FixedMetadataValue;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.player.EconomyPlayer;
+import com.ue.player.api.EconomyPlayer;
+import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.playershop.impl.PlayershopImpl;
 import com.ue.shopsystem.rentshop.api.Rentshop;
 import com.ue.shopsystem.rentshop.api.RentshopController;
-
-import ultimate_economy.UEVillagerType;
-import ultimate_economy.Ultimate_Economy;
+import com.ue.ultimate_economy.UEVillagerType;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class RentshopImpl extends PlayershopImpl implements Rentshop{
 
@@ -294,7 +294,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop{
 	 */
 	public void rentShop(String player, int duration) throws ShopSystemException, PlayerException {
 		if(isRentable()) {
-			EconomyPlayer economyPlayer = EconomyPlayer.getEconomyPlayerByName(player);
+			EconomyPlayer economyPlayer = EconomyPlayerController.getEconomyPlayerByName(player);
 			//throws a playerexception, if the player has not enough money.
 			economyPlayer.decreasePlayerAmount(duration*rentalFee, true);
 			changeOwner(player);

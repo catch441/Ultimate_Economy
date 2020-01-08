@@ -11,8 +11,7 @@ import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.Jobcenter;
 import com.ue.jobsystem.api.JobcenterController;
-
-import ultimate_economy.Ultimate_Economy;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class JobCommandExecutor implements CommandExecutor {
 
@@ -48,7 +47,7 @@ public class JobCommandExecutor implements CommandExecutor {
 							//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							case "delete":
 								if (args.length == 2) {
-									JobcenterController.deleteJobCenter(args[1]);
+									JobcenterController.deleteJobCenter(JobcenterController.getJobCenterByName(args[1]));
 									plugin.getConfig().set("JobCenterNames", JobcenterController.getJobCenterNameList());
 									plugin.saveConfig();
 									player.sendMessage(
@@ -72,7 +71,8 @@ public class JobCommandExecutor implements CommandExecutor {
 							case "addJob":
 								if (args.length == 5) {
 									Jobcenter jobcenter = JobcenterController.getJobCenterByName(args[1]);
-									jobcenter.addJob(args[2], args[3], Integer.valueOf(args[4]));
+									Job job = JobController.getJobByName(args[2]);
+									jobcenter.addJob(job, args[3], Integer.valueOf(args[4]));
 									player.sendMessage(
 											ChatColor.GOLD + "The job " + ChatColor.GREEN + args[2] + ChatColor.GOLD
 													+ " was added to the JobCenter " + ChatColor.GREEN + args[1] + ".");
@@ -84,7 +84,8 @@ public class JobCommandExecutor implements CommandExecutor {
 							case "removeJob":
 								if (args.length == 3) {
 									Jobcenter jobcenter = JobcenterController.getJobCenterByName(args[1]);
-									jobcenter.removeJob(args[2]);
+									Job job = JobController.getJobByName(args[2]);
+									jobcenter.removeJob(job);
 									player.sendMessage(
 											ChatColor.GOLD + Ultimate_Economy.messages.getString("jobcenter_removeJob1")
 													+ " " + ChatColor.GREEN + args[2] + ChatColor.GOLD + " "

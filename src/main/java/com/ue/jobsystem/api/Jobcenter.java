@@ -12,20 +12,20 @@ public interface Jobcenter {
 	/**
 	 * This method adds a job to this jobcenter.
 	 * 
-	 * @param jobname
+	 * @param job
 	 * @param itemMaterial
 	 * @param slot
 	 * @throws JobSystemException
 	 */
-	public void addJob(String jobname, String itemMaterial, int slot) throws JobSystemException;
+	public void addJob(Job job,String itemMaterial, int slot) throws JobSystemException;
 	
 	/**
 	 * This method removes a job from this jobcenter.
 	 * 
-	 * @param jobname
+	 * @param job
 	 * @throws JobSystemException
 	 */
-	public void removeJob(String jobname) throws JobSystemException;
+	public void removeJob(Job job) throws JobSystemException;
 	
 	/**
 	 * This method moves a jobcenter villager to a other location.
@@ -47,11 +47,11 @@ public interface Jobcenter {
 	public void despawnVillager();
 	
 	/**
-	 * This method returns a list of all jobnames in this jobcenter.
+	 * This method returns a list of all jobs in this jobcenter.
 	 * 
-	 * @return
+	 * @return List of jobs
 	 */
-	public List<String> getJobNameList();
+	public List<Job> getJobList();
 
 	/**
 	 * This method opens the jobcenter inventory.
@@ -63,11 +63,11 @@ public interface Jobcenter {
 	/**
 	 * This method returns true if this jobcenter contains this job.
 	 * 
-	 * @param jobname
+	 * @param job
 	 * @return boolean
 	 * @throws JobSystemException
 	 */
-	public boolean hasJob(String jobname) throws JobSystemException;
+	public boolean hasJob(Job job) throws JobSystemException;
 	
 	/**
 	 * Deletes savefile and despawns villager;

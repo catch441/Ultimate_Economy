@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.player.EconomyPlayer;
+import com.ue.player.api.EconomyPlayer;
 import com.ue.townsystem.townworld.api.Townworld;
 
 public interface Town {

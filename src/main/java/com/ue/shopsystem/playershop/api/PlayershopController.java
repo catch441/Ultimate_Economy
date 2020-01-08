@@ -154,13 +154,16 @@ public class PlayershopController {
 	/**
 	 * This method should be used to delete a playershop.
 	 * 
-	 * @param name
+	 * @param playershop
 	 * @throws ShopSystemException
 	 */
-	public static void deletePlayerShop(String name) throws ShopSystemException {
-		Playershop shop = getPlayerShopByUniqueName(name);
-		playerShopList.remove(shop);
-		shop.deleteShop();
+	public static void deletePlayerShop(Playershop playershop) throws ShopSystemException {
+		playerShopList.remove(playershop);
+		playershop.despawnVillager();
+		playershop.getWorld().save();
+		playershop.getSaveFile().delete();
+		// to make sure that all references are no more available
+		playershop = null;
 	}
 
 	/**

@@ -26,9 +26,8 @@ import org.bukkit.potion.PotionEffectType;
 
 import com.ue.exceptions.TownSystemException;
 import com.ue.townsystem.town.api.Plot;
-
-import ultimate_economy.UEVillagerType;
-import ultimate_economy.Ultimate_Economy;
+import com.ue.ultimate_economy.UEVillagerType;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class PlotImpl implements Plot {
 

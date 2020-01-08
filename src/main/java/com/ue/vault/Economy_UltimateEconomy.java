@@ -5,12 +5,12 @@ import java.util.List;
 import org.bukkit.OfflinePlayer;
 
 import com.ue.exceptions.PlayerException;
-import com.ue.player.EconomyPlayer;
+import com.ue.player.api.EconomyPlayerController;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
-import ultimate_economy.Ultimate_Economy;
 
 public class Economy_UltimateEconomy implements Economy {
 	
@@ -30,7 +30,7 @@ public class Economy_UltimateEconomy implements Economy {
 	@Override
 	public EconomyResponse depositPlayer(OfflinePlayer player, double amount) {
 		try {
-			EconomyPlayer.getEconomyPlayerByName(player.getName()).increasePlayerAmount(amount);
+			EconomyPlayerController.getEconomyPlayerByName(player.getName()).increasePlayerAmount(amount, false);
 			return new EconomyResponse(amount, getBalance(player), ResponseType.SUCCESS , "");
 		} catch (PlayerException e) {
 			return new EconomyResponse(0, 0, ResponseType.FAILURE , e.getMessage());
@@ -55,7 +55,7 @@ public class Economy_UltimateEconomy implements Economy {
 	@Override
 	public double getBalance(OfflinePlayer player) {
 		try {
-			return EconomyPlayer.getEconomyPlayerByName(player.getName()).getBankAmount();
+			return EconomyPlayerController.getEconomyPlayerByName(player.getName()).getBankAmount();
 		} catch (PlayerException e) {
 			return 0;
 		}
@@ -74,7 +74,7 @@ public class Economy_UltimateEconomy implements Economy {
 	@Override
 	public boolean has(OfflinePlayer player, double amount) {
 		try {
-			return EconomyPlayer.getEconomyPlayerByName(player.getName()).hasEnoughtMoney(amount);
+			return EconomyPlayerController.getEconomyPlayerByName(player.getName()).hasEnoughtMoney(amount);
 		} catch (PlayerException e) {
 			return false;
 		}
@@ -113,7 +113,7 @@ public class Economy_UltimateEconomy implements Economy {
 	@Override
 	public EconomyResponse withdrawPlayer(OfflinePlayer player, double amount) {
 		try {
-			EconomyPlayer.getEconomyPlayerByName(player.getName()).decreasePlayerAmount(amount,false);
+			EconomyPlayerController.getEconomyPlayerByName(player.getName()).decreasePlayerAmount(amount,false);
 			return new EconomyResponse(0, 0, ResponseType.SUCCESS , "");
 		} catch (PlayerException e) {
 			return new EconomyResponse(0, 0, ResponseType.FAILURE , e.getMessage());
@@ -213,7 +213,7 @@ public class Economy_UltimateEconomy implements Economy {
 	@Override
 	public double getBalance(String player) {
 		try {
-			return EconomyPlayer.getEconomyPlayerByName(player).getBankAmount();
+			return EconomyPlayerController.getEconomyPlayerByName(player).getBankAmount();
 		} catch (PlayerException e) {
 			return 0;
 		}
@@ -247,7 +247,7 @@ public class Economy_UltimateEconomy implements Economy {
 	@Override
 	public EconomyResponse withdrawPlayer(String player, double amount) {
 		try {
-			EconomyPlayer.getEconomyPlayerByName(player).decreasePlayerAmount(amount,false);
+			EconomyPlayerController.getEconomyPlayerByName(player).decreasePlayerAmount(amount,false);
 			return new EconomyResponse(0, 0, ResponseType.SUCCESS , "");
 		} catch (PlayerException e) {
 			return new EconomyResponse(0, 0, ResponseType.FAILURE , e.getMessage());
@@ -262,7 +262,7 @@ public class Economy_UltimateEconomy implements Economy {
 	@Override
 	public EconomyResponse depositPlayer(String player, double amount) {
 		try {
-			EconomyPlayer.getEconomyPlayerByName(player).increasePlayerAmount(amount);
+			EconomyPlayerController.getEconomyPlayerByName(player).increasePlayerAmount(amount,false);
 			return new EconomyResponse(amount, getBalance(player), ResponseType.SUCCESS , "");
 		} catch (PlayerException e) {
 			return new EconomyResponse(0, 0, ResponseType.FAILURE , e.getMessage());

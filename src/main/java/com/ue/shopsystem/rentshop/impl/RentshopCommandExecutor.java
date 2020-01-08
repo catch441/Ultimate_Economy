@@ -10,8 +10,7 @@ import org.bukkit.entity.Villager.Profession;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.rentshop.api.RentshopController;
-
-import ultimate_economy.Ultimate_Economy;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class RentshopCommandExecutor implements CommandExecutor {
 
@@ -44,7 +43,7 @@ public class RentshopCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					else if (player.hasPermission("ultimate_economy.rentshop.admin") && args[0].equals("delete")) {
 						if (args.length == 2) {
-							RentshopController.deleteRentShop(args[1]);
+							RentshopController.deleteRentShop(RentshopController.getRentShopByUniqueName(args[1]));
 							plugin.getConfig().set("RentShopIds", RentshopController.getRentShopIdList());
 							plugin.saveConfig();
 							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_delete1")

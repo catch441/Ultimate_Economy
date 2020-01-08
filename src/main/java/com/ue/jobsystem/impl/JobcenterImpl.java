@@ -28,13 +28,14 @@ import org.bukkit.potion.PotionEffectType;
 
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
+import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.Jobcenter;
 import com.ue.jobsystem.api.JobcenterController;
-import com.ue.player.EconomyPlayer;
-
-import ultimate_economy.UEVillagerType;
-import ultimate_economy.Ultimate_Economy;
+import com.ue.player.api.EconomyPlayer;
+import com.ue.player.api.EconomyPlayerController;
+import com.ue.ultimate_economy.UEVillagerType;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class JobcenterImpl implements Jobcenter {
 
@@ -43,7 +44,7 @@ public class JobcenterImpl implements Jobcenter {
 	private Villager villager;
 	private Location location;
 	private String name;
-	private List<String> jobnames;
+	private List<Job> jobs;
 	private Inventory inventory;
 
 	/**
@@ -58,7 +59,7 @@ public class JobcenterImpl implements Jobcenter {
 	 */
 	public JobcenterImpl(Server server, File dataFolder, String name, Location spawnLocation, int size)
 			throws JobSystemException {
-		jobnames = new ArrayList<>();
+		jobs = new ArrayList<>();
 		this.name = name;
 		file = new File(dataFolder, name + "-JobCenter.yml");
 		try {
@@ -89,24 +90,31 @@ public class JobcenterImpl implements Jobcenter {
 	 * @param name
 	 */
 	public JobcenterImpl(Server server, File dataFolder, String name) {
-		jobnames = new ArrayList<>();
+		jobs = new ArrayList<>();
 		this.name = name;
 		file = new File(dataFolder, name + "-JobCenter.yml");
 		config = YamlConfiguration.loadConfiguration(file);
-		jobnames = config.getStringList("Jobnames");
+		List<String> jobNames = config.getStringList("Jobnames");
+		for(String jobName:jobNames) {
+			try {
+				jobs.add(JobController.getJobByName(jobName));
+			} catch (JobSystemException e) {
+				Bukkit.getLogger().warning(JobSystemException.JOB_DOES_NOT_EXIST + ":" + jobName);
+			}
+		}
 		name = config.getString("JobCenterName");
 		location = new Location(server.getWorld(config.getString("ShopLocation.World")),
 				config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
 				config.getDouble("ShopLocation.z"));
 		setupVillager();
 		inventory = Bukkit.createInventory(villager, config.getInt("JobCenterSize"), name);
-		for (String string : jobnames) {
-			ItemStack jobItem = new ItemStack(Material.valueOf(config.getString("Jobs." + string + ".ItemMaterial")));
+		for (Job job : jobs) {
+			ItemStack jobItem = new ItemStack(Material.valueOf(config.getString("Jobs." + job.getName() + ".ItemMaterial")));
 			ItemMeta meta = jobItem.getItemMeta();
-			meta.setDisplayName(string);
+			meta.setDisplayName(job.getName());
 			meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 			jobItem.setItemMeta(meta);
-			inventory.setItem(config.getInt("Jobs." + string + ".ItemSlot") - 1, jobItem);
+			inventory.setItem(config.getInt("Jobs." + job.getName() + ".ItemSlot") - 1, jobItem);
 		}
 		setupJobCenter();
 	}
@@ -129,57 +137,53 @@ public class JobcenterImpl implements Jobcenter {
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
 	}
 
-	public void addJob(String jobname, String itemMaterial, int slot) throws JobSystemException {
+	public void addJob(Job job, String itemMaterial, int slot) throws JobSystemException {
 		itemMaterial = itemMaterial.toUpperCase();
 		if (slot < 0 || slot > inventory.getSize()) {
 			throw new JobSystemException(JobSystemException.INVENTORY_SLOT_INVALID);
 		} else if (!slotIsEmpty(slot)) {
 			throw new JobSystemException(JobSystemException.INVENTORY_SLOT_OCCUPIED);
-		} else if (!JobController.getJobNameList().contains(jobname)) {
-			throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
-		} else if (jobnames.contains(jobname)) {
+		} else if (jobs.contains(job)) {
 			throw new JobSystemException(JobSystemException.JOB_ALREADY_EXIST_IN_JOBCENTER);
 		} else if (Material.matchMaterial(itemMaterial) == null) {
 			throw new JobSystemException(JobSystemException.ITEM_IS_INVALID);
 		} else {
 			config = YamlConfiguration.loadConfiguration(file);
-			jobnames.add(jobname);
-			config.set("Jobnames", jobnames);
-			config.set("Jobs." + jobname + ".ItemMaterial", itemMaterial);
-			config.set("Jobs." + jobname + ".ItemSlot", slot);
+			jobs.add(job);
+			config.set("Jobnames", getJobNameList());
+			config.set("Jobs." + job.getName() + ".ItemMaterial", itemMaterial);
+			config.set("Jobs." + job.getName() + ".ItemSlot", slot);
 			save();
 			ItemStack jobItem = new ItemStack(Material.valueOf(itemMaterial));
 			ItemMeta meta = jobItem.getItemMeta();
-			meta.setDisplayName(jobname);
+			meta.setDisplayName(job.getName());
 			meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 			jobItem.setItemMeta(meta);
 			inventory.setItem(slot - 1, jobItem);
 		}
 	}
 
-	public void removeJob(String jobname) throws JobSystemException {
-		if (!JobController.getJobNameList().contains(jobname)) {
-			throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
-		} else if (!jobnames.contains(jobname)) {
+	public void removeJob(Job job) throws JobSystemException {
+		if (!jobs.contains(job)) {
 			throw new JobSystemException(JobSystemException.JOB_NOT_EXIST_IN_JOBCENTER);
 		} else {
 			config = YamlConfiguration.loadConfiguration(file);
-			inventory.clear(config.getInt("Jobs." + jobname + ".ItemSlot") - 1);
-			config.set("Jobs." + jobname, null);
-			jobnames.remove(jobname);
-			config.set("Jobnames", jobnames);
+			inventory.clear(config.getInt("Jobs." + job.getName() + ".ItemSlot") - 1);
+			config.set("Jobs." + job.getName(), null);
+			jobs.remove(job);
+			config.set("Jobnames", getJobNameList());
 			save();
 			int i = 0;
 			for (Jobcenter jobcenter : JobcenterController.getJobCenterList()) {
-				if (jobcenter.hasJob(jobname)) {
+				if (jobcenter.hasJob(job)) {
 					i++;
 				}
 			}
 			if (i == 0) {
-				for (EconomyPlayer ecoPlayer : EconomyPlayer.getAllEconomyPlayers()) {
-					if (ecoPlayer.hasJob(jobname)) {
+				for (EconomyPlayer ecoPlayer : EconomyPlayerController.getAllEconomyPlayers()) {
+					if (ecoPlayer.hasJob(job)) {
 						try {
-							ecoPlayer.removeJob(jobname);
+							ecoPlayer.leaveJob(job,false);
 						} catch (PlayerException e) {
 						}
 					}
@@ -187,9 +191,17 @@ public class JobcenterImpl implements Jobcenter {
 			}
 		}
 	}
+	
+	private List<String> getJobNameList() {
+		List<String> list = new ArrayList<>();
+		for(Job job:jobs) {
+			list.add(job.getName());
+		}
+		return list;
+	}
 
-	public List<String> getJobNameList() {
-		return jobnames;
+	public List<Job> getJobList() {
+		return jobs;
 	}
 
 	public void moveJobCenter(Location location) {
@@ -241,15 +253,11 @@ public class JobcenterImpl implements Jobcenter {
 		player.openInventory(inventory);
 	}
 
-	public boolean hasJob(String jobname) throws JobSystemException {
-		if (!JobController.getJobNameList().contains(jobname)) {
-			throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
+	public boolean hasJob(Job job) throws JobSystemException {
+		if (jobs.contains(job)) {
+			return true;
 		}
-		boolean exist = false;
-		if (jobnames.contains(jobname)) {
-			exist = true;
-		}
-		return exist;
+		return false;
 	}
 
 	private boolean slotIsEmpty(int slot) {

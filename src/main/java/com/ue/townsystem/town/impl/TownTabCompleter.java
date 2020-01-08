@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
 import com.ue.exceptions.PlayerException;
-import com.ue.player.EconomyPlayer;
+import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.town.api.TownController;
 
 public class TownTabCompleter implements TabCompleter {
@@ -78,9 +78,9 @@ public class TownTabCompleter implements TabCompleter {
 					|| args[0].equals("withdraw") || args[0].equals("rename")) {
 				try {
 					if (args[1].equals("")) {
-						list.addAll(EconomyPlayer.getEconomyPlayerByName(sender.getName()).getJoinedTownList());
+						list.addAll(EconomyPlayerController.getEconomyPlayerByName(sender.getName()).getJoinedTownList());
 					} else if (args.length == 2) {
-						List<String> list2 = EconomyPlayer.getEconomyPlayerByName(sender.getName()).getJoinedTownList();
+						List<String> list2 = EconomyPlayerController.getEconomyPlayerByName(sender.getName()).getJoinedTownList();
 						for (String string : list2) {
 							if (string.contains(args[1])) {
 								list.add(string);

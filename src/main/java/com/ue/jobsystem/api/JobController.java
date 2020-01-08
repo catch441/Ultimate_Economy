@@ -11,12 +11,13 @@ import org.bukkit.configuration.file.FileConfiguration;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.impl.JobImpl;
-import com.ue.player.EconomyPlayer;
+import com.ue.player.api.EconomyPlayer;
+import com.ue.player.api.EconomyPlayerController;
 
 public class JobController {
 
 	private static List<Job> jobList = new ArrayList<>();
-	
+
 	public static List<Job> getJobList() {
 		return jobList;
 	}
@@ -56,15 +57,15 @@ public class JobController {
 		List<Jobcenter> jobCenterList = JobcenterController.getJobCenterList();
 		for (Jobcenter jobcenter : jobCenterList) {
 			try {
-				jobcenter.removeJob(jobName);
+				jobcenter.removeJob(job);
 			} catch (JobSystemException e) {
 				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 			}
 		}
-		for (EconomyPlayer ecoPlayer : EconomyPlayer.getAllEconomyPlayers()) {
-			if (ecoPlayer.hasJob(jobName)) {
+		for (EconomyPlayer ecoPlayer : EconomyPlayerController.getAllEconomyPlayers()) {
+			if (ecoPlayer.hasJob(job)) {
 				try {
-					ecoPlayer.removeJob(jobName);
+					ecoPlayer.leaveJob(job, false);
 				} catch (PlayerException e) {
 					Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 				}
@@ -107,5 +108,5 @@ public class JobController {
 
 		}
 	}
-	
+
 }

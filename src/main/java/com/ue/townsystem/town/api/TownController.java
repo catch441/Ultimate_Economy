@@ -12,7 +12,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.player.EconomyPlayer;
+import com.ue.player.api.EconomyPlayer;
+import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.town.impl.TownImpl;
 import com.ue.townsystem.townworld.api.Townworld;
 
@@ -66,7 +67,7 @@ public class TownController {
 			List<String> tList = new ArrayList<>();
 			tList.addAll(town.getCitizens());
 			for (String citizen : tList) {
-				EconomyPlayer.getEconomyPlayerByName(citizen).removeJoinedTown(town.getTownName());
+				EconomyPlayerController.getEconomyPlayerByName(citizen).removeJoinedTown(town.getTownName());
 			}
 			town.despawnAllVillagers();
 			town.getTownworld().removeTown(town);

@@ -13,12 +13,13 @@ import org.bukkit.configuration.file.FileConfiguration;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.impl.JobcenterImpl;
-import com.ue.player.EconomyPlayer;
+import com.ue.player.api.EconomyPlayer;
+import com.ue.player.api.EconomyPlayerController;
 
 public class JobcenterController {
-	
+
 	private static List<Jobcenter> jobCenterList = new ArrayList<>();
-	
+
 	/**
 	 * This method returns a jobcenter by it's name.
 	 * 
@@ -63,23 +64,22 @@ public class JobcenterController {
 	 * @param name
 	 * @throws JobSystemException
 	 */
-	public static void deleteJobCenter(String name) throws JobSystemException {
-		Jobcenter jobcenter = getJobCenterByName(name);
+	public static void deleteJobCenter(Jobcenter jobcenter) throws JobSystemException {
 		jobcenter.deleteJobCenter();
-		List<String> jobList = jobcenter.getJobNameList();
+		List<Job> jobList = jobcenter.getJobList();
 		jobCenterList.remove(jobcenter);
 		int i = 0;
-		for (String jobName : jobList) {
+		for (Job job : jobList) {
 			for (Jobcenter jobCenter2 : jobCenterList) {
-				if (jobCenter2.hasJob(jobName)) {
+				if (jobCenter2.hasJob(job)) {
 					i++;
 				}
 			}
 			if (i == 0) {
-				for (EconomyPlayer ecoPlayer : EconomyPlayer.getAllEconomyPlayers()) {
-					if (ecoPlayer.hasJob(jobName)) {
+				for (EconomyPlayer ecoPlayer : EconomyPlayerController.getAllEconomyPlayers()) {
+					if (ecoPlayer.hasJob(job)) {
 						try {
-							ecoPlayer.removeJob(jobName);
+							ecoPlayer.leaveJob(job, false);
 						} catch (PlayerException e) {
 						}
 					}
@@ -111,6 +111,7 @@ public class JobcenterController {
 
 	/**
 	 * This method loads all jobcenters from the save files.
+	 * !!! {@link JobController#loadAllJobs()} have to be executed before this method. !!!
 	 * 
 	 * @param server
 	 * @param fileConfig

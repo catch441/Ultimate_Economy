@@ -7,8 +7,7 @@ import org.bukkit.command.CommandSender;
 
 import com.ue.exceptions.TownSystemException;
 import com.ue.townsystem.townworld.api.TownworldController;
-
-import ultimate_economy.Ultimate_Economy;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class TownworldCommandExecutor implements CommandExecutor {
 	

@@ -8,8 +8,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.ue.shopsystem.rentshop.api.Rentshop;
 import com.ue.shopsystem.rentshop.api.RentshopController;
-
-import ultimate_economy.Ultimate_Economy;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class RentDailyTask extends BukkitRunnable {
 

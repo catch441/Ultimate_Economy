@@ -14,7 +14,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.player.EconomyPlayer;
+import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.town.api.TownController;
 import com.ue.townsystem.townworld.impl.TownworldImpl;
@@ -81,7 +81,7 @@ public class TownworldController {
 	
 	public static void handleTownWorldLocationCheck(String worldname, Chunk chunk, String playername) {
 		try {
-			BossBar bossbar = EconomyPlayer.getEconomyPlayerByName(playername).getBossBar();
+			BossBar bossbar = EconomyPlayerController.getEconomyPlayerByName(playername).getBossBar();
 			try {
 				Townworld townworld = getTownWorldByName(worldname);
 				try {

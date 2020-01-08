@@ -9,14 +9,14 @@ import org.bukkit.entity.Player;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.player.EconomyPlayer;
+import com.ue.player.api.EconomyPlayer;
+import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.town.api.Plot;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.town.api.TownController;
 import com.ue.townsystem.townworld.api.Townworld;
 import com.ue.townsystem.townworld.api.TownworldController;
-
-import ultimate_economy.Ultimate_Economy;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class TownCommandExecutor implements CommandExecutor {
 
@@ -25,7 +25,7 @@ public class TownCommandExecutor implements CommandExecutor {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 			try {
-				EconomyPlayer ecoPlayer = EconomyPlayer.getEconomyPlayerByName(player.getName());
+				EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(player.getName());
 				if (args.length != 0) {
 					switch(args[0]) {
 						case "create": 
@@ -207,10 +207,7 @@ public class TownCommandExecutor implements CommandExecutor {
 										if (town.hasCoOwnerPermission(player.getName())) {
 											double amount = Double.valueOf(args[2]);
 											town.decreaseTownBankAmount(amount);
-											ecoPlayer.increasePlayerAmount(amount);
-											player.sendMessage(
-													ChatColor.GOLD + Ultimate_Economy.messages.getString("got_money")
-															+ " " + ChatColor.GREEN + amount + " $");
+											ecoPlayer.increasePlayerAmount(amount,true);
 										} else {
 											player.sendMessage(ChatColor.RED
 													+ Ultimate_Economy.messages.getString("player_has_no_permission"));

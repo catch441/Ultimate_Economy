@@ -26,14 +26,14 @@ import org.bukkit.potion.PotionEffectType;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.player.EconomyPlayer;
+import com.ue.player.api.EconomyPlayer;
+import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.town.api.Plot;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.town.api.TownController;
 import com.ue.townsystem.townworld.api.Townworld;
-
-import ultimate_economy.UEVillagerType;
-import ultimate_economy.Ultimate_Economy;
+import com.ue.ultimate_economy.UEVillagerType;
+import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class TownImpl implements Town {
 
@@ -57,6 +57,7 @@ public class TownImpl implements Town {
 	 * @param owner
 	 * @param townName
 	 * @param location
+	 * @param load false, if the town is a new one
 	 * @throws TownSystemException
 	 */
 	public TownImpl(Townworld townworld, String owner, String townName, Location location,boolean load) throws TownSystemException {
@@ -157,7 +158,7 @@ public class TownImpl implements Town {
 			
 			config.set("Towns." + townName, null);
 			for(String citizen: citizens) {
-				EconomyPlayer economyPlayer = EconomyPlayer.getEconomyPlayerByName(citizen);
+				EconomyPlayer economyPlayer = EconomyPlayerController.getEconomyPlayerByName(citizen);
 				economyPlayer.removeJoinedTown(townName);
 				economyPlayer.addJoinedTown(newName);
 			}
@@ -561,7 +562,7 @@ public class TownImpl implements Town {
 		if (!coOwners.contains(coOwner)) {
 			if(!isPlayerCitizen(coOwner)) {
 				addCitizen(coOwner);
-				EconomyPlayer.getEconomyPlayerByName(coOwner).addJoinedTown(townName);
+				EconomyPlayerController.getEconomyPlayerByName(coOwner).addJoinedTown(townName);
 			}
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
 			coOwners.add(coOwner);
