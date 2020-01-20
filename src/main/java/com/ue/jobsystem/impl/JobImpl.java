@@ -12,7 +12,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 
+import com.ue.exceptions.JobExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
+import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.jobsystem.api.Job;
 
 public class JobImpl implements Job {
@@ -50,13 +53,13 @@ public class JobImpl implements Job {
 		fisherList = config.getStringList("Fisherlist");
 	}
 
-	public void addFisherLootType(String lootType, double price) throws JobSystemException {
+	public void addFisherLootType(String lootType, double price) throws JobSystemException, PlayerException {
 		if (!lootType.equals("treasure") && !lootType.equals("junk") && !lootType.equals("fish")) {
-			throw new JobSystemException(JobSystemException.LOOTTYPE_IS_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, lootType);
 		} else if (price <= 0) {
-			throw new JobSystemException(JobSystemException.PRICE_IS_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, price);
 		} else if (fisherList.contains(lootType)) {
-			throw new JobSystemException(JobSystemException.LOOTTYPE_ALREADY_EXISTS);
+			throw JobSystemException.getException(JobExceptionMessageEnum.LOOTTYPE_ALREADY_EXISTS);
 		} else {
 			config = YamlConfiguration.loadConfiguration(file);
 			config.set("Fisher." + lootType, price);
@@ -67,11 +70,11 @@ public class JobImpl implements Job {
 		}
 	}
 
-	public void delFisherLootType(String lootType) throws JobSystemException {
+	public void delFisherLootType(String lootType) throws JobSystemException, PlayerException {
 		if (!lootType.equals("treasure") && !lootType.equals("junk") && !lootType.equals("fish")) {
-			throw new JobSystemException(JobSystemException.LOOTTYPE_IS_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, lootType);
 		} else if (!fisherList.contains(lootType)) {
-			throw new JobSystemException(JobSystemException.LOOTTYPE_DOES_NOT_EXISTS);
+			throw JobSystemException.getException(JobExceptionMessageEnum.LOOTTYPE_DOES_NOT_EXIST);
 		} else {
 			config = YamlConfiguration.loadConfiguration(file);
 			config.set("Fisher." + lootType, null);
@@ -83,17 +86,17 @@ public class JobImpl implements Job {
 
 	}
 
-	public void addMob(String entity, double price) throws JobSystemException {
+	public void addMob(String entity, double price) throws JobSystemException, PlayerException {
 		entity = entity.toUpperCase();
 		try {
 			EntityType.valueOf(entity);
 		} catch (IllegalArgumentException e) {
-			throw new JobSystemException(JobSystemException.ENTITY_IS_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, entity);
 		}
 		if (entityList.contains(entity)) {
-			throw new JobSystemException(JobSystemException.ENTITY_ALREADY_EXISTS);
+			throw JobSystemException.getException(JobExceptionMessageEnum.ENTITY_ALREADY_EXISTS);
 		} else if (price <= 0.0) {
-			throw new JobSystemException(JobSystemException.PRICE_IS_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, price);
 		} else {
 			entityList.add(entity);
 			config = YamlConfiguration.loadConfiguration(file);
@@ -104,11 +107,11 @@ public class JobImpl implements Job {
 		}
 	}
 
-	public void deleteMob(String entity) throws JobSystemException {
+	public void deleteMob(String entity) throws JobSystemException, PlayerException {
 		try {
 			EntityType.valueOf(entity.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			throw new JobSystemException(JobSystemException.ENTITY_IS_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, entity);
 		}
 		entity = entity.toUpperCase();
 		if (entityList.contains(entity)) {
@@ -118,19 +121,19 @@ public class JobImpl implements Job {
 			config.set("Entitylist", entityList);
 			save();
 		} else {
-			throw new JobSystemException(JobSystemException.ENTITY_DOES_NOT_EXIST);
+			throw JobSystemException.getException(JobExceptionMessageEnum.ENTITY_DOES_NOT_EXIST);
 		}
 	}
 
-	public void addItem(String material, double price) throws JobSystemException {
+	public void addItem(String material, double price) throws JobSystemException, PlayerException {
 		material = material.toUpperCase();
 		;
 		if (price <= 0.0) {
-			throw new JobSystemException(JobSystemException.PRICE_IS_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, price);
 		} else if (Material.matchMaterial(material) == null) {
-			throw new JobSystemException(JobSystemException.ITEM_IS_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, material);
 		} else if (itemList.contains(material)) {
-			throw new JobSystemException(JobSystemException.ITEM_ALREADY_EXISTS);
+			throw JobSystemException.getException(JobExceptionMessageEnum.ITEM_ALREADY_EXISTS);
 		} else {
 			itemList.add(material);
 			config = YamlConfiguration.loadConfiguration(file);
@@ -141,12 +144,12 @@ public class JobImpl implements Job {
 		}
 	}
 
-	public void deleteItem(String material) throws JobSystemException {
+	public void deleteItem(String material) throws JobSystemException, PlayerException {
 		material = material.toUpperCase();
 		if (Material.matchMaterial(material) == null) {
-			throw new JobSystemException(JobSystemException.ITEM_IS_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, material);
 		} else if (!itemList.contains(material)) {
-			throw new JobSystemException(JobSystemException.ITEM_DOES_NOT_EXIST);
+			throw JobSystemException.getException(JobExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
 		} else {
 			itemList.remove(material);
 			config = YamlConfiguration.loadConfiguration(file);
@@ -160,11 +163,11 @@ public class JobImpl implements Job {
 		return name;
 	}
 
-	public double getItemPrice(String material) throws JobSystemException {
+	public double getItemPrice(String material) throws JobSystemException, PlayerException {
 		if (Material.matchMaterial(material.toUpperCase()) == null) {
-			throw new JobSystemException(JobSystemException.ITEM_IS_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, material);
 		} else if (!itemList.contains(material)) {
-			throw new JobSystemException(JobSystemException.ITEM_DOES_NOT_EXIST);
+			throw JobSystemException.getException(JobExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
 		} else {
 			config = YamlConfiguration.loadConfiguration(file);
 			double price = config.getDouble("JobItems." + material + ".breakprice");
@@ -172,11 +175,11 @@ public class JobImpl implements Job {
 		}
 	}
 
-	public double getFisherPrice(String lootType) throws JobSystemException {
+	public double getFisherPrice(String lootType) throws JobSystemException, PlayerException {
 		if (!lootType.equals("treasure") && !lootType.equals("junk") && !lootType.equals("fish")) {
-			throw new JobSystemException(JobSystemException.LOOTTYPE_IS_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, lootType);
 		} else if (!fisherList.contains(lootType)) {
-			throw new JobSystemException(JobSystemException.LOOTTYPE_DOES_NOT_EXISTS);
+			throw JobSystemException.getException(JobExceptionMessageEnum.LOOTTYPE_DOES_NOT_EXIST);
 		} else {
 			config = YamlConfiguration.loadConfiguration(file);
 			double price1 = config.getDouble("Fisher." + lootType);
@@ -184,14 +187,14 @@ public class JobImpl implements Job {
 		}
 	}
 
-	public double getKillPrice(String entityName) throws JobSystemException {
+	public double getKillPrice(String entityName) throws JobSystemException, PlayerException {
 		try {
 			EntityType.valueOf(entityName.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			throw new JobSystemException(JobSystemException.ENTITY_IS_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, entityName);
 		}
 		if (!entityList.contains(entityName)) {
-			throw new JobSystemException(JobSystemException.ENTITY_DOES_NOT_EXIST);
+			throw JobSystemException.getException(JobExceptionMessageEnum.ENTITY_DOES_NOT_EXIST);
 		} else {
 			config = YamlConfiguration.loadConfiguration(file);
 			double price2 = config.getDouble("JobEntitys." + entityName + ".killprice");

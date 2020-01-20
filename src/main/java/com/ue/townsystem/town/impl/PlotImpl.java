@@ -24,15 +24,20 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.PlayerExceptionMessageEnum;
+import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
+import com.ue.language.MessageWrapper;
+import com.ue.player.api.EconomyPlayer;
 import com.ue.townsystem.town.api.Plot;
 import com.ue.ultimate_economy.UEVillagerType;
 import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class PlotImpl implements Plot {
 
-	private String owner;
-	private List<String> coOwners;
+	private EconomyPlayer owner;
+	private List<EconomyPlayer> coOwners;
 	private final String chunkCoords;
 	private boolean isForSale;
 	private double salePrice;
@@ -41,9 +46,7 @@ public class PlotImpl implements Plot {
 	private TownImpl townImpl;
 
 	/**
-	 * <p>
 	 * Represents a plot in a town.
-	 * <p>
 	 * 
 	 * @param file
 	 * @param owner
@@ -51,7 +54,7 @@ public class PlotImpl implements Plot {
 	 *            (format "X/Z")
 	 * @param townName
 	 */
-	public PlotImpl(TownImpl townImpl, String owner, String chunkCoords) {
+	public PlotImpl(TownImpl townImpl, EconomyPlayer owner, String chunkCoords) {
 		this.chunkCoords = chunkCoords;
 		this.townImpl = townImpl;
 		setOwner(owner);
@@ -77,9 +80,7 @@ public class PlotImpl implements Plot {
 	}
 
 	/**
-	 * <p>
 	 * Spawns a sale villager without saving.
-	 * <p>
 	 * 
 	 * @param file
 	 * @param location
@@ -109,7 +110,7 @@ public class PlotImpl implements Plot {
 		meta.setDisplayName("Buy");
 		List<String> list = new ArrayList<String>();
 		list.add(ChatColor.GOLD + "Price: " + ChatColor.GREEN + salePrice);
-		list.add(ChatColor.GOLD + "Is sold by " + ChatColor.GREEN + owner);
+		list.add(ChatColor.GOLD + "Is sold by " + ChatColor.GREEN + owner.getName());
 		meta.setLore(list);
 		itemStack.setItemMeta(meta);
 		inventory.setItem(0, itemStack);
@@ -135,60 +136,58 @@ public class PlotImpl implements Plot {
 	 * @param newLocation
 	 * @throws TownSystemException
 	 */
-	public void moveSaleVillager(Location newLocation) throws TownSystemException {
+	public void moveSaleVillager(Location newLocation) throws PlayerException {
 		if (chunkCoords.equals(newLocation.getChunk().getX() + "/" + newLocation.getChunk().getZ())) {
 			villager.teleport(newLocation);
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townImpl.getTownworld().getSaveFile());
-			config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".SaleVillager.x", newLocation.getX());
-			config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".SaleVillager.y", newLocation.getY());
-			config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".SaleVillager.z", newLocation.getZ());
+			config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".SaleVillager.x",
+					newLocation.getX());
+			config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".SaleVillager.y",
+					newLocation.getY());
+			config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".SaleVillager.z",
+					newLocation.getZ());
 			config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".SaleVillager.world",
 					newLocation.getWorld().getName());
 			save(townImpl.getTownworld().getSaveFile(), config);
 		} else {
-			throw new TownSystemException(TownSystemException.OUTSIDE_OF_THE_PLOT);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.OUTSIDE_OF_THE_PLOT);
 		}
 	}
 
 	/**
 	 * Opens the inventory of the saleManager.
-	 * 
 	 */
 	public void openSaleVillagerInv(Player player) {
 		player.openInventory(inventory);
 	}
 
-	public String getOwner() {
+	public EconomyPlayer getOwner() {
 		return owner;
 	}
 
-	public void setOwner(String owner) {
+	public void setOwner(EconomyPlayer owner) {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(townImpl.getTownworld().getSaveFile());
-		config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".owner", owner);
+		config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".owner", owner.getName());
 		this.owner = owner;
 		save(townImpl.getTownworld().getSaveFile(), config);
 	}
 
 	/**
-	 * <p>
 	 * Get a list of all coOwners of this plot.
-	 * <p>
 	 * 
 	 * @return List
 	 */
-	public List<String> getCoOwners() {
+	public List<EconomyPlayer> getCoOwners() {
 		return coOwners;
 	}
 
 	/**
-	 * <p>
 	 * Set the list of coOwners of this plot.
-	 * <p>
 	 * 
 	 * @param file
 	 * @param coOwners
 	 */
-	public void setCoOwners(List<String> coOwners) {
+	public void setCoOwners(List<EconomyPlayer> coOwners) {
 		this.coOwners = coOwners;
 	}
 
@@ -198,25 +197,31 @@ public class PlotImpl implements Plot {
 	 * @param citizen
 	 * @throws TownSystemException
 	 */
-	public void addCoOwner(String citizen) throws TownSystemException {
+	public void addCoOwner(EconomyPlayer citizen) throws TownSystemException {
 		if (!coOwners.contains(citizen)) {
 			coOwners.add(citizen);
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townImpl.getTownworld().getSaveFile());
-			config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".coOwners", coOwners);
+			List<String> list = config
+					.getStringList("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".coOwners");
+			list.add(citizen.getName());
+			config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".coOwners", list);
 			save(townImpl.getTownworld().getSaveFile(), config);
 		} else {
-			throw new TownSystemException(TownSystemException.PLAYER_IS_ALREADY_COOWNERN);
+			throw TownSystemException.getException(TownExceptionMessageEnum.PLAYER_IS_ALREADY_COOWNERN);
 		}
 	}
 
-	public void removeCoOwner(String citizen) throws TownSystemException {
+	public void removeCoOwner(EconomyPlayer citizen) throws TownSystemException {
 		if (coOwners.contains(citizen)) {
 			coOwners.remove(citizen);
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townImpl.getTownworld().getSaveFile());
-			config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".coOwners", coOwners);
+			List<String> list = config
+					.getStringList("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".coOwners");
+			list.remove(citizen.getName());
+			config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".coOwners", list);
 			save(townImpl.getTownworld().getSaveFile(), config);
 		} else {
-			throw new TownSystemException(TownSystemException.PLAYER_IS_NO_COOWNER);
+			throw TownSystemException.getException(TownExceptionMessageEnum.PLAYER_IS_NO_COOWNER);
 		}
 	}
 
@@ -236,7 +241,7 @@ public class PlotImpl implements Plot {
 		return chunkCoords;
 	}
 
-	public boolean isOwner(String owner) {
+	public boolean isOwner(EconomyPlayer owner) {
 		if (this.owner.equals(owner)) {
 			return true;
 		} else {
@@ -244,10 +249,10 @@ public class PlotImpl implements Plot {
 		}
 	}
 
-	public boolean isCoOwner(String coOwner) {
+	public boolean isCoOwner(EconomyPlayer coOwner) {
 		boolean is = false;
-		for (String string : coOwners) {
-			if (string.equals(coOwner)) {
+		for (EconomyPlayer player : coOwners) {
+			if (player.equals(coOwner)) {
 				is = true;
 				break;
 			}
@@ -259,7 +264,7 @@ public class PlotImpl implements Plot {
 		return isForSale;
 	}
 
-	public void removeFromSale(String owner) throws TownSystemException {
+	public void removeFromSale(EconomyPlayer owner) throws TownSystemException {
 		if (isOwner(owner)) {
 			setIsForSale(false);
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townImpl.getTownworld().getSaveFile());
@@ -269,21 +274,24 @@ public class PlotImpl implements Plot {
 			world.save();
 			save(townImpl.getTownworld().getSaveFile(), config);
 		} else {
-			throw new TownSystemException(TownSystemException.PLAYER_IS_NOT_OWNER);
+			throw TownSystemException.getException(TownExceptionMessageEnum.PLAYER_IS_NOT_OWNER);
 		}
 	}
 
-	public void setForSale(double salePrice, Location playerLocation,String player) throws TownSystemException {
+	public void setForSale(double salePrice, Location playerLocation, EconomyPlayer player,boolean sendMessage) throws TownSystemException, PlayerException {
 		if (isOwner(player)) {
 			if (this.isForSale) {
-				throw new TownSystemException(TownSystemException.PLOT_IS_ALREADY_FOR_SALE);
+				throw TownSystemException.getException(TownExceptionMessageEnum.PLOT_IS_ALREADY_FOR_SALE);
 			} else {
 				setSalePrice(salePrice);
 				spawnSaleVillagerWithSaving(playerLocation);
 				setIsForSale(true);
+				if(player.isOnline() && sendMessage) {
+					player.getPlayer().sendMessage(MessageWrapper.getString("town_plot_setForSale"));
+				}
 			}
 		} else {
-			throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
 		}
 	}
 

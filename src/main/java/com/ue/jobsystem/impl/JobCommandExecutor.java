@@ -7,10 +7,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.ue.exceptions.JobSystemException;
+import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.Jobcenter;
 import com.ue.jobsystem.api.JobcenterController;
+import com.ue.language.MessageWrapper;
 import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class JobCommandExecutor implements CommandExecutor {
@@ -35,10 +37,7 @@ public class JobCommandExecutor implements CommandExecutor {
 											player.getLocation(), Integer.parseInt(args[2]));
 									plugin.getConfig().set("JobCenterNames", JobcenterController.getJobCenterNameList());
 									plugin.saveConfig();
-									player.sendMessage(
-											ChatColor.GOLD + Ultimate_Economy.messages.getString("jobcenter_create1")
-													+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
-													+ Ultimate_Economy.messages.getString("jobcenter_create2"));
+									player.sendMessage(MessageWrapper.getString("jobcenter_create", args[1]));
 								} else {
 									player.sendMessage(
 											"/jobcenter create <jobcenter> <size> <- size have to be a multible of 9");
@@ -50,10 +49,7 @@ public class JobCommandExecutor implements CommandExecutor {
 									JobcenterController.deleteJobCenter(JobcenterController.getJobCenterByName(args[1]));
 									plugin.getConfig().set("JobCenterNames", JobcenterController.getJobCenterNameList());
 									plugin.saveConfig();
-									player.sendMessage(
-											ChatColor.GOLD + Ultimate_Economy.messages.getString("jobcenter_delete1")
-													+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + " "
-													+ Ultimate_Economy.messages.getString("jobcenter_delete2"));
+									player.sendMessage(MessageWrapper.getString("jobcenter_delete", args[1]));
 								} else {
 									player.sendMessage("/jobcenter delete <jobcenter>");
 								}
@@ -73,6 +69,7 @@ public class JobCommandExecutor implements CommandExecutor {
 									Jobcenter jobcenter = JobcenterController.getJobCenterByName(args[1]);
 									Job job = JobController.getJobByName(args[2]);
 									jobcenter.addJob(job, args[3], Integer.valueOf(args[4]));
+									//TODO aus messages holen
 									player.sendMessage(
 											ChatColor.GOLD + "The job " + ChatColor.GREEN + args[2] + ChatColor.GOLD
 													+ " was added to the JobCenter " + ChatColor.GREEN + args[1] + ".");
@@ -86,10 +83,7 @@ public class JobCommandExecutor implements CommandExecutor {
 									Jobcenter jobcenter = JobcenterController.getJobCenterByName(args[1]);
 									Job job = JobController.getJobByName(args[2]);
 									jobcenter.removeJob(job);
-									player.sendMessage(
-											ChatColor.GOLD + Ultimate_Economy.messages.getString("jobcenter_removeJob1")
-													+ " " + ChatColor.GREEN + args[2] + ChatColor.GOLD + " "
-													+ Ultimate_Economy.messages.getString("jobcenter_removeJob2"));
+									player.sendMessage(MessageWrapper.getString("jobcenter_removeJob", args[2]));
 								} else {
 									player.sendMessage("/jobcenter removeJob <jobcenter> <job>");
 								}
@@ -106,10 +100,7 @@ public class JobCommandExecutor implements CommandExecutor {
 												JobController.createJob(plugin.getDataFolder(), args[2]);
 												plugin.getConfig().set("JobList", JobController.getJobNameList());
 												plugin.saveConfig();
-												player.sendMessage(ChatColor.GOLD
-														+ Ultimate_Economy.messages.getString("jobcenter_createJob1")
-														+ " " + ChatColor.GREEN + args[2] + ChatColor.GOLD + " "
-														+ Ultimate_Economy.messages.getString("jobcenter_createJob2"));
+												player.sendMessage(MessageWrapper.getString("jobcenter_createJob", args[2]));
 											} else {
 												player.sendMessage("/jobcenter job create <job>");
 											}
@@ -120,10 +111,7 @@ public class JobCommandExecutor implements CommandExecutor {
 												JobController.deleteJob(args[2]);
 												plugin.getConfig().set("JobList", JobController.getJobNameList());
 												plugin.saveConfig();
-												player.sendMessage(ChatColor.GOLD
-														+ Ultimate_Economy.messages.getString("jobcenter_delJob1") + " "
-														+ ChatColor.GREEN + args[2] + ChatColor.GOLD + " "
-														+ Ultimate_Economy.messages.getString("jobcenter_delJob2"));
+												player.sendMessage(MessageWrapper.getString("jobcenter_delJob", args[2]));
 											} else {
 												player.sendMessage("/jobcenter job delete <job>");
 											}
@@ -133,10 +121,7 @@ public class JobCommandExecutor implements CommandExecutor {
 											if (args.length == 5) {
 												Job job = JobController.getJobByName(args[2]);
 												job.addMob(args[3], Double.valueOf(args[4]));
-												player.sendMessage(ChatColor.GOLD
-														+ Ultimate_Economy.messages.getString("jobcenter_addMob1") + " "
-														+ ChatColor.GREEN + args[3] + ChatColor.GOLD + " "
-														+ Ultimate_Economy.messages.getString("jobcenter_addMob2"));
+												player.sendMessage(MessageWrapper.getString("jobcenter_addMob", args[3]));
 											} else {
 												player.sendMessage("/jobcenter job addMob <job> <entity> <price>");
 											}
@@ -146,11 +131,7 @@ public class JobCommandExecutor implements CommandExecutor {
 											if (args.length == 4) {
 												Job job = JobController.getJobByName(args[2]);
 												job.deleteMob(args[3]);
-												player.sendMessage(ChatColor.GOLD
-														+ Ultimate_Economy.messages.getString("jobcenter_removeMob1")
-														+ " " + ChatColor.GREEN + args[3] + ChatColor.GOLD + " "
-														+ Ultimate_Economy.messages.getString("jobcenter_removeMob2")
-														+ " " + ChatColor.GREEN + job.getName() + ".");
+												player.sendMessage(MessageWrapper.getString("jobcenter_removeMob", args[3]));
 											} else {
 												player.sendMessage("/jobcenter job removeMob <jobname> <entity>");
 											}
@@ -160,11 +141,7 @@ public class JobCommandExecutor implements CommandExecutor {
 											if (args.length == 5) {
 												Job job = JobController.getJobByName(args[2]);
 												job.addItem(args[3], Double.valueOf(args[4]));
-												player.sendMessage(ChatColor.GOLD
-														+ Ultimate_Economy.messages.getString("jobcenter_addItem1")
-														+ " " + ChatColor.GREEN + args[3] + ChatColor.GOLD + " "
-														+ Ultimate_Economy.messages.getString("jobcenter_addItem2")
-														+ " " + ChatColor.GREEN + job.getName() + ".");
+												player.sendMessage(MessageWrapper.getString("jobcenter_addItem", args[3]));
 											} else {
 												player.sendMessage("/jobcenter job addItem <job> <material> <price>");
 											}
@@ -174,11 +151,7 @@ public class JobCommandExecutor implements CommandExecutor {
 											if (args.length == 4) {
 												Job job = JobController.getJobByName(args[2]);
 												job.deleteItem(args[3]);
-												player.sendMessage(ChatColor.GOLD
-														+ Ultimate_Economy.messages.getString("jobcenter_removeItem1")
-														+ " " + ChatColor.GREEN + args[3] + ChatColor.GOLD + " "
-														+ Ultimate_Economy.messages.getString("jobcenter_removeItem2")
-														+ " " + ChatColor.GREEN + job.getName() + ".");
+												player.sendMessage(MessageWrapper.getString("jobcenter_removeItem", args[3]));
 											} else {
 												player.sendMessage("/jobcenter job removeItem <job> <material>");
 											}
@@ -188,11 +161,7 @@ public class JobCommandExecutor implements CommandExecutor {
 											if (args.length == 5) {
 												Job job = JobController.getJobByName(args[2]);
 												job.addFisherLootType(args[3], Double.valueOf(args[4]));
-												player.sendMessage(ChatColor.GOLD
-														+ Ultimate_Economy.messages.getString("jobcenter_addFisher1")
-														+ " " + ChatColor.GREEN + args[3] + ChatColor.GOLD + " "
-														+ Ultimate_Economy.messages.getString("jobcenter_addFisher2")
-														+ " " + ChatColor.GREEN + job.getName() + ".");
+												player.sendMessage(MessageWrapper.getString("jobcenter_addFisher", args[3]));
 											} else {
 												player.sendMessage(
 														"/jobcenter job addFisher <job> [fish/treasure/junk] <price>");
@@ -203,11 +172,7 @@ public class JobCommandExecutor implements CommandExecutor {
 											if (args.length == 4) {
 												Job job = JobController.getJobByName(args[2]);
 												job.delFisherLootType(args[3]);
-												player.sendMessage(ChatColor.GOLD
-														+ Ultimate_Economy.messages.getString("jobcenter_removeFisher1")
-														+ " " + ChatColor.GREEN + args[3] + ChatColor.GOLD + " "
-														+ Ultimate_Economy.messages.getString("jobcenter_removeFisher2")
-														+ " " + ChatColor.GREEN + job.getName() + ".");
+												player.sendMessage(MessageWrapper.getString("jobcenter_removeFisher", args[3]));
 											} else {
 												player.sendMessage(
 														"/jobcenter job removeFisher <jobname> <fish/treasure/junk>");
@@ -228,10 +193,10 @@ public class JobCommandExecutor implements CommandExecutor {
 						return false;
 					}
 				}
-			} catch (JobSystemException e) {
-				player.sendMessage(ChatColor.RED + e.getMessage());
+			} catch (JobSystemException | PlayerException e) {
+				player.sendMessage(e.getMessage());
 			} catch (NumberFormatException e2) {
-				player.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("invalid_number"));
+				player.sendMessage(MessageWrapper.getErrorString("invalid_parameter",""));
 			}
 		}
 		return true;

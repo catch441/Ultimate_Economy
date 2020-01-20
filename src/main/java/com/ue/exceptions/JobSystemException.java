@@ -1,34 +1,47 @@
 package com.ue.exceptions;
 
-import com.ue.ultimate_economy.Ultimate_Economy;
+import com.ue.language.MessageWrapper;
 
 public class JobSystemException extends Exception{
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String PRICE_IS_INVALID = Ultimate_Economy.messages.getString("price_is_invalid");
-	public static final String LOOTTYPE_IS_INVALID = Ultimate_Economy.messages.getString("loottype_is_invalid");
-	public static final String LOOTTYPE_ALREADY_EXISTS = Ultimate_Economy.messages.getString("loottype_already_exists");
-	public static final String LOOTTYPE_DOES_NOT_EXISTS = Ultimate_Economy.messages.getString("loottype_does_not_exist");
-	public static final String JOB_DOES_NOT_EXIST = Ultimate_Economy.messages.getString("job_does_not_exist");
-	public static final String JOB_ALREADY_EXIST = Ultimate_Economy.messages.getString("job_already_exists");
-	public static final String ENTITY_IS_INVALID = Ultimate_Economy.messages.getString("entity_is_invalid");
-	public static final String ITEM_IS_INVALID = Ultimate_Economy.messages.getString("item_is_invalid");
-	public static final String ENTITY_ALREADY_EXISTS = Ultimate_Economy.messages.getString("entity_already_exists");
-	public static final String ENTITY_DOES_NOT_EXIST = Ultimate_Economy.messages.getString("entity_does_not_exist");
-	public static final String ITEM_ALREADY_EXISTS = Ultimate_Economy.messages.getString("item_already_exists_in_job");
-	public static final String ITEM_DOES_NOT_EXIST = Ultimate_Economy.messages.getString("item_does_not_exist_in_job");
-	public static final String CANNOT_LOAD_JOB = Ultimate_Economy.messages.getString("cannot_load_job");
-	public static final String CANNOT_LOAD_JOBCENTER = Ultimate_Economy.messages.getString("cannot_load_jobcenter");
-	public static final String JOB_NOT_EXIST_IN_JOBCENTER = Ultimate_Economy.messages.getString("job_not_exist_in_jobcenter");
-	public static final String JOB_ALREADY_EXIST_IN_JOBCENTER = Ultimate_Economy.messages.getString("job_already_exists_in_jobcenter");
-	public static final String JOBCENTER_ALREADY_EXIST = Ultimate_Economy.messages.getString("jobcenter_already_exist");
-	public static final String JOBCENTER_DOES_NOT_EXIST = Ultimate_Economy.messages.getString("jobcenter_does_not_exist");
-	public static final String INVALID_INVENTORY_SIZE = Ultimate_Economy.messages.getString("invalid_inventory_size");
-	public static final String INVENTORY_SLOT_OCCUPIED = Ultimate_Economy.messages.getString("inventory_slot_occupied");
-	public static final String INVENTORY_SLOT_INVALID = Ultimate_Economy.messages.getString("inventory_slot_invalid");
+	public static JobSystemException getException(JobExceptionMessageEnum key, Object... params) {
+		switch (key) {
+			case JOB_DOES_NOT_EXISTS:
+				return new JobSystemException(MessageWrapper.getErrorString("job_does_not_exist"));
+			case JOB_ALREADY_EXISTS:
+				return new JobSystemException(MessageWrapper.getErrorString("job_already_exists"));
+			case JOBCENTER_ALREADY_EXISTS:
+				return new JobSystemException(MessageWrapper.getErrorString("jobcenter_already_exist"));
+			case JOBCENTER_DOES_NOT_EXIST:
+				return new JobSystemException(MessageWrapper.getErrorString("jobcenter_does_not_exist"));
+			case ENTITY_ALREADY_EXISTS:
+				return new JobSystemException(MessageWrapper.getErrorString("entity_already_exists"));
+			case ENTITY_DOES_NOT_EXIST:
+				return new JobSystemException(MessageWrapper.getErrorString("entity_does_not_exist"));
+			case ITEM_ALREADY_EXISTS:
+				return new JobSystemException(MessageWrapper.getErrorString("item_already_exists_in_job"));
+			case ITEM_DOES_NOT_EXIST:
+				return new JobSystemException(MessageWrapper.getErrorString("item_does_not_exist_in_job"));
+			case JOB_NOT_EXIST_IN_JOBCENTER:
+				return new JobSystemException(MessageWrapper.getErrorString("job_not_exist_in_jobcenter"));
+			case LOOTTYPE_ALREADY_EXISTS:
+				return new JobSystemException(MessageWrapper.getErrorString("loottype_already_exists"));
+			case LOOTTYPE_DOES_NOT_EXIST:
+				return new JobSystemException(MessageWrapper.getErrorString("loottype_does_not_exist"));
+			case JOB_ALREADY_EXIST_IN_JOBCENTER:
+				return new JobSystemException(MessageWrapper.getErrorString("job_already_exists_in_jobcenter"));
+			case CANNOT_LOAD_JOB:
+				return new JobSystemException(MessageWrapper.getErrorString("cannot_load_job"));
+			case CANNOT_LOAD_JOBCENTER:
+				return new JobSystemException(MessageWrapper.getErrorString("cannot_load_jobcenter"));
+			default:
+				return null;
+		}
+	}
 	
-	public JobSystemException(String msg) {
+	private JobSystemException(String msg) {
 		super(msg);
 	}
 }

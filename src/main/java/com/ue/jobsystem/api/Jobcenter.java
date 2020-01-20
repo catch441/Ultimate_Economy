@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import com.ue.exceptions.JobSystemException;
+import com.ue.exceptions.PlayerException;
 
 public interface Jobcenter {
 	
@@ -16,8 +17,9 @@ public interface Jobcenter {
 	 * @param itemMaterial
 	 * @param slot
 	 * @throws JobSystemException
+	 * @throws PlayerException
 	 */
-	public void addJob(Job job,String itemMaterial, int slot) throws JobSystemException;
+	public void addJob(Job job,String itemMaterial, int slot) throws JobSystemException,PlayerException;
 	
 	/**
 	 * This method removes a job from this jobcenter.

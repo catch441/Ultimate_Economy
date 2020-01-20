@@ -25,21 +25,24 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.PlayerExceptionMessageEnum;
+import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
+import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
-import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.town.api.Plot;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.town.api.TownController;
 import com.ue.townsystem.townworld.api.Townworld;
+import com.ue.townsystem.townworld.api.TownworldController;
 import com.ue.ultimate_economy.UEVillagerType;
 import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class TownImpl implements Town {
 
 	private String townName;
-	private String owner;
-	private ArrayList<String> citizens, coOwners;
+	private EconomyPlayer owner;
+	private ArrayList<EconomyPlayer> citizens, coOwners;
 	private ArrayList<String> chunkCoords;
 	private Location townSpawn;
 	private ArrayList<Plot> plots;
@@ -49,7 +52,6 @@ public class TownImpl implements Town {
 	private Inventory inventory;
 	private Townworld townworld;
 
-
 	/**
 	 * Creates a town object.
 	 * 
@@ -57,10 +59,13 @@ public class TownImpl implements Town {
 	 * @param owner
 	 * @param townName
 	 * @param location
-	 * @param load false, if the town is a new one
+	 * @param load
+	 *            false, if the town is a new one
 	 * @throws TownSystemException
+	 * @throws PlayerException 
 	 */
-	public TownImpl(Townworld townworld, String owner, String townName, Location location,boolean load) throws TownSystemException {
+	public TownImpl(Townworld townworld, EconomyPlayer owner, String townName, Location location, boolean load)
+			throws TownSystemException, PlayerException {
 		Chunk startChunk = location.getChunk();
 		this.townworld = townworld;
 		this.townName = townName;
@@ -69,7 +74,7 @@ public class TownImpl implements Town {
 		coOwners = new ArrayList<>();
 		chunkCoords = new ArrayList<>();
 		plots = new ArrayList<>();
-		if(load) {
+		if (load) {
 			spawnTownManagerVillager(location);
 		} else {
 			setOwner(owner);
@@ -80,13 +85,12 @@ public class TownImpl implements Town {
 			Location spawn = new Location(startChunk.getWorld(), (startChunk.getX() << 4) + 7, 0,
 					(startChunk.getZ() << 4) + 7);
 			spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn));
-			setTownSpawn(spawn);
+			setTownSpawn(spawn, owner, false);
 		}
 	}
 
 	/**
 	 * Spawns a town villager with saving.
-	 * <p>
 	 * 
 	 * @param location
 	 */
@@ -101,9 +105,7 @@ public class TownImpl implements Town {
 	}
 
 	/**
-	 * <p>
 	 * Spawns a villager without saving.
-	 * <p>
 	 * 
 	 * @param location
 	 */
@@ -119,7 +121,8 @@ public class TownImpl implements Town {
 		villager.setCustomName(townName + " TownManager");
 		villager.setCustomNameVisible(true);
 		// set the tye of the villager
-		villager.setMetadata("ue-type", new FixedMetadataValue(Ultimate_Economy.getInstance, UEVillagerType.TOWNMANAGER));
+		villager.setMetadata("ue-type",
+				new FixedMetadataValue(Ultimate_Economy.getInstance, UEVillagerType.TOWNMANAGER));
 		villager.setProfession(Villager.Profession.NITWIT);
 		villager.setSilent(true);
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
@@ -136,15 +139,16 @@ public class TownImpl implements Town {
 		itemStack.setItemMeta(meta);
 		inventory.setItem(1, itemStack);
 	}
-	
-	public void renameTown(String newName, String player) throws TownSystemException, PlayerException {
-		if(TownController.getTownNameList().contains(newName)) {
-			throw new TownSystemException(TownSystemException.TOWN_ALREADY_EXIST);
-		} else if(!isTownOwner(player)) {
-			throw new TownSystemException(TownSystemException.YOU_ARE_NOT_OWNER);
+
+	public void renameTown(String newName, EconomyPlayer player, boolean sendMessage)
+			throws TownSystemException, PlayerException {
+		if (TownController.getTownNameList().contains(newName)) {
+			throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_ALREADY_EXIST);
+		} else if (!isTownOwner(player)) {
+			throw PlayerException.getException(PlayerExceptionMessageEnum.YOU_ARE_NOT_OWNER);
 		} else {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
-			
+			String oldName = getTownName();
 			config.set("Towns." + newName + ".TownManagerVillager.x", villager.getLocation().getBlockX());
 			config.set("Towns." + newName + ".TownManagerVillager.y", villager.getLocation().getY());
 			config.set("Towns." + newName + ".TownManagerVillager.z", villager.getLocation().getZ());
@@ -155,14 +159,11 @@ public class TownImpl implements Town {
 			config.set("Towns." + newName + ".chunks", chunkCoords);
 			config.set("Towns." + newName + ".owner", owner);
 			config.set("Towns." + newName + ".coOwners", coOwners);
-			
 			config.set("Towns." + townName, null);
-			for(String citizen: citizens) {
-				EconomyPlayer economyPlayer = EconomyPlayerController.getEconomyPlayerByName(citizen);
-				economyPlayer.removeJoinedTown(townName);
-				economyPlayer.addJoinedTown(newName);
+			for (EconomyPlayer citizen : citizens) {
+				citizen.removeJoinedTown(townName);
+				citizen.addJoinedTown(newName);
 			}
-			
 			villager.setCustomName(newName + " TownManager");
 			List<String> townNameList = TownController.getTownNameList();
 			townNameList.remove(townName);
@@ -174,21 +175,34 @@ public class TownImpl implements Town {
 			townNameList.add(townName);
 			config.set("TownNames", townNameList);
 			save(townworld.getSaveFile(), config);
-			
+			if (player.isOnline() && sendMessage) {
+				for (Player p : Bukkit.getOnlinePlayers()) {
+					TownworldController.handleTownWorldLocationCheck(p.getWorld().getName(), p.getLocation().getChunk(),
+							p.getName());
+				}
+				player.getPlayer().sendMessage(MessageWrapper.getString("town_rename", oldName, newName));
+			}
 		}
 	}
-	
-	public void expandTown(Chunk chunk, String player) throws TownSystemException {
+
+	public void expandTown(Chunk chunk, EconomyPlayer player, boolean sendMessage) throws TownSystemException, PlayerException {
 		if (!townworld.chunkIsFree(chunk)) {
-			throw new TownSystemException(TownSystemException.CHUNK_ALREADY_CLAIMED);
+			throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED);
 		} else {
 			if (!chunkIsConnectedToTown(chunk.getX(), chunk.getZ())) {
-				throw new TownSystemException(TownSystemException.CHUNK_IS_NOT_CONNECTED_WITH_TOWN);
+				throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_IS_NOT_CONNECTED_WITH_TOWN);
 			} else if (!hasCoOwnerPermission(player)) {
-				throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
+				throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
 			} else {
 				decreaseTownBankAmount(townworld.getExpandPrice());
-				addPlot(new PlotImpl(this, player, chunk.getX() + "/" + chunk.getZ()),player);
+				addPlot(new PlotImpl(this, player, chunk.getX() + "/" + chunk.getZ()), player);
+				for (Player p : Bukkit.getOnlinePlayers()) {
+					TownworldController.handleTownWorldLocationCheck(p.getWorld().getName(), p.getLocation().getChunk(),
+							p.getName());
+				}
+				if (player.isOnline() && sendMessage) {
+					player.getPlayer().sendMessage(MessageWrapper.getString("town_expand"));
+				}
 			}
 		}
 	}
@@ -197,11 +211,11 @@ public class TownImpl implements Town {
 		player.openInventory(inventory);
 	}
 
-	public void moveTownManagerVillager(Location location, String player) throws TownSystemException {
+	public void moveTownManagerVillager(Location location, EconomyPlayer player) throws TownSystemException, PlayerException {
 		if (!isClaimedByTown(location.getChunk())) {
-			throw new TownSystemException(TownSystemException.CHUNK_NOT_CLAIMED_BY_TOWN);
+			throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_NOT_CLAIMED_BY_TOWN);
 		} else if (!isTownOwner(player)) {
-			throw new TownSystemException(TownSystemException.YOU_ARE_NOT_OWNER);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.YOU_ARE_NOT_OWNER);
 		} else {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
 			config.set("Towns." + townName + ".TownManagerVillager.x", location.getX());
@@ -215,7 +229,6 @@ public class TownImpl implements Town {
 
 	/**
 	 * Despawns the town managerVillager.
-	 * 
 	 */
 	public void despawnTownManagerVillager() {
 		villager.remove();
@@ -228,12 +241,12 @@ public class TownImpl implements Town {
 		despawnTownManagerVillager();
 	}
 
-	public void buyPlot(String citizen, int chunkX, int chunkZ) throws TownSystemException {
+	public void buyPlot(EconomyPlayer citizen, int chunkX, int chunkZ) throws TownSystemException, PlayerException {
 		Plot plot = getPlotByChunk(chunkX + "/" + chunkZ);
 		if (!plot.isForSale()) {
-			throw new TownSystemException(TownSystemException.PLOT_IS_NOT_FOR_SALE);
+			throw TownSystemException.getException(TownExceptionMessageEnum.PLOT_IS_NOT_FOR_SALE);
 		} else if (plot.isOwner(citizen)) {
-			throw new TownSystemException(TownSystemException.YOU_ARE_ALREADY_OWNER);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.YOU_ARE_THE_OWNER);
 		} else {
 			if (plot.isCoOwner(citizen)) {
 				plot.removeCoOwner(citizen);
@@ -249,13 +262,14 @@ public class TownImpl implements Town {
 	 * @param plot
 	 * @param player
 	 * @return File
+	 * @throws PlayerException 
 	 * @throws TownSystemException
 	 */
-	public void addPlot(Plot plot, String player) throws TownSystemException {
+	public void addPlot(Plot plot, EconomyPlayer player) throws PlayerException, TownSystemException {
 		if (player != null && !isPlayerCitizen(player)) {
-			throw new TownSystemException(TownSystemException.YOU_ARE_NO_CITIZEN);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.YOU_ARE_NO_CITIZEN);
 		} else if (chunkCoords.contains(plot.getChunkCoords())) {
-			throw new TownSystemException(TownSystemException.CHUNK_ALREADY_CLAIMED);
+			throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED);
 		} else {
 			plots.add(plot);
 			chunkCoords.add(plot.getChunkCoords());
@@ -280,7 +294,7 @@ public class TownImpl implements Town {
 			plots.remove(plot);
 			save(townworld.getSaveFile(), config);
 		} else {
-			throw new TownSystemException(TownSystemException.CHUNK_NOT_CLAIMED_BY_TOWN);
+			throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_NOT_CLAIMED_BY_TOWN);
 		}
 	}
 
@@ -289,7 +303,7 @@ public class TownImpl implements Town {
 	 * 
 	 * @return String
 	 */
-	public String getOwner() {
+	public EconomyPlayer getOwner() {
 		return owner;
 	}
 
@@ -298,58 +312,59 @@ public class TownImpl implements Town {
 	 * 
 	 * @param owner
 	 */
-	public void setOwner(String owner) {
+	public void setOwner(EconomyPlayer owner) {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
 		this.owner = owner;
-		config.set("Towns." + townName + ".owner", owner);
+		config.set("Towns." + townName + ".owner", owner.getName());
 		save(townworld.getSaveFile(), config);
 	}
 
-	public ArrayList<String> getCitizens() {
+	public ArrayList<EconomyPlayer> getCitizens() {
 		return citizens;
 	}
 
 	/**
-	 * <p>
 	 * Set all citizens.
-	 * <p>
 	 * 
 	 * @param citizens
 	 */
-	public void setCitizens(List<String> citizens) {
+	public void setCitizens(List<EconomyPlayer> citizens) {
 		this.citizens = new ArrayList<>(citizens);
 	}
-	
+
 	public void joinTown(EconomyPlayer ecoPlayer) throws PlayerException, TownSystemException {
 		if (ecoPlayer.reachedMaxJoinedTowns()) {
-			throw new PlayerException(PlayerException.MAX_JOINED_TOWNS);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
 		} else {
-			addCitizen(ecoPlayer.getName());
+			addCitizen(ecoPlayer);
 			ecoPlayer.addJoinedTown(townName);
 		}
 	}
 
 	public void leaveTown(EconomyPlayer ecoPlayer) throws TownSystemException, PlayerException {
-		removeCitizen(ecoPlayer.getName());
+		removeCitizen(ecoPlayer);
 		ecoPlayer.removeJoinedTown(townName);
 	}
-
+	// TODO move personal exceptions
 	/**
 	 * Add a player as citizen to a town
-	 * <p>
 	 * 
 	 * @param newCitizen
 	 * @return file
-	 * @throws TownSystemException
+	 * @throws PlayerException 
 	 */
-	public void addCitizen(String newCitizen) throws TownSystemException {
+	public void addCitizen(EconomyPlayer newCitizen) throws PlayerException {
 		if (!isPlayerCitizen(newCitizen)) {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
 			citizens.add(newCitizen);
-			config.set("Towns." + townName + ".citizens", citizens);
+			List<String> list = new ArrayList<>();
+			for (EconomyPlayer economyPlayer : citizens) {
+				list.add(economyPlayer.getName());
+			}
+			config.set("Towns." + townName + ".citizens", list);
 			save(townworld.getSaveFile(), config);
 		} else {
-			throw new TownSystemException(TownSystemException.YOU_ARE_ALREADY_CITIZEN);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.YOU_ARE_ALREADY_CITIZEN);
 		}
 	}
 
@@ -358,12 +373,13 @@ public class TownImpl implements Town {
 	 * 
 	 * @param citizen
 	 * @throws TownSystemException
+	 * @throws PlayerException 
 	 */
-	public void removeCitizen(String citizen) throws TownSystemException {
+	public void removeCitizen(EconomyPlayer citizen) throws TownSystemException, PlayerException {
 		if (isTownOwner(citizen)) {
-			throw new TownSystemException(TownSystemException.YOU_ARE_THE_OWNER);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.YOU_ARE_THE_OWNER);
 		} else if (!isPlayerCitizen(citizen)) {
-			throw new TownSystemException(TownSystemException.YOU_ARE_NO_CITIZEN);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.YOU_ARE_NO_CITIZEN);
 		} else {
 			if (isCoOwner(citizen)) {
 				removeCoOwner(citizen);
@@ -377,12 +393,16 @@ public class TownImpl implements Town {
 			}
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
 			citizens.remove(citizen);
-			config.set("Towns." + townName + ".citizens", citizens);
+			List<String> list = new ArrayList<>();
+			for (EconomyPlayer economyPlayer : citizens) {
+				list.add(economyPlayer.getName());
+			}
+			config.set("Towns." + townName + ".citizens", list);
 			save(townworld.getSaveFile(), config);
 		}
 	}
 
-	public boolean isPlayerCitizen(String player) {
+	public boolean isPlayerCitizen(EconomyPlayer player) {
 		if (citizens.contains(player)) {
 			return true;
 		} else {
@@ -429,45 +449,48 @@ public class TownImpl implements Town {
 		return townSpawn;
 	}
 
-	public void setTownSpawn(Location townSpawn) throws TownSystemException {
+	public void setTownSpawn(Location townSpawn, EconomyPlayer ecoPlayer, boolean sendMessage)
+			throws TownSystemException, PlayerException {
 		if (chunkCoords.contains(townSpawn.getChunk().getX() + "/" + townSpawn.getChunk().getZ())) {
-			FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
-			this.townSpawn = townSpawn;
-			config.set("Towns." + townName + ".townspawn",
-					townSpawn.getX() + "/" + townSpawn.getY() + "/" + townSpawn.getZ());
-			this.townSpawn = townSpawn;
-			save(townworld.getSaveFile(), config);
+			if (hasCoOwnerPermission(ecoPlayer)) {
+				FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
+				this.townSpawn = townSpawn;
+				config.set("Towns." + townName + ".townspawn",
+						townSpawn.getX() + "/" + townSpawn.getY() + "/" + townSpawn.getZ());
+				this.townSpawn = townSpawn;
+				save(townworld.getSaveFile(), config);
+				if (ecoPlayer.isOnline() && sendMessage) {
+					ecoPlayer.getPlayer().sendMessage(MessageWrapper.getString("town_setTownSpawn",
+							(int) townSpawn.getX(), (int) townSpawn.getY(), (int) townSpawn.getZ()));
+				}
+			} else {
+				throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
+			}
 		} else {
-			throw new TownSystemException(TownSystemException.LOCATION_NOT_IN_TOWN);
+			throw TownSystemException.getException(TownExceptionMessageEnum.LOCATION_NOT_IN_TOWN);
 		}
 	}
 
 	/**
-	 * <p>
 	 * Get a list of CoOwners of the town.
-	 * <p>
 	 * 
-	 * @return ArrayList
+	 * @return ArrayList of EconomyPlayers
 	 */
-	public ArrayList<String> getCoOwners() {
+	public ArrayList<EconomyPlayer> getCoOwners() {
 		return coOwners;
 	}
 
 	/**
-	 * <p>
 	 * Set all coOwners without saving.
-	 * <p>
 	 * 
 	 * @param coOwners
 	 */
-	public void setCoOwners(List<String> coOwners) {
+	public void setCoOwners(List<EconomyPlayer> coOwners) {
 		this.coOwners.addAll(coOwners);
 	}
 
 	/**
-	 * <p>
 	 * Returns the tax of the town.
-	 * <p>
 	 * 
 	 * @return double
 	 */
@@ -494,7 +517,7 @@ public class TownImpl implements Town {
 	 * @return int
 	 * @throws TownSystemException
 	 */
-	public int getNumberOfPlotsOwned(String player) throws TownSystemException {
+	public int getNumberOfPlotsOwned(EconomyPlayer player) throws TownSystemException {
 		if (isPlayerCitizen(player)) {
 			int number = 0;
 			for (Plot plot : plots) {
@@ -504,7 +527,7 @@ public class TownImpl implements Town {
 			}
 			return number;
 		} else {
-			throw new TownSystemException(TownSystemException.PLAYER_IS_NOT_CITIZEN);
+			throw TownSystemException.getException(TownExceptionMessageEnum.PLAYER_IS_NOT_CITIZEN);
 		}
 
 	}
@@ -515,17 +538,10 @@ public class TownImpl implements Town {
 				return plot;
 			}
 		}
-		throw new TownSystemException(TownSystemException.CHUNK_NOT_CLAIMED_BY_TOWN);
+		throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_NOT_CLAIMED_BY_TOWN);
 	}
 
-	/**
-	 * Returns true if player is townowner.
-	 * 
-	 * @param player
-	 * @return boolean
-	 * @throws TownSystemException
-	 */
-	public boolean isTownOwner(String player) throws TownSystemException {
+	public boolean isTownOwner(EconomyPlayer player) throws TownSystemException {
 		if (isPlayerCitizen(player)) {
 			if (player.equals(owner)) {
 				return true;
@@ -533,20 +549,11 @@ public class TownImpl implements Town {
 				return false;
 			}
 		} else {
-			throw new TownSystemException(TownSystemException.PLAYER_IS_NOT_CITIZEN);
+			throw TownSystemException.getException(TownExceptionMessageEnum.PLAYER_IS_NOT_CITIZEN);
 		}
 	}
 
-	/**
-	 * <p>
-	 * Returns true if player is coOwner of this town.
-	 * <p>
-	 * 
-	 * @param player
-	 * @return boolean
-	 * @throws TownSystemException
-	 */
-	public boolean isCoOwner(String player) throws TownSystemException {
+	public boolean isCoOwner(EconomyPlayer player) throws TownSystemException {
 		if (isPlayerCitizen(player)) {
 			if (coOwners.contains(player)) {
 				return true;
@@ -554,53 +561,53 @@ public class TownImpl implements Town {
 				return false;
 			}
 		} else {
-			throw new TownSystemException(TownSystemException.PLAYER_IS_NOT_CITIZEN);
+			throw TownSystemException.getException(TownExceptionMessageEnum.PLAYER_IS_NOT_CITIZEN);
 		}
 	}
 
-	public void addCoOwner(String coOwner) throws TownSystemException, PlayerException {
+	public void addCoOwner(EconomyPlayer coOwner) throws TownSystemException, PlayerException {
 		if (!coOwners.contains(coOwner)) {
-			if(!isPlayerCitizen(coOwner)) {
+			if (!isPlayerCitizen(coOwner)) {
 				addCitizen(coOwner);
-				EconomyPlayerController.getEconomyPlayerByName(coOwner).addJoinedTown(townName);
+				coOwner.addJoinedTown(townName);
 			}
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
 			coOwners.add(coOwner);
-			config.set("Towns." + townName + ".coOwners", coOwners);
+			List<String> list = new ArrayList<>();
+			for (EconomyPlayer economyPlayer : coOwners) {
+				list.add(economyPlayer.getName());
+			}
+			config.set("Towns." + townName + ".coOwners", list);
 			save(townworld.getSaveFile(), config);
 		} else {
-			throw new TownSystemException(TownSystemException.PLAYER_IS_ALREADY_COOWNERN);
+			throw TownSystemException.getException(TownExceptionMessageEnum.PLAYER_IS_ALREADY_COOWNERN);
 		}
 	}
 
-	public void removeCoOwner(String coOwner) throws TownSystemException {
+	public void removeCoOwner(EconomyPlayer coOwner) throws TownSystemException {
 		if (coOwners.contains(coOwner)) {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
 			coOwners.remove(coOwner);
-			config.set("Towns." + townName + ".coOwners", coOwners);
+			List<String> list = new ArrayList<>();
+			for (EconomyPlayer economyPlayer : coOwners) {
+				list.add(economyPlayer.getName());
+			}
+			config.set("Towns." + townName + ".coOwners", list);
 			save(townworld.getSaveFile(), config);
 		} else {
-			throw new TownSystemException(TownSystemException.PLAYER_IS_NO_COOWNER);
+			throw TownSystemException.getException(TownExceptionMessageEnum.PLAYER_IS_NO_COOWNER);
 		}
 	}
-	
-	/**
-	 * <p>
-	 * Returns true, if the town has enough money.
-	 * <p>
-	 * 
-	 * @param amount
-	 * @return
-	 */
+
 	public boolean hasEnoughMoney(double amount) {
-		if(townBankAmount >= amount) {
+		if (townBankAmount >= amount) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public boolean hasCoOwnerPermission(String player) throws TownSystemException {
+	public boolean hasCoOwnerPermission(EconomyPlayer player) throws TownSystemException {
 		if (isPlayerCitizen(player)) {
 			if (isCoOwner(player) || isTownOwner(player)) {
 				return true;
@@ -608,20 +615,11 @@ public class TownImpl implements Town {
 				return false;
 			}
 		} else {
-			throw new TownSystemException(TownSystemException.PLAYER_IS_NOT_CITIZEN);
+			throw TownSystemException.getException(TownExceptionMessageEnum.PLAYER_IS_NOT_CITIZEN);
 		}
 	}
 
-	/**
-	 * Returns true if player is the townOwner, town coOwner, plot owner or plot
-	 * coOwner.
-	 * 
-	 * @param player
-	 * @param plot
-	 * @return boolean
-	 * @throws TownSystemException
-	 */
-	public boolean hasBuildPermissions(String player, Plot plot) throws TownSystemException {
+	public boolean hasBuildPermissions(EconomyPlayer player, Plot plot) throws TownSystemException {
 		if (isPlayerCitizen(player)) {
 			if (isTownOwner(player) || isCoOwner(player) || plot.isOwner(player) || plot.isCoOwner(player)) {
 				return true;
@@ -629,14 +627,12 @@ public class TownImpl implements Town {
 				return false;
 			}
 		} else {
-			throw new TownSystemException(TownSystemException.PLAYER_IS_NOT_CITIZEN);
+			throw TownSystemException.getException(TownExceptionMessageEnum.PLAYER_IS_NOT_CITIZEN);
 		}
 	}
 
 	/**
-	 * <p>
 	 * Return true if chunk is connected to this town.
-	 * <p>
 	 * 
 	 * @param chunkX
 	 * @param chunkZ
@@ -686,7 +682,7 @@ public class TownImpl implements Town {
 
 	public void decreaseTownBankAmount(double amount) throws TownSystemException {
 		if (amount > townBankAmount) {
-			throw new TownSystemException(TownSystemException.TOWN_HAS_NOT_ENOUGH_MONEY);
+			throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_HAS_NOT_ENOUGH_MONEY);
 		} else {
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
 			townBankAmount -= amount;
@@ -708,7 +704,7 @@ public class TownImpl implements Town {
 		this.townBankAmount = amount;
 		save(townworld.getSaveFile(), config);
 	}
-	
+
 	public Townworld getTownworld() {
 		return townworld;
 	}

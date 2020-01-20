@@ -20,8 +20,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.PlayerExceptionMessageEnum;
+import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.playershop.impl.PlayershopImpl;
@@ -30,7 +33,7 @@ import com.ue.shopsystem.rentshop.api.RentshopController;
 import com.ue.ultimate_economy.UEVillagerType;
 import com.ue.ultimate_economy.Ultimate_Economy;
 
-public class RentshopImpl extends PlayershopImpl implements Rentshop{
+public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
 	private double rentalFee;
 	private long rentUntil;
@@ -48,7 +51,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop{
 	 * @param rentalFee
 	 */
 	public RentshopImpl(File dataFolder, Location spawnLocation, int size, String shopId, double rentalFee) {
-		super(dataFolder, "RentShop#" + shopId,"", shopId, spawnLocation, size);
+		super(dataFolder, "RentShop#" + shopId,null, shopId, spawnLocation, size);
 		saveRentalFeeToFile(rentalFee);
 		this.rentalFee = rentalFee;
 		saveRentableToFile(true);
@@ -91,18 +94,13 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop{
 	 */
 	@Override
 	public void changeShopName(String name) throws ShopSystemException {
-		if(!isRentable()) {
-			//Name validation
-			if(name.contains("_" )) {
-				throw new ShopSystemException(ShopSystemException.INVALID_CHAR_IN_SHOP_NAME);
-			} else {
-				saveShopNameToFile(name);
-				villager.setCustomName(name + "_" + owner);
-				changeInventoryNames(name);
-			}
+		if(name.contains("_" )) {
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 		} else {
-			if(name.contains("_" )) {
-				throw new ShopSystemException(ShopSystemException.INVALID_CHAR_IN_SHOP_NAME);
+			if(!isRentable()) {
+				saveShopNameToFile(name);
+				villager.setCustomName(name + "_" + owner.getName());
+				changeInventoryNames(name);
 			} else {
 				saveShopNameToFile(name);
 				villager.setCustomName(name + "#" + getShopId());
@@ -118,7 +116,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop{
 	 * 
 	 */
 	@Override
-	public void changeOwner(String newOwner) throws PlayerException, ShopSystemException {
+	public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException {
 		if(isRentable()) {
 			this.owner = newOwner;
 			saveOwnerToFile(newOwner);
@@ -132,7 +130,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop{
 	 * @return owner 
 	 */
 	@Override
-	public String getOwner() {
+	public EconomyPlayer getOwner() {
 		if(!rentable) {
 			return owner;
 		} else {
@@ -142,13 +140,14 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop{
 	
 	/**
 	 * Only, if the shop is not rented.
+	 * @throws PlayerException 
 	 */
 	@Override
-	public void changeShopSize(int newSize) throws ShopSystemException {
+	public void changeShopSize(int newSize) throws ShopSystemException, PlayerException {
 		if(isRentable()) {
 			super.changeShopSize(newSize);
 		} else {
-			throw new ShopSystemException(ShopSystemException.RENTED);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.ALREADY_RENTED);
 		}
 	}
 	
@@ -160,7 +159,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop{
 		villager.setMetadata("ue-type", new FixedMetadataValue(Ultimate_Economy.getInstance, UEVillagerType.PLAYERSHOP_RENTABLE));
 		//if not rentable, then change to the custom name choosen by the tenant
 		if(!isRentable()) {
-			villager.setCustomName(getName() + "_" + owner);		
+			villager.setCustomName(getName() + "_" + owner.getName());		
 		} else {
 			villager.setCustomName("RentShop#" + getShopId());
 		}
@@ -292,22 +291,21 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop{
 	 * @throws ShopSystemException should not be thrown
 	 * @throws PlayerException should not be thrown
 	 */
-	public void rentShop(String player, int duration) throws ShopSystemException, PlayerException {
+	public void rentShop(EconomyPlayer player, int duration) throws ShopSystemException, PlayerException {
 		if(isRentable()) {
-			EconomyPlayer economyPlayer = EconomyPlayerController.getEconomyPlayerByName(player);
 			//throws a playerexception, if the player has not enough money.
-			economyPlayer.decreasePlayerAmount(duration*rentalFee, true);
+			player.decreasePlayerAmount(duration*rentalFee, true);
 			changeOwner(player);
 			saveRentableToFile(false);
 			saveRentUntilTimeToFile(Calendar.getInstance().getTimeInMillis() + (86400000*duration));
 			changeShopName("Shop#" + getShopId());
 		} else {
-			throw new ShopSystemException(ShopSystemException.RENTED);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.ALREADY_RENTED);
 		}
 	}
 	
 	public void resetShop() {
-		saveOwnerToFile("");
+		saveOwnerToFile(null);
 		saveRentUntilTimeToFile(0L);
 		saveRentableToFile(true);
 		changeProfession(Profession.NITWIT);
@@ -320,7 +318,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop{
 		for (int i=0; i<(size-2); i++) {
 			try {
 				removeShopItem(i);
-			} catch (ShopSystemException e) {}
+			} catch (ShopSystemException | PlayerException e) {}
 		}
 	}
 	
@@ -330,11 +328,11 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop{
 	 * Change the rental fee of this shop.
 	 * 
 	 * @param fee
-	 * @throws PlayerException PlayerException.INVALID_NUMBER
+	 * @throws PlayerException PlayerException.INVALID_PARAMETER
 	 */
 	public void changeRentalFee(double fee) throws PlayerException {
 		if(fee < 0) {
-			throw new PlayerException(PlayerException.INVALID_NUMBER);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, fee);
 		} else {
 			saveRentalFeeToFile(fee);
 			rentalFee = fee;
@@ -429,9 +427,8 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop{
 					refreshRentalFeeOnRentGUI(duration);
 					break;
 				case "Rent": 
-					rentShop(event.getWhoClicked().getName(), duration);
-					event.getWhoClicked().sendMessage(
-							ChatColor.GOLD + Ultimate_Economy.messages.getString("rent_rented"));
+					rentShop(EconomyPlayerController.getEconomyPlayerByName(event.getWhoClicked().getName()), duration);
+					event.getWhoClicked().sendMessage(MessageWrapper.getString("rent_rented"));
 					event.getWhoClicked().closeInventory();
 					break;
 			}

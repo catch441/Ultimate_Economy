@@ -17,8 +17,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.PlayerExceptionMessageEnum;
+import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.impl.ShopImpl;
 import com.ue.shopsystem.playershop.api.Playershop;
@@ -33,7 +36,7 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 
 	// true = shop, false = stock
 	private boolean shopMode;
-	protected String owner;
+	protected EconomyPlayer owner;
 
 	/**
 	 * Constructor for creating a new playershop.
@@ -48,13 +51,13 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 	 * @param spawnLocation
 	 * @param size
 	 */
-	public PlayershopImpl(File dataFolder, String name, String owner, String shopId, Location spawnLocation, int size) {
+	public PlayershopImpl(File dataFolder, String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size) {
 		super(dataFolder, name, shopId, spawnLocation, size);
 		shopMode = true;
 		saveOwnerToFile(owner);
 		// set the type of the villager
 		villager.setMetadata("ue-type", new FixedMetadataValue(Ultimate_Economy.getInstance, UEVillagerType.PLAYERSHOP));
-		villager.setCustomName(name + "_" + owner);
+		villager.setCustomName(name + "_" + owner.getName());
 	}
 
 	/**
@@ -70,24 +73,27 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 	public PlayershopImpl(File dataFolder, Server server, String name, String shopId) {
 		super(dataFolder, server, name, shopId);
 		shopMode = true;
-		//old loading, can be deleted in the future
-		if(name != null) {
-			saveOwnerToFile(name.substring(name.indexOf("_") + 1));
-			saveShopNameToFile(name.substring(0,name.indexOf("_")));
-		} 
-		//new loading
-		else {
-			loadOwner();
+		try {
+			//old loading, can be deleted in the future
+			if(name != null) {
+				saveOwnerToFile(EconomyPlayerController.getEconomyPlayerByName(name.substring(name.indexOf("_") + 1)));
+				saveShopNameToFile(name.substring(0,name.indexOf("_")));
+			} 
+			//new loading
+			else {
+				loadOwner();
+			}
+		} catch (PlayerException e) {
 		}
 		// set the type of the villager
 		villager.setMetadata("ue-type", new FixedMetadataValue(Ultimate_Economy.getInstance, UEVillagerType.PLAYERSHOP));
 		// update villager name to naming convention
-		villager.setCustomName(getName() + "_" + owner);
+		villager.setCustomName(getName() + "_" + owner.getName());
 		// load shop items
 		for (String item : itemNames) {
 			try {
 				loadShopItem(item);
-			} catch (ShopSystemException e) {
+			} catch (ShopSystemException | PlayerException e) {
 				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 			}
 		}
@@ -112,9 +118,10 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 	
 	/**
 	 * Overridden, because of the stock value
+	 * @throws PlayerException 
 	 */
 	@Override
-	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack) throws ShopSystemException {
+	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack) throws ShopSystemException, PlayerException {
 		super.addShopItem(slot, sellPrice, buyPrice, itemStack);
 		//create a new ItemStack to avoid changes to the original stack
 		ItemStack itemStackCopy = new ItemStack(itemStack);
@@ -127,11 +134,12 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 	
 	/**
 	 * Overridden, because of the number of reserved slots.
+	 * @throws PlayerException 
 	 */
 	@Override
-	public void changeShopSize(int newSize) throws ShopSystemException {
+	public void changeShopSize(int newSize) throws ShopSystemException, PlayerException {
 		if(newSize % 9 != 0) {
-			throw new ShopSystemException(ShopSystemException.INVALID_INVENTORY_SIZE);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, newSize);
 		} else {
 			boolean possible = true;
 			int diff = size - newSize;
@@ -152,7 +160,7 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 				reload();
 				setupShopItems();
 			} else {
-				throw new ShopSystemException(ShopSystemException.RESIZING_FAILED);
+				throw ShopSystemException.getException(ShopExceptionMessageEnum.RESIZING_FAILED);
 			}
 		}
 	}
@@ -164,15 +172,15 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 	 */
 	@Override
 	public void changeShopName(String name) throws ShopSystemException {
-		if(PlayershopController.getPlayerShopUniqueNameList().contains(name + owner)) {
-			throw new ShopSystemException(ShopSystemException.SHOP_ALREADY_EXISTS);
+		if(PlayershopController.getPlayerShopUniqueNameList().contains(name + owner.getName())) {
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_ALREADY_EXISTS);
 		} else if(PlayershopController.getPlayerShopUniqueNameList().contains(name)) {
-			throw new ShopSystemException(ShopSystemException.SHOP_ALREADY_EXISTS);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_ALREADY_EXISTS);
 		} else if(name.contains("_")) {
-			throw new ShopSystemException(ShopSystemException.INVALID_CHAR_IN_SHOP_NAME);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 		} else {
 			saveShopNameToFile(name);
-			villager.setCustomName(name + "_" + owner);
+			villager.setCustomName(name + "_" + owner.getName());
 			changeInventoryNames(name);
 		}
 	}
@@ -181,7 +189,7 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 	 * Overridden, because of the permission validation.
 	 */
 	@Override
-	public void moveShop(Location location) throws TownSystemException {
+	public void moveShop(Location location) throws TownSystemException, PlayerException {
 		if(TownworldController.isTownWorld(location.getWorld().getName())) {
 			Townworld townworld = null;
 			try {
@@ -190,11 +198,11 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 				//should never happen
 			}
 				if(townworld.chunkIsFree(location.getChunk())) {
-					throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
+					throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
 				} else {
 					Town town = townworld.getTownByChunk(location.getChunk());
 					if(!town.hasBuildPermissions(owner, town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
-						throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
+						throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
 					}
 				}
 		}
@@ -216,7 +224,7 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 				} else {
 					editor.setItem(i, getSkull(SLOTFILLED, "Slot " + (i + 1)));
 				}
-			} catch (ShopSystemException e) {
+			} catch (PlayerException e) {
 			}
 		}
 		player.openInventory(editor);
@@ -253,17 +261,17 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 	 * 
 	 * @param owner
 	 */
-	protected void saveOwnerToFile(String owner) {
+	protected void saveOwnerToFile(EconomyPlayer owner) {
 		this.owner = owner;
 		config = YamlConfiguration.loadConfiguration(file);
-		config.set("Owner", owner);
+		config.set("Owner", owner.getName());
 		save();
 	}
 		
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////save file read/ get methods
 	
-	public String getOwner() {
+	public EconomyPlayer getOwner() {
 		return owner;
 	}
 	
@@ -271,29 +279,24 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 	 * --Save file read method--
 	 * <p>
 	 * Loads the shop owner from the savefile.
+	 * @throws PlayerException 
 	 * 
 	 */
-	private void loadOwner() {
+	private void loadOwner() throws PlayerException {
 		config = YamlConfiguration.loadConfiguration(file);
-		owner = config.getString("Owner");
+		owner = EconomyPlayerController.getEconomyPlayerByName(config.getString("Owner"));
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////change methods
 	
-	public void changeOwner(String newOwner) throws PlayerException, ShopSystemException {
-		if (!EconomyPlayerController.getEconomyPlayerNameList().contains(newOwner)) {
-			throw new PlayerException(PlayerException.PLAYER_DOES_NOT_EXIST);
+	public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException {
+		// validation, check if the new owner has already a shop with this name.
+		if (PlayershopController.getPlayerShopUniqueNameList().contains(getName() + "_" + newOwner)) {
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_CHANGEOWNER_ERROR);
 		} else {
-			// validation, check if the new owner has already a shop with this name.
-			if (PlayershopController.getPlayerShopUniqueNameList().contains(getName() + "_" + newOwner)) {
-				throw new ShopSystemException(ChatColor.RED + Ultimate_Economy.messages.getString("shop_changeOwner1")
-													+ " " + ChatColor.GREEN + newOwner + ChatColor.RED + " "
-													+ Ultimate_Economy.messages.getString("shop_changeOwner2"));
-			} else {
-				saveOwnerToFile(newOwner);
-				villager.setCustomName(getName() + "_" + newOwner);
-			}
+			saveOwnerToFile(newOwner);
+			villager.setCustomName(getName() + "_" + newOwner.getName());
 		}
 	}
 	
@@ -326,7 +329,7 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 				if (!item.equals("ANVIL_0") && !item.equals("CRAFTING_TABLE_0")) {
 					try {
 						loadShopItem(item);
-					} catch (ShopSystemException e) {
+					} catch (ShopSystemException | PlayerException e) {
 						Bukkit.getLogger().info(e.getMessage());
 					}
 				}
@@ -369,5 +372,13 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 			available = true;
 		}
 		return available;
+	}
+
+	@Override
+	public boolean isOwner(EconomyPlayer ecoPlayer) {
+		if(ecoPlayer.equals(owner)) {
+			return true;
+		}
+		return false;
 	}
 }

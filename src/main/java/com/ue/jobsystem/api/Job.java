@@ -3,6 +3,7 @@ package com.ue.jobsystem.api;
 import java.util.List;
 
 import com.ue.exceptions.JobSystemException;
+import com.ue.exceptions.PlayerException;
 
 public interface Job {
 	
@@ -11,16 +12,18 @@ public interface Job {
 	 * 
 	 * @param entity
 	 * @throws JobSystemException
+	 * @throws PlayerException 
 	 */
-	public void deleteMob(String entity) throws JobSystemException;
+	public void deleteMob(String entity) throws JobSystemException, PlayerException;
 	
 	/**
 	 * This method removes a item from a job.
 	 * 
 	 * @param material
 	 * @throws JobSystemException
+	 * @throws PlayerException 
 	 */
-	public void deleteItem(String material) throws JobSystemException;
+	public void deleteItem(String material) throws JobSystemException, PlayerException;
 	
 	/**
 	 * This method removes a loottype from this job. The loottype is for a
@@ -28,8 +31,9 @@ public interface Job {
 	 * 
 	 * @param lootType
 	 * @throws JobSystemException
+	 * @throws PlayerException 
 	 */
-	public void delFisherLootType(String lootType) throws JobSystemException;
+	public void delFisherLootType(String lootType) throws JobSystemException, PlayerException;
 	
 	/**
 	 * This method adds a loottype with a price to this job. The loottype is for a
@@ -38,8 +42,9 @@ public interface Job {
 	 * @param lootType
 	 * @param price
 	 * @throws JobSystemException
+	 * @throws PlayerException 
 	 */
-	public void addFisherLootType(String lootType, double price) throws JobSystemException;
+	public void addFisherLootType(String lootType, double price) throws JobSystemException, PlayerException;
 	
 	/**
 	 * This method adds a mob to a job.
@@ -47,8 +52,9 @@ public interface Job {
 	 * @param entity
 	 * @param price
 	 * @throws JobSystemException
+	 * @throws PlayerException 
 	 */
-	public void addMob(String entity, double price) throws JobSystemException;
+	public void addMob(String entity, double price) throws JobSystemException, PlayerException;
 	
 	/**
 	 * This method adds a item to a job.
@@ -56,8 +62,9 @@ public interface Job {
 	 * @param material
 	 * @param price
 	 * @throws JobSystemException
+	 * @throws PlayerException 
 	 */
-	public void addItem(String material, double price) throws JobSystemException;
+	public void addItem(String material, double price) throws JobSystemException, PlayerException;
 	
 	/**
 	 * This method deletes the job saveFile.
@@ -77,8 +84,9 @@ public interface Job {
 	 * @param material
 	 * @return double
 	 * @throws JobSystemException
+	 * @throws PlayerException 
 	 */
-	public double getItemPrice(String material) throws JobSystemException;
+	public double getItemPrice(String material) throws JobSystemException, PlayerException;
 	
 	/**
 	 * This method returns the price of a fisher lootType.
@@ -86,8 +94,9 @@ public interface Job {
 	 * @param lootType
 	 * @return double
 	 * @throws JobSystemException
+	 * @throws PlayerException 
 	 */
-	public double getFisherPrice(String lootType) throws JobSystemException;
+	public double getFisherPrice(String lootType) throws JobSystemException, PlayerException;
 	
 	/**
 	 * This method returns the price for killing a entity.
@@ -95,8 +104,9 @@ public interface Job {
 	 * @param entityName
 	 * @return double
 	 * @throws JobSystemException
+	 * @throws PlayerException 
 	 */
-	public double getKillPrice(String entityName) throws JobSystemException;
+	public double getKillPrice(String entityName) throws JobSystemException, PlayerException;
 	
 	/**
 	 * This method returns the fisherList.

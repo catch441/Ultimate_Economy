@@ -11,6 +11,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.PlayerExceptionMessageEnum;
+import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
@@ -35,15 +37,15 @@ public class TownController {
 	public static void createTown(Townworld townworld, String townName, Location location, EconomyPlayer owner)
 			throws TownSystemException, PlayerException {
 		if (townNameList.contains(townName)) {
-			throw new TownSystemException(TownSystemException.TOWN_ALREADY_EXIST);
+			throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_ALREADY_EXIST);
 		} else if (!townworld.chunkIsFree(location.getChunk())) {
-			throw new TownSystemException(TownSystemException.CHUNK_ALREADY_CLAIMED);
+			throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED);
 		} else if (!owner.hasEnoughtMoney(townworld.getFoundationPrice())) {
-			throw new PlayerException(PlayerException.NOT_ENOUGH_MONEY_PERSONAL);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
 		} else if (owner.reachedMaxJoinedTowns()) {
-			throw new PlayerException(PlayerException.MAX_JOINED_TOWNS);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
 		} else {
-			TownImpl townImpl = new TownImpl(townworld,owner.getName(), townName, location,false);
+			TownImpl townImpl = new TownImpl(townworld,owner, townName, location,false);
 			townworld.addTown(townImpl);;
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
 			townNameList.add(townName);
@@ -57,17 +59,16 @@ public class TownController {
 	/**
 	 * Dissolves a entire town. The Chunks are not resettet.
 	 * 
-	 * @param townname
-	 * @param playername
+	 * @param town
 	 * @throws TownSystemException
 	 * @throws PlayerException
 	 */
-	public static void dissolveTown(Town town, String playername) throws TownSystemException, PlayerException {
-		if (town.isTownOwner(playername)) {
-			List<String> tList = new ArrayList<>();
+	public static void dissolveTown(Town town, EconomyPlayer player) throws TownSystemException, PlayerException {
+		if (town.isTownOwner(player)) {
+			List<EconomyPlayer> tList = new ArrayList<>();
 			tList.addAll(town.getCitizens());
-			for (String citizen : tList) {
-				EconomyPlayerController.getEconomyPlayerByName(citizen).removeJoinedTown(town.getTownName());
+			for (EconomyPlayer citizen : tList) {
+				citizen.removeJoinedTown(town.getTownName());
 			}
 			town.despawnAllVillagers();
 			town.getTownworld().removeTown(town);
@@ -77,38 +78,51 @@ public class TownController {
 			config.set("TownNames", townNameList);
 			save(town.getTownworld().getSaveFile(),config);
 		} else {
-			throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
 		}
 	}
 
 	/**
 	 * Static method for loading a existing town by name.
+	 * EconomyPlayers have to be loaded first.
 	 * 
-	 * @param file
+	 * @param townworld
+	 * @param server
 	 * @param townName
 	 * @return Town
 	 * @throws TownSystemException
 	 * @throws PlayerException 
 	 */
-	public static TownImpl loadTown(Townworld townworld, Server server, String townName) throws TownSystemException, PlayerException {
+	public static Town loadTown(Townworld townworld, Server server, String townName) throws TownSystemException, PlayerException {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
 		Location location = new Location(
 				server.getWorld(config.getString("Towns." + townName + ".TownManagerVillager.world")),
 				config.getDouble("Towns." + townName + ".TownManagerVillager.x"),
 				config.getDouble("Towns." + townName + ".TownManagerVillager.y"),
 				config.getDouble("Towns." + townName + ".TownManagerVillager.z"));
-		TownImpl townImpl = new TownImpl(townworld,config.getString("Towns." + townName + ".owner"), townName, location,true);
-		townImpl.setCoOwners(config.getStringList("Towns." + townName + ".coOwners"));
-		townImpl.setCitizens(config.getStringList("Towns." + townName + ".citizens"));
+		EconomyPlayer owner = EconomyPlayerController.getEconomyPlayerByName(config.getString("Towns." + townName + ".owner"));
+		TownImpl townImpl = new TownImpl(townworld,owner, townName, location,true);
+		townImpl.setOwner(owner);
+		List<EconomyPlayer> coOwners = new ArrayList<>();
+		for(String name:config.getStringList("Towns." + townName + ".coOwners")) {
+			coOwners.add(EconomyPlayerController.getEconomyPlayerByName(name));
+		}
+		townImpl.setCoOwners(coOwners);
+		List<EconomyPlayer> citizens = new ArrayList<>();
+		for(String name:config.getStringList("Towns." + townName + ".citizens")) {
+			citizens.add(EconomyPlayerController.getEconomyPlayerByName(name));
+		}
+		townImpl.setCitizens(citizens);
 		townImpl.setChunkList(config.getStringList("Towns." + townName + ".chunks"));
 		townImpl.setTax(config.getDouble("Towns." + townName + ".tax"));
 		townImpl.setTownBankAmount(config.getDouble("Towns." + townName + ".bank"));
 		String locationString = config.getString("Towns." + townName + ".townspawn");
+		
 		townImpl.setTownSpawn(new Location(server.getWorld(config.getString("World")),
 				Double.valueOf(locationString.substring(0, locationString.indexOf("/"))),
 				Double.valueOf(
 						locationString.substring(locationString.indexOf("/") + 1, locationString.lastIndexOf("/"))),
-				Double.valueOf(locationString.substring(locationString.lastIndexOf("/") + 1))));
+				Double.valueOf(locationString.substring(locationString.lastIndexOf("/") + 1))),owner,false);
 		ArrayList<Plot> plotList = new ArrayList<>();
 		for (String coords : townImpl.getChunkList()) {
 			Plot plot = PlotController.loadPlot(townImpl, coords);

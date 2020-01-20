@@ -52,6 +52,7 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.JobcenterController;
+import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.adminshop.api.Adminshop;
@@ -101,24 +102,23 @@ public class Ultimate_EconomyEventHandler implements Listener {
 			Location location = event.getClickedBlock().getLocation();
 			try {
 				Townworld townworld = TownworldController.getTownWorldByName(location.getWorld().getName());
+				EconomyPlayer economyPlayer = EconomyPlayerController
+						.getEconomyPlayerByName(event.getPlayer().getName());
 				if (townworld.chunkIsFree(location.getChunk())) {
 					if (!event.getPlayer().hasPermission("ultimate_economy.wilderness")) {
 						event.setCancelled(true);
-						event.getPlayer()
-								.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("wilderness"));
+						event.getPlayer().sendMessage(MessageWrapper.getErrorString("wilderness"));
 					}
 				} else {
 					Town town = townworld.getTownByChunk(location.getChunk());
 					if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")
-							&& (!town.isPlayerCitizen(event.getPlayer().getName())
-									|| !town.hasBuildPermissions(event.getPlayer().getName(), town.getPlotByChunk(
-											location.getChunk().getX() + "/" + location.getChunk().getZ())))) {
+							&& (!town.isPlayerCitizen(economyPlayer) || !town.hasBuildPermissions(economyPlayer, town
+									.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ())))) {
 						event.setCancelled(true);
-						event.getPlayer().sendMessage(
-								ChatColor.RED + Ultimate_Economy.messages.getString("no_permission_on_plot"));
+						event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
 					}
 				}
-			} catch (TownSystemException e) {
+			} catch (TownSystemException | PlayerException e) {
 			}
 		}
 	}
@@ -182,23 +182,14 @@ public class Ultimate_EconomyEventHandler implements Listener {
 			Player damager = (Player) event.getDamager();
 			UEVillagerType type = (UEVillagerType) event.getEntity().getMetadata("ue-type").get(0).value();
 			event.setCancelled(true);
-
 			switch (type) {
 				case PLOTSALE:
-					damager.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("sale_villager_hitevent"));
-					break;
 				case TOWNMANAGER:
-					damager.sendMessage(
-							ChatColor.RED + Ultimate_Economy.messages.getString("townManager_villager_hitevent"));
-					break;
 				case ADMINSHOP:
 				case PLAYERSHOP_RENTABLE:
 				case PLAYERSHOP:
-					damager.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("shop_villager_hitevent"));
-					break;
 				case JOBCENTER:
-					damager.sendMessage(
-							ChatColor.RED + Ultimate_Economy.messages.getString("jobcenter_villager_hitevent"));
+					damager.sendMessage(MessageWrapper.getErrorString("villager_hitevent"));
 					break;
 			}
 		}
@@ -241,8 +232,7 @@ public class Ultimate_EconomyEventHandler implements Listener {
 			if (event.getCurrentItem() != null && event.getInventory().getType() == InventoryType.ANVIL
 					&& event.getCurrentItem().getType() == Material.SPAWNER) {
 				event.setCancelled(true);
-			}
-			else if (entity.hasMetadata("ue-type") && event.getCurrentItem() != null
+			} else if (entity.hasMetadata("ue-type") && event.getCurrentItem() != null
 					&& event.getCurrentItem().getItemMeta() != null) {
 				String shopId = "";
 				if (entity.hasMetadata("ue-id")) {
@@ -264,11 +254,8 @@ public class Ultimate_EconomyEventHandler implements Listener {
 							EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(player.getName());
 							String displayname = clickedItem.getItemMeta().getDisplayName();
 							if (clickType == ClickType.RIGHT && displayname != null) {
-								if (!ecoPlayer.getJobList().isEmpty()) {
+								if (!displayname.equals("Info") && !ecoPlayer.getJobList().isEmpty()) {
 									ecoPlayer.leaveJob(JobController.getJobByName(displayname), true);
-								} else if (!displayname.equals("Info")) {
-									player.sendMessage(
-											ChatColor.RED + Ultimate_Economy.messages.getString("no_job_joined"));
 								}
 							} else if (clickType == ClickType.LEFT && displayname != null) {
 								ecoPlayer.joinJob(JobController.getJobByName(displayname), true);
@@ -332,8 +319,7 @@ public class Ultimate_EconomyEventHandler implements Listener {
 				config.set(spawnername + ".EntityType", string.substring(0, string.lastIndexOf("-")));
 				saveFile(spawner, config);
 			} else {
-				event.getPlayer()
-						.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("no_permision_set_spawner"));
+				event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permision_set_spawner"));
 				event.setCancelled(true);
 			}
 		} else if (event.getPlayer().getGameMode() == GameMode.SURVIVAL
@@ -389,8 +375,7 @@ public class Ultimate_EconomyEventHandler implements Listener {
 						String blockname = s.asString();
 						if (event.getPlayer().getInventory().firstEmpty() == -1) {
 							event.setCancelled(true);
-							event.getPlayer().sendMessage(
-									ChatColor.RED + Ultimate_Economy.messages.getString("no_permision_break_spawner"));
+							event.getPlayer().sendMessage(MessageWrapper.getErrorString("inventory_full"));
 						} else if (event.getPlayer().getName().equals(blockname)) {
 							if (!event.getBlock().getMetadata("entity").isEmpty()) {
 								YamlConfiguration config = YamlConfiguration.loadConfiguration(spawner);
@@ -413,8 +398,7 @@ public class Ultimate_EconomyEventHandler implements Listener {
 							}
 						} else {
 							event.setCancelled(true);
-							event.getPlayer().sendMessage(
-									ChatColor.RED + Ultimate_Economy.messages.getString("no_permision_break_spawner"));
+							event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permision_break_spawner"));
 						}
 					}
 				}
@@ -449,11 +433,10 @@ public class Ultimate_EconomyEventHandler implements Listener {
 				EconomyPlayerController.createEconomyPlayer(playername);
 			}
 			EconomyPlayer economyPlayer = EconomyPlayerController.getEconomyPlayerByName(playername);
+			economyPlayer.setPlayer(event.getPlayer());
 			economyPlayer.updateScoreBoard();
-			economyPlayer.getBossBar().addPlayer(event.getPlayer());
 			TownworldController.handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
 					event.getPlayer().getLocation().getChunk(), event.getPlayer().getName());
-
 		} catch (PlayerException e) {
 			Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 		}
@@ -555,15 +538,16 @@ public class Ultimate_EconomyEventHandler implements Listener {
 			} else {
 				handleBuySell(shop, event, player);
 			}
-		} catch (IllegalArgumentException | ShopSystemException e) {
+		} catch (IllegalArgumentException | ShopSystemException | PlayerException e) {
 		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private void handleBuySell(Shop shop, InventoryClickEvent event, Player playe) {
+	private void handleBuySell(Shop shop, InventoryClickEvent event, Player playe) throws PlayerException {
 		event.setCancelled(true);
+		EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(playe.getName());
 		boolean isPlayershop = false;
 		boolean alreadysay = false;
 		ClickType clickType = event.getClick();
@@ -574,7 +558,7 @@ public class Ultimate_EconomyEventHandler implements Listener {
 			playershop = (Playershop) shop;
 		}
 		// Playershop
-		if (isPlayershop && clickType == ClickType.MIDDLE && playershop.getOwner().equals(playe.getName())) {
+		if (isPlayershop && clickType == ClickType.MIDDLE && playershop.isOwner(ecoPlayer)) {
 			playershop.switchStockpile();
 		} //
 		else {
@@ -609,16 +593,13 @@ public class Ultimate_EconomyEventHandler implements Listener {
 						int amount = shop.getItemAmount(itemString);
 						EconomyPlayer playerShopOwner = null;
 						if (isPlayershop) {
-							playerShopOwner = EconomyPlayerController.getEconomyPlayerByName(playershop.getOwner());
+							playerShopOwner = playershop.getOwner();
 						}
-						EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(playe.getName());
 						if (clickType == ClickType.LEFT) {
 							if (buyprice != 0.0 && ecoPlayer.hasEnoughtMoney(buyprice)
 									|| (isPlayershop && playe.getName().equals(playerShopOwner.getName()))) {
 								if (!isPlayershop || playershop.isAvailable(clickedItemString)) {
-
 									if (inventoryplayer.firstEmpty() != -1) {
-
 										// only adminshop
 										if (isSpawner) {
 											ItemStack stack = new ItemStack(Material.SPAWNER, amount);
@@ -629,22 +610,14 @@ public class Ultimate_EconomyEventHandler implements Listener {
 											inventoryplayer.addItem(stack);
 											ecoPlayer.decreasePlayerAmount(buyprice, true);
 											if (amount > 1) {
-												playe.sendMessage(
-														ChatColor.GREEN + String.valueOf(amount) + " " + ChatColor.GOLD
-																+ Ultimate_Economy.messages.getString("shop_buy_plural")
-																+ " " + ChatColor.GREEN + buyprice + ChatColor.GREEN
-																+ "$" + ChatColor.GOLD + ".");
+												playe.sendMessage(MessageWrapper.getString("shop_buy_plural",
+														String.valueOf(amount), buyprice));
 											} else {
-												playe.sendMessage(
-														ChatColor.GREEN + String.valueOf(amount) + " " + ChatColor.GOLD
-																+ Ultimate_Economy.messages
-																		.getString("shop_buy_singular")
-																+ " " + ChatColor.GREEN + buyprice + ChatColor.GREEN
-																+ "$" + ChatColor.GOLD + ".");
+												playe.sendMessage(MessageWrapper.getString("shop_buy_singular",
+														String.valueOf(amount), buyprice));
 											}
 										} //
 										else if (!isSpawner) {
-
 											ItemStack itemStack = shop.getItemStack(itemString);
 											if (isPlayershop) {
 												playershop.decreaseStock(itemString, amount);
@@ -655,59 +628,41 @@ public class Ultimate_EconomyEventHandler implements Listener {
 											inventoryplayer.addItem(itemStack);
 											if (!isPlayershop || !playerShopOwner.getName().equals(playe.getName())) {
 												ecoPlayer.decreasePlayerAmount(buyprice, true);
-
 												// only playershop
 												if (isPlayershop) {
 													playerShopOwner.increasePlayerAmount(buyprice, false);
 												}
 												if (amount > 1) {
-													playe.sendMessage(ChatColor.GREEN + String.valueOf(amount) + " "
-															+ ChatColor.GOLD
-															+ Ultimate_Economy.messages.getString("shop_buy_plural")
-															+ " " + ChatColor.GREEN + buyprice + ChatColor.GREEN + "$"
-															+ ChatColor.GOLD + ".");
+													playe.sendMessage(MessageWrapper.getString("shop_buy_plural",
+															String.valueOf(amount), buyprice));
 												} else {
-													playe.sendMessage(ChatColor.GREEN + String.valueOf(amount) + " "
-															+ ChatColor.GOLD
-															+ Ultimate_Economy.messages.getString("shop_buy_singular")
-															+ " " + ChatColor.GREEN + buyprice + ChatColor.GREEN + "$"
-															+ ChatColor.GOLD + ".");
+													playe.sendMessage(MessageWrapper.getString("shop_buy_singular",
+															String.valueOf(amount), buyprice));
 												}
 											}
 											// only playershop
 											else if (isPlayershop
 													&& playerShopOwner.getName().equals(playe.getName())) {
 												if (amount > 1) {
-													playe.sendMessage(ChatColor.GOLD
-															+ Ultimate_Economy.messages
-																	.getString("shop_got_item_plural1")
-															+ " " + ChatColor.GREEN + String.valueOf(amount)
-															+ ChatColor.GOLD + " " + Ultimate_Economy.messages
-																	.getString("shop_got_item_plural2"));
+													playe.sendMessage(MessageWrapper.getString("shop_got_item_plural",
+															String.valueOf(amount)));
 												} else {
-													playe.sendMessage(ChatColor.GOLD
-															+ Ultimate_Economy.messages
-																	.getString("shop_got_item_singular1")
-															+ " " + ChatColor.GREEN + String.valueOf(amount)
-															+ ChatColor.GOLD + " " + Ultimate_Economy.messages
-																	.getString("shop_got_item_singular2"));
+													playe.sendMessage(MessageWrapper.getString("shop_got_item_singular",
+															String.valueOf(amount)));
 												}
 											}
 											break;
 										}
 									} else {
-										playe.sendMessage(
-												ChatColor.RED + Ultimate_Economy.messages.getString("inventory_full"));
+										playe.sendMessage(MessageWrapper.getErrorString("inventory_full"));
 									}
 								}
 								// only playershop
 								else if (isPlayershop) {
-									playe.sendMessage(
-											ChatColor.GOLD + Ultimate_Economy.messages.getString("item_unavailable"));
+									playe.sendMessage(MessageWrapper.getErrorString("item_unavailable"));
 								}
 							} else if (!ecoPlayer.hasEnoughtMoney(buyprice) && !alreadysay) {
-								playe.sendMessage(ChatColor.RED
-										+ Ultimate_Economy.messages.getString("not_enough_money_personal"));
+								playe.sendMessage(MessageWrapper.getErrorString("not_enough_money_personal"));
 								alreadysay = true;
 							}
 						} else if (clickType == ClickType.RIGHT && !itemString.contains("ANVIL_0")
@@ -715,7 +670,6 @@ public class Ultimate_EconomyEventHandler implements Listener {
 								|| clickType == ClickType.RIGHT && isPlayershop
 										&& playe.getName().equals(playerShopOwner.getName())
 										&& inventoryplayer.containsAtLeast(clickedItem, amount)) {
-
 							ItemStack itemStack = shop.getItemStack(itemString);
 							itemStack.setAmount(amount);
 							if (inventoryContainsItems(inventoryplayer, itemStack, amount)) {
@@ -729,38 +683,27 @@ public class Ultimate_EconomyEventHandler implements Listener {
 											playershop.increaseStock(clickedItemString, amount);
 										}
 										if (amount > 1) {
-											playe.sendMessage(
-													ChatColor.GREEN + String.valueOf(amount) + " " + ChatColor.GOLD
-															+ Ultimate_Economy.messages.getString("shop_sell_plural")
-															+ " " + ChatColor.GREEN + sellprice + ChatColor.GREEN + "$"
-															+ ChatColor.GOLD + ".");
+											playe.sendMessage(MessageWrapper.getString("shop_sell_plural",
+													String.valueOf(amount), sellprice));
 										} else {
-											playe.sendMessage(
-													ChatColor.GREEN + String.valueOf(amount) + " " + ChatColor.GOLD
-															+ Ultimate_Economy.messages.getString("shop_sell_singular")
-															+ " " + ChatColor.GREEN + sellprice + ChatColor.GREEN + "$"
-															+ ChatColor.GOLD + ".");
+											playe.sendMessage(MessageWrapper.getString("shop_sell_singular",
+													String.valueOf(amount), sellprice));
 										}
 										removeItemFromInventory(inventoryplayer, itemStack, amount);
 									}
 									// only playershop
 									else if (isPlayershop) {
-										playe.sendMessage(ChatColor.RED
-												+ Ultimate_Economy.messages.getString("shopowner_not_enough_money"));
+										playe.sendMessage(MessageWrapper.getErrorString("shopowner_not_enough_money"));
 									}
 								}
 								// only playershop
 								else if (isPlayershop) {
 									if (amount > 1) {
-										playe.sendMessage(ChatColor.GOLD
-												+ Ultimate_Economy.messages.getString("shop_added_item_plural1") + " "
-												+ ChatColor.GREEN + String.valueOf(amount) + ChatColor.GOLD + " "
-												+ Ultimate_Economy.messages.getString("shop_added_item_plural2"));
+										playe.sendMessage(MessageWrapper.getString("shop_added_item_plural",
+												String.valueOf(amount)));
 									} else {
-										playe.sendMessage(ChatColor.GOLD
-												+ Ultimate_Economy.messages.getString("shop_added_item_singular1") + " "
-												+ ChatColor.GREEN + String.valueOf(amount) + ChatColor.GOLD + " "
-												+ Ultimate_Economy.messages.getString("shop_added_item_singular2"));
+										playe.sendMessage(MessageWrapper.getString("shop_added_item_singular",
+												String.valueOf(amount)));
 									}
 									playershop.increaseStock(clickedItemString, amount);
 									// if the player is in stockpile mode, then the stockpile gets refreshed
@@ -794,17 +737,11 @@ public class Ultimate_EconomyEventHandler implements Listener {
 										|| !isPlayershop) {
 									if ((isPlayershop && playerShopOwner.hasEnoughtMoney(newprice)) || !isPlayershop) {
 										if (itemAmount > 1) {
-											playe.sendMessage(
-													ChatColor.GREEN + String.valueOf(itemAmount) + " " + ChatColor.GOLD
-															+ Ultimate_Economy.messages.getString("shop_sell_plural")
-															+ " " + ChatColor.GREEN + newprice + ChatColor.GREEN + "$"
-															+ ChatColor.GOLD + ".");
+											playe.sendMessage(MessageWrapper.getString("shop_sell_plural",
+													String.valueOf(itemAmount), newprice));
 										} else {
-											playe.sendMessage(
-													ChatColor.GREEN + String.valueOf(itemAmount) + " " + ChatColor.GOLD
-															+ Ultimate_Economy.messages.getString("shop_sell_singular")
-															+ " " + ChatColor.GREEN + newprice + ChatColor.GREEN + "$"
-															+ ChatColor.GOLD + ".");
+											playe.sendMessage(MessageWrapper.getString("shop_sell_singular",
+													String.valueOf(itemAmount), newprice));
 										}
 										ecoPlayer.increasePlayerAmount(newprice, false);
 										// only playershop
@@ -817,22 +754,17 @@ public class Ultimate_EconomyEventHandler implements Listener {
 									}
 									// only playershop
 									else if (isPlayershop) {
-										playe.sendMessage(ChatColor.RED
-												+ Ultimate_Economy.messages.getString("shopowner_not_enough_money"));
+										playe.sendMessage(MessageWrapper.getErrorString("shopowner_not_enough_money"));
 									}
 								}
 								// only playershop
 								else if (isPlayershop) {
 									if (itemAmount > 1) {
-										playe.sendMessage(ChatColor.GOLD
-												+ Ultimate_Economy.messages.getString("shop_added_item_plural1") + " "
-												+ ChatColor.GREEN + String.valueOf(itemAmount) + ChatColor.GOLD + " "
-												+ Ultimate_Economy.messages.getString("shop_added_item_plural2"));
+										playe.sendMessage(MessageWrapper.getString("shop_added_item_plural",
+												String.valueOf(itemAmount)));
 									} else {
-										playe.sendMessage(ChatColor.GOLD
-												+ Ultimate_Economy.messages.getString("shop_added_item_singular1") + " "
-												+ ChatColor.GREEN + String.valueOf(itemAmount) + ChatColor.GOLD + " "
-												+ Ultimate_Economy.messages.getString("shop_added_item_singular2"));
+										playe.sendMessage(MessageWrapper.getString("shop_added_item_singular",
+												String.valueOf(itemAmount)));
 									}
 									playershop.increaseStock(clickedItemString, itemAmount);
 									// if the player is in stockpile mode, then the stockpile gets refreshed
@@ -840,7 +772,6 @@ public class Ultimate_EconomyEventHandler implements Listener {
 									itemStack.setAmount(itemAmount);
 									removeItemFromInventory(inventoryplayer, itemStack, itemAmount);
 								}
-
 								break;
 							}
 						}

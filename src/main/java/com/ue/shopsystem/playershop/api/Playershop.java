@@ -2,6 +2,7 @@ package com.ue.shopsystem.playershop.api;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
+import com.ue.player.api.EconomyPlayer;
 import com.ue.shopsystem.api.Shop;
 
 public interface Playershop extends Shop {
@@ -16,16 +17,24 @@ public interface Playershop extends Shop {
 	 * @throws PlayerException
 	 * @throws ShopSystemException 
 	 */
-	public void changeOwner(String newOwner) throws PlayerException, ShopSystemException;
+	public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException;
+	
+	/**
+	 * Returns true if the ecoPlayer is the owner of this shop;
+	 * 
+	 * @param ecoPlayer
+	 * @return boolean
+	 */
+	public boolean isOwner(EconomyPlayer ecoPlayer);
 	
 	/**
 	 * --Get Method--
 	 * <p>
-	 * Returns the name of the shop owner.
+	 * Returns the shop owner.
 	 * 
-	 * @return
+	 * @return EconomyPlayer
 	 */
-	public String getOwner();
+	public EconomyPlayer getOwner();
 	
 	/**
 	 * --Save file edit method--

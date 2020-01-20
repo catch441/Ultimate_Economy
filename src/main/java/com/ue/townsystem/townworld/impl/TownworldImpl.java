@@ -12,6 +12,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.PlayerExceptionMessageEnum;
+import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
@@ -81,7 +83,7 @@ public class TownworldImpl implements Townworld {
 	
 	public void addTown(Town town) throws TownSystemException {
 		if(townNames.contains(town.getTownName())) {
-			throw new TownSystemException(TownSystemException.TOWN_ALREADY_EXIST);
+			throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_ALREADY_EXIST);
 		} else {
 			towns.add(town);
 			townNames.add(town.getTownName());
@@ -90,7 +92,7 @@ public class TownworldImpl implements Townworld {
 	
 	public void removeTown(Town town) throws TownSystemException {
 		if(!townNames.contains(town.getTownName())) {
-			throw new TownSystemException(TownSystemException.TOWN_DOES_NOT_EXIST);
+			throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_DOES_NOT_EXIST);
 		} else {
 			towns.remove(town);
 			townNames.remove(town.getTownName());
@@ -156,7 +158,7 @@ public class TownworldImpl implements Townworld {
 				return town;
 			}
 		}
-		throw new TownSystemException(TownSystemException.TOWN_DOES_NOT_EXIST);
+		throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_DOES_NOT_EXIST);
 	}
 
 	public boolean chunkIsFree(Chunk chunk) {
@@ -187,7 +189,7 @@ public class TownworldImpl implements Townworld {
 				return town;
 			}
 		}
-		throw new TownSystemException(TownSystemException.CHUNK_NOT_CLAIMED);
+		throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_NOT_CLAIMED);
 	}
 
 	public File getSaveFile() {
@@ -208,25 +210,23 @@ public class TownworldImpl implements Townworld {
 
 	public void handleTownVillagerInvClick(InventoryClickEvent event) throws TownSystemException, PlayerException {
 		Chunk chunk = event.getWhoClicked().getLocation().getChunk();
-		String playerName = event.getWhoClicked().getName();
-		EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(playerName);
+		EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(event.getWhoClicked().getName());
 		Town town = getTownByChunk(chunk);
 		Plot plot = town.getPlotByChunk(chunk.getX() + "/" + chunk.getZ());
 		switch (event.getCurrentItem().getItemMeta().getDisplayName()) {
 			case "Buy":
 				if (!ecoPlayer.hasEnoughtMoney(plot.getSalePrice())) {
-					throw new PlayerException(PlayerException.NOT_ENOUGH_MONEY_PERSONAL);
+					throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
 				} else {
-					String receiverName = plot.getOwner();
-					EconomyPlayer receiver = EconomyPlayerController.getEconomyPlayerByName(receiverName);
+					EconomyPlayer receiver = plot.getOwner();
 					ecoPlayer.payToOtherPlayer(receiver, plot.getSalePrice(), false);
-					town.buyPlot(playerName, chunk.getX(), chunk.getZ());
+					town.buyPlot(ecoPlayer, chunk.getX(), chunk.getZ());
 					event.getWhoClicked().sendMessage(ChatColor.GOLD + "Congratulation! You bought this plot!");
 				}
 				break;
 			case "Cancel Sale":
-				if (plot.isOwner(playerName)) {
-					plot.removeFromSale(playerName);
+				if (plot.isOwner(ecoPlayer)) {
+					plot.removeFromSale(ecoPlayer);
 					event.getWhoClicked().sendMessage(ChatColor.GOLD + "You removed this plot from sale!");
 				}
 				break;

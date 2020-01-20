@@ -6,6 +6,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import com.ue.exceptions.PlayerException;
+import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.rentshop.api.RentshopController;
 import com.ue.ultimate_economy.Ultimate_Economy;
@@ -28,18 +29,16 @@ public class ConfigCommandExecutor implements CommandExecutor {
 							if (!args[1].equals("cs") && !args[1].equals("de") && !args[1].equals("en")
 									&& !args[1].equals("fr") && !args[1].equals("zh") && !args[1].equals("ru")
 									&& !args[1].equals("es") && !args[1].equals("lt")) {
-								sender.sendMessage(
-										ChatColor.RED + Ultimate_Economy.messages.getString("invalid_language"));
+								sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter", args[1]));
 							} else if (!args[2].equals("CZ") && !args[2].equals("DE") && !args[2].equals("US")
 									&& !args[2].equals("FR") && !args[2].equals("CN") && !args[2].equals("RU")
 									&& !args[2].equals("ES") && !args[2].equals("LT")) {
-								sender.sendMessage(
-										ChatColor.RED + Ultimate_Economy.messages.getString("invalid_country"));
+								sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter", args[2]));
 							} else {
 								plugin.getConfig().set("localeLanguage", args[1]);
 								plugin.getConfig().set("localeCountry", args[2]);
 								plugin.saveConfig();
-								sender.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("restart"));
+								sender.sendMessage(MessageWrapper.getString("restart"));
 							}
 						} else {
 							sender.sendMessage("/" + label + " language <language> <country>");
@@ -50,9 +49,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 						if (args.length == 2) {
 							EconomyPlayerController.setMaxHomes(plugin.getConfig(), Integer.valueOf(args[1]));
 							plugin.saveConfig();
-							sender.sendMessage(
-									ChatColor.GOLD + Ultimate_Economy.messages.getString("max_homes_change") + " "
-											+ ChatColor.GREEN + args[1] + ChatColor.GOLD + ".");
+							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 						} else {
 							sender.sendMessage("/" + label + " maxHomes <number>");
 						}
@@ -62,9 +59,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 						if (args.length == 2) {
 							RentshopController.setMaxRentedDays(plugin.getConfig(), Integer.valueOf(args[1]));
 							plugin.saveConfig();
-							sender.sendMessage(
-									ChatColor.GOLD + Ultimate_Economy.messages.getString("max_rented_days") + " "
-											+ ChatColor.GREEN + args[1] + ChatColor.GOLD + ".");
+							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 						} else {
 							sender.sendMessage("/" + label + " maxRentedDays <number>");
 						}
@@ -74,9 +69,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 						if (args.length == 2) {
 							EconomyPlayerController.setMaxJobs(plugin.getConfig(), Integer.valueOf(args[1]));
 							plugin.saveConfig();
-							sender.sendMessage(
-									ChatColor.GOLD + Ultimate_Economy.messages.getString("max_jobs_change") + " "
-											+ ChatColor.GREEN + args[1] + ChatColor.GOLD + ".");
+							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 						} else {
 							sender.sendMessage("/" + label + " maxJobs <number>");
 						}
@@ -86,9 +79,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 						if (args.length == 2) {
 							EconomyPlayerController.setMaxJoinedTowns(plugin.getConfig(), Integer.valueOf(args[1]));
 							plugin.saveConfig();
-							sender.sendMessage(
-									ChatColor.GOLD + Ultimate_Economy.messages.getString("max_joined_towns_change")
-											+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + ".");
+							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 						} else {
 							sender.sendMessage("/" + label + " maxJoinedTowns <number>");
 						}
@@ -99,8 +90,8 @@ public class ConfigCommandExecutor implements CommandExecutor {
 							if (args[1].equals("true") || args[1].equals("false")) {
 								plugin.getConfig().set("homes", Boolean.valueOf(args[1]));
 								plugin.saveConfig();
-								sender.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("ue_homes")
-										+ " " + ChatColor.GREEN + args[1] + ChatColor.GOLD + ".");
+								sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
+								sender.sendMessage(MessageWrapper.getString("restart"));
 							} else {
 								sender.sendMessage("/" + label + " homes <true/false>");
 							}
@@ -109,12 +100,22 @@ public class ConfigCommandExecutor implements CommandExecutor {
 						}
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					case "maxPlayershops":
+						if (args.length == 2) {
+							EconomyPlayerController.setMaxPlayershops(plugin.getConfig(), Integer.valueOf(args[1]));
+							plugin.saveConfig();
+							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
+						} else {
+							sender.sendMessage("/" + label + " maxPlayershops <number>");
+						}
+						break;
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					default: return false;
 				}
 			} catch (PlayerException e) {
 				sender.sendMessage(ChatColor.RED + e.getMessage());
 			} catch (NumberFormatException e2) {
-				sender.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("invalid_number"));
+				sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter",args[1]));
 			}
 		} else {
 			return false;

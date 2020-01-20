@@ -10,6 +10,7 @@ import org.bukkit.entity.Villager.Profession;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
+import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 
@@ -120,8 +121,9 @@ public abstract interface Shop {
 	 * @param buyPrice
 	 * @param itemStack
 	 * @throws ShopSystemException
+	 * @throws PlayerException 
 	 */
-	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack) throws ShopSystemException;
+	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack) throws ShopSystemException, PlayerException;
 	
 	/**
 	 * --ShopItem Methode--
@@ -130,8 +132,9 @@ public abstract interface Shop {
 	 * 
 	 * @param slot
 	 * @throws ShopSystemException
+	 * @throws PlayerException 
 	 */
-	public void removeShopItem(int slot) throws ShopSystemException;
+	public void removeShopItem(int slot) throws ShopSystemException, PlayerException;
 	
 	/**
 	 * --ShopItem Methode--
@@ -144,8 +147,9 @@ public abstract interface Shop {
 	 * @param buyPrice
 	 * @return String
 	 * @throws ShopSystemException
+	 * @throws PlayerException 
 	 */
-	public String editShopItem(int slot, String amount, String sellPrice, String buyPrice) throws ShopSystemException;
+	public String editShopItem(int slot, String amount, String sellPrice, String buyPrice) throws ShopSystemException, PlayerException;
 	
 	/**
 	 * --Change Methode--
@@ -175,8 +179,9 @@ public abstract interface Shop {
 	 * 
 	 * @param newSize
 	 * @throws ShopSystemException 
+	 * @throws PlayerException 
 	 */
-	public void changeShopSize(int newSize) throws ShopSystemException;
+	public void changeShopSize(int newSize) throws ShopSystemException, PlayerException;
 	
 	/**
 	 * --Shop Method--
@@ -185,8 +190,9 @@ public abstract interface Shop {
 	 * 
 	 * @param location
 	 * @throws TownSystemException 
+	 * @throws PlayerException 
 	 */
-	public void moveShop(Location location) throws TownSystemException;
+	public void moveShop(Location location) throws TownSystemException, PlayerException;
 	
 	/**
 	 * --Shop Method--
@@ -213,8 +219,9 @@ public abstract interface Shop {
 	 * @param slot
 	 * @throws IllegalArgumentException
 	 * @throws ShopSystemException
+	 * @throws PlayerException 
 	 */
-	public void openSlotEditor(Player player, int slot) throws IllegalArgumentException, ShopSystemException;
+	public void openSlotEditor(Player player, int slot) throws IllegalArgumentException, ShopSystemException, PlayerException;
 	
 	/**
 	 * --Editor Method-- 
@@ -236,6 +243,7 @@ public abstract interface Shop {
 	 * 
 	 * @param event
 	 * @throws ShopSystemException
+	 * @throws PlayerException 
 	 */
-	public void handleSlotEditor(InventoryClickEvent event) throws ShopSystemException;
+	public void handleSlotEditor(InventoryClickEvent event) throws ShopSystemException, PlayerException;
 }

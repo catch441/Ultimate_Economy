@@ -21,6 +21,14 @@ public interface EconomyPlayer {
 	public Player getPlayer();
 	
 	/**
+	 * Adds a bukkit player to the economy player.
+	 * And adds this player to the bossbar of the economy player.
+	 * 
+	 * @param player
+	 */
+	public void setPlayer(Player player);
+	
+	/**
 	 * Returns true, if the player is online;
 	 * 
 	 * @return boolean

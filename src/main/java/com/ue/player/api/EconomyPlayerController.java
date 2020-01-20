@@ -5,20 +5,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.player.impl.EconomyPlayerImpl;
 
 public class EconomyPlayerController {
-	
+
 	private static List<EconomyPlayer> economyPlayers = new ArrayList<>();
 	private static File playerFile;
 	private static int maxHomes;
 	private static int maxJobs;
 	private static int maxJoinedTowns;
+	private static int maxPlayershops;
 
 	/**
 	 * This method returns a list of all player names.
@@ -27,7 +30,7 @@ public class EconomyPlayerController {
 	 */
 	public static List<String> getEconomyPlayerNameList() {
 		List<String> list = new ArrayList<>();
-		for (EconomyPlayer economyPlayer: economyPlayers) {
+		for (EconomyPlayer economyPlayer : economyPlayers) {
 			list.add(economyPlayer.getName());
 		}
 		return list;
@@ -64,9 +67,9 @@ public class EconomyPlayerController {
 				return economyPlayer;
 			}
 		}
-		throw new PlayerException(PlayerException.PLAYER_DOES_NOT_EXIST);
+		throw PlayerException.getException(PlayerExceptionMessageEnum.PLAYER_DOES_NOT_EXIST);
 	}
-	
+
 	/**
 	 * This method returns all economyPlayers.
 	 * 
@@ -84,7 +87,7 @@ public class EconomyPlayerController {
 	 */
 	public static void createEconomyPlayer(String playerName) throws PlayerException {
 		if (getEconomyPlayerNameList().contains(playerName)) {
-			throw new PlayerException(PlayerException.PLAYER_ALREADY_EXIST);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.PLAYER_ALREADY_EXIST);
 		} else {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
 			economyPlayers.add(new EconomyPlayerImpl(playerName, true));
@@ -92,15 +95,14 @@ public class EconomyPlayerController {
 			try {
 				config.save(playerFile);
 			} catch (IOException e) {
-				e.printStackTrace();
+				Bukkit.getLogger().warning(e.getMessage() + ":" + playerName);
 			}
 		}
 	}
 
 	/**
-	 * This method loads all economyPlayers. 
-	 * 
-	 * !!! {@link JobController#loadAllJobs()} have to be executed before this method. !!!
+	 * This method loads all economyPlayers. !!! {@link JobController#loadAllJobs()}
+	 * have to be executed before this method. !!!
 	 * 
 	 * @param dataFolder
 	 * @throws JobSystemException
@@ -123,24 +125,54 @@ public class EconomyPlayerController {
 	}
 
 	public static void setupConfig(FileConfiguration fileConfig) {
-		if (!fileConfig.isSet("MaxHomes")) {
-			fileConfig.set("MaxHomes", 3);
-			maxHomes = 3;
-		} else {
-			maxHomes = fileConfig.getInt("MaxHomes");
+		try {
+			if (!fileConfig.isSet("MaxHomes")) {
+				setMaxHomes(fileConfig, 3);
+			} else {
+				maxHomes = fileConfig.getInt("MaxHomes");
+			}
+			if (!fileConfig.isSet("MaxJobs")) {
+				setMaxJobs(fileConfig, 2);
+			} else {
+				maxJobs = fileConfig.getInt("MaxJobs");
+			}
+			if (!fileConfig.isSet("MaxJoinedTowns")) {
+				setMaxJoinedTowns(fileConfig, 1);
+			} else {
+				maxJoinedTowns = fileConfig.getInt("MaxJoinedTowns");
+			}
+			if (!fileConfig.isSet("MaxPlayershops")) {
+				setMaxPlayershops(fileConfig, 3);
+			} else {
+				maxPlayershops = fileConfig.getInt("MaxPlayershops");
+			}
+		} catch (PlayerException e) {
 		}
-		if (!fileConfig.isSet("MaxJobs")) {
-			fileConfig.set("MaxJobs", 2);
-			maxJobs = 2;
+	}
+
+	/**
+	 * This method sets the maxPlayershops per player value.
+	 * 
+	 * @param config
+	 * @param value
+	 * @throws PlayerException
+	 */
+	public static void setMaxPlayershops(FileConfiguration config, int value) throws PlayerException {
+		if (value < 0) {
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, value);
 		} else {
-			maxJobs = fileConfig.getInt("MaxJobs");
+			config.set("MaxPlayershops", value);
+			maxPlayershops = value;
 		}
-		if (!fileConfig.isSet("MaxJoinedTowns")) {
-			fileConfig.set("MaxJoinedTowns", 1);
-			maxJoinedTowns = 1;
-		} else {
-			maxJoinedTowns = fileConfig.getInt("MaxJoinedTowns");
-		}
+	}
+	
+	/**
+	 * Returns the maxPlayershops per player value.
+	 * 
+	 * @return int
+	 */
+	public static int getMaxPlayershops() {
+		return maxPlayershops;
 	}
 
 	/**
@@ -152,13 +184,13 @@ public class EconomyPlayerController {
 	 */
 	public static void setMaxHomes(FileConfiguration config, int value) throws PlayerException {
 		if (value < 0) {
-			throw new PlayerException(PlayerException.INVALID_NUMBER);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, value);
 		} else {
 			config.set("MaxHomes", value);
 			maxHomes = value;
 		}
 	}
-	
+
 	/**
 	 * Returns the max homes configuration.
 	 * 
@@ -177,13 +209,13 @@ public class EconomyPlayerController {
 	 */
 	public static void setMaxJobs(FileConfiguration config, int value) throws PlayerException {
 		if (value < 0) {
-			throw new PlayerException(PlayerException.INVALID_NUMBER);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, value);
 		} else {
 			config.set("MaxJobs", value);
 			maxJobs = value;
 		}
 	}
-	
+
 	/**
 	 * Returns the max jobs configuration.
 	 * 
@@ -202,13 +234,13 @@ public class EconomyPlayerController {
 	 */
 	public static void setMaxJoinedTowns(FileConfiguration config, int value) throws PlayerException {
 		if (value < 0) {
-			throw new PlayerException(PlayerException.INVALID_NUMBER);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, value);
 		} else {
 			config.set("MaxJoinedTowns", value);
 			maxJoinedTowns = value;
 		}
 	}
-	
+
 	/**
 	 * Returns the max joined towns configuration.
 	 * 

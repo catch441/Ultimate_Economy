@@ -3,15 +3,20 @@ package com.ue.shopsystem.playershop.api;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.PlayerExceptionMessageEnum;
+import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.language.MessageWrapper;
+import com.ue.player.api.EconomyPlayer;
+import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.playershop.impl.PlayershopImpl;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.townworld.api.Townworld;
@@ -47,7 +52,7 @@ public class PlayershopController {
 	public static List<String> getPlayerShopUniqueNameList() {
 		List<String> list = new ArrayList<>();
 		for (Playershop shop : playerShopList) {
-			list.add(shop.getName() + "_" + shop.getOwner());
+			list.add(shop.getName() + "_" + shop.getOwner().getName());
 		}
 		return list;
 	}
@@ -62,11 +67,11 @@ public class PlayershopController {
 	 */
 	public static Playershop getPlayerShopByUniqueName(String name) throws ShopSystemException {
 		for (Playershop shop : playerShopList) {
-			if (name.equals(shop.getName() + "_" + shop.getOwner())) {
+			if (name.equals(shop.getName() + "_" + shop.getOwner().getName())) {
 				return shop;
 			}
 		}
-		throw new ShopSystemException(ShopSystemException.SHOP_DOES_NOT_EXIST);
+		throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_DOES_NOT_EXIST);
 	}
 
 	/**
@@ -82,7 +87,7 @@ public class PlayershopController {
 				return shop;
 			}
 		}
-		throw new ShopSystemException(ShopSystemException.SHOP_DOES_NOT_EXIST);
+		throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_DOES_NOT_EXIST);
 	}
 
 	/*
@@ -114,15 +119,23 @@ public class PlayershopController {
 	 * @param name
 	 * @param spawnLocation
 	 * @param size
-	 * @param playerName
+	 * @param ecoPlayer
 	 * @throws ShopSystemException
 	 * @throws TownSystemException
+	 * @throws PlayerException 
 	 */
 	public static void createPlayerShop(File dataFolder, String name, Location spawnLocation, int size,
-			String playerName) throws ShopSystemException, TownSystemException {
+			EconomyPlayer ecoPlayer) throws ShopSystemException, TownSystemException, PlayerException {
+		int actualNumber = 0;
+		for(Playershop shop:PlayershopController.getPlayerShops()) {
+			if(shop.isOwner(ecoPlayer)) {
+				actualNumber++;
+			}
+		}
 		if (name.contains("_")) {
-			throw new ShopSystemException(ShopSystemException.INVALID_CHAR_IN_SHOP_NAME);
-
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
+		} else if(actualNumber >= EconomyPlayerController.getMaxPlayershops()) {
+			throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
 		}
 		if (TownworldController.isTownWorld(spawnLocation.getWorld().getName())) {
 			Townworld townworld = null;
@@ -132,22 +145,22 @@ public class PlayershopController {
 				// should never happen
 			}
 			if (townworld.chunkIsFree(spawnLocation.getChunk())) {
-				throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
+				throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
 			} else {
 				Town town = townworld.getTownByChunk(spawnLocation.getChunk());
-				if (!town.hasBuildPermissions(playerName,
+				if (!town.hasBuildPermissions(ecoPlayer,
 						town.getPlotByChunk(spawnLocation.getChunk().getX() + "/" + spawnLocation.getChunk().getZ()))) {
-					throw new TownSystemException(TownSystemException.PLAYER_HAS_NO_PERMISSION);
+					throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
 				}
 			}
 		}
-		if (getPlayerShopUniqueNameList().contains(name + "_" + playerName)) {
-			throw new ShopSystemException(ShopSystemException.SHOP_ALREADY_EXISTS);
+		if (getPlayerShopUniqueNameList().contains(name + "_" + ecoPlayer.getName())) {
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_ALREADY_EXISTS);
 		} else if (size % 9 != 0) {
-			throw new ShopSystemException(ShopSystemException.INVALID_INVENTORY_SIZE);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, size);
 		} else {
 			playerShopList.add(
-					new PlayershopImpl(dataFolder, name, playerName, generateFreePlayerShopId(), spawnLocation, size));
+					new PlayershopImpl(dataFolder, name, ecoPlayer, generateFreePlayerShopId(), spawnLocation, size));
 		}
 	}
 
@@ -176,7 +189,7 @@ public class PlayershopController {
 	}
 
 	/**
-	 * This method loads all playerShops.
+	 * This method loads all playerShops. EconomyPlayer have to be loaded first.
 	 * 
 	 * @param fileConfig
 	 * @param dataFolder
@@ -191,8 +204,7 @@ public class PlayershopController {
 					String shopId = generateFreePlayerShopId();
 					playerShopList.add(new PlayershopImpl(dataFolder, server, shopName, shopId));
 				} else {
-					Bukkit.getLogger().log(Level.WARNING, ShopSystemException.CANNOT_LOAD_SHOP,
-							new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOP));
+					Bukkit.getLogger().info(MessageWrapper.getErrorString("cannot_load_shop", shopName));
 				}
 			}
 			// convert to new shopId save system
@@ -206,8 +218,7 @@ public class PlayershopController {
 				if (file.exists()) {
 					playerShopList.add(new PlayershopImpl(dataFolder, server, null, shopId));
 				} else {
-					Bukkit.getLogger().log(Level.WARNING, ShopSystemException.CANNOT_LOAD_SHOP,
-							new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOP));
+					Bukkit.getLogger().info(MessageWrapper.getErrorString("cannot_load_shop", shopId));
 				}
 			}
 		}

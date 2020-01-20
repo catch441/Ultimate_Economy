@@ -9,6 +9,8 @@ import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.metadata.FixedMetadataValue;
 
+import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.adminshop.api.Adminshop;
 import com.ue.shopsystem.adminshop.api.AdminshopController;
@@ -35,7 +37,7 @@ public class AdminshopImpl extends ShopImpl implements Adminshop{
 		for (String item : itemNames) {
 			try {
 				loadShopItem(item);
-			} catch (ShopSystemException e) {
+			} catch (ShopSystemException | PlayerException e) {
 				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 			}
 		}
@@ -58,7 +60,7 @@ public class AdminshopImpl extends ShopImpl implements Adminshop{
 		for (String item : tempList) {
 			try {
 				loadShopItem(item);
-			} catch (ShopSystemException e) {
+			} catch (ShopSystemException | PlayerException e) {
 				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 			}
 		}
@@ -67,9 +69,9 @@ public class AdminshopImpl extends ShopImpl implements Adminshop{
 	@Override
 	public void changeShopName(String name) throws ShopSystemException {
 		if(AdminshopController.getAdminshopNameList().contains(name)) {
-			throw new ShopSystemException(ShopSystemException.SHOP_ALREADY_EXISTS);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_ALREADY_EXISTS);
 		} else if(name.contains("_")) {
-			throw new ShopSystemException(ShopSystemException.INVALID_CHAR_IN_SHOP_NAME);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 		} else {
 			saveShopNameToFile(name);
 			changeInventoryNames(name);

@@ -44,8 +44,12 @@ import org.bukkit.potion.PotionType;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.PlayerExceptionMessageEnum;
+import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.Shop;
 import com.ue.ultimate_economy.Ultimate_Economy;
 
@@ -216,7 +220,7 @@ public abstract class ShopImpl implements Shop {
 				buyPrice = getItemBuyPrice(itemString);
 				sellPrice = getItemSellPrice(itemString);
 			}
-		} catch (ShopSystemException e) {}
+		} catch (ShopSystemException | PlayerException e) {}
 		
 		List<String> listBuy = new ArrayList<String>();
 		List<String> listSell = new ArrayList<String>();
@@ -383,7 +387,7 @@ public abstract class ShopImpl implements Shop {
 			file = newFile;
 			save();
 		} else {
-			throw new ShopSystemException(ShopSystemException.ERROR_ON_RENAMING);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.ERROR_ON_RENAMING);
 		}
 	}
 	
@@ -458,7 +462,7 @@ public abstract class ShopImpl implements Shop {
 			config = YamlConfiguration.loadConfiguration(file);
 			return config.getDouble("ShopItems." + itemName + ".sellPrice");
 		} else {
-			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
 		}
 	}
 	
@@ -467,7 +471,7 @@ public abstract class ShopImpl implements Shop {
 		if (itemNames.contains(itemName)) {
 			return config.getInt("ShopItems." + itemName + ".Amount");
 		} else {
-			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
 		}
 	}
 	
@@ -476,7 +480,7 @@ public abstract class ShopImpl implements Shop {
 		if (itemNames.contains(itemName)) {
 			return config.getDouble("ShopItems." + itemName + ".buyPrice");
 		} else {
-			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
 		}
 	}
 	
@@ -517,7 +521,7 @@ public abstract class ShopImpl implements Shop {
 	
 	public ItemStack getItemStack(String itemString) throws ShopSystemException {
 		if(!itemNames.contains(itemString)) {
-			throw new ShopSystemException(ShopSystemException.ITEM_DOES_NOT_EXIST);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
 		}
 		else {
 			config = YamlConfiguration.loadConfiguration(file);
@@ -554,9 +558,9 @@ public abstract class ShopImpl implements Shop {
 		slotEditor = slotEditorNew;
 	}
 	
-	public void changeShopSize(int newSize) throws ShopSystemException {
+	public void changeShopSize(int newSize) throws ShopSystemException, PlayerException {
 		if(newSize % 9 != 0) {
-			throw new ShopSystemException(ShopSystemException.INVALID_INVENTORY_SIZE);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, size);
 		} else {
 			boolean possible = true;
 			int diff = size - newSize;
@@ -577,7 +581,7 @@ public abstract class ShopImpl implements Shop {
 				reload();
 				setupShopItems();
 			} else {
-				throw new ShopSystemException(ShopSystemException.RESIZING_FAILED);
+				throw ShopSystemException.getException(ShopExceptionMessageEnum.RESIZING_FAILED);
 			}
 		}
 	}
@@ -585,7 +589,7 @@ public abstract class ShopImpl implements Shop {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////// shopitem methods
 	
-	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack) throws ShopSystemException {
+	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack) throws ShopSystemException, PlayerException {
 		int amount = itemStack.getAmount();
 		String itemString = itemStack.toString();
 		if (itemStack.getType() == Material.SPAWNER) {
@@ -594,35 +598,35 @@ public abstract class ShopImpl implements Shop {
 			itemString = "SPAWNER_" + entity;
 		}
 		if (!slotIsEmpty(slot + 1)) {
-			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_OCCUPIED);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVENTORY_SLOT_OCCUPIED);
 		} else if (sellPrice < 0) {
-			throw new ShopSystemException(ShopSystemException.INVALID_SELL_PRICE);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, buyPrice);
 		} else if (buyPrice < 0) {
-			throw new ShopSystemException(ShopSystemException.INVALID_BUY_PRICE);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, buyPrice);
 		} else if (buyPrice == 0 && sellPrice == 0) {
-			throw new ShopSystemException(ShopSystemException.INVALID_PRICES);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_PRICES);
 		} else if (itemNames.contains(itemString)) {
-			throw new ShopSystemException(ShopSystemException.ITEM_ALREADY_EXISTS);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_ALREADY_EXISTS);
 		} else {
 			saveShopItemToFile(itemStack, slot, sellPrice, buyPrice);
 			addShopItemToInv(new ItemStack(itemStack), amount, slot, sellPrice, buyPrice);
 		}
 	}
 
-	public String editShopItem(int slot, String amount, String sellPrice, String buyPrice) throws ShopSystemException {
+	public String editShopItem(int slot, String amount, String sellPrice, String buyPrice) throws ShopSystemException, PlayerException {
 		if (slotIsEmpty(slot)) {
-			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_EMPTY);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.INVENTORY_SLOT_EMPTY);
 		} else if (!amount.equals("none") && (Integer.valueOf(amount) <= 0 || Integer.valueOf(amount) > 64)) {
-			throw new ShopSystemException(ShopSystemException.INVALID_AMOUNT);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, amount);
 		}
 		if (!sellPrice.equals("none") && Double.valueOf(sellPrice) < 0) {
-			throw new ShopSystemException(ShopSystemException.INVALID_SELL_PRICE);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, sellPrice);
 		} 
 		if (!buyPrice.equals("none") && Double.valueOf(buyPrice) < 0) {
-			throw new ShopSystemException(ShopSystemException.INVALID_BUY_PRICE);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, buyPrice);
 		} else if (!sellPrice.equals("none") && !buyPrice.equals("none") && Double.valueOf(sellPrice) == 0
 				&& Double.valueOf(buyPrice) == 0) {
-			throw new ShopSystemException(ShopSystemException.INVALID_PRICES);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_PRICES);
 		} else {
 			ItemStack itemStack = inventory.getItem(slot - 1);
 			itemStack.setAmount(1);
@@ -667,8 +671,9 @@ public abstract class ShopImpl implements Shop {
 	 * 
 	 * @param itemString
 	 * @throws ShopSystemException
+	 * @throws PlayerException 
 	 */
-	public void loadShopItem(String itemString) throws ShopSystemException {
+	public void loadShopItem(String itemString) throws ShopSystemException, PlayerException {
 		config = YamlConfiguration.loadConfiguration(file);
 		//new loading method for new save method
 		if(!itemString.contains("SPAWNER_") && !itemString.equals("ANVIL_0") && !itemString.equals("CRAFTING_TABLE_0") && config.getString("ShopItems." + itemString + ".newSaveMethod") != null) {
@@ -765,14 +770,14 @@ public abstract class ShopImpl implements Shop {
 					addShopItem(slot, sell , buy , itemStack);
 				}
 			} else if (!itemString.equals("ANVIL_0") && !itemString.equals("CRAFTING_TABLE_0")) {
-				throw new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOPITEM + " |" + itemString + "|");
+				throw ShopSystemException.getException(ShopExceptionMessageEnum.CANNOT_LOAD_SHOPITEM, itemString);
 			}
 		}
 	}
 
-	public void removeShopItem(int slot) throws ShopSystemException {
+	public void removeShopItem(int slot) throws ShopSystemException, PlayerException {
 		if (slotIsEmpty(slot + 1)) {
-			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_EMPTY);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.INVENTORY_SLOT_EMPTY);
 		} else if ((slot + 1) != size && (slot + 1) <= size) {
 			String itemString = "";
 			ItemStack stack = inventory.getItem(slot);
@@ -797,7 +802,7 @@ public abstract class ShopImpl implements Shop {
 			inventory.clear(slot);
 			removeShopItemFromFile(itemString);
 		} else if ((slot + 1) == size) {
-			throw new ShopSystemException(ShopSystemException.ITEM_CANNOT_BE_DELETED);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_CANNOT_BE_DELETED);
 		}
 	}
 	
@@ -858,13 +863,13 @@ public abstract class ShopImpl implements Shop {
 				} else {
 					editor.setItem(i, getSkull(SLOTFILLED, "Slot " + (i + 1)));
 				}
-			} catch (ShopSystemException e) {
+			} catch (PlayerException e) {
 			}
 		}
 		player.openInventory(editor);
 	}
 	
-	public void openSlotEditor(Player player, int slot) throws IllegalArgumentException, ShopSystemException {
+	public void openSlotEditor(Player player, int slot) throws IllegalArgumentException, ShopSystemException, PlayerException {
 		setupSlotEditor(slot);
 		ItemStack item;
 		slotEditorSlot = slot;
@@ -895,7 +900,7 @@ public abstract class ShopImpl implements Shop {
 		player.openInventory(slotEditor);
 	}
 	
-	public void handleSlotEditor(InventoryClickEvent event) throws ShopSystemException {
+	public void handleSlotEditor(InventoryClickEvent event) throws ShopSystemException, PlayerException {
 		if (event.getCurrentItem().getItemMeta() != null) {
 			Player player = (Player) event.getWhoClicked();
 			ItemStack originStack = null;
@@ -1057,23 +1062,16 @@ public abstract class ShopImpl implements Shop {
 						newItemStackCopy.setAmount(1);
 						// check, if this item already exists in a other slot
 						if(itemNames.contains(newItemStackCopy.toString())) {
-							player.sendMessage(ChatColor.RED + ShopSystemException.ITEM_ALREADY_EXISTS);
+							player.sendMessage(MessageWrapper.getErrorString("item_already_exists_in_shop"));
 						} 
 						else {
 							// the old item in the selected slot gets deleted
 							if(originStack != null) {
 								removeShopItem(slotEditorSlot - 1);
-								player.sendMessage(
-										ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_removeItem1") + " "
-										+ ChatColor.GREEN + originStack.getType().toString().toLowerCase() + ChatColor.GOLD + " "
-										+ Ultimate_Economy.messages.getString("shop_removeItem2"));
+								player.sendMessage(MessageWrapper.getString("shop_removeItem", originStack.getType().toString().toLowerCase()));
 							}
 							addShopItem(slotEditorSlot - 1, sellPrice, buyPrice, itemStack);
-							player.sendMessage(
-									ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_addItem1") + " "
-											+ ChatColor.GREEN + itemStack.getType().toString().toLowerCase()
-											+ ChatColor.GOLD + " "
-											+ Ultimate_Economy.messages.getString("shop_addItem2"));
+							player.sendMessage(MessageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
 						}
 					} 
 					// if the item doesn't changed
@@ -1086,10 +1084,7 @@ public abstract class ShopImpl implements Shop {
 				}
 			} else if (command.equals(ChatColor.RED + "remove item")) {
 				removeShopItem(slotEditorSlot - 1);
-				player.sendMessage(
-						ChatColor.GOLD + Ultimate_Economy.messages.getString("shop_removeItem1") + " "
-						+ ChatColor.GREEN + originStack.getType().toString().toLowerCase() + ChatColor.GOLD + " "
-						+ Ultimate_Economy.messages.getString("shop_removeItem2"));
+				player.sendMessage(MessageWrapper.getString("shop_removeItem", originStack.getType().toString().toLowerCase()));
 			} else if (!command.equals("buyprice") && !command.equals("sellprice")) {
 				ItemStack editorItemStack2 = new ItemStack(event.getCurrentItem());
 				editorItemStack2.setAmount(1);
@@ -1149,8 +1144,9 @@ public abstract class ShopImpl implements Shop {
 	 * This method reloads all shopitems.
 	 * 
 	 * @throws ShopSystemException
+	 * @throws PlayerException 
 	 */
-	public void reload() throws ShopSystemException {
+	public void reload() throws ShopSystemException, PlayerException {
 		for (String item : itemNames) {
 			loadShopItem(item);
 		}
@@ -1164,7 +1160,7 @@ public abstract class ShopImpl implements Shop {
 		p.openInventory(inventory);
 	}
 	
-	public void moveShop(Location location) throws TownSystemException {
+	public void moveShop(Location location) throws TownSystemException, PlayerException {
 		saveLocationToFile(location);
 		villager.teleport(location);
 	};
@@ -1179,9 +1175,9 @@ public abstract class ShopImpl implements Shop {
 	 * 
 	 * @param slot
 	 * @return boolean
-	 * @throws ShopSystemException
+	 * @throws PlayerException 
 	 */
-	protected boolean slotIsEmpty(int slot) throws ShopSystemException {
+	protected boolean slotIsEmpty(int slot) throws PlayerException {
 		if (slot <= inventory.getSize() && slot > 0) {
 			slot--;
 			boolean isEmpty = false;
@@ -1190,7 +1186,7 @@ public abstract class ShopImpl implements Shop {
 			}
 			return isEmpty;
 		} else {
-			throw new ShopSystemException(ShopSystemException.INVENTORY_SLOT_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, slot);
 		}
 	}
 	

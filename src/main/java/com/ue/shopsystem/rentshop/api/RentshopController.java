@@ -3,7 +3,6 @@ package com.ue.shopsystem.rentshop.api;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -11,8 +10,10 @@ import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.PlayerExceptionMessageEnum;
+import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.exceptions.TownSystemException;
+import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.rentshop.impl.RentshopImpl;
 
 public class RentshopController {
@@ -72,7 +73,7 @@ public class RentshopController {
 				return shop;
 			}
 		}
-		throw new ShopSystemException(ShopSystemException.SHOP_DOES_NOT_EXIST);
+		throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_DOES_NOT_EXIST);
 	}
 	
 	/**
@@ -98,7 +99,7 @@ public class RentshopController {
 				}
 			}
 		}
-		throw new ShopSystemException(ShopSystemException.SHOP_DOES_NOT_EXIST);
+		throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_DOES_NOT_EXIST);
 	}
 	
 	/**
@@ -135,15 +136,14 @@ public class RentshopController {
 	 * @param size
 	 * @param rentalFee
 	 * @return RentShop
-	 * @throws ShopSystemException
-	 * @throws TownSystemException 
+	 * @throws PlayerException 
 	 */
 	public static RentshopImpl createRentShop(File dataFolder, Location spawnLocation, int size, double rentalFee)
-			throws ShopSystemException, TownSystemException {		
+			throws PlayerException {		
 		if (size % 9 != 0) {
-			throw new ShopSystemException(ShopSystemException.INVALID_INVENTORY_SIZE);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, size);
 		} else if(rentalFee < 0) {
-			throw new ShopSystemException(PlayerException.INVALID_NUMBER);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, rentalFee);
 		} else {
 			RentshopImpl shop = new RentshopImpl(dataFolder, spawnLocation, size, generateFreeRentShopId(), rentalFee);
 			rentShopList.add(shop);
@@ -176,7 +176,7 @@ public class RentshopController {
 	}
 
 	/**
-	 * This method loads all rentShops.
+	 * This method loads all rentShops. EconomyPlayers have to be loaded first.
 	 * 
 	 * @param fileConfig
 	 * @param dataFolder
@@ -188,8 +188,7 @@ public class RentshopController {
 			if (file.exists()) {
 				rentShopList.add(new RentshopImpl(dataFolder, server, shopId));
 			} else {
-				Bukkit.getLogger().log(Level.WARNING, ShopSystemException.CANNOT_LOAD_SHOP,
-						new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOP));
+				Bukkit.getLogger().info(MessageWrapper.getErrorString("cannot_load_shop", shopId));
 			}
 		}
 	}
@@ -203,7 +202,7 @@ public class RentshopController {
 	 */
 	public static void setMaxRentedDays(FileConfiguration config,int days) throws PlayerException {
 		if (days < 0) {
-			throw new PlayerException(PlayerException.INVALID_NUMBER);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, days);
 		} else {
 			config.set("MaxRentedDays", days);
 			maxRentedDays = days;

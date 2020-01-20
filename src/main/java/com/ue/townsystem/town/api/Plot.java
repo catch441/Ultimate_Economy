@@ -3,7 +3,9 @@ package com.ue.townsystem.town.api;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.player.api.EconomyPlayer;
 
 public interface Plot {
 	
@@ -14,9 +16,11 @@ public interface Plot {
 	 * @param salePrice
 	 * @param playerLocation
 	 * @param player
+	 * @param sendMessage when true a message is send to the receiver and this player
 	 * @throws TownSystemException
+	 * @throws PlayerException 
 	 */
-	public void setForSale(double salePrice, Location playerLocation, String player) throws TownSystemException;
+	public void setForSale(double salePrice, Location playerLocation, EconomyPlayer player,boolean sendMessage) throws TownSystemException, PlayerException;
 	
 	/**
 	 * Returns the salePrice for this slot.
@@ -38,14 +42,14 @@ public interface Plot {
 	 * 
 	 * @param owner
 	 */
-	public void setOwner(String owner);
+	public void setOwner(EconomyPlayer owner);
 	
 	/**
 	 * Get the owner of this plot.
 	 * 
 	 * @return String
 	 */
-	public String getOwner();
+	public EconomyPlayer getOwner();
 	
 	/**
 	 * Returns true if the player is the owner of this plot.
@@ -53,7 +57,7 @@ public interface Plot {
 	 * @param owner
 	 * @return booelan
 	 */
-	public boolean isOwner(String owner);
+	public boolean isOwner(EconomyPlayer owner);
 	
 	/**
 	 * Removes a coOwner from this plot.
@@ -61,7 +65,7 @@ public interface Plot {
 	 * @param citizen
 	 * @throws TownSystemException
 	 */
-	public void removeCoOwner(String citizen) throws TownSystemException;
+	public void removeCoOwner(EconomyPlayer citizen) throws TownSystemException;
 	
 	/**
 	 * Returns true if the player is a coOwner of this plot.
@@ -69,7 +73,7 @@ public interface Plot {
 	 * @param coOwner
 	 * @return boolean
 	 */
-	public boolean isCoOwner(String coOwner);
+	public boolean isCoOwner(EconomyPlayer coOwner);
 	
 	/**
 	 * Returns true if this plot is for sale.
@@ -90,7 +94,7 @@ public interface Plot {
 	 * @param owner
 	 * @throws TownSystemException
 	 */
-	public void removeFromSale(String owner) throws TownSystemException;
+	public void removeFromSale(EconomyPlayer owner) throws TownSystemException;
 	
 	/**
 	 * Opens the inventory of the saleManager.

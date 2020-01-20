@@ -3,16 +3,18 @@ package com.ue.jobsystem.api;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import com.ue.exceptions.JobExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.jobsystem.impl.JobcenterImpl;
+import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 
@@ -33,7 +35,7 @@ public class JobcenterController {
 				return jobcenter;
 			}
 		}
-		throw new JobSystemException(JobSystemException.JOBCENTER_DOES_NOT_EXIST);
+		throw JobSystemException.getException(JobExceptionMessageEnum.JOBCENTER_DOES_NOT_EXIST);
 	}
 
 	/**
@@ -97,13 +99,14 @@ public class JobcenterController {
 	 * @param spawnLocation
 	 * @param size
 	 * @throws JobSystemException
+	 * @throws PlayerException 
 	 */
 	public static void createJobCenter(Server server, File dataFolder, String name, Location spawnLocation, int size)
-			throws JobSystemException {
+			throws JobSystemException, PlayerException {
 		if (getJobCenterNameList().contains(name)) {
-			throw new JobSystemException(JobSystemException.JOBCENTER_ALREADY_EXIST);
+			throw JobSystemException.getException(JobExceptionMessageEnum.JOB_ALREADY_EXISTS);
 		} else if (size % 9 != 0) {
-			throw new JobSystemException(JobSystemException.INVALID_INVENTORY_SIZE);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, size);
 		} else {
 			jobCenterList.add(new JobcenterImpl(server, dataFolder, name, spawnLocation, size));
 		}
@@ -123,8 +126,7 @@ public class JobcenterController {
 			if (file.exists()) {
 				jobCenterList.add(new JobcenterImpl(server, dataFolder, jobCenterName));
 			} else {
-				Bukkit.getLogger().log(Level.WARNING, JobSystemException.CANNOT_LOAD_JOBCENTER,
-						new JobSystemException(JobSystemException.CANNOT_LOAD_JOBCENTER));
+				Bukkit.getLogger().warning(MessageWrapper.getErrorString("cannot_load_jobcenter", jobCenterName));
 			}
 		}
 	}

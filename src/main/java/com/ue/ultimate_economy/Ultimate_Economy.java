@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
@@ -35,7 +33,7 @@ import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.JobcenterController;
 import com.ue.jobsystem.impl.JobCommandExecutor;
 import com.ue.jobsystem.impl.JobTabCompleter;
-import com.ue.language.UTF8Control;
+import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.player.impl.PlayerCommandExecutor;
@@ -64,12 +62,11 @@ import com.ue.vault.VaultHook;
 public class Ultimate_Economy extends JavaPlugin {
 
 	public static Ultimate_Economy getInstance;
-	public static ResourceBundle messages;
 	public Economy_UltimateEconomy economyImplementer;
 	private VaultHook vaultHook;
 
 	public void onEnable() {
-		
+
 		getInstance = this;
 
 		if (!getDataFolder().exists()) {
@@ -81,42 +78,30 @@ public class Ultimate_Economy extends JavaPlugin {
 			getConfig().set("TownNames", null);
 			saveConfig();
 		}
-		
+
 		// config to disable/enable homes feature
 		boolean homesFeature = false;
 		if (getConfig().contains("homes") && !getConfig().getBoolean("homes")) {
-			
+
 		} else {
 			homesFeature = true;
 			getConfig().set("homes", true);
 		}
 
-		// load language file
-		Locale currentLocale;
-		if (getConfig().getString("localeLanguage") == null) {
-			getConfig().set("localeLanguage", "en");
-			getConfig().set("localeCountry", "US");
-			currentLocale = new Locale("en", "US");
-			Bukkit.getLogger().info("Loading default language file: 'en' 'US'");
-		} else {
-			String lang = getConfig().getString("localeLanguage");
-			String country = getConfig().getString("localeCountry");
-			currentLocale = new Locale(lang, country);
-			Bukkit.getLogger().info("Loading language file: '" + lang + "' '" + country + "'");
-		}
-		messages = ResourceBundle.getBundle("language.MessagesBundle", currentLocale, new UTF8Control());
-		JobcenterController.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
-		JobController.loadAllJobs(getDataFolder(), getConfig());
-		AdminshopController.loadAllAdminShops(getConfig(), getDataFolder(), getServer());
-		PlayershopController.loadAllPlayerShops(getConfig(), getDataFolder(), getServer());
-		RentshopController.loadAllRentShops(getConfig(), getDataFolder(), getServer());
-		TownworldController.loadAllTownWorlds(getDataFolder(), getConfig(), getServer());
+		// load language
+		MessageWrapper.loadLanguage();
 
+		JobController.loadAllJobs(getDataFolder(), getConfig());
+		JobcenterController.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
 		try {
 			EconomyPlayerController.loadAllEconomyPlayers(getDataFolder());
 		} catch (JobSystemException e) {
 			Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 		}
+		TownworldController.loadAllTownWorlds(getDataFolder(), getConfig(), getServer());
+		AdminshopController.loadAllAdminShops(getConfig(), getDataFolder(), getServer());
+		PlayershopController.loadAllPlayerShops(getConfig(), getDataFolder(), getServer());
+		RentshopController.loadAllRentShops(getConfig(), getDataFolder(), getServer());
 
 		EconomyPlayerController.setupConfig(getConfig());
 		RentshopController.setupConfig(getConfig());
@@ -153,14 +138,14 @@ public class Ultimate_Economy extends JavaPlugin {
 				Field commandMapField = SimplePluginManager.class.getDeclaredField("commandMap");
 				commandMapField.setAccessible(true);
 				CommandMap map = (CommandMap) commandMapField.get(Bukkit.getServer().getPluginManager());
-				
+
 				UltimateEconomyCommand home = new UltimateEconomyCommand("home", this);
 				home.setDescription("Teleports you to a homepoint.");
 				home.setPermission("ultimate_economy.home");
 				home.setLabel("home");
 				home.setPermissionMessage("You don't have the permission.");
 				map.register("ultimate_economy", home);
-				
+
 				UltimateEconomyCommand setHome = new UltimateEconomyCommand("sethome", this);
 				setHome.setDescription("Sets a homepoint.");
 				setHome.setPermission("ultimate_economy.home");
@@ -168,7 +153,7 @@ public class Ultimate_Economy extends JavaPlugin {
 				setHome.setPermissionMessage("You don't have the permission.");
 				setHome.setUsage("/<command> [home]");
 				map.register("ultimate_economy", setHome);
-				
+
 				UltimateEconomyCommand delHome = new UltimateEconomyCommand("delhome", this);
 				delHome.setDescription("Remove a homepoint.");
 				delHome.setPermission("ultimate_economy.home");
@@ -176,7 +161,7 @@ public class Ultimate_Economy extends JavaPlugin {
 				delHome.setPermissionMessage("You don't have the permission.");
 				delHome.setUsage("/<command> [home]");
 				map.register("ultimate_economy", delHome);
-				
+
 				home.setExecutor(playerCommandExecutor);
 				home.setTabCompleter(playerTabCompleter);
 				delHome.setExecutor(playerCommandExecutor);
@@ -206,14 +191,15 @@ public class Ultimate_Economy extends JavaPlugin {
 			world.getBlockAt(location).setMetadata("entity",
 					new FixedMetadataValue(this, spawnerconfig.getString(spawnername + ".EntityType")));
 		}
-		
+
 		getConfig().options().copyDefaults(true);
 		saveConfig();
-		
-		//setup eventhandler
-		getServer().getPluginManager().registerEvents(new Ultimate_EconomyEventHandler(this,spawnerlist,spawner), this);
-		
-		//setup and start RentDailyTask
+
+		// setup eventhandler
+		getServer().getPluginManager().registerEvents(new Ultimate_EconomyEventHandler(this, spawnerlist, spawner),
+				this);
+
+		// setup and start RentDailyTask
 		new RentDailyTask().runTaskTimerAsynchronously(this, 1, 1000);
 
 		// setup metrics for bstats
@@ -267,64 +253,44 @@ public class Ultimate_Economy extends JavaPlugin {
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				// Commands
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				switch(label) {
-					case "shop": 
+				switch (label) {
+					case "shop":
 						if (args.length == 1) {
 							if (ecoPlayer.hasJob(JobController.getJobByName(args[0]))) {
 								AdminshopController.getAdminShopByName(args[0]).openInv(player);
 							} else {
-								player.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("shop_info"));
+								player.sendMessage(MessageWrapper.getErrorString("job_not_joined"));
 							}
 						} else {
 							return false;
 						}
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					case "shoplist": 
+					case "shoplist":
 						List<String> shopNames = AdminshopController.getAdminshopNameList();
-						String shopString = shopNames.toString();
-						shopString = shopString.replace("[", "");
-						shopString = shopString.replace("]", "");
-						if (shopNames.size() > 0) {
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shoplist_info1") + " "
-									+ ChatColor.GREEN + shopString);
-						} else {
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("shoplist_info2"));
-						}
+						player.sendMessage(MessageWrapper.getString("shoplist_info", shopNames.toArray()));
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					case "joblist": 
+					case "joblist":
 						List<String> jobNames = JobController.getJobNameList();
-						String jobString = jobNames.toString();
-						jobString = jobString.replace("[", "");
-						jobString = jobString.replace("]", "");
-						if (jobNames.size() > 0) {
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("joblist_info1") + " "
-									+ ChatColor.GREEN + jobString);
-						} else {
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("joblist_info2"));
-						}
+						player.sendMessage(MessageWrapper.getString("joblist_info", jobNames.toArray()));
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					case "jobinfo": 
+					case "jobinfo":
 						if (args.length == 1) {
 							Job job = JobController.getJobByName(args[0]);
-							player.sendMessage("");
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("jobinfo_info1") + " "
-									+ ChatColor.GREEN + job.getName() + ChatColor.GOLD + ":");
+							player.sendMessage(MessageWrapper.getString("jobinfo_info", job.getName()));
 							for (String string : job.getItemList()) {
 								player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN
 										+ job.getItemPrice(string) + "$");
 							}
 							for (String string : job.getFisherList()) {
-								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("jobinfo_info2")
-										+ " " + string.toLowerCase() + " " + ChatColor.GREEN + job.getFisherPrice(string)
-										+ "$");
+								player.sendMessage(MessageWrapper.getString("jobinfo_fishingprice",
+										string.toLowerCase(), job.getFisherPrice(string)));
 							}
 							for (String string : job.getEntityList()) {
-								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("jobinfo_info3")
-										+ " " + string.toLowerCase() + " " + ChatColor.GREEN + job.getKillPrice(string)
-										+ "$");
+								player.sendMessage(MessageWrapper.getString("jobinfo_killprice", string.toLowerCase(),
+										job.getKillPrice(string)));
 							}
 						} else {
 							return false;
@@ -332,7 +298,7 @@ public class Ultimate_Economy extends JavaPlugin {
 						break;
 				}
 			} catch (PlayerException | ShopSystemException | JobSystemException e1) {
-				player.sendMessage(ChatColor.RED + e1.getMessage());
+				player.sendMessage(e1.getMessage());
 			}
 		}
 		return true;

@@ -26,12 +26,15 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import com.ue.exceptions.JobExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.Jobcenter;
 import com.ue.jobsystem.api.JobcenterController;
+import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.ultimate_economy.UEVillagerType;
@@ -99,7 +102,7 @@ public class JobcenterImpl implements Jobcenter {
 			try {
 				jobs.add(JobController.getJobByName(jobName));
 			} catch (JobSystemException e) {
-				Bukkit.getLogger().warning(JobSystemException.JOB_DOES_NOT_EXIST + ":" + jobName);
+				Bukkit.getLogger().warning(MessageWrapper.getErrorString("job_does_not_exist") + ":" + jobName);
 			}
 		}
 		name = config.getString("JobCenterName");
@@ -137,16 +140,16 @@ public class JobcenterImpl implements Jobcenter {
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
 	}
 
-	public void addJob(Job job, String itemMaterial, int slot) throws JobSystemException {
+	public void addJob(Job job, String itemMaterial, int slot) throws JobSystemException, PlayerException {
 		itemMaterial = itemMaterial.toUpperCase();
 		if (slot < 0 || slot > inventory.getSize()) {
-			throw new JobSystemException(JobSystemException.INVENTORY_SLOT_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, slot);
 		} else if (!slotIsEmpty(slot)) {
-			throw new JobSystemException(JobSystemException.INVENTORY_SLOT_OCCUPIED);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVENTORY_SLOT_OCCUPIED);
 		} else if (jobs.contains(job)) {
-			throw new JobSystemException(JobSystemException.JOB_ALREADY_EXIST_IN_JOBCENTER);
+			throw JobSystemException.getException(JobExceptionMessageEnum.JOB_ALREADY_EXIST_IN_JOBCENTER);
 		} else if (Material.matchMaterial(itemMaterial) == null) {
-			throw new JobSystemException(JobSystemException.ITEM_IS_INVALID);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, itemMaterial);
 		} else {
 			config = YamlConfiguration.loadConfiguration(file);
 			jobs.add(job);
@@ -165,7 +168,7 @@ public class JobcenterImpl implements Jobcenter {
 
 	public void removeJob(Job job) throws JobSystemException {
 		if (!jobs.contains(job)) {
-			throw new JobSystemException(JobSystemException.JOB_NOT_EXIST_IN_JOBCENTER);
+			throw JobSystemException.getException(JobExceptionMessageEnum.JOB_NOT_EXIST_IN_JOBCENTER);
 		} else {
 			config = YamlConfiguration.loadConfiguration(file);
 			inventory.clear(config.getInt("Jobs." + job.getName() + ".ItemSlot") - 1);

@@ -75,7 +75,7 @@ public class RentshopTabCompleter implements TabCompleter{
 	private List<String> getRentedShopsForPlayer(String arg, String player) {
 		List<String> list = new ArrayList<>();
 		for (RentshopImpl shop : RentshopController.getRentShops()) {
-			if (!shop.isRentable() && shop.getOwner().equals(player)) {
+			if (!shop.isRentable() && shop.getOwner().getName().equals(player)) {
 				if (arg.equals("") || shop.getName().contains(arg)) {
 					list.add(shop.getName());
 				}

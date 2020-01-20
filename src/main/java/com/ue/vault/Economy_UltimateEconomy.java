@@ -226,22 +226,26 @@ public class Economy_UltimateEconomy implements Economy {
 	
 	@Override
 	public boolean hasAccount(String player) {
-		return false;
+		return true;
 	}
 	
 	@Override
 	public boolean hasAccount(String player, String world) {
-		return false;
+		return true;
 	}
 	
 	@Override
 	public boolean has(String player, double amount) {
-		return false;
+		try {
+			return EconomyPlayerController.getEconomyPlayerByName(player).hasEnoughtMoney(amount);
+		} catch (PlayerException e) {
+			return false;
+		}
 	}
 	
 	@Override
 	public boolean has(String player, String world, double amount) {
-		return false;
+		return has(player,amount);
 	}
 	
 	@Override
@@ -276,6 +280,6 @@ public class Economy_UltimateEconomy implements Economy {
 	
 	@Override
 	public EconomyResponse createBank(String arg0, String arg1) {
-		return null;
+		return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Ultimate_Economy does not support bank accounts!");
 	}
 }

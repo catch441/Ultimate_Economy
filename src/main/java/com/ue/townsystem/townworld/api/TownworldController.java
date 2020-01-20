@@ -13,6 +13,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.town.api.Town;
@@ -36,7 +37,7 @@ public class TownworldController {
 				return townworld;
 			}
 		}
-		throw new TownSystemException(TownSystemException.TOWNWORLD_DOES_NOT_EXIST);
+		throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_DOES_NOT_EXIST);
 	}
 
 	/**
@@ -114,9 +115,9 @@ public class TownworldController {
 	 */
 	public static void createTownWorld(File mainDataFolder, String world) throws TownSystemException {
 		if (Bukkit.getWorld(world) == null) {
-			throw new TownSystemException(TownSystemException.WORLD_DOES_NOT_EXIST);
+			throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST);
 		} else if (isTownWorld(world)) {
-			throw new TownSystemException(TownSystemException.TOWNWORLD_ALREADY_EXIST);
+			throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_ALREADY_EXIST);
 		} else {
 			townWorldList.add(new TownworldImpl(mainDataFolder, world));
 		}
@@ -130,7 +131,7 @@ public class TownworldController {
 	 */
 	public static void deleteTownWorld(String world) throws TownSystemException {
 		if (Bukkit.getWorld(world) == null) {
-			throw new TownSystemException(TownSystemException.WORLD_DOES_NOT_EXIST);
+			throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST);
 		} else {
 			Townworld townworld = getTownWorldByName(world);
 			townWorldList.remove(townworld);
@@ -141,6 +142,7 @@ public class TownworldController {
 	/**
 	 * This method loads all townworlds from the save file.
 	 * Loads all towns and plots in the townworld as well.
+	 * EconomyPlayers have to be loaded first.
 	 * 
 	 * @param main
 	 * @param worldname

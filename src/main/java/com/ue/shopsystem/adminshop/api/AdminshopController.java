@@ -3,14 +3,17 @@ package com.ue.shopsystem.adminshop.api;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.PlayerExceptionMessageEnum;
+import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
+import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.adminshop.api.AdminshopController;
 import com.ue.shopsystem.adminshop.impl.AdminshopImpl;
 
@@ -33,7 +36,7 @@ public class AdminshopController {
 				return shop;
 			}
 		}
-		throw new ShopSystemException(ShopSystemException.SHOP_DOES_NOT_EXIST);
+		throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_DOES_NOT_EXIST);
 	}
 	
 	/**
@@ -49,7 +52,7 @@ public class AdminshopController {
 				return shop;
 			}
 		}
-		throw new ShopSystemException(ShopSystemException.SHOP_DOES_NOT_EXIST);
+		throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_DOES_NOT_EXIST);
 	}
 	
 	/**
@@ -107,15 +110,16 @@ public class AdminshopController {
 	 * @param spawnLocation
 	 * @param size
 	 * @throws ShopSystemException
+	 * @throws PlayerException 
 	 */
 	public static void createAdminShop(File dataFolder, String name, Location spawnLocation, int size)
-			throws ShopSystemException {
+			throws ShopSystemException, PlayerException {
 		if (name.contains("_")) {
-			throw new ShopSystemException(ShopSystemException.INVALID_CHAR_IN_SHOP_NAME);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 		} else if (getAdminshopNameList().contains(name)) {
-			throw new ShopSystemException(ShopSystemException.SHOP_ALREADY_EXISTS);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_ALREADY_EXISTS);
 		} else if (size % 9 != 0) {
-			throw new ShopSystemException(ShopSystemException.INVALID_INVENTORY_SIZE);
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, size);
 		} else {
 			adminShopList.add(new AdminshopImpl(dataFolder, name, generateFreeAdminShopId(), spawnLocation, size));
 		}
@@ -160,8 +164,7 @@ public class AdminshopController {
 				if (file.exists()) {
 					adminShopList.add(new AdminshopImpl(dataFolder, server, shopName, generateFreeAdminShopId()));
 				} else {
-					Bukkit.getLogger().log(Level.WARNING, ShopSystemException.CANNOT_LOAD_SHOP,
-							new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOP));
+					Bukkit.getLogger().info(MessageWrapper.getErrorString("cannot_load_shop", shopName));
 				}
 			}
 			//convert to new shopId save system
@@ -178,8 +181,7 @@ public class AdminshopController {
 				if (file.exists()) {
 					adminShopList.add(new AdminshopImpl(dataFolder, server,null, shopId));
 				} else {
-					Bukkit.getLogger().log(Level.WARNING, ShopSystemException.CANNOT_LOAD_SHOP,
-							new ShopSystemException(ShopSystemException.CANNOT_LOAD_SHOP));
+					Bukkit.getLogger().info(MessageWrapper.getErrorString("cannot_load_shop", shopId));
 				}
 			}
 		}

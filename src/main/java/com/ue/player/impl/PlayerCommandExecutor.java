@@ -2,10 +2,9 @@ package com.ue.player.impl;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -14,10 +13,10 @@ import org.bukkit.entity.Player;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.api.Job;
+import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.townworld.api.TownworldController;
-import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class PlayerCommandExecutor implements CommandExecutor {
 
@@ -37,9 +36,9 @@ public class PlayerCommandExecutor implements CommandExecutor {
 					return false;
 				}
 			} catch (PlayerException e) {
-				sender.sendMessage(ChatColor.RED + e.getMessage());
+				sender.sendMessage(e.getMessage());
 			} catch (NumberFormatException e2) {
-				sender.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("invalid_number"));
+				sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter",args[1]));
 			}
 		}
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,13 +67,10 @@ public class PlayerCommandExecutor implements CommandExecutor {
 						DecimalFormat dFormat = new DecimalFormat(".##");
 						dFormat.setRoundingMode(RoundingMode.DOWN);
 						if (args.length == 0) {
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("money_info") + " "
-									+ ChatColor.GREEN + dFormat.format(ecoPlayer.getBankAmount()));
+							player.sendMessage(MessageWrapper.getString("money_info",dFormat.format(ecoPlayer.getBankAmount())));
 						} else if (args.length == 1 && player.hasPermission("Ultimate_Economy.adminpay")) {
 							EconomyPlayer otherPlayer = EconomyPlayerController.getEconomyPlayerByName(args[0]);
-							player.sendMessage(ChatColor.GREEN + args[0] + " " + ChatColor.GOLD
-									+ Ultimate_Economy.messages.getString("money_info") + " " + ChatColor.GREEN
-									+ dFormat.format(otherPlayer.getBankAmount()));
+							player.sendMessage(MessageWrapper.getString("money_info",dFormat.format(otherPlayer.getBankAmount())));
 						} else if (player.hasPermission("Ultimate_Economy.adminpay")) {
 							player.sendMessage("/money or /money <player>");
 						} else {
@@ -85,18 +81,11 @@ public class PlayerCommandExecutor implements CommandExecutor {
 					case "myjobs":
 						if (args.length == 0) {
 							List<Job> jobs = ecoPlayer.getJobList();
-							String jobString = "";
+							List<String> jobNames = new ArrayList<>();
 							for(Job job:jobs) {
-								jobString = jobString + job.getName() + ",";
+								jobNames.add(job.getName());
 							}
-							jobString = jobString.substring(0, jobString.length()-1);
-							if (jobs.size() > 0) {
-								player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("myjobs_info1")
-										+ " " + ChatColor.GREEN + jobString);
-							} else {
-								player.sendMessage(
-										ChatColor.GOLD + Ultimate_Economy.messages.getString("myjobs_info2"));
-							}
+							player.sendMessage(MessageWrapper.getString("myjobs_info", jobNames.toArray()));
 						} else {
 							return false;
 						}
@@ -109,10 +98,8 @@ public class PlayerCommandExecutor implements CommandExecutor {
 							TownworldController.handleTownWorldLocationCheck(player.getWorld().getName(),
 									player.getLocation().getChunk(), player.getName());
 						} else if (args.length == 0) {
-							Set<String> homes = ecoPlayer.getHomeList().keySet();
-							String homeString = String.join(",", homes);
-							player.sendMessage(ChatColor.GOLD + Ultimate_Economy.messages.getString("home_info") + " "
-									+ ChatColor.GREEN + homeString);
+							Object[] homes = ecoPlayer.getHomeList().keySet().toArray();
+							player.sendMessage(MessageWrapper.getString("home_info", homes));
 						}
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,9 +129,9 @@ public class PlayerCommandExecutor implements CommandExecutor {
 						break;
 				}
 			} catch (PlayerException e) {
-				player.sendMessage(ChatColor.RED + e.getMessage());
+				player.sendMessage(e.getMessage());
 			} catch (NumberFormatException e2) {
-				player.sendMessage(ChatColor.RED + Ultimate_Economy.messages.getString("invalid_number"));
+				player.sendMessage(MessageWrapper.getErrorString("invalid_parameter",args[1]));
 			}
 		}
 		return true;

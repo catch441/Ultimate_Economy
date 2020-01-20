@@ -8,9 +8,11 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import com.ue.exceptions.JobExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.impl.JobImpl;
+import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 
@@ -43,7 +45,7 @@ public class JobController {
 				return job;
 			}
 		}
-		throw new JobSystemException(JobSystemException.JOB_DOES_NOT_EXIST);
+		throw JobSystemException.getException(JobExceptionMessageEnum.JOB_DOES_NOT_EXISTS);
 	}
 
 	/**
@@ -84,7 +86,7 @@ public class JobController {
 	 */
 	public static void createJob(File dataFolder, String jobName) throws JobSystemException {
 		if (getJobNameList().contains(jobName)) {
-			throw new JobSystemException(JobSystemException.JOB_ALREADY_EXIST);
+			throw JobSystemException.getException(JobExceptionMessageEnum.JOB_ALREADY_EXISTS);
 		} else {
 			jobList.add(new JobImpl(dataFolder, jobName));
 		}
@@ -102,11 +104,8 @@ public class JobController {
 			if (file.exists()) {
 				jobList.add(new JobImpl(dataFolder, jobName));
 			} else {
-				Bukkit.getLogger().log(Level.WARNING, JobSystemException.CANNOT_LOAD_JOB,
-						new JobSystemException(JobSystemException.CANNOT_LOAD_JOB));
+				Bukkit.getLogger().warning(MessageWrapper.getErrorString("cannot_load_job", jobName));
 			}
-
 		}
 	}
-
 }
