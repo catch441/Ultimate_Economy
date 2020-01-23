@@ -23,6 +23,7 @@ import com.ue.townsystem.townworld.impl.TownworldImpl;
 public class TownworldController {
 	
 	private static List<Townworld> townWorldList = new ArrayList<>();
+	private static boolean extendedInteraction;
 
 	/**
 	 * This method returns a townworld by it's name,
@@ -161,5 +162,37 @@ public class TownworldController {
 				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 			}
 		}
+	}
+	
+	/**
+	 * Setup configuration.
+	 * @param fileConfig
+	 */
+	public static void setupConfig(FileConfiguration fileConfig) {
+		if (!fileConfig.isSet("ExtendedInteraction")) {
+			setExtendedInteraction(fileConfig, false);
+		} else {
+			extendedInteraction = fileConfig.getBoolean("ExtendedInteraction");
+		}
+	}
+	
+	/**
+	 * This method sets the extended town interaction configuration.
+	 * 
+	 * @param config
+	 * @param value
+	 */
+	public static void setExtendedInteraction(FileConfiguration config, boolean value) {
+			config.set("ExtendedInteraction", value);
+			extendedInteraction = value;
+	}
+
+	/**
+	 * Returns the extended town interaction configuration.
+	 * 
+	 * @return boolean
+	 */
+	public static boolean isExtendedInteraction() {
+		return extendedInteraction;
 	}
 }

@@ -23,6 +23,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -111,11 +112,47 @@ public class Ultimate_EconomyEventHandler implements Listener {
 					}
 				} else {
 					Town town = townworld.getTownByChunk(location.getChunk());
-					if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")
-							&& (!town.isPlayerCitizen(economyPlayer) || !town.hasBuildPermissions(economyPlayer, town
-									.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ())))) {
-						event.setCancelled(true);
-						event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
+					if(event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+						switch(event.getClickedBlock().getType()) {
+							case ACACIA_TRAPDOOR:
+							case BIRCH_TRAPDOOR:
+							case IRON_TRAPDOOR:
+							case DARK_OAK_TRAPDOOR:
+							case JUNGLE_TRAPDOOR:
+							case OAK_TRAPDOOR:
+							case SPRUCE_TRAPDOOR:
+							case ACACIA_DOOR:
+							case IRON_DOOR:
+							case JUNGLE_DOOR:
+							case BIRCH_DOOR:
+							case DARK_OAK_DOOR:
+							case SPRUCE_DOOR:
+							case OAK_DOOR:
+							case ACACIA_FENCE_GATE:
+							case JUNGLE_FENCE_GATE:
+							case BIRCH_FENCE_GATE:
+							case DARK_OAK_FENCE_GATE:
+							case OAK_FENCE_GATE:
+							case SPRUCE_FENCE_GATE:
+								if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")
+										&& (!town.isPlayerCitizen(economyPlayer) || !town.hasBuildPermissions(economyPlayer, town
+												.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ())))) {
+									if(!TownworldController.isExtendedInteraction()) {
+										event.setCancelled(true);
+										event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
+									}
+								}
+								break;
+							default:
+								break;
+						}
+					} else {
+						if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")
+								&& (!town.isPlayerCitizen(economyPlayer) || !town.hasBuildPermissions(economyPlayer, town
+										.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ())))) {
+							event.setCancelled(true);
+							event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
+						}
 					}
 				}
 			} catch (TownSystemException | PlayerException e) {

@@ -105,6 +105,7 @@ public class Ultimate_Economy extends JavaPlugin {
 
 		EconomyPlayerController.setupConfig(getConfig());
 		RentshopController.setupConfig(getConfig());
+		TownworldController.setupConfig(getConfig());
 		saveConfig();
 
 		File spawner = new File(getDataFolder(), "SpawnerLocations.yml");

@@ -9,6 +9,7 @@ import com.ue.exceptions.PlayerException;
 import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.rentshop.api.RentshopController;
+import com.ue.townsystem.townworld.api.TownworldController;
 import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class ConfigCommandExecutor implements CommandExecutor {
@@ -110,11 +111,21 @@ public class ConfigCommandExecutor implements CommandExecutor {
 						}
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					case "extendedInteraction": 
+						if (args.length == 2) {
+							TownworldController.setExtendedInteraction(plugin.getConfig(), Boolean.valueOf(args[1]));
+							plugin.saveConfig();
+							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
+						} else {
+							sender.sendMessage("/" + label + " extendedInteraction <true/false>");
+						}
+						break;
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					default: return false;
 				}
 			} catch (PlayerException e) {
 				sender.sendMessage(ChatColor.RED + e.getMessage());
-			} catch (NumberFormatException e2) {
+			} catch (IllegalArgumentException e2) {
 				sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter",args[1]));
 			}
 		} else {

@@ -23,7 +23,7 @@
     <dependency>
            <groupId>org.spigotmc</groupId>
            <artifactId>spigot-api</artifactId>
-           <version>1.15.1-R0.1-SNAPSHOT</version>
+           <version>1.15.2-R0.1-SNAPSHOT</version>
            <scope>provided</scope>
     </dependency>
     
@@ -58,7 +58,7 @@
 		<artifactId>maven-jar-plugin</artifactId>
 		<version>3.0.0</version>
 		<configuration>
-			<outputDirectory>D:\Programme\bukkitserver\spigot-1.15.1\plugins\</outputDirectory>
+			<outputDirectory>D:\Programme\bukkitserver\spigot-1.15.2\plugins\</outputDirectory>
 		</configuration>
       </plugin>
     </plugins>

@@ -19,6 +19,7 @@ public class ConfigTabCompleter implements TabCompleter {
 			list.add("maxRentedDays");
 			list.add("maxJobs");
 			list.add("maxJoinedTowns");
+			list.add("extendedInteraction");
 		} else if (args.length == 1) {
 			if ("language".contains(args[0])) {
 				list.add("language");
@@ -37,6 +38,9 @@ public class ConfigTabCompleter implements TabCompleter {
 			}
 			if ("maxJoinedTowns".contains(args[0])) {
 				list.add("maxJoinedTowns");
+			}
+			if ("extendedInteraction".contains(args[0])) {
+				list.add("extendedInteraction");
 			}
 		} else if (args.length == 2) {
 			if(args[0].equals("homes")) {
