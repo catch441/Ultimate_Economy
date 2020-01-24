@@ -78,17 +78,22 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 			if(name != null) {
 				saveOwnerToFile(EconomyPlayerController.getEconomyPlayerByName(name.substring(name.indexOf("_") + 1)));
 				saveShopNameToFile(name.substring(0,name.indexOf("_")));
+				
 			} 
 			//new loading
 			else {
 				loadOwner();
 			}
-		} catch (PlayerException e) {
+		} catch (PlayerException e) {			
 		}
 		// set the type of the villager
 		villager.setMetadata("ue-type", new FixedMetadataValue(Ultimate_Economy.getInstance, UEVillagerType.PLAYERSHOP));
 		// update villager name to naming convention
-		villager.setCustomName(getName() + "_" + owner.getName());
+		if(owner == null) {
+			villager.setCustomName(getName() + "_");
+		} else {
+			villager.setCustomName(getName() + "_" + owner.getName());
+		}
 		// load shop items
 		for (String item : itemNames) {
 			try {
@@ -279,12 +284,15 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 	 * --Save file read method--
 	 * <p>
 	 * Loads the shop owner from the savefile.
-	 * @throws PlayerException 
 	 * 
 	 */
-	private void loadOwner() throws PlayerException {
+	private void loadOwner() {
 		config = YamlConfiguration.loadConfiguration(file);
-		owner = EconomyPlayerController.getEconomyPlayerByName(config.getString("Owner"));
+		try {
+			owner = EconomyPlayerController.getEconomyPlayerByName(config.getString("Owner"));
+		} catch (PlayerException e) {
+		}
+		
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
