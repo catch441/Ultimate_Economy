@@ -96,7 +96,7 @@ commands:
     permission: ultimate_economy.config
     permission-message: You don't have the permission
     description: Handles the configuration of the plugin.
-    usage: /<command> [language/maxHomes/homes/maxRentedDays/maxJobs/maxJoinedTowns]
+    usage: /<command> [language/maxHomes/homes/maxRentedDays/maxJobs/maxJoinedTowns/maxPlayershops/extendedInteraction]
     
   townworld:   
     permission: ultimate_economy.townworld

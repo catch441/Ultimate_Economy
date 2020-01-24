@@ -20,6 +20,7 @@ public class ConfigTabCompleter implements TabCompleter {
 			list.add("maxJobs");
 			list.add("maxJoinedTowns");
 			list.add("extendedInteraction");
+			list.add("maxPlayershops");
 		} else if (args.length == 1) {
 			if ("language".contains(args[0])) {
 				list.add("language");
@@ -38,6 +39,9 @@ public class ConfigTabCompleter implements TabCompleter {
 			}
 			if ("maxJoinedTowns".contains(args[0])) {
 				list.add("maxJoinedTowns");
+			}
+			if ("maxPlayershops".contains(args[0])) {
+				list.add("maxPlayershops");
 			}
 			if ("extendedInteraction".contains(args[0])) {
 				list.add("extendedInteraction");
