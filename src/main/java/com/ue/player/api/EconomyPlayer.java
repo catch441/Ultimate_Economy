@@ -36,6 +36,18 @@ public interface EconomyPlayer {
 	public boolean isOnline();
 	
 	/**
+	 * Adds the wilderness permission to the player.
+	 * Only if player is online.
+	 */
+	public void addWildernessPermission();
+	
+	/**
+	 * Denys the wilderness permission for the player.
+	 * Only if player is online.
+	 */
+	public void denyWildernessPermission();
+	
+	/**
 	 * Transfers a money amount from this player to another player.
 	 * 
 	 * @param reciever

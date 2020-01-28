@@ -121,6 +121,16 @@ public class ConfigCommandExecutor implements CommandExecutor {
 						}
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					case "wildernessInteraction":
+						if(args.length == 2) {
+							TownworldController.setWildernessInteraction(plugin.getConfig(), Boolean.valueOf(args[1]));
+							plugin.saveConfig();
+							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
+						} else {
+							sender.sendMessage("/" + label + " wildernessInteraction <true/false>");
+						}
+						break;
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					default: return false;
 				}
 			} catch (PlayerException e) {

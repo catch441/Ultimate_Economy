@@ -15,6 +15,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
+import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.town.api.TownController;
@@ -24,6 +25,7 @@ public class TownworldController {
 	
 	private static List<Townworld> townWorldList = new ArrayList<>();
 	private static boolean extendedInteraction;
+	private static boolean wildernessInteraction;
 
 	/**
 	 * This method returns a townworld by it's name,
@@ -174,6 +176,11 @@ public class TownworldController {
 		} else {
 			extendedInteraction = fileConfig.getBoolean("ExtendedInteraction");
 		}
+		if (!fileConfig.isSet("WildernessInteraction")) {
+			setWildernessInteraction(fileConfig, false);
+		} else {
+			wildernessInteraction = fileConfig.getBoolean("WildernessInteraction");
+		}
 	}
 	
 	/**
@@ -183,8 +190,8 @@ public class TownworldController {
 	 * @param value
 	 */
 	public static void setExtendedInteraction(FileConfiguration config, boolean value) {
-			config.set("ExtendedInteraction", value);
-			extendedInteraction = value;
+		config.set("ExtendedInteraction", value);
+		extendedInteraction = value;
 	}
 
 	/**
@@ -194,5 +201,34 @@ public class TownworldController {
 	 */
 	public static boolean isExtendedInteraction() {
 		return extendedInteraction;
+	}
+	
+	/**
+	 * This method enables/disables the wilderness interaction.
+	 * 
+	 * @param config
+	 * @param value
+	 */
+	public static void setWildernessInteraction(FileConfiguration config, boolean value) {
+			config.set("WildernessInteraction", value);
+			wildernessInteraction = value;
+			if(value) {
+				for(EconomyPlayer player:EconomyPlayerController.getAllEconomyPlayers()) {
+					player.addWildernessPermission();
+				}
+			} else {
+				for(EconomyPlayer player:EconomyPlayerController.getAllEconomyPlayers()) {
+					player.denyWildernessPermission();
+				}
+			}
+	}
+	
+	/**
+	 * Returns true, if the wilderness is enabled.
+	 * 
+	 * @return boolean
+	 */
+	public static boolean isWildernessInteraction() {
+		return wildernessInteraction;
 	}
 }

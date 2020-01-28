@@ -472,6 +472,9 @@ public class Ultimate_EconomyEventHandler implements Listener {
 			EconomyPlayer economyPlayer = EconomyPlayerController.getEconomyPlayerByName(playername);
 			economyPlayer.setPlayer(event.getPlayer());
 			economyPlayer.updateScoreBoard();
+			if(TownworldController.isWildernessInteraction()) {
+				economyPlayer.addWildernessPermission();
+			}
 			TownworldController.handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
 					event.getPlayer().getLocation().getChunk(), event.getPlayer().getName());
 		} catch (PlayerException e) {

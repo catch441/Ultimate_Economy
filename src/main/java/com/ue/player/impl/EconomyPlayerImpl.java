@@ -54,7 +54,6 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		joinedTowns = new ArrayList<>();
 		this.player = Bukkit.getPlayer(name);
 		this.name = name;
-		
 		if (isNew) {
 			scoreBoardDisabled = true;
 			account = 0.0;
@@ -86,7 +85,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		bossBar = Bukkit.createBossBar("", BarColor.GREEN, BarStyle.SOLID);
 		bossBar.setVisible(false);
 	}
-
+	
 	public boolean isOnline() {
 		if(player == null) {
 			return false;
@@ -400,6 +399,16 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		public void run() {
 			updateScoreBoard();
 		}
+	}
+
+	@Override
+	public void addWildernessPermission() {
+		player.addAttachment(Ultimate_Economy.getInstance).setPermission("ultimate_economy.wilderness", true);
+	}
+
+	@Override
+	public void denyWildernessPermission() {
+		player.addAttachment(Ultimate_Economy.getInstance).setPermission("ultimate_economy.wilderness", false);
 	}
 }
 

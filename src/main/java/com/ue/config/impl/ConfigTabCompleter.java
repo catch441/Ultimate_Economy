@@ -21,6 +21,7 @@ public class ConfigTabCompleter implements TabCompleter {
 			list.add("maxJoinedTowns");
 			list.add("extendedInteraction");
 			list.add("maxPlayershops");
+			list.add("wildernessInteraction");
 		} else if (args.length == 1) {
 			if ("language".contains(args[0])) {
 				list.add("language");
@@ -46,8 +47,11 @@ public class ConfigTabCompleter implements TabCompleter {
 			if ("extendedInteraction".contains(args[0])) {
 				list.add("extendedInteraction");
 			}
+			if ("wildernessInteraction".contains(args[0])) {
+				list.add("wildernessInteraction");
+			}
 		} else if (args.length == 2) {
-			if(args[0].equals("homes")) {
+			if (args[0].equals("homes") || args[0].equals("wildernessInteraction")) {
 				if (args[1].equals("")) {
 					list.add("true");
 					list.add("false");
@@ -84,8 +88,8 @@ public class ConfigTabCompleter implements TabCompleter {
 					list.add("lt");
 				}
 			}
-		} else if(args.length == 3) {
-			if(args[0].equals("language")) {
+		} else if (args.length == 3) {
+			if (args[0].equals("language")) {
 				if (args[1].equals("de")) {
 					list.add("DE");
 				} else if (args[1].equals("en")) {
