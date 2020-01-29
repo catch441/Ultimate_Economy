@@ -1,0 +1,8 @@
+# Eclipse Specific
+.classpath
+.project
+
+/target
+
+# Javadoc
+/doc
