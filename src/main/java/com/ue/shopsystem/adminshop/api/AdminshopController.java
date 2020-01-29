@@ -105,7 +105,6 @@ public class AdminshopController {
 	 * This method should be used to create a new adminshop.
 	 * 
 	 * @param dataFolder
-	 * @param server
 	 * @param name
 	 * @param spawnLocation
 	 * @param size

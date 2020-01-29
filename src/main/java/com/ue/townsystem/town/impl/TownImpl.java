@@ -261,7 +261,6 @@ public class TownImpl implements Town {
 	 * 
 	 * @param plot
 	 * @param player
-	 * @return File
 	 * @throws PlayerException 
 	 * @throws TownSystemException
 	 */
@@ -350,7 +349,6 @@ public class TownImpl implements Town {
 	 * Add a player as citizen to a town
 	 * 
 	 * @param newCitizen
-	 * @return file
 	 * @throws PlayerException 
 	 */
 	public void addCitizen(EconomyPlayer newCitizen) throws PlayerException {
@@ -696,7 +694,6 @@ public class TownImpl implements Town {
 	 * Set town bank amount with saving.
 	 * 
 	 * @param amount
-	 * @return
 	 */
 	public void setTownBankAmount(double amount) {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());

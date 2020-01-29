@@ -48,11 +48,10 @@ public class PlotImpl implements Plot {
 	/**
 	 * Represents a plot in a town.
 	 * 
-	 * @param file
+	 * @param townImpl
 	 * @param owner
 	 * @param chunkCoords
 	 *            (format "X/Z")
-	 * @param townName
 	 */
 	public PlotImpl(TownImpl townImpl, EconomyPlayer owner, String chunkCoords) {
 		this.chunkCoords = chunkCoords;
@@ -82,7 +81,6 @@ public class PlotImpl implements Plot {
 	/**
 	 * Spawns a sale villager without saving.
 	 * 
-	 * @param file
 	 * @param location
 	 */
 	public void spawnSaleVillager(Location location) {
@@ -134,7 +132,7 @@ public class PlotImpl implements Plot {
 	 * Moves a sale villager to a new location.
 	 * 
 	 * @param newLocation
-	 * @throws TownSystemException
+	 * @throws PlayerException
 	 */
 	public void moveSaleVillager(Location newLocation) throws PlayerException {
 		if (chunkCoords.equals(newLocation.getChunk().getX() + "/" + newLocation.getChunk().getZ())) {
@@ -184,7 +182,6 @@ public class PlotImpl implements Plot {
 	/**
 	 * Set the list of coOwners of this plot.
 	 * 
-	 * @param file
 	 * @param coOwners
 	 */
 	public void setCoOwners(List<EconomyPlayer> coOwners) {

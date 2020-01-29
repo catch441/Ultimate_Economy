@@ -99,6 +99,7 @@ public interface Plot {
 	/**
 	 * Opens the inventory of the saleManager.
 	 * 
+	 * @param player
 	 */
 	public void openSaleVillagerInv(Player player);
 }

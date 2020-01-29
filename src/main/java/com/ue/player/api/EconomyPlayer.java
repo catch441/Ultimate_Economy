@@ -80,7 +80,6 @@ public interface EconomyPlayer {
 	 * 
 	 * @param amount
 	 * @return boolean
-	 * @throws PlayerDoesNotExistException
 	 */
 	public boolean hasEnoughtMoney(double amount);
 	

@@ -83,7 +83,7 @@ public class RentshopController {
 	 * <p>
 	 * not rented: name = RentShop# + shopId
 	 * 
-	 * @param id
+	 * @param name
 	 * @return RentShop
 	 * @throws ShopSystemException
 	 */

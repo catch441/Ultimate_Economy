@@ -101,8 +101,8 @@ public class EconomyPlayerController {
 	}
 
 	/**
-	 * This method loads all economyPlayers. !!! {@link JobController#loadAllJobs()}
-	 * have to be executed before this method. !!!
+	 * This method loads all economyPlayers. !!!
+	 * JobController.loadAllJobs() have to be executed before this method. !!!
 	 * 
 	 * @param dataFolder
 	 * @throws JobSystemException

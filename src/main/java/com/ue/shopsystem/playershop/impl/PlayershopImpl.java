@@ -44,7 +44,6 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 
 	 * 
 	 * @param dataFolder
-	 * @param server
 	 * @param name
 	 * @param owner
 	 * @param shopId

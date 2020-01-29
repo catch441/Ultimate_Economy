@@ -88,7 +88,7 @@ public abstract class ShopImpl implements Shop {
 	 * 
 	 * @param dataFolder
 	 * @param name
-	 * @param shopIs
+	 * @param shopId
 	 * @param spawnLocation
 	 * @param size
 	 */

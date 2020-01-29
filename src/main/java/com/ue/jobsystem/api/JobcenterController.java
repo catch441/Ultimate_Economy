@@ -63,7 +63,7 @@ public class JobcenterController {
 	/**
 	 * This method should me used to delete a jobcenter.
 	 * 
-	 * @param name
+	 * @param jobcenter
 	 * @throws JobSystemException
 	 */
 	public static void deleteJobCenter(Jobcenter jobcenter) throws JobSystemException {
@@ -114,7 +114,7 @@ public class JobcenterController {
 
 	/**
 	 * This method loads all jobcenters from the save files.
-	 * !!! {@link JobController#loadAllJobs()} have to be executed before this method. !!!
+	 * !!! JobController.loadAllJobs() have to be executed before this method. !!!
 	 * 
 	 * @param server
 	 * @param fileConfig

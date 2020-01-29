@@ -147,8 +147,9 @@ public class TownworldController {
 	 * Loads all towns and plots in the townworld as well.
 	 * EconomyPlayers have to be loaded first.
 	 * 
-	 * @param main
-	 * @param worldname
+	 * @param mainDataFolder
+	 * @param fileConfig
+	 * @param server
 	 */
 	public static void loadAllTownWorlds(File mainDataFolder, FileConfiguration fileConfig,Server server) {
 		for (String townWorldName : fileConfig.getStringList("TownWorlds")) {

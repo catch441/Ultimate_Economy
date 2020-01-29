@@ -33,7 +33,7 @@ public class TownworldImpl implements Townworld {
 	/**
 	 * Represents a townworld.
 	 * 
-	 * @param main
+	 * @param mainDataFolder
 	 * @param world
 	 */
 	public TownworldImpl(File mainDataFolder, String world) {
@@ -120,7 +120,7 @@ public class TownworldImpl implements Townworld {
 	/**
 	 * Set the town list. Not necessary if you load the townworld with the TownworldController.
 	 * 
-	 * @param townImpls
+	 * @param towns
 	 */
 	public void setTownList(List<Town> towns) {
 		this.towns = towns;
