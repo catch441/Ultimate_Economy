@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.exceptions.PlayerException;
@@ -193,18 +192,22 @@ public class PlayershopController {
 	 * 
 	 * @param fileConfig
 	 * @param dataFolder
-	 * @param server
 	 */
-	public static void loadAllPlayerShops(FileConfiguration fileConfig, File dataFolder, Server server) {
+	public static void loadAllPlayerShops(FileConfiguration fileConfig, File dataFolder) {
 		// old load system, can be deleted in the future
 		if (fileConfig.contains("PlayerShopNames")) {
 			for (String shopName : fileConfig.getStringList("PlayerShopNames")) {
 				File file = new File(dataFolder, shopName + ".yml");
 				if (file.exists()) {
 					String shopId = generateFreePlayerShopId();
-					playerShopList.add(new PlayershopImpl(dataFolder, server, shopName, shopId));
+					try {
+						playerShopList.add(new PlayershopImpl(dataFolder, shopName, shopId));
+					} catch (TownSystemException e) {
+						Bukkit.getLogger().warning(e.getMessage());
+						Bukkit.getLogger().warning(MessageWrapper.getErrorString("cannot_load_shop", shopName));
+					}
 				} else {
-					Bukkit.getLogger().info(MessageWrapper.getErrorString("cannot_load_shop", shopName));
+					Bukkit.getLogger().warning(MessageWrapper.getErrorString("cannot_load_shop", shopName));
 				}
 			}
 			// convert to new shopId save system
@@ -216,9 +219,14 @@ public class PlayershopController {
 			for (String shopId : fileConfig.getStringList("PlayerShopIds")) {
 				File file = new File(dataFolder, shopId + ".yml");
 				if (file.exists()) {
-					playerShopList.add(new PlayershopImpl(dataFolder, server, null, shopId));
+					try {
+						playerShopList.add(new PlayershopImpl(dataFolder, null, shopId));
+					} catch (TownSystemException e) {
+						Bukkit.getLogger().warning(e.getMessage());
+						Bukkit.getLogger().warning(MessageWrapper.getErrorString("cannot_load_shop", shopId));
+					}
 				} else {
-					Bukkit.getLogger().info(MessageWrapper.getErrorString("cannot_load_shop", shopId));
+					Bukkit.getLogger().warning(MessageWrapper.getErrorString("cannot_load_shop", shopId));
 				}
 			}
 		}

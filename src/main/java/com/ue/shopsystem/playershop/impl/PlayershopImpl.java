@@ -9,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Server;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -65,12 +64,12 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 	 * If name != null then use old loading otherwise use new loading.
 	 * 
 	 * @param dataFolder
-	 * @param server
 	 * @param name
 	 * @param shopId
+	 * @throws TownSystemException 
 	 */
-	public PlayershopImpl(File dataFolder, Server server, String name, String shopId) {
-		super(dataFolder, server, name, shopId);
+	public PlayershopImpl(File dataFolder, String name, String shopId) throws TownSystemException {
+		super(dataFolder, name, shopId);
 		shopMode = true;
 		try {
 			//old loading, can be deleted in the future

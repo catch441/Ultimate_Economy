@@ -9,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.player.impl.EconomyPlayerImpl;
@@ -22,6 +21,7 @@ public class EconomyPlayerController {
 	private static int maxJobs;
 	private static int maxJoinedTowns;
 	private static int maxPlayershops;
+	private static boolean homesSystem;
 
 	/**
 	 * This method returns a list of all player names.
@@ -105,9 +105,8 @@ public class EconomyPlayerController {
 	 * JobController.loadAllJobs() have to be executed before this method. !!!
 	 * 
 	 * @param dataFolder
-	 * @throws JobSystemException
 	 */
-	public static void loadAllEconomyPlayers(File dataFolder) throws JobSystemException {
+	public static void loadAllEconomyPlayers(File dataFolder) {
 		playerFile = new File(dataFolder, "PlayerFile.yml");
 		if (!playerFile.exists()) {
 			try {
@@ -145,6 +144,11 @@ public class EconomyPlayerController {
 				setMaxPlayershops(fileConfig, 3);
 			} else {
 				maxPlayershops = fileConfig.getInt("MaxPlayershops");
+			}
+			if (!fileConfig.isSet("homes")) {
+				setHomeSystem(fileConfig, true);
+			} else {
+				homesSystem = fileConfig.getBoolean("homes");
 			}
 		} catch (PlayerException e) {
 		}
@@ -248,5 +252,25 @@ public class EconomyPlayerController {
 	 */
 	public static int getMaxJoinedTowns() {
 		return maxJoinedTowns;
+	}
+	
+	/**
+	 * Enables/disables the home system.
+	 * 
+	 * @param config
+	 * @param value
+	 */
+	public static void setHomeSystem(FileConfiguration config, boolean value) {
+		config.set("homes", Boolean.valueOf(value));
+		homesSystem = value;
+	}
+	
+	/**
+	 * Returns true, if the home system is enabled.
+	 * 
+	 * @return boolean
+	 */
+	public static boolean isHomeSystem() {
+		return homesSystem;
 	}
 }

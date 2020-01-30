@@ -88,14 +88,10 @@ public class ConfigCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					case "homes":
 						if (args.length == 2) {
-							if (args[1].equals("true") || args[1].equals("false")) {
-								plugin.getConfig().set("homes", Boolean.valueOf(args[1]));
-								plugin.saveConfig();
-								sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
-								sender.sendMessage(MessageWrapper.getString("restart"));
-							} else {
-								sender.sendMessage("/" + label + " homes <true/false>");
-							}
+							EconomyPlayerController.setHomeSystem(plugin.getConfig(), Boolean.valueOf(args[1]));
+							plugin.saveConfig();
+							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
+							sender.sendMessage(MessageWrapper.getString("restart"));
 						} else {
 							sender.sendMessage("/" + label + " homes <true/false>");
 						}

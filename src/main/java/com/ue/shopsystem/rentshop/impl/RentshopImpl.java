@@ -9,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Server;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
@@ -64,11 +63,11 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * No validation, if the shopId is unique.
 	 * 
 	 * @param dataFolder
-	 * @param server
 	 * @param shopId
+	 * @throws TownSystemException 
 	 */
-	public RentshopImpl(File dataFolder, Server server, String shopId) {
-		super(dataFolder, server, null,shopId);
+	public RentshopImpl(File dataFolder, String shopId) throws TownSystemException {
+		super(dataFolder, null,shopId);
 		loadRentalFee();
 		loadRentable();
 		loadRentUntil();

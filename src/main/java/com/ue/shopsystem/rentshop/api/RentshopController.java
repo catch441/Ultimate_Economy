@@ -6,13 +6,13 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
+import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.rentshop.impl.RentshopImpl;
 
@@ -180,13 +180,18 @@ public class RentshopController {
 	 * 
 	 * @param fileConfig
 	 * @param dataFolder
-	 * @param server
+	 * @throws TownSystemException 
 	 */
-	public static void loadAllRentShops(FileConfiguration fileConfig, File dataFolder, Server server) {
+	public static void loadAllRentShops(FileConfiguration fileConfig, File dataFolder) {
 		for (String shopId : fileConfig.getStringList("RentShopIds")) {
 			File file = new File(dataFolder, shopId + ".yml");
 			if (file.exists()) {
-				rentShopList.add(new RentshopImpl(dataFolder, server, shopId));
+				try {
+					rentShopList.add(new RentshopImpl(dataFolder, shopId));
+				} catch (TownSystemException e) {
+					Bukkit.getLogger().warning(e.getMessage());
+					Bukkit.getLogger().info(MessageWrapper.getErrorString("cannot_load_shop", shopId));
+				}
 			} else {
 				Bukkit.getLogger().info(MessageWrapper.getErrorString("cannot_load_shop", shopId));
 			}

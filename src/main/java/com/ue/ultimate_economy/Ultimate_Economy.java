@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -57,7 +56,7 @@ import com.ue.vault.Economy_UltimateEconomy;
 import com.ue.vault.VaultHook;
 
 /**
- * @author Lukas Heubach
+ * @author Lukas Heubach (catch441)
  */
 public class Ultimate_Economy extends JavaPlugin {
 
@@ -65,49 +64,38 @@ public class Ultimate_Economy extends JavaPlugin {
 	public Economy_UltimateEconomy economyImplementer;
 	private VaultHook vaultHook;
 
+	@Override
 	public void onEnable() {
+		loadPlugin();
+		setupBstatsMetrics();
+		setupVault();
+	}
+	@Override
+	public void onDisable() {
+		disablePlugin();
+		disableVault();
+	}
 
-		getInstance = this;
+	private void disablePlugin() {
+		JobcenterController.despawnAllVillagers();
+		TownworldController.despawnAllVillagers();
+		AdminshopController.despawnAllVillagers();
+		PlayershopController.despawnAllVillagers();
+		RentshopController.despawnAllVillagers();
+	}
 
-		if (!getDataFolder().exists()) {
-			getDataFolder().mkdirs();
+	private void setupBstatsMetrics() {
+		@SuppressWarnings("unused")
+		Metrics metrics = new Metrics(this);
+	}
+
+	private void disableVault() {
+		if (Bukkit.getServer().getPluginManager().getPlugin("Vault") != null) {
+			vaultHook.unhook();
 		}
-		// can be removed in a future update
-		else {
-			getConfig().set("ItemList", null);
-			getConfig().set("TownNames", null);
-			saveConfig();
-		}
-
-		// config to disable/enable homes feature
-		boolean homesFeature = false;
-		if (getConfig().contains("homes") && !getConfig().getBoolean("homes")) {
-
-		} else {
-			homesFeature = true;
-			getConfig().set("homes", true);
-		}
-
-		// load language
-		MessageWrapper.loadLanguage();
-
-		JobController.loadAllJobs(getDataFolder(), getConfig());
-		JobcenterController.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
-		try {
-			EconomyPlayerController.loadAllEconomyPlayers(getDataFolder());
-		} catch (JobSystemException e) {
-			Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
-		}
-		TownworldController.loadAllTownWorlds(getDataFolder(), getConfig(), getServer());
-		AdminshopController.loadAllAdminShops(getConfig(), getDataFolder(), getServer());
-		PlayershopController.loadAllPlayerShops(getConfig(), getDataFolder(), getServer());
-		RentshopController.loadAllRentShops(getConfig(), getDataFolder(), getServer());
-
-		EconomyPlayerController.setupConfig(getConfig());
-		RentshopController.setupConfig(getConfig());
-		TownworldController.setupConfig(getConfig());
-		saveConfig();
-
+	}
+	
+	private void loadSpawners() {
 		File spawner = new File(getDataFolder(), "SpawnerLocations.yml");
 		if (!spawner.exists()) {
 			try {
@@ -116,8 +104,35 @@ public class Ultimate_Economy extends JavaPlugin {
 				e.printStackTrace();
 			}
 		}
+		// spawn all spawners
+		List<String> spawnerlist = new ArrayList<>();
+		FileConfiguration spawnerconfig = YamlConfiguration.loadConfiguration(spawner);
+		for (String spawnername : getConfig().getStringList("Spawnerlist")) {
+			spawnerlist.add(spawnername);
+			World world = getServer().getWorld(spawnerconfig.getString(spawnername + ".World"));
+			Location location = new Location(world, spawnerconfig.getDouble(spawnername + ".X"),
+					spawnerconfig.getDouble(spawnername + ".Y"), spawnerconfig.getDouble(spawnername + ".Z"));
+			world.getBlockAt(location).setMetadata("name",
+					new FixedMetadataValue(this, spawnerconfig.getString(spawnername + ".player")));
+			world.getBlockAt(location).setMetadata("entity",
+					new FixedMetadataValue(this, spawnerconfig.getString(spawnername + ".EntityType")));
+		}
+		getConfig().options().copyDefaults(true);
+		saveConfig();
+		// setup eventhandler
+				getServer().getPluginManager().registerEvents(new Ultimate_EconomyEventHandler(this, spawnerlist, spawner),
+						this);
+	}
 
-		// setup command executors and tab completer
+	private void setupVault() {
+		if (Bukkit.getServer().getPluginManager().getPlugin("Vault") != null) {
+			economyImplementer = new Economy_UltimateEconomy();
+			vaultHook = new VaultHook();
+			vaultHook.hook();
+		}
+	}
+
+	private void loadCommands() {
 		getCommand("jobcenter").setExecutor(new JobCommandExecutor(this));
 		getCommand("jobcenter").setTabCompleter(new JobTabCompleter(getConfig()));
 		getCommand("town").setExecutor(new TownCommandExecutor());
@@ -134,7 +149,7 @@ public class Ultimate_Economy extends JavaPlugin {
 		PlayerTabCompleter playerTabCompleter = new PlayerTabCompleter();
 		getCommand("bank").setExecutor(playerCommandExecutor);
 		getCommand("bank").setTabCompleter(playerTabCompleter);
-		if (homesFeature) {
+		if (EconomyPlayerController.isHomeSystem()) {
 			try {
 				Field commandMapField = SimplePluginManager.class.getDeclaredField("commandMap");
 				commandMapField.setAccessible(true);
@@ -178,54 +193,33 @@ public class Ultimate_Economy extends JavaPlugin {
 		getCommand("myjobs").setExecutor(playerCommandExecutor);
 		getCommand("ue-config").setExecutor(new ConfigCommandExecutor(this));
 		getCommand("ue-config").setTabCompleter(new ConfigTabCompleter());
-
-		// spawn all spawners
-		List<String> spawnerlist = new ArrayList<>();
-		FileConfiguration spawnerconfig = YamlConfiguration.loadConfiguration(spawner);
-		for (String spawnername : getConfig().getStringList("Spawnerlist")) {
-			spawnerlist.add(spawnername);
-			World world = getServer().getWorld(spawnerconfig.getString(spawnername + ".World"));
-			Location location = new Location(world, spawnerconfig.getDouble(spawnername + ".X"),
-					spawnerconfig.getDouble(spawnername + ".Y"), spawnerconfig.getDouble(spawnername + ".Z"));
-			world.getBlockAt(location).setMetadata("name",
-					new FixedMetadataValue(this, spawnerconfig.getString(spawnername + ".player")));
-			world.getBlockAt(location).setMetadata("entity",
-					new FixedMetadataValue(this, spawnerconfig.getString(spawnername + ".EntityType")));
-		}
-
-		getConfig().options().copyDefaults(true);
-		saveConfig();
-
-		// setup eventhandler
-		getServer().getPluginManager().registerEvents(new Ultimate_EconomyEventHandler(this, spawnerlist, spawner),
-				this);
-
-		// setup and start RentDailyTask
-		new RentDailyTask().runTaskTimerAsynchronously(this, 1, 1000);
-
-		// setup metrics for bstats
-		@SuppressWarnings("unused")
-		Metrics metrics = new Metrics(this);
-
-		// vault setup
-		if (Bukkit.getServer().getPluginManager().getPlugin("Vault") != null) {
-			economyImplementer = new Economy_UltimateEconomy();
-			vaultHook = new VaultHook();
-			vaultHook.hook();
-		}
 	}
 
-	public void onDisable() {
-		JobcenterController.despawnAllVillagers();
-		TownworldController.despawnAllVillagers();
-		AdminshopController.despawnAllVillagers();
-		PlayershopController.despawnAllVillagers();
-		RentshopController.despawnAllVillagers();
-		saveConfig();
-		// vault
-		if (Bukkit.getServer().getPluginManager().getPlugin("Vault") != null) {
-			vaultHook.unhook();
+	private void loadPlugin() {
+		getInstance = this;
+		if (!getDataFolder().exists()) {
+			getDataFolder().mkdirs();
 		}
+		MessageWrapper.loadLanguage();
+		JobController.loadAllJobs(getDataFolder(), getConfig());
+		JobcenterController.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
+		EconomyPlayerController.loadAllEconomyPlayers(getDataFolder());
+		TownworldController.loadAllTownWorlds(getDataFolder(), getConfig());
+		AdminshopController.loadAllAdminShops(getConfig(), getDataFolder());
+		PlayershopController.loadAllPlayerShops(getConfig(), getDataFolder());
+		RentshopController.loadAllRentShops(getConfig(), getDataFolder());
+		setupPlugin();
+		loadCommands();
+		loadSpawners();
+	}
+
+	private void setupPlugin() {
+		EconomyPlayerController.setupConfig(getConfig());
+		RentshopController.setupConfig(getConfig());
+		TownworldController.setupConfig(getConfig());
+		saveConfig();
+		// setup and start RentDailyTask
+		new RentDailyTask().runTaskTimerAsynchronously(this, 1, 1000);
 	}
 
 	@Override

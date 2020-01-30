@@ -5,8 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -87,16 +88,19 @@ public class TownController {
 	 * EconomyPlayers have to be loaded first.
 	 * 
 	 * @param townworld
-	 * @param server
 	 * @param townName
 	 * @return Town
 	 * @throws TownSystemException
 	 * @throws PlayerException 
 	 */
-	public static Town loadTown(Townworld townworld, Server server, String townName) throws TownSystemException, PlayerException {
+	public static Town loadTown(Townworld townworld, String townName) throws TownSystemException, PlayerException {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
+		World world = Bukkit.getWorld(config.getString("World"));
+		if(world == null) {
+			throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, config.getString("World"));
+		}
 		Location location = new Location(
-				server.getWorld(config.getString("Towns." + townName + ".TownManagerVillager.world")),
+				world,
 				config.getDouble("Towns." + townName + ".TownManagerVillager.x"),
 				config.getDouble("Towns." + townName + ".TownManagerVillager.y"),
 				config.getDouble("Towns." + townName + ".TownManagerVillager.z"));
@@ -117,8 +121,7 @@ public class TownController {
 		townImpl.setTax(config.getDouble("Towns." + townName + ".tax"));
 		townImpl.setTownBankAmount(config.getDouble("Towns." + townName + ".bank"));
 		String locationString = config.getString("Towns." + townName + ".townspawn");
-		
-		townImpl.setTownSpawn(new Location(server.getWorld(config.getString("World")),
+		townImpl.setTownSpawn(new Location(world,
 				Double.valueOf(locationString.substring(0, locationString.indexOf("/"))),
 				Double.valueOf(
 						locationString.substring(locationString.indexOf("/") + 1, locationString.lastIndexOf("/"))),

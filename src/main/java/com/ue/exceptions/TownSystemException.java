@@ -39,7 +39,7 @@ public class TownSystemException extends Exception{
 			case TOWNWORLD_ALREADY_EXIST:
 				return new TownSystemException(MessageWrapper.getErrorString("townworld_already_exist"));
 			case WORLD_DOES_NOT_EXIST:
-				return new TownSystemException(MessageWrapper.getErrorString("world_does_not_exist"));
+				return new TownSystemException(MessageWrapper.getErrorString("world_does_not_exist",params));
 			case PLAYER_IS_ALREADY_COOWNERN:
 				return new TownSystemException(MessageWrapper.getErrorString("player_is_already_coowner"));
 			case PLAYER_IS_NO_COOWNER:

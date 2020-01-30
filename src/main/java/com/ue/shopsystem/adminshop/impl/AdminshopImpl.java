@@ -6,12 +6,12 @@ import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Server;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
+import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.adminshop.api.Adminshop;
 import com.ue.shopsystem.adminshop.api.AdminshopController;
 import com.ue.shopsystem.impl.ShopImpl;
@@ -51,9 +51,10 @@ public class AdminshopImpl extends ShopImpl implements Adminshop{
 	 * @param dataFolder
 	 * @param server
 	 * @param name
+	 * @throws TownSystemException 
 	 */
-	public AdminshopImpl(File dataFolder, Server server, String name, String shopId) {
-		super(dataFolder, server, name, shopId);
+	public AdminshopImpl(File dataFolder, String name, String shopId) throws TownSystemException {
+		super(dataFolder, name, shopId);
 		// set the tye of the villager
 		villager.setMetadata("ue-type", new FixedMetadataValue(Ultimate_Economy.getInstance, UEVillagerType.ADMINSHOP));
 		ArrayList<String> tempList = new ArrayList<>(itemNames);

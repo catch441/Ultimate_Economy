@@ -18,7 +18,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -48,6 +47,7 @@ import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
+import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.Shop;
@@ -116,11 +116,11 @@ public abstract class ShopImpl implements Shop {
 	 * If name != null then use old loading otherwise use new loading
 	 * 
 	 * @param dataFolder
-	 * @param server
 	 * @param name //deprecated
 	 * @param shopId
+	 * @throws TownSystemException 
 	 */
-	public ShopImpl(File dataFolder, Server server, String name,String shopId) {
+	public ShopImpl(File dataFolder, String name,String shopId) throws TownSystemException {
 		itemNames = new ArrayList<>();
 		//old loading with names, can be deleted in the future
 		if(name != null) {
@@ -141,8 +141,12 @@ public abstract class ShopImpl implements Shop {
 		}
 		this.shopId = shopId;
 		size = config.getInt("ShopSize");
+		World world = Bukkit.getWorld(config.getString("ShopLocation.World"));
+		if(world == null) {
+			throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, config.getString("ShopLocation.World"));
+		}
 		itemNames = config.getStringList("ShopItemList");
-		location = new Location(server.getWorld(config.getString("ShopLocation.World")),
+		location = new Location(world,
 				config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
 				config.getDouble("ShopLocation.z"));
 		setupShopVillager();

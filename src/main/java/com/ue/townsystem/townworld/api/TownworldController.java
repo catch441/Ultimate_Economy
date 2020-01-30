@@ -3,11 +3,9 @@ package com.ue.townsystem.townworld.api;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.Server;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -118,7 +116,7 @@ public class TownworldController {
 	 */
 	public static void createTownWorld(File mainDataFolder, String world) throws TownSystemException {
 		if (Bukkit.getWorld(world) == null) {
-			throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST);
+			throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST,world);
 		} else if (isTownWorld(world)) {
 			throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_ALREADY_EXIST);
 		} else {
@@ -134,7 +132,7 @@ public class TownworldController {
 	 */
 	public static void deleteTownWorld(String world) throws TownSystemException {
 		if (Bukkit.getWorld(world) == null) {
-			throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST);
+			throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST,world);
 		} else {
 			Townworld townworld = getTownWorldByName(world);
 			townWorldList.remove(townworld);
@@ -149,20 +147,19 @@ public class TownworldController {
 	 * 
 	 * @param mainDataFolder
 	 * @param fileConfig
-	 * @param server
 	 */
-	public static void loadAllTownWorlds(File mainDataFolder, FileConfiguration fileConfig,Server server) {
+	public static void loadAllTownWorlds(File mainDataFolder, FileConfiguration fileConfig) {
 		for (String townWorldName : fileConfig.getStringList("TownWorlds")) {
 			try {
 				TownworldImpl townworldImpl = new TownworldImpl(mainDataFolder, townWorldName);
 				List<Town> towns = new ArrayList<>();
 				for (String townName : townworldImpl.getTownNameList()) {
-					towns.add(TownController.loadTown(townworldImpl,server, townName));
+					towns.add(TownController.loadTown(townworldImpl, townName));
 				}
 				townworldImpl.setTownList(towns);
 				townWorldList.add(townworldImpl);
 			} catch(TownSystemException | PlayerException e) {
-				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+				Bukkit.getLogger().warning(e.getMessage());;
 			}
 		}
 	}
