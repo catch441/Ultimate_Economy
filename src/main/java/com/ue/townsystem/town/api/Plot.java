@@ -40,9 +40,9 @@ public interface Plot {
 	/**
 	 * Set the owner of this plot. With saving.
 	 * 
-	 * @param owner
+	 * @param player
 	 */
-	public void setOwner(EconomyPlayer owner);
+	public void setOwner(EconomyPlayer player);
 	
 	/**
 	 * Get the owner of this plot.
@@ -54,26 +54,26 @@ public interface Plot {
 	/**
 	 * Returns true if the player is the owner of this plot.
 	 * 
-	 * @param owner
+	 * @param player
 	 * @return booelan
 	 */
-	public boolean isOwner(EconomyPlayer owner);
+	public boolean isOwner(EconomyPlayer player);
 	
 	/**
-	 * Removes a coOwner from this plot.
+	 * Removes a resident from this plot.
 	 * 
-	 * @param citizen
+	 * @param player
 	 * @throws TownSystemException
 	 */
-	public void removeCoOwner(EconomyPlayer citizen) throws TownSystemException;
+	public void removeResident(EconomyPlayer player) throws TownSystemException;
 	
 	/**
-	 * Returns true if the player is a coOwner of this plot.
+	 * Returns true if the player is a resident of this plot.
 	 * 
-	 * @param coOwner
+	 * @param player
 	 * @return boolean
 	 */
-	public boolean isCoOwner(EconomyPlayer coOwner);
+	public boolean isResident(EconomyPlayer player);
 	
 	/**
 	 * Returns true if this plot is for sale.
@@ -91,10 +91,10 @@ public interface Plot {
 	/**
 	 * Removes a plot from sale. Removes also the saleVillager.
 	 * 
-	 * @param owner
+	 * @param player
 	 * @throws TownSystemException
 	 */
-	public void removeFromSale(EconomyPlayer owner) throws TownSystemException;
+	public void removeFromSale(EconomyPlayer player) throws TownSystemException;
 	
 	/**
 	 * Opens the inventory of the saleManager.

@@ -23,8 +23,8 @@ public class TownTabCompleter implements TabCompleter {
 				list.add("create");
 				list.add("delete");
 				list.add("expand");
-				list.add("addCoOwner");
-				list.add("removeCoOwner");
+				list.add("addDeputy");
+				list.add("removeDeputy");
 				list.add("setTownSpawn");
 				list.add("moveTownManager");
 				list.add("plot");
@@ -43,11 +43,11 @@ public class TownTabCompleter implements TabCompleter {
 				if ("expand".contains(args[0])) {
 					list.add("expand");
 				}
-				if ("addCoOwner".contains(args[0])) {
-					list.add("addCoOwner");
+				if ("adddeputy".contains(args[0])) {
+					list.add("adddeputy");
 				}
-				if ("removeCoOwner".contains(args[0])) {
-					list.add("removeCoOwner");
+				if ("removeDeputy".contains(args[0])) {
+					list.add("removeDeputy");
 				}
 				if ("setTownSpawn".contains(args[0])) {
 					list.add("setTownSpawn");
@@ -74,7 +74,7 @@ public class TownTabCompleter implements TabCompleter {
 					list.add("rename");
 				}
 			} else if (args[0].equals("delete") || args[0].equals("expand") || args[0].equals("setTownSpawn")
-					|| args[0].equals("bank") || args[0].equals("addCoOwner") || args[0].equals("removeCoOwner")
+					|| args[0].equals("bank") || args[0].equals("addDeputy") || args[0].equals("removeDeputy")
 					|| args[0].equals("withdraw") || args[0].equals("rename")) {
 				try {
 					if (args[1].equals("")) {

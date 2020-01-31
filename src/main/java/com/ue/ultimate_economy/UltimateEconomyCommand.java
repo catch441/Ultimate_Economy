@@ -19,10 +19,10 @@ public class UltimateEconomyCommand extends Command implements PluginIdentifiabl
     private CommandExecutor executor;
     private TabCompleter completer;
 
-    protected UltimateEconomyCommand(String name, Plugin owner) {
+    protected UltimateEconomyCommand(String name, Plugin plugin) {
         super(name);
-        this.executor = owner;
-        this.owningPlugin = owner;
+        this.executor = plugin;
+        this.owningPlugin = plugin;
         this.usageMessage = "";
     }
 
@@ -101,7 +101,7 @@ public class UltimateEconomyCommand extends Command implements PluginIdentifiabl
     }
 
     /**
-     * Gets the owner of this PluginCommand
+     * Gets the plugin of this PluginCommand
      *
      * @return Plugin that owns this command
      */
@@ -127,7 +127,7 @@ public class UltimateEconomyCommand extends Command implements PluginIdentifiabl
      * @throws IllegalArgumentException if sender, alias, or args is null
      */
     @Override
-    public java.util.List<String> tabComplete(CommandSender sender, String alias, String[] args) throws CommandException, IllegalArgumentException {
+    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws CommandException, IllegalArgumentException {
         Validate.notNull(sender, "Sender cannot be null");
         Validate.notNull(args, "Arguments cannot be null");
         Validate.notNull(alias, "Alias cannot be null");

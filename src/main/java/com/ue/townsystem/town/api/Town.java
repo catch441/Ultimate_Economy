@@ -36,21 +36,21 @@ public interface Town {
 	public void increaseTownBankAmount(double amount);
 	
 	/**
-	 * Set a player as CoOwner of a town
+	 * Set a player as deputy of a town.
 	 * 
-	 * @param coOwner
+	 * @param player the player has to be a citizen of the town
 	 * @throws TownSystemException
 	 * @throws PlayerException
 	 */
-	public void addCoOwner(EconomyPlayer coOwner) throws TownSystemException, PlayerException;
+	public void addDeputy(EconomyPlayer player) throws TownSystemException, PlayerException;
 	
 	/**
-	 * Removes a coOwner from the town.
+	 * Removes a deputy from the town.
 	 * 
-	 * @param coOwner
+	 * @param player the player has to be a deputy of the town
 	 * @throws TownSystemException
 	 */
-	public void removeCoOwner(EconomyPlayer coOwner) throws TownSystemException;
+	public void removeDeputy(EconomyPlayer player) throws TownSystemException;
 	
 	/**
 	 * Opens the inventory of the TownManager.
@@ -60,10 +60,10 @@ public interface Town {
 	public void openTownManagerVillagerInv(Player player);
 	
 	/**
-	 * Returns true if player is the townOwner, town coOwner, plot owner or plot
-	 * coOwner.
+	 * Returns true if player is the mayor, deputy, plot owner or plot
+	 * resident.
 	 * 
-	 * @param player the player who want to use this method
+	 * @param player can be any player
 	 * @param plot
 	 * @return boolean
 	 * @throws TownSystemException
@@ -71,13 +71,13 @@ public interface Town {
 	public boolean hasBuildPermissions(EconomyPlayer player, Plot plot) throws TownSystemException;
 	
 	/**
-	 * Returns true if player is townOwner or coOwner
+	 * Returns true if player is mayor or deputy
 	 * 
-	 * @param player the player who want to use this method
+	 * @param player the player has to be a citizen of the town
 	 * @return boolean
 	 * @throws TownSystemException
 	 */
-	public boolean hasCoOwnerPermission(EconomyPlayer player) throws TownSystemException;
+	public boolean hasDeputyPermissions(EconomyPlayer player) throws TownSystemException;
 	
 	/**
 	 * Returns true, if the town has enough money.
@@ -90,7 +90,7 @@ public interface Town {
 	/**
 	 * Returns true if player is a citizen of this town.
 	 * 
-	 * @param player the player who want to use this method
+	 * @param player
 	 * @return boolean
 	 */
 	public boolean isPlayerCitizen(EconomyPlayer player);
@@ -103,22 +103,22 @@ public interface Town {
 	public ArrayList<EconomyPlayer> getCitizens();
 	
 	/**
-	 * Returns true if player is townowner.
+	 * Returns true if player is mayor.
 	 * 
-	 * @param player
+	 * @param player the player has to be a citizen of the town
 	 * @return boolean
 	 * @throws TownSystemException
 	 */
-	public boolean isTownOwner(EconomyPlayer player) throws TownSystemException;
+	public boolean isMayor(EconomyPlayer player) throws TownSystemException;
 	
 	/**
-	 * Returns true if player is coOwner of this town.
+	 * Returns true if player is a deputy of this town.
 	 * 
-	 * @param player
+	 * @param player the player has to be a citizen of the town
 	 * @return boolean
 	 * @throws TownSystemException
 	 */
-	public boolean isCoOwner(EconomyPlayer player) throws TownSystemException;
+	public boolean isDeputy(EconomyPlayer player) throws TownSystemException;
 	
 	/**
 	 * Expands a town by a new chunk.
@@ -145,20 +145,20 @@ public interface Town {
 	/**
 	 * Joins a player to a town.
 	 * 
-	 * @param ecoPlayer
+	 * @param player the player who wants to join the town
 	 * @throws PlayerException
 	 * @throws TownSystemException
 	 */
-	public void joinTown(EconomyPlayer ecoPlayer) throws PlayerException, TownSystemException;
+	public void joinTown(EconomyPlayer player) throws PlayerException, TownSystemException;
 	
 	/**
 	 * Leaves a player from a town.
 	 * 
-	 * @param ecoPlayer
+	 * @param player have to be a citizen
 	 * @throws TownSystemException
 	 * @throws PlayerException
 	 */
-	public void leaveTown(EconomyPlayer ecoPlayer) throws TownSystemException, PlayerException;
+	public void leaveTown(EconomyPlayer player) throws TownSystemException, PlayerException;
 
 	/**
 	 * Despawns all town villagers
@@ -169,13 +169,13 @@ public interface Town {
 	/**
 	 * Buy a plot in a town if the plot is for sale. Did not handle payment.
 	 * 
-	 * @param citizen
+	 * @param player the player who wants to by the plot, have to be a citizen of the town
 	 * @param chunkX
 	 * @param chunkZ
 	 * @throws TownSystemException
 	 * @throws PlayerException 
 	 */
-	public void buyPlot(EconomyPlayer citizen, int chunkX, int chunkZ) throws TownSystemException, PlayerException;
+	public void buyPlot(EconomyPlayer player, int chunkX, int chunkZ) throws TownSystemException, PlayerException;
 	
 	/**
 	 * Returns a Plot by chunk coords.
@@ -209,15 +209,15 @@ public interface Town {
 	public Townworld getTownworld();
 	
 	/**
-	 * Set the town spawn location. CoOwner permission needed.
+	 * Set the town spawn location. Deputy mayor permission needed.
 	 * 
 	 * @param townSpawn
-	 * @param ecoPlayer the player who wants to change the townspawn
+	 * @param player the player who wants to change the townspawn
 	 * @param sendMessage when true a message is send to the receiver and this player
 	 * @throws TownSystemException
 	 * @throws PlayerException 
 	 */
-	public void setTownSpawn(Location townSpawn,EconomyPlayer ecoPlayer, boolean sendMessage) throws TownSystemException, PlayerException;
+	public void setTownSpawn(Location townSpawn,EconomyPlayer player, boolean sendMessage) throws TownSystemException, PlayerException;
 	
 	/**
 	 * Get the town spawn location.
@@ -230,7 +230,7 @@ public interface Town {
 	 * Moves a town manager villager.
 	 * 
 	 * @param location
-	 * @param player
+	 * @param player the player who wants to move the townmanager
 	 * @throws TownSystemException
 	 * @throws PlayerException 
 	 */

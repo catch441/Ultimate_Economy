@@ -36,12 +36,12 @@ public class PlotController {
 			PlotImpl plotImpl = new PlotImpl(townImpl, economyPlayer, coords);
 			plotImpl.setIsForSale(
 					config.getBoolean("Towns." + townImpl.getTownName() + ".Plots." + coords + ".isForSale"));
-			List<EconomyPlayer> coOwners = new ArrayList<>();
+			List<EconomyPlayer> residents = new ArrayList<>();
 			for (String name : config
 					.getStringList("Towns." + townImpl.getTownName() + ".Plots." + coords + ".coOwners")) {
-				coOwners.add(EconomyPlayerController.getEconomyPlayerByName(name));
+				residents.add(EconomyPlayerController.getEconomyPlayerByName(name));
 			}
-			plotImpl.setCoOwners(coOwners);
+			plotImpl.setResidents(residents);
 			plotImpl.setSalePrice(
 					config.getDouble("Towns." + townImpl.getTownName() + ".Plots." + coords + ".salePrice"));
 			if (plotImpl.isForSale()) {

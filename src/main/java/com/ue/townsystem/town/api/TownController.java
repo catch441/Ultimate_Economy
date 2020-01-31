@@ -31,29 +31,29 @@ public class TownController {
 	 * @param townworld
 	 * @param townName
 	 * @param location
-	 * @param owner
+	 * @param owner the player who wants to be the mayor of the town
 	 * @throws TownSystemException
 	 * @throws PlayerException
 	 */
-	public static void createTown(Townworld townworld, String townName, Location location, EconomyPlayer owner)
+	public static void createTown(Townworld townworld, String townName, Location location, EconomyPlayer player)
 			throws TownSystemException, PlayerException {
 		if (townNameList.contains(townName)) {
 			throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_ALREADY_EXIST);
 		} else if (!townworld.chunkIsFree(location.getChunk())) {
 			throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED);
-		} else if (!owner.hasEnoughtMoney(townworld.getFoundationPrice())) {
+		} else if (!player.hasEnoughtMoney(townworld.getFoundationPrice())) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
-		} else if (owner.reachedMaxJoinedTowns()) {
+		} else if (player.reachedMaxJoinedTowns()) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
 		} else {
-			TownImpl townImpl = new TownImpl(townworld,owner, townName, location,false);
+			TownImpl townImpl = new TownImpl(townworld,player, townName, location,false);
 			townworld.addTown(townImpl);;
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
 			townNameList.add(townName);
 			config.set("TownNames", townNameList);
 			save(townworld.getSaveFile(), config);
-			owner.addJoinedTown(townName);
-			owner.decreasePlayerAmount(townworld.getFoundationPrice(), true);
+			player.addJoinedTown(townName);
+			player.decreasePlayerAmount(townworld.getFoundationPrice(), true);
 		}
 	}
 	
@@ -65,7 +65,7 @@ public class TownController {
 	 * @throws PlayerException
 	 */
 	public static void dissolveTown(Town town, EconomyPlayer player) throws TownSystemException, PlayerException {
-		if (town.isTownOwner(player)) {
+		if (town.isMayor(player)) {
 			List<EconomyPlayer> tList = new ArrayList<>();
 			tList.addAll(town.getCitizens());
 			for (EconomyPlayer citizen : tList) {
@@ -104,14 +104,14 @@ public class TownController {
 				config.getDouble("Towns." + townName + ".TownManagerVillager.x"),
 				config.getDouble("Towns." + townName + ".TownManagerVillager.y"),
 				config.getDouble("Towns." + townName + ".TownManagerVillager.z"));
-		EconomyPlayer owner = EconomyPlayerController.getEconomyPlayerByName(config.getString("Towns." + townName + ".owner"));
-		TownImpl townImpl = new TownImpl(townworld,owner, townName, location,true);
-		townImpl.setOwner(owner);
-		List<EconomyPlayer> coOwners = new ArrayList<>();
+		EconomyPlayer mayor = EconomyPlayerController.getEconomyPlayerByName(config.getString("Towns." + townName + ".owner"));
+		TownImpl townImpl = new TownImpl(townworld,mayor, townName, location,true);
+		townImpl.setMayor(mayor);
+		List<EconomyPlayer> deputys = new ArrayList<>();
 		for(String name:config.getStringList("Towns." + townName + ".coOwners")) {
-			coOwners.add(EconomyPlayerController.getEconomyPlayerByName(name));
+			deputys.add(EconomyPlayerController.getEconomyPlayerByName(name));
 		}
-		townImpl.setCoOwners(coOwners);
+		townImpl.setDeputys(deputys);
 		List<EconomyPlayer> citizens = new ArrayList<>();
 		for(String name:config.getStringList("Towns." + townName + ".citizens")) {
 			citizens.add(EconomyPlayerController.getEconomyPlayerByName(name));
@@ -125,7 +125,7 @@ public class TownController {
 				Double.valueOf(locationString.substring(0, locationString.indexOf("/"))),
 				Double.valueOf(
 						locationString.substring(locationString.indexOf("/") + 1, locationString.lastIndexOf("/"))),
-				Double.valueOf(locationString.substring(locationString.lastIndexOf("/") + 1))),owner,false);
+				Double.valueOf(locationString.substring(locationString.lastIndexOf("/") + 1))),mayor,false);
 		ArrayList<Plot> plotList = new ArrayList<>();
 		for (String coords : townImpl.getChunkList()) {
 			Plot plot = PlotController.loadPlot(townImpl, coords);

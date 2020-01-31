@@ -37,7 +37,7 @@ import com.ue.ultimate_economy.Ultimate_Economy;
 public class PlotImpl implements Plot {
 
 	private EconomyPlayer owner;
-	private List<EconomyPlayer> coOwners;
+	private List<EconomyPlayer> residents;
 	private final String chunkCoords;
 	private boolean isForSale;
 	private double salePrice;
@@ -59,7 +59,7 @@ public class PlotImpl implements Plot {
 		setOwner(owner);
 		isForSale = false;
 		salePrice = 0;
-		coOwners = new ArrayList<>();
+		residents = new ArrayList<>();
 	}
 
 	/**
@@ -163,62 +163,62 @@ public class PlotImpl implements Plot {
 		return owner;
 	}
 
-	public void setOwner(EconomyPlayer owner) {
+	public void setOwner(EconomyPlayer player) {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(townImpl.getTownworld().getSaveFile());
-		config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".owner", owner.getName());
-		this.owner = owner;
+		config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".owner", player.getName());
+		this.owner = player;
 		save(townImpl.getTownworld().getSaveFile(), config);
 	}
 
 	/**
-	 * Get a list of all coOwners of this plot.
+	 * Get a list of all residents of this plot.
 	 * 
 	 * @return List
 	 */
-	public List<EconomyPlayer> getCoOwners() {
-		return coOwners;
+	public List<EconomyPlayer> getResidents() {
+		return residents;
 	}
 
 	/**
-	 * Set the list of coOwners of this plot.
+	 * Set the list of residents of this plot.
 	 * 
-	 * @param coOwners
+	 * @param residents
 	 */
-	public void setCoOwners(List<EconomyPlayer> coOwners) {
-		this.coOwners = coOwners;
+	public void setResidents(List<EconomyPlayer> residents) {
+		this.residents = residents;
 	}
 
 	/**
-	 * Add a coOwner to this plot.
+	 * Add a residents to this plot.
 	 * 
-	 * @param citizen
+	 * @param player
 	 * @throws TownSystemException
 	 */
-	public void addCoOwner(EconomyPlayer citizen) throws TownSystemException {
-		if (!coOwners.contains(citizen)) {
-			coOwners.add(citizen);
+	public void addResident(EconomyPlayer player) throws TownSystemException {
+		if (!residents.contains(player)) {
+			residents.add(player);
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townImpl.getTownworld().getSaveFile());
 			List<String> list = config
 					.getStringList("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".coOwners");
-			list.add(citizen.getName());
+			list.add(player.getName());
 			config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".coOwners", list);
 			save(townImpl.getTownworld().getSaveFile(), config);
 		} else {
-			throw TownSystemException.getException(TownExceptionMessageEnum.PLAYER_IS_ALREADY_COOWNERN);
+			throw TownSystemException.getException(TownExceptionMessageEnum.PLAYER_IS_ALREADY_RESIDENT);
 		}
 	}
 
-	public void removeCoOwner(EconomyPlayer citizen) throws TownSystemException {
-		if (coOwners.contains(citizen)) {
-			coOwners.remove(citizen);
+	public void removeResident(EconomyPlayer player) throws TownSystemException {
+		if (residents.contains(player)) {
+			residents.remove(player);
 			FileConfiguration config = YamlConfiguration.loadConfiguration(townImpl.getTownworld().getSaveFile());
 			List<String> list = config
 					.getStringList("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".coOwners");
-			list.remove(citizen.getName());
+			list.remove(player.getName());
 			config.set("Towns." + townImpl.getTownName() + ".Plots." + chunkCoords + ".coOwners", list);
 			save(townImpl.getTownworld().getSaveFile(), config);
 		} else {
-			throw TownSystemException.getException(TownExceptionMessageEnum.PLAYER_IS_NO_COOWNER);
+			throw TownSystemException.getException(TownExceptionMessageEnum.PLAYER_IS_NO_RESIDENT);
 		}
 	}
 
@@ -246,10 +246,10 @@ public class PlotImpl implements Plot {
 		}
 	}
 
-	public boolean isCoOwner(EconomyPlayer coOwner) {
+	public boolean isResident(EconomyPlayer player) {
 		boolean is = false;
-		for (EconomyPlayer player : coOwners) {
-			if (player.equals(coOwner)) {
+		for (EconomyPlayer resident : residents) {
+			if (resident.equals(player)) {
 				is = true;
 				break;
 			}

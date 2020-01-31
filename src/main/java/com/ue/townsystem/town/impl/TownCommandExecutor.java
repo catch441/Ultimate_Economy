@@ -92,13 +92,13 @@ public class TownCommandExecutor implements CommandExecutor {
 							}
 							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						case "addCoOwner":
+						case "addDeputy":
 							if (args.length == 3) {
 								for (Townworld townworld : TownworldController.getTownWorldList()) {
 									if (townworld.getTownNameList().contains(args[1])) {
 										Town town = townworld.getTownByName(args[1]);
-										if (town.isTownOwner(ecoPlayer)) {
-											town.addCoOwner(EconomyPlayerController.getEconomyPlayerByName(args[2]));
+										if (town.isMayor(ecoPlayer)) {
+											town.addDeputy(EconomyPlayerController.getEconomyPlayerByName(args[2]));
 											player.sendMessage(MessageWrapper.getString("town_addCoOwner", args[2]));
 										} else {
 											player.sendMessage(MessageWrapper.getErrorString("town_not_town_owner"));
@@ -107,17 +107,17 @@ public class TownCommandExecutor implements CommandExecutor {
 									}
 								}
 							} else {
-								player.sendMessage("/" + label + " addCoOwner <town> <player>");
+								player.sendMessage("/" + label + " addDeputy <town> <player>");
 							}
 							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-						case "removeCoOwner":
+						case "removeaDeputy":
 							if (args.length == 3) {
 								for (Townworld townworld : TownworldController.getTownWorldList()) {
 									if (townworld.getTownNameList().contains(args[1])) {
 										Town town = townworld.getTownByName(args[1]);
-										if (town.isTownOwner(ecoPlayer)) {
-											town.removeCoOwner(EconomyPlayerController.getEconomyPlayerByName(args[2]));
+										if (town.isMayor(ecoPlayer)) {
+											town.removeDeputy(EconomyPlayerController.getEconomyPlayerByName(args[2]));
 											player.sendMessage(MessageWrapper.getString("town_removeCoOwner", args[2]));
 										} else {
 											player.sendMessage(MessageWrapper.getErrorString("town_not_town_owner"));
@@ -126,7 +126,7 @@ public class TownCommandExecutor implements CommandExecutor {
 									}
 								}
 							} else {
-								player.sendMessage("/" + label + " removeCoOwner <town> <player>");
+								player.sendMessage("/" + label + " removeDeputy <town> <player>");
 							}
 							break;
 						//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -175,7 +175,7 @@ public class TownCommandExecutor implements CommandExecutor {
 								for (Townworld townworld : TownworldController.getTownWorldList()) {
 									if (townworld.getTownNameList().contains(args[1])) {
 										Town town = townworld.getTownByName(args[1]);
-										if (town.hasCoOwnerPermission(ecoPlayer)) {
+										if (town.hasDeputyPermissions(ecoPlayer)) {
 											double amount = Double.valueOf(args[2]);
 											town.decreaseTownBankAmount(amount);
 											ecoPlayer.increasePlayerAmount(amount, true);
@@ -195,7 +195,7 @@ public class TownCommandExecutor implements CommandExecutor {
 								for (Townworld townworld : TownworldController.getTownWorldList()) {
 									if (townworld.getTownNameList().contains(args[1])) {
 										Town town = townworld.getTownByName(args[1]);
-										if (town.hasCoOwnerPermission(ecoPlayer)) {
+										if (town.hasDeputyPermissions(ecoPlayer)) {
 											player.sendMessage(MessageWrapper.getString("town_bank", town.getTownBankAmount()));
 										}
 										break;
