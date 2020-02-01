@@ -22,6 +22,7 @@ import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.bstats.metrics.Metrics;
+import com.ue.config.api.ConfigController;
 import com.ue.config.impl.ConfigCommandExecutor;
 import com.ue.config.impl.ConfigTabCompleter;
 import com.ue.exceptions.JobSystemException;
@@ -70,6 +71,7 @@ public class Ultimate_Economy extends JavaPlugin {
 		setupBstatsMetrics();
 		setupVault();
 	}
+
 	@Override
 	public void onDisable() {
 		disablePlugin();
@@ -94,7 +96,7 @@ public class Ultimate_Economy extends JavaPlugin {
 			vaultHook.unhook();
 		}
 	}
-	
+
 	private void loadSpawners() {
 		File spawner = new File(getDataFolder(), "SpawnerLocations.yml");
 		if (!spawner.exists()) {
@@ -120,8 +122,8 @@ public class Ultimate_Economy extends JavaPlugin {
 		getConfig().options().copyDefaults(true);
 		saveConfig();
 		// setup eventhandler
-				getServer().getPluginManager().registerEvents(new Ultimate_EconomyEventHandler(this, spawnerlist, spawner),
-						this);
+		getServer().getPluginManager().registerEvents(new Ultimate_EconomyEventHandler(this, spawnerlist, spawner),
+				this);
 	}
 
 	private void setupVault() {
@@ -149,7 +151,7 @@ public class Ultimate_Economy extends JavaPlugin {
 		PlayerTabCompleter playerTabCompleter = new PlayerTabCompleter();
 		getCommand("bank").setExecutor(playerCommandExecutor);
 		getCommand("bank").setTabCompleter(playerTabCompleter);
-		if (EconomyPlayerController.isHomeSystem()) {
+		if (ConfigController.isHomeSystem()) {
 			try {
 				Field commandMapField = SimplePluginManager.class.getDeclaredField("commandMap");
 				commandMapField.setAccessible(true);
@@ -191,7 +193,7 @@ public class Ultimate_Economy extends JavaPlugin {
 		getCommand("pay").setExecutor(playerCommandExecutor);
 		getCommand("money").setExecutor(playerCommandExecutor);
 		getCommand("myjobs").setExecutor(playerCommandExecutor);
-		getCommand("ue-config").setExecutor(new ConfigCommandExecutor(this));
+		getCommand("ue-config").setExecutor(new ConfigCommandExecutor());
 		getCommand("ue-config").setTabCompleter(new ConfigTabCompleter());
 	}
 
@@ -200,6 +202,7 @@ public class Ultimate_Economy extends JavaPlugin {
 		if (!getDataFolder().exists()) {
 			getDataFolder().mkdirs();
 		}
+		setupPlugin();
 		MessageWrapper.loadLanguage();
 		JobController.loadAllJobs(getDataFolder(), getConfig());
 		JobcenterController.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
@@ -208,16 +211,13 @@ public class Ultimate_Economy extends JavaPlugin {
 		AdminshopController.loadAllAdminShops(getConfig(), getDataFolder());
 		PlayershopController.loadAllPlayerShops(getConfig(), getDataFolder());
 		RentshopController.loadAllRentShops(getConfig(), getDataFolder());
-		setupPlugin();
+
 		loadCommands();
 		loadSpawners();
 	}
 
 	private void setupPlugin() {
-		EconomyPlayerController.setupConfig(getConfig());
-		RentshopController.setupConfig(getConfig());
-		TownworldController.setupConfig(getConfig());
-		saveConfig();
+		ConfigController.setupConfig();
 		// setup and start RentDailyTask
 		new RentDailyTask().runTaskTimerAsynchronously(this, 1, 1000);
 	}
@@ -277,15 +277,16 @@ public class Ultimate_Economy extends JavaPlugin {
 							player.sendMessage(MessageWrapper.getString("jobinfo_info", job.getName()));
 							for (String string : job.getItemList()) {
 								player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN
-										+ job.getItemPrice(string) + "$");
+										+ job.getItemPrice(string) + ConfigController.getCurrencyText(job.getItemPrice(string)));
 							}
 							for (String string : job.getFisherList()) {
 								player.sendMessage(MessageWrapper.getString("jobinfo_fishingprice",
-										string.toLowerCase(), job.getFisherPrice(string)));
+										string.toLowerCase(), job.getFisherPrice(string),
+										ConfigController.getCurrencyText(job.getFisherPrice(string))));
 							}
 							for (String string : job.getEntityList()) {
 								player.sendMessage(MessageWrapper.getString("jobinfo_killprice", string.toLowerCase(),
-										job.getKillPrice(string)));
+										job.getKillPrice(string), ConfigController.getCurrencyText(job.getKillPrice(string))));
 							}
 						} else {
 							return false;

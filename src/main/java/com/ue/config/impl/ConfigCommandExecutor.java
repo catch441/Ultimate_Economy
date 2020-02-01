@@ -5,20 +5,12 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
+import com.ue.config.api.ConfigController;
 import com.ue.exceptions.PlayerException;
 import com.ue.language.MessageWrapper;
-import com.ue.player.api.EconomyPlayerController;
-import com.ue.shopsystem.rentshop.api.RentshopController;
-import com.ue.townsystem.townworld.api.TownworldController;
 import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class ConfigCommandExecutor implements CommandExecutor {
-
-	private Ultimate_Economy plugin;
-
-	public ConfigCommandExecutor(Ultimate_Economy plugin) {
-		this.plugin = plugin;
-	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -26,6 +18,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 			try {
 				switch (args[0]) {
 					case "language":
+						// TODO refractor
 						if (args.length == 3) {
 							if (!args[1].equals("cs") && !args[1].equals("de") && !args[1].equals("en")
 									&& !args[1].equals("fr") && !args[1].equals("zh") && !args[1].equals("ru")
@@ -36,9 +29,9 @@ public class ConfigCommandExecutor implements CommandExecutor {
 									&& !args[2].equals("ES") && !args[2].equals("LT")) {
 								sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter", args[2]));
 							} else {
-								plugin.getConfig().set("localeLanguage", args[1]);
-								plugin.getConfig().set("localeCountry", args[2]);
-								plugin.saveConfig();
+								Ultimate_Economy.getInstance.getConfig().set("localeLanguage", args[1]);
+								Ultimate_Economy.getInstance.getConfig().set("localeCountry", args[2]);
+								Ultimate_Economy.getInstance.saveConfig();
 								sender.sendMessage(MessageWrapper.getString("restart"));
 							}
 						} else {
@@ -48,8 +41,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					case "maxHomes":
 						if (args.length == 2) {
-							EconomyPlayerController.setMaxHomes(plugin.getConfig(), Integer.valueOf(args[1]));
-							plugin.saveConfig();
+							ConfigController.setMaxHomes(Integer.valueOf(args[1]));
 							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 						} else {
 							sender.sendMessage("/" + label + " maxHomes <number>");
@@ -58,8 +50,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					case "maxRentedDays":
 						if (args.length == 2) {
-							RentshopController.setMaxRentedDays(plugin.getConfig(), Integer.valueOf(args[1]));
-							plugin.saveConfig();
+							ConfigController.setMaxRentedDays(Integer.valueOf(args[1]));
 							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 						} else {
 							sender.sendMessage("/" + label + " maxRentedDays <number>");
@@ -68,8 +59,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					case "maxJobs":
 						if (args.length == 2) {
-							EconomyPlayerController.setMaxJobs(plugin.getConfig(), Integer.valueOf(args[1]));
-							plugin.saveConfig();
+							ConfigController.setMaxJobs(Integer.valueOf(args[1]));
 							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 						} else {
 							sender.sendMessage("/" + label + " maxJobs <number>");
@@ -78,8 +68,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					case "maxJoinedTowns":
 						if (args.length == 2) {
-							EconomyPlayerController.setMaxJoinedTowns(plugin.getConfig(), Integer.valueOf(args[1]));
-							plugin.saveConfig();
+							ConfigController.setMaxJoinedTowns(Integer.valueOf(args[1]));
 							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 						} else {
 							sender.sendMessage("/" + label + " maxJoinedTowns <number>");
@@ -88,8 +77,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					case "homes":
 						if (args.length == 2) {
-							EconomyPlayerController.setHomeSystem(plugin.getConfig(), Boolean.valueOf(args[1]));
-							plugin.saveConfig();
+							ConfigController.setHomeSystem(Boolean.valueOf(args[1]));
 							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 							sender.sendMessage(MessageWrapper.getString("restart"));
 						} else {
@@ -99,8 +87,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					case "maxPlayershops":
 						if (args.length == 2) {
-							EconomyPlayerController.setMaxPlayershops(plugin.getConfig(), Integer.valueOf(args[1]));
-							plugin.saveConfig();
+							ConfigController.setMaxPlayershops(Integer.valueOf(args[1]));
 							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 						} else {
 							sender.sendMessage("/" + label + " maxPlayershops <number>");
@@ -109,8 +96,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					case "extendedInteraction": 
 						if (args.length == 2) {
-							TownworldController.setExtendedInteraction(plugin.getConfig(), Boolean.valueOf(args[1]));
-							plugin.saveConfig();
+							ConfigController.setExtendedInteraction(Boolean.valueOf(args[1]));
 							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 						} else {
 							sender.sendMessage("/" + label + " extendedInteraction <true/false>");
@@ -119,11 +105,21 @@ public class ConfigCommandExecutor implements CommandExecutor {
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					case "wildernessInteraction":
 						if(args.length == 2) {
-							TownworldController.setWildernessInteraction(plugin.getConfig(), Boolean.valueOf(args[1]));
-							plugin.saveConfig();
+							ConfigController.setWildernessInteraction(Boolean.valueOf(args[1]));
 							sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 						} else {
 							sender.sendMessage("/" + label + " wildernessInteraction <true/false>");
+						}
+						break;
+					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					case "currency":
+						if(args.length == 3) {
+							ConfigController.setCurrencyPl(args[2]);
+							ConfigController.setCurrencySg(args[1]);
+							sender.sendMessage(MessageWrapper.getString("config_change", args[1] + " " + args[2]));
+							sender.sendMessage(MessageWrapper.getString("restart"));
+						} else {
+							sender.sendMessage("/" + label + " currency <singular> <plural>");
 						}
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////

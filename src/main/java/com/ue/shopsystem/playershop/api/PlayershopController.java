@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import com.ue.config.api.ConfigController;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.ShopExceptionMessageEnum;
@@ -15,7 +16,6 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
-import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.playershop.impl.PlayershopImpl;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.townworld.api.Townworld;
@@ -133,7 +133,7 @@ public class PlayershopController {
 		}
 		if (name.contains("_")) {
 			throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
-		} else if(actualNumber >= EconomyPlayerController.getMaxPlayershops()) {
+		} else if(actualNumber >= ConfigController.getMaxPlayershops()) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
 		}
 		if (TownworldController.isTownWorld(spawnLocation.getWorld().getName())) {

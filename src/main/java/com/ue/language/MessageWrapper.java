@@ -23,12 +23,12 @@ public class MessageWrapper {
 			Ultimate_Economy.getInstance.getConfig().set("localeLanguage", "en");
 			Ultimate_Economy.getInstance.getConfig().set("localeCountry", "US");
 			currentLocale = new Locale("en", "US");
-			Bukkit.getLogger().info("Loading default language file: 'en' 'US'");
+			Bukkit.getLogger().info("[Ultimate_Economy] Loading default language file: 'en' 'US'");
 		} else {
 			String lang = Ultimate_Economy.getInstance.getConfig().getString("localeLanguage");
 			String country = Ultimate_Economy.getInstance.getConfig().getString("localeCountry");
 			currentLocale = new Locale(lang, country);
-			Bukkit.getLogger().info("Loading language file: '" + lang + "' '" + country + "'");
+			Bukkit.getLogger().info("[Ultimate_Economy] Loading language file: '" + lang + "' '" + country + "'");
 		}
 		messages = ResourceBundle.getBundle("language.MessagesBundle", currentLocale, new UTF8Control());
 	}

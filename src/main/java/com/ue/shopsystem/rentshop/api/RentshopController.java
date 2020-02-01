@@ -19,16 +19,9 @@ import com.ue.shopsystem.rentshop.impl.RentshopImpl;
 public class RentshopController {
 
 	private static List<RentshopImpl> rentShopList = new ArrayList<>();
-	private static int maxRentedDays;
 	
-	/**
-	 * Returns the max rented days.
-	 * 
-	 * @return int
-	 */
-	public static int getMaxRentedDays() {
-		return maxRentedDays;
-	}
+	
+
 	
 	/**
 	 * Returns a free unique id for a rentshop.
@@ -195,36 +188,6 @@ public class RentshopController {
 			} else {
 				Bukkit.getLogger().warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopId));
 			}
-		}
-	}
-	
-	/**
-	 * This method sets the maxRentedDays value.
-	 * 
-	 * @param config
-	 * @param days
-	 * @throws PlayerException
-	 */
-	public static void setMaxRentedDays(FileConfiguration config,int days) throws PlayerException {
-		if (days < 0) {
-			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, days);
-		} else {
-			config.set("MaxRentedDays", days);
-			maxRentedDays = days;
-		}
-	}
-	
-	/**
-	 * Loads the maxRentedDays value.
-	 * 
-	 * @param fileConfig
-	 */
-	public static void setupConfig(FileConfiguration fileConfig) {
-		if (!fileConfig.isSet("MaxRentedDays")) {
-			fileConfig.set("MaxRentedDays", 14);
-			maxRentedDays = 14;
-		} else {
-			maxRentedDays = fileConfig.getInt("MaxRentedDays");
 		}
 	}
 }

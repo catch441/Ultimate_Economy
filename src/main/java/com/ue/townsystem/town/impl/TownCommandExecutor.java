@@ -6,6 +6,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.ue.config.api.ConfigController;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
@@ -86,7 +87,7 @@ public class TownCommandExecutor implements CommandExecutor {
 							if (args.length == 2) {
 								Townworld tWorld = TownworldController.getTownWorldByName(player.getWorld().getName());
 								Town town = tWorld.getTownByName(args[1]);
-								town.setTownSpawn(player.getLocation(),ecoPlayer,true);
+								town.setTownSpawn(player.getLocation(), ecoPlayer, true);
 							} else {
 								player.sendMessage("/" + label + " setTownSpawn <town>");
 							}
@@ -161,7 +162,8 @@ public class TownCommandExecutor implements CommandExecutor {
 										double amount = Double.valueOf(args[2]);
 										ecoPlayer.decreasePlayerAmount(amount, true);
 										townworld.getTownByName(args[1]).increaseTownBankAmount(amount);
-										player.sendMessage(MessageWrapper.getString("town_pay", args[1],amount));
+										player.sendMessage(MessageWrapper.getString("town_pay", args[1], amount,
+												ConfigController.getCurrencyText(amount)));
 										break;
 									}
 								}
@@ -180,7 +182,8 @@ public class TownCommandExecutor implements CommandExecutor {
 											town.decreaseTownBankAmount(amount);
 											ecoPlayer.increasePlayerAmount(amount, true);
 										} else {
-											throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
+											throw PlayerException
+													.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
 										}
 										break;
 									}
@@ -196,7 +199,9 @@ public class TownCommandExecutor implements CommandExecutor {
 									if (townworld.getTownNameList().contains(args[1])) {
 										Town town = townworld.getTownByName(args[1]);
 										if (town.hasDeputyPermissions(ecoPlayer)) {
-											player.sendMessage(MessageWrapper.getString("town_bank", town.getTownBankAmount()));
+											player.sendMessage(MessageWrapper.getString("town_bank",
+													town.getTownBankAmount(),
+													ConfigController.getCurrencyText(town.getTownBankAmount())));
 										}
 										break;
 									}
@@ -242,7 +247,7 @@ public class TownCommandExecutor implements CommandExecutor {
 			} catch (PlayerException | TownSystemException e) {
 				player.sendMessage(e.getMessage());
 			} catch (NumberFormatException e1) {
-				
+
 			}
 		}
 		return true;

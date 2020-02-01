@@ -13,7 +13,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
-import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.town.api.TownController;
@@ -22,8 +21,7 @@ import com.ue.townsystem.townworld.impl.TownworldImpl;
 public class TownworldController {
 	
 	private static List<Townworld> townWorldList = new ArrayList<>();
-	private static boolean extendedInteraction;
-	private static boolean wildernessInteraction;
+	
 
 	/**
 	 * This method returns a townworld by it's name,
@@ -162,71 +160,5 @@ public class TownworldController {
 				Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());;
 			}
 		}
-	}
-	
-	/**
-	 * Setup configuration.
-	 * @param fileConfig
-	 */
-	public static void setupConfig(FileConfiguration fileConfig) {
-		if (!fileConfig.isSet("ExtendedInteraction")) {
-			setExtendedInteraction(fileConfig, false);
-		} else {
-			extendedInteraction = fileConfig.getBoolean("ExtendedInteraction");
-		}
-		if (!fileConfig.isSet("WildernessInteraction")) {
-			setWildernessInteraction(fileConfig, false);
-		} else {
-			wildernessInteraction = fileConfig.getBoolean("WildernessInteraction");
-		}
-	}
-	
-	/**
-	 * This method sets the extended town interaction configuration.
-	 * 
-	 * @param config
-	 * @param value
-	 */
-	public static void setExtendedInteraction(FileConfiguration config, boolean value) {
-		config.set("ExtendedInteraction", value);
-		extendedInteraction = value;
-	}
-
-	/**
-	 * Returns the extended town interaction configuration.
-	 * 
-	 * @return boolean
-	 */
-	public static boolean isExtendedInteraction() {
-		return extendedInteraction;
-	}
-	
-	/**
-	 * This method enables/disables the wilderness interaction.
-	 * 
-	 * @param config
-	 * @param value
-	 */
-	public static void setWildernessInteraction(FileConfiguration config, boolean value) {
-			config.set("WildernessInteraction", value);
-			wildernessInteraction = value;
-			if(value) {
-				for(EconomyPlayer player:EconomyPlayerController.getAllEconomyPlayers()) {
-					player.addWildernessPermission();
-				}
-			} else {
-				for(EconomyPlayer player:EconomyPlayerController.getAllEconomyPlayers()) {
-					player.denyWildernessPermission();
-				}
-			}
-	}
-	
-	/**
-	 * Returns true, if the wilderness is enabled.
-	 * 
-	 * @return boolean
-	 */
-	public static boolean isWildernessInteraction() {
-		return wildernessInteraction;
 	}
 }

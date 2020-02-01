@@ -4,15 +4,16 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
+import com.ue.config.api.ConfigController;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
 import com.ue.townsystem.townworld.api.TownworldController;
 import com.ue.ultimate_economy.Ultimate_Economy;
 
 public class TownworldCommandExecutor implements CommandExecutor {
-	
+
 	private Ultimate_Economy plugin;
-	
+
 	public TownworldCommandExecutor(Ultimate_Economy plugin) {
 		this.plugin = plugin;
 	}
@@ -21,8 +22,8 @@ public class TownworldCommandExecutor implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		try {
 			if (args.length != 1) {
-				switch(args[0]) {
-					case "enable": 
+				switch (args[0]) {
+					case "enable":
 						if (args.length == 2) {
 							TownworldController.createTownWorld(plugin.getDataFolder(), args[1]);
 							sender.sendMessage(MessageWrapper.getString("townworld_enable", args[1]));
@@ -31,7 +32,7 @@ public class TownworldCommandExecutor implements CommandExecutor {
 						}
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					case "disable": 
+					case "disable":
 						if (args.length == 2) {
 							TownworldController.deleteTownWorld(args[1]);
 							sender.sendMessage(MessageWrapper.getString("townworld_disable", args[1]));
@@ -40,35 +41,40 @@ public class TownworldCommandExecutor implements CommandExecutor {
 						}
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					case "setFoundationPrice": 
+					case "setFoundationPrice":
 						if (args.length == 3) {
-							TownworldController.getTownWorldByName(args[1]).setFoundationPrice(Double.valueOf(args[2]), true);
-							sender.sendMessage(MessageWrapper.getString("townworld_setFoundationPrice", args[2]));
+							TownworldController.getTownWorldByName(args[1]).setFoundationPrice(Double.valueOf(args[2]),
+									true);
+							sender.sendMessage(MessageWrapper.getString("townworld_setFoundationPrice", args[2],
+									ConfigController.getCurrencyText(Double.valueOf(args[2]))));
 						} else {
 							sender.sendMessage("/" + label + " setFoundationPrice <world> <price>");
 						}
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					case "setExpandPrice": 
+					case "setExpandPrice":
 						if (args.length == 3) {
-							TownworldController.getTownWorldByName(args[1]).setExpandPrice(Double.valueOf(args[2]), true);
-							sender.sendMessage(MessageWrapper.getString("townworld_setExpandPrice", args[2]));
+							TownworldController.getTownWorldByName(args[1]).setExpandPrice(Double.valueOf(args[2]),
+									true);
+							sender.sendMessage(MessageWrapper.getString("townworld_setExpandPrice", args[2],
+									ConfigController.getCurrencyText(Double.valueOf(args[2]))));
 						} else {
 							sender.sendMessage("/" + label + " setExpandPrice <world> <price / chunk");
 						}
 						break;
 					//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					default: return false;
-				}	
+					default:
+						return false;
+				}
 				plugin.getConfig().set("TownWorlds", TownworldController.getTownWorldNameList());
 				plugin.saveConfig();
 			} else {
 				return false;
 			}
-		} catch(TownSystemException e) {
+		} catch (TownSystemException e) {
 			sender.sendMessage(e.getMessage());
 		} catch (NumberFormatException e2) {
-			sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter",args[2]));
+			sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter", args[2]));
 		}
 		return true;
 	}

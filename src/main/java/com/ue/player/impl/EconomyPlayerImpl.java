@@ -20,6 +20,7 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
+import com.ue.config.api.ConfigController;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
@@ -47,7 +48,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	 * @param name
 	 * @param isNew
 	 */
-	public EconomyPlayerImpl(String name,boolean isNew) {
+	public EconomyPlayerImpl(String name, boolean isNew) {
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
 		jobs = new ArrayList<>();
 		homes = new HashMap<>();
@@ -64,11 +65,12 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			scoreBoardDisabled = config.getBoolean(name + ".bank");
 			account = config.getDouble(name + ".account amount");
 			List<String> jobNames = config.getStringList(name + ".Jobs");
-			for(String jobName:jobNames) {
+			for (String jobName : jobNames) {
 				try {
 					jobs.add(JobController.getJobByName(jobName));
 				} catch (JobSystemException e) {
-					Bukkit.getLogger().warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("job_does_not_exist") + ":" + jobName);
+					Bukkit.getLogger().warning("[Ultimate_Economy] "
+							+ MessageWrapper.getErrorString("job_does_not_exist") + ":" + jobName);
 				}
 			}
 			joinedTowns = config.getStringList(name + ".joinedTowns");
@@ -85,15 +87,15 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		bossBar = Bukkit.createBossBar("", BarColor.GREEN, BarStyle.SOLID);
 		bossBar.setVisible(false);
 	}
-	
+
 	public boolean isOnline() {
-		if(player == null) {
+		if (player == null) {
 			return false;
 		} else {
 			return true;
 		}
 	}
-	
+
 	public BossBar getBossBar() {
 		return bossBar;
 	}
@@ -102,7 +104,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		return name;
 	}
 
-	public void joinJob(Job job,boolean sendMessage) throws PlayerException, JobSystemException {
+	public void joinJob(Job job, boolean sendMessage) throws PlayerException, JobSystemException {
 		if (reachedMaxJoinedJobs()) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
 		} else if (jobs.contains(job)) {
@@ -114,13 +116,13 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			jobList.add(job.getName());
 			config.set(name + ".Jobs", jobList);
 			save(config);
-			if(sendMessage && isOnline()) {
+			if (sendMessage && isOnline()) {
 				player.sendMessage(MessageWrapper.getString("job_join", job.getName()));
 			}
 		}
 	}
 
-	public void leaveJob(Job job,boolean sendMessage) throws PlayerException, JobSystemException {
+	public void leaveJob(Job job, boolean sendMessage) throws PlayerException, JobSystemException {
 		if (!jobs.contains(job)) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.JOB_NOT_JOINED);
 		} else {
@@ -130,7 +132,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			jobList.remove(job.getName());
 			config.set(name + ".Jobs", jobs);
 			save(config);
-			if(isOnline() && sendMessage) {
+			if (isOnline() && sendMessage) {
 				player.sendMessage(MessageWrapper.getString("job_left", job.getName()));
 			}
 		}
@@ -190,7 +192,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	public boolean reachedMaxJoinedTowns() {
-		if (EconomyPlayerController.getMaxJoinedTowns() <= joinedTowns.size()) {
+		if (ConfigController.getMaxJoinedTowns() <= joinedTowns.size()) {
 			return true;
 		} else {
 			return false;
@@ -203,7 +205,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	 * @return boolean
 	 */
 	public boolean reachedMaxHomes() {
-		if (EconomyPlayerController.getMaxHomes() <= homes.size()) {
+		if (ConfigController.getMaxHomes() <= homes.size()) {
 			return true;
 		} else {
 			return false;
@@ -216,7 +218,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	 * @return boolean
 	 */
 	public boolean reachedMaxJoinedJobs() {
-		if (EconomyPlayerController.getMaxJobs() <= jobs.size()) {
+		if (ConfigController.getMaxJobs() <= jobs.size()) {
 			return true;
 		} else {
 			return false;
@@ -240,7 +242,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			config.set(name + ".Home." + homeName + ".Y", location.getY());
 			config.set(name + ".Home." + homeName + ".Z", location.getZ());
 			save(config);
-			if(isOnline() && sendMessage) {
+			if (isOnline() && sendMessage) {
 				player.sendMessage(MessageWrapper.getString("sethome", homeName));
 			}
 		}
@@ -255,7 +257,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			config.set(name + ".Home." + homeName, null);
 			config.set(name + ".Home.Homelist", homeNameList);
 			save(config);
-			if(isOnline() && sendMessage) {
+			if (isOnline() && sendMessage) {
 				player.sendMessage(MessageWrapper.getString("delhome", homeName));
 			}
 		} else {
@@ -276,9 +278,9 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		this.scoreBoardDisabled = scoreBoardDisabled;
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
 		config.set(name + ".bank", scoreBoardDisabled);
-		if(scoreBoardDisabled) {
+		if (scoreBoardDisabled) {
 			Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
-			if(isOnline()) {
+			if (isOnline()) {
 				player.setScoreboard(board);
 			}
 		} else {
@@ -294,23 +296,25 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		}
 	}
 
-	public void payToOtherPlayer(EconomyPlayer reciever, double amount,boolean sendMessage) throws PlayerException {
+	public void payToOtherPlayer(EconomyPlayer reciever, double amount, boolean sendMessage) throws PlayerException {
 		if (amount < 0) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, amount);
 		} else if (hasEnoughtMoney(amount)) {
 			reciever.increasePlayerAmount(amount, false);
-			
+
 			decreasePlayerAmount(amount, true);
 			if (reciever.isOnline() && sendMessage) {
-				reciever.getPlayer().sendMessage(MessageWrapper.getString("got_money_with_sender", amount,player.getName()));
+				reciever.getPlayer().sendMessage(MessageWrapper.getString("got_money_with_sender", amount,
+						ConfigController.getCurrencyText(amount), player.getName()));
 			}
-			if(isOnline() && sendMessage) {
-				player.sendMessage(MessageWrapper.getString("gave_money", reciever.getName(),amount));
+			if (isOnline() && sendMessage) {
+				player.sendMessage(MessageWrapper.getString("gave_money", reciever.getName(), amount,
+						ConfigController.getCurrencyText(amount)));
 			}
 		}
 	}
 
-	public void increasePlayerAmount(double amount,boolean sendMessage) throws PlayerException {
+	public void increasePlayerAmount(double amount, boolean sendMessage) throws PlayerException {
 		if (amount < 0) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.INVALID_PARAMETER, amount);
 		} else {
@@ -320,8 +324,8 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			save(config);
 			if (isOnline()) {
 				new UpdateScoreboardRunnable().runTask(Ultimate_Economy.getInstance);
-				if(sendMessage) {
-					player.sendMessage(MessageWrapper.getString("got_money", amount));
+				if (sendMessage) {
+					player.sendMessage(MessageWrapper.getString("got_money", amount, ConfigController.getCurrencyText(amount)));
 				}
 			}
 		}
@@ -363,22 +367,24 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
 			Objective o = board.registerNewObjective("bank", "dummy", MessageWrapper.getString("bank"));
 			o.setDisplaySlot(DisplaySlot.SIDEBAR);
-			o.getScore(ChatColor.GOLD + MessageWrapper.getString("money_info", "")).setScore(score);
+			o.getScore(ChatColor.GOLD
+					+ MessageWrapper.getString("money_info", "", ConfigController.getCurrencyText(score)))
+					.setScore(score);
 			p.setScoreboard(board);
 		}
 	}
 
 	public void updateScoreBoard() {
 		int score = (int) account;
-		if(isOnline()) {
+		if (isOnline()) {
 			setScoreboard(player, score);
 		}
 	}
-	
+
 	public Player getPlayer() {
 		return player;
 	}
-	
+
 	public void setPlayer(Player player) {
 		bossBar.removeAll();
 		this.player = player;
@@ -392,7 +398,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private class UpdateScoreboardRunnable extends BukkitRunnable {
 
 		@Override
@@ -411,5 +417,3 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		player.addAttachment(Ultimate_Economy.getInstance).setPermission("ultimate_economy.wilderness", false);
 	}
 }
-
-

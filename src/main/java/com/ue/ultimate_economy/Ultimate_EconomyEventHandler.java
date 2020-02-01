@@ -45,6 +45,7 @@ import org.bukkit.inventory.meta.Repairable;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
+import com.ue.config.api.ConfigController;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
@@ -111,8 +112,8 @@ public class Ultimate_EconomyEventHandler implements Listener {
 					}
 				} else {
 					Town town = townworld.getTownByChunk(location.getChunk());
-					if(event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-						switch(event.getClickedBlock().getType()) {
+					if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+						switch (event.getClickedBlock().getType()) {
 							case ACACIA_TRAPDOOR:
 							case BIRCH_TRAPDOOR:
 							case IRON_TRAPDOOR:
@@ -133,12 +134,14 @@ public class Ultimate_EconomyEventHandler implements Listener {
 							case DARK_OAK_FENCE_GATE:
 							case OAK_FENCE_GATE:
 							case SPRUCE_FENCE_GATE:
-								if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")
-										&& (!town.isPlayerCitizen(economyPlayer) || !town.hasBuildPermissions(economyPlayer, town
-												.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ())))) {
-									if(!TownworldController.isExtendedInteraction()) {
+								if (!event.getPlayer().hasPermission("ultimate_economy.towninteract") && (!town
+										.isPlayerCitizen(economyPlayer)
+										|| !town.hasBuildPermissions(economyPlayer, town.getPlotByChunk(
+												location.getChunk().getX() + "/" + location.getChunk().getZ())))) {
+									if (!ConfigController.isExtendedInteraction()) {
 										event.setCancelled(true);
-										event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
+										event.getPlayer()
+												.sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
 									}
 								}
 								break;
@@ -147,8 +150,9 @@ public class Ultimate_EconomyEventHandler implements Listener {
 						}
 					} else {
 						if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")
-								&& (!town.isPlayerCitizen(economyPlayer) || !town.hasBuildPermissions(economyPlayer, town
-										.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ())))) {
+								&& (!town.isPlayerCitizen(economyPlayer)
+										|| !town.hasBuildPermissions(economyPlayer, town.getPlotByChunk(
+												location.getChunk().getX() + "/" + location.getChunk().getZ())))) {
 							event.setCancelled(true);
 							event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
 						}
@@ -471,7 +475,7 @@ public class Ultimate_EconomyEventHandler implements Listener {
 			EconomyPlayer economyPlayer = EconomyPlayerController.getEconomyPlayerByName(playername);
 			economyPlayer.setPlayer(event.getPlayer());
 			economyPlayer.updateScoreBoard();
-			if(TownworldController.isWildernessInteraction()) {
+			if (ConfigController.isWildernessInteraction()) {
 				economyPlayer.addWildernessPermission();
 			}
 			TownworldController.handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
@@ -650,10 +654,12 @@ public class Ultimate_EconomyEventHandler implements Listener {
 											ecoPlayer.decreasePlayerAmount(buyprice, true);
 											if (amount > 1) {
 												playe.sendMessage(MessageWrapper.getString("shop_buy_plural",
-														String.valueOf(amount), buyprice));
+														String.valueOf(amount), buyprice,
+														ConfigController.getCurrencyText(buyprice)));
 											} else {
 												playe.sendMessage(MessageWrapper.getString("shop_buy_singular",
-														String.valueOf(amount), buyprice));
+														String.valueOf(amount), buyprice,
+														ConfigController.getCurrencyText(buyprice)));
 											}
 										} //
 										else if (!isSpawner) {
@@ -673,10 +679,12 @@ public class Ultimate_EconomyEventHandler implements Listener {
 												}
 												if (amount > 1) {
 													playe.sendMessage(MessageWrapper.getString("shop_buy_plural",
-															String.valueOf(amount), buyprice));
+															String.valueOf(amount), buyprice,
+															ConfigController.getCurrencyText(buyprice)));
 												} else {
 													playe.sendMessage(MessageWrapper.getString("shop_buy_singular",
-															String.valueOf(amount), buyprice));
+															String.valueOf(amount), buyprice,
+															ConfigController.getCurrencyText(buyprice)));
 												}
 											}
 											// only playershop
@@ -722,11 +730,12 @@ public class Ultimate_EconomyEventHandler implements Listener {
 											playershop.increaseStock(clickedItemString, amount);
 										}
 										if (amount > 1) {
-											playe.sendMessage(MessageWrapper.getString("shop_sell_plural",
-													String.valueOf(amount), sellprice));
+											playe.sendMessage(
+													MessageWrapper.getString("shop_sell_plural", String.valueOf(amount),
+															sellprice, ConfigController.getCurrencyText(sellprice)));
 										} else {
 											playe.sendMessage(MessageWrapper.getString("shop_sell_singular",
-													String.valueOf(amount), sellprice));
+													String.valueOf(amount), sellprice, ConfigController.getCurrencyText(sellprice)));
 										}
 										removeItemFromInventory(inventoryplayer, itemStack, amount);
 									}
@@ -777,10 +786,11 @@ public class Ultimate_EconomyEventHandler implements Listener {
 									if ((isPlayershop && playerShopOwner.hasEnoughtMoney(newprice)) || !isPlayershop) {
 										if (itemAmount > 1) {
 											playe.sendMessage(MessageWrapper.getString("shop_sell_plural",
-													String.valueOf(itemAmount), newprice));
+													String.valueOf(itemAmount), newprice,
+													ConfigController.getCurrencyText(newprice)));
 										} else {
 											playe.sendMessage(MessageWrapper.getString("shop_sell_singular",
-													String.valueOf(itemAmount), newprice));
+													String.valueOf(itemAmount), newprice, ConfigController.getCurrencyText(newprice)));
 										}
 										ecoPlayer.increasePlayerAmount(newprice, false);
 										// only playershop

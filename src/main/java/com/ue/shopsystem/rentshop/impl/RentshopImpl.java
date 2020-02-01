@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
+import com.ue.config.api.ConfigController;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.ShopExceptionMessageEnum;
@@ -28,7 +29,6 @@ import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.playershop.impl.PlayershopImpl;
 import com.ue.shopsystem.rentshop.api.Rentshop;
-import com.ue.shopsystem.rentshop.api.RentshopController;
 import com.ue.ultimate_economy.UEVillagerType;
 import com.ue.ultimate_economy.Ultimate_Economy;
 
@@ -402,7 +402,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 					break;
 				case "one":
 					if(operation.equals("plus")) {
-						if(duration < RentshopController.getMaxRentedDays()) {
+						if(duration < ConfigController.getMaxRentedDays()) {
 							duration++;
 						}
 					} else if(duration > 1){
@@ -413,10 +413,10 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 					break;
 				case "seven":
 					if(operation.equals("plus")) {
-						if(duration < RentshopController.getMaxRentedDays()) {
+						if(duration < ConfigController.getMaxRentedDays()) {
 							duration += 7;
-							if(duration > RentshopController.getMaxRentedDays()) {
-								duration = RentshopController.getMaxRentedDays();
+							if(duration > ConfigController.getMaxRentedDays()) {
+								duration = ConfigController.getMaxRentedDays();
 							}
 						}
 					} else if(duration > 7){

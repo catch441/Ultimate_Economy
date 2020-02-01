@@ -22,6 +22,7 @@ public class ConfigTabCompleter implements TabCompleter {
 			list.add("extendedInteraction");
 			list.add("maxPlayershops");
 			list.add("wildernessInteraction");
+			list.add("currency");
 		} else if (args.length == 1) {
 			if ("language".contains(args[0])) {
 				list.add("language");
@@ -49,6 +50,9 @@ public class ConfigTabCompleter implements TabCompleter {
 			}
 			if ("wildernessInteraction".contains(args[0])) {
 				list.add("wildernessInteraction");
+			}
+			if ("currency".contains(args[0])) {
+				list.add("currency");
 			}
 		} else if (args.length == 2) {
 			if (args[0].equals("homes") || args[0].equals("wildernessInteraction")) {
