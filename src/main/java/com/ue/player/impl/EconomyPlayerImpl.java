@@ -325,7 +325,8 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			if (isOnline()) {
 				new UpdateScoreboardRunnable().runTask(Ultimate_Economy.getInstance);
 				if (sendMessage) {
-					player.sendMessage(MessageWrapper.getString("got_money", amount, ConfigController.getCurrencyText(amount)));
+					player.sendMessage(
+							MessageWrapper.getString("got_money", amount, ConfigController.getCurrencyText(amount)));
 				}
 			}
 		}
@@ -367,9 +368,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
 			Objective o = board.registerNewObjective("bank", "dummy", MessageWrapper.getString("bank"));
 			o.setDisplaySlot(DisplaySlot.SIDEBAR);
-			o.getScore(ChatColor.GOLD
-					+ MessageWrapper.getString("money_info", "", ConfigController.getCurrencyText(score)))
-					.setScore(score);
+			o.getScore(ChatColor.GOLD + ConfigController.getCurrencyText(score)).setScore(score);
 			p.setScoreboard(board);
 		}
 	}
