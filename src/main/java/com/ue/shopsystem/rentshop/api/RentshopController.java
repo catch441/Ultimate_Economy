@@ -189,11 +189,11 @@ public class RentshopController {
 				try {
 					rentShopList.add(new RentshopImpl(dataFolder, shopId));
 				} catch (TownSystemException e) {
-					Bukkit.getLogger().warning(e.getMessage());
-					Bukkit.getLogger().info(MessageWrapper.getErrorString("cannot_load_shop", shopId));
+					Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
+					Bukkit.getLogger().warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopId));
 				}
 			} else {
-				Bukkit.getLogger().info(MessageWrapper.getErrorString("cannot_load_shop", shopId));
+				Bukkit.getLogger().warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopId));
 			}
 		}
 	}

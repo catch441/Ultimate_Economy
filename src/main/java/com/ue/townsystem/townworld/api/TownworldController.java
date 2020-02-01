@@ -159,7 +159,7 @@ public class TownworldController {
 				townworldImpl.setTownList(towns);
 				townWorldList.add(townworldImpl);
 			} catch(TownSystemException | PlayerException e) {
-				Bukkit.getLogger().warning(e.getMessage());;
+				Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());;
 			}
 		}
 	}

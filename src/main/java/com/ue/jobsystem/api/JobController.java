@@ -61,7 +61,7 @@ public class JobController {
 			try {
 				jobcenter.removeJob(job);
 			} catch (JobSystemException e) {
-				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+				Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
 			}
 		}
 		for (EconomyPlayer ecoPlayer : EconomyPlayerController.getAllEconomyPlayers()) {
@@ -69,7 +69,7 @@ public class JobController {
 				try {
 					ecoPlayer.leaveJob(job, false);
 				} catch (PlayerException e) {
-					Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+					Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
 				}
 			}
 		}
@@ -104,7 +104,7 @@ public class JobController {
 			if (file.exists()) {
 				jobList.add(new JobImpl(dataFolder, jobName));
 			} else {
-				Bukkit.getLogger().warning(MessageWrapper.getErrorString("cannot_load_job", jobName));
+				Bukkit.getLogger().warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_job", jobName));
 			}
 		}
 	}

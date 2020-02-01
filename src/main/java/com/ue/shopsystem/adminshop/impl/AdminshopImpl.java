@@ -2,7 +2,6 @@ package com.ue.shopsystem.adminshop.impl;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -38,7 +37,7 @@ public class AdminshopImpl extends ShopImpl implements Adminshop{
 			try {
 				loadShopItem(item);
 			} catch (ShopSystemException | PlayerException e) {
-				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+				Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
 			}
 		}
 	}
@@ -62,7 +61,7 @@ public class AdminshopImpl extends ShopImpl implements Adminshop{
 			try {
 				loadShopItem(item);
 			} catch (ShopSystemException | PlayerException e) {
-				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+				Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
 			}
 		}
 	}

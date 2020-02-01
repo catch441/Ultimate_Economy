@@ -102,7 +102,7 @@ public class JobcenterImpl implements Jobcenter {
 			try {
 				jobs.add(JobController.getJobByName(jobName));
 			} catch (JobSystemException e) {
-				Bukkit.getLogger().warning(MessageWrapper.getErrorString("job_does_not_exist") + ":" + jobName);
+				Bukkit.getLogger().warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("job_does_not_exist") + ":" + jobName);
 			}
 		}
 		name = config.getString("JobCenterName");

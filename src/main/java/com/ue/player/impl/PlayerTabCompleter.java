@@ -2,9 +2,7 @@ package com.ue.player.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -52,7 +50,6 @@ public class PlayerTabCompleter implements TabCompleter {
 				}
 			}
 		} catch (PlayerException e) {
-			Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
 		}
 		return list;
 	}

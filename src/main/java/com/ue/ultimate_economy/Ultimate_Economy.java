@@ -184,7 +184,7 @@ public class Ultimate_Economy extends JavaPlugin {
 				delHome.setTabCompleter(playerTabCompleter);
 				setHome.setExecutor(playerCommandExecutor);
 			} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-				Bukkit.getLogger().warning("Error on enable homes feature.");
+				Bukkit.getLogger().warning("[Ultimate_Economy] Error on enable homes feature.");
 			}
 		}
 		getCommand("givemoney").setExecutor(playerCommandExecutor);

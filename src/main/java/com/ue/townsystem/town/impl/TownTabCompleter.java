@@ -2,7 +2,6 @@ package com.ue.townsystem.town.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -88,7 +87,7 @@ public class TownTabCompleter implements TabCompleter {
 						}
 					}
 				} catch (PlayerException e) {
-					Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+					Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
 				}
 			} else if (args[0].equals("pay") || args[0].equals("tp") || args[0].equals("withdraw")) {
 				if (args[1].equals("")) {

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -398,12 +397,12 @@ public class Ultimate_EconomyEventHandler implements Listener {
 								break;
 							} catch (JobSystemException e) {
 							} catch (PlayerException e) {
-								Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+								Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
 							}
 						}
 					}
 				} catch (PlayerException e1) {
-					Bukkit.getLogger().log(Level.WARNING, e1.getMessage(), e1);
+					Bukkit.getLogger().warning("[Ultimate_Economy] " + e1.getMessage());
 				}
 				if (event.getBlock().getBlockData().getMaterial() == Material.SPAWNER) {
 					List<MetadataValue> blockmeta = event.getBlock().getMetadata("name");
@@ -478,7 +477,7 @@ public class Ultimate_EconomyEventHandler implements Listener {
 			TownworldController.handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
 					event.getPlayer().getLocation().getChunk(), event.getPlayer().getName());
 		} catch (PlayerException e) {
-			Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+			Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
 		}
 		if (event.getPlayer().isOp()) {
 			if (updateResult == UpdateResult.UPDATE_AVAILABLE) {
@@ -816,7 +815,7 @@ public class Ultimate_EconomyEventHandler implements Listener {
 							}
 						}
 					} catch (PlayerException | ShopSystemException e) {
-						Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+						Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
 					}
 				}
 			}

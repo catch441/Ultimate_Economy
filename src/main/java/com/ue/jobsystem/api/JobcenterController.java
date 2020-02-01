@@ -126,7 +126,7 @@ public class JobcenterController {
 			if (file.exists()) {
 				jobCenterList.add(new JobcenterImpl(server, dataFolder, jobCenterName));
 			} else {
-				Bukkit.getLogger().warning(MessageWrapper.getErrorString("cannot_load_jobcenter", jobCenterName));
+				Bukkit.getLogger().warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_jobcenter", jobCenterName));
 			}
 		}
 	}

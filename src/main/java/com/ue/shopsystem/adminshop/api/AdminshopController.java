@@ -163,11 +163,11 @@ public class AdminshopController {
 					try {
 						adminShopList.add(new AdminshopImpl(dataFolder, shopName, generateFreeAdminShopId()));
 					} catch (TownSystemException e) {
-						Bukkit.getLogger().warning(e.getMessage());
-						Bukkit.getLogger().warning(MessageWrapper.getErrorString("cannot_load_shop",shopName));
+						Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
+						Bukkit.getLogger().warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop",shopName));
 					}
 				} else {
-					Bukkit.getLogger().warning(MessageWrapper.getErrorString("cannot_load_shop",shopName));
+					Bukkit.getLogger().warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop",shopName));
 				}
 			}
 			//convert to new shopId save system
@@ -185,11 +185,11 @@ public class AdminshopController {
 					try {
 						adminShopList.add(new AdminshopImpl(dataFolder,null, shopId));
 					} catch (TownSystemException e) {
-						Bukkit.getLogger().warning(e.getMessage());
-						Bukkit.getLogger().warning(MessageWrapper.getErrorString("cannot_load_shop",shopId));
+						Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
+						Bukkit.getLogger().warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop",shopId));
 					}
 				} else {
-					Bukkit.getLogger().warning(MessageWrapper.getErrorString("cannot_load_shop",shopId));
+					Bukkit.getLogger().warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop",shopId));
 				}
 			}
 		}

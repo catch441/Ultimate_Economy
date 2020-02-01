@@ -3,7 +3,6 @@ package com.ue.shopsystem.playershop.impl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -97,7 +96,7 @@ public class PlayershopImpl extends ShopImpl implements Playershop {
 			try {
 				loadShopItem(item);
 			} catch (ShopSystemException | PlayerException e) {
-				Bukkit.getLogger().log(Level.WARNING, e.getMessage(), e);
+				Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
 			}
 		}
 	}

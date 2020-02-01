@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -95,7 +94,7 @@ public class EconomyPlayerController {
 			try {
 				config.save(playerFile);
 			} catch (IOException e) {
-				Bukkit.getLogger().warning(e.getMessage() + ":" + playerName);
+				e.printStackTrace();
 			}
 		}
 	}
