@@ -3,7 +3,6 @@ package com.ue.exceptions;
 public enum PlayerExceptionMessageEnum {
 
 	NO_PERMISSION,
-	INVALID_PARAMETER,
 	NO_PERMISSION_SET_SPAWNER,
 	NO_PERMISSION_BREAK_SPAWNER,
 	WILDERNESS,
@@ -27,6 +26,6 @@ public enum PlayerExceptionMessageEnum {
 	HOME_ALREADY_EXIST,
 	INVENTORY_SLOT_OCCUPIED,
 	NOT_ENOUGH_MONEY_NON_PERSONAL,
-	MAX_REACHED;
+	MAX_REACHED
 	
 }

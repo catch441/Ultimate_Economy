@@ -11,7 +11,7 @@ public class ConfigTabCompleter implements TabCompleter {
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> list = new ArrayList<>();
+		final List<String> list = new ArrayList<>();
 		if (args[0].equals("")) {
 			list.add("language");
 			list.add("maxHomes");

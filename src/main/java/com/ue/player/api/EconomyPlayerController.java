@@ -19,7 +19,7 @@ public class EconomyPlayerController {
 	/**
 	 * This method returns a list of all player names.
 	 * 
-	 * @return
+	 * @return list of player names
 	 */
 	public static List<String> getEconomyPlayerNameList() {
 		List<String> list = new ArrayList<>();

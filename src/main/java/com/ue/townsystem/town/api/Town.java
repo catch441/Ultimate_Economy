@@ -12,227 +12,300 @@ import com.ue.player.api.EconomyPlayer;
 import com.ue.townsystem.townworld.api.Townworld;
 
 public interface Town {
-	
-	/**
-	 * Returns the town bank amount.
-	 * 
-	 * @return double
-	 */
-	public double getTownBankAmount();
-	
-	/**
-	 * Decrease the town bank amount.
-	 * 
-	 * @param amount
-	 * @throws TownSystemException 
-	 */
-	public void decreaseTownBankAmount(double amount) throws TownSystemException;
-	
-	/**
-	 * Increase the town bank amount.
-	 * 
-	 * @param amount
-	 */
-	public void increaseTownBankAmount(double amount);
-	
-	/**
-	 * Set a player as deputy of a town.
-	 * 
-	 * @param player the player has to be a citizen of the town
-	 * @throws TownSystemException
-	 * @throws PlayerException
-	 */
-	public void addDeputy(EconomyPlayer player) throws TownSystemException, PlayerException;
-	
-	/**
-	 * Removes a deputy from the town.
-	 * 
-	 * @param player the player has to be a deputy of the town
-	 * @throws TownSystemException
-	 */
-	public void removeDeputy(EconomyPlayer player) throws TownSystemException;
-	
-	/**
-	 * Opens the inventory of the TownManager.
-	 * 
-	 * @param player
-	 */
-	public void openTownManagerVillagerInv(Player player);
-	
-	/**
-	 * Returns true if player is the mayor, deputy, plot owner or plot
-	 * resident.
-	 * 
-	 * @param player can be any player
-	 * @param plot
-	 * @return boolean
-	 * @throws TownSystemException
-	 */
-	public boolean hasBuildPermissions(EconomyPlayer player, Plot plot) throws TownSystemException;
-	
-	/**
-	 * Returns true if player is mayor or deputy
-	 * 
-	 * @param player the player has to be a citizen of the town
-	 * @return boolean
-	 * @throws TownSystemException
-	 */
-	public boolean hasDeputyPermissions(EconomyPlayer player) throws TownSystemException;
-	
-	/**
-	 * Returns true, if the town has enough money.
-	 * 
-	 * @param amount
-	 * @return boolean
-	 */
-	public boolean hasEnoughMoney(double amount);
-	
-	/**
-	 * Returns true if player is a citizen of this town.
-	 * 
-	 * @param player
-	 * @return boolean
-	 */
-	public boolean isPlayerCitizen(EconomyPlayer player);
-	
-	/**
-	 * Get list of citizens.
-	 * 
-	 * @return ArrayList of EconomyPlayers
-	 */
-	public ArrayList<EconomyPlayer> getCitizens();
-	
-	/**
-	 * Returns true if player is mayor.
-	 * 
-	 * @param player the player has to be a citizen of the town
-	 * @return boolean
-	 * @throws TownSystemException
-	 */
-	public boolean isMayor(EconomyPlayer player) throws TownSystemException;
-	
-	/**
-	 * Returns true if player is a deputy of this town.
-	 * 
-	 * @param player the player has to be a citizen of the town
-	 * @return boolean
-	 * @throws TownSystemException
-	 */
-	public boolean isDeputy(EconomyPlayer player) throws TownSystemException;
-	
-	/**
-	 * Expands a town by a new chunk.
-	 * 
-	 * @param chunk
-	 * @param player the player who want to use this method
-	 * @param sendMessage when true a message is send to the receiver and this player
-	 * @throws TownSystemException
-	 * @throws PlayerException 
-	 */
-	public void expandTown(Chunk chunk, EconomyPlayer player,boolean sendMessage) throws TownSystemException, PlayerException;
-	
-	/**
-	 * Renames this town.
-	 * 
-	 * @param newName
-	 * @param player the player who want to use this method
-	 * @param sendMessage when true a message is send to the receiver and this player
-	 * @throws TownSystemException 
-	 * @throws PlayerException 
-	 */
-	public void renameTown(String newName, EconomyPlayer player,boolean sendMessage) throws TownSystemException, PlayerException;
-	
-	/**
-	 * Joins a player to a town.
-	 * 
-	 * @param player the player who wants to join the town
-	 * @throws PlayerException
-	 * @throws TownSystemException
-	 */
-	public void joinTown(EconomyPlayer player) throws PlayerException, TownSystemException;
-	
-	/**
-	 * Leaves a player from a town.
-	 * 
-	 * @param player have to be a citizen
-	 * @throws TownSystemException
-	 * @throws PlayerException
-	 */
-	public void leaveTown(EconomyPlayer player) throws TownSystemException, PlayerException;
 
-	/**
-	 * Despawns all town villagers
-	 * 
-	 */
-	public void despawnAllVillagers();
-	
-	/**
-	 * Buy a plot in a town if the plot is for sale. Did not handle payment.
-	 * 
-	 * @param player the player who wants to by the plot, have to be a citizen of the town
-	 * @param chunkX
-	 * @param chunkZ
-	 * @throws TownSystemException
-	 * @throws PlayerException 
-	 */
-	public void buyPlot(EconomyPlayer player, int chunkX, int chunkZ) throws TownSystemException, PlayerException;
-	
-	/**
-	 * Returns a Plot by chunk coords.
-	 * 
-	 * @param chunkCoords Format X/Z
-	 * @return Plot
-	 * @throws TownSystemException
-	 */
-	public Plot getPlotByChunk(String chunkCoords) throws TownSystemException;
-	
-	/**
-	 * Get town name.
-	 * 
-	 * @return String
-	 */
-	public String getTownName();
-	
-	/**
-	 * Returns true if the cunk is owned by any town
-	 * 
-	 * @param chunk
-	 * @return boolean
-	 */
-	public boolean isClaimedByTown(Chunk chunk);
-	
-	/**
-	 * Returns the townworld.
-	 * 
-	 * @return Townworld
-	 */
-	public Townworld getTownworld();
-	
-	/**
-	 * Set the town spawn location. Deputy mayor permission needed.
-	 * 
-	 * @param townSpawn
-	 * @param player the player who wants to change the townspawn
-	 * @param sendMessage when true a message is send to the receiver and this player
-	 * @throws TownSystemException
-	 * @throws PlayerException 
-	 */
-	public void setTownSpawn(Location townSpawn,EconomyPlayer player, boolean sendMessage) throws TownSystemException, PlayerException;
-	
-	/**
-	 * Get the town spawn location.
-	 * 
-	 * @return Location
-	 */
-	public Location getTownSpawn();
-	
-	/**
-	 * Moves a town manager villager.
-	 * 
-	 * @param location
-	 * @param player the player who wants to move the townmanager
-	 * @throws TownSystemException
-	 * @throws PlayerException 
-	 */
-	public void moveTownManagerVillager(Location location, EconomyPlayer player) throws TownSystemException, PlayerException;
+    /**
+     * Removes a chunk from a town.
+     * 
+     * @param plot
+     * @throws TownSystemException
+     */
+    public void deletePlot(Plot plot) throws TownSystemException;
+
+    /**
+     * Return true if chunk is connected to this town.
+     * 
+     * @param chunkX
+     * @param chunkZ
+     * @return boolean
+     */
+    public boolean isChunkConnectedToTown(int chunkX, int chunkZ);
+
+    /**
+     * Returns the town bank amount.
+     * 
+     * @return double
+     */
+    public double getTownBankAmount();
+
+    /**
+     * Decrease the town bank amount.
+     * 
+     * @param amount
+     * @throws TownSystemException
+     */
+    public void decreaseTownBankAmount(double amount) throws TownSystemException;
+
+    /**
+     * Increase the town bank amount.
+     * 
+     * @param amount
+     */
+    public void increaseTownBankAmount(double amount);
+
+    /**
+     * Set a player as deputy of a town.
+     * 
+     * @param player
+     *            the player has to be a citizen of the town
+     * @throws TownSystemException
+     * @throws PlayerException
+     */
+    public void addDeputy(EconomyPlayer player)
+	    throws TownSystemException, PlayerException;
+
+    /**
+     * Removes a deputy from the town.
+     * 
+     * @param player
+     *            the player has to be a deputy of the town
+     * @throws TownSystemException
+     * @throws PlayerException
+     */
+    public void removeDeputy(EconomyPlayer player)
+	    throws TownSystemException, PlayerException;
+
+    /**
+     * Add a player as citizen to a town.
+     * 
+     * @param newCitizen
+     * @throws PlayerException
+     */
+    public void addCitizen(EconomyPlayer newCitizen) throws PlayerException;
+
+    /**
+     * Remove a citizen from a town.
+     * 
+     * @param citizen
+     * @throws TownSystemException
+     * @throws PlayerException
+     */
+    public void removeCitizen(EconomyPlayer citizen)
+	    throws TownSystemException, PlayerException;
+
+    /**
+     * Opens the inventory of the TownManager.
+     * 
+     * @param player
+     */
+    public void openTownManagerVillagerInv(Player player);
+
+    /**
+     * Returns true if player is the mayor, deputy, plot owner or plot resident.
+     * 
+     * @param player
+     *            can be any player
+     * @param plot
+     * @return boolean
+     * @throws TownSystemException
+     */
+    public boolean hasBuildPermissions(EconomyPlayer player, Plot plot) throws TownSystemException;
+
+    /**
+     * Returns true if player is mayor or deputy.
+     * 
+     * @param player
+     *            the player has to be a citizen of the town
+     * @return boolean
+     * @throws TownSystemException
+     */
+    public boolean hasDeputyPermissions(EconomyPlayer player) throws TownSystemException;
+
+    /**
+     * Returns true, if the town has enough money.
+     * 
+     * @param amount
+     * @return boolean
+     */
+    public boolean hasEnoughMoney(double amount);
+
+    /**
+     * Returns true if player is a citizen of this town.
+     * 
+     * @param player
+     * @return boolean
+     */
+    public boolean isPlayerCitizen(EconomyPlayer player);
+
+    /**
+     * Get list of citizens.
+     * 
+     * @return ArrayList of EconomyPlayers
+     */
+    public ArrayList<EconomyPlayer> getCitizens();
+
+    /**
+     * Returns true if player is mayor.
+     * 
+     * @param player
+     *            the player has to be a citizen of the town
+     * @return boolean
+     * @throws TownSystemException
+     */
+    public boolean isMayor(EconomyPlayer player) throws TownSystemException;
+
+    /**
+     * Set town mayor.
+     * 
+     * @param player
+     */
+    public void setMayor(EconomyPlayer player);
+
+    /**
+     * Get mayor.
+     * 
+     * @return String
+     */
+    public EconomyPlayer getMayor();
+
+    /**
+     * Returns true if player is a deputy of this town.
+     * 
+     * @param player
+     *            the player has to be a citizen of the town
+     * @return boolean
+     * @throws TownSystemException
+     */
+    public boolean isDeputy(EconomyPlayer player) throws TownSystemException;
+
+    /**
+     * Expands a town by a new chunk.
+     * 
+     * @param chunk
+     * @param player
+     *            the player who want to use this method
+     * @param sendMessage
+     *            when true a message is send to the receiver and this player
+     * @throws TownSystemException
+     * @throws PlayerException
+     */
+    public void expandTown(Chunk chunk, EconomyPlayer player, boolean sendMessage)
+	    throws TownSystemException, PlayerException;
+
+    /**
+     * Renames this town.
+     * 
+     * @param newName
+     * @param player
+     *            the player who want to use this method
+     * @param sendMessage
+     *            when true a message is send to the receiver and this player
+     * @throws TownSystemException
+     * @throws PlayerException
+     */
+    public void renameTown(String newName, EconomyPlayer player, boolean sendMessage)
+	    throws TownSystemException, PlayerException;
+
+    /**
+     * Joins a player to a town.
+     * 
+     * @param player
+     *            the player who wants to join the town
+     * @throws PlayerException
+     * @throws TownSystemException
+     */
+    public void joinTown(EconomyPlayer player) throws PlayerException, TownSystemException;
+
+    /**
+     * Leaves a player from a town.
+     * 
+     * @param player
+     *            have to be a citizen
+     * @throws TownSystemException
+     * @throws PlayerException
+     */
+    public void leaveTown(EconomyPlayer player) throws TownSystemException, PlayerException;
+
+    /**
+     * Despawns all town villagers.
+     * 
+     */
+    public void despawnAllVillagers();
+
+    /**
+     * Buy a plot in a town if the plot is for sale. Did not handle payment.
+     * 
+     * @param player
+     *            the player who wants to by the plot, have to be a citizen of the
+     *            town
+     * @param chunkX
+     * @param chunkZ
+     * @throws TownSystemException
+     * @throws PlayerException
+     */
+    public void buyPlot(EconomyPlayer player, int chunkX, int chunkZ) throws TownSystemException, PlayerException;
+
+    /**
+     * Returns a Plot by chunk coords.
+     * 
+     * @param chunkCoords
+     *            Format X/Z
+     * @return Plot
+     * @throws TownSystemException
+     */
+    public Plot getPlotByChunk(String chunkCoords) throws TownSystemException;
+
+    /**
+     * Get town name.
+     * 
+     * @return String
+     */
+    public String getTownName();
+
+    /**
+     * Returns true if the cunk is owned by any town.
+     * 
+     * @param chunk
+     * @return boolean
+     */
+    public boolean isClaimedByTown(Chunk chunk);
+
+    /**
+     * Returns the townworld.
+     * 
+     * @return Townworld
+     */
+    public Townworld getTownworld();
+
+    /**
+     * Set the town spawn location. Deputy mayor permission needed.
+     * 
+     * @param townSpawn
+     * @param player
+     *            the player who wants to change the townspawn
+     * @param sendMessage
+     *            when true a message is send to the receiver and this player
+     * @throws TownSystemException
+     * @throws PlayerException
+     */
+    public void setTownSpawn(Location townSpawn, EconomyPlayer player, boolean sendMessage)
+	    throws TownSystemException, PlayerException;
+
+    /**
+     * Get the town spawn location.
+     * 
+     * @return Location
+     */
+    public Location getTownSpawn();
+
+    /**
+     * Moves a town manager villager.
+     * 
+     * @param location
+     * @param player
+     *            the player who wants to move the townmanager
+     * @throws TownSystemException
+     * @throws PlayerException
+     */
+    public void moveTownManagerVillager(Location location, EconomyPlayer player)
+	    throws TownSystemException, PlayerException;
 }

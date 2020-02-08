@@ -12,45 +12,45 @@ import com.ue.player.api.EconomyPlayerController;
 
 public class PlayerTabCompleter implements TabCompleter {
 
-	@Override
-	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> list = new ArrayList<>();
-		 if (command.getName().equals("bank")) {
-			if (args[0].equals("")) {
-				list.add("on");
-				list.add("off");
-			} else if (args.length == 1) {
-				if ("on".contains(args[0])) {
-					list.add("on");
-				}
-				if ("off".contains(args[0])) {
-					list.add("off");
-				}
-			}
-		} else if (command.getName().equals("delhome") || command.getName().equals("home")) {
-				if (args.length <= 1) {
-					list = getHomeList(args[0], sender.getName());
-				}
-			}
-		return list;
-	}
-	
-	private List<String> getHomeList(String arg, String playerName) {
-		List<String> list = new ArrayList<>();
-		try {
-			List<String> temp = new ArrayList<String>(
-					EconomyPlayerController.getEconomyPlayerByName(playerName).getHomeList().keySet());
-			if (arg.equals("")) {
-				list = temp;
-			} else {
-				for (String homeName : temp) {
-					if (homeName.contains(arg)) {
-						list.add(homeName);
-					}
-				}
-			}
-		} catch (PlayerException e) {
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+	List<String> list = new ArrayList<>();
+	if (command.getName().equals("bank")) {
+	    if (args[0].equals("")) {
+		list.add("on");
+		list.add("off");
+	    } else if (args.length == 1) {
+		if ("on".contains(args[0])) {
+		    list.add("on");
 		}
-		return list;
+		if ("off".contains(args[0])) {
+		    list.add("off");
+		}
+	    }
+	} else if (command.getName().equals("delhome") || command.getName().equals("home")) {
+	    if (args.length <= 1) {
+		list = getHomeList(args[0], sender.getName());
+	    }
 	}
+	return list;
+    }
+
+    private List<String> getHomeList(String arg, String playerName) {
+	List<String> list = new ArrayList<>();
+	try {
+	    List<String> temp = new ArrayList<String>(
+		    EconomyPlayerController.getEconomyPlayerByName(playerName).getHomeList().keySet());
+	    if ("".equals(arg)) {
+		list = temp;
+	    } else {
+		for (String homeName : temp) {
+		    if (homeName.contains(arg)) {
+			list.add(homeName);
+		    }
+		}
+	    }
+	} catch (PlayerException e) {
+	}
+	return list;
+    }
 }
