@@ -15,7 +15,7 @@ import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 
-public abstract interface Shop {
+public abstract interface AbstractShop {
 
     /**
      * --Get Method--

@@ -1,12 +1,12 @@
-package com.ue.shopsystem.rentshop.impl;
+package com.ue.shopsystem.impl;
 
 import java.util.Calendar;
 
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.ue.language.MessageWrapper;
-import com.ue.shopsystem.rentshop.api.Rentshop;
-import com.ue.shopsystem.rentshop.api.RentshopController;
+import com.ue.shopsystem.api.Rentshop;
+import com.ue.shopsystem.controller.RentshopController;
 
 public class RentDailyTask extends BukkitRunnable {
 

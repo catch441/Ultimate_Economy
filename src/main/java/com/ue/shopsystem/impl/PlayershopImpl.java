@@ -1,4 +1,4 @@
-package com.ue.shopsystem.playershop.impl;
+package com.ue.shopsystem.impl;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,9 +23,8 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
-import com.ue.shopsystem.impl.AbstractShopImpl;
-import com.ue.shopsystem.playershop.api.Playershop;
-import com.ue.shopsystem.playershop.api.PlayershopController;
+import com.ue.shopsystem.api.Playershop;
+import com.ue.shopsystem.controller.PlayershopController;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.townworld.api.Townworld;
 import com.ue.townsystem.townworld.api.TownworldController;
@@ -42,17 +41,15 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      * Constructor for creating a new playershop. No validation, if the shopId is
      * unique.
      * 
-     * 
-     * @param dataFolder
      * @param name
      * @param owner
      * @param shopId
      * @param spawnLocation
      * @param size
      */
-    public PlayershopImpl(File dataFolder, String name, EconomyPlayer owner, String shopId, Location spawnLocation,
+    public PlayershopImpl(String name, EconomyPlayer owner, String shopId, Location spawnLocation,
 	    int size) {
-	super(dataFolder, name, shopId, spawnLocation, size);
+	super(name, shopId, spawnLocation, size);
 	shopMode = true;
 	saveOwnerToFile(owner);
 	// set the type of the villager

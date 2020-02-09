@@ -1,11 +1,10 @@
-package com.ue.shopsystem.playershop.api;
+package com.ue.shopsystem.api;
 
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.player.api.EconomyPlayer;
-import com.ue.shopsystem.api.Shop;
 
-public interface Playershop extends Shop {
+public interface Playershop extends AbstractShop {
 
     /**
      * --Change Method--

@@ -55,18 +55,16 @@ public class JobcenterImpl implements Jobcenter {
     /**
      * Constructor for creating a new jobcenter.
      * 
-     * @param server
-     * @param dataFolder
      * @param name
      * @param spawnLocation
      * @param size
      * @throws JobSystemException
      */
-    public JobcenterImpl(Server server, File dataFolder, String name, Location spawnLocation, int size)
+    public JobcenterImpl(String name, Location spawnLocation, int size)
 	    throws JobSystemException {
 	jobs = new ArrayList<>();
 	this.name = name;
-	file = new File(dataFolder, name + "-JobCenter.yml");
+	file = new File(UltimateEconomy.getInstance.getDataFolder(), name + "-JobCenter.yml");
 	try {
 	    file.createNewFile();
 	} catch (IOException e) {

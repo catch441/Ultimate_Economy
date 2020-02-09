@@ -53,10 +53,10 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
-import com.ue.shopsystem.api.Shop;
+import com.ue.shopsystem.api.AbstractShop;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-public abstract class AbstractShopImpl implements Shop {
+public abstract class AbstractShopImpl implements AbstractShop {
 
     // minecraft skull texture links
     protected static final String PLUS = "http://textures.minecraft.net/texture/"
@@ -99,15 +99,14 @@ public abstract class AbstractShopImpl implements Shop {
     /**
      * Constructor for creating a new shop. No validation, if the shopId is unique.
      * 
-     * @param dataFolder
      * @param name
      * @param shopId
      * @param spawnLocation
      * @param size
      */
-    public AbstractShopImpl(File dataFolder, String name, String shopId, Location spawnLocation, int size) {
+    public AbstractShopImpl(String name, String shopId, Location spawnLocation, int size) {
 	itemNames = new ArrayList<>();
-	file = new File(dataFolder, shopId + ".yml");
+	file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
 	try {
 	    file.createNewFile();
 	} catch (IOException e) {

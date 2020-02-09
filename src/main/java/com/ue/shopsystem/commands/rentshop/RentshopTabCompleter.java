@@ -1,4 +1,4 @@
-package com.ue.shopsystem.rentshop.impl;
+package com.ue.shopsystem.commands.rentshop;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Villager.Profession;
 
-import com.ue.shopsystem.rentshop.api.RentshopController;
+import com.ue.shopsystem.api.Rentshop;
+import com.ue.shopsystem.controller.RentshopController;
 
 public class RentshopTabCompleter implements TabCompleter {
 
@@ -74,7 +75,7 @@ public class RentshopTabCompleter implements TabCompleter {
 
     private List<String> getRentedShopsForPlayer(String arg, String player) {
 	List<String> list = new ArrayList<>();
-	for (RentshopImpl shop : RentshopController.getRentShops()) {
+	for (Rentshop shop : RentshopController.getRentShops()) {
 	    if (!shop.isRentable() && shop.getOwner().getName().equals(player)) {
 		if ("".equals(arg) || shop.getName().contains(arg)) {
 		    list.add(shop.getName());

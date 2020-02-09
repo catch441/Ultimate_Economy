@@ -1,4 +1,4 @@
-package com.ue.shopsystem.adminshop.impl;
+package com.ue.shopsystem.commands.adminshop;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import org.bukkit.entity.Villager.Profession;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
-import com.ue.shopsystem.adminshop.api.AdminshopController;
+import com.ue.shopsystem.controller.AdminshopController;
 
 public class AdminshopTabCompleterImpl implements TabCompleter {
 

@@ -1,4 +1,4 @@
-package com.ue.shopsystem.playershop.impl;
+package com.ue.shopsystem.commands.playershop;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Villager.Profession;
 
-import com.ue.shopsystem.playershop.api.PlayershopController;
+import com.ue.shopsystem.controller.PlayershopController;
 
 public class PlayershopTabCompleter implements TabCompleter {
 

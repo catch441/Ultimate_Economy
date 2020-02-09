@@ -1,4 +1,4 @@
-package com.ue.shopsystem.rentshop.api;
+package com.ue.shopsystem.api;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -6,7 +6,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.shopsystem.playershop.api.Playershop;
 
 public interface Rentshop extends Playershop {
 

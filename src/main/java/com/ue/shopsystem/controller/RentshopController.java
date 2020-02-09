@@ -1,4 +1,4 @@
-package com.ue.shopsystem.rentshop.api;
+package com.ue.shopsystem.controller;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,11 +14,13 @@ import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
-import com.ue.shopsystem.rentshop.impl.RentshopImpl;
+import com.ue.shopsystem.api.Rentshop;
+import com.ue.shopsystem.impl.RentshopImpl;
+import com.ue.ultimate_economy.UltimateEconomy;
 
 public class RentshopController {
 
-    private static List<RentshopImpl> rentShopList = new ArrayList<>();
+    private static List<Rentshop> rentShopList = new ArrayList<>();
 
     /**
      * Returns a free unique id for a rentshop.
@@ -44,7 +46,7 @@ public class RentshopController {
      */
     public static List<String> getRentShopIdList() {
 	List<String> list = new ArrayList<>();
-	for (RentshopImpl shop : rentShopList) {
+	for (Rentshop shop : rentShopList) {
 	    list.add(shop.getShopId());
 	}
 	return list;
@@ -57,8 +59,8 @@ public class RentshopController {
      * @return RentShop
      * @throws ShopSystemException
      */
-    public static RentshopImpl getRentShopById(String id) throws ShopSystemException {
-	for (RentshopImpl shop : rentShopList) {
+    public static Rentshop getRentShopById(String id) throws ShopSystemException {
+	for (Rentshop shop : rentShopList) {
 	    if (shop.getShopId().equals(id)) {
 		return shop;
 	    }
@@ -77,8 +79,8 @@ public class RentshopController {
      * @return RentShop
      * @throws ShopSystemException
      */
-    public static RentshopImpl getRentShopByUniqueName(String name) throws ShopSystemException {
-	for (RentshopImpl shop : rentShopList) {
+    public static Rentshop getRentShopByUniqueName(String name) throws ShopSystemException {
+	for (Rentshop shop : rentShopList) {
 	    if (shop.isRentable()) {
 		if (("RentShop#" + shop.getShopId()).equals(name)) {
 		    return shop;
@@ -100,7 +102,7 @@ public class RentshopController {
      */
     public static List<String> getRentShopUniqueNameList() {
 	List<String> list = new ArrayList<>();
-	for (RentshopImpl shop : rentShopList) {
+	for (Rentshop shop : rentShopList) {
 	    if (shop.isRentable()) {
 		list.add("RentShop#" + shop.getShopId());
 	    } else {
@@ -115,29 +117,30 @@ public class RentshopController {
      * 
      * @return list of rent shops
      */
-    public static List<RentshopImpl> getRentShops() {
+    public static List<Rentshop> getRentShops() {
 	return rentShopList;
     }
 
     /**
      * This method should be used to create a new rentshop.
      * 
-     * @param dataFolder
      * @param spawnLocation
      * @param size
      * @param rentalFee
-     * @return RentShop
+     * @return rentshop
      * @throws GeneralEconomyException
      */
-    public static RentshopImpl createRentShop(File dataFolder, Location spawnLocation, int size, double rentalFee)
+    public static Rentshop createRentShop(Location spawnLocation, int size, double rentalFee)
 	    throws GeneralEconomyException {
 	if (size % 9 != 0) {
 	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, size);
 	} else if (rentalFee < 0) {
 	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, rentalFee);
 	} else {
-	    RentshopImpl shop = new RentshopImpl(dataFolder, spawnLocation, size, generateFreeRentShopId(), rentalFee);
+	    Rentshop shop = new RentshopImpl(spawnLocation, size, generateFreeRentShopId(), rentalFee);
 	    rentShopList.add(shop);
+	    UltimateEconomy.getInstance.getConfig().set("RentShopIds", RentshopController.getRentShopIdList());
+	    UltimateEconomy.getInstance.saveConfig();
 	    return shop;
 	}
     }
@@ -155,13 +158,15 @@ public class RentshopController {
 	rentshop.getSaveFile().delete();
 	// to make sure that all references are no more available
 	rentshop = null;
+	UltimateEconomy.getInstance.getConfig().set("RentShopIds", RentshopController.getRentShopIdList());
+	UltimateEconomy.getInstance.saveConfig();
     }
 
     /**
      * This method despawns all rentshop villager.
      */
     public static void despawnAllVillagers() {
-	for (RentshopImpl shop : rentShopList) {
+	for (Rentshop shop : rentShopList) {
 	    shop.despawnVillager();
 	}
     }

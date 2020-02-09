@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.exceptions.JobExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
@@ -14,6 +13,7 @@ import com.ue.jobsystem.impl.JobImpl;
 import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
+import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobController {
 
@@ -21,6 +21,7 @@ public class JobController {
 
     /**
      * Returns a list of all available jobs.
+     * 
      * @return list of jobs
      */
     public static List<Job> getJobList() {
@@ -29,6 +30,7 @@ public class JobController {
 
     /**
      * Returns a string list of all job names.
+     * 
      * @return list of job names
      */
     public static List<String> getJobNameList() {
@@ -82,34 +84,35 @@ public class JobController {
 	}
 	jobList.remove(job);
 	job.deleteJob();
+	UltimateEconomy.getInstance.getConfig().set("JobList", JobController.getJobNameList());
+	UltimateEconomy.getInstance.saveConfig();
     }
 
     /**
      * This method should be used to create a new Job.
      * 
-     * @param dataFolder
      * @param jobName
      * @throws JobSystemException
      */
-    public static void createJob(File dataFolder, String jobName) throws JobSystemException {
+    public static void createJob(String jobName) throws JobSystemException {
 	if (getJobNameList().contains(jobName)) {
 	    throw JobSystemException.getException(JobExceptionMessageEnum.JOB_ALREADY_EXISTS);
 	} else {
-	    jobList.add(new JobImpl(dataFolder, jobName));
+	    jobList.add(new JobImpl(jobName));
+	    UltimateEconomy.getInstance.getConfig().set("JobList", JobController.getJobNameList());
+	    UltimateEconomy.getInstance.saveConfig();
 	}
     }
 
     /**
      * This method loads all Jobs from the save files.
      * 
-     * @param dataFolder
-     * @param fileConfig
      */
-    public static void loadAllJobs(File dataFolder, FileConfiguration fileConfig) {
-	for (String jobName : fileConfig.getStringList("JobList")) {
-	    File file = new File(dataFolder, jobName + "-Job.yml");
+    public static void loadAllJobs() {
+	for (String jobName : UltimateEconomy.getInstance.getConfig().getStringList("JobList")) {
+	    File file = new File(UltimateEconomy.getInstance.getDataFolder(), jobName + "-Job.yml");
 	    if (file.exists()) {
-		jobList.add(new JobImpl(dataFolder, jobName));
+		jobList.add(new JobImpl(jobName));
 	    } else {
 		Bukkit.getLogger()
 			.warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_job", jobName));

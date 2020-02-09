@@ -1,4 +1,4 @@
-package com.ue.shopsystem.playershop.api;
+package com.ue.shopsystem.controller;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -18,10 +18,12 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
-import com.ue.shopsystem.playershop.impl.PlayershopImpl;
+import com.ue.shopsystem.api.Playershop;
+import com.ue.shopsystem.impl.PlayershopImpl;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.townworld.api.Townworld;
 import com.ue.townsystem.townworld.api.TownworldController;
+import com.ue.ultimate_economy.UltimateEconomy;
 
 public class PlayershopController {
 
@@ -116,7 +118,6 @@ public class PlayershopController {
     /**
      * This method should be used to create a new playershop.
      * 
-     * @param dataFolder
      * @param name
      * @param spawnLocation
      * @param size
@@ -126,7 +127,7 @@ public class PlayershopController {
      * @throws PlayerException
      * @throws GeneralEconomyException
      */
-    public static void createPlayerShop(File dataFolder, String name, Location spawnLocation, int size,
+    public static void createPlayerShop(String name, Location spawnLocation, int size,
 	    EconomyPlayer ecoPlayer)
 	    throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
 	checkForValidShopName(name);
@@ -136,7 +137,9 @@ public class PlayershopController {
 	checkForValidSize(size);
 	
 	playerShopList.add(
-		    new PlayershopImpl(dataFolder, name, ecoPlayer, generateFreePlayerShopId(), spawnLocation, size));
+		    new PlayershopImpl(name, ecoPlayer, generateFreePlayerShopId(), spawnLocation, size));
+	UltimateEconomy.getInstance.getConfig().set("PlayerShopIds", PlayershopController.getPlayershopIdList());
+	UltimateEconomy.getInstance.saveConfig();
     }
 
     private static void checkForValidSize(int size) throws GeneralEconomyException {
@@ -204,6 +207,8 @@ public class PlayershopController {
 	playershop.getSaveFile().delete();
 	// to make sure that all references are no more available
 	playershop = null;
+	UltimateEconomy.getInstance.getConfig().set("PlayerShopIds", PlayershopController.getPlayershopIdList());
+	UltimateEconomy.getInstance.saveConfig();
     }
 
     /**

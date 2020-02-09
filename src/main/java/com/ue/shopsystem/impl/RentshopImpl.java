@@ -1,4 +1,4 @@
-package com.ue.shopsystem.rentshop.impl;
+package com.ue.shopsystem.impl;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,8 +28,7 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
-import com.ue.shopsystem.playershop.impl.PlayershopImpl;
-import com.ue.shopsystem.rentshop.api.Rentshop;
+import com.ue.shopsystem.api.Rentshop;
 import com.ue.ultimate_economy.UEVillagerType;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -44,14 +43,13 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      * Constructor for creating a new rentShop. No validation, if the shopId is
      * unique.
      * 
-     * @param dataFolder
      * @param spawnLocation
      * @param size
      * @param shopId
      * @param rentalFee
      */
-    public RentshopImpl(File dataFolder, Location spawnLocation, int size, String shopId, double rentalFee) {
-	super(dataFolder, "RentShop#" + shopId, null, shopId, spawnLocation, size);
+    public RentshopImpl(Location spawnLocation, int size, String shopId, double rentalFee) {
+	super("RentShop#" + shopId, null, shopId, spawnLocation, size);
 	saveRentalFeeToFile(rentalFee);
 	this.rentalFee = rentalFee;
 	saveRentableToFile(true);

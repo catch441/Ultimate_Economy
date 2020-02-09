@@ -18,6 +18,7 @@ import com.ue.jobsystem.impl.JobcenterImpl;
 import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
+import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobcenterController {
 
@@ -89,27 +90,29 @@ public class JobcenterController {
 		}
 	    }
 	}
+	UltimateEconomy.getInstance.getConfig().set("JobCenterNames", JobcenterController.getJobCenterNameList());
+	UltimateEconomy.getInstance.saveConfig();
     }
 
     /**
      * This method should be used to create a new jobcenter.
      * 
-     * @param server
-     * @param dataFolder
      * @param name
      * @param spawnLocation
      * @param size
      * @throws JobSystemException
      * @throws GeneralEconomyException
      */
-    public static void createJobCenter(Server server, File dataFolder, String name, Location spawnLocation, int size)
+    public static void createJobCenter(String name, Location spawnLocation, int size)
 	    throws JobSystemException, GeneralEconomyException {
 	if (getJobCenterNameList().contains(name)) {
 	    throw JobSystemException.getException(JobExceptionMessageEnum.JOB_ALREADY_EXISTS);
 	} else if (size % 9 != 0) {
 	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, size);
 	} else {
-	    jobCenterList.add(new JobcenterImpl(server, dataFolder, name, spawnLocation, size));
+	    jobCenterList.add(new JobcenterImpl(name, spawnLocation, size));
+	    UltimateEconomy.getInstance.getConfig().set("JobCenterNames", JobcenterController.getJobCenterNameList());
+	    UltimateEconomy.getInstance.saveConfig();
 	}
     }
 

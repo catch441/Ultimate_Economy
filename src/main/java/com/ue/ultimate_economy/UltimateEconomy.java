@@ -32,25 +32,25 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.JobcenterController;
-import com.ue.jobsystem.impl.JobCommandExecutor;
-import com.ue.jobsystem.impl.JobTabCompleter;
+import com.ue.jobsystem.commands.JobCommandExecutor;
+import com.ue.jobsystem.commands.JobTabCompleter;
 import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.player.impl.PlayerCommandExecutor;
 import com.ue.player.impl.PlayerTabCompleter;
-import com.ue.shopsystem.adminshop.api.AdminshopController;
-import com.ue.shopsystem.adminshop.impl.AdminshopCommandExecutor;
-import com.ue.shopsystem.adminshop.impl.AdminshopTabCompleterImpl;
-import com.ue.shopsystem.playershop.api.PlayershopController;
-import com.ue.shopsystem.playershop.impl.PlayershopCommandExecutor;
-import com.ue.shopsystem.playershop.impl.PlayershopTabCompleter;
-import com.ue.shopsystem.rentshop.api.RentshopController;
-import com.ue.shopsystem.rentshop.impl.RentDailyTask;
-import com.ue.shopsystem.rentshop.impl.RentshopCommandExecutor;
-import com.ue.shopsystem.rentshop.impl.RentshopTabCompleter;
-import com.ue.townsystem.town.impl.TownCommandExecutor;
-import com.ue.townsystem.town.impl.TownTabCompleter;
+import com.ue.shopsystem.commands.adminshop.AdminshopCommandExecutor;
+import com.ue.shopsystem.commands.adminshop.AdminshopTabCompleterImpl;
+import com.ue.shopsystem.commands.playershop.PlayershopCommandExecutor;
+import com.ue.shopsystem.commands.playershop.PlayershopTabCompleter;
+import com.ue.shopsystem.commands.rentshop.RentshopCommandExecutor;
+import com.ue.shopsystem.commands.rentshop.RentshopTabCompleter;
+import com.ue.shopsystem.controller.AdminshopController;
+import com.ue.shopsystem.controller.PlayershopController;
+import com.ue.shopsystem.controller.RentshopController;
+import com.ue.shopsystem.impl.RentDailyTask;
+import com.ue.townsystem.town.commands.TownCommandExecutor;
+import com.ue.townsystem.town.commands.TownTabCompleter;
 import com.ue.townsystem.townworld.api.TownworldController;
 import com.ue.townsystem.townworld.impl.TownworldCommandExecutor;
 import com.ue.townsystem.townworld.impl.TownworldTabCompleter;
@@ -202,12 +202,12 @@ public class UltimateEconomy extends JavaPlugin {
     }
 
     private PlayerCommandExecutor setupCommandExecutors() {
-	getCommand("jobcenter").setExecutor(new JobCommandExecutor(this));
+	getCommand("jobcenter").setExecutor(new JobCommandExecutor());
 	getCommand("town").setExecutor(new TownCommandExecutor());
 	getCommand("townworld").setExecutor(new TownworldCommandExecutor(this));
-	getCommand("adminshop").setExecutor(new AdminshopCommandExecutor(this));
-	getCommand("playershop").setExecutor(new PlayershopCommandExecutor(this));
-	getCommand("rentshop").setExecutor(new RentshopCommandExecutor(this));
+	getCommand("adminshop").setExecutor(new AdminshopCommandExecutor());
+	getCommand("playershop").setExecutor(new PlayershopCommandExecutor());
+	getCommand("rentshop").setExecutor(new RentshopCommandExecutor());
 	PlayerCommandExecutor playerCommandExecutor = new PlayerCommandExecutor();
 	getCommand("pay").setExecutor(playerCommandExecutor);
 	getCommand("money").setExecutor(playerCommandExecutor);
@@ -224,7 +224,7 @@ public class UltimateEconomy extends JavaPlugin {
 	}
 	setupPlugin();
 	MessageWrapper.loadLanguage();
-	JobController.loadAllJobs(getDataFolder(), getConfig());
+	JobController.loadAllJobs();
 	JobcenterController.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
 	EconomyPlayerController.loadAllEconomyPlayers(getDataFolder());
 	TownworldController.loadAllTownWorlds(getDataFolder(), getConfig());

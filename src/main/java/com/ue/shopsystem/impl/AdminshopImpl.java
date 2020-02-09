@@ -1,4 +1,4 @@
-package com.ue.shopsystem.adminshop.impl;
+package com.ue.shopsystem.impl;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,9 +12,8 @@ import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.shopsystem.adminshop.api.Adminshop;
-import com.ue.shopsystem.adminshop.api.AdminshopController;
-import com.ue.shopsystem.impl.AbstractShopImpl;
+import com.ue.shopsystem.api.Adminshop;
+import com.ue.shopsystem.controller.AdminshopController;
 import com.ue.ultimate_economy.UEVillagerType;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -24,14 +23,13 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
      * Constructor for creating a new adminShop. No validation, if the shopId is
      * unique.
      * 
-     * @param dataFolder
      * @param name
      * @param shopId
      * @param spawnLocation
      * @param size
      */
-    public AdminshopImpl(File dataFolder, String name, String shopId, Location spawnLocation, int size) {
-	super(dataFolder, name, shopId, spawnLocation, size);
+    public AdminshopImpl(String name, String shopId, Location spawnLocation, int size) {
+	super(name, shopId, spawnLocation, size);
 	// set the tye of the villager
 	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, UEVillagerType.ADMINSHOP));
 	for (String item : itemNames) {

@@ -17,6 +17,7 @@ import com.ue.exceptions.GeneralEconomyMessageEnum;
 import com.ue.exceptions.JobExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
 import com.ue.jobsystem.api.Job;
+import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobImpl implements Job {
 
@@ -27,15 +28,14 @@ public class JobImpl implements Job {
 
     /**
      * Constructor to create a new or load a existing job.
-     * @param dataFolder
      * @param name
      */
-    public JobImpl(File dataFolder, String name) {
+    public JobImpl(String name) {
 	itemList = new ArrayList<>();
 	entityList = new ArrayList<>();
 	fisherList = new ArrayList<>();
 	this.name = name;
-	file = new File(dataFolder, name + "-Job.yml");
+	file = new File(UltimateEconomy.getInstance.getDataFolder(), name + "-Job.yml");
 	if (!file.exists()) {
 	    try {
 		file.createNewFile();

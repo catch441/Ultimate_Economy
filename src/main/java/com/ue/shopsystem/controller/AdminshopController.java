@@ -1,4 +1,4 @@
-package com.ue.shopsystem.adminshop.api;
+package com.ue.shopsystem.controller;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,7 +14,9 @@ import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
-import com.ue.shopsystem.adminshop.impl.AdminshopImpl;
+import com.ue.shopsystem.api.Adminshop;
+import com.ue.shopsystem.impl.AdminshopImpl;
+import com.ue.ultimate_economy.UltimateEconomy;
 
 public class AdminshopController {
 
@@ -108,14 +110,13 @@ public class AdminshopController {
     /**
      * This method should be used to create a new adminshop.
      * 
-     * @param dataFolder
      * @param name
      * @param spawnLocation
      * @param size
      * @throws ShopSystemException
      * @throws GeneralEconomyException
      */
-    public static void createAdminShop(File dataFolder, String name, Location spawnLocation, int size)
+    public static void createAdminShop(String name, Location spawnLocation, int size)
 	    throws ShopSystemException, GeneralEconomyException {
 	if (name.contains("_")) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
@@ -124,7 +125,9 @@ public class AdminshopController {
 	} else if (size % 9 != 0) {
 	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, size);
 	} else {
-	    adminShopList.add(new AdminshopImpl(dataFolder, name, generateFreeAdminShopId(), spawnLocation, size));
+	    adminShopList.add(new AdminshopImpl(name, generateFreeAdminShopId(), spawnLocation, size));
+	    UltimateEconomy.getInstance.getConfig().set("AdminShopIds", AdminshopController.getAdminshopIdList());
+	    UltimateEconomy.getInstance.saveConfig();
 	}
     }
 
@@ -141,6 +144,8 @@ public class AdminshopController {
 	adminshop.getWorld().save();
 	// to make sure that all references are no more available
 	adminshop = null;
+	UltimateEconomy.getInstance.getConfig().set("AdminShopIds", AdminshopController.getAdminshopIdList());
+	UltimateEconomy.getInstance.saveConfig();
     }
 
     /**

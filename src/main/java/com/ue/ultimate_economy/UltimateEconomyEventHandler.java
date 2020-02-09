@@ -57,14 +57,14 @@ import com.ue.jobsystem.api.JobcenterController;
 import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
-import com.ue.shopsystem.adminshop.api.Adminshop;
-import com.ue.shopsystem.adminshop.api.AdminshopController;
-import com.ue.shopsystem.api.Shop;
+import com.ue.shopsystem.api.Adminshop;
+import com.ue.shopsystem.api.Playershop;
+import com.ue.shopsystem.api.Rentshop;
+import com.ue.shopsystem.api.AbstractShop;
+import com.ue.shopsystem.controller.AdminshopController;
+import com.ue.shopsystem.controller.PlayershopController;
+import com.ue.shopsystem.controller.RentshopController;
 import com.ue.shopsystem.impl.Spawner;
-import com.ue.shopsystem.playershop.api.Playershop;
-import com.ue.shopsystem.playershop.api.PlayershopController;
-import com.ue.shopsystem.rentshop.api.Rentshop;
-import com.ue.shopsystem.rentshop.api.RentshopController;
 import com.ue.townsystem.town.api.Plot;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.townworld.api.Townworld;
@@ -624,23 +624,23 @@ public class UltimateEconomyEventHandler implements Listener {
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void handleShopInvClickEvent(Shop shop, Player player, InventoryClickEvent event) {
+    private void handleShopInvClickEvent(AbstractShop abstractShop, Player player, InventoryClickEvent event) {
 	ItemMeta clickedItemMeta = event.getCurrentItem().getItemMeta();
 	try {
-	    if (event.getView().getTitle().equals(shop.getName() + "-Editor")
+	    if (event.getView().getTitle().equals(abstractShop.getName() + "-Editor")
 		    && clickedItemMeta.getDisplayName().contains("Slot")) {
 		int slot = Integer.valueOf(clickedItemMeta.getDisplayName().substring(5));
-		shop.openSlotEditor(player, slot);
-	    } else if (event.getView().getTitle().equals(shop.getName() + "-SlotEditor")) {
-		shop.handleSlotEditor(event);
+		abstractShop.openSlotEditor(player, slot);
+	    } else if (event.getView().getTitle().equals(abstractShop.getName() + "-SlotEditor")) {
+		abstractShop.handleSlotEditor(event);
 		String command = clickedItemMeta.getDisplayName();
 		if ((ChatColor.RED + "remove item").equals(command)
 			|| (ChatColor.RED + "exit without save").equals(command)
 			|| (ChatColor.YELLOW + "save changes").equals(command)) {
-		    shop.openEditor(player);
+		    abstractShop.openEditor(player);
 		}
 	    } else {
-		handleBuySell(shop, event, player);
+		handleBuySell(abstractShop, event, player);
 	    }
 	} catch (IllegalArgumentException | ShopSystemException | PlayerException | GeneralEconomyException e) {
 	}
@@ -649,7 +649,7 @@ public class UltimateEconomyEventHandler implements Listener {
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void handleBuySell(Shop shop, InventoryClickEvent event, Player playe)
+    private void handleBuySell(AbstractShop abstractShop, InventoryClickEvent event, Player playe)
 	    throws PlayerException, GeneralEconomyException {
 	event.setCancelled(true);
 	EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(playe.getName());
@@ -658,16 +658,16 @@ public class UltimateEconomyEventHandler implements Listener {
 	ClickType clickType = event.getClick();
 	Inventory inventoryplayer = event.getWhoClicked().getInventory();
 	Playershop playershop = null;
-	if (shop instanceof Playershop) {
+	if (abstractShop instanceof Playershop) {
 	    isPlayershop = true;
-	    playershop = (Playershop) shop;
+	    playershop = (Playershop) abstractShop;
 	}
 	// Playershop
 	if (isPlayershop && clickType == ClickType.MIDDLE && playershop.isOwner(ecoPlayer)) {
 	    playershop.switchStockpile();
 	} //
 	else {
-	    for (String itemString : shop.getItemList()) {
+	    for (String itemString : abstractShop.getItemList()) {
 		// only relevant for adminshop
 		boolean isSpawner = false;
 		// standardize the itemstack for the string
@@ -693,9 +693,9 @@ public class UltimateEconomyEventHandler implements Listener {
 		}
 		if (itemString.equals(clickedItemString)) {
 		    try {
-			double sellprice = shop.getItemSellPrice(itemString);
-			double buyprice = shop.getItemBuyPrice(itemString);
-			int amount = shop.getItemAmount(itemString);
+			double sellprice = abstractShop.getItemSellPrice(itemString);
+			double buyprice = abstractShop.getItemBuyPrice(itemString);
+			int amount = abstractShop.getItemAmount(itemString);
 			EconomyPlayer playerShopOwner = null;
 			if (isPlayershop) {
 			    playerShopOwner = playershop.getOwner();
@@ -725,7 +725,7 @@ public class UltimateEconomyEventHandler implements Listener {
 					    }
 					} //
 					else if (!isSpawner) {
-					    ItemStack itemStack = shop.getItemStack(itemString);
+					    ItemStack itemStack = abstractShop.getItemStack(itemString);
 					    if (isPlayershop) {
 						playershop.decreaseStock(itemString, amount);
 						// if the player is in stockpile mode, then the stockpile gets refreshed
@@ -779,7 +779,7 @@ public class UltimateEconomyEventHandler implements Listener {
 				|| clickType == ClickType.RIGHT && isPlayershop
 					&& playe.getName().equals(playerShopOwner.getName())
 					&& inventoryplayer.containsAtLeast(clickedItem, amount)) {
-			    ItemStack itemStack = shop.getItemStack(itemString);
+			    ItemStack itemStack = abstractShop.getItemStack(itemString);
 			    itemStack.setAmount(amount);
 			    if (inventoryContainsItems(inventoryplayer, itemStack, amount)) {
 				if (isPlayershop && !playerShopOwner.getName().equals(playe.getName())
@@ -827,7 +827,7 @@ public class UltimateEconomyEventHandler implements Listener {
 				|| clickType == ClickType.SHIFT_RIGHT && isPlayershop
 					&& playe.getName().equals(playerShopOwner.getName())
 					&& inventoryplayer.containsAtLeast(clickedItem, amount)) {
-			    ItemStack itemStack = shop.getItemStack(itemString);
+			    ItemStack itemStack = abstractShop.getItemStack(itemString);
 			    if (inventoryContainsItems(inventoryplayer, itemStack, 1)) {
 				ItemStack[] i = inventoryplayer.getStorageContents();
 				int itemAmount = 0;

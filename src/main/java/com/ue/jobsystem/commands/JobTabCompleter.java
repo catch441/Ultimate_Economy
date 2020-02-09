@@ -1,4 +1,4 @@
-package com.ue.jobsystem.impl;
+package com.ue.jobsystem.commands;
 
 import java.util.ArrayList;
 import java.util.List;
