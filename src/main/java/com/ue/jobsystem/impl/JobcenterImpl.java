@@ -26,6 +26,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyMessageEnum;
 import com.ue.exceptions.JobExceptionMessageEnum;
@@ -39,7 +40,6 @@ import com.ue.jobsystem.api.JobcenterController;
 import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
-import com.ue.ultimate_economy.UEVillagerType;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobcenterImpl implements Jobcenter {
@@ -60,8 +60,7 @@ public class JobcenterImpl implements Jobcenter {
      * @param size
      * @throws JobSystemException
      */
-    public JobcenterImpl(String name, Location spawnLocation, int size)
-	    throws JobSystemException {
+    public JobcenterImpl(String name, Location spawnLocation, int size) throws JobSystemException {
 	jobs = new ArrayList<>();
 	this.name = name;
 	file = new File(UltimateEconomy.getInstance.getDataFolder(), name + "-JobCenter.yml");
@@ -134,7 +133,7 @@ public class JobcenterImpl implements Jobcenter {
 	}
 	villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
 	villager.setCustomName(name);
-	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, UEVillagerType.JOBCENTER));
+	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.JOBCENTER));
 	villager.setCustomNameVisible(true);
 	villager.setProfession(Villager.Profession.NITWIT);
 	villager.setSilent(true);

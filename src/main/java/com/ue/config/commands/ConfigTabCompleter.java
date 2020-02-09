@@ -1,4 +1,4 @@
-package com.ue.config.impl;
+package com.ue.config.commands;
 
 import java.util.ArrayList;
 import java.util.List;

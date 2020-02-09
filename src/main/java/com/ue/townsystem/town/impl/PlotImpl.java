@@ -24,6 +24,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.TownExceptionMessageEnum;
@@ -31,7 +32,6 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.townsystem.town.api.Plot;
-import com.ue.ultimate_economy.UEVillagerType;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class PlotImpl implements Plot {
@@ -96,7 +96,7 @@ public class PlotImpl implements Plot {
 	villager.setCustomName("Plot " + location.getChunk().getX() + "/" + location.getChunk().getZ() + " For Sale!");
 	villager.setCustomNameVisible(true);
 	// set the tye of the villager to meta
-	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, UEVillagerType.PLOTSALE));
+	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLOTSALE));
 	villager.setProfession(Villager.Profession.NITWIT);
 	villager.setSilent(true);
 	villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));

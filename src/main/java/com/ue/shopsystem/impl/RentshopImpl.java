@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import com.ue.config.api.ConfigController;
+import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyMessageEnum;
 import com.ue.exceptions.PlayerException;
@@ -29,7 +30,6 @@ import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.api.Rentshop;
-import com.ue.ultimate_economy.UEVillagerType;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class RentshopImpl extends PlayershopImpl implements Rentshop {
@@ -158,7 +158,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
     private void setupVillager() {
 	// set the type of the villager
 	villager.setMetadata("ue-type",
-		new FixedMetadataValue(UltimateEconomy.getInstance, UEVillagerType.PLAYERSHOP_RENTABLE));
+		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP_RENTABLE));
 	// if not rentable, then change to the custom name choosen by the tenant
 	if (!isRentable()) {
 	    villager.setCustomName(getName() + "_" + owner.getName());

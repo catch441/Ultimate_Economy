@@ -251,5 +251,6 @@ public class TownworldImpl implements Townworld {
 	default:
 	    break;
 	}
+	event.getWhoClicked().closeInventory();
     }
 }

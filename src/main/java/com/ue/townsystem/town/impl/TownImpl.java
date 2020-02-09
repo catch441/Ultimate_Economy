@@ -23,6 +23,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.TownExceptionMessageEnum;
@@ -34,7 +35,6 @@ import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.town.api.TownController;
 import com.ue.townsystem.townworld.api.Townworld;
 import com.ue.townsystem.townworld.api.TownworldController;
-import com.ue.ultimate_economy.UEVillagerType;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class TownImpl implements Town {
@@ -121,7 +121,7 @@ public class TownImpl implements Town {
 	villager.setCustomNameVisible(true);
 	// set the tye of the villager
 	villager.setMetadata("ue-type",
-		new FixedMetadataValue(UltimateEconomy.getInstance, UEVillagerType.TOWNMANAGER));
+		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.TOWNMANAGER));
 	villager.setProfession(Villager.Profession.NITWIT);
 	villager.setSilent(true);
 	villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));

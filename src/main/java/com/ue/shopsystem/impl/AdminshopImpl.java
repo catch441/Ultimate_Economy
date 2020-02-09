@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.metadata.FixedMetadataValue;
 
+import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopExceptionMessageEnum;
@@ -14,7 +15,6 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.api.Adminshop;
 import com.ue.shopsystem.controller.AdminshopController;
-import com.ue.ultimate_economy.UEVillagerType;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
@@ -31,7 +31,7 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
     public AdminshopImpl(String name, String shopId, Location spawnLocation, int size) {
 	super(name, shopId, spawnLocation, size);
 	// set the tye of the villager
-	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, UEVillagerType.ADMINSHOP));
+	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.ADMINSHOP));
 	for (String item : itemNames) {
 	    try {
 		loadShopItem(item);
@@ -53,7 +53,7 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
     public AdminshopImpl(File dataFolder, String name, String shopId) throws TownSystemException {
 	super(dataFolder, name, shopId);
 	// set the tye of the villager
-	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, UEVillagerType.ADMINSHOP));
+	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.ADMINSHOP));
 	ArrayList<String> tempList = new ArrayList<>(itemNames);
 	for (String item : tempList) {
 	    try {

@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
+import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyMessageEnum;
 import com.ue.exceptions.PlayerException;
@@ -28,7 +29,6 @@ import com.ue.shopsystem.controller.PlayershopController;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.townworld.api.Townworld;
 import com.ue.townsystem.townworld.api.TownworldController;
-import com.ue.ultimate_economy.UEVillagerType;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class PlayershopImpl extends AbstractShopImpl implements Playershop {
@@ -36,7 +36,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     protected EconomyPlayer owner;
     // true = shop, false = stock
     private boolean shopMode;
-   
+
     /**
      * Constructor for creating a new playershop. No validation, if the shopId is
      * unique.
@@ -47,13 +47,13 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      * @param spawnLocation
      * @param size
      */
-    public PlayershopImpl(String name, EconomyPlayer owner, String shopId, Location spawnLocation,
-	    int size) {
+    public PlayershopImpl(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size) {
 	super(name, shopId, spawnLocation, size);
 	shopMode = true;
 	saveOwnerToFile(owner);
 	// set the type of the villager
-	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, UEVillagerType.PLAYERSHOP));
+	villager.setMetadata("ue-type",
+		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP));
 	villager.setCustomName(name + "_" + owner.getName());
     }
 
@@ -83,7 +83,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	} catch (PlayerException e) {
 	}
 	// set the type of the villager
-	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, UEVillagerType.PLAYERSHOP));
+	villager.setMetadata("ue-type",
+		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP));
 	// update villager name to naming convention
 	if (owner == null) {
 	    villager.setCustomName(getName() + "_");
@@ -101,7 +102,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////overridden
+    /////////////////////////////////////////////////////////////////////////////////////////////// overridden
 
     /**
      * Overridden, because of the stock item.

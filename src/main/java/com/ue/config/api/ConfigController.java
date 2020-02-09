@@ -27,58 +27,97 @@ public class ConfigController {
     public static void setupConfig() {
 	FileConfiguration fileConfig = UltimateEconomy.getInstance.getConfig();
 	try {
-	    if (!fileConfig.isSet("MaxHomes")) {
-		setMaxHomes(3);
-	    } else {
-		maxHomes = fileConfig.getInt("MaxHomes");
-	    }
-	    if (!fileConfig.isSet("MaxJobs")) {
-		setMaxJobs(2);
-	    } else {
-		maxJobs = fileConfig.getInt("MaxJobs");
-	    }
-	    if (!fileConfig.isSet("MaxJoinedTowns")) {
-		setMaxJoinedTowns(1);
-	    } else {
-		maxJoinedTowns = fileConfig.getInt("MaxJoinedTowns");
-	    }
-	    if (!fileConfig.isSet("MaxPlayershops")) {
-		setMaxPlayershops(3);
-	    } else {
-		maxPlayershops = fileConfig.getInt("MaxPlayershops");
-	    }
-	    if (!fileConfig.isSet("homes")) {
-		setHomeSystem(true);
-	    } else {
-		homesSystem = fileConfig.getBoolean("homes");
-	    }
-	    if (!fileConfig.isSet("MaxRentedDays")) {
-		fileConfig.set("MaxRentedDays", 14);
-		maxRentedDays = 14;
-	    } else {
-		maxRentedDays = fileConfig.getInt("MaxRentedDays");
-	    }
-	    if (!fileConfig.isSet("ExtendedInteraction")) {
-		setExtendedInteraction(false);
-	    } else {
-		extendedInteraction = fileConfig.getBoolean("ExtendedInteraction");
-	    }
-	    if (!fileConfig.isSet("WildernessInteraction")) {
-		setWildernessInteraction(false);
-	    } else {
-		wildernessInteraction = fileConfig.getBoolean("WildernessInteraction");
-	    }
-	    if (!fileConfig.isSet("currencyPl")) {
-		setCurrencyPl("$");
-	    } else {
-		setCurrencyPl(fileConfig.getString("currencyPl"));
-	    }
-	    if (!fileConfig.isSet("currencySg")) {
-		setCurrencySg("$");
-	    } else {
-		setCurrencySg(fileConfig.getString("currencySg"));
-	    }
+	    setupMaxHomes(fileConfig);
+	    setupMaxJobs(fileConfig);
+	    setupMaxJoinedTowns(fileConfig);
+	    setupMaxPlayershops(fileConfig);
+	    setupHomesFeature(fileConfig);
+	    setupMaxRentedDays(fileConfig);
+	    setupExtendedInteraction(fileConfig);
+	    setupWildernessInteraction(fileConfig);
+	    setupCurrencyPl(fileConfig);
+	    setupCurrencySg(fileConfig);
 	} catch (GeneralEconomyException e) {
+	}
+    }
+
+    private static void setupMaxRentedDays(FileConfiguration fileConfig) throws GeneralEconomyException {
+	if (!fileConfig.isSet("MaxRentedDays")) {
+	setMaxRentedDays(14);
+	} else {
+	maxRentedDays = fileConfig.getInt("MaxRentedDays");
+	}
+    }
+
+    private static void setupExtendedInteraction(FileConfiguration fileConfig) {
+	if (!fileConfig.isSet("ExtendedInteraction")) {
+	setExtendedInteraction(false);
+	} else {
+	extendedInteraction = fileConfig.getBoolean("ExtendedInteraction");
+	}
+    }
+
+    private static void setupWildernessInteraction(FileConfiguration fileConfig) {
+	if (!fileConfig.isSet("WildernessInteraction")) {
+	setWildernessInteraction(false);
+	} else {
+	wildernessInteraction = fileConfig.getBoolean("WildernessInteraction");
+	}
+    }
+
+    private static void setupCurrencyPl(FileConfiguration fileConfig) {
+	if (!fileConfig.isSet("currencyPl")) {
+	setCurrencyPl("$");
+	} else {
+	setCurrencyPl(fileConfig.getString("currencyPl"));
+	}
+    }
+
+    private static void setupCurrencySg(FileConfiguration fileConfig) {
+	if (!fileConfig.isSet("currencySg")) {
+	setCurrencySg("$");
+	} else {
+	setCurrencySg(fileConfig.getString("currencySg"));
+	}
+    }
+
+    private static void setupHomesFeature(FileConfiguration fileConfig) {
+	if (!fileConfig.isSet("homes")) {
+	setHomeSystem(true);
+	} else {
+	homesSystem = fileConfig.getBoolean("homes");
+	}
+    }
+
+    private static void setupMaxPlayershops(FileConfiguration fileConfig) throws GeneralEconomyException {
+	if (!fileConfig.isSet("MaxPlayershops")) {
+	setMaxPlayershops(3);
+	} else {
+	maxPlayershops = fileConfig.getInt("MaxPlayershops");
+	}
+    }
+
+    private static void setupMaxJoinedTowns(FileConfiguration fileConfig) throws GeneralEconomyException {
+	if (!fileConfig.isSet("MaxJoinedTowns")) {
+	setMaxJoinedTowns(1);
+	} else {
+	maxJoinedTowns = fileConfig.getInt("MaxJoinedTowns");
+	}
+    }
+
+    private static void setupMaxJobs(FileConfiguration fileConfig) throws GeneralEconomyException {
+	if (!fileConfig.isSet("MaxJobs")) {
+	setMaxJobs(2);
+	} else {
+	maxJobs = fileConfig.getInt("MaxJobs");
+	}
+    }
+
+    private static void setupMaxHomes(FileConfiguration fileConfig) throws GeneralEconomyException {
+	if (!fileConfig.isSet("MaxHomes")) {
+	setMaxHomes(3);
+	} else {
+	maxHomes = fileConfig.getInt("MaxHomes");
 	}
     }
 
