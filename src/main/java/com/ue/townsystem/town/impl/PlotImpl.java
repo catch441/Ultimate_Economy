@@ -42,7 +42,7 @@ public class PlotImpl implements Plot {
     private boolean isForSale;
     private double salePrice;
     private Villager villager;
-    private Inventory inventory;
+    private Inventory salesVillagerInv;
     private TownImpl townImpl;
 
     /**
@@ -85,23 +85,13 @@ public class PlotImpl implements Plot {
      */
     public void spawnSaleVillager(Location location) {
 	location.getChunk().load();
-	Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10, 10, 10);
-	for (Entity entity : entitys) {
-	    if (entity.getName()
-		    .equals("Plot " + location.getChunk().getX() + "/" + location.getChunk().getZ() + " For Sale!")) {
-		entity.remove();
-	    }
-	}
-	villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
-	villager.setCustomName("Plot " + location.getChunk().getX() + "/" + location.getChunk().getZ() + " For Sale!");
-	villager.setCustomNameVisible(true);
-	// set the tye of the villager to meta
-	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLOTSALE));
-	villager.setProfession(Villager.Profession.NITWIT);
-	villager.setSilent(true);
-	villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
-	villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
-	inventory = Bukkit.createInventory(villager, 9,
+	removeDuplicatedVillagers(location);
+	setupSaleVillager(location);
+	setupSaleVillagerInventory(location);
+    }
+
+    private void setupSaleVillagerInventory(Location location) {
+	salesVillagerInv = Bukkit.createInventory(villager, 9,
 		"Plot " + location.getChunk().getX() + "/" + location.getChunk().getZ());
 	ItemStack itemStack = new ItemStack(Material.GREEN_WOOL, 1);
 	ItemMeta meta = itemStack.getItemMeta();
@@ -111,7 +101,7 @@ public class PlotImpl implements Plot {
 	list.add(ChatColor.GOLD + "Is sold by " + ChatColor.GREEN + owner.getName());
 	meta.setLore(list);
 	itemStack.setItemMeta(meta);
-	inventory.setItem(0, itemStack);
+	salesVillagerInv.setItem(0, itemStack);
 	itemStack = new ItemStack(Material.RED_WOOL, 1);
 	meta = itemStack.getItemMeta();
 	list.clear();
@@ -119,7 +109,29 @@ public class PlotImpl implements Plot {
 	meta.setDisplayName("Cancel Sale");
 	meta.setLore(list);
 	itemStack.setItemMeta(meta);
-	inventory.setItem(8, itemStack);
+	salesVillagerInv.setItem(8, itemStack);
+    }
+
+    private void setupSaleVillager(Location location) {
+	villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
+	villager.setCustomName("Plot " + location.getChunk().getX() + "/" + location.getChunk().getZ() + " For Sale!");
+	villager.setCustomNameVisible(true);
+	// set the tye of the villager to meta
+	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLOTSALE));
+	villager.setProfession(Villager.Profession.NITWIT);
+	villager.setSilent(true);
+	villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
+	villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
+    }
+
+    private void removeDuplicatedVillagers(Location location) {
+	Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10, 10, 10);
+	for (Entity entity : entitys) {
+	    if (entity.getName()
+		    .equals("Plot " + location.getChunk().getX() + "/" + location.getChunk().getZ() + " For Sale!")) {
+		entity.remove();
+	    }
+	}
     }
 
     @Override
@@ -150,7 +162,7 @@ public class PlotImpl implements Plot {
 
     @Override
     public void openSaleVillagerInv(Player player) {
-	player.openInventory(inventory);
+	player.openInventory(salesVillagerInv);
     }
 
     @Override

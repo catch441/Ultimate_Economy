@@ -154,13 +154,6 @@ public interface Town {
     public boolean isMayor(EconomyPlayer player) throws TownSystemException;
 
     /**
-     * Set town mayor.
-     * 
-     * @param player
-     */
-    public void setMayor(EconomyPlayer player);
-
-    /**
      * Get mayor.
      * 
      * @return String
@@ -280,14 +273,14 @@ public interface Town {
      * Set the town spawn location. Deputy mayor permission needed.
      * 
      * @param townSpawn
-     * @param player
+     * @param ecoPlayer
      *            the player who wants to change the townspawn
      * @param sendMessage
      *            when true a message is send to the receiver and this player
      * @throws TownSystemException
      * @throws PlayerException
      */
-    public void setTownSpawn(Location townSpawn, EconomyPlayer player, boolean sendMessage)
+    public void changeTownSpawn(Location townSpawn, EconomyPlayer ecoPlayer, boolean sendMessage)
 	    throws TownSystemException, PlayerException;
 
     /**

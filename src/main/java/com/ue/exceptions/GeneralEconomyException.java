@@ -17,12 +17,6 @@ public class GeneralEconomyException extends Exception {
      * @return general economy exception
      */
     public static GeneralEconomyException getException(GeneralEconomyMessageEnum key, Object... params) {
-	switch (key) {
-	case INVALID_PARAMETER:
-	    return new GeneralEconomyException(MessageWrapper.getErrorString("invalid_parameter", params));
-	default:
-	    return null;
-	}
+	return new GeneralEconomyException(MessageWrapper.getErrorString(key.getValue(), params));
     }
-
 }

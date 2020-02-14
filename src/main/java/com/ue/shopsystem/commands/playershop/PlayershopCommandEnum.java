@@ -43,7 +43,7 @@ public enum PlayershopCommandEnum {
 	    return true;
 	}
     },
-    DELETE_OTHER {
+    DELETEOTHER {
 	@Override
 	boolean perform(String label, String[] args, Player player)
 		throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
@@ -99,7 +99,7 @@ public enum PlayershopCommandEnum {
 	    return true;
 	}
     },
-    CHANGE_OWNER {
+    CHANGEOWNER {
 	@Override
 	boolean perform(String label, String[] args, Player player)
 		throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
@@ -131,7 +131,7 @@ public enum PlayershopCommandEnum {
 	    return true;
 	}
     },
-    EDIT_SHOP {
+    EDITSHOP {
 	@Override
 	boolean perform(String label, String[] args, Player player)
 		throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {

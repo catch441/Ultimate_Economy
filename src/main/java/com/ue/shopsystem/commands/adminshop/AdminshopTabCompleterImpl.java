@@ -55,47 +55,25 @@ public class AdminshopTabCompleterImpl implements TabCompleter {
     }
 
     private void addMatchingCommandsToList(String[] args, List<String> list) {
-	if ("create".contains(args[0])) {
-	    list.add("create");
-	}
-	if ("delete".contains(args[0])) {
-	    list.add("delete");
-	}
-	if ("move".contains(args[0])) {
-	    list.add("move");
-	}
-	if ("addItem".contains(args[0])) {
-	    list.add("addItem");
-	}
-	if ("removeItem".contains(args[0])) {
-	    list.add("removeItem");
-	}
-	if ("rename".contains(args[0])) {
-	    list.add("rename");
-	}
-	if ("changeProfession".contains(args[0])) {
-	    list.add("changeProfession");
-	}
-	if ("resize".contains(args[0])) {
-	    list.add("resize");
-	}
-	if ("editItem".contains(args[0])) {
-	    list.add("editItem");
-	}
-	if ("editShop".contains(args[0])) {
-	    list.add("editShop");
-	}
-	if ("addEnchantedItem".contains(args[0])) {
-	    list.add("addEnchantedItem");
-	}
-	if ("addPotion".contains(args[0])) {
-	    list.add("addPotion");
-	}
-	if ("addSpawner".contains(args[0])) {
-	    list.add("addSpawner");
-	}
-	if ("removeSpawner".contains(args[0])) {
-	    list.add("removeSpawner");
+	addIfMatching(list, "create", args[0]);
+	addIfMatching(list, "delete", args[0]);
+	addIfMatching(list, "move", args[0]);
+	addIfMatching(list, "addItem", args[0]);
+	addIfMatching(list, "removeItem", args[0]);
+	addIfMatching(list, "rename", args[0]);	
+	addIfMatching(list, "changeProfession", args[0]);
+	addIfMatching(list, "resize", args[0]);
+	addIfMatching(list, "editItem", args[0]);
+	addIfMatching(list, "editShop", args[0]);
+	addIfMatching(list, "addEnchantedItem", args[0]);
+	addIfMatching(list, "addPotion", args[0]);	
+	addIfMatching(list, "addSpawner", args[0]);
+	addIfMatching(list, "removeSpawner", args[0]);
+    }
+
+    private void addIfMatching(List<String> list, String command, String arg) {
+	if (command.contains(arg)) {
+	    list.add(command);
 	}
     }
 
@@ -135,15 +113,9 @@ public class AdminshopTabCompleterImpl implements TabCompleter {
 	    list.add("upgraded");
 	    list.add("none");
 	} else {
-	    if ("extended".contains(args[4])) {
-		list.add("extended");
-	    }
-	    if ("upgraded".contains(args[4])) {
-		list.add("upgraded");
-	    }
-	    if ("none".contains(args[4])) {
-		list.add("none");
-	    }
+	    addIfMatching(list, "extended", args[4]);
+	    addIfMatching(list, "upgraded", args[4]);
+	    addIfMatching(list, "none", args[4]);
 	}
     }
 
@@ -201,9 +173,7 @@ public class AdminshopTabCompleterImpl implements TabCompleter {
 	    list = temp;
 	} else {
 	    for (String shopName : temp) {
-		if (shopName.contains(arg)) {
-		    list.add(shopName);
-		}
+		addIfMatching(list, shopName, arg);
 	    }
 	}
 	return list;

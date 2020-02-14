@@ -67,10 +67,11 @@ public class JobController {
 	Job job = getJobByName(jobName);
 	List<Jobcenter> jobCenterList = JobcenterController.getJobCenterList();
 	for (Jobcenter jobcenter : jobCenterList) {
-	    try {
-		jobcenter.removeJob(job);
-	    } catch (JobSystemException e) {
-		Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
+	    if (jobcenter.hasJob(job)) {
+		try {
+		    jobcenter.removeJob(job);
+		} catch (JobSystemException e) {
+		}
 	    }
 	}
 	for (EconomyPlayer ecoPlayer : EconomyPlayerController.getAllEconomyPlayers()) {
@@ -78,7 +79,6 @@ public class JobController {
 		try {
 		    ecoPlayer.leaveJob(job, false);
 		} catch (PlayerException e) {
-		    Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
 		}
 	    }
 	}

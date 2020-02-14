@@ -13,41 +13,81 @@ public class TownworldTabCompleter implements TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+
+	switch (args[0]) {
+	case "enable":
+	case "disable":
+	case "setFoundationPrice":
+	case "setExpandPrice":
+	    return handleSetExpandPriceTabCompleter(args);
+	case "":
+	    return getAllCommands();
+	default:
+	    return handleDefaultMatchingCommands(args);
+	}
+    }
+
+    private List<String> handleSetExpandPriceTabCompleter(String[] args) {
+	if (args.length == 2) {
+	if (args[1].equals("")) {
+	    return getAllWorlds();
+	} else {
+	    return getAllMatchingWorlds(args);
+	}
+	} else {
+	return new ArrayList<>();
+	}
+    }
+
+    private List<String> getAllMatchingWorlds(String[] args) {
 	List<String> list = new ArrayList<>();
-	if (command.getName().equalsIgnoreCase("townWorld")) {
-	    if (args[0].equals("")) {
-		list.add("enable");
-		list.add("disable");
-		list.add("setFoundationPrice");
-		list.add("setExpandPrice");
-	    } else if (args.length == 1) {
-		if ("enable".contains(args[0])) {
-		    list.add("enable");
-		}
-		if ("disable".contains(args[0])) {
-		    list.add("disable");
-		}
-		if ("setFoundationPrice".contains(args[0])) {
-		    list.add("setFoundationPrice");
-		}
-		if ("setExpandPrice".contains(args[0])) {
-		    list.add("setExpandPrice");
-		}
-	    } else if (args[0].equals("enable") || args[0].equals("disable") || args[0].equals("setFoundationPrice")
-		    || args[0].equals("setExpandPrice")) {
-		if (args[1].equals("")) {
-		    for (World world : Bukkit.getWorlds()) {
-			list.add(world.getName());
-		    }
-		} else if (args.length == 2) {
-		    for (World world : Bukkit.getWorlds()) {
-			if (world.getName().contains(args[1])) {
-			    list.add(world.getName());
-			}
-		    }
-		}
+	for (World world : Bukkit.getWorlds()) {
+	    if (world.getName().contains(args[1])) {
+		list.add(world.getName());
 	    }
 	}
+	return list;
+    }
+
+    private List<String> getAllWorlds() {
+	List<String> list = new ArrayList<>();
+	for (World world : Bukkit.getWorlds()) {
+	    list.add(world.getName());
+	}
+	return list;
+    }
+
+    private List<String> handleDefaultMatchingCommands(String[] args) {
+	if (args.length == 1) {
+	    return getAllMatchingCommands(args);
+	} else {
+	    return new ArrayList<>();
+	}
+    }
+
+    private List<String> getAllMatchingCommands(String[] args) {
+	List<String> list = new ArrayList<>();
+	if ("enable".contains(args[0])) {
+	    list.add("enable");
+	}
+	if ("disable".contains(args[0])) {
+	    list.add("disable");
+	}
+	if ("setFoundationPrice".contains(args[0])) {
+	    list.add("setFoundationPrice");
+	}
+	if ("setExpandPrice".contains(args[0])) {
+	    list.add("setExpandPrice");
+	}
+	return list;
+    }
+
+    private List<String> getAllCommands() {
+	List<String> list = new ArrayList<>();
+	list.add("enable");
+	list.add("disable");
+	list.add("setFoundationPrice");
+	list.add("setExpandPrice");
 	return list;
     }
 

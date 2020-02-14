@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -18,7 +17,6 @@ import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.player.api.EconomyPlayer;
-import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.town.impl.TownImpl;
 import com.ue.townsystem.townworld.api.Townworld;
 import com.ue.townsystem.townworld.api.TownworldController;
@@ -51,7 +49,7 @@ public class TownController {
 	} else if (player.reachedMaxJoinedTowns()) {
 	    throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
 	} else {
-	    TownImpl townImpl = new TownImpl(townworld, player, townName, location, false);
+	    TownImpl townImpl = new TownImpl(townworld, player, townName, location);
 	    townworld.addTown(townImpl);
 	    FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
 	    townNameList.add(townName);
@@ -108,44 +106,7 @@ public class TownController {
      * @throws PlayerException
      */
     public static Town loadTown(Townworld townworld, String townName) throws TownSystemException, PlayerException {
-	FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
-	World world = Bukkit.getWorld(config.getString("World"));
-	if (world == null) {
-	    throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST,
-		    config.getString("World"));
-	}
-	Location location = new Location(world, config.getDouble("Towns." + townName + ".TownManagerVillager.x"),
-		config.getDouble("Towns." + townName + ".TownManagerVillager.y"),
-		config.getDouble("Towns." + townName + ".TownManagerVillager.z"));
-	EconomyPlayer mayor = EconomyPlayerController
-		.getEconomyPlayerByName(config.getString("Towns." + townName + ".owner"));
-	TownImpl townImpl = new TownImpl(townworld, mayor, townName, location, true);
-	townImpl.setMayor(mayor);
-	List<EconomyPlayer> deputys = new ArrayList<>();
-	for (String name : config.getStringList("Towns." + townName + ".coOwners")) {
-	    deputys.add(EconomyPlayerController.getEconomyPlayerByName(name));
-	}
-	townImpl.setDeputys(deputys);
-	List<EconomyPlayer> citizens = new ArrayList<>();
-	for (String name : config.getStringList("Towns." + townName + ".citizens")) {
-	    citizens.add(EconomyPlayerController.getEconomyPlayerByName(name));
-	}
-	townImpl.setCitizens(citizens);
-	townImpl.setChunkList(config.getStringList("Towns." + townName + ".chunks"));
-	townImpl.setTax(config.getDouble("Towns." + townName + ".tax"));
-	townImpl.setTownBankAmount(config.getDouble("Towns." + townName + ".bank"));
-	String locationString = config.getString("Towns." + townName + ".townspawn");
-	townImpl.setTownSpawn(new Location(world,
-		Double.valueOf(locationString.substring(0, locationString.indexOf("/"))),
-		Double.valueOf(
-			locationString.substring(locationString.indexOf("/") + 1, locationString.lastIndexOf("/"))),
-		Double.valueOf(locationString.substring(locationString.lastIndexOf("/") + 1))), mayor, false);
-	ArrayList<Plot> plotList = new ArrayList<>();
-	for (String coords : townImpl.getChunkList()) {
-	    Plot plot = PlotController.loadPlot(townImpl, coords);
-	    plotList.add(plot);
-	}
-	townImpl.setPlotList(plotList);
+	TownImpl townImpl = new TownImpl(townworld, townName);
 	townNameList.add(townName);
 	return townImpl;
     }

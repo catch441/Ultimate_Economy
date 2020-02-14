@@ -237,11 +237,27 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    }
 	} catch (ShopSystemException | GeneralEconomyException e) {
 	}
+	setupSlotEditorStandardItems(buyPrice, sellPrice);
+    }
 
+    private void setupSlotEditorStandardItems(double buyPrice, double sellPrice) {
 	List<String> listBuy = new ArrayList<String>();
 	List<String> listSell = new ArrayList<String>();
 	listBuy.add(ChatColor.GOLD + "Price: " + buyPrice);
-	listSell.add(ChatColor.GOLD + "Price: " + sellPrice);
+	listSell.add(ChatColor.GOLD + "Price: " + sellPrice);	
+	setupPlusItem(listBuy, listSell);
+	setupFactorItem();
+	setupOneNumberItems(listBuy, listSell);	
+	setupTenNumberItems(listBuy, listSell);
+	setupTwentyNumberItems(listBuy, listSell);
+	setupSaveItem();
+	setupExitItem();
+	setupRemoveItem();
+	addSkullToSlotEditor("buyprice", 9, listBuy, BUY);
+	addSkullToSlotEditor("sellprice", 18, listSell, SELL);
+    }
+
+    private void setupPlusItem(List<String> listBuy, List<String> listSell) {
 	ItemStack item = getSkull(PLUS, "plus");
 	slotEditor.setItem(2, item);
 	ItemMeta meta = item.getItemMeta();
@@ -252,34 +268,42 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	meta.setLore(listSell);
 	item.setItemMeta(meta);
 	slotEditor.setItem(20, item);
+    }
 
-	item = getSkull(K_OFF, "factor off");
+    private void setupFactorItem() {
+	ItemStack item = getSkull(K_OFF, "factor off");
 	slotEditor.setItem(12, item);
 	slotEditor.setItem(21, item);
+    }
 
-	item = getSkull(ONE, "one");
-	slotEditor.setItem(4, item);
-	meta = item.getItemMeta();
-	meta.setLore(listBuy);
+    private void setupRemoveItem() {
+	ItemStack item = new ItemStack(Material.BARRIER);
+	ItemMeta meta = item.getItemMeta();
+	meta.setDisplayName(ChatColor.RED + "remove item");
 	item.setItemMeta(meta);
-	slotEditor.setItem(13, item);
-	meta = item.getItemMeta();
-	meta.setLore(listSell);
+	slotEditor.setItem(26, item);
+    }
+
+    private void setupExitItem() {
+	ItemStack item = new ItemStack(Material.RED_WOOL);
+	ItemMeta meta = item.getItemMeta();
+	meta.setDisplayName(ChatColor.RED + "exit without save");
 	item.setItemMeta(meta);
-	slotEditor.setItem(22, item);
-	item = getSkull(TEN, "ten");
-	slotEditor.setItem(5, item);
-	meta = item.getItemMeta();
-	meta.setLore(listBuy);
+	slotEditor.setItem(7, item);
+    }
+
+    private void setupSaveItem() {
+	ItemStack item = new ItemStack(Material.GREEN_WOOL);
+	ItemMeta meta = item.getItemMeta();
+	meta.setDisplayName(ChatColor.YELLOW + "save changes");
 	item.setItemMeta(meta);
-	slotEditor.setItem(14, item);
-	meta = item.getItemMeta();
-	meta.setLore(listSell);
-	item.setItemMeta(meta);
-	slotEditor.setItem(23, item);
-	item = getSkull(TWENTY, "twenty");
+	slotEditor.setItem(8, item);
+    }
+
+    private void setupTwentyNumberItems(List<String> listBuy, List<String> listSell) {
+	ItemStack item = getSkull(TWENTY, "twenty");
 	slotEditor.setItem(6, item);
-	meta = item.getItemMeta();
+	ItemMeta meta = item.getItemMeta();
 	meta.setLore(listBuy);
 	item.setItemMeta(meta);
 	slotEditor.setItem(15, item);
@@ -287,31 +311,40 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	meta.setLore(listSell);
 	item.setItemMeta(meta);
 	slotEditor.setItem(24, item);
-	item = new ItemStack(Material.GREEN_WOOL);
-	meta = item.getItemMeta();
-	meta.setDisplayName(ChatColor.YELLOW + "save changes");
-	item.setItemMeta(meta);
-	slotEditor.setItem(8, item);
-	item = new ItemStack(Material.RED_WOOL);
-	meta = item.getItemMeta();
-	meta.setDisplayName(ChatColor.RED + "exit without save");
-	item.setItemMeta(meta);
-	slotEditor.setItem(7, item);
-	item = new ItemStack(Material.BARRIER);
-	meta = item.getItemMeta();
-	meta.setDisplayName(ChatColor.RED + "remove item");
-	item.setItemMeta(meta);
-	slotEditor.setItem(26, item);
-	item = getSkull(BUY, "buyprice");
-	meta = item.getItemMeta();
+    }
+
+    private void setupTenNumberItems(List<String> listBuy, List<String> listSell) {
+	ItemStack item = getSkull(TEN, "ten");
+	slotEditor.setItem(5, item);
+	ItemMeta meta = item.getItemMeta();
 	meta.setLore(listBuy);
 	item.setItemMeta(meta);
-	slotEditor.setItem(9, item);
-	item = getSkull(SELL, "sellprice");
+	slotEditor.setItem(14, item);
 	meta = item.getItemMeta();
 	meta.setLore(listSell);
 	item.setItemMeta(meta);
-	slotEditor.setItem(18, item);
+	slotEditor.setItem(23, item);
+    }
+
+    private void setupOneNumberItems(List<String> listBuy, List<String> listSell) {
+	ItemStack item = getSkull(ONE, "one");
+	slotEditor.setItem(4, item);
+	ItemMeta meta = item.getItemMeta();
+	meta.setLore(listBuy);
+	item.setItemMeta(meta);
+	slotEditor.setItem(13, item);
+	meta = item.getItemMeta();
+	meta.setLore(listSell);
+	item.setItemMeta(meta);
+	slotEditor.setItem(22, item);
+    }
+    
+    private void addSkullToSlotEditor(String displayName,int slot, List<String> loreList,String skullAdress) {
+	ItemStack item = getSkull(skullAdress, displayName);
+	ItemMeta meta = item.getItemMeta();
+	meta.setLore(loreList);
+	item.setItemMeta(meta);
+	slotEditor.setItem(slot, item);
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////

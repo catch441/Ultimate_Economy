@@ -23,13 +23,11 @@ public class PlayershopTabCompleter implements TabCompleter {
 	case "move":
 	case "editShop":
 	case "resize":
-	case "changeProfession":
-	    if (args.length == 3) {
-		return getProfessions(args);
-	    }
 	case "changeOwner":
 	case "rename":
 	    return handlePlayershopNameTabComplete(sender, args);
+	case "changeProfession":
+	    return handleChangeProfessionTabComplete(sender, args);
 	case "":
 	    return getAllCommands(sender);
 	default:
@@ -37,19 +35,29 @@ public class PlayershopTabCompleter implements TabCompleter {
 	}
     }
 
+    private List<String> handleChangeProfessionTabComplete(CommandSender sender, String[] args) {
+	if (args.length == 3) {
+	    return getProfessions(args);
+	} else if (args.length == 2) {
+	    return getPlayerShopList(args[1], sender.getName());
+	} else {
+	    return new ArrayList<>();
+	}
+    }
+
     private List<String> handleDeleteOtherTabComplete(String[] args) {
 	if (args.length == 2) {
-	return PlayershopController.getPlayerShopUniqueNameList();
+	    return PlayershopController.getPlayerShopUniqueNameList();
 	} else {
-	return new ArrayList<>();
+	    return new ArrayList<>();
 	}
     }
 
     private List<String> handlePlayershopNameTabComplete(CommandSender sender, String[] args) {
 	if (args.length == 2) {
-	return getPlayerShopList(args[1], sender.getName());
+	    return getPlayerShopList(args[1], sender.getName());
 	} else {
-	return new ArrayList<>();
+	    return new ArrayList<>();
 	}
     }
 

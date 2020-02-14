@@ -74,7 +74,7 @@ public enum RentshopCommandEnum {
 	    return true;
 	}
     },
-    CHANGE_PROFESSION {
+    CHANGEPROFESSION {
 	@Override
 	boolean perform(String label, String[] args, Player player)
 		throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
@@ -105,7 +105,7 @@ public enum RentshopCommandEnum {
 	    return true;
 	}
     },
-    EDIT_SHOP {
+    EDITSHOP {
 	@Override
 	boolean perform(String label, String[] args, Player player)
 		throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
