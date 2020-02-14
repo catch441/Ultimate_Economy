@@ -5,6 +5,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import com.ue.config.api.ConfigController;
+import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
 import com.ue.townsystem.townworld.api.TownworldController;
@@ -16,6 +17,7 @@ public class TownworldCommandExecutor implements CommandExecutor {
 
     /**
      * Constructor of townworld command executor.
+     * 
      * @param plugin
      */
     public TownworldCommandExecutor(UltimateEconomy plugin) {
@@ -41,7 +43,7 @@ public class TownworldCommandExecutor implements CommandExecutor {
 	    } else {
 		return false;
 	    }
-	} catch (TownSystemException e) {
+	} catch (PlayerException | TownSystemException e) {
 	    sender.sendMessage(e.getMessage());
 	} catch (NumberFormatException e) {
 	    sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter", args[2]));
@@ -52,11 +54,11 @@ public class TownworldCommandExecutor implements CommandExecutor {
     private boolean handleSetExpandPriceCommand(CommandSender sender, String label, String[] args)
 	    throws TownSystemException {
 	if (args.length == 3) {
-	TownworldController.getTownWorldByName(args[1]).setExpandPrice(Double.valueOf(args[2]), true);
-	sender.sendMessage(MessageWrapper.getString("townworld_setExpandPrice", args[2],
-		ConfigController.getCurrencyText(Double.valueOf(args[2]))));
+	    TownworldController.getTownWorldByName(args[1]).setExpandPrice(Double.valueOf(args[2]), true);
+	    sender.sendMessage(MessageWrapper.getString("townworld_setExpandPrice", args[2],
+		    ConfigController.getCurrencyText(Double.valueOf(args[2]))));
 	} else {
-	sender.sendMessage("/" + label + " setExpandPrice <world> <price / chunk");
+	    sender.sendMessage("/" + label + " setExpandPrice <world> <price / chunk");
 	}
 	return true;
     }
@@ -64,32 +66,32 @@ public class TownworldCommandExecutor implements CommandExecutor {
     private boolean handleSetFoundationPriceCommand(CommandSender sender, String label, String[] args)
 	    throws TownSystemException {
 	if (args.length == 3) {
-	TownworldController.getTownWorldByName(args[1]).setFoundationPrice(Double.valueOf(args[2]),
-		true);
-	sender.sendMessage(MessageWrapper.getString("townworld_setFoundationPrice", args[2],
-		ConfigController.getCurrencyText(Double.valueOf(args[2]))));
+	    TownworldController.getTownWorldByName(args[1]).setFoundationPrice(Double.valueOf(args[2]), true);
+	    sender.sendMessage(MessageWrapper.getString("townworld_setFoundationPrice", args[2],
+		    ConfigController.getCurrencyText(Double.valueOf(args[2]))));
 	} else {
-	sender.sendMessage("/" + label + " setFoundationPrice <world> <price>");
+	    sender.sendMessage("/" + label + " setFoundationPrice <world> <price>");
 	}
 	return true;
     }
 
-    private boolean handleDisableCommand(CommandSender sender, String label, String[] args) throws TownSystemException {
+    private boolean handleDisableCommand(CommandSender sender, String label, String[] args)
+	    throws TownSystemException, PlayerException {
 	if (args.length == 2) {
-	TownworldController.deleteTownWorld(args[1]);
-	sender.sendMessage(MessageWrapper.getString("townworld_disable", args[1]));
+	    TownworldController.deleteTownWorld(args[1]);
+	    sender.sendMessage(MessageWrapper.getString("townworld_disable", args[1]));
 	} else {
-	sender.sendMessage("/" + label + " disable <world>");
+	    sender.sendMessage("/" + label + " disable <world>");
 	}
 	return true;
     }
 
     private boolean handleEnableCommand(CommandSender sender, String label, String[] args) throws TownSystemException {
 	if (args.length == 2) {
-	TownworldController.createTownWorld(plugin.getDataFolder(), args[1]);
-	sender.sendMessage(MessageWrapper.getString("townworld_enable", args[1]));
+	    TownworldController.createTownWorld(plugin.getDataFolder(), args[1]);
+	    sender.sendMessage(MessageWrapper.getString("townworld_enable", args[1]));
 	} else {
-	sender.sendMessage("/" + label + " enable <world>");
+	    sender.sendMessage("/" + label + " enable <world>");
 	}
 	return true;
     }

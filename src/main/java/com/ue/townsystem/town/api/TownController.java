@@ -40,27 +40,46 @@ public class TownController {
      */
     public static void createTown(Townworld townworld, String townName, Location location, EconomyPlayer player)
 	    throws TownSystemException, PlayerException, GeneralEconomyException {
+	checkForTownDoesNotExist(townName);
+	checkForChunkIsFree(townworld, location);
+	checkForPlayerHasEnoughMoney(townworld, player);
+	checkForMaxJoinedTownsNotReached(player);
+	TownImpl townImpl = new TownImpl(townworld, player, townName, location);
+	townworld.addTown(townImpl);
+	FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
+	townNameList.add(townName);
+	config.set("TownNames", townNameList);
+	save(townworld.getSaveFile(), config);
+	player.addJoinedTown(townName);
+	player.decreasePlayerAmount(townworld.getFoundationPrice(), true);
+	for (Player p : Bukkit.getOnlinePlayers()) {
+	    TownworldController.handleTownWorldLocationCheck(p.getWorld().getName(), p.getLocation().getChunk(),
+		    p.getName());
+	}
+    }
+
+    private static void checkForMaxJoinedTownsNotReached(EconomyPlayer player) throws PlayerException {
+	if (player.reachedMaxJoinedTowns()) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
+	}
+    }
+
+    private static void checkForPlayerHasEnoughMoney(Townworld townworld, EconomyPlayer player) throws PlayerException {
+	if (!player.hasEnoughtMoney(townworld.getFoundationPrice())) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
+	}
+    }
+
+    private static void checkForChunkIsFree(Townworld townworld, Location location)
+	    throws TownSystemException {
+	if (!townworld.isChunkFree(location.getChunk())) {
+	    throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED);
+	}
+    }
+
+    private static void checkForTownDoesNotExist(String townName) throws TownSystemException {
 	if (townNameList.contains(townName)) {
 	    throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_ALREADY_EXIST);
-	} else if (!townworld.isChunkFree(location.getChunk())) {
-	    throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED);
-	} else if (!player.hasEnoughtMoney(townworld.getFoundationPrice())) {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
-	} else if (player.reachedMaxJoinedTowns()) {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
-	} else {
-	    TownImpl townImpl = new TownImpl(townworld, player, townName, location);
-	    townworld.addTown(townImpl);
-	    FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
-	    townNameList.add(townName);
-	    config.set("TownNames", townNameList);
-	    save(townworld.getSaveFile(), config);
-	    player.addJoinedTown(townName);
-	    player.decreasePlayerAmount(townworld.getFoundationPrice(), true);
-	    for (Player p : Bukkit.getOnlinePlayers()) {
-		TownworldController.handleTownWorldLocationCheck(p.getWorld().getName(),
-			p.getLocation().getChunk(), p.getName());
-	    }
 	}
     }
 
@@ -87,8 +106,8 @@ public class TownController {
 	    config.set("TownNames", townNameList);
 	    save(town.getTownworld().getSaveFile(), config);
 	    for (Player p : Bukkit.getOnlinePlayers()) {
-		TownworldController.handleTownWorldLocationCheck(p.getWorld().getName(),
-			p.getLocation().getChunk(), p.getName());
+		TownworldController.handleTownWorldLocationCheck(p.getWorld().getName(), p.getLocation().getChunk(),
+			p.getName());
 	    }
 	} else {
 	    throw PlayerException.getException(PlayerExceptionMessageEnum.TOWN_NOT_TOWN_OWNER);

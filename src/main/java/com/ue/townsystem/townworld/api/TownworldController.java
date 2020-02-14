@@ -36,7 +36,7 @@ public class TownworldController {
 		return townworld;
 	    }
 	}
-	throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_DOES_NOT_EXIST);
+	throw TownSystemException.getException(TownExceptionMessageEnum.TOWNWORLD_DOES_NOT_EXIST);
     }
 
     /**
@@ -127,7 +127,7 @@ public class TownworldController {
 	if (Bukkit.getWorld(world) == null) {
 	    throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, world);
 	} else if (isTownWorld(world)) {
-	    throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_ALREADY_EXIST);
+	    throw TownSystemException.getException(TownExceptionMessageEnum.TOWNWORLD_ALREADY_EXIST);
 	} else {
 	    townWorldList.add(new TownworldImpl(mainDataFolder, world));
 	    UltimateEconomy.getInstance.getConfig().set("TownWorlds", TownworldController.getTownWorldNameList());
@@ -140,12 +140,16 @@ public class TownworldController {
      * 
      * @param world
      * @throws TownSystemException
+     * @throws PlayerException 
      */
-    public static void deleteTownWorld(String world) throws TownSystemException {
+    public static void deleteTownWorld(String world) throws TownSystemException, PlayerException {
 	if (Bukkit.getWorld(world) == null) {
 	    throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, world);
 	} else {
 	    Townworld townworld = getTownWorldByName(world);
+	    for(Town town:townworld.getTownList()) {
+		TownController.dissolveTown(town, town.getMayor());
+	    }
 	    townWorldList.remove(townworld);
 	    townworld.delete();
 	    UltimateEconomy.getInstance.getConfig().set("TownWorlds", TownworldController.getTownWorldNameList());
@@ -172,6 +176,7 @@ public class TownworldController {
 		townWorldList.add(townworldImpl);
 	    } catch (TownSystemException | PlayerException e) {
 		Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
+		e.printStackTrace();
 	    }
 	}
     }

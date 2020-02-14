@@ -118,27 +118,8 @@ public class UltimateEconomyEventHandler implements Listener {
 		} else {
 		    Town town = townworld.getTownByChunk(location.getChunk());
 		    if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-			switch (event.getClickedBlock().getType()) {
-			case ACACIA_TRAPDOOR:
-			case BIRCH_TRAPDOOR:
-			case IRON_TRAPDOOR:
-			case DARK_OAK_TRAPDOOR:
-			case JUNGLE_TRAPDOOR:
-			case OAK_TRAPDOOR:
-			case SPRUCE_TRAPDOOR:
-			case ACACIA_DOOR:
-			case IRON_DOOR:
-			case JUNGLE_DOOR:
-			case BIRCH_DOOR:
-			case DARK_OAK_DOOR:
-			case SPRUCE_DOOR:
-			case OAK_DOOR:
-			case ACACIA_FENCE_GATE:
-			case JUNGLE_FENCE_GATE:
-			case BIRCH_FENCE_GATE:
-			case DARK_OAK_FENCE_GATE:
-			case OAK_FENCE_GATE:
-			case SPRUCE_FENCE_GATE:
+			if (event.getClickedBlock().getType().toString().contains("DOOR")
+				|| event.getClickedBlock().getType().toString().contains("GATE")) {
 			    if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")
 				    && (!town.isPlayerCitizen(economyPlayer)
 					    || !town.hasBuildPermissions(economyPlayer, town.getPlotByChunk(
@@ -149,9 +130,6 @@ public class UltimateEconomyEventHandler implements Listener {
 					    .sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
 				}
 			    }
-			    break;
-			default:
-			    break;
 			}
 		    } else {
 			if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")

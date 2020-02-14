@@ -223,18 +223,6 @@ public class TownImpl implements Town {
 
     }
 
-    private void checkForPlayerHasMayorPermissions(EconomyPlayer player) throws TownSystemException, PlayerException {
-	if (!isMayor(player)) {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
-	}
-    }
-
-    private void checkForTownAlreadyExists(String newName) throws TownSystemException {
-	if (TownController.getTownNameList().contains(newName)) {
-	    throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_ALREADY_EXIST);
-	}
-    }
-
     @Override
     public void expandTown(Chunk chunk, EconomyPlayer player, boolean sendMessage)
 	    throws TownSystemException, PlayerException {
@@ -413,7 +401,7 @@ public class TownImpl implements Town {
 
     @Override
     public void removeCitizen(EconomyPlayer citizen) throws TownSystemException, PlayerException {
-	checkForPlayerHasMayorPermissions(citizen);
+	checkForPlayerIsNotMayor(citizen);
 	checkForPlayerIsCitizenPersonalError(citizen);
 	if (isDeputy(citizen)) {
 	    removeDeputy(citizen);
@@ -832,6 +820,24 @@ public class TownImpl implements Town {
     private void checkForPlayerIsCitizenPersonalError(EconomyPlayer citizen) throws PlayerException {
 	if (!isPlayerCitizen(citizen)) {
 	    throw PlayerException.getException(PlayerExceptionMessageEnum.YOU_ARE_NO_CITIZEN);
+	}
+    }
+    
+    private void checkForPlayerHasMayorPermissions(EconomyPlayer player) throws TownSystemException, PlayerException {
+	if (!isMayor(player)) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
+	}
+    }
+    
+    private void checkForPlayerIsNotMayor(EconomyPlayer player) throws PlayerException, TownSystemException {
+	if (isMayor(player)) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.YOU_ARE_THE_OWNER);
+	}
+    }
+
+    private void checkForTownAlreadyExists(String newName) throws TownSystemException {
+	if (TownController.getTownNameList().contains(newName)) {
+	    throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_ALREADY_EXIST);
 	}
     }
 }

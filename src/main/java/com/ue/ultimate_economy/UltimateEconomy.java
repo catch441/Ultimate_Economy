@@ -22,6 +22,7 @@ import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.bstats.metrics.Metrics;
+import com.ue.bank.api.BankController;
 import com.ue.config.api.ConfigController;
 import com.ue.config.commands.ConfigCommandExecutor;
 import com.ue.config.commands.ConfigTabCompleter;
@@ -225,6 +226,7 @@ public class UltimateEconomy extends JavaPlugin {
 	}
 	setupPlugin();
 	MessageWrapper.loadLanguage();
+	BankController.loadBankAccounts();
 	JobController.loadAllJobs();
 	JobcenterController.loadAllJobCenters(getServer(), getConfig(), getDataFolder());
 	EconomyPlayerController.loadAllEconomyPlayers(getDataFolder());
@@ -266,62 +268,73 @@ public class UltimateEconomy extends JavaPlugin {
 	    Player player = (Player) sender;
 	    try {
 		EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(player.getName());
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// Commands
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
 		switch (label) {
 		case "shop":
-		    if (args.length == 1) {
-			if (ecoPlayer.hasJob(JobController.getJobByName(args[0]))) {
-			    AdminshopController.getAdminShopByName(args[0]).openInv(player);
-			} else {
-			    player.sendMessage(MessageWrapper.getErrorString("job_not_joined"));
-			}
-		    } else {
-			return false;
-		    }
-		    break;
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		    return handleShopCommand(args, player, ecoPlayer);
 		case "shoplist":
-		    List<String> shopNames = AdminshopController.getAdminshopNameList();
-		    player.sendMessage(MessageWrapper.getString("shoplist_info", shopNames.toArray()));
-		    break;
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		    return handleShopListCommand(player);
 		case "joblist":
-		    List<String> jobNames = JobController.getJobNameList();
-		    player.sendMessage(MessageWrapper.getString("joblist_info", jobNames.toArray()));
-		    break;
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		    return handleJobListCommand(player);
 		case "jobinfo":
-		    if (args.length == 1) {
-			Job job = JobController.getJobByName(args[0]);
-			player.sendMessage(MessageWrapper.getString("jobinfo_info", job.getName()));
-			for (String string : job.getItemList()) {
-			    player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN
-				    + job.getItemPrice(string)
-				    + ConfigController.getCurrencyText(job.getItemPrice(string)));
-			}
-			for (String string : job.getFisherList()) {
-			    player.sendMessage(MessageWrapper.getString("jobinfo_fishingprice", string.toLowerCase(),
-				    job.getFisherPrice(string),
-				    ConfigController.getCurrencyText(job.getFisherPrice(string))));
-			}
-			for (String string : job.getEntityList()) {
-			    player.sendMessage(MessageWrapper.getString("jobinfo_killprice", string.toLowerCase(),
-				    job.getKillPrice(string),
-				    ConfigController.getCurrencyText(job.getKillPrice(string))));
-			}
-		    } else {
-			return false;
-		    }
-		    break;
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		    return handleJobInfoCommand(args, player);
 		default:
 		    break;
 		}
 	    } catch (PlayerException | ShopSystemException | JobSystemException | GeneralEconomyException e) {
 		player.sendMessage(e.getMessage());
 	    }
+	}
+	return true;
+    }
+
+    private boolean handleJobInfoCommand(String[] args, Player player)
+	    throws JobSystemException, GeneralEconomyException {
+	if (args.length == 1) {
+	Job job = JobController.getJobByName(args[0]);
+	player.sendMessage(MessageWrapper.getString("jobinfo_info", job.getName()));
+	for (String string : job.getItemList()) {
+	    player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN
+		    + job.getItemPrice(string)
+		    + ConfigController.getCurrencyText(job.getItemPrice(string)));
+	}
+	for (String string : job.getFisherList()) {
+	    player.sendMessage(MessageWrapper.getString("jobinfo_fishingprice", string.toLowerCase(),
+		    job.getFisherPrice(string),
+		    ConfigController.getCurrencyText(job.getFisherPrice(string))));
+	}
+	for (String string : job.getEntityList()) {
+	    player.sendMessage(MessageWrapper.getString("jobinfo_killprice", string.toLowerCase(),
+		    job.getKillPrice(string),
+		    ConfigController.getCurrencyText(job.getKillPrice(string))));
+	}
+	} else {
+	return false;
+	}
+	return true;
+    }
+
+    private boolean handleJobListCommand(Player player) {
+	List<String> jobNames = JobController.getJobNameList();
+	player.sendMessage(MessageWrapper.getString("joblist_info", jobNames.toArray()));
+	return true;
+    }
+
+    private boolean handleShopListCommand(Player player) {
+	List<String> shopNames = AdminshopController.getAdminshopNameList();
+	player.sendMessage(MessageWrapper.getString("shoplist_info", shopNames.toArray()));
+	return true;
+    }
+
+    private boolean handleShopCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
+	    throws JobSystemException, ShopSystemException {
+	if (args.length == 1) {
+	if (ecoPlayer.hasJob(JobController.getJobByName(args[0]))) {
+	    AdminshopController.getAdminShopByName(args[0]).openInv(player);
+	} else {
+	    player.sendMessage(MessageWrapper.getErrorString("job_not_joined"));
+	}
+	} else {
+	return false;
 	}
 	return true;
     }
