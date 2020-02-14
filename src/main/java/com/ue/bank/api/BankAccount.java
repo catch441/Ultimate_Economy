@@ -1,7 +1,5 @@
 package com.ue.bank.api;
 
-import com.ue.bank.impl.AbstractBankEntity;
-
 public interface BankAccount {
 
 	/**
@@ -24,13 +22,6 @@ public interface BankAccount {
 	 * @return bank amount
 	 */
 	public double getAmount();
-	
-	/**
-	 * Returns the owner of this bank account. It can be a town or a economy player.
-	 * 
-	 * @return AbstractBankEntity implemented by town and economy player
-	 */
-	public AbstractBankEntity getOwner();
 	
 	/**
 	 * Returns the unique iban of this bank account.
