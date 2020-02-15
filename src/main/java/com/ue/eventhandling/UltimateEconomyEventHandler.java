@@ -117,25 +117,20 @@ public class UltimateEconomyEventHandler implements Listener {
 		    }
 		} else {
 		    Town town = townworld.getTownByChunk(location.getChunk());
-		    if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-			if (event.getClickedBlock().getType().toString().contains("DOOR")
-				|| event.getClickedBlock().getType().toString().contains("GATE")) {
-			    if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")
-				    && (!town.isPlayerCitizen(economyPlayer)
-					    || !town.hasBuildPermissions(economyPlayer, town.getPlotByChunk(
-						    location.getChunk().getX() + "/" + location.getChunk().getZ())))) {
+		    if (event.getPlayer().getGameMode() != GameMode.CREATIVE
+			    && hasNoBuildPermission(event, location, economyPlayer, town)) {
+			if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+			    if (isDoorOrGate(event)) {
 				if (!ConfigController.isExtendedInteraction()) {
 				    event.setCancelled(true);
 				    event.getPlayer()
 					    .sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
 				}
+			    } else {
+				event.setCancelled(true);
+				event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
 			    }
-			}
-		    } else {
-			if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")
-				&& (!town.isPlayerCitizen(economyPlayer)
-					|| !town.hasBuildPermissions(economyPlayer, town.getPlotByChunk(
-						location.getChunk().getX() + "/" + location.getChunk().getZ())))) {
+			} else {
 			    event.setCancelled(true);
 			    event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
 			}
@@ -143,6 +138,26 @@ public class UltimateEconomyEventHandler implements Listener {
 		}
 	    } catch (TownSystemException | PlayerException e) {
 	    }
+	}
+    }
+
+    private boolean hasNoBuildPermission(PlayerInteractEvent event, Location location, EconomyPlayer economyPlayer,
+	    Town town) throws TownSystemException {
+	if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")
+		&& (!town.isPlayerCitizen(economyPlayer) || !town.hasBuildPermissions(economyPlayer,
+			town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ())))) {
+	    return true;
+	} else {
+	    return false;
+	}
+    }
+
+    private boolean isDoorOrGate(PlayerInteractEvent event) {
+	if (event.getClickedBlock().getType().toString().contains("DOOR")
+		|| event.getClickedBlock().getType().toString().contains("GATE")) {
+	    return true;
+	} else {
+	    return false;
 	}
     }
 
