@@ -105,7 +105,7 @@ public class RentshopController {
 	    if (shop.isRentable()) {
 		list.add("RentShop#" + shop.getShopId());
 	    } else {
-		list.add(shop.getName() + "_" + shop.getOwner());
+		list.add(shop.getName() + "_" + shop.getOwner().getName());
 	    }
 	}
 	return list;
