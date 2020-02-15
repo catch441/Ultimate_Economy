@@ -65,23 +65,12 @@ public class TownworldImpl implements Townworld {
     }
 
     @Override
-    public void delete() {
+    public void delete() throws TownSystemException, PlayerException, GeneralEconomyException {
 	file.delete();
 	despawnAllTownVillagers();
-	for (EconomyPlayer ecoPlayer : EconomyPlayerController.getAllEconomyPlayers()) {
-	    if (!ecoPlayer.getJoinedTownList().isEmpty()) {
-		for (String townName : townNames) {
-		    if (ecoPlayer.getJoinedTownList().contains(townName)) {
-			try {
-			    ecoPlayer.removeJoinedTown(townName);
-			} catch (PlayerException e) {
-			}
-		    }
-		}
-	    }
-	}
-	for (String townName : townNames) {
-	    TownController.getTownNameList().remove(townName);
+	for (Town town : getTownList()) {
+	    TownController.dissolveTown(town, town.getMayor());
+	    TownController.getTownNameList().remove(town.getTownName());
 	}
     }
 

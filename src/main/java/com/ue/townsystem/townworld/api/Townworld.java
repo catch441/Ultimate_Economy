@@ -146,9 +146,11 @@ public interface Townworld {
 	    throws TownSystemException, PlayerException, GeneralEconomyException;
 
     /**
-     * Delete the save file and town from every economy player. And despawns all
-     * villagers
+     * Delets all save files and towns.
      * <p>
+     * @throws GeneralEconomyException 
+     * @throws PlayerException 
+     * @throws TownSystemException 
      */
-    public void delete();
+    public void delete() throws TownSystemException, PlayerException, GeneralEconomyException;
 }

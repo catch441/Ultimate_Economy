@@ -150,9 +150,6 @@ public class TownworldController {
 	    throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, world);
 	} else {
 	    Townworld townworld = getTownWorldByName(world);
-	    for (Town town : townworld.getTownList()) {
-		TownController.dissolveTown(town, town.getMayor());
-	    }
 	    townWorldList.remove(townworld);
 	    townworld.delete();
 	    UltimateEconomy.getInstance.getConfig().set("TownWorlds", TownworldController.getTownWorldNameList());
