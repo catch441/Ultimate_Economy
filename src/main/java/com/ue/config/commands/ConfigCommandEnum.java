@@ -86,7 +86,7 @@ public enum ConfigCommandEnum {
 	@Override
 	boolean perform(String label, String[] args, CommandSender sender) throws GeneralEconomyException {
 	    if (args.length == 2) {
-		ConfigController.setHomeSystem(Boolean.valueOf(args[1]));
+		ConfigController.setHomeSystem(stringToBoolean(args[1]));
 		sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 		sender.sendMessage(MessageWrapper.getString("restart"));
 	    } else {
@@ -111,7 +111,7 @@ public enum ConfigCommandEnum {
 	@Override
 	boolean perform(String label, String[] args, CommandSender sender) throws GeneralEconomyException {
 	    if (args.length == 2) {
-		ConfigController.setExtendedInteraction(Boolean.valueOf(args[1]));
+		ConfigController.setExtendedInteraction(stringToBoolean(args[1]));
 		sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 	    } else {
 		sender.sendMessage("/" + label + " extendedInteraction <true/false>");
@@ -123,7 +123,7 @@ public enum ConfigCommandEnum {
 	@Override
 	boolean perform(String label, String[] args, CommandSender sender) throws GeneralEconomyException {
 	    if (args.length == 2) {
-		ConfigController.setWildernessInteraction(Boolean.valueOf(args[1]));
+		ConfigController.setWildernessInteraction(stringToBoolean(args[1]));
 		sender.sendMessage(MessageWrapper.getString("config_change", args[1]));
 	    } else {
 		sender.sendMessage("/" + label + " wildernessInteraction <true/false>");
@@ -161,5 +161,15 @@ public enum ConfigCommandEnum {
 	    }
 	}
 	return null;
+    }
+    
+    private static boolean stringToBoolean(String string) {
+	if("true".equalsIgnoreCase(string)) {
+	    return true;
+	} else if("true".equalsIgnoreCase(string)) {
+	    return false;
+	} else {
+	    throw new IllegalArgumentException();
+	}
     }
 }
