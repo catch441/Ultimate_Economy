@@ -9,6 +9,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import com.ue.exceptions.GeneralEconomyException;
@@ -222,7 +223,7 @@ public class TownworldImpl implements Townworld {
     @Override
     public void handleTownVillagerInvClick(InventoryClickEvent event)
 	    throws TownSystemException, PlayerException, GeneralEconomyException {
-	Chunk chunk = event.getWhoClicked().getLocation().getChunk();
+	Chunk chunk = ((Villager) event.getClickedInventory().getHolder()).getLocation().getChunk();
 	EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(event.getWhoClicked().getName());
 	Town town = getTownByChunk(chunk);
 	Plot plot = town.getPlotByChunk(chunk.getX() + "/" + chunk.getZ());
