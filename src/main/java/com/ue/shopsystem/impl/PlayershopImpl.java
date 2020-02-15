@@ -50,11 +50,14 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     public PlayershopImpl(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size) {
 	super(name, shopId, spawnLocation, size);
 	shopMode = true;
-	saveOwnerToFile(owner);
+	// neccecsary for rentshops without a owner
+	if(owner != null) {
+	    saveOwnerToFile(owner);
+	    villager.setCustomName(name + "_" + owner.getName());
+	}
 	// set the type of the villager
 	villager.setMetadata("ue-type",
 		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP));
-	villager.setCustomName(name + "_" + owner.getName());
     }
 
     /**
