@@ -166,7 +166,7 @@ public enum ConfigCommandEnum {
     private static boolean stringToBoolean(String string) {
 	if("true".equalsIgnoreCase(string)) {
 	    return true;
-	} else if("true".equalsIgnoreCase(string)) {
+	} else if("false".equalsIgnoreCase(string)) {
 	    return false;
 	} else {
 	    throw new IllegalArgumentException();
