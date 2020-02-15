@@ -45,7 +45,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.ue.config.api.ConfigController;
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyMessageEnum;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.ShopExceptionMessageEnum;
@@ -649,7 +649,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
     private void checkForValidSize(int newSize) throws GeneralEconomyException {
 	if (newSize % 9 != 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, size);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
 	}
     }
 
@@ -670,9 +670,9 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	if (!slotIsEmpty(slot + 1)) {
 	    throw PlayerException.getException(PlayerExceptionMessageEnum.INVENTORY_SLOT_OCCUPIED);
 	} else if (sellPrice < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, buyPrice);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, buyPrice);
 	} else if (buyPrice < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, buyPrice);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, buyPrice);
 	} else if (buyPrice == 0 && sellPrice == 0) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_PRICES);
 	} else if (itemNames.contains(itemString)) {
@@ -744,13 +744,13 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
     private void checkForValidAmount(String amount) throws GeneralEconomyException {
 	if (!"none".equals(amount) && (Integer.valueOf(amount) <= 0 || Integer.valueOf(amount) > 64)) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, amount);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, amount);
 	}
     }
 
     private void checkforValidBuyPrice(String buyPrice) throws GeneralEconomyException {
 	if (!"none".equals(buyPrice) && Double.valueOf(buyPrice) < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, buyPrice);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, buyPrice);
 	}
     }
 
@@ -1429,7 +1429,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    }
 	    return isEmpty;
 	} else {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, slot);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, slot);
 	}
     }
 

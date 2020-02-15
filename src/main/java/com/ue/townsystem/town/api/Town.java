@@ -6,6 +6,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.player.api.EconomyPlayer;
@@ -194,9 +195,10 @@ public interface Town {
      *            when true a message is send to the receiver and this player
      * @throws TownSystemException
      * @throws PlayerException
+     * @throws GeneralEconomyException 
      */
     public void renameTown(String newName, EconomyPlayer player, boolean sendMessage)
-	    throws TownSystemException, PlayerException;
+	    throws TownSystemException, PlayerException, GeneralEconomyException;
 
     /**
      * Joins a player to a town.

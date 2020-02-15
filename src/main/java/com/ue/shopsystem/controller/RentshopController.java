@@ -9,8 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyMessageEnum;
-import com.ue.exceptions.ShopExceptionMessageEnum;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
@@ -57,15 +56,15 @@ public class RentshopController {
      * 
      * @param id
      * @return RentShop
-     * @throws ShopSystemException
+     * @throws GeneralEconomyException 
      */
-    public static Rentshop getRentShopById(String id) throws ShopSystemException {
+    public static Rentshop getRentShopById(String id) throws GeneralEconomyException {
 	for (Rentshop shop : rentShopList) {
 	    if (shop.getShopId().equals(id)) {
 		return shop;
 	    }
 	}
-	throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_DOES_NOT_EXIST);
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,id);
     }
 
     /**
@@ -77,9 +76,9 @@ public class RentshopController {
      * 
      * @param name
      * @return RentShop
-     * @throws ShopSystemException
+     * @throws GeneralEconomyException 
      */
-    public static Rentshop getRentShopByUniqueName(String name) throws ShopSystemException {
+    public static Rentshop getRentShopByUniqueName(String name) throws GeneralEconomyException {
 	for (Rentshop shop : rentShopList) {
 	    if (shop.isRentable()) {
 		if (("RentShop#" + shop.getShopId()).equals(name)) {
@@ -91,7 +90,7 @@ public class RentshopController {
 		}
 	    }
 	}
-	throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_DOES_NOT_EXIST);
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,name);
     }
 
     /**
@@ -133,9 +132,9 @@ public class RentshopController {
     public static Rentshop createRentShop(Location spawnLocation, int size, double rentalFee)
 	    throws GeneralEconomyException {
 	if (size % 9 != 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, size);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
 	} else if (rentalFee < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, rentalFee);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, rentalFee);
 	} else {
 	    Rentshop shop = new RentshopImpl(spawnLocation, size, generateFreeRentShopId(), rentalFee);
 	    rentShopList.add(shop);

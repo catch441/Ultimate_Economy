@@ -2,8 +2,6 @@ package com.ue.exceptions;
 
 public enum JobExceptionMessageEnum {
 
-    JOB_DOES_NOT_EXISTS ("job_does_not_exist"),
-    JOB_ALREADY_EXISTS ("job_already_exists"),
     JOBCENTER_ALREADY_EXISTS ("jobcenter_already_exist"),
     JOBCENTER_DOES_NOT_EXIST ("jobcenter_does_not_exist"),
     ENTITY_ALREADY_EXISTS ("entity_already_exists"),

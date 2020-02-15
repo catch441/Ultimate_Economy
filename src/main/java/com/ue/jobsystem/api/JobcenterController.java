@@ -10,7 +10,7 @@ import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyMessageEnum;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.JobExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
@@ -106,9 +106,9 @@ public class JobcenterController {
     public static void createJobCenter(String name, Location spawnLocation, int size)
 	    throws JobSystemException, GeneralEconomyException {
 	if (getJobCenterNameList().contains(name)) {
-	    throw JobSystemException.getException(JobExceptionMessageEnum.JOB_ALREADY_EXISTS);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, name);
 	} else if (size % 9 != 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, size);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
 	} else {
 	    jobCenterList.add(new JobcenterImpl(name, spawnLocation, size));
 	    UltimateEconomy.getInstance.getConfig().set("JobCenterNames", JobcenterController.getJobCenterNameList());

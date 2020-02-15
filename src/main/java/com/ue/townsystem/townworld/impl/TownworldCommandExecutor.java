@@ -5,6 +5,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import com.ue.config.api.ConfigController;
+import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
@@ -43,7 +44,7 @@ public class TownworldCommandExecutor implements CommandExecutor {
 	    } else {
 		return false;
 	    }
-	} catch (PlayerException | TownSystemException e) {
+	} catch (PlayerException | TownSystemException | GeneralEconomyException e) {
 	    sender.sendMessage(e.getMessage());
 	} catch (NumberFormatException e) {
 	    sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter", args[2]));
@@ -76,7 +77,7 @@ public class TownworldCommandExecutor implements CommandExecutor {
     }
 
     private boolean handleDisableCommand(CommandSender sender, String label, String[] args)
-	    throws TownSystemException, PlayerException {
+	    throws PlayerException, GeneralEconomyException, TownSystemException {
 	if (args.length == 2) {
 	    TownworldController.deleteTownWorld(args[1]);
 	    sender.sendMessage(MessageWrapper.getString("townworld_disable", args[1]));

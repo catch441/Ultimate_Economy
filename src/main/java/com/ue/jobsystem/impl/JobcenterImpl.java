@@ -28,7 +28,7 @@ import org.bukkit.potion.PotionEffectType;
 
 import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyMessageEnum;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.JobExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
@@ -100,7 +100,7 @@ public class JobcenterImpl implements Jobcenter {
 	for (String jobName : jobNames) {
 	    try {
 		jobs.add(JobController.getJobByName(jobName));
-	    } catch (JobSystemException e) {
+	    } catch (GeneralEconomyException e) {
 		Bukkit.getLogger().warning(
 			"[Ultimate_Economy] " + MessageWrapper.getErrorString("job_does_not_exist") + ":" + jobName);
 	    }
@@ -146,13 +146,13 @@ public class JobcenterImpl implements Jobcenter {
 	    throws JobSystemException, GeneralEconomyException, PlayerException {
 	itemMaterial = itemMaterial.toUpperCase();
 	if (slot < 0 || slot > inventory.getSize()) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, slot);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, slot);
 	} else if (!slotIsEmpty(slot)) {
 	    throw PlayerException.getException(PlayerExceptionMessageEnum.INVENTORY_SLOT_OCCUPIED);
 	} else if (jobs.contains(job)) {
 	    throw JobSystemException.getException(JobExceptionMessageEnum.JOB_ALREADY_EXIST_IN_JOBCENTER);
 	} else if (Material.matchMaterial(itemMaterial) == null) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, itemMaterial);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, itemMaterial);
 	} else {
 	    config = YamlConfiguration.loadConfiguration(file);
 	    jobs.add(job);

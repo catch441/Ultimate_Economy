@@ -16,7 +16,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyMessageEnum;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.ShopExceptionMessageEnum;
@@ -147,7 +147,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     @Override
     public void changeShopSize(int newSize) throws ShopSystemException, PlayerException, GeneralEconomyException {
 	if (newSize % 9 != 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, newSize);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, newSize);
 	} else {
 	    boolean possible = true;
 	    int diff = size - newSize;
@@ -177,13 +177,15 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      * Overridden, because of the naming convention.
      * <p>
      * name_owner
+     * 
+     * @throws GeneralEconomyException
      */
     @Override
-    public void changeShopName(String name) throws ShopSystemException {
-	if (PlayershopController.getPlayerShopUniqueNameList().contains(name + owner.getName())) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_ALREADY_EXISTS);
-	} else if (PlayershopController.getPlayerShopUniqueNameList().contains(name)) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_ALREADY_EXISTS);
+    public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
+	if (PlayershopController.getPlayerShopUniqueNameList().contains(name + owner.getName())
+		|| PlayershopController.getPlayerShopUniqueNameList().contains(name)) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
+		    name + owner.getName());
 	} else if (name.contains("_")) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 	} else {

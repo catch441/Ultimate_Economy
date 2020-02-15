@@ -16,7 +16,7 @@ public class GeneralEconomyException extends Exception {
      * @param params
      * @return general economy exception
      */
-    public static GeneralEconomyException getException(GeneralEconomyMessageEnum key, Object... params) {
+    public static GeneralEconomyException getException(GeneralEconomyExceptionMessageEnum key, Object... params) {
 	return new GeneralEconomyException(MessageWrapper.getErrorString(key.getValue(), params));
     }
 }

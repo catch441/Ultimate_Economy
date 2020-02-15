@@ -12,6 +12,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import com.ue.exceptions.GeneralEconomyException;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.TownExceptionMessageEnum;
@@ -84,9 +85,10 @@ public class TownworldImpl implements Townworld {
     }
 
     @Override
-    public void addTown(Town town) throws TownSystemException {
+    public void addTown(Town town) throws GeneralEconomyException {
 	if (townNames.contains(town.getTownName())) {
-	    throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_ALREADY_EXIST);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
+		    town.getTownName());
 	} else {
 	    towns.add(town);
 	    townNames.add(town.getTownName());
@@ -94,9 +96,10 @@ public class TownworldImpl implements Townworld {
     }
 
     @Override
-    public void removeTown(Town town) throws TownSystemException {
+    public void removeTown(Town town) throws GeneralEconomyException {
 	if (!townNames.contains(town.getTownName())) {
-	    throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_DOES_NOT_EXIST);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,
+		    town.getTownName());
 	} else {
 	    towns.remove(town);
 	    townNames.remove(town.getTownName());
@@ -165,13 +168,13 @@ public class TownworldImpl implements Townworld {
     }
 
     @Override
-    public Town getTownByName(String townName) throws TownSystemException {
+    public Town getTownByName(String townName) throws GeneralEconomyException {
 	for (Town town : towns) {
 	    if (town.getTownName().equals(townName)) {
 		return town;
 	    }
 	}
-	throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_DOES_NOT_EXIST);
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, townName);
     }
 
     @Override

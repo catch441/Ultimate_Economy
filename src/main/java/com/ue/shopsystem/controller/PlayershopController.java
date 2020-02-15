@@ -10,7 +10,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.config.api.ConfigController;
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyMessageEnum;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.ShopExceptionMessageEnum;
@@ -66,15 +66,15 @@ public class PlayershopController {
      * 
      * @param name
      * @return PlayerShop
-     * @throws ShopSystemException
+     * @throws GeneralEconomyException
      */
-    public static Playershop getPlayerShopByUniqueName(String name) throws ShopSystemException {
+    public static Playershop getPlayerShopByUniqueName(String name) throws GeneralEconomyException {
 	for (Playershop shop : playerShopList) {
 	    if (name.equals(shop.getName() + "_" + shop.getOwner().getName())) {
 		return shop;
 	    }
 	}
-	throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_DOES_NOT_EXIST);
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
     }
 
     /**
@@ -82,15 +82,15 @@ public class PlayershopController {
      * 
      * @param id
      * @return PlayerShop
-     * @throws ShopSystemException
+     * @throws GeneralEconomyException
      */
-    public static Playershop getPlayerShopById(String id) throws ShopSystemException {
+    public static Playershop getPlayerShopById(String id) throws GeneralEconomyException {
 	for (Playershop shop : playerShopList) {
 	    if (shop.getShopId().equals(id)) {
 		return shop;
 	    }
 	}
-	throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_DOES_NOT_EXIST);
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, id);
     }
 
     /**
@@ -127,31 +127,30 @@ public class PlayershopController {
      * @throws PlayerException
      * @throws GeneralEconomyException
      */
-    public static void createPlayerShop(String name, Location spawnLocation, int size,
-	    EconomyPlayer ecoPlayer)
+    public static void createPlayerShop(String name, Location spawnLocation, int size, EconomyPlayer ecoPlayer)
 	    throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
 	checkForValidShopName(name);
 	checkForMaxPlayershopsForPlayer(ecoPlayer);
 	checkForTownworldPlotPermission(spawnLocation, ecoPlayer);
-	checkForUniqueShopnameForPlayer(name, ecoPlayer); 
+	checkForUniqueShopnameForPlayer(name, ecoPlayer);
 	checkForValidSize(size);
-	
-	playerShopList.add(
-		    new PlayershopImpl(name, ecoPlayer, generateFreePlayerShopId(), spawnLocation, size));
+
+	playerShopList.add(new PlayershopImpl(name, ecoPlayer, generateFreePlayerShopId(), spawnLocation, size));
 	UltimateEconomy.getInstance.getConfig().set("PlayerShopIds", PlayershopController.getPlayershopIdList());
 	UltimateEconomy.getInstance.saveConfig();
     }
 
     private static void checkForValidSize(int size) throws GeneralEconomyException {
 	if (size % 9 != 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, size);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
 	}
     }
 
     private static void checkForUniqueShopnameForPlayer(String name, EconomyPlayer ecoPlayer)
-	    throws ShopSystemException {
+	    throws GeneralEconomyException {
 	if (getPlayerShopUniqueNameList().contains(name + "_" + ecoPlayer.getName())) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_ALREADY_EXISTS);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,
+		    name + "_" + ecoPlayer.getName());
 	}
     }
 
@@ -239,39 +238,39 @@ public class PlayershopController {
 
     private static void playerShopsNewLoadingAll(FileConfiguration fileConfig, File dataFolder) {
 	for (String shopId : fileConfig.getStringList("PlayerShopIds")) {
-	File file = new File(dataFolder, shopId + ".yml");
-	if (file.exists()) {
-	    try {
-		playerShopList.add(new PlayershopImpl(dataFolder, null, shopId));
-	    } catch (TownSystemException e) {
-		Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
-		Bukkit.getLogger().warning(
-			"[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopId));
+	    File file = new File(dataFolder, shopId + ".yml");
+	    if (file.exists()) {
+		try {
+		    playerShopList.add(new PlayershopImpl(dataFolder, null, shopId));
+		} catch (TownSystemException e) {
+		    Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
+		    Bukkit.getLogger()
+			    .warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopId));
+		}
+	    } else {
+		Bukkit.getLogger()
+			.warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopId));
 	    }
-	} else {
-	    Bukkit.getLogger()
-		    .warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopId));
-	}
 	}
     }
 
     @Deprecated
     private static void playerShopsOldLoadingAll(FileConfiguration fileConfig, File dataFolder) {
 	for (String shopName : fileConfig.getStringList("PlayerShopNames")) {
-	File file = new File(dataFolder, shopName + ".yml");
-	if (file.exists()) {
-	    String shopId = generateFreePlayerShopId();
-	    try {
-		playerShopList.add(new PlayershopImpl(dataFolder, shopName, shopId));
-	    } catch (TownSystemException e) {
-		Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
-		Bukkit.getLogger().warning(
-			"[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopName));
+	    File file = new File(dataFolder, shopName + ".yml");
+	    if (file.exists()) {
+		String shopId = generateFreePlayerShopId();
+		try {
+		    playerShopList.add(new PlayershopImpl(dataFolder, shopName, shopId));
+		} catch (TownSystemException e) {
+		    Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
+		    Bukkit.getLogger().warning(
+			    "[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopName));
+		}
+	    } else {
+		Bukkit.getLogger()
+			.warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopName));
 	    }
-	} else {
-	    Bukkit.getLogger().warning(
-		    "[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopName));
-	}
 	}
 	// convert to new shopId save system
 	fileConfig.set("PlayerShopNames", null);

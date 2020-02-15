@@ -10,6 +10,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
@@ -140,14 +141,16 @@ public class TownworldController {
      * 
      * @param world
      * @throws TownSystemException
-     * @throws PlayerException 
+     * @throws PlayerException
+     * @throws GeneralEconomyException
      */
-    public static void deleteTownWorld(String world) throws TownSystemException, PlayerException {
+    public static void deleteTownWorld(String world)
+	    throws TownSystemException, PlayerException, GeneralEconomyException {
 	if (Bukkit.getWorld(world) == null) {
 	    throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, world);
 	} else {
 	    Townworld townworld = getTownWorldByName(world);
-	    for(Town town:townworld.getTownList()) {
+	    for (Town town : townworld.getTownList()) {
 		TownController.dissolveTown(town, town.getMayor());
 	    }
 	    townWorldList.remove(townworld);

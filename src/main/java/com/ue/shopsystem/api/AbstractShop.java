@@ -176,8 +176,9 @@ public abstract interface AbstractShop {
      * @throws ShopSystemException
      *             thrown, when a shop with this name already exists or the name
      *             contains "_"
+     * @throws GeneralEconomyException 
      */
-    public abstract void changeShopName(String name) throws ShopSystemException;
+    public abstract void changeShopName(String name) throws ShopSystemException, GeneralEconomyException;
 
     /**
      * --Change Methode--

@@ -42,33 +42,33 @@ public enum EconomyVillager {
 
     ADMINSHOP {
 	@Override
-	void performOpenInventory(Entity entity, String id, Player player)
-		throws TownSystemException, ShopSystemException, JobSystemException {
+	void performOpenInventory(Entity entity, String id, Player player) throws GeneralEconomyException {
 	    AdminshopController.getAdminShopById(id).openInv(player);
 	}
 
 	@Override
-	void performHandleInventoryClick(InventoryClickEvent event, String id) throws ShopSystemException {
+	void performHandleInventoryClick(InventoryClickEvent event, String id)
+		throws GeneralEconomyException {
 	    Adminshop adminshop = AdminshopController.getAdminShopById(id);
 	    handleShopInvClickEvent(adminshop, (Player) event.getWhoClicked(), event);
 	}
     },
     PLAYERSHOP {
 	@Override
-	void performOpenInventory(Entity entity, String id, Player player)
-		throws TownSystemException, ShopSystemException, JobSystemException {
+	void performOpenInventory(Entity entity, String id, Player player) throws GeneralEconomyException {
 	    PlayershopController.getPlayerShopById(id).openInv(player);
 	}
 
 	@Override
-	void performHandleInventoryClick(InventoryClickEvent event, String id) throws ShopSystemException {
+	void performHandleInventoryClick(InventoryClickEvent event, String id)
+		throws GeneralEconomyException {
 	    Playershop playershop = PlayershopController.getPlayerShopById(id);
 	    handleShopInvClickEvent(playershop, (Player) event.getWhoClicked(), event);
 	}
     },
     PLAYERSHOP_RENTABLE {
 	@Override
-	void performOpenInventory(Entity entity, String id, Player player) throws ShopSystemException {
+	void performOpenInventory(Entity entity, String id, Player player) throws GeneralEconomyException {
 	    Rentshop shop = RentshopController.getRentShopById(id);
 	    if (shop.isRentable()) {
 		shop.openRentGUI(player);
@@ -79,7 +79,7 @@ public enum EconomyVillager {
 
 	@Override
 	void performHandleInventoryClick(InventoryClickEvent event, String id)
-		throws ShopSystemException, PlayerException, GeneralEconomyException {
+		throws ShopSystemException, GeneralEconomyException, PlayerException {
 	    Rentshop rentshop = RentshopController.getRentShopById(id);
 	    if (rentshop.isRentable()) {
 		rentshop.handleRentShopGUIClick(event);
@@ -131,7 +131,7 @@ public enum EconomyVillager {
 
 	@Override
 	void performHandleInventoryClick(InventoryClickEvent event, String id)
-		throws PlayerException, JobSystemException {
+		throws PlayerException, JobSystemException, GeneralEconomyException {
 	    EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(event.getWhoClicked().getName());
 	    String displayname = event.getCurrentItem().getItemMeta().getDisplayName();
 	    if (event.getClick() == ClickType.RIGHT && displayname != null) {
@@ -145,7 +145,7 @@ public enum EconomyVillager {
     };
 
     abstract void performOpenInventory(Entity entity, String id, Player player)
-	    throws TownSystemException, ShopSystemException, JobSystemException;
+	    throws TownSystemException, ShopSystemException, JobSystemException, GeneralEconomyException;
 
     abstract void performHandleInventoryClick(InventoryClickEvent event, String id) throws TownSystemException,
 	    ShopSystemException, JobSystemException, PlayerException, GeneralEconomyException;
@@ -418,7 +418,7 @@ public enum EconomyVillager {
 	    }
 	}
     }
-    
+
     private static void removeItemFromInventory(Inventory inventory, ItemStack item, int amount) {
 	int amount2 = amount;
 	int amountStack, repairCosts = 0;

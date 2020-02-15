@@ -25,6 +25,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import com.ue.eventhandling.EconomyVillager;
+import com.ue.exceptions.GeneralEconomyException;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.TownExceptionMessageEnum;
@@ -188,7 +190,7 @@ public class TownImpl implements Town {
 
     @Override
     public void renameTown(String newName, EconomyPlayer player, boolean sendMessage)
-	    throws TownSystemException, PlayerException {
+	    throws PlayerException, GeneralEconomyException, TownSystemException {
 	checkForTownAlreadyExists(newName);
 	checkForPlayerHasMayorPermissions(player);
 	String oldName = getTownName();
@@ -835,9 +837,9 @@ public class TownImpl implements Town {
 	}
     }
 
-    private void checkForTownAlreadyExists(String newName) throws TownSystemException {
+    private void checkForTownAlreadyExists(String newName) throws GeneralEconomyException {
 	if (TownController.getTownNameList().contains(newName)) {
-	    throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_ALREADY_EXIST);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,newName);
 	}
     }
 }

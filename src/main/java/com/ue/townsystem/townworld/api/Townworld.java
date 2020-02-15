@@ -25,18 +25,18 @@ public interface Townworld {
      * one with the TownController.
      * 
      * @param town
-     * @throws TownSystemException
+     * @throws GeneralEconomyException 
      */
-    public void addTown(Town town) throws TownSystemException;
+    public void addTown(Town town) throws GeneralEconomyException;
 
     /**
      * Removes a town from the townworld. You don't have to remove a town, after you
      * dissolved one with the TownController.
      * 
      * @param town
-     * @throws TownSystemException
+     * @throws GeneralEconomyException 
      */
-    public void removeTown(Town town) throws TownSystemException;
+    public void removeTown(Town town) throws GeneralEconomyException;
 
     /**
      * Returns town by chunk.
@@ -60,9 +60,9 @@ public interface Townworld {
      * 
      * @param townName
      * @return Town
-     * @throws TownSystemException
+     * @throws GeneralEconomyException 
      */
-    public Town getTownByName(String townName) throws TownSystemException;
+    public Town getTownByName(String townName) throws GeneralEconomyException;
 
     /**
      * Returns a list of all townnames in this townworld.

@@ -22,7 +22,7 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import com.ue.config.api.ConfigController;
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyMessageEnum;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
@@ -73,7 +73,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	for (String jobName : jobNames) {
 	try {
 	    jobs.add(JobController.getJobByName(jobName));
-	} catch (JobSystemException e) {
+	} catch (GeneralEconomyException e) {
 	    Bukkit.getLogger().warning("[Ultimate_Economy] "
 		    + MessageWrapper.getErrorString("job_does_not_exist") + ":" + jobName);
 	}
@@ -315,7 +315,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
     public void payToOtherPlayer(EconomyPlayer reciever, double amount, boolean sendMessage)
 	    throws GeneralEconomyException, PlayerException {
 	if (amount < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, amount);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, amount);
 	} else if (hasEnoughtMoney(amount)) {
 	    reciever.increasePlayerAmount(amount, false);
 
@@ -334,7 +334,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
     @Override
     public void increasePlayerAmount(double amount, boolean sendMessage) throws GeneralEconomyException {
 	if (amount < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, amount);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, amount);
 	} else {
 	    FileConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
 	    account += amount;
@@ -353,7 +353,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
     @Override
     public void decreasePlayerAmount(double amount, boolean personal) throws GeneralEconomyException, PlayerException {
 	if (amount < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, amount);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, amount);
 	} else if (hasEnoughtMoney(amount)) {
 	    FileConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
 	    account -= amount;

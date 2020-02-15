@@ -3,7 +3,7 @@ package com.ue.config.api;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyMessageEnum;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -178,7 +178,7 @@ public class ConfigController {
      */
     public static void setMaxRentedDays(int days) throws GeneralEconomyException {
 	if (days < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, days);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, days);
 	} else {
 	    UltimateEconomy.getInstance.getConfig().set("MaxRentedDays", days);
 	    maxRentedDays = days;
@@ -203,7 +203,7 @@ public class ConfigController {
      */
     public static void setMaxPlayershops(int value) throws GeneralEconomyException {
 	if (value < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, value);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, value);
 	} else {
 	    UltimateEconomy.getInstance.getConfig().set("MaxPlayershops", value);
 	    maxPlayershops = value;
@@ -228,7 +228,7 @@ public class ConfigController {
      */
     public static void setMaxHomes(int value) throws GeneralEconomyException {
 	if (value < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, value);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, value);
 	} else {
 	    UltimateEconomy.getInstance.getConfig().set("MaxHomes", value);
 	    maxHomes = value;
@@ -253,7 +253,7 @@ public class ConfigController {
      */
     public static void setMaxJobs(int value) throws GeneralEconomyException {
 	if (value < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, value);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, value);
 	} else {
 	    UltimateEconomy.getInstance.getConfig().set("MaxJobs", value);
 	    maxJobs = value;
@@ -278,7 +278,7 @@ public class ConfigController {
      */
     public static void setMaxJoinedTowns(int value) throws GeneralEconomyException {
 	if (value < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, value);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, value);
 	} else {
 	    UltimateEconomy.getInstance.getConfig().set("MaxJoinedTowns", value);
 	    maxJoinedTowns = value;

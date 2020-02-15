@@ -6,7 +6,8 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 
-import com.ue.exceptions.JobExceptionMessageEnum;
+import com.ue.exceptions.GeneralEconomyException;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.impl.JobImpl;
@@ -46,15 +47,15 @@ public class JobController {
      * 
      * @param jobName
      * @return Job
-     * @throws JobSystemException
+     * @throws GeneralEconomyException 
      */
-    public static Job getJobByName(String jobName) throws JobSystemException {
+    public static Job getJobByName(String jobName) throws GeneralEconomyException {
 	for (Job job : jobList) {
 	    if (job.getName().equals(jobName)) {
 		return job;
 	    }
 	}
-	throw JobSystemException.getException(JobExceptionMessageEnum.JOB_DOES_NOT_EXISTS);
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,jobName);
     }
 
     /**
@@ -62,8 +63,9 @@ public class JobController {
      * 
      * @param jobName
      * @throws JobSystemException
+     * @throws GeneralEconomyException 
      */
-    public static void deleteJob(String jobName) throws JobSystemException {
+    public static void deleteJob(String jobName) throws GeneralEconomyException, JobSystemException {
 	Job job = getJobByName(jobName);
 	List<Jobcenter> jobCenterList = JobcenterController.getJobCenterList();
 	for (Jobcenter jobcenter : jobCenterList) {
@@ -92,11 +94,11 @@ public class JobController {
      * This method should be used to create a new Job.
      * 
      * @param jobName
-     * @throws JobSystemException
+     * @throws GeneralEconomyException 
      */
-    public static void createJob(String jobName) throws JobSystemException {
+    public static void createJob(String jobName) throws GeneralEconomyException {
 	if (getJobNameList().contains(jobName)) {
-	    throw JobSystemException.getException(JobExceptionMessageEnum.JOB_ALREADY_EXISTS);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,jobName);
 	} else {
 	    jobList.add(new JobImpl(jobName));
 	    UltimateEconomy.getInstance.getConfig().set("JobList", JobController.getJobNameList());

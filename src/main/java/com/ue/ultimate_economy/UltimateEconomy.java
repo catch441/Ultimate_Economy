@@ -30,7 +30,6 @@ import com.ue.eventhandling.UltimateEconomyEventHandler;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
-import com.ue.exceptions.ShopSystemException;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.JobcenterController;
@@ -212,6 +211,7 @@ public class UltimateEconomy extends JavaPlugin {
 	getCommand("rentshop").setExecutor(new RentshopCommandExecutor());
 	PlayerCommandExecutor playerCommandExecutor = new PlayerCommandExecutor();
 	getCommand("pay").setExecutor(playerCommandExecutor);
+	getCommand("givemoney").setExecutor(playerCommandExecutor);
 	getCommand("money").setExecutor(playerCommandExecutor);
 	getCommand("myjobs").setExecutor(playerCommandExecutor);
 	getCommand("bank").setExecutor(playerCommandExecutor);
@@ -280,7 +280,7 @@ public class UltimateEconomy extends JavaPlugin {
 		default:
 		    break;
 		}
-	    } catch (PlayerException | ShopSystemException | JobSystemException | GeneralEconomyException e) {
+	    } catch (PlayerException | JobSystemException | GeneralEconomyException e) {
 		player.sendMessage(e.getMessage());
 	    }
 	}
@@ -290,25 +290,22 @@ public class UltimateEconomy extends JavaPlugin {
     private boolean handleJobInfoCommand(String[] args, Player player)
 	    throws JobSystemException, GeneralEconomyException {
 	if (args.length == 1) {
-	Job job = JobController.getJobByName(args[0]);
-	player.sendMessage(MessageWrapper.getString("jobinfo_info", job.getName()));
-	for (String string : job.getItemList()) {
-	    player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN
-		    + job.getItemPrice(string)
-		    + ConfigController.getCurrencyText(job.getItemPrice(string)));
-	}
-	for (String string : job.getFisherList()) {
-	    player.sendMessage(MessageWrapper.getString("jobinfo_fishingprice", string.toLowerCase(),
-		    job.getFisherPrice(string),
-		    ConfigController.getCurrencyText(job.getFisherPrice(string))));
-	}
-	for (String string : job.getEntityList()) {
-	    player.sendMessage(MessageWrapper.getString("jobinfo_killprice", string.toLowerCase(),
-		    job.getKillPrice(string),
-		    ConfigController.getCurrencyText(job.getKillPrice(string))));
-	}
+	    Job job = JobController.getJobByName(args[0]);
+	    player.sendMessage(MessageWrapper.getString("jobinfo_info", job.getName()));
+	    for (String string : job.getItemList()) {
+		player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN
+			+ job.getItemPrice(string) + ConfigController.getCurrencyText(job.getItemPrice(string)));
+	    }
+	    for (String string : job.getFisherList()) {
+		player.sendMessage(MessageWrapper.getString("jobinfo_fishingprice", string.toLowerCase(),
+			job.getFisherPrice(string), ConfigController.getCurrencyText(job.getFisherPrice(string))));
+	    }
+	    for (String string : job.getEntityList()) {
+		player.sendMessage(MessageWrapper.getString("jobinfo_killprice", string.toLowerCase(),
+			job.getKillPrice(string), ConfigController.getCurrencyText(job.getKillPrice(string))));
+	    }
 	} else {
-	return false;
+	    return false;
 	}
 	return true;
     }
@@ -326,15 +323,15 @@ public class UltimateEconomy extends JavaPlugin {
     }
 
     private boolean handleShopCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
-	    throws JobSystemException, ShopSystemException {
+	    throws JobSystemException, GeneralEconomyException {
 	if (args.length == 1) {
-	if (ecoPlayer.hasJob(JobController.getJobByName(args[0]))) {
-	    AdminshopController.getAdminShopByName(args[0]).openInv(player);
+	    if (ecoPlayer.hasJob(JobController.getJobByName(args[0]))) {
+		AdminshopController.getAdminShopByName(args[0]).openInv(player);
+	    } else {
+		player.sendMessage(MessageWrapper.getErrorString("job_not_joined"));
+	    }
 	} else {
-	    player.sendMessage(MessageWrapper.getErrorString("job_not_joined"));
-	}
-	} else {
-	return false;
+	    return false;
 	}
 	return true;
     }

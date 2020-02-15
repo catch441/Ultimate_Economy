@@ -165,7 +165,7 @@ public class UltimateEconomyEventHandler implements Listener {
 	    event.setCancelled(true);
 	    try {
 		type.performOpenInventory(entity, shopId, event.getPlayer());
-	    } catch (TownSystemException | ShopSystemException | JobSystemException e) {
+	    } catch (TownSystemException | ShopSystemException | JobSystemException | GeneralEconomyException e) {
 	    }
 	}
     }
@@ -212,10 +212,8 @@ public class UltimateEconomyEventHandler implements Listener {
 	if (entity.getKiller() instanceof Player) {
 	    try {
 		EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(entity.getKiller().getName());
-		if (!ecoPlayer.getJobList().isEmpty() && entity.getKiller().getGameMode() != GameMode.CREATIVE
-			&& entity.getKiller().getGameMode() != GameMode.SPECTATOR) {
-		    List<Job> jobList = ecoPlayer.getJobList();
-		    for (Job job : jobList) {
+		if (!ecoPlayer.getJobList().isEmpty() && entity.getKiller().getGameMode() == GameMode.SURVIVAL) {
+		    for (Job job : ecoPlayer.getJobList()) {
 			try {
 			    double d = job.getKillPrice(entity.getType().toString());
 			    ecoPlayer.increasePlayerAmount(d, false);
@@ -311,7 +309,7 @@ public class UltimateEconomyEventHandler implements Listener {
 	    config.set(spawnername + ".EntityType", string.substring(0, string.lastIndexOf("-")));
 	    saveFile(spawner, config);
 	} else {
-	    event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permision_set_spawner"));
+	    event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_set_spawner"));
 	    event.setCancelled(true);
 	}
     }
@@ -406,7 +404,7 @@ public class UltimateEconomyEventHandler implements Listener {
 		}
 	    } else {
 		event.setCancelled(true);
-		event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permision_break_spawner"));
+		event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_break_spawner"));
 	    }
 	}
     }

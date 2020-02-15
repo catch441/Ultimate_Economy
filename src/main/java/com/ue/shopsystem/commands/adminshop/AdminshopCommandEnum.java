@@ -13,7 +13,7 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyMessageEnum;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
@@ -126,7 +126,7 @@ public enum AdminshopCommandEnum {
 		throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 7) {
 		if (Material.matchMaterial(args[2].toUpperCase()) == null) {
-		    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, args[2]);
+		    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, args[2]);
 		} else {
 		    ItemStack itemStack = new ItemStack(Material.getMaterial(args[2].toUpperCase()),
 			    Integer.valueOf(args[4]));
@@ -253,12 +253,12 @@ public enum AdminshopCommandEnum {
 	    throws ShopSystemException, PlayerException, GeneralEconomyException {
 	if (!args[2].equalsIgnoreCase("potion") && !args[2].equalsIgnoreCase("splash_potion")
 		&& !args[2].equalsIgnoreCase("lingering_potion")) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, args[2]);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, args[2]);
 	} else if (!args[4].equalsIgnoreCase("extended") && !args[4].equalsIgnoreCase("upgraded")
 		&& !args[4].equalsIgnoreCase("none")) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, args[4]);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, args[4]);
 	} else if (!args[2].toUpperCase().equals("HAND") && Material.matchMaterial(args[2].toUpperCase()) == null) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, args[2]);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, args[2]);
 	} else {
 	    ItemStack itemStack = new ItemStack(Material.valueOf(args[2].toUpperCase()), Integer.valueOf(args[6]));
 	    PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
@@ -279,7 +279,7 @@ public enum AdminshopCommandEnum {
     private static void handleAddEnchantedItem(Player p, String[] args, Adminshop s)
 	    throws ShopSystemException, PlayerException, GeneralEconomyException {
 	if (!args[2].toUpperCase().equals("HAND") && Material.matchMaterial(args[2].toUpperCase()) == null) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, args[2]);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, args[2]);
 	} else {
 	    Integer length = args.length - 7;
 	    if (length % 2 == 0) {

@@ -21,7 +21,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import com.ue.config.api.ConfigController;
 import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyMessageEnum;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
@@ -355,7 +355,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      */
     public void changeRentalFee(double fee) throws GeneralEconomyException {
 	if (fee < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, fee);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, fee);
 	} else {
 	    saveRentalFeeToFile(fee);
 	    rentalFee = fee;

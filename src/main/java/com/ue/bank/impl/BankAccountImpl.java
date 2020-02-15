@@ -8,6 +8,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ue.bank.api.BankAccount;
 import com.ue.bank.api.BankController;
+import com.ue.exceptions.GeneralEconomyException;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 
 public class BankAccountImpl implements BankAccount {
 
@@ -20,9 +22,9 @@ public class BankAccountImpl implements BankAccount {
      * @param startAmount
      */
     public BankAccountImpl(double startAmount) {
+	iban = UUID.randomUUID().toString();
 	setAmount(startAmount);
 	saveAmount(startAmount);
-	iban = UUID.randomUUID().toString();
     }
     
     /**
@@ -31,9 +33,9 @@ public class BankAccountImpl implements BankAccount {
      * @param externalIban
      */
     public BankAccountImpl(double startAmount, String externalIban) {
+	iban = externalIban;
 	setAmount(startAmount);
 	saveAmount(startAmount);
-	iban = externalIban;
     }
     
     /**
@@ -46,15 +48,37 @@ public class BankAccountImpl implements BankAccount {
     }
 
     @Override
-    public void decreaseAmount(double amount) {
-	// TODO decreaseAmount
-
+    public void decreaseAmount(double amount) throws GeneralEconomyException {
+	checkForPositiveAmount(amount);
+	if(this.amount < amount) {
+	    // TODO throw error not enough money
+	} else {
+	    this.amount -= amount;
+	    saveAmount(this.amount);
+	}
     }
 
     @Override
-    public void increaseAmount(double amount) {
-	// TODO increaseAmount
+    public void increaseAmount(double amount) throws GeneralEconomyException {
+	checkForPositiveAmount(amount);
+	this.amount += amount;
+	saveAmount(this.amount);
+    }
 
+    private void checkForPositiveAmount(double amount) throws GeneralEconomyException {
+	if(amount < 0) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, amount);
+	}
+    }
+    
+    @Override
+    public boolean hasAmount(double amount) throws GeneralEconomyException {
+	checkForPositiveAmount(amount);
+	if(this.amount < amount) {
+	    return false;
+	} else {
+	    return true;
+	}
     }
 
     @Override

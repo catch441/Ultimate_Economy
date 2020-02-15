@@ -9,7 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyMessageEnum;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
@@ -29,15 +29,15 @@ public class AdminshopController {
      * 
      * @param name
      * @return adminshop
-     * @throws ShopSystemException
+     * @throws GeneralEconomyException 
      */
-    public static Adminshop getAdminShopByName(String name) throws ShopSystemException {
+    public static Adminshop getAdminShopByName(String name) throws GeneralEconomyException {
 	for (Adminshop shop : adminShopList) {
 	    if (shop.getName().equals(name)) {
 		return shop;
 	    }
-	}
-	throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_DOES_NOT_EXIST);
+	}	
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,name);
     }
 
     /**
@@ -45,15 +45,15 @@ public class AdminshopController {
      * 
      * @param id
      * @return adminshop
-     * @throws ShopSystemException
+     * @throws GeneralEconomyException 
      */
-    public static Adminshop getAdminShopById(String id) throws ShopSystemException {
+    public static Adminshop getAdminShopById(String id) throws GeneralEconomyException {
 	for (Adminshop shop : adminShopList) {
 	    if (shop.getShopId().equals(id)) {
 		return shop;
 	    }
 	}
-	throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_DOES_NOT_EXIST);
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,id);
     }
 
     /**
@@ -121,9 +121,9 @@ public class AdminshopController {
 	if (name.contains("_")) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 	} else if (getAdminshopNameList().contains(name)) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_ALREADY_EXISTS);
+		throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,name);
 	} else if (size % 9 != 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyMessageEnum.INVALID_PARAMETER, size);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
 	} else {
 	    adminShopList.add(new AdminshopImpl(name, generateFreeAdminShopId(), spawnLocation, size));
 	    UltimateEconomy.getInstance.getConfig().set("AdminShopIds", AdminshopController.getAdminshopIdList());

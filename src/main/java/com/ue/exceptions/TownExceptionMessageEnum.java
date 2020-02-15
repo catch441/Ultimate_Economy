@@ -2,8 +2,6 @@ package com.ue.exceptions;
 
 public enum TownExceptionMessageEnum {
 
-    TOWN_ALREADY_EXIST ("town_already_exist"),
-    TOWN_DOES_NOT_EXIST ("town_does_not_exist"),
     PLOT_IS_ALREADY_FOR_SALE ("plot_is_already_for_sale"),
     PLOT_IS_NOT_FOR_SALE ("plot_is_not_for_sale"),
     CHUNK_IS_NOT_CONNECTED_WITH_TOWN ("chunk_is_not_connected_with_town"),

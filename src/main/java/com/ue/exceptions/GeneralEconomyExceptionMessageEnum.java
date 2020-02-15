@@ -1,12 +1,14 @@
 package com.ue.exceptions;
 
-public enum GeneralEconomyMessageEnum {
+public enum GeneralEconomyExceptionMessageEnum {
 
-    INVALID_PARAMETER ("invalid_parameter");
+    INVALID_PARAMETER ("invalid_parameter"),
+    DOES_NOT_EXIST ("does_not_exist"),
+    ALREADY_EXISTS ("already_exists");
 	
     private String value; 
     
-    private GeneralEconomyMessageEnum(String value) { 
+    private GeneralEconomyExceptionMessageEnum(String value) { 
 	this.value = value; 
     } 
 	  

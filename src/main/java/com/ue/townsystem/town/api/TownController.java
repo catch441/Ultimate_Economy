@@ -12,6 +12,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import com.ue.exceptions.GeneralEconomyException;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.TownExceptionMessageEnum;
@@ -70,16 +71,15 @@ public class TownController {
 	}
     }
 
-    private static void checkForChunkIsFree(Townworld townworld, Location location)
-	    throws TownSystemException {
+    private static void checkForChunkIsFree(Townworld townworld, Location location) throws TownSystemException {
 	if (!townworld.isChunkFree(location.getChunk())) {
 	    throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED);
 	}
     }
 
-    private static void checkForTownDoesNotExist(String townName) throws TownSystemException {
+    private static void checkForTownDoesNotExist(String townName) throws GeneralEconomyException {
 	if (townNameList.contains(townName)) {
-	    throw TownSystemException.getException(TownExceptionMessageEnum.TOWN_ALREADY_EXIST);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,townName);
 	}
     }
 
@@ -90,8 +90,10 @@ public class TownController {
      * @param player
      * @throws TownSystemException
      * @throws PlayerException
+     * @throws GeneralEconomyException
      */
-    public static void dissolveTown(Town town, EconomyPlayer player) throws TownSystemException, PlayerException {
+    public static void dissolveTown(Town town, EconomyPlayer player)
+	    throws TownSystemException, PlayerException, GeneralEconomyException {
 	if (town.isMayor(player)) {
 	    List<EconomyPlayer> tList = new ArrayList<>();
 	    tList.addAll(town.getCitizens());

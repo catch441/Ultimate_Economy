@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import com.ue.bank.impl.BankAccountImpl;
+import com.ue.exceptions.GeneralEconomyException;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import org.bukkit.configuration.file.FileConfiguration;
@@ -16,15 +18,32 @@ public class BankController {
     private static File bankFile;
 
     /**
-     * Creats a new bank account with a given start
-     * amount.
+     * Creats a new bank account with a given start amount.
      * 
      * @param startAmount
      */
     public static void createBankAccount(double startAmount) {
-	FileConfiguration config = YamlConfiguration.loadConfiguration(bankFile);
 	accounts.add(new BankAccountImpl(startAmount));
-	config.set("IbanList", getIbanList());
+	FileConfiguration config = YamlConfiguration.loadConfiguration(bankFile);
+	config.set("Ibans", getIbanList());
+	saveConfig(config);
+    }
+
+    /**
+     * Creats a new bank account with a given start amount and a external iban.
+     * 
+     * @param startAmount
+     * @param externalIban
+     * @throws GeneralEconomyException
+     */
+    public static void createExternalBankAccount(double startAmount, String externalIban)
+	    throws GeneralEconomyException {
+	if (getIbanList().contains(externalIban)) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, externalIban);
+	}	
+	accounts.add(new BankAccountImpl(startAmount, externalIban));
+	FileConfiguration config = YamlConfiguration.loadConfiguration(bankFile);
+	config.set("Ibans", getIbanList());
 	saveConfig(config);
     }
 
@@ -32,15 +51,16 @@ public class BankController {
      * Delets a bank account by a iban.
      * 
      * @param iban
+     * @throws GeneralEconomyException
      */
-    public static void deleteBankAccount(String iban) {
+    public static void deleteBankAccount(String iban) throws GeneralEconomyException {
 	if (!getIbanList().contains(iban)) {
-	    // TODO throw error -> account does not exist
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, iban);
 	}
 	BankAccount account = getBankAccountByIban(iban);
 	accounts.remove(account);
 	FileConfiguration config = YamlConfiguration.loadConfiguration(bankFile);
-	config.set("IbanList", getIbanList());
+	config.set("Ibans", getIbanList());
 	config.set(iban, null);
 	saveConfig(config);
     }
@@ -60,7 +80,7 @@ public class BankController {
 	    config.set("Ibans", new ArrayList<>());
 	    saveConfig(config);
 	} else {
-	    for(String iban:config.getStringList("Ibans")) {
+	    for (String iban : config.getStringList("Ibans")) {
 		accounts.add(new BankAccountImpl(iban));
 	    }
 	}
@@ -71,15 +91,15 @@ public class BankController {
      * 
      * @param iban
      * @return the bank account
+     * @throws GeneralEconomyException
      */
-    public static BankAccount getBankAccountByIban(String iban) {
+    public static BankAccount getBankAccountByIban(String iban) throws GeneralEconomyException {
 	for (BankAccount account : getBankAccounts()) {
 	    if (account.getIban().equals(iban)) {
 		return account;
 	    }
 	}
-	// TODO throw error -> account does not exist
-	return null;
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, iban);
     }
 
     /**
@@ -90,16 +110,22 @@ public class BankController {
     public static List<BankAccount> getBankAccounts() {
 	return accounts;
     }
-    
+
     /**
      * Returns the savefile of the bank accounts.
+     * 
      * @return bankfile
      */
     public static File getSavefile() {
 	return bankFile;
     }
 
-    private static List<String> getIbanList() {
+    /**
+     * Returns a list of all ibans.
+     * 
+     * @return list of strings
+     */
+    public static List<String> getIbanList() {
 	List<String> ibans = new ArrayList<>();
 	for (BankAccount account : getBankAccounts()) {
 	    ibans.add(account.getIban());

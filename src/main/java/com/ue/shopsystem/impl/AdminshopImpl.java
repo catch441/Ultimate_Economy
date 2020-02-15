@@ -9,6 +9,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
+import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
@@ -65,9 +66,9 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
     }
 
     @Override
-    public void changeShopName(String name) throws ShopSystemException {
+    public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
 	if (AdminshopController.getAdminshopNameList().contains(name)) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_ALREADY_EXISTS);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,name);
 	} else if (name.contains("_")) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 	} else {
