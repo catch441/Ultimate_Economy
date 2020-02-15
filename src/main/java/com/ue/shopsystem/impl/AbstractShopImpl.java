@@ -365,9 +365,9 @@ public abstract class AbstractShopImpl implements AbstractShop {
     protected void saveLocationToFile(Location location) {
 	this.location = location;
 	config = YamlConfiguration.loadConfiguration(file);
-	config.set("ShopLocation.x", location.getBlockX());
-	config.set("ShopLocation.y", location.getBlockY());
-	config.set("ShopLocation.z", location.getBlockZ());
+	config.set("ShopLocation.x", location.getX());
+	config.set("ShopLocation.y", location.getY());
+	config.set("ShopLocation.z", location.getZ());
 	config.set("ShopLocation.World", location.getWorld().getName());
 	save();
     }
