@@ -152,7 +152,8 @@ public class JobcenterImpl implements Jobcenter {
 	} else if (jobs.contains(job)) {
 	    throw JobSystemException.getException(JobExceptionMessageEnum.JOB_ALREADY_EXIST_IN_JOBCENTER);
 	} else if (Material.matchMaterial(itemMaterial) == null) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, itemMaterial);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
+		    itemMaterial);
 	} else {
 	    config = YamlConfiguration.loadConfiguration(file);
 	    jobs.add(job);

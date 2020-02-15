@@ -30,8 +30,7 @@ public enum AdminshopCommandEnum {
 	boolean perform(String label, String[] args, Player player)
 		throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 3) {
-		AdminshopController.createAdminShop(args[1], player.getLocation(),
-			Integer.valueOf(args[2]));
+		AdminshopController.createAdminShop(args[1], player.getLocation(), Integer.valueOf(args[2]));
 		player.sendMessage(MessageWrapper.getString("shop_create", args[1]));
 	    } else {
 		player.sendMessage("/" + label + " create <shopname> <size> <- size have to be a multible of 9");
@@ -126,7 +125,8 @@ public enum AdminshopCommandEnum {
 		throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 7) {
 		if (Material.matchMaterial(args[2].toUpperCase()) == null) {
-		    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, args[2]);
+		    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
+			    args[2]);
 		} else {
 		    ItemStack itemStack = new ItemStack(Material.getMaterial(args[2].toUpperCase()),
 			    Integer.valueOf(args[4]));
@@ -248,7 +248,7 @@ public enum AdminshopCommandEnum {
 	}
 	return null;
     }
-    
+
     private static void handleAddPotion(Player p, Adminshop s, String[] args)
 	    throws ShopSystemException, PlayerException, GeneralEconomyException {
 	if (!args[2].equalsIgnoreCase("potion") && !args[2].equalsIgnoreCase("splash_potion")

@@ -28,6 +28,7 @@ public class JobImpl implements Job {
 
     /**
      * Constructor to create a new or load a existing job.
+     * 
      * @param name
      */
     public JobImpl(String name) {
@@ -75,7 +76,7 @@ public class JobImpl implements Job {
 	    save();
 	}
     }
-    
+
     @Override
     public void delFisherLootType(String lootType) throws JobSystemException, GeneralEconomyException {
 	if (!"treasure".equals(lootType) && !"junk".equals(lootType) && !"fish".equals(lootType)) {
@@ -92,7 +93,7 @@ public class JobImpl implements Job {
 	}
 
     }
-    
+
     @Override
     public void addMob(String entity, double price) throws JobSystemException, GeneralEconomyException {
 	entity = entity.toUpperCase();
@@ -205,7 +206,8 @@ public class JobImpl implements Job {
 	try {
 	    EntityType.valueOf(entityName.toUpperCase());
 	} catch (IllegalArgumentException e) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, entityName);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
+		    entityName);
 	}
 	if (!entityList.contains(entityName)) {
 	    throw JobSystemException.getException(JobExceptionMessageEnum.ENTITY_DOES_NOT_EXIST);
