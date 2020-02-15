@@ -6,12 +6,9 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Server;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
-import com.ue.exceptions.JobExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.impl.JobcenterImpl;
@@ -29,15 +26,15 @@ public class JobcenterController {
      * 
      * @param name
      * @return JobCenter
-     * @throws JobSystemException
+     * @throws GeneralEconomyException
      */
-    public static Jobcenter getJobCenterByName(String name) throws JobSystemException {
+    public static Jobcenter getJobCenterByName(String name) throws GeneralEconomyException {
 	for (Jobcenter jobcenter : jobCenterList) {
 	    if (jobcenter.getName().equals(name)) {
 		return jobcenter;
 	    }
 	}
-	throw JobSystemException.getException(JobExceptionMessageEnum.JOBCENTER_DOES_NOT_EXIST);
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
     }
 
     /**
@@ -119,16 +116,13 @@ public class JobcenterController {
     /**
      * This method loads all jobcenters from the save files. !!!
      * JobController.loadAllJobs() have to be executed before this method. !!!
-     * 
-     * @param server
-     * @param fileConfig
-     * @param dataFolder
      */
-    public static void loadAllJobCenters(Server server, FileConfiguration fileConfig, File dataFolder) {
-	for (String jobCenterName : fileConfig.getStringList("JobCenterNames")) {
-	    File file = new File(dataFolder, jobCenterName + "-JobCenter.yml");
+    public static void loadAllJobCenters() {
+	for (String jobCenterName : UltimateEconomy.getInstance.getConfig().getStringList("JobCenterNames")) {
+	    File file = new File(UltimateEconomy.getInstance.getDataFolder(), jobCenterName + "-JobCenter.yml");
 	    if (file.exists()) {
-		jobCenterList.add(new JobcenterImpl(server, dataFolder, jobCenterName));
+		jobCenterList.add(new JobcenterImpl(UltimateEconomy.getInstance.getServer(),
+			UltimateEconomy.getInstance.getDataFolder(), jobCenterName));
 	    } else {
 		Bukkit.getLogger().warning(
 			"[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_jobcenter", jobCenterName));
