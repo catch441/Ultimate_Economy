@@ -125,7 +125,7 @@ public enum EconomyVillager {
     JOBCENTER {
 	@Override
 	void performOpenInventory(Entity entity, String id, Player player)
-		throws TownSystemException, ShopSystemException, JobSystemException {
+		throws GeneralEconomyException {
 	    JobcenterController.getJobCenterByName(entity.getCustomName()).openInv(player);
 	}
 
