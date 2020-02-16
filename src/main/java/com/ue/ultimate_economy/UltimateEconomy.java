@@ -312,13 +312,13 @@ public class UltimateEconomy extends JavaPlugin {
 
     private boolean handleJobListCommand(Player player) {
 	List<String> jobNames = JobController.getJobNameList();
-	player.sendMessage(MessageWrapper.getString("joblist_info", jobNames.toArray()));
+	player.sendMessage(MessageWrapper.getString("joblist_info", jobNames.toString()));
 	return true;
     }
 
     private boolean handleShopListCommand(Player player) {
 	List<String> shopNames = AdminshopController.getAdminshopNameList();
-	player.sendMessage(MessageWrapper.getString("shoplist_info", shopNames.toArray()));
+	player.sendMessage(MessageWrapper.getString("shoplist_info", shopNames.toString()));
 	return true;
     }
 

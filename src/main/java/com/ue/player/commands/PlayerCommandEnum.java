@@ -67,7 +67,7 @@ public enum PlayerCommandEnum {
 		for (Job job : jobs) {
 		    jobNames.add(job.getName());
 		}
-		player.sendMessage(MessageWrapper.getString("myjobs_info", jobNames.toArray()));
+		player.sendMessage(MessageWrapper.getString("myjobs_info", jobNames.toString()));
 	    } else {
 		return false;
 	    }
