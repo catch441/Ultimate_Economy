@@ -92,9 +92,11 @@ public class MessageWrapper {
     public static String getString(String key, Object... params) {
 	try {
 	    List<String> colored = new ArrayList<>();
+	    
 	    for (Object object : params) {
 		colored.add("§a" + object.toString() + "§6");
 	    }
+	    
 	    String message = "§6" + messages.getString(key);
 	    String newMessage = MessageFormat.format(message, colored.toArray());
 	    return ChatColor.translateAlternateColorCodes('§', newMessage);
