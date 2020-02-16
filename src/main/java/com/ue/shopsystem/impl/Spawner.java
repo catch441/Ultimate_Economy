@@ -7,10 +7,15 @@ import org.bukkit.entity.EntityType;
 
 public class Spawner {
 
-	public static void setSpawner(EntityType type,Block block) {
-		BlockState blockState = block.getState();
-        CreatureSpawner spawner = ((CreatureSpawner)blockState);
-        spawner.setSpawnedType(type);
-        blockState.update();
-	}
+    /**
+     * Set entity of spawner.
+     * @param type
+     * @param block
+     */
+    public static void setSpawner(EntityType type, Block block) {
+	BlockState blockState = block.getState();
+	CreatureSpawner spawner = ((CreatureSpawner) blockState);
+	spawner.setSpawnedType(type);
+	blockState.update();
+    }
 }

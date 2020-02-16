@@ -10,69 +10,96 @@ import java.util.ResourceBundle;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
-import com.ue.ultimate_economy.Ultimate_Economy;
+import com.ue.ultimate_economy.UltimateEconomy;
 
 public class MessageWrapper {
-	
-	private static ResourceBundle messages;
-	//TODO add method to change language
-	
-	public static void loadLanguage() {
-		Locale currentLocale;
-		if (Ultimate_Economy.getInstance.getConfig().getString("localeLanguage") == null) {
-			Ultimate_Economy.getInstance.getConfig().set("localeLanguage", "en");
-			Ultimate_Economy.getInstance.getConfig().set("localeCountry", "US");
-			currentLocale = new Locale("en", "US");
-			Bukkit.getLogger().info("Loading default language file: 'en' 'US'");
-		} else {
-			String lang = Ultimate_Economy.getInstance.getConfig().getString("localeLanguage");
-			String country = Ultimate_Economy.getInstance.getConfig().getString("localeCountry");
-			currentLocale = new Locale(lang, country);
-			Bukkit.getLogger().info("Loading language file: '" + lang + "' '" + country + "'");
-		}
-		messages = ResourceBundle.getBundle("language.MessagesBundle", currentLocale, new UTF8Control());
+
+    private static ResourceBundle messages;
+    // TODO add method to change language
+
+    /**
+     * Load the language from the save file. 
+     * Loads default en US.
+     */
+    public static void loadLanguage() {
+	Locale currentLocale;
+	if (UltimateEconomy.getInstance.getConfig().getString("localeLanguage") == null) {
+	    UltimateEconomy.getInstance.getConfig().set("localeLanguage", "en");
+	    UltimateEconomy.getInstance.getConfig().set("localeCountry", "US");
+	    currentLocale = new Locale("en", "US");
+	    Bukkit.getLogger().info("[Ultimate_Economy] Loading default language file: 'en' 'US'");
+	} else {
+	    String lang = UltimateEconomy.getInstance.getConfig().getString("localeLanguage");
+	    String country = UltimateEconomy.getInstance.getConfig().getString("localeCountry");
+	    currentLocale = new Locale(lang, country);
+	    Bukkit.getLogger().info("[Ultimate_Economy] Loading language file: '" + lang + "' '" + country + "'");
 	}
-	
-	public static String getErrorString(String key) {
-        try {
-            return ChatColor.RED + messages.getString(key);
-        } catch (MissingResourceException e) {
-            return '!' + key + '!';
-        }
-    }
-	
-	public static String getErrorString(String key,Object... params) {
-		try {
-        	List<String> colored = new ArrayList<>();
-        	for(Object object: params) {
-        		colored.add("§4" + object.toString() + "§c");
-        	}
-        	String message = "§c" + messages.getString(key);
-        	String newMessage = MessageFormat.format(message, colored.toArray());
-            return ChatColor.translateAlternateColorCodes('§', newMessage);
-        } catch (MissingResourceException e) {
-            return '!' + key + '!';
-        }
+	messages = ResourceBundle.getBundle("language.MessagesBundle", currentLocale, new UTF8Control());
     }
 
-    public static String getString(String key) {
-        try {
-            return ChatColor.GOLD + messages.getString(key);
-        } catch (MissingResourceException e) {
-            return '!' + key + '!';
-        }
+    /**
+     * Returns a error message with the chatcolor red.
+     * @param key
+     * @return message
+     */
+    public static String getErrorString(String key) {
+	try {
+	    return ChatColor.RED + messages.getString(key);
+	} catch (MissingResourceException e) {
+	    return '!' + key + '!';
+	}
     }
-    public static String getString(String key, Object... params ) {
-        try {
-        	List<String> colored = new ArrayList<>();
-        	for(Object object: params) {
-        		colored.add("§a" + object.toString() + "§6");
-        	}
-        	String message = "§6" + messages.getString(key);
-        	String newMessage = MessageFormat.format(message, colored.toArray());
-            return ChatColor.translateAlternateColorCodes('§', newMessage);
-        } catch (MissingResourceException e) {
-            return '!' + key + '!';
-        }
+
+    /**
+     * Returns a error message with the chatcolor red.
+     * @param key
+     * @param params
+     * @return message
+     */
+    public static String getErrorString(String key, Object... params) {
+	try {
+	    List<String> colored = new ArrayList<>();
+	    for (Object object : params) {
+		colored.add("§4" + object.toString() + "§c");
+	    }
+	    String message = "§c" + messages.getString(key);
+	    String newMessage = MessageFormat.format(message, colored.toArray());
+	    return ChatColor.translateAlternateColorCodes('§', newMessage);
+	} catch (MissingResourceException e) {
+	    return '!' + key + '!';
+	}
+    }
+
+    /**
+     * Returns a message with chatcolor gold.
+     * @param key
+     * @return messgage
+     */
+    public static String getString(String key) {
+	try {
+	    return ChatColor.GOLD + messages.getString(key);
+	} catch (MissingResourceException e) {
+	    return '!' + key + '!';
+	}
+    }
+
+    /**
+     * Returns a message with chatcolor gold and green.
+     * @param key
+     * @param params
+     * @return message
+     */
+    public static String getString(String key, Object... params) {
+	try {
+	    List<String> colored = new ArrayList<>();
+	    for (Object object : params) {
+		colored.add("§a" + object.toString() + "§6");
+	    }
+	    String message = "§6" + messages.getString(key);
+	    String newMessage = MessageFormat.format(message, colored.toArray());
+	    return ChatColor.translateAlternateColorCodes('§', newMessage);
+	} catch (MissingResourceException e) {
+	    return '!' + key + '!';
+	}
     }
 }
