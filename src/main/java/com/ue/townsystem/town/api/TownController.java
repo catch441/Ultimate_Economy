@@ -154,6 +154,23 @@ public class TownController {
 	config.set("TownNames", townNameList);
 	save(townworld.getSaveFile(), config);
     }
+    
+    /**
+     * Returns a town by it's name.
+     * @param name
+     * @return town
+     * @throws GeneralEconomyException
+     */
+    public static Town getTown(String name) throws GeneralEconomyException {
+	for(Townworld world:TownworldController.getTownWorldList()) {
+	    for(Town town:world.getTownList()) {
+		if(town.getTownName().equals(name)) {
+		    return town;
+		}
+	    }
+	}
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
+    }
 
     /**
      * Saves a config in a file.
