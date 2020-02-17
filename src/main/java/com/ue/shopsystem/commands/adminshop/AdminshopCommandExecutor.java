@@ -28,6 +28,7 @@ public class AdminshopCommandExecutor implements CommandExecutor {
 	    } catch (TownSystemException | ShopSystemException | PlayerException | GeneralEconomyException e) {
 		player.sendMessage(e.getMessage());
 	    } catch (NumberFormatException e) {
+		// add param to this methods everywhere
 		player.sendMessage(MessageWrapper.getErrorString("invalid_parameter"));
 	    }
 	}

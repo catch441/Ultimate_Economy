@@ -37,8 +37,7 @@ public enum TownCommandEnum {
 	boolean perform(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 		throws TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 2) {
-		Townworld townworld = TownworldController.getTownWorldByName(player.getWorld().getName());
-		Town town = townworld.getTownByName(args[1]);
+		Town town = TownController.getTown(args[1]);
 		TownController.dissolveTown(town, ecoPlayer);
 		player.sendMessage(MessageWrapper.getString("town_delete", args[1]));
 	    } else {
@@ -52,8 +51,8 @@ public enum TownCommandEnum {
 	boolean perform(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 		throws TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 2) {
-		Townworld townworld = TownworldController.getTownWorldByName(player.getWorld().getName());
-		townworld.getTownByName(args[1]).expandTown(player.getLocation().getChunk(), ecoPlayer, true);
+		Town town = TownController.getTown(args[1]);
+		town.expandTown(player.getLocation().getChunk(), ecoPlayer, true);
 	    } else {
 		player.sendMessage("/" + label + " expand <town>");
 	    }
@@ -65,8 +64,8 @@ public enum TownCommandEnum {
 	boolean perform(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 		throws TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 3) {
-		Townworld townworld = TownworldController.getTownWorldByName(player.getWorld().getName());
-		townworld.getTownByName(args[1]).renameTown(args[2], ecoPlayer, true);
+		Town town = TownController.getTown(args[1]);
+		town.renameTown(args[2], ecoPlayer, true);
 	    } else {
 		player.sendMessage("/" + label + " rename <old name> <new name>");
 	    }
@@ -78,8 +77,8 @@ public enum TownCommandEnum {
 	boolean perform(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 		throws TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 2) {
-		Townworld tWorld = TownworldController.getTownWorldByName(player.getWorld().getName());
-		tWorld.getTownByName(args[1]).changeTownSpawn(player.getLocation(), ecoPlayer, true);
+		Town town = TownController.getTown(args[1]);
+		town.changeTownSpawn(player.getLocation(), ecoPlayer, true);
 	    } else {
 		player.sendMessage("/" + label + " setTownSpawn <town>");
 	    }
@@ -91,8 +90,7 @@ public enum TownCommandEnum {
 	boolean perform(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 		throws TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 3) {
-		Townworld world = TownworldController.getTownWorldByName(args[1]);
-		Town town = world.getTownByName(args[1]);
+		Town town = TownController.getTown(args[1]);
 		if (!town.isMayor(ecoPlayer)) {
 		    throw PlayerException.getException(PlayerExceptionMessageEnum.TOWN_NOT_TOWN_OWNER);
 		} else {
@@ -110,8 +108,7 @@ public enum TownCommandEnum {
 	boolean perform(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 		throws TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 3) {
-		Townworld world = TownworldController.getTownWorldByName(args[1]);
-		Town town = world.getTownByName(args[1]);
+		Town town = TownController.getTown(args[1]);
 		if (!town.isMayor(ecoPlayer)) {
 		    throw PlayerException.getException(PlayerExceptionMessageEnum.TOWN_NOT_TOWN_OWNER);
 		} else {
@@ -144,8 +141,8 @@ public enum TownCommandEnum {
 	boolean perform(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 		throws TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 2) {
-		Townworld townworld = TownworldController.getTownWorldByName(args[1]);
-		player.teleport(townworld.getTownByName(args[1]).getTownSpawn());
+		Town town = TownController.getTown(args[1]);
+		player.teleport(town.getTownSpawn());
 	    } else {
 		player.sendMessage("/" + label + " tp <town>");
 	    }
@@ -157,10 +154,10 @@ public enum TownCommandEnum {
 	boolean perform(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 		throws TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 3) {
-		Townworld townworld = TownworldController.getTownWorldByName(args[1]);
+		Town town = TownController.getTown(args[1]);
 		double amount = Double.valueOf(args[2]);
 		ecoPlayer.decreasePlayerAmount(amount, true);
-		townworld.getTownByName(args[1]).increaseTownBankAmount(amount);
+		town.increaseTownBankAmount(amount);
 		player.sendMessage(MessageWrapper.getString("town_pay", args[1], amount,
 			ConfigController.getCurrencyText(amount)));
 	    } else {
@@ -174,8 +171,7 @@ public enum TownCommandEnum {
 	boolean perform(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 		throws TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 3) {
-		Townworld townworld = TownworldController.getTownWorldByName(args[1]);
-		Town town = townworld.getTownByName(args[1]);
+		Town town = TownController.getTown(args[1]);
 		if (town.hasDeputyPermissions(ecoPlayer)) {
 		    double amount = Double.valueOf(args[2]);
 		    town.decreaseTownBankAmount(amount);
@@ -194,8 +190,7 @@ public enum TownCommandEnum {
 	boolean perform(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 		throws TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 2) {
-		Townworld townworld = TownworldController.getTownWorldByName(args[1]);
-		Town town = townworld.getTownByName(args[1]);
+		Town town = TownController.getTown(args[1]);
 		if (town.hasDeputyPermissions(ecoPlayer)) {
 		    player.sendMessage(MessageWrapper.getString("town_bank", town.getTownBankAmount(),
 			    ConfigController.getCurrencyText(town.getTownBankAmount())));
