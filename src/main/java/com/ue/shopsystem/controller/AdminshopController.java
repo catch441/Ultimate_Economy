@@ -121,7 +121,7 @@ public class AdminshopController {
 	if (name.contains("_")) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 	} else if (getAdminshopNameList().contains(name)) {
-		throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,name);
+		throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,name);
 	} else if (size % 9 != 0) {
 	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
 	} else {

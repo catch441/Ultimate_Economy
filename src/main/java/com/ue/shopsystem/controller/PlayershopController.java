@@ -149,7 +149,7 @@ public class PlayershopController {
     private static void checkForUniqueShopnameForPlayer(String name, EconomyPlayer ecoPlayer)
 	    throws GeneralEconomyException {
 	if (getPlayerShopUniqueNameList().contains(name + "_" + ecoPlayer.getName())) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
 		    name + "_" + ecoPlayer.getName());
 	}
     }
