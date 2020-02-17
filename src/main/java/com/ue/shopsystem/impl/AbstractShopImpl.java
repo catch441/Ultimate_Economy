@@ -1062,10 +1062,10 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	command = ChatColor.stripColor(command);
 	switch (command) {
 	case "minus":
-	    switchPlusMinus(slot, "plus");
+	    switchPlusMinus(slot, "minus");
 	    break;
 	case "plus":
-	    switchPlusMinus(slot, "minus");
+	    switchPlusMinus(slot, "plus");
 	    break;
 	case "factor off":
 	    switchFactor(slot, "factor on");
