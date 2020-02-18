@@ -706,10 +706,12 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	if (!"none".equals(amount)) {
 	    config.set("ShopItems." + itemString + ".Amount", Integer.valueOf(amount));
 	    message = message + ChatColor.GREEN + "amount ";
-	} else if (!"none".equals(sellPrice)) {
+	}
+	if (!"none".equals(sellPrice)) {
 	    config.set("ShopItems." + itemString + ".sellPrice", Double.valueOf(sellPrice));
 	    message = message + ChatColor.GREEN + "sellPrice ";
-	} else if (!"none".equals(buyPrice)) {
+	}
+	if (!"none".equals(buyPrice)) {
 	    config.set("ShopItems." + itemString + ".buyPrice", Double.valueOf(buyPrice));
 	    message = message + ChatColor.GREEN + "buyPrice ";
 	}
