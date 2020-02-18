@@ -284,7 +284,11 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     protected void saveOwnerToFile(EconomyPlayer owner) {
 	this.owner = owner;
 	config = YamlConfiguration.loadConfiguration(file);
-	config.set("Owner", owner.getName());
+	if(owner == null) {
+	    config.set("Owner", "");
+	} else {
+	    config.set("Owner", owner.getName());
+	}
 	save();
     }
 
