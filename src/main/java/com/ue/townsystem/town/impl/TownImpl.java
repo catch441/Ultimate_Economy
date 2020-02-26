@@ -196,12 +196,20 @@ public class TownImpl implements Town {
 	String oldName = getTownName();
 	saveTownManagerVillager(villager.getLocation());
 	FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
+	List<String> deputyList = new ArrayList<>();
+	for(EconomyPlayer deputy: deputys) {
+	    deputyList.add(deputy.getName());
+	}
+	List<String> citizenList = new ArrayList<>();
+	for(EconomyPlayer citizen: citizens) {
+	    citizenList.add(citizen.getName());
+	}
 	config.set("Towns." + newName + ".townspawn",
 		townSpawn.getX() + "/" + townSpawn.getY() + "/" + townSpawn.getZ());
-	config.set("Towns." + newName + ".citizens", citizens);
+	config.set("Towns." + newName + ".citizens", citizenList);
 	config.set("Towns." + newName + ".chunks", chunkCoords);
-	config.set("Towns." + newName + ".owner", mayor);
-	config.set("Towns." + newName + ".coOwners", deputys);
+	config.set("Towns." + newName + ".owner", mayor.getName());
+	config.set("Towns." + newName + ".coOwners", deputyList);
 	config.set("Towns." + townName, null);
 	for (EconomyPlayer citizen : citizens) {
 	    citizen.removeJoinedTown(townName);
