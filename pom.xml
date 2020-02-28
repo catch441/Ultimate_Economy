@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>Ultimate_Economy</groupId>
   <artifactId>Ultimate_Economy</artifactId>
-  <version>1.2.5d</version>
+  <version>1.2.5e</version>
   <name>Ultimate_Economy</name>
     <repositories>
     <!-- This adds the Spigot Maven repository to the build -->

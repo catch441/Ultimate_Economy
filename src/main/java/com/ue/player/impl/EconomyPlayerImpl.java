@@ -58,15 +58,15 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	this.player = Bukkit.getPlayer(name);
 	this.name = name;
 	if (isNew) {
-	    setupNewShop(config);
+	    setupNewPlayer(config);
 	} else {
-	    setupExistingShop(name, config);
+	    setupExistingPlayer(name, config);
 	}
 	bossBar = Bukkit.createBossBar("", BarColor.GREEN, BarStyle.SOLID);
 	bossBar.setVisible(false);
     }
 
-    private void setupExistingShop(String name, YamlConfiguration config) {
+    private void setupExistingPlayer(String name, YamlConfiguration config) {
 	scoreBoardDisabled = config.getBoolean(name + ".bank");
 	account = config.getDouble(name + ".account amount");
 	List<String> jobNames = config.getStringList(name + ".Jobs");
@@ -90,7 +90,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
     }
 
-    private void setupNewShop(YamlConfiguration config) {
+    private void setupNewPlayer(YamlConfiguration config) {
 	scoreBoardDisabled = true;
 	account = 0.0;
 	config.set(player + ".bank", scoreBoardDisabled);
@@ -145,7 +145,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	    jobs.remove(job);
 	    List<String> jobList = config.getStringList(name + ".Jobs");
 	    jobList.remove(job.getName());
-	    config.set(name + ".Jobs", jobs);
+	    config.set(name + ".Jobs", jobList);
 	    save(config);
 	    if (isOnline() && sendMessage) {
 		player.sendMessage(MessageWrapper.getString("job_left", job.getName()));
