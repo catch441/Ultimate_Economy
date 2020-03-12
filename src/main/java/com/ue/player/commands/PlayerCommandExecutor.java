@@ -32,6 +32,6 @@ public class PlayerCommandExecutor implements CommandExecutor {
 	} catch (NumberFormatException e) {
 	    sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter", args[1]));
 	}
-	return false;
+	return true;
     }
 }

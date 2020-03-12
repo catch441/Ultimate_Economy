@@ -117,23 +117,9 @@ public class UltimateEconomyEventHandler implements Listener {
 		    }
 		} else {
 		    Town town = townworld.getTownByChunk(location.getChunk());
-		    if (event.getPlayer().getGameMode() != GameMode.CREATIVE
-			    && hasNoBuildPermission(event, location, economyPlayer, town)) {
-			if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-			    if (isDoorOrGate(event)) {
-				if (!ConfigController.isExtendedInteraction()) {
-				    event.setCancelled(true);
-				    event.getPlayer()
-					    .sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
-				}
-			    } else {
-				event.setCancelled(true);
-				event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
-			    }
-			} else {
-			    event.setCancelled(true);
-			    event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
-			}
+		    if (hasNoBuildPermission(event, location, economyPlayer, town)) {
+			event.setCancelled(true);
+			event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
 		    }
 		}
 	    } catch (TownSystemException | PlayerException e) {
@@ -144,8 +130,10 @@ public class UltimateEconomyEventHandler implements Listener {
     private boolean hasNoBuildPermission(PlayerInteractEvent event, Location location, EconomyPlayer economyPlayer,
 	    Town town) throws TownSystemException {
 	if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")
-		&& (!town.isPlayerCitizen(economyPlayer) || !town.hasBuildPermissions(economyPlayer,
-			town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ())))) {
+		&& !town.hasBuildPermissions(economyPlayer,
+			town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))
+		|| (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) && isDoorOrGate(event)
+			&& ConfigController.isExtendedInteraction())) {
 	    return true;
 	} else {
 	    return false;

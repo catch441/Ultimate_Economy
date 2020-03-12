@@ -21,12 +21,15 @@ public class BankController {
      * Creats a new bank account with a given start amount.
      * 
      * @param startAmount
+     * @return bank account
      */
-    public static void createBankAccount(double startAmount) {
-	accounts.add(new BankAccountImpl(startAmount));
+    public static BankAccount createBankAccount(double startAmount) {
+	BankAccount account = new BankAccountImpl(startAmount);
+	accounts.add(account);
 	FileConfiguration config = YamlConfiguration.loadConfiguration(bankFile);
 	config.set("Ibans", getIbanList());
 	saveConfig(config);
+	return account;
     }
 
     /**

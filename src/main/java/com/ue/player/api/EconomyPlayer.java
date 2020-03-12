@@ -100,19 +100,20 @@ public interface EconomyPlayer {
      * @throws PlayerException
      */
     public void decreasePlayerAmount(double amount, boolean personal) throws GeneralEconomyException, PlayerException;
-
+    
     /**
      * Returns true if the player has at minimum 'amount' on his bank account.
      * 
      * @param amount
      * @return boolean
+     * @throws GeneralEconomyException 
      */
-    public boolean hasEnoughtMoney(double amount);
+    public boolean hasEnoughtMoney(double amount) throws GeneralEconomyException;
 
     /**
      * Get the bank amount of this player.
      * 
-     * @return double
+     * @return bank account
      */
     public double getBankAmount();
 
@@ -234,7 +235,7 @@ public interface EconomyPlayer {
     /**
      * This method returns the list of joined towns.
      * 
-     * @return List of Strings
+     * @return joined towns list
      */
     public List<String> getJoinedTownList();
 

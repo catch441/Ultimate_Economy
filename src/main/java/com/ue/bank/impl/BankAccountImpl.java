@@ -51,7 +51,7 @@ public class BankAccountImpl implements BankAccount {
     public void decreaseAmount(double amount) throws GeneralEconomyException {
 	checkForPositiveAmount(amount);
 	if(this.amount < amount) {
-	    // TODO throw error not enough money
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.NOT_ENOUGH_MONEY);
 	} else {
 	    this.amount -= amount;
 	    saveAmount(this.amount);

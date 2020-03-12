@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ue.exceptions.PlayerException;
@@ -94,9 +95,9 @@ public class EconomyPlayerController {
     }
 
     /**
-     * This method loads all economyPlayers. !!! JobController.loadAllJobs() have to
-     * be executed before this method. !!!
-     * 
+     * This method loads all economyPlayers. !!! 
+     * The jobs have to be loaded first.
+     * The banc accounts have to be loaded first.
      * @param dataFolder
      */
     public static void loadAllEconomyPlayers(File dataFolder) {
@@ -105,7 +106,7 @@ public class EconomyPlayerController {
 	    try {
 		playerFile.createNewFile();
 	    } catch (IOException e) {
-		e.printStackTrace();
+		Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the playerfile");
 	    }
 	} else {
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);

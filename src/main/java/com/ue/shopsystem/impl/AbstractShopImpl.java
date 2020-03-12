@@ -790,7 +790,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
     @Deprecated
     private void loadItemOld(String itemString) throws ShopSystemException, PlayerException, GeneralEconomyException {
-	checkForLoadableItem(itemString);
 	if (config.getString("ShopItems." + itemString + ".Name") != null) {
 	    String string = config.getString("ShopItems." + itemString + ".Name");
 	    List<String> lore = config.getStringList("ShopItems." + itemString + ".lore");
@@ -841,13 +840,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	config.set("ShopItemList", itemNames);
 	config.set("ShopItems." + itemString, null);
 	save();
-    }
-
-    @Deprecated
-    private void checkForLoadableItem(String itemString) throws ShopSystemException {
-	if (!"ANVIL_0".equals(itemString) && !"CRAFTING_TABLE_0".equals(itemString)) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.CANNOT_LOAD_SHOPITEM, itemString);
-	}
     }
 
     @Deprecated

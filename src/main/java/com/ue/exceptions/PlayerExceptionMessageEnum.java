@@ -12,7 +12,6 @@ public enum PlayerExceptionMessageEnum {
     JOB_NOT_JOINED ("job_not_joined"),
     TOWN_ALREADY_JOINED ("town_already_joined"),
     TOWN_NOT_JOINED ("town_not_joined"),
-    NOT_ENOUGH_MONEY_PERSONAL ("not_enough_money_personal"),
     YOU_ARE_NOT_OWNER ("you_are_not_owner"),
     YOU_ARE_THE_OWNER ("you_are_the_owner"),
     OUTSIDE_OF_THE_PLOT ("outside_of_the_plot"),
@@ -25,8 +24,9 @@ public enum PlayerExceptionMessageEnum {
     HOME_DOES_NOT_EXIST ("home_does_not_exist"),
     HOME_ALREADY_EXIST ("home_already_exist"),
     INVENTORY_SLOT_OCCUPIED ("inventory_slot_occupied"),
-    NOT_ENOUGH_MONEY_NON_PERSONAL ("not_enough_money_non_personal"),
-    MAX_REACHED ("max_reached");
+    MAX_REACHED ("max_reached"),
+    NOT_ENOUGH_MONEY_PERSONAL ("not_enough_money_personal"),
+    NOT_ENOUGH_MONEY_NON_PERSONAL ("not_enough_money_non_personal");
 	
     private String value; 
     
