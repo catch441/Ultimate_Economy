@@ -20,9 +20,10 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
+import com.ue.bank.api.BankAccount;
+import com.ue.bank.api.BankController;
 import com.ue.config.api.ConfigController;
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
@@ -35,12 +36,12 @@ import com.ue.ultimate_economy.UltimateEconomy;
 
 public class EconomyPlayerImpl implements EconomyPlayer {
 
-    private Map<String, Location> homes;
-    private double account;
+    private Map<String, Location> homes = new HashMap<>();
+    private BankAccount bankAccount;
     private Player player;
     private String name;
-    private List<Job> jobs;
-    private List<String> joinedTowns;
+    private List<Job> jobs = new ArrayList<>();
+    private List<String> joinedTowns = new ArrayList<>();
     private boolean scoreBoardDisabled;
     private BossBar bossBar;
 
@@ -51,56 +52,23 @@ public class EconomyPlayerImpl implements EconomyPlayer {
      * @param isNew
      */
     public EconomyPlayerImpl(String name, boolean isNew) {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
-	jobs = new ArrayList<>();
-	homes = new HashMap<>();
-	joinedTowns = new ArrayList<>();
 	this.player = Bukkit.getPlayer(name);
-	this.name = name;
 	if (isNew) {
-	    setupNewPlayer(config);
+	    setupNewPlayer(name);
 	} else {
-	    setupExistingPlayer(name, config);
+	    loadExistingPlayer(name);
 	}
 	bossBar = Bukkit.createBossBar("", BarColor.GREEN, BarStyle.SOLID);
 	bossBar.setVisible(false);
     }
 
-    private void setupExistingPlayer(String name, YamlConfiguration config) {
-	scoreBoardDisabled = config.getBoolean(name + ".bank");
-	account = config.getDouble(name + ".account amount");
-	List<String> jobNames = config.getStringList(name + ".Jobs");
-	for (String jobName : jobNames) {
-	try {
-	    jobs.add(JobController.getJobByName(jobName));
-	} catch (GeneralEconomyException e) {
-	    Bukkit.getLogger().warning("[Ultimate_Economy] "
-		    + MessageWrapper.getErrorString("job_does_not_exist") + ":" + jobName);
-	}
-	}
-	joinedTowns = config.getStringList(name + ".joinedTowns");
-	List<String> homeNameList = config.getStringList(name + ".Home.Homelist");
-	for (String homeName : homeNameList) {
-	Location homeLocation = new Location(
-		Bukkit.getWorld(config.getString(name + ".Home." + homeName + ".World")),
-		config.getDouble(name + ".Home." + homeName + ".X"),
-		config.getDouble(name + ".Home." + homeName + ".Y"),
-		config.getDouble(name + ".Home." + homeName + ".Z"));
-	homes.put(homeName, homeLocation);
-	}
-    }
-
-    private void setupNewPlayer(YamlConfiguration config) {
-	scoreBoardDisabled = true;
-	account = 0.0;
-	config.set(player + ".bank", scoreBoardDisabled);
-	config.set(player + ".account amount", account);
-	save(config);
+    private void setName(String name) {
+	this.name = name;
     }
 
     @Override
     public boolean isOnline() {
-	if (player == null) {
+	if (getPlayer() == null) {
 	    return false;
 	} else {
 	    return true;
@@ -119,43 +87,28 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
     @Override
     public void joinJob(Job job, boolean sendMessage) throws PlayerException, JobSystemException {
-	if (reachedMaxJoinedJobs()) {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
-	} else if (jobs.contains(job)) {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.JOB_ALREADY_JOINED);
-	} else {
-	    YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
-	    jobs.add(job);
-	    List<String> jobList = config.getStringList(name + ".Jobs");
-	    jobList.add(job.getName());
-	    config.set(name + ".Jobs", jobList);
-	    save(config);
-	    if (sendMessage && isOnline()) {
-		player.sendMessage(MessageWrapper.getString("job_join", job.getName()));
-	    }
+	checkForNotReachedMaxJoinedJobs();
+	checkForJobNotJoined(job);
+	getJobList().add(job);
+	saveJoinedJobsList();
+	if (sendMessage && isOnline()) {
+	    getPlayer().sendMessage(MessageWrapper.getString("job_join", job.getName()));
 	}
     }
 
     @Override
     public void leaveJob(Job job, boolean sendMessage) throws PlayerException, JobSystemException {
-	if (!jobs.contains(job)) {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.JOB_NOT_JOINED);
-	} else {
-	    YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
-	    jobs.remove(job);
-	    List<String> jobList = config.getStringList(name + ".Jobs");
-	    jobList.remove(job.getName());
-	    config.set(name + ".Jobs", jobList);
-	    save(config);
-	    if (isOnline() && sendMessage) {
-		player.sendMessage(MessageWrapper.getString("job_left", job.getName()));
-	    }
+	checkForJobJoined(job);
+	getJobList().remove(job);
+	saveJoinedJobsList();
+	if (isOnline() && sendMessage) {
+	    getPlayer().sendMessage(MessageWrapper.getString("job_left", job.getName()));
 	}
     }
 
     @Override
     public boolean hasJob(Job job) throws JobSystemException {
-	if (jobs.contains(job)) {
+	if (getJobList().contains(job)) {
 	    return true;
 	} else {
 	    return false;
@@ -169,11 +122,8 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
     @Override
     public Location getHome(String homeName) throws PlayerException {
-	if (homes.containsKey(homeName)) {
-	    return homes.get(homeName);
-	} else {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.HOME_DOES_NOT_EXIST);
-	}
+	checkForExistingHome(homeName);
+	return getHomeList().get(homeName);
     }
 
     @Override
@@ -183,29 +133,17 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
     @Override
     public void addJoinedTown(String townName) throws PlayerException {
-	if (joinedTowns.contains(townName)) {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.TOWN_ALREADY_JOINED);
-	} else if (reachedMaxJoinedTowns()) {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
-	} else {
-	    FileConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
-	    joinedTowns.add(townName);
-	    config.set(name + ".joinedTowns", joinedTowns);
-	    save(config);
-
-	}
+	checkForTownNotJoined(townName);
+	checkForNotReachedMaxJoinedTowns();
+	getJoinedTownList().add(townName);
+	saveJoinedTowns();
     }
-    
+
     @Override
     public void removeJoinedTown(String townName) throws PlayerException {
-	if (joinedTowns.contains(townName)) {
-	    FileConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
-	    joinedTowns.remove(townName);
-	    config.set(name + ".joinedTowns", joinedTowns);
-	    save(config);
-	} else {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.TOWN_NOT_JOINED);
-	}
+	checkForJoinedTown(townName);
+	getJoinedTownList().remove(townName);
+	saveJoinedTowns();
     }
 
     @Override
@@ -215,7 +153,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
     @Override
     public boolean reachedMaxJoinedTowns() {
-	if (ConfigController.getMaxJoinedTowns() <= joinedTowns.size()) {
+	if (ConfigController.getMaxJoinedTowns() <= getJoinedTownList().size()) {
 	    return true;
 	} else {
 	    return false;
@@ -224,7 +162,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
     @Override
     public boolean reachedMaxHomes() {
-	if (ConfigController.getMaxHomes() <= homes.size()) {
+	if (ConfigController.getMaxHomes() <= getHomeList().size()) {
 	    return true;
 	} else {
 	    return false;
@@ -233,7 +171,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
     @Override
     public boolean reachedMaxJoinedJobs() {
-	if (ConfigController.getMaxJobs() <= jobs.size()) {
+	if (ConfigController.getMaxJobs() <= getJobList().size()) {
 	    return true;
 	} else {
 	    return false;
@@ -242,43 +180,24 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
     @Override
     public void addHome(String homeName, Location location, boolean sendMessage) throws PlayerException {
-	if (reachedMaxHomes()) {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
-	} else if (homes.containsKey(homeName)) {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.HOME_ALREADY_EXIST);
-	} else {
-	    homes.put(homeName, location);
-	    YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
-	    List<String> homeNameList = config.getStringList(name + ".Home.Homelist");
-	    homeNameList.add(homeName);
-	    config.set(name + ".Home.Homelist", homeNameList);
-	    config.set(name + ".Home." + homeName + ".Name", homeName);
-	    config.set(name + ".Home." + homeName + ".World", location.getWorld().getName());
-	    config.set(name + ".Home." + homeName + ".X", location.getX());
-	    config.set(name + ".Home." + homeName + ".Y", location.getY());
-	    config.set(name + ".Home." + homeName + ".Z", location.getZ());
-	    save(config);
-	    if (isOnline() && sendMessage) {
-		player.sendMessage(MessageWrapper.getString("sethome", homeName));
-	    }
+	checkForNotReachedMaxHomes();
+	checkForNotExistingHome(homeName);
+	getHomeList().put(homeName, location);
+	saveHomeList();
+	saveHome(homeName, location);
+	if (isOnline() && sendMessage) {
+	    getPlayer().sendMessage(MessageWrapper.getString("sethome", homeName));
 	}
     }
 
     @Override
     public void removeHome(String homeName, boolean sendMessage) throws PlayerException {
-	if (homes.containsKey(homeName)) {
-	    YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
-	    List<String> homeNameList = config.getStringList(name + ".Home.Homelist");
-	    homes.remove(homeName);
-	    homeNameList.remove(homeName);
-	    config.set(name + ".Home." + homeName, null);
-	    config.set(name + ".Home.Homelist", homeNameList);
-	    save(config);
-	    if (isOnline() && sendMessage) {
-		player.sendMessage(MessageWrapper.getString("delhome", homeName));
-	    }
-	} else {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.HOME_DOES_NOT_EXIST);
+	checkForExistingHome(homeName);
+	getHomeList().remove(homeName);
+	saveHomeList();
+	saveHome(homeName, null);
+	if (isOnline() && sendMessage) {
+	    getPlayer().sendMessage(MessageWrapper.getString("delhome", homeName));
 	}
     }
 
@@ -290,12 +209,10 @@ public class EconomyPlayerImpl implements EconomyPlayer {
     @Override
     public void setScoreBoardDisabled(boolean scoreBoardDisabled) {
 	this.scoreBoardDisabled = scoreBoardDisabled;
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
-	config.set(name + ".bank", scoreBoardDisabled);
-	if (scoreBoardDisabled) {
-	    Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
+	saveScoreboardDisabled();
+	if (isScoreBoardDisabled()) {
 	    if (isOnline()) {
-		player.setScoreboard(board);
+		getPlayer().setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
 	    }
 	} else {
 	    new UpdateScoreboardRunnable().runTask(UltimateEconomy.getInstance);
@@ -303,77 +220,53 @@ public class EconomyPlayerImpl implements EconomyPlayer {
     }
 
     @Override
-    public boolean hasEnoughtMoney(double amount) {
-	if (account >= amount) {
-	    return true;
-	} else {
-	    return false;
-	}
-    }
-
-    @Override
     public void payToOtherPlayer(EconomyPlayer reciever, double amount, boolean sendMessage)
 	    throws GeneralEconomyException, PlayerException {
-	if (amount < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, amount);
-	} else if (hasEnoughtMoney(amount)) {
-	    reciever.increasePlayerAmount(amount, false);
-
-	    decreasePlayerAmount(amount, true);
-	    if (reciever.isOnline() && sendMessage) {
-		reciever.getPlayer().sendMessage(MessageWrapper.getString("got_money_with_sender", amount,
-			ConfigController.getCurrencyText(amount), player.getName()));
-	    }
-	    if (isOnline() && sendMessage) {
-		player.sendMessage(MessageWrapper.getString("gave_money", reciever.getName(), amount,
-			ConfigController.getCurrencyText(amount)));
-	    }
+	reciever.increasePlayerAmount(amount, false);
+	decreasePlayerAmount(amount, true);
+	if (reciever.isOnline() && sendMessage) {
+	    reciever.getPlayer().sendMessage(MessageWrapper.getString("got_money_with_sender", amount,
+		    ConfigController.getCurrencyText(amount), player.getName()));
+	}
+	if (isOnline() && sendMessage) {
+	    getPlayer().sendMessage(MessageWrapper.getString("gave_money", reciever.getName(), amount,
+		    ConfigController.getCurrencyText(amount)));
 	}
     }
 
     @Override
     public void increasePlayerAmount(double amount, boolean sendMessage) throws GeneralEconomyException {
-	if (amount < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, amount);
-	} else {
-	    FileConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
-	    account += amount;
-	    config.set(name + ".account amount", account);
-	    save(config);
-	    if (isOnline()) {
-		new UpdateScoreboardRunnable().runTask(UltimateEconomy.getInstance);
-		if (sendMessage) {
-		    player.sendMessage(
-			    MessageWrapper.getString("got_money", amount, ConfigController.getCurrencyText(amount)));
-		}
+	getBankAccount().increaseAmount(amount);
+	if (isOnline()) {
+	    new UpdateScoreboardRunnable().runTask(UltimateEconomy.getInstance);
+	    if (sendMessage) {
+		getPlayer().sendMessage(
+			MessageWrapper.getString("got_money", amount, ConfigController.getCurrencyText(amount)));
 	    }
 	}
     }
 
     @Override
     public void decreasePlayerAmount(double amount, boolean personal) throws GeneralEconomyException, PlayerException {
-	if (amount < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, amount);
-	} else if (hasEnoughtMoney(amount)) {
-	    FileConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
-	    account -= amount;
-	    config.set(name + ".account amount", account);
-	    save(config);
-	    if (isOnline()) {
-		new UpdateScoreboardRunnable().runTask(UltimateEconomy.getInstance);
-	    }
-	} else {
-	    if (personal) {
-		throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
-	    } else {
-		throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_NON_PERSONAL);
-	    }
+	checkForEnoughMoney(amount, personal);
+	getBankAccount().decreaseAmount(amount);
+	if (isOnline()) {
+	    new UpdateScoreboardRunnable().runTask(UltimateEconomy.getInstance);
 	}
     }
 
     @Override
+    public boolean hasEnoughtMoney(double amount) throws GeneralEconomyException {
+	return getBankAccount().hasAmount(amount);
+    }
+
+    private BankAccount getBankAccount() {
+	return bankAccount;
+    }
+
+    @Override
     public double getBankAmount() {
-	return account;
+	return bankAccount.getAmount();
     }
 
     /**
@@ -382,21 +275,21 @@ public class EconomyPlayerImpl implements EconomyPlayer {
      * @param p
      * @param score
      */
-    private void setScoreboard(Player p, int score) {
+    private void setScoreboard(int score) {
 	if (!scoreBoardDisabled) {
 	    Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
 	    Objective o = board.registerNewObjective("bank", "dummy", MessageWrapper.getString("bank"));
 	    o.setDisplaySlot(DisplaySlot.SIDEBAR);
 	    o.getScore(ChatColor.GOLD + ConfigController.getCurrencyText(score)).setScore(score);
-	    p.setScoreboard(board);
+	    getPlayer().setScoreboard(board);
 	}
     }
 
     @Override
     public void updateScoreBoard() {
-	int score = (int) account;
+	int score = (int) getBankAccount().getAmount();
 	if (isOnline()) {
-	    setScoreboard(player, score);
+	    setScoreboard(score);
 	}
     }
 
@@ -431,14 +324,227 @@ public class EconomyPlayerImpl implements EconomyPlayer {
     @Override
     public void addWildernessPermission() {
 	if (isOnline()) {
-	    player.addAttachment(UltimateEconomy.getInstance).setPermission("ultimate_economy.wilderness", true);
+	    getPlayer().addAttachment(UltimateEconomy.getInstance).setPermission("ultimate_economy.wilderness", true);
 	}
     }
 
     @Override
     public void denyWildernessPermission() {
 	if (isOnline()) {
-	    player.addAttachment(UltimateEconomy.getInstance).setPermission("ultimate_economy.wilderness", false);
+	    getPlayer().addAttachment(UltimateEconomy.getInstance).setPermission("ultimate_economy.wilderness", false);
 	}
     }
+
+    /*
+     * Save methods
+     * 
+     */
+
+    private void saveScoreboardDisabled() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
+	config.set(getName() + ".bank", isScoreBoardDisabled());
+	save(config);
+    }
+
+    private void saveHome(String homeName, Location location) {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
+	if (location == null) {
+	    config.set(getName() + ".Home." + homeName, null);
+	} else {
+	    config.set(getName() + ".Home." + homeName + ".Name", homeName);
+	    config.set(getName() + ".Home." + homeName + ".World", location.getWorld().getName());
+	    config.set(getName() + ".Home." + homeName + ".X", location.getX());
+	    config.set(getName() + ".Home." + homeName + ".Y", location.getY());
+	    config.set(getName() + ".Home." + homeName + ".Z", location.getZ());
+	}
+	save(config);
+    }
+
+    private void saveHomeList() {
+	List<String> homeNameList = new ArrayList<>(getHomeList().keySet());
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
+	config.set(getName() + ".Home.Homelist", homeNameList);
+	save(config);
+    }
+
+    private void saveJoinedTowns() {
+	FileConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
+	config.set(getName() + ".joinedTowns", getJoinedTownList());
+	save(config);
+    }
+
+    private void saveJoinedJobsList() {
+	List<String> jobList = new ArrayList<>();
+	for (Job job : getJobList()) {
+	    jobList.add(job.getName());
+	}
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
+	config.set(getName() + ".Jobs", jobList);
+	save(config);
+    }
+
+    /*
+     * Setup methods
+     * 
+     */
+
+    private void setupNewPlayer(String name) {
+	setName(name);
+	setupScoreboardDisabled();
+	setupBankAccount();
+    }
+
+    private void setupBankAccount() {
+	bankAccount = BankController.createBankAccount(0.0);
+    }
+
+    private void setupScoreboardDisabled() {
+	scoreBoardDisabled = true;
+	saveScoreboardDisabled();
+    }
+
+    /*
+     * Loading methods
+     * 
+     */
+
+    private void loadExistingPlayer(String name) {
+	setName(name);
+	loadScoreboardDisabled();
+	loadBankAccount();
+	loadJoinedJobs();
+	loadJoinedTowns();
+	loadHomes();
+    }
+
+    private void loadScoreboardDisabled() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
+	scoreBoardDisabled = config.getBoolean(getName() + ".bank");
+	save(config);
+    }
+
+    private void loadJoinedTowns() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
+	joinedTowns = config.getStringList(getName() + ".joinedTowns");
+	save(config);
+    }
+
+    private void loadBankAccount() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
+
+	if (config.isSet(getName() + ".account amount")) {
+	    // old loading, convert to new
+	    double amount = config.getDouble(getName() + ".account amount");
+	    bankAccount = BankController.createBankAccount(amount);
+	    config.set(getName() + ".account amount", null);
+	    config.set(getName() + ".Iban", bankAccount.getIban());
+	    save(config);
+	} else {
+	    // new loading
+	    String iban = config.getString(getName() + ".Iban");
+	    try {
+		bankAccount = BankController.getBankAccountByIban(iban);
+	    } catch (GeneralEconomyException e) {
+		Bukkit.getLogger().warning(
+			"[Ultimate_Economy] Failed to load the bank account " + iban + " for the player " + getName());
+	    }
+	}
+	save(config);
+    }
+
+    private void loadHomes() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
+	for (String homeName : config.getStringList(getName() + ".Home.Homelist")) {
+	    Location homeLocation = new Location(
+		    Bukkit.getWorld(config.getString(getName() + ".Home." + homeName + ".World")),
+		    config.getDouble(getName() + ".Home." + homeName + ".X"),
+		    config.getDouble(getName() + ".Home." + homeName + ".Y"),
+		    config.getDouble(getName() + ".Home." + homeName + ".Z"));
+	    getHomeList().put(homeName, homeLocation);
+	}
+	save(config);
+    }
+
+    private void loadJoinedJobs() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
+	for (String jobName : config.getStringList(getName() + ".Jobs")) {
+	    try {
+		getJobList().add(JobController.getJobByName(jobName));
+	    } catch (GeneralEconomyException e) {
+		Bukkit.getLogger().warning(
+			"[Ultimate_Economy] " + MessageWrapper.getErrorString("job_does_not_exist") + ":" + jobName);
+	    }
+	}
+	save(config);
+    }
+
+    /*
+     * Validation check methods
+     * 
+     */
+
+    private void checkForEnoughMoney(double amount, boolean personal) throws PlayerException, GeneralEconomyException {
+	if (!getBankAccount().hasAmount(amount)) {
+	    if (personal) {
+		throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
+	    } else {
+		throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_NON_PERSONAL);
+	    }
+	}
+    }
+
+    private void checkForExistingHome(String homeName) throws PlayerException {
+	if (!getHomeList().containsKey(homeName)) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.HOME_DOES_NOT_EXIST);
+	}
+    }
+
+    private void checkForNotReachedMaxHomes() throws PlayerException {
+	if (reachedMaxHomes()) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
+	}
+    }
+
+    private void checkForNotExistingHome(String homeName) throws PlayerException {
+	if (getHomeList().containsKey(homeName)) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.HOME_ALREADY_EXIST);
+	}
+    }
+
+    private void checkForJoinedTown(String townName) throws PlayerException {
+	if (!getJoinedTownList().contains(townName)) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.TOWN_NOT_JOINED);
+	}
+    }
+
+    private void checkForNotReachedMaxJoinedTowns() throws PlayerException {
+	if (reachedMaxJoinedTowns()) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
+	}
+    }
+
+    private void checkForTownNotJoined(String townName) throws PlayerException {
+	if (getJoinedTownList().contains(townName)) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.TOWN_ALREADY_JOINED);
+	}
+    }
+
+    private void checkForJobJoined(Job job) throws PlayerException {
+	if (!getJobList().contains(job)) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.JOB_NOT_JOINED);
+	}
+    }
+
+    private void checkForNotReachedMaxJoinedJobs() throws PlayerException {
+	if (reachedMaxJoinedJobs()) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
+	}
+    }
+
+    private void checkForJobNotJoined(Job job) throws PlayerException {
+	if (getJobList().contains(job)) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.JOB_ALREADY_JOINED);
+	}
+    }
+
 }

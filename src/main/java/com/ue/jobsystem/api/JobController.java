@@ -11,7 +11,6 @@ import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.impl.JobImpl;
-import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -36,7 +35,7 @@ public class JobController {
      */
     public static List<String> getJobNameList() {
 	List<String> jobNames = new ArrayList<>();
-	for (Job job : jobList) {
+	for (Job job : getJobList()) {
 	    jobNames.add(job.getName());
 	}
 	return jobNames;
@@ -47,15 +46,15 @@ public class JobController {
      * 
      * @param jobName
      * @return Job
-     * @throws GeneralEconomyException 
+     * @throws GeneralEconomyException
      */
     public static Job getJobByName(String jobName) throws GeneralEconomyException {
-	for (Job job : jobList) {
+	for (Job job : getJobList()) {
 	    if (job.getName().equals(jobName)) {
 		return job;
 	    }
 	}
-	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,jobName);
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, jobName);
     }
 
     /**
@@ -63,12 +62,11 @@ public class JobController {
      * 
      * @param jobName
      * @throws JobSystemException
-     * @throws GeneralEconomyException 
+     * @throws GeneralEconomyException
      */
     public static void deleteJob(String jobName) throws GeneralEconomyException, JobSystemException {
 	Job job = getJobByName(jobName);
-	List<Jobcenter> jobCenterList = JobcenterController.getJobCenterList();
-	for (Jobcenter jobcenter : jobCenterList) {
+	for (Jobcenter jobcenter : JobcenterController.getJobCenterList()) {
 	    if (jobcenter.hasJob(job)) {
 		try {
 		    jobcenter.removeJob(job);
@@ -84,26 +82,21 @@ public class JobController {
 		}
 	    }
 	}
-	jobList.remove(job);
+	getJobList().remove(job);
 	job.deleteJob();
-	UltimateEconomy.getInstance.getConfig().set("JobList", JobController.getJobNameList());
-	UltimateEconomy.getInstance.saveConfig();
+	saveJobNameList();
     }
 
     /**
      * This method should be used to create a new Job.
      * 
      * @param jobName
-     * @throws GeneralEconomyException 
+     * @throws GeneralEconomyException
      */
     public static void createJob(String jobName) throws GeneralEconomyException {
-	if (getJobNameList().contains(jobName)) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,jobName);
-	} else {
-	    jobList.add(new JobImpl(jobName));
-	    UltimateEconomy.getInstance.getConfig().set("JobList", JobController.getJobNameList());
-	    UltimateEconomy.getInstance.saveConfig();
-	}
+	checkForJobNameDoesNotExist(jobName);
+	getJobList().add(new JobImpl(jobName));
+	saveJobNameList();
     }
 
     /**
@@ -114,11 +107,31 @@ public class JobController {
 	for (String jobName : UltimateEconomy.getInstance.getConfig().getStringList("JobList")) {
 	    File file = new File(UltimateEconomy.getInstance.getDataFolder(), jobName + "-Job.yml");
 	    if (file.exists()) {
-		jobList.add(new JobImpl(jobName));
+		getJobList().add(new JobImpl(jobName));
 	    } else {
-		Bukkit.getLogger()
-			.warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_job", jobName));
+		Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the job " + jobName);
 	    }
+	}
+    }
+    
+    /*
+     * Save methods
+     * 
+     */
+    
+    private static void saveJobNameList() {
+	UltimateEconomy.getInstance.getConfig().set("JobList", JobController.getJobNameList());
+	UltimateEconomy.getInstance.saveConfig();
+    }
+
+    /*
+     * Validation check methods
+     * 
+     */
+
+    private static void checkForJobNameDoesNotExist(String jobName) throws GeneralEconomyException {
+	if (getJobNameList().contains(jobName)) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, jobName);
 	}
     }
 }

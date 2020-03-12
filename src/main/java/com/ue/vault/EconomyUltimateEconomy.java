@@ -128,7 +128,7 @@ public class EconomyUltimateEconomy implements Economy {
 	// System.out.println("14 " + player.getName() + " " + amount);
 	try {
 	    return EconomyPlayerController.getEconomyPlayerByName(player.getName()).hasEnoughtMoney(amount);
-	} catch (PlayerException e) {
+	} catch (PlayerException | GeneralEconomyException e) {
 	    // System.out.println("14 error: " + e.getMessage());
 	    return false;
 	}

@@ -65,7 +65,8 @@ public class TownController {
 	}
     }
 
-    private static void checkForPlayerHasEnoughMoney(Townworld townworld, EconomyPlayer player) throws PlayerException {
+    private static void checkForPlayerHasEnoughMoney(Townworld townworld, EconomyPlayer player)
+	    throws PlayerException, GeneralEconomyException {
 	if (!player.hasEnoughtMoney(townworld.getFoundationPrice())) {
 	    throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
 	}
@@ -79,7 +80,7 @@ public class TownController {
 
     private static void checkForTownDoesNotExist(String townName) throws GeneralEconomyException {
 	if (townNameList.contains(townName)) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,townName);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, townName);
 	}
     }
 
@@ -154,17 +155,18 @@ public class TownController {
 	config.set("TownNames", townNameList);
 	save(townworld.getSaveFile(), config);
     }
-    
+
     /**
      * Returns a town by it's name.
+     * 
      * @param name
      * @return town
      * @throws GeneralEconomyException
      */
     public static Town getTown(String name) throws GeneralEconomyException {
-	for(Townworld world:TownworldController.getTownWorldList()) {
-	    for(Town town:world.getTownList()) {
-		if(town.getTownName().equals(name)) {
+	for (Townworld world : TownworldController.getTownWorldList()) {
+	    for (Town town : world.getTownList()) {
+		if (town.getTownName().equals(name)) {
 		    return town;
 		}
 	    }
