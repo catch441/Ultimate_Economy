@@ -13,7 +13,6 @@ import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.Adminshop;
 import com.ue.shopsystem.impl.AdminshopImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -29,15 +28,15 @@ public class AdminshopController {
      * 
      * @param name
      * @return adminshop
-     * @throws GeneralEconomyException 
+     * @throws GeneralEconomyException
      */
     public static Adminshop getAdminShopByName(String name) throws GeneralEconomyException {
 	for (Adminshop shop : adminShopList) {
 	    if (shop.getName().equals(name)) {
 		return shop;
 	    }
-	}	
-	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,name);
+	}
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
     }
 
     /**
@@ -45,7 +44,7 @@ public class AdminshopController {
      * 
      * @param id
      * @return adminshop
-     * @throws GeneralEconomyException 
+     * @throws GeneralEconomyException
      */
     public static Adminshop getAdminShopById(String id) throws GeneralEconomyException {
 	for (Adminshop shop : adminShopList) {
@@ -53,7 +52,7 @@ public class AdminshopController {
 		return shop;
 	    }
 	}
-	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,id);
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, id);
     }
 
     /**
@@ -71,6 +70,7 @@ public class AdminshopController {
 
     /**
      * Returns a list of all adminshop names.
+     * 
      * @return list of adminshop names
      */
     public static List<String> getAdminshopNameList() {
@@ -121,7 +121,7 @@ public class AdminshopController {
 	if (name.contains("_")) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 	} else if (getAdminshopNameList().contains(name)) {
-		throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,name);
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, name);
 	} else if (size % 9 != 0) {
 	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
 	} else {
@@ -176,41 +176,37 @@ public class AdminshopController {
 
     private static void loadAllAdminshopsNew(FileConfiguration fileConfig, File dataFolder) {
 	if (fileConfig.contains("AdminshopIds")) {
-	fileConfig.set("AdminShopIds", fileConfig.get("AdminshopIds"));
+	    fileConfig.set("AdminShopIds", fileConfig.get("AdminshopIds"));
 	}
 	for (String shopId : fileConfig.getStringList("AdminShopIds")) {
-	File file = new File(dataFolder, shopId + ".yml");
-	if (file.exists()) {
-	    try {
-		adminShopList.add(new AdminshopImpl(dataFolder, null, shopId));
-	    } catch (TownSystemException e) {
-		Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
-		Bukkit.getLogger().warning(
-			"[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopId));
+	    File file = new File(dataFolder, shopId + ".yml");
+	    if (file.exists()) {
+		try {
+		    adminShopList.add(new AdminshopImpl(dataFolder, null, shopId));
+		} catch (TownSystemException e) {
+		    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
+		    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+		}
+	    } else {
+		Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
 	    }
-	} else {
-	    Bukkit.getLogger()
-		    .warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopId));
-	}
 	}
     }
 
     @Deprecated
     private static void loadAllAdminshopsOld(FileConfiguration fileConfig, File dataFolder) {
 	for (String shopName : fileConfig.getStringList("ShopNames")) {
-	File file = new File(dataFolder, shopName + ".yml");
-	if (file.exists()) {
-	    try {
-		adminShopList.add(new AdminshopImpl(dataFolder, shopName, generateFreeAdminShopId()));
-	    } catch (TownSystemException e) {
-		Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
-		Bukkit.getLogger().warning(
-			"[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopName));
+	    File file = new File(dataFolder, shopName + ".yml");
+	    if (file.exists()) {
+		try {
+		    adminShopList.add(new AdminshopImpl(dataFolder, shopName, generateFreeAdminShopId()));
+		} catch (TownSystemException e) {
+		    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopName);
+		    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+		}
+	    } else {
+		Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopName);
 	    }
-	} else {
-	    Bukkit.getLogger().warning(
-		    "[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopName));
-	}
 	}
 	// convert to new shopId save system
 	fileConfig.set("ShopNames", null);

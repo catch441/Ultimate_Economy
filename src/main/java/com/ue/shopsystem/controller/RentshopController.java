@@ -12,7 +12,6 @@ import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.Rentshop;
 import com.ue.shopsystem.impl.RentshopImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -85,7 +84,7 @@ public class RentshopController {
 		    return shop;
 		}
 	    } else {
-		if (name.equals(shop.getName() + "_" + shop.getOwner())) {
+		if (name.equals(shop.getName() + "_" + shop.getOwner().getName())) {
 		    return shop;
 		}
 	    }
@@ -184,13 +183,11 @@ public class RentshopController {
 		try {
 		    rentShopList.add(new RentshopImpl(dataFolder, shopId));
 		} catch (TownSystemException e) {
-		    Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
-		    Bukkit.getLogger()
-			    .warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopId));
+		    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
+		    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 		}
 	    } else {
-		Bukkit.getLogger()
-			.warning("[Ultimate_Economy] " + MessageWrapper.getErrorString("cannot_load_shop", shopId));
+		Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
 	    }
 	}
     }

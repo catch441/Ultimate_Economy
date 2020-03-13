@@ -30,6 +30,13 @@ public interface Town {
      * @return boolean
      */
     public boolean isChunkConnectedToTown(int chunkX, int chunkZ);
+    
+    /**
+     * Returns the tax of the town.
+     * 
+     * @return double
+     */
+    public double getTax();
 
     /**
      * Returns the town bank amount.
@@ -76,24 +83,6 @@ public interface Town {
 	    throws TownSystemException, PlayerException;
 
     /**
-     * Add a player as citizen to a town.
-     * 
-     * @param newCitizen
-     * @throws PlayerException
-     */
-    public void addCitizen(EconomyPlayer newCitizen) throws PlayerException;
-
-    /**
-     * Remove a citizen from a town.
-     * 
-     * @param citizen
-     * @throws TownSystemException
-     * @throws PlayerException
-     */
-    public void removeCitizen(EconomyPlayer citizen)
-	    throws TownSystemException, PlayerException;
-
-    /**
      * Opens the inventory of the TownManager.
      * 
      * @param player
@@ -107,9 +96,8 @@ public interface Town {
      *            can be any player
      * @param plot
      * @return boolean
-     * @throws TownSystemException
      */
-    public boolean hasBuildPermissions(EconomyPlayer player, Plot plot) throws TownSystemException;
+    public boolean hasBuildPermissions(EconomyPlayer player, Plot plot);
 
     /**
      * Returns true if player is mayor or deputy.
@@ -117,9 +105,8 @@ public interface Town {
      * @param player
      *            the player has to be a citizen of the town
      * @return boolean
-     * @throws TownSystemException
      */
-    public boolean hasDeputyPermissions(EconomyPlayer player) throws TownSystemException;
+    public boolean hasDeputyPermissions(EconomyPlayer player);
 
     /**
      * Returns true, if the town has enough money.
@@ -150,9 +137,8 @@ public interface Town {
      * @param player
      *            the player has to be a citizen of the town
      * @return boolean
-     * @throws TownSystemException
      */
-    public boolean isMayor(EconomyPlayer player) throws TownSystemException;
+    public boolean isMayor(EconomyPlayer player);
 
     /**
      * Get mayor.
@@ -167,9 +153,15 @@ public interface Town {
      * @param player
      *            the player has to be a citizen of the town
      * @return boolean
-     * @throws TownSystemException
      */
-    public boolean isDeputy(EconomyPlayer player) throws TownSystemException;
+    public boolean isDeputy(EconomyPlayer player);
+    
+    /**
+     * Get a list of deputys of the town.
+     * 
+     * @return ArrayList of EconomyPlayers
+     */
+    public ArrayList<EconomyPlayer> getDeputies();
 
     /**
      * Expands a town by a new chunk.

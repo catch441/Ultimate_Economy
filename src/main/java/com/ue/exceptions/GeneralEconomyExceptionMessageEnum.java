@@ -4,7 +4,8 @@ public enum GeneralEconomyExceptionMessageEnum {
 
     INVALID_PARAMETER ("invalid_parameter"),
     DOES_NOT_EXIST ("does_not_exist"),
-    ALREADY_EXISTS ("already_exists");
+    ALREADY_EXISTS ("already_exists"),
+    NOT_ENOUGH_MONEY ("not_enough_money");
 	
     private String value; 
     

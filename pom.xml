@@ -58,6 +58,7 @@
 		<artifactId>maven-jar-plugin</artifactId>
 		<version>3.0.0</version>
 		<configuration>
+			<encoding>UTF-8</encoding>
 			<outputDirectory>D:\Programme\bukkitserver\spigot-1.15.2\plugins\</outputDirectory>
 		</configuration>
       </plugin>

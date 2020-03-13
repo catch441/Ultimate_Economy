@@ -67,14 +67,27 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 
     @Override
     public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
-	if (AdminshopController.getAdminshopNameList().contains(name)) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,name);
-	} else if (name.contains("_")) {
+	checkForShopNameDoesNotExist(name);
+	checkForValidShopName(name);
+	saveShopNameToFile(name);
+	changeInventoryNames(name);
+	villager.setCustomName(name);
+    }
+    
+    /*
+     * Validation check methods
+     * 
+     */
+
+    private void checkForValidShopName(String name) throws ShopSystemException {
+	if (name.contains("_")) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
-	} else {
-	    saveShopNameToFile(name);
-	    changeInventoryNames(name);
-	    villager.setCustomName(name);
+	}
+    }
+
+    private void checkForShopNameDoesNotExist(String name) throws GeneralEconomyException {
+	if (AdminshopController.getAdminshopNameList().contains(name)) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, name);
 	}
     }
 }

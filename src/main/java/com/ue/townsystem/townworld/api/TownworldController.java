@@ -175,8 +175,8 @@ public class TownworldController {
 		townworldImpl.setTownList(towns);
 		townWorldList.add(townworldImpl);
 	    } catch (TownSystemException | PlayerException e) {
-		Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
-		e.printStackTrace();
+		Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the townworld " + townWorldName);
+		Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 	    }
 	}
     }

@@ -9,9 +9,7 @@ public enum JobExceptionMessageEnum {
     JOB_NOT_EXIST_IN_JOBCENTER ("job_not_exist_in_jobcenter"),
     LOOTTYPE_ALREADY_EXISTS ("loottype_already_exists"),
     LOOTTYPE_DOES_NOT_EXIST ("loottype_does_not_exist"),
-    JOB_ALREADY_EXIST_IN_JOBCENTER ("job_already_exists_in_jobcenter"),
-    CANNOT_LOAD_JOB ("cannot_load_job"),
-    CANNOT_LOAD_JOBCENTER ("cannot_load_jobcenter");
+    JOB_ALREADY_EXIST_IN_JOBCENTER ("job_already_exists_in_jobcenter");
 	
     private String value; 
     
