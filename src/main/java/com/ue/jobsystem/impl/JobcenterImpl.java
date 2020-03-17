@@ -299,6 +299,8 @@ public class JobcenterImpl implements Jobcenter {
 	villager.setCustomNameVisible(true);
 	villager.setProfession(Villager.Profession.NITWIT);
 	villager.setSilent(true);
+  villager.setCollidable(false);
+  villager.setInvulnerable(true);
 	villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
 	villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
     }

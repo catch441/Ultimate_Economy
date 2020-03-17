@@ -180,10 +180,10 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	villager.setCustomNameVisible(true);
 	villager.setSilent(true);
 	villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
-	villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
 	villager.setVillagerLevel(2);
 	villager.setMetadata("ue-id", new FixedMetadataValue(UltimateEconomy.getInstance, shopId));
 	villager.setCollidable(false);
+        villager.setInvulnerable(true);
 	config = YamlConfiguration.loadConfiguration(file);
 	if (config.isSet("Profession")) {
 	    villager.setProfession(Profession.valueOf(config.getString("Profession")));
