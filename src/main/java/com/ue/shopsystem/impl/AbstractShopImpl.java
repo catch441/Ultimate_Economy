@@ -1107,18 +1107,10 @@ public abstract class AbstractShopImpl implements AbstractShop {
     }
 
     private void loadShopItem(String itemString) throws ShopSystemException, PlayerException, GeneralEconomyException {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-	if (!"ANVIL_0".equals(itemString) && !"CRAFTING_TABLE_0".equals(itemString)) {
-	    if (config.getString("ShopItems." + itemString + ".newSaveMethod") != null) {
-		if (!itemString.contains("SPAWNER_")) {
-		    loadItemNew(itemString);
-		} else {
-		    loadSpawner(itemString);
-		}
-	    } else {
-		// old loading, converts to new system
-		loadItemOld(itemString);
-	    }
+	if (!itemString.contains("SPAWNER_")) {
+	    loadItemNew(itemString);
+	} else {
+	    loadSpawner(itemString);
 	}
     }
 
@@ -1259,53 +1251,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
      */
 
     @Deprecated
-    private void loadItemOld(String itemString) throws ShopSystemException, PlayerException, GeneralEconomyException {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-	if (config.getString("ShopItems." + itemString + ".Name") != null) {
-	    String string = config.getString("ShopItems." + itemString + ".Name");
-	    List<String> lore = config.getStringList("ShopItems." + itemString + ".lore");
-	    int damage = config.getInt("ShopItems." + itemString + ".damage");
-	    String displayName = "default";
-	    if (string.contains("|")) {
-		displayName = string.substring(0, string.indexOf("|"));
-		string = string.substring(string.indexOf("|") + 1);
-	    }
-	    ItemStack itemStack = null;
-	    if (string.contains("#Enchanted_")) {
-		itemStack = getEnchantedItemStackOld(itemString, string);
-	    } else if (string.contains("potion:")) {
-		itemStack = getPotionStackOld(itemString, string);
-	    } else if (!string.contains("SPAWNER")) {
-		itemStack = new ItemStack(Material.getMaterial(string),
-			config.getInt("ShopItems." + itemString + ".Amount"));
-	    }
-	    if (itemStack != null) {
-		ItemMeta meta2 = itemStack.getItemMeta();
-		if (lore != null && !lore.isEmpty()) {
-		    meta2.setLore(lore);
-		}
-		if (!"default".equals(displayName)) {
-		    meta2.setDisplayName(displayName);
-		}
-		if (damage > 0) {
-		    Damageable damageMeta = (Damageable) meta2;
-		    damageMeta.setDamage(damage);
-		    meta2 = (ItemMeta) damageMeta;
-		}
-		itemStack.setItemMeta(meta2);
-		// convert to new save method
-		itemStack.setAmount(config.getInt("ShopItems." + itemString + ".Amount"));
-		double sell = config.getDouble("ShopItems." + itemString + ".sellPrice");
-		double buy = config.getDouble("ShopItems." + itemString + ".buyPrice");
-		int slot = config.getInt("ShopItems." + itemString + ".Slot");
-		saveShopItem(itemStack, slot, 0, 0, true);
-		// add new item
-		addShopItem(slot, sell, buy, itemStack);
-	    }
-	}
-    }
-
-    @Deprecated
     private void loadExistingShopOld() throws TownSystemException {
 	file = new File(UltimateEconomy.getInstance.getDataFolder(), name + ".yml");
 	try {
@@ -1315,37 +1260,5 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to change savefile name to new save system");
 	    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 	}
-    }
-
-    @Deprecated
-    private ItemStack getEnchantedItemStackOld(String itemString, String string) {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-	ItemStack itemStack = new ItemStack(Material.valueOf(string.substring(0, string.indexOf("#")).toUpperCase()),
-		config.getInt("ShopItems." + itemString + ".Amount"));
-	addEnchantments(itemStack,
-		new ArrayList<String>(config.getStringList("ShopItems." + itemString + ".enchantments")));
-	return itemStack;
-    }
-
-    @Deprecated
-    private ItemStack getPotionStackOld(String itemString, String string) {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-	String name = config.getString("ShopItems." + itemString + ".Name");
-	ItemStack itemStack = new ItemStack(Material.valueOf(string.substring(0, string.indexOf(":")).toUpperCase()),
-		config.getInt("ShopItems." + itemString + ".Amount"));
-	PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
-	boolean extended = false;
-	boolean upgraded = false;
-	String property = name.substring(name.indexOf("#") + 1);
-	if ("extended".equalsIgnoreCase(property)) {
-	    extended = true;
-	} else if ("upgraded".equalsIgnoreCase(property)) {
-	    upgraded = true;
-	}
-	meta.setBasePotionData(new PotionData(
-		PotionType.valueOf(name.substring(name.indexOf(":") + 1, name.indexOf("#")).toUpperCase()), extended,
-		upgraded));
-	itemStack.setItemMeta(meta);
-	return itemStack;
     }
 }
