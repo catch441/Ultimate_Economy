@@ -78,7 +78,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
     /////////////////////////////////////////////////////////////////////////////////////////// overridden
 
     /**
-     * Overridde, because the position didn't have to be validatet for build
+     * Overridde, because the position didn't have to be validated for build
      * permissions like the parent playershop.
      */
     @Override

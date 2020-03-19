@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
 
@@ -19,7 +17,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -84,17 +81,16 @@ public abstract class AbstractShopImpl implements AbstractShop {
     private static final String K_OFF = "http://textures.minecraft.net/texture/"
 	    + "e883b5beb4e601c3cbf50505c8bd552e81b996076312cffe27b3cc1a29e3";
 
-    public Villager villager;
-    public FileConfiguration config;
-    public File file;
-    public Location location;
-    public Inventory inventory, editor, slotEditor;
-    // size 9 = slots 0 - 8
-    public int size;
-    public List<String> itemNames;
-    public int slotEditorSlot;
+    private Villager villager;
+    private File file;
+    private Location location;
+    private Inventory inventory, editor, slotEditor;
+    // size = 9 (means slots 0-8)
+    private int size;
+    private List<String> itemNames = new ArrayList<>();
+    private int selectedEditorSlot;
     private String name;
-    private final String shopId;
+    private String shopId;
 
     /**
      * Constructor for creating a new shop. No validation, if the shopId is unique.
@@ -105,453 +101,59 @@ public abstract class AbstractShopImpl implements AbstractShop {
      * @param size
      */
     public AbstractShopImpl(String name, String shopId, Location spawnLocation, int size) {
-	itemNames = new ArrayList<>();
 	file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
 	try {
 	    file.createNewFile();
+	    setupNewShop(name, shopId, spawnLocation, size);
 	} catch (IOException e) {
-	    e.printStackTrace();
+	    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create savefile");
+	    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 	}
-	config = YamlConfiguration.loadConfiguration(file);
-	config.set("ShopItemList", itemNames);
-	save();
-	this.shopId = shopId;
-	saveLocationToFile(spawnLocation);
-	saveShopNameToFile(name);
-	saveShopSizeToFile(size);
-	setupShopVillager();
     }
 
     /**
      * Constructor for loading an existing shop. No validation, if the shopId is
-     * unique. If name != null then use old loading otherwise use new loading
+     * unique. If name != null then use old loading otherwise use new loading. If
+     * you choose old loading, the savefile gets converted to the new save system.
      * 
-     * @param dataFolder
      * @param name
      *            //deprecated
      * @param shopId
      * @throws TownSystemException
      */
-    public AbstractShopImpl(File dataFolder, String name, String shopId) throws TownSystemException {
-	itemNames = new ArrayList<>();
-	// old loading with names, can be deleted in the future
+    public AbstractShopImpl(String name, String shopId) throws TownSystemException {
 	if (name != null) {
-	    file = new File(dataFolder, name + ".yml");
-	    config = YamlConfiguration.loadConfiguration(file);
-	    this.name = name;
-	    try {
-		changeSavefileName(dataFolder, shopId);
-	    } catch (ShopSystemException e) {
-	    }
-	}
-	// new loading with ids
-	else {
-	    file = new File(dataFolder, shopId + ".yml");
-	    config = YamlConfiguration.loadConfiguration(file);
-	    loadShopName();
-	}
-	this.shopId = shopId;
-	size = config.getInt("ShopSize");
-	World world = Bukkit.getWorld(config.getString("ShopLocation.World"));
-	if (world == null) {
-	    throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST,
-		    config.getString("ShopLocation.World"));
-	}
-	itemNames = config.getStringList("ShopItemList");
-	location = new Location(world, config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
-		config.getDouble("ShopLocation.z"));
-	setupShopVillager();
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// Setup
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// Methods
-
-    private void setupShopVillager() {
-	location.getChunk().load();
-	Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10, 10, 10);
-	for (Entity entity : entitys) {
-	    if (entity.getName().contains(name)) {
-		entity.remove();
-	    }
-	}
-	villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
-	villager.setCustomName(name);
-	villager.setCustomNameVisible(true);
-	villager.setSilent(true);
-	villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
-	villager.setVillagerLevel(2);
-	villager.setMetadata("ue-id", new FixedMetadataValue(UltimateEconomy.getInstance, shopId));
-	villager.setCollidable(false);
-        villager.setInvulnerable(true);
-	config = YamlConfiguration.loadConfiguration(file);
-	if (config.isSet("Profession")) {
-	    villager.setProfession(Profession.valueOf(config.getString("Profession")));
+	    loadExistingShopOld();
 	} else {
-	    villager.setProfession(Profession.NITWIT);
-	}
-	inventory = Bukkit.createInventory(villager, size, name);
-	slotEditor = Bukkit.createInventory(villager, 27, name + "-SlotEditor");
-	editor = Bukkit.createInventory(villager, size, name + "-Editor");
-	setupShopItems();
-    }
-
-    /**
-     * --Setup method--
-     * <p>
-     * Not for commercial use.
-     * <p>
-     * Setup the info slot of the shop.
-     */
-    protected void setupShopItems() {
-	int slot = size - 1;
-	ItemStack anvil = new ItemStack(Material.ANVIL);
-	ItemMeta meta = anvil.getItemMeta();
-	meta.setDisplayName("Info");
-	anvil.setItemMeta(meta);
-	addShopItemToInv(anvil, 1, slot, 0.0, 0.0);
-	itemNames.add("ANVIL_0");
-    }
-
-    private void setupSlotEditor(int slot) {
-	double buyPrice = 0;
-	double sellPrice = 0;
-	try {
-	    if (!slotIsEmpty(slot)) {
-		ItemStack itemStack = new ItemStack(inventory.getItem(slot - 1));
-		itemStack.setAmount(1);
-		ItemMeta itemMeta = itemStack.getItemMeta();
-		List<String> loreList = itemMeta.getLore();
-		Iterator<String> loreIter = loreList.iterator();
-		while (loreIter.hasNext()) {
-		    String lore = loreIter.next();
-		    if (lore.contains(" buy for ") || lore.contains(" sell for ")) {
-			loreIter.remove();
-		    }
-		}
-		itemMeta.setLore(loreList);
-		itemStack.setItemMeta(itemMeta);
-		String itemString = itemStack.toString();
-		buyPrice = getItemBuyPrice(itemString);
-		sellPrice = getItemSellPrice(itemString);
-	    }
-	} catch (ShopSystemException | GeneralEconomyException e) {
-	}
-	setupSlotEditorStandardItems(buyPrice, sellPrice);
-    }
-
-    private void setupSlotEditorStandardItems(double buyPrice, double sellPrice) {
-	List<String> listBuy = new ArrayList<String>();
-	List<String> listSell = new ArrayList<String>();
-	listBuy.add(ChatColor.GOLD + "Price: " + buyPrice);
-	listSell.add(ChatColor.GOLD + "Price: " + sellPrice);	
-	setupPlusItem(listBuy, listSell);
-	setupFactorItem();
-	setupOneNumberItems(listBuy, listSell);	
-	setupTenNumberItems(listBuy, listSell);
-	setupTwentyNumberItems(listBuy, listSell);
-	setupSaveItem();
-	setupExitItem();
-	setupRemoveItem();
-	addSkullToSlotEditor("buyprice", 9, listBuy, BUY);
-	addSkullToSlotEditor("sellprice", 18, listSell, SELL);
-    }
-
-    private void setupPlusItem(List<String> listBuy, List<String> listSell) {
-	ItemStack item = getSkull(PLUS, "plus");
-	slotEditor.setItem(2, item);
-	ItemMeta meta = item.getItemMeta();
-	meta.setLore(listBuy);
-	item.setItemMeta(meta);
-	slotEditor.setItem(11, item);
-	meta = item.getItemMeta();
-	meta.setLore(listSell);
-	item.setItemMeta(meta);
-	slotEditor.setItem(20, item);
-    }
-
-    private void setupFactorItem() {
-	ItemStack item = getSkull(K_OFF, "factor off");
-	slotEditor.setItem(12, item);
-	slotEditor.setItem(21, item);
-    }
-
-    private void setupRemoveItem() {
-	ItemStack item = new ItemStack(Material.BARRIER);
-	ItemMeta meta = item.getItemMeta();
-	meta.setDisplayName(ChatColor.RED + "remove item");
-	item.setItemMeta(meta);
-	slotEditor.setItem(26, item);
-    }
-
-    private void setupExitItem() {
-	ItemStack item = new ItemStack(Material.RED_WOOL);
-	ItemMeta meta = item.getItemMeta();
-	meta.setDisplayName(ChatColor.RED + "exit without save");
-	item.setItemMeta(meta);
-	slotEditor.setItem(7, item);
-    }
-
-    private void setupSaveItem() {
-	ItemStack item = new ItemStack(Material.GREEN_WOOL);
-	ItemMeta meta = item.getItemMeta();
-	meta.setDisplayName(ChatColor.YELLOW + "save changes");
-	item.setItemMeta(meta);
-	slotEditor.setItem(8, item);
-    }
-
-    private void setupTwentyNumberItems(List<String> listBuy, List<String> listSell) {
-	ItemStack item = getSkull(TWENTY, "twenty");
-	slotEditor.setItem(6, item);
-	ItemMeta meta = item.getItemMeta();
-	meta.setLore(listBuy);
-	item.setItemMeta(meta);
-	slotEditor.setItem(15, item);
-	meta = item.getItemMeta();
-	meta.setLore(listSell);
-	item.setItemMeta(meta);
-	slotEditor.setItem(24, item);
-    }
-
-    private void setupTenNumberItems(List<String> listBuy, List<String> listSell) {
-	ItemStack item = getSkull(TEN, "ten");
-	slotEditor.setItem(5, item);
-	ItemMeta meta = item.getItemMeta();
-	meta.setLore(listBuy);
-	item.setItemMeta(meta);
-	slotEditor.setItem(14, item);
-	meta = item.getItemMeta();
-	meta.setLore(listSell);
-	item.setItemMeta(meta);
-	slotEditor.setItem(23, item);
-    }
-
-    private void setupOneNumberItems(List<String> listBuy, List<String> listSell) {
-	ItemStack item = getSkull(ONE, "one");
-	slotEditor.setItem(4, item);
-	ItemMeta meta = item.getItemMeta();
-	meta.setLore(listBuy);
-	item.setItemMeta(meta);
-	slotEditor.setItem(13, item);
-	meta = item.getItemMeta();
-	meta.setLore(listSell);
-	item.setItemMeta(meta);
-	slotEditor.setItem(22, item);
-    }
-    
-    private void addSkullToSlotEditor(String displayName,int slot, List<String> loreList,String skullAdress) {
-	ItemStack item = getSkull(skullAdress, displayName);
-	ItemMeta meta = item.getItemMeta();
-	meta.setLore(loreList);
-	item.setItemMeta(meta);
-	slotEditor.setItem(slot, item);
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// Save
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// file
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// edit
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
-
-    /**
-     * --Save file edit method--
-     * <p>
-     * Not for commercial use.
-     * <p>
-     * Save this location to the savefile of the shop.
-     * 
-     * @param location
-     */
-    protected void saveLocationToFile(Location location) {
-	this.location = location;
-	config = YamlConfiguration.loadConfiguration(file);
-	config.set("ShopLocation.x", location.getX());
-	config.set("ShopLocation.y", location.getY());
-	config.set("ShopLocation.z", location.getZ());
-	config.set("ShopLocation.World", location.getWorld().getName());
-	save();
-    }
-
-    /**
-     * --Save file edit method--
-     * <p>
-     * Not for commercial use.
-     * <p>
-     * Save this profession of the shop to the savefile.
-     * 
-     * @param profession
-     */
-    protected void saveProfessionToFile(Profession profession) {
-	config = YamlConfiguration.loadConfiguration(file);
-	config.set("Profession", profession.name());
-	save();
-    }
-
-    /**
-     * --Save file edit method--
-     * <p>
-     * Not for commercial use.
-     * <p>
-     * Save this name of the shop to the savefile.
-     * 
-     * @param name
-     */
-    protected void saveShopNameToFile(String name) {
-	this.name = name;
-	config = YamlConfiguration.loadConfiguration(file);
-	config.set("ShopName", name);
-	save();
-    }
-
-    /**
-     * --Save file edit method--
-     * <p>
-     * Not for commercial use.
-     * <p>
-     * Save this size of the shop to the savefile.
-     * 
-     * @param size
-     */
-    protected void saveShopSizeToFile(int size) {
-	this.size = size;
-	config = YamlConfiguration.loadConfiguration(file);
-	config.set("ShopSize", size);
-	save();
-    }
-
-    /**
-     * --Save file edit method--
-     * <p>
-     * Not for commercial use. Only to convert old save files to the new save system
-     * <p>
-     * Changes the name of the savefile
-     * 
-     * @param dataFolder
-     * @param newName
-     * @throws ShopSystemException
-     */
-    private void changeSavefileName(File dataFolder, String newName) throws ShopSystemException {
-	File newFile = new File(dataFolder, newName + ".yml");
-	if (!newFile.exists()) {
-	    config = YamlConfiguration.loadConfiguration(file);
-	    file.delete();
-	    file = newFile;
-	    save();
-	} else {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ERROR_ON_RENAMING);
-	}
-    }
-
-    /**
-     * --Save fileedit method--
-     * <p>
-     * Not for commercial use.
-     * <p>
-     * Saves a item to the savefile.
-     * 
-     * @param stack
-     * @param slot
-     * @param sellPrice
-     * @param buyPrice
-     */
-    protected void saveShopItemToFile(ItemStack stack, int slot, double sellPrice, double buyPrice) {
-	// create a new ItemStack to avoid changes to the original stack
-	ItemStack itemStackCopy = new ItemStack(stack);
-	int amount = itemStackCopy.getAmount();
-	itemStackCopy.setAmount(1);
-	String itemString = itemStackCopy.toString();
-	config = YamlConfiguration.loadConfiguration(file);
-	itemNames.add(itemString);
-	removedoubleObjects(itemNames);
-	config.set("ShopItems." + itemString + ".Name", itemStackCopy);
-	config.set("ShopItems." + itemString + ".Amount", amount);
-	config.set("ShopItems." + itemString + ".Slot", slot);
-	config.set("ShopItems." + itemString + ".sellPrice", sellPrice);
-	config.set("ShopItems." + itemString + ".buyPrice", buyPrice);
-	config.set("ShopItems." + itemString + ".newSaveMethod", "true");
-	config.set("ShopItemList", itemNames);
-	save();
-    }
-
-    /**
-     * --Save file edit method--
-     * <p>
-     * Not for commercial use.
-     * <p>
-     * Deletes a shop item from the save file.
-     * 
-     * @param itemString
-     */
-    protected void removeShopItemFromFile(String itemString) {
-	if (itemNames.contains(itemString)) {
-	    removeOldItemSaving(itemString);
-	}
-    }
-
-    /**
-     * --Save file edit method--
-     * <p>
-     * Saved the config into the savefile.
-     */
-    protected void save() {
-	try {
-	    config.save(file);
-	} catch (IOException e) {
-	    e.printStackTrace();
-	}
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// Save
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// file
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// read
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// /
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// get
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
-
-    @Override
-    public double getItemSellPrice(String itemName) throws ShopSystemException {
-	if (itemNames.contains(itemName)) {
-	    config = YamlConfiguration.loadConfiguration(file);
-	    return config.getDouble("ShopItems." + itemName + ".sellPrice");
-	} else {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
+	    file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
+	    loadExistingShop(shopId);
 	}
     }
 
     @Override
-    public int getItemAmount(String itemName) throws ShopSystemException {
-	config = YamlConfiguration.loadConfiguration(file);
-	if (itemNames.contains(itemName)) {
-	    return config.getInt("ShopItems." + itemName + ".Amount");
-	} else {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
-	}
+    public double getItemSellPrice(int slot) throws ShopSystemException {
+	String itemString = getItemString(inventory.getItem(slot), true);
+	checkForItemExists(itemString);
+	return YamlConfiguration.loadConfiguration(file).getDouble("ShopItems." + itemString + ".sellPrice");
     }
 
     @Override
-    public double getItemBuyPrice(String itemName) throws ShopSystemException {
-	config = YamlConfiguration.loadConfiguration(file);
-	if (itemNames.contains(itemName)) {
-	    return config.getDouble("ShopItems." + itemName + ".buyPrice");
-	} else {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
-	}
+    public int getItemAmount(int slot) throws ShopSystemException {
+	String itemString = getItemString(inventory.getItem(slot), true);
+	checkForItemExists(itemString);
+	return YamlConfiguration.loadConfiguration(file).getInt("ShopItems." + itemString + ".Amount");
+    }
+
+    @Override
+    public double getItemBuyPrice(int slot) throws ShopSystemException {
+	String itemString = getItemString(inventory.getItem(slot), true);
+	checkForItemExists(itemString);
+	return YamlConfiguration.loadConfiguration(file).getDouble("ShopItems." + itemString + ".buyPrice");
     }
 
     @Override
     public List<String> getItemList() {
 	return itemNames;
-    }
-
-    /**
-     * --Save file read method--
-     * <p>
-     * This method loads the shop name from the save file.
-     */
-    private void loadShopName() {
-	config = YamlConfiguration.loadConfiguration(file);
-	name = config.getString("ShopName");
     }
 
     @Override
@@ -576,813 +178,99 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
     @Override
     public ItemStack getItem(int slot) {
-	slot--;
 	return inventory.getItem(slot);
     }
 
     @Override
     public ItemStack getItemStack(String itemString) throws ShopSystemException {
-	if (!itemNames.contains(itemString)) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
-	} else {
-	    config = YamlConfiguration.loadConfiguration(file);
-	    return config.getItemStack("ShopItems." + itemString + ".Name");
-	}
+	checkForItemExists(itemString);
+	return YamlConfiguration.loadConfiguration(file).getItemStack("ShopItems." + itemString + ".Name");
     }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// change
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
 
     @Override
     public void changeProfession(Profession profession) {
 	villager.setProfession(profession);
-	saveProfessionToFile(profession);
-    }
-
-    /**
-     * --Change Methode--
-     * <p>
-     * Not for commercial use
-     * <p>
-     * Change the name of the inventory, shot editor and editor
-     * 
-     * @param name
-     */
-    protected void changeInventoryNames(String name) {
-	Inventory inventoryNew = Bukkit.createInventory(villager, size, name);
-	inventoryNew.setContents(inventory.getContents());
-	inventory = inventoryNew;
-	Inventory editorNew = Bukkit.createInventory(villager, this.size, name + "-Editor");
-	editorNew.setContents(editor.getContents());
-	editor = editorNew;
-	Inventory slotEditorNew = Bukkit.createInventory(villager, 27, name + "-SlotEditor");
-	slotEditorNew.setContents(slotEditor.getContents());
-	slotEditor = slotEditorNew;
+	saveProfession();
     }
 
     @Override
     public void changeShopSize(int newSize) throws ShopSystemException, GeneralEconomyException, PlayerException {
 	checkForValidSize(newSize);
-	boolean possible = true;
-	int diff = size - newSize;
-	// number of reserved slots
-	int temp = 1;
-	if (inventory.getSize() > newSize) {
-	    for (int i = 1; i <= diff; i++) {
-		ItemStack stack = inventory.getItem(size - i - temp);
-		if (stack != null) {
-		    possible = false;
-		}
-	    }
-	}
-	if (possible) {
-	    config = YamlConfiguration.loadConfiguration(file);
-	    saveShopSizeToFile(newSize);
-	    inventory = Bukkit.createInventory(null, size, name);
-	    reload();
-	    setupShopItems();
-	} else {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.RESIZING_FAILED);
-	}
+	checkForResizePossible(newSize);
+	this.size = newSize;
+	saveShopSize();
+	setupShopInventory();
+	reloadShopItems();
     }
-
-    private void checkForValidSize(int newSize) throws GeneralEconomyException {
-	if (newSize % 9 != 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
-	}
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// shopitem
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
 
     @Override
     public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack)
 	    throws ShopSystemException, PlayerException, GeneralEconomyException {
-	int amount = itemStack.getAmount();
-	String itemString = itemStack.toString();
-	if (itemStack.getType() == Material.SPAWNER) {
-	    ItemMeta meta = itemStack.getItemMeta();
-	    String entity = meta.getDisplayName();
-	    itemString = "SPAWNER_" + entity;
-	}
-	if (!slotIsEmpty(slot + 1)) {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.INVENTORY_SLOT_OCCUPIED);
-	} else if (sellPrice < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, buyPrice);
-	} else if (buyPrice < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, buyPrice);
-	} else if (buyPrice == 0 && sellPrice == 0) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_PRICES);
-	} else if (itemNames.contains(itemString)) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_ALREADY_EXISTS);
-	} else {
-	    saveShopItemToFile(itemStack, slot, sellPrice, buyPrice);
-	    addShopItemToInv(new ItemStack(itemStack), amount, slot, sellPrice, buyPrice);
-	}
+	checkForSlotIsEmpty(slot);
+	checkForValidSellPrice(String.valueOf(sellPrice));
+	checkForValidBuyPrice(String.valueOf(buyPrice));
+	checkForPricesGreaterThenZero(sellPrice, buyPrice);
+	String itemString = getItemString(itemStack, true);
+	checkForItemDoesNotExist(itemString);
+	itemNames.add(itemString);
+	editor.setItem(slot, getSkull(SLOTFILLED, "Slot " + slot));
+	saveItemNames();
+	saveShopItem(itemStack, slot, sellPrice, buyPrice, false);
+	addShopItemToInv(new ItemStack(itemStack), itemStack.getAmount(), slot, sellPrice, buyPrice);
     }
 
     @Override
-    public String editShopItem(int slot, String amount, String sellPrice, String buyPrice)
+    public String editShopItem(int slot, String newAmount, String newSellPrice, String newBuyPrice)
 	    throws ShopSystemException, PlayerException, GeneralEconomyException {
-	performValidationChecks(slot, amount, sellPrice, buyPrice);
-	ItemStack itemStack = inventory.getItem(slot - 1);
-	itemStack.setAmount(1);
-	ItemMeta itemMeta = itemStack.getItemMeta();
-	List<String> loreList = itemMeta.getLore();
-	Iterator<String> loreIter = loreList.iterator();
-	while (loreIter.hasNext()) {
-	    String lore = loreIter.next();
-	    if (lore.contains(" buy for ") || lore.contains(" sell for ")) {
-		loreIter.remove();
-	    }
-	}
-	itemMeta.setLore(loreList);
-	itemStack.setItemMeta(itemMeta);
-	String itemString = itemStack.toString();
+	checkForSlotIsNotEmpty(slot);
+	checkForValidAmount(newAmount);
+	checkForValidSellPrice(newSellPrice);
+	checkForValidBuyPrice(newBuyPrice);
+	checkForOnePriceGreaterThenZero(newSellPrice, newBuyPrice);
+	ItemStack itemStack = inventory.getItem(slot);
+	String itemString = getItemString(itemStack, true);
 	String message = ChatColor.GOLD + "Updated ";
-	config = YamlConfiguration.loadConfiguration(file);
-	if (!"none".equals(amount)) {
-	    config.set("ShopItems." + itemString + ".Amount", Integer.valueOf(amount));
+	if (!"none".equals(newAmount)) {
+	    saveShopItemAmount(itemString, Integer.valueOf(newAmount));
 	    message = message + ChatColor.GREEN + "amount ";
 	}
-	if (!"none".equals(sellPrice)) {
-	    config.set("ShopItems." + itemString + ".sellPrice", Double.valueOf(sellPrice));
+	if (!"none".equals(newSellPrice)) {
+	    saveShopItemSellPrice(itemString, Integer.valueOf(newSellPrice));
 	    message = message + ChatColor.GREEN + "sellPrice ";
 	}
-	if (!"none".equals(buyPrice)) {
-	    config.set("ShopItems." + itemString + ".buyPrice", Double.valueOf(buyPrice));
+	if (!"none".equals(newBuyPrice)) {
+	    saveShopItemBuyPrice(itemString, Integer.valueOf(newBuyPrice));
 	    message = message + ChatColor.GREEN + "buyPrice ";
 	}
-	save();
 	loadShopItem(itemString);
 	message = message + ChatColor.GOLD + "for item " + ChatColor.GREEN + itemStack.getType().name().toLowerCase();
 	return message;
 
     }
 
-    private void performValidationChecks(int slot, String amount, String sellPrice, String buyPrice)
-	    throws GeneralEconomyException, ShopSystemException {
-	checkForValidSlot(slot);
-	checkForValidAmount(amount);
-	checkForValidSellPrice(sellPrice);
-	checkforValidBuyPrice(buyPrice);
-	checkForOnePriceGreaterThenZero(sellPrice, buyPrice);
-    }
-
-    private void checkForOnePriceGreaterThenZero(String sellPrice, String buyPrice) throws ShopSystemException {
-	if (!"none".equals(sellPrice) && !"none".equals(buyPrice) && Double.valueOf(sellPrice) == 0
-		&& Double.valueOf(buyPrice) == 0) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_PRICES);
-	}
-    }
-
-    private void checkForValidSlot(int slot) throws GeneralEconomyException, ShopSystemException {
-	if (slotIsEmpty(slot)) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVENTORY_SLOT_EMPTY);
-	}
-    }
-
-    private void checkForValidAmount(String amount) throws GeneralEconomyException {
-	if (!"none".equals(amount) && (Integer.valueOf(amount) <= 0 || Integer.valueOf(amount) > 64)) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, amount);
-	}
-    }
-
-    private void checkforValidBuyPrice(String buyPrice) throws GeneralEconomyException {
-	if (!"none".equals(buyPrice) && Double.valueOf(buyPrice) < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, buyPrice);
-	}
-    }
-
-    private void checkForValidSellPrice(String sellPrice) throws GeneralEconomyException {
-	checkforValidBuyPrice(sellPrice);
-    }
-
-    /**
-     * --ShopItem Methode--
-     * <p>
-     * Loads a item by it's name. Not for commercial use.
-     * 
-     * @param itemString
-     * @throws ShopSystemException
-     * @throws PlayerException
-     * @throws GeneralEconomyException
-     */
-    public void loadShopItem(String itemString) throws ShopSystemException, PlayerException, GeneralEconomyException {
-	config = YamlConfiguration.loadConfiguration(file);
-	// new loading method for new save method
-	if (!itemString.contains("SPAWNER_") && !"ANVIL_0".equals(itemString) && !"CRAFTING_TABLE_0".equals(itemString)
-		&& config.getString("ShopItems." + itemString + ".newSaveMethod") != null) {
-	    loadItemNew(itemString);
-	}
-	// load spawner
-	else if (itemString.contains("SPAWNER_")) {
-	    loadSpawner(itemString);
-	}
-	// old loading method, only for old saved items, converts to the new save method
-	// can be deleted in the future
-	else if (!!"ANVIL_0".equals(itemString) && !"CRAFTING_TABLE_0".equals(itemString)) {
-	    loadItemOld(itemString);
-	}
-    }
-
-    @Deprecated
-    private void loadItemOld(String itemString) throws ShopSystemException, PlayerException, GeneralEconomyException {
-	if (config.getString("ShopItems." + itemString + ".Name") != null) {
-	    String string = config.getString("ShopItems." + itemString + ".Name");
-	    List<String> lore = config.getStringList("ShopItems." + itemString + ".lore");
-	    int damage = config.getInt("ShopItems." + itemString + ".damage");
-	    String displayName = "default";
-	    if (string.contains("|")) {
-		displayName = string.substring(0, string.indexOf("|"));
-		string = string.substring(string.indexOf("|") + 1);
-	    }
-	    ItemStack itemStack = null;
-	    if (string.contains("#Enchanted_")) {
-		itemStack = getEnchantedItemStackOld(itemString, string);
-	    } else if (string.contains("potion:")) {
-		itemStack = getPotionStackOld(itemString, string);
-	    } else if (!string.contains("SPAWNER")) {
-		itemStack = new ItemStack(Material.getMaterial(string),
-			config.getInt("ShopItems." + itemString + ".Amount"));
-	    }
-	    if (itemStack != null) {
-		ItemMeta meta2 = itemStack.getItemMeta();
-		if (lore != null && !lore.isEmpty()) {
-		    meta2.setLore(lore);
-		}
-		if (!"default".equals(displayName)) {
-		    meta2.setDisplayName(displayName);
-		}
-		if (damage > 0) {
-		    Damageable damageMeta = (Damageable) meta2;
-		    damageMeta.setDamage(damage);
-		    meta2 = (ItemMeta) damageMeta;
-		}
-		itemStack.setItemMeta(meta2);
-		// convert to new save method
-		itemStack.setAmount(config.getInt("ShopItems." + itemString + ".Amount"));
-		double sell = config.getDouble("ShopItems." + itemString + ".sellPrice");
-		double buy = config.getDouble("ShopItems." + itemString + ".buyPrice");
-		int slot = config.getInt("ShopItems." + itemString + ".Slot");
-		removeOldItemSaving(itemString);
-		// add new item
-		addShopItem(slot, sell, buy, itemStack);
-	    }
-	}
-    }
-
-    private void removeOldItemSaving(String itemString) {
-	config = YamlConfiguration.loadConfiguration(file);
-	itemNames.remove(itemString);
-	config.set("ShopItemList", itemNames);
-	config.set("ShopItems." + itemString, null);
-	save();
-    }
-
-    @Deprecated
-    private ItemStack getEnchantedItemStackOld(String itemString, String string) {
-	ItemStack itemStack;
-	itemStack = new ItemStack(Material.valueOf(string.substring(0, string.indexOf("#")).toUpperCase()),
-		config.getInt("ShopItems." + itemString + ".Amount"));
-	addEnchantments(itemStack,
-		new ArrayList<String>(config.getStringList("ShopItems." + itemString + ".enchantments")));
-	return itemStack;
-    }
-
-    @Deprecated
-    private ItemStack getPotionStackOld(String itemString, String string) {
-	ItemStack itemStack;
-	String name = config.getString("ShopItems." + itemString + ".Name");
-	itemStack = new ItemStack(Material.valueOf(string.substring(0, string.indexOf(":")).toUpperCase()),
-		config.getInt("ShopItems." + itemString + ".Amount"));
-	PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
-	boolean extended = false;
-	boolean upgraded = false;
-	String property = name.substring(name.indexOf("#") + 1);
-	if ("extended".equalsIgnoreCase(property)) {
-	    extended = true;
-	} else if ("upgraded".equalsIgnoreCase(property)) {
-	    upgraded = true;
-	}
-	meta.setBasePotionData(new PotionData(
-		PotionType.valueOf(name.substring(name.indexOf(":") + 1, name.indexOf("#")).toUpperCase()), extended,
-		upgraded));
-	itemStack.setItemMeta(meta);
-	return itemStack;
-    }
-
-    private void loadItemNew(String itemString) {
-	ItemStack itemStack = config.getItemStack("ShopItems." + itemString + ".Name");
-	addShopItemToInv(itemStack, config.getInt("ShopItems." + itemString + ".Amount"),
-		config.getInt("ShopItems." + itemString + ".Slot"),
-		config.getDouble("ShopItems." + itemString + ".sellPrice"),
-		config.getDouble("ShopItems." + itemString + ".buyPrice"));
-    }
-
-    private void loadSpawner(String itemString) {
-	String entityname = itemString.substring(8);
-	ItemStack itemStack = new ItemStack(Material.SPAWNER);
-	ItemMeta meta = itemStack.getItemMeta();
-	meta.setDisplayName(entityname);
-	itemStack.setItemMeta(meta);
-	addShopItemToInv(itemStack, config.getInt("ShopItems." + itemString + ".Amount"),
-		config.getInt("ShopItems." + itemString + ".Slot"),
-		config.getDouble("ShopItems." + itemString + ".sellPrice"),
-		config.getDouble("ShopItems." + itemString + ".buyPrice"));
-    }
-
     @Override
     public void removeShopItem(int slot) throws ShopSystemException, GeneralEconomyException {
-	if (slotIsEmpty(slot + 1)) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVENTORY_SLOT_EMPTY);
-	} else if ((slot + 1) != size && (slot + 1) <= size) {
-	    String itemString = "";
-	    ItemStack stack = inventory.getItem(slot);
-	    if (stack.getType().equals(Material.SPAWNER)) {
-		itemString = "SPAWNER_" + stack.getItemMeta().getDisplayName();
-	    } else {
-		ItemMeta itemMeta = stack.getItemMeta();
-		List<String> loreList = itemMeta.getLore();
-		Iterator<String> loreIter = loreList.iterator();
-		while (loreIter.hasNext()) {
-		    String lore = loreIter.next();
-		    if (lore.contains(" buy for ") || lore.contains(" sell for ")) {
-			loreIter.remove();
-		    }
-		}
-		itemMeta.setLore(loreList);
-		stack.setItemMeta(itemMeta);
-		stack.setAmount(1);
-		itemString = stack.toString();
-	    }
-	    inventory.clear(slot);
-	    removeShopItemFromFile(itemString);
-	} else if ((slot + 1) == size) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_CANNOT_BE_DELETED);
-	}
+	checkForValidSlot(slot);
+	checkForSlotIsNotEmpty(slot);
+	checkForItemCanBeDeleted(slot);
+	inventory.clear(slot);
+	String itemString = getItemString(inventory.getItem(slot), true);
+	itemNames.remove(itemString);
+	editor.setItem(slot, getSkull(SLOTEMPTY, "Slot " + slot));
+	saveShopItem(inventory.getItem(slot), slot, 0, 0, true);
     }
-
-    /**
-     * --ShopItem Methode--
-     * <p>
-     * Not for commercial use.
-     * <p>
-     * This method adds a shopitem to the shop inventory.
-     * 
-     * @param itemStack
-     * @param amount
-     * @param slot
-     * @param sellPrice
-     * @param buyPrice
-     */
-    protected void addShopItemToInv(ItemStack itemStack, int amount, int slot, double sellPrice, double buyPrice) {
-	String displayName = itemStack.getItemMeta().getDisplayName();
-	List<String> list = null;
-	if (itemStack.getItemMeta().getLore() != null) {
-	    list = itemStack.getItemMeta().getLore();
-	} else {
-	    list = new ArrayList<>();
-	}
-	ItemMeta meta = itemStack.getItemMeta();
-	if ("Info".equals(displayName)) {
-	    meta.setDisplayName("Info");
-	    list.add(ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "sell specified amount");
-	    list.add(ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "sell all");
-	    list.add(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "buy");
-	} else if ("Stock".equals(displayName)) {
-	    list.add(ChatColor.RED + "Only for Shopowner");
-	    list.add(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile");
-	} else if (sellPrice == 0.0) {
-	    list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + " "
-		    + ConfigController.getCurrencyText(buyPrice));
-	} else if (buyPrice == 0.0) {
-	    list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + " "
-		    + ConfigController.getCurrencyText(sellPrice));
-	} else {
-	    list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + " "
-		    + ConfigController.getCurrencyText(buyPrice));
-	    list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + " "
-		    + ConfigController.getCurrencyText(sellPrice));
-	}
-	meta.setLore(list);
-	itemStack.setItemMeta(meta);
-	itemStack.setAmount(amount);
-	inventory.setItem(slot, itemStack);
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// editor
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
 
     @Override
     public void openEditor(Player player) {
-	// value = slots for other usage - 1
-	int value = 1;
-	for (int i = 0; i < (size - value); i++) {
-	    try {
-		if (slotIsEmpty(i + 1)) {
-		    editor.setItem(i, getSkull(SLOTEMPTY, "Slot " + (i + 1)));
-		} else {
-		    editor.setItem(i, getSkull(SLOTFILLED, "Slot " + (i + 1)));
-		}
-	    } catch (GeneralEconomyException e) {
-	    }
-	}
 	player.openInventory(editor);
     }
 
     @Override
     public void openSlotEditor(Player player, int slot)
 	    throws IllegalArgumentException, ShopSystemException, GeneralEconomyException {
-	setupSlotEditor(slot);
-	ItemStack item;
-	slotEditorSlot = slot;
-	if (slotIsEmpty(slot)) {
-	    item = new ItemStack(Material.BARRIER);
-	    ItemMeta meta = item.getItemMeta();
-	    meta.setDisplayName(ChatColor.GREEN + "select item");
-	    item.setItemMeta(meta);
-	    slotEditor.setItem(0, item);
-	} else {
-	    slot--;
-	    item = new ItemStack(inventory.getItem(slot));
-	    ItemMeta meta = item.getItemMeta();
-	    List<String> lore = meta.getLore();
-	    if (lore != null) {
-		Iterator<String> iterator = lore.iterator();
-		while (iterator.hasNext()) {
-		    String string = iterator.next();
-		    if (string.contains("buy for") || string.contains("sell for")) {
-			iterator.remove();
-		    }
-		}
-	    }
-	    meta.setLore(lore);
-	    item.setItemMeta(meta);
-	    slotEditor.setItem(0, item);
-	}
+	updateSlotEditorWithShopItemInformations(slot);
+	selectedEditorSlot = slot;
 	player.openInventory(slotEditor);
-    }
-
-    @Override
-    public void handleSlotEditor(InventoryClickEvent event)
-	    throws ShopSystemException, PlayerException, GeneralEconomyException {
-	if (event.getCurrentItem().getItemMeta() != null) {
-	    Player player = (Player) event.getWhoClicked();
-	    ItemStack originStack = null;
-	    if (inventory.getItem(slotEditorSlot - 1) != null) {
-		originStack = new ItemStack(inventory.getItem(slotEditorSlot - 1));
-	    }
-	    int slot = event.getSlot() + 1;
-	    int factor = 1;
-	    if (event.getInventory().getItem(12).getItemMeta().getDisplayName().equals("factor on")) {
-		factor = 1000;
-	    }
-	    String operator = getOperatorForHandleSlotEditor(event, slot);
-	    double price = getPriceForHandleSlotEditor(event, slot);
-	    ItemStack editorItemStack = slotEditor.getItem(0);
-	    String command = event.getCurrentItem().getItemMeta().getDisplayName();
-	    handleSlotEditorCommand(event, player, originStack, slot, factor, operator, price, editorItemStack,
-		    command);
-	}
-    }
-
-    private void handleSlotEditorCommand(InventoryClickEvent event, Player player, ItemStack originStack, int slot,
-	    int factor, String operator, double price, ItemStack editorItemStack, String command)
-	    throws ShopSystemException, GeneralEconomyException, PlayerException {
-	command = ChatColor.stripColor(command);
-	switch (command) {
-	case "minus":
-	    switchPlusMinus(slot, "minus");
-	    break;
-	case "plus":
-	    switchPlusMinus(slot, "plus");
-	    break;
-	case "factor off":
-	    switchFactor(slot, "factor on");
-	    break;
-	case "factor on":
-	    switchFactor(slot, "factor off");
-	    break;
-	case "one":
-	    handlePlusMinusOne(slot, factor, operator, price, editorItemStack);
-	    break;
-	case "ten":
-	    handlePlusMinusTen(slot, factor, operator, price, editorItemStack);
-	    break;
-	case "twenty":
-	    handlePlusMinusTwenty(slot, factor, operator, price, editorItemStack);
-	    break;
-	case "save changes":
-	    handleSaveChanges(event, player, originStack);
-	    break;
-	case "remove item":
-	    handleRemoveItem(player, originStack);
-	    break;
-	default:
-	    if (!"buyprice".equals(command) && !"sellprice".equals(command)) {
-		handleAddItemToEditor(event);
-	    }
-	    break;
-	}
-    }
-
-    private void handleAddItemToEditor(InventoryClickEvent event) {
-	ItemStack editorItemStack2 = new ItemStack(event.getCurrentItem());
-	editorItemStack2.setAmount(1);
-	slotEditor.setItem(0, editorItemStack2);
-    }
-
-    private void handleRemoveItem(Player player, ItemStack originStack)
-	    throws ShopSystemException, GeneralEconomyException {
-	removeShopItem(slotEditorSlot - 1);
-	player.sendMessage(MessageWrapper.getString("shop_removeItem", originStack.getType().toString().toLowerCase()));
-    }
-
-    private void handleSaveChanges(InventoryClickEvent event, Player player, ItemStack originStack)
-	    throws ShopSystemException, GeneralEconomyException, PlayerException {
-	double buyPrice = Double.valueOf(event.getInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
-	double sellPrice = Double.valueOf(event.getInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
-	if (buyPrice != 0 || sellPrice != 0) {
-	    ItemStack itemStack = event.getInventory().getItem(0);
-	    String originalStackString = "";
-	    // make a copy of the edited/created item
-	    ItemStack newItemStackCopy = new ItemStack(itemStack);
-	    if (originStack != null) {
-		ItemStack originalItemStackCopy = new ItemStack(originStack);
-		if (originalItemStackCopy.getItemMeta().getLore() != null) {
-		    List<String> loreList = originalItemStackCopy.getItemMeta().getLore();
-		    Iterator<String> iterator = loreList.iterator();
-		    while (iterator.hasNext()) {
-			String lore = iterator.next();
-			if (lore.contains("buy for") || lore.contains("sell for")) {
-			    iterator.remove();
-			}
-		    }
-		    ItemMeta meta2 = originalItemStackCopy.getItemMeta();
-		    meta2.setLore(loreList);
-		    originalItemStackCopy.setItemMeta(meta2);
-		}
-		originalStackString = originalItemStackCopy.toString();
-		newItemStackCopy.setAmount(originStack.getAmount());
-	    }
-	    // if the item changed
-	    if (!newItemStackCopy.toString().equals(originalStackString)) {
-		newItemStackCopy.setAmount(1);
-		// check, if this item already exists in a other slot
-		if (itemNames.contains(newItemStackCopy.toString())) {
-		    player.sendMessage(MessageWrapper.getErrorString("item_already_exists_in_shop"));
-		} else {
-		    // the old item in the selected slot gets deleted
-		    if (originStack != null) {
-			handleRemoveItem(player, originStack);
-		    }
-		    addShopItem(slotEditorSlot - 1, sellPrice, buyPrice, itemStack);
-		    player.sendMessage(
-			    MessageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
-		}
-	    }
-	    // if the item doesn't changed
-	    else {
-		player.sendMessage(editShopItem(slotEditorSlot, String.valueOf(itemStack.getAmount()),
-			String.valueOf(sellPrice), String.valueOf(buyPrice)));
-	    }
-	} else {
-	    player.sendMessage(ChatColor.RED + "The sellprice and the buyprice are both 0!");
-	}
-    }
-
-    private void handlePlusMinusTwenty(int slot, int factor, String operator, double price, ItemStack editorItemStack) {
-	switch (slot) {
-	case 7:
-	    handlePlusMinusTwentyAmount(operator, editorItemStack);
-	    break;
-	case 16:
-	    handlePlusMinusTwentySellPrice(factor, operator, price);
-	    break;
-	case 25:
-	    handlePlusMinusTwentyBuyPrice(factor, operator, price);
-	    break;
-	default:
-	    break;
-	}
-    }
-
-    private void handlePlusMinusTwentyBuyPrice(int factor, String operator, double price) {
-	if (price >= 20 && "minus".equals(operator)) {
-	    updateEditorPrice(18, 20, 22, 23, 24, price - 20 * factor);
-	} else if ("plus".equals(operator)) {
-	    updateEditorPrice(18, 20, 22, 23, 24, price + 20 * factor);
-	}
-    }
-
-    private void handlePlusMinusTwentySellPrice(int factor, String operator, double price) {
-	if (price >= 20 && "minus".equals(operator)) {
-	    updateEditorPrice(9, 11, 13, 14, 15, price - 20 * factor);
-	} else if ("plus".equals(operator)) {
-	    updateEditorPrice(9, 11, 13, 14, 15, price + 20 * factor);
-	}
-    }
-
-    private void handlePlusMinusTwentyAmount(String operator, ItemStack editorItemStack) {
-	if (editorItemStack != null && "plus".equals(operator) && (editorItemStack.getAmount() + 20 <= 64)) {
-	    editorItemStack.setAmount(editorItemStack.getAmount() + 20);
-	} else if (editorItemStack != null && "plus".equals(operator) && (editorItemStack.getAmount() + 20 > 64)) {
-	    editorItemStack.setAmount(64);
-	} else if (editorItemStack != null && editorItemStack.getAmount() > 20) {
-	    editorItemStack.setAmount(editorItemStack.getAmount() - 20);
-	}
-    }
-
-    private void handlePlusMinusTen(int slot, int factor, String operator, double price, ItemStack editorItemStack) {
-	switch (slot) {
-	case 6:
-	    handlePlusMinusTenAmount(operator, editorItemStack);
-	    break;
-	case 15:
-	    handlePlusMinusTenSellPrice(factor, operator, price);
-	    break;
-	case 24:
-	    handlePlusMinusTenBuyPrice(factor, operator, price);
-	    break;
-	default:
-	    break;
-	}
-    }
-
-    private void handlePlusMinusTenBuyPrice(int factor, String operator, double price) {
-	if (price >= 10 && "minus".equals(operator)) {
-	    updateEditorPrice(18, 20, 22, 23, 24, price - 10 * factor);
-	} else if ("plus".equals(operator)) {
-	    updateEditorPrice(18, 20, 22, 23, 24, price + 10 * factor);
-	}
-    }
-
-    private void handlePlusMinusTenSellPrice(int factor, String operator, double price) {
-	if (price >= 10 && "minus".equals(operator)) {
-	    updateEditorPrice(9, 11, 13, 14, 15, price - 10 * factor);
-	} else if ("plus".equals(operator)) {
-	    updateEditorPrice(9, 11, 13, 14, 15, price + 10 * factor);
-	}
-    }
-
-    private void handlePlusMinusTenAmount(String operator, ItemStack editorItemStack) {
-	if (editorItemStack != null && "plus".equals(operator) && (editorItemStack.getAmount() + 10 <= 64)) {
-	    editorItemStack.setAmount(editorItemStack.getAmount() + 10);
-	} else if (editorItemStack != null && "plus".equals(operator) && (editorItemStack.getAmount() + 10 > 64)) {
-	    editorItemStack.setAmount(64);
-	} else if (editorItemStack != null && editorItemStack.getAmount() > 10) {
-	    editorItemStack.setAmount(editorItemStack.getAmount() - 10);
-	}
-    }
-
-    private void handlePlusMinusOne(int slot, int factor, String operator, double price, ItemStack editorItemStack) {
-	switch (slot) {
-	case 5:
-	    handlePlusMinusOneAmount(operator, editorItemStack);
-	    break;
-	case 14:
-	    handlePlusMinusOneSellPrice(factor, operator, price);
-	    break;
-	case 23:
-	    handlePlusMinusOneBuyPrice(factor, operator, price);
-	    break;
-	default:
-	    break;
-	}
-    }
-
-    private void handlePlusMinusOneBuyPrice(int factor, String operator, double price) {
-	if (price >= 1 && "minus".equals(operator)) {
-	    updateEditorPrice(18, 20, 22, 23, 24, price - 1 * factor);
-	} else if ("plus".equals(operator)) {
-	    updateEditorPrice(18, 20, 22, 23, 24, price + 1 * factor);
-	}
-    }
-
-    private void handlePlusMinusOneSellPrice(int factor, String operator, double price) {
-	if (price >= 1 && "minus".equals(operator)) {
-	    updateEditorPrice(9, 11, 13, 14, 15, price - 1 * factor);
-	} else if ("plus".equals(operator)) {
-	    updateEditorPrice(9, 11, 13, 14, 15, price + 1 * factor);
-	}
-    }
-
-    private void handlePlusMinusOneAmount(String operator, ItemStack editorItemStack) {
-	if (editorItemStack != null && "plus".equals(operator) && (editorItemStack.getAmount() + 1 <= 64)) {
-	    editorItemStack.setAmount(editorItemStack.getAmount() + 1);
-	} else if (editorItemStack != null && "plus".equals(operator) && (editorItemStack.getAmount() + 1 > 64)) {
-	    editorItemStack.setAmount(64);
-	} else if (editorItemStack != null && editorItemStack.getAmount() > 1) {
-	    editorItemStack.setAmount(editorItemStack.getAmount() - 1);
-	}
-    }
-
-    private String getOperatorForHandleSlotEditor(InventoryClickEvent event, int slot) {
-	String operator = null;
-	switch (slot) {
-	case 5:
-	case 6:
-	case 7:
-	    operator = event.getInventory().getItem(2).getItemMeta().getDisplayName();
-	    break;
-	case 14:
-	case 15:
-	case 16:
-	    operator = event.getInventory().getItem(11).getItemMeta().getDisplayName();
-	    break;
-	case 23:
-	case 24:
-	case 25:
-	    operator = event.getInventory().getItem(20).getItemMeta().getDisplayName();
-	    break;
-	default:
-	    break;
-	}
-	return operator;
-    }
-
-    private double getPriceForHandleSlotEditor(InventoryClickEvent event, int slot) {
-	double price = 0.0;
-	switch (slot) {
-	case 14:
-	case 15:
-	case 16:
-	    price = Double.valueOf(event.getInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
-	    break;
-	case 23:
-	case 24:
-	case 25:
-	    price = Double.valueOf(event.getInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
-	    break;
-	default:
-	    break;
-	}
-	return price;
-    }
-
-    private void switchPlusMinus(int slot, String state) {
-	slot--;
-	if ("plus".equals(state)) {
-	    ItemStack item = getSkull(MINUS, "minus");
-	    slotEditor.setItem(slot, item);
-	} else {
-	    ItemStack item = getSkull(PLUS, "plus");
-	    slotEditor.setItem(slot, item);
-	}
-    }
-
-    private void switchFactor(int slot, String state) {
-	slot--;
-	if ("factor off".equals(state)) {
-	    ItemStack item = getSkull(K_OFF, "factor off");
-	    slotEditor.setItem(slot, item);
-	} else {
-	    ItemStack item = getSkull(K_ON, "factor on");
-	    slotEditor.setItem(slot, item);
-	}
-    }
-
-    private void updateEditorPrice(int a, int b, int c, int d, int e, Double price) {
-	List<String> list = new ArrayList<>();
-	list.add(ChatColor.GOLD + "Price: " + price);
-	ItemMeta meta = slotEditor.getItem(a).getItemMeta();
-	meta.setLore(list);
-	slotEditor.getItem(a).setItemMeta(meta);
-	meta = slotEditor.getItem(b).getItemMeta();
-	meta.setLore(list);
-	slotEditor.getItem(b).setItemMeta(meta);
-	meta = slotEditor.getItem(c).getItemMeta();
-	meta.setLore(list);
-	slotEditor.getItem(c).setItemMeta(meta);
-	meta = slotEditor.getItem(d).getItemMeta();
-	meta.setLore(list);
-	slotEditor.getItem(d).setItemMeta(meta);
-	meta = slotEditor.getItem(e).getItemMeta();
-	meta.setLore(list);
-	slotEditor.getItem(e).setItemMeta(meta);
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// shop
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
-
-    /**
-     * --Shop Method--
-     * <p>
-     * This method reloads all shopitems.
-     * 
-     * @throws ShopSystemException
-     * @throws PlayerException
-     * @throws GeneralEconomyException
-     */
-    public void reload() throws GeneralEconomyException, ShopSystemException, PlayerException {
-	for (String item : itemNames) {
-	    loadShopItem(item);
-	}
     }
 
     @Override
@@ -1391,40 +279,15 @@ public abstract class AbstractShopImpl implements AbstractShop {
     }
 
     @Override
-    public void openInv(Player p) {
-	p.openInventory(inventory);
+    public void openShopInventory(Player player) {
+	player.openInventory(inventory);
     }
 
     @Override
     public void moveShop(Location location) throws TownSystemException, PlayerException {
-	saveLocationToFile(location);
+	this.location = location;
+	saveShopLocation();
 	villager.teleport(location);
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// utils
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
-
-    /**
-     * --Utils Method--
-     * <p>
-     * This method returns true if the slot is empty.
-     * 
-     * @param slot
-     * @return boolean
-     * @throws GeneralEconomyException
-     */
-    protected boolean slotIsEmpty(int slot) throws GeneralEconomyException {
-	if (slot <= inventory.getSize() && slot > 0) {
-	    slot--;
-	    boolean isEmpty = false;
-	    if (inventory.getItem(slot) == null) {
-		isEmpty = true;
-	    }
-	    return isEmpty;
-	} else {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, slot);
-	}
     }
 
     /**
@@ -1475,15 +338,15 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	return newList;
     }
 
-    /**
-     * --Utils Method--
-     * <p>
-     * Returns a custom playerhead
+    protected void setName(String name) {
+	this.name = name;
+    }
+
+    /*
+     * Utility methods
      * 
-     * @param url
-     * @param name
-     * @return
      */
+
     protected ItemStack getSkull(String url, String name) {
 	ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
 	if (url.isEmpty()) {
@@ -1500,25 +363,989 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    profileField.setAccessible(true);
 	    profileField.set(headMeta, profile);
 	} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-	    e.printStackTrace();
+	    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to request skull texture from minecraft.");
+	    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 	}
 	headMeta.setDisplayName(name);
 	head.setItemMeta(headMeta);
 	return head;
     }
 
-    /**
-     * --Utils Method--
-     * <p>
-     * Removes double objects from a list.
-     * 
-     * @param list
-     * @return
-     */
-    protected List<String> removedoubleObjects(List<String> list) {
-	Set<String> set = new LinkedHashSet<String>(list);
-	list = new ArrayList<String>(set);
+    protected boolean isSlotEmpty(int slot) throws GeneralEconomyException {
+	checkForValidSlot(slot);
+	boolean isEmpty = false;
+	if (inventory.getItem(slot) == null) {
+	    isEmpty = true;
+	}
+	return isEmpty;
+    }
+
+    protected void reloadShopItems() throws GeneralEconomyException, ShopSystemException, PlayerException {
+	for (String item : itemNames) {
+	    loadShopItem(item);
+	}
+    }
+
+    protected void changeInventoryNames(String name) {
+	Inventory inventoryNew = Bukkit.createInventory(villager, size, name);
+	inventoryNew.setContents(inventory.getContents());
+	inventory = inventoryNew;
+	Inventory editorNew = Bukkit.createInventory(villager, this.size, name + "-Editor");
+	editorNew.setContents(editor.getContents());
+	editor = editorNew;
+	Inventory slotEditorNew = Bukkit.createInventory(villager, 27, name + "-SlotEditor");
+	slotEditorNew.setContents(slotEditor.getContents());
+	slotEditor = slotEditorNew;
+    }
+
+    private String getItemString(ItemStack itemStack, boolean amountOne) {
+	ItemStack itemStackCpy = new ItemStack(itemStack);
+	if (amountOne) {
+	    itemStackCpy.setAmount(1);
+	}
+	if (itemStack.getType() == Material.SPAWNER) {
+	    return getItemStringForSpawner(itemStack.getItemMeta());
+	} else {
+	    return getItemStringForNonSpawner(itemStackCpy);
+	}
+    }
+
+    private String getItemStringForNonSpawner(ItemStack itemStack) {
+	ItemMeta itemMeta = itemStack.getItemMeta();
+	List<String> loreList = removeShopItemPriceLore(itemMeta.getLore());
+	itemMeta.setLore(loreList);
+	itemStack.setItemMeta(itemMeta);
+	return itemStack.toString();
+    }
+
+    private List<String> removeShopItemPriceLore(List<String> loreList) {
+	Iterator<String> loreIter = loreList.iterator();
+	while (loreIter.hasNext()) {
+	    String lore = loreIter.next();
+	    if (lore.contains(" buy for ") || lore.contains(" sell for ")) {
+		loreIter.remove();
+	    }
+	}
+	return loreList;
+    }
+
+    private String getItemStringForSpawner(ItemMeta meta) {
+	return "SPAWNER_" + meta.getDisplayName();
+    }
+
+    private double getPriceForHandleSlotEditor(InventoryClickEvent event, int slot) {
+	switch (slot) {
+	case 14:
+	case 15:
+	case 16:
+	    return Double.valueOf(event.getInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
+	case 23:
+	case 24:
+	case 25:
+	    return Double.valueOf(event.getInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
+	default:
+	    return 0.0;
+	}
+    }
+
+    private String getOperatorForHandleSlotEditor(InventoryClickEvent event, int slot) {
+	switch (slot) {
+	case 5:
+	case 6:
+	case 7:
+	    return event.getInventory().getItem(2).getItemMeta().getDisplayName();
+	case 14:
+	case 15:
+	case 16:
+	    return event.getInventory().getItem(11).getItemMeta().getDisplayName();
+	case 23:
+	case 24:
+	case 25:
+	    return event.getInventory().getItem(20).getItemMeta().getDisplayName();
+	default:
+	    return null;
+	}
+    }
+
+    private void addShopItemToInv(ItemStack itemStack, int amount, int slot, double sellPrice, double buyPrice) {
+	ItemMeta meta = itemStack.getItemMeta();
+	List<String> loreList = createItemLoreList(meta, amount, sellPrice, buyPrice);
+	meta.setLore(loreList);
+	itemStack.setItemMeta(meta);
+	itemStack.setAmount(amount);
+	inventory.setItem(slot, itemStack);
+    }
+
+    private List<String> createItemLoreList(ItemMeta meta, int amount, double sellPrice, double buyPrice) {
+	if ("Info".equals(meta.getDisplayName()) || "Stock".equals(meta.getDisplayName())) {
+	    return createDefaultItemLoreList(meta);
+	} else {
+	    return createShopItemLoreList(meta, amount, sellPrice, buyPrice);
+	}
+    }
+
+    private List<String> createShopItemLoreList(ItemMeta meta, int amount, double sellPrice, double buyPrice) {
+	List<String> list = new ArrayList<>();
+	if (meta.getLore() != null) {
+	    list.addAll(meta.getLore());
+	}
+	if (sellPrice == 0.0) {
+	    list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + " "
+		    + ConfigController.getCurrencyText(buyPrice));
+	} else if (buyPrice == 0.0) {
+	    list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + " "
+		    + ConfigController.getCurrencyText(sellPrice));
+	} else {
+	    list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + " "
+		    + ConfigController.getCurrencyText(buyPrice));
+	    list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + " "
+		    + ConfigController.getCurrencyText(sellPrice));
+	}
 	return list;
     }
 
+    private List<String> createDefaultItemLoreList(ItemMeta meta) {
+	List<String> list = new ArrayList<>();
+	if ("Info".equals(meta.getDisplayName())) {
+	    list.add(ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "sell specified amount");
+	    list.add(ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "sell all");
+	    list.add(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "buy");
+	} else if ("Stock".equals(meta.getDisplayName())) {
+	    list.add(ChatColor.RED + "Only for Shopowner");
+	    list.add(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile");
+	}
+	return list;
+    }
+
+    private void setShopId(String shopId) {
+	this.shopId = shopId;
+    }
+
+    /*
+     * Handle editor methods
+     * 
+     */
+
+    /*
+     * Handle slot editor methods
+     * 
+     */
+
+    @Override
+    public void handleSlotEditor(InventoryClickEvent event) {
+	if (event.getCurrentItem().getItemMeta() != null) {
+	    Player player = (Player) event.getWhoClicked();
+	    ItemStack originStack = new ItemStack(inventory.getItem(selectedEditorSlot - 1));
+	    int slot = event.getSlot();
+	    int factor = 1;
+	    if (event.getInventory().getItem(12).getItemMeta().getDisplayName().equals("factor on")) {
+		factor = 1000;
+	    }
+	    String operator = getOperatorForHandleSlotEditor(event, slot);
+	    double price = getPriceForHandleSlotEditor(event, slot);
+	    ItemStack editorItemStack = slotEditor.getItem(0);
+	    String command = event.getCurrentItem().getItemMeta().getDisplayName();
+	    try {
+		handleSlotEditorCommand(event, player, originStack, slot, factor, operator, price, editorItemStack,
+			command);
+	    } catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
+		player.sendMessage(e.getMessage());
+	    }
+	}
+    }
+
+    private void handleSlotEditorCommand(InventoryClickEvent event, Player player, ItemStack originStack, int slot,
+	    int factor, String operator, double price, ItemStack editorItemStack, String command)
+	    throws ShopSystemException, PlayerException, GeneralEconomyException {
+	command = ChatColor.stripColor(command);
+	switch (command) {
+	case "minus":
+	case "plus":
+	    handleSwitchPlusMinus(slot, command);
+	    break;
+	case "factor off":
+	case "factor on":
+	    handleSwitchFactor(slot, command);
+	    break;
+	case "one":
+	    handlePlusMinusOne(slot, factor, operator, price, editorItemStack);
+	    break;
+	case "ten":
+	    handlePlusMinusTen(slot, factor, operator, price, editorItemStack);
+	    break;
+	case "twenty":
+	    handlePlusMinusTwenty(slot, factor, operator, price, editorItemStack);
+	    break;
+	case "save changes":
+	    handleSaveChanges(event.getInventory(), player, originStack);
+	    break;
+	case "remove item":
+	    handleRemoveItem(player, originStack);
+	    break;
+	default:
+	    if (!"buyprice".equals(command) && !"sellprice".equals(command)) {
+		handleAddItemToSlotEditor(event.getCurrentItem());
+	    }
+	    break;
+	}
+    }
+
+    private void handleAddItemToSlotEditor(ItemStack clickedItem) {
+	ItemStack editorItemStack2 = new ItemStack(clickedItem);
+	editorItemStack2.setAmount(1);
+	slotEditor.setItem(0, editorItemStack2);
+    }
+
+    private void handleSaveChanges(Inventory inv, Player player, ItemStack originStack)
+	    throws ShopSystemException, PlayerException, GeneralEconomyException {
+	double buyPrice = Double.valueOf(inv.getItem(9).getItemMeta().getLore().get(0).substring(9));
+	double sellPrice = Double.valueOf(inv.getItem(18).getItemMeta().getLore().get(0).substring(9));
+	checkForPricesGreaterThenZero(sellPrice, buyPrice);
+	ItemStack itemStack = inv.getItem(0);
+	// make a copy of the edited/created item
+	ItemStack newItemStackCopy = new ItemStack(itemStack);
+	String originalStackString = getItemString(originStack, false);
+	newItemStackCopy.setAmount(originStack.getAmount());
+	// if the item changed
+	if (!newItemStackCopy.toString().equals(originalStackString)) {
+	    newItemStackCopy.setAmount(1);
+	    checkForItemDoesNotExist(newItemStackCopy.toString());
+	    // the old item in the selected slot gets deleted
+	    handleRemoveItem(player, originStack);
+	    addShopItem(selectedEditorSlot - 1, sellPrice, buyPrice, itemStack);
+	    player.sendMessage(MessageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
+	}
+	// if the item doesn't changed
+	else {
+	    player.sendMessage(editShopItem(selectedEditorSlot, String.valueOf(itemStack.getAmount()),
+		    String.valueOf(sellPrice), String.valueOf(buyPrice)));
+	}
+    }
+
+    private void handleRemoveItem(Player player, ItemStack originStack)
+	    throws ShopSystemException, GeneralEconomyException {
+	removeShopItem(selectedEditorSlot - 1);
+	player.sendMessage(MessageWrapper.getString("shop_removeItem", originStack.getType().toString().toLowerCase()));
+    }
+
+    private void handleSwitchFactor(int slot, String state) {
+	if ("factor off".equals(state)) {
+	    ItemStack item = getSkull(K_ON, "factor on");
+	    slotEditor.setItem(slot, item);
+	} else {
+	    ItemStack item = getSkull(K_OFF, "factor off");
+	    slotEditor.setItem(slot, item);
+	}
+    }
+
+    private void handleSwitchPlusMinus(int slot, String state) {
+	if ("plus".equals(state)) {
+	    ItemStack item = getSkull(MINUS, "minus");
+	    slotEditor.setItem(slot, item);
+	} else {
+	    ItemStack item = getSkull(PLUS, "plus");
+	    slotEditor.setItem(slot, item);
+	}
+    }
+
+    private void handlePlusMinusOne(int slot, int factor, String operator, double price, ItemStack editorItemStack) {
+	switch (slot) {
+	case 4:
+	    handlePlusMinusAmount(1, operator, editorItemStack);
+	    break;
+	case 13:
+	    handlePlusMinusSellPrice(1, factor, operator, price);
+	    break;
+	case 22:
+	    handlePlusMinusBuyPrice(1, factor, operator, price);
+	    break;
+	default:
+	    break;
+	}
+    }
+
+    private void handlePlusMinusTen(int slot, int factor, String operator, double price, ItemStack editorItemStack) {
+	switch (slot) {
+	case 5:
+	    handlePlusMinusAmount(10, operator, editorItemStack);
+	    break;
+	case 14:
+	    handlePlusMinusSellPrice(10, factor, operator, price);
+	    break;
+	case 23:
+	    handlePlusMinusBuyPrice(10, factor, operator, price);
+	    break;
+	default:
+	    break;
+	}
+    }
+
+    private void handlePlusMinusTwenty(int slot, int factor, String operator, double price, ItemStack editorItemStack) {
+	switch (slot) {
+	case 6:
+	    handlePlusMinusAmount(20, operator, editorItemStack);
+	    break;
+	case 15:
+	    handlePlusMinusSellPrice(20, factor, operator, price);
+	    break;
+	case 24:
+	    handlePlusMinusBuyPrice(20, factor, operator, price);
+	    break;
+	default:
+	    break;
+	}
+    }
+
+    private void handlePlusMinusAmount(int value, String operator, ItemStack editorItemStack) {
+	if (editorItemStack != null) {
+	    if ("plus".equals(operator)) {
+		if ((editorItemStack.getAmount() + value <= 64)) {
+		    editorItemStack.setAmount(editorItemStack.getAmount() + value);
+		} else {
+		    editorItemStack.setAmount(64);
+		}
+	    } else {
+		if (editorItemStack.getAmount() > value) {
+		    editorItemStack.setAmount(editorItemStack.getAmount() - value);
+		}
+	    }
+	}
+    }
+
+    private void handlePlusMinusSellPrice(int value, int factor, String operator, double price) {
+	if (price >= value && "minus".equals(operator)) {
+	    updateEditorPrice(9, 11, 13, 14, 15, price - value * factor);
+	} else if ("plus".equals(operator)) {
+	    updateEditorPrice(9, 11, 13, 14, 15, price + value * factor);
+	}
+    }
+
+    private void handlePlusMinusBuyPrice(int value, int factor, String operator, double price) {
+	if (price >= value && "minus".equals(operator)) {
+	    updateEditorPrice(18, 20, 22, 23, 24, price - value * factor);
+	} else if ("plus".equals(operator)) {
+	    updateEditorPrice(18, 20, 22, 23, 24, price + value * factor);
+	}
+    }
+
+    /*
+     * Slot editor utility methods
+     * 
+     */
+
+    private void updateSlotEditorWithShopItemInformations(int slot)
+	    throws ShopSystemException, GeneralEconomyException {
+	double buyPrice = 0;
+	double sellPrice = 0;
+	if (!isSlotEmpty(slot)) {
+	    buyPrice = getItemBuyPrice(slot);
+	    sellPrice = getItemSellPrice(slot);
+	}
+	List<String> listBuy = new ArrayList<String>();
+	List<String> listSell = new ArrayList<String>();
+	listBuy.add(ChatColor.GOLD + "Price: " + buyPrice);
+	listSell.add(ChatColor.GOLD + "Price: " + sellPrice);
+	setupPlusItemInSlotEditor(listBuy, listSell);
+	setupOneNumberItemsInSlotEditor(listBuy, listSell);
+	setupTenNumberItemsInSlotEditor(listBuy, listSell);
+	setupTwentyNumberItemsInSlotEditor(listBuy, listSell);
+	addSkullToSlotEditor("buyprice", 9, listBuy, BUY);
+	addSkullToSlotEditor("sellprice", 18, listSell, SELL);
+	setupSlotItemInSlotEditor(slot);
+    }
+
+    private void setupSlotItemInSlotEditor(int slot) throws GeneralEconomyException {
+	if (isSlotEmpty(slot)) {
+	    ItemStack item = new ItemStack(Material.BARRIER);
+	    ItemMeta meta = item.getItemMeta();
+	    meta.setDisplayName(ChatColor.GREEN + "select item");
+	    item.setItemMeta(meta);
+	    slotEditor.setItem(0, item);
+	} else {
+	    ItemStack item = new ItemStack(inventory.getItem(slot));
+	    ItemMeta meta = item.getItemMeta();
+	    List<String> lore = removeShopItemPriceLore(meta.getLore());
+	    meta.setLore(lore);
+	    item.setItemMeta(meta);
+	    slotEditor.setItem(0, item);
+	}
+    }
+
+    private void addSkullToSlotEditor(String displayName, int slot, List<String> loreList, String skullAdress) {
+	ItemStack item = getSkull(skullAdress, displayName);
+	ItemMeta meta = item.getItemMeta();
+	meta.setLore(loreList);
+	item.setItemMeta(meta);
+	slotEditor.setItem(slot, item);
+    }
+
+    private void setupPlusItemInSlotEditor(List<String> listBuy, List<String> listSell) {
+	ItemStack item = getSkull(PLUS, "plus");
+	slotEditor.setItem(2, item);
+	ItemMeta meta = item.getItemMeta();
+	meta.setLore(listBuy);
+	item.setItemMeta(meta);
+	slotEditor.setItem(11, item);
+	meta = item.getItemMeta();
+	meta.setLore(listSell);
+	item.setItemMeta(meta);
+	slotEditor.setItem(20, item);
+    }
+
+    private void setupTwentyNumberItemsInSlotEditor(List<String> listBuy, List<String> listSell) {
+	ItemStack item = getSkull(TWENTY, "twenty");
+	slotEditor.setItem(6, item);
+	ItemMeta meta = item.getItemMeta();
+	meta.setLore(listBuy);
+	item.setItemMeta(meta);
+	slotEditor.setItem(15, item);
+	meta = item.getItemMeta();
+	meta.setLore(listSell);
+	item.setItemMeta(meta);
+	slotEditor.setItem(24, item);
+    }
+
+    private void setupTenNumberItemsInSlotEditor(List<String> listBuy, List<String> listSell) {
+	ItemStack item = getSkull(TEN, "ten");
+	slotEditor.setItem(5, item);
+	ItemMeta meta = item.getItemMeta();
+	meta.setLore(listBuy);
+	item.setItemMeta(meta);
+	slotEditor.setItem(14, item);
+	meta = item.getItemMeta();
+	meta.setLore(listSell);
+	item.setItemMeta(meta);
+	slotEditor.setItem(23, item);
+    }
+
+    private void setupOneNumberItemsInSlotEditor(List<String> listBuy, List<String> listSell) {
+	ItemStack item = getSkull(ONE, "one");
+	slotEditor.setItem(4, item);
+	ItemMeta meta = item.getItemMeta();
+	meta.setLore(listBuy);
+	item.setItemMeta(meta);
+	slotEditor.setItem(13, item);
+	meta = item.getItemMeta();
+	meta.setLore(listSell);
+	item.setItemMeta(meta);
+	slotEditor.setItem(22, item);
+    }
+
+    private void updateEditorPrice(int a, int b, int c, int d, int e, Double price) {
+	List<String> list = new ArrayList<>();
+	list.add(ChatColor.GOLD + "Price: " + price);
+	ItemMeta meta = slotEditor.getItem(a).getItemMeta();
+	meta.setLore(list);
+	slotEditor.getItem(a).setItemMeta(meta);
+	meta = slotEditor.getItem(b).getItemMeta();
+	meta.setLore(list);
+	slotEditor.getItem(b).setItemMeta(meta);
+	meta = slotEditor.getItem(c).getItemMeta();
+	meta.setLore(list);
+	slotEditor.getItem(c).setItemMeta(meta);
+	meta = slotEditor.getItem(d).getItemMeta();
+	meta.setLore(list);
+	slotEditor.getItem(d).setItemMeta(meta);
+	meta = slotEditor.getItem(e).getItemMeta();
+	meta.setLore(list);
+	slotEditor.getItem(e).setItemMeta(meta);
+    }
+
+    /*
+     * Save methods
+     * 
+     */
+
+    protected void saveShopName() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	config.set("ShopName", name);
+	save(config);
+    }
+
+    protected void save(YamlConfiguration config) {
+	try {
+	    config.save(file);
+	} catch (IOException e) {
+	    Bukkit.getLogger().warning("[Ultimate_Economy] Error an save config to file");
+	    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+	}
+    }
+
+    private void saveShopItem(ItemStack stack, int slot, double sellPrice, double buyPrice, boolean delete) {
+	ItemStack itemStackCopy = new ItemStack(stack);
+	int amount = itemStackCopy.getAmount();
+	itemStackCopy.setAmount(1);
+	String itemString = itemStackCopy.toString();
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	if (delete) {
+	    config.set("ShopItems." + itemString, null);
+	    save(config);
+	} else {
+	    // create a new ItemStack to avoid changes to the original stack
+	    config.set("ShopItems." + itemString + ".Name", itemStackCopy);
+	    config.set("ShopItems." + itemString + ".Slot", slot);
+	    config.set("ShopItems." + itemString + ".newSaveMethod", "true");
+	    save(config);
+	    saveShopItemSellPrice(itemString, sellPrice);
+	    saveShopItemBuyPrice(itemString, sellPrice);
+	    saveShopItemAmount(itemString, amount);
+	}
+    }
+
+    private void saveShopItemSellPrice(String itemString, double sellPrice) {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	config.set("ShopItems." + itemString + ".sellPrice", sellPrice);
+	save(config);
+    }
+
+    private void saveShopItemBuyPrice(String itemString, double buyPrice) {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	config.set("ShopItems." + itemString + ".buyPrice", buyPrice);
+
+    }
+
+    private void saveShopItemAmount(String itemString, int amount) {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	config.set("ShopItems." + itemString + ".Amount", amount);
+	save(config);
+    }
+
+    private void saveShopSize() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	config.set("ShopSize", size);
+	save(config);
+    }
+
+    private void saveShopLocation() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	config.set("ShopLocation.x", location.getX());
+	config.set("ShopLocation.y", location.getY());
+	config.set("ShopLocation.z", location.getZ());
+	config.set("ShopLocation.World", location.getWorld().getName());
+	save(config);
+    }
+
+    private void saveItemNames() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	config.set("ShopItemList", itemNames);
+	save(config);
+    }
+
+    private void saveProfession() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	config.set("Profession", villager.getProfession());
+	save(config);
+    }
+
+    private void changeSavefileName(File dataFolder, String newName) throws ShopSystemException {
+	File newFile = new File(dataFolder, newName + ".yml");
+	checkForRenamingSavefileIsPossible(newFile);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	file.delete();
+	file = newFile;
+	save(config);
+    }
+
+    /*
+     * Setup methods
+     * 
+     */
+
+    private void setupNewShop(String name, String shopId, Location spawnLocation, int size) {
+	saveItemNames();
+	setShopId(shopId);
+	setupShopLocation(spawnLocation);
+	setupShopName(name);
+	setupShopSize(size);
+	setupShopVillager();
+	setupShopInventory();
+	setupSlotEditor();
+	setupEditor();
+    }
+
+    private void setupShopLocation(Location location) {
+	this.location = location;
+	saveShopLocation();
+    }
+
+    private void setupShopName(String name) {
+	setName(name);
+	saveShopName();
+    }
+
+    private void setupShopSize(int size) {
+	this.size = size;
+	saveShopSize();
+    }
+
+    private void setupShopVillager() {
+	location.getChunk().load();
+	Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10, 10, 10);
+	for (Entity entity : entitys) {
+	    if (entity.getName().contains(name)) {
+		entity.remove();
+	    }
+	}
+	villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
+	villager.setCustomName(name);
+	villager.setCustomNameVisible(true);
+	villager.setSilent(true);
+	villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
+	villager.setVillagerLevel(2);
+	villager.setMetadata("ue-id", new FixedMetadataValue(UltimateEconomy.getInstance, shopId));
+	villager.setCollidable(false);
+	villager.setInvulnerable(true);
+	villager.setProfession(Profession.NITWIT);
+    }
+
+    private void setupEditor() {
+	editor = Bukkit.createInventory(villager, size, name + "-Editor");
+    }
+
+    private void setupSlotEditor() {
+	slotEditor = Bukkit.createInventory(villager, 27, getName() + "-SlotEditor");
+	setupFactorItem();
+	setupSaveItem();
+	setupExitItem();
+	setupRemoveItem();
+    }
+
+    private void setupFactorItem() {
+	ItemStack item = getSkull(K_OFF, "factor off");
+	slotEditor.setItem(12, item);
+	slotEditor.setItem(21, item);
+    }
+
+    private void setupRemoveItem() {
+	ItemStack item = new ItemStack(Material.BARRIER);
+	ItemMeta meta = item.getItemMeta();
+	meta.setDisplayName(ChatColor.RED + "remove item");
+	item.setItemMeta(meta);
+	slotEditor.setItem(26, item);
+    }
+
+    private void setupExitItem() {
+	ItemStack item = new ItemStack(Material.RED_WOOL);
+	ItemMeta meta = item.getItemMeta();
+	meta.setDisplayName(ChatColor.RED + "exit without save");
+	item.setItemMeta(meta);
+	slotEditor.setItem(7, item);
+    }
+
+    private void setupSaveItem() {
+	ItemStack item = new ItemStack(Material.GREEN_WOOL);
+	ItemMeta meta = item.getItemMeta();
+	meta.setDisplayName(ChatColor.YELLOW + "save changes");
+	item.setItemMeta(meta);
+	slotEditor.setItem(8, item);
+    }
+
+    private void setupShopInventory() {
+	inventory = Bukkit.createInventory(villager, size, name);
+	setupShopInvDefaultItems();
+    }
+
+    private void setupShopInvDefaultItems() {
+	int slot = size - 1;
+	ItemStack anvil = new ItemStack(Material.ANVIL);
+	ItemMeta meta = anvil.getItemMeta();
+	meta.setDisplayName("Info");
+	anvil.setItemMeta(meta);
+	addShopItemToInv(anvil, 1, slot, 0.0, 0.0);
+	itemNames.add("ANVIL_0");
+    }
+
+    /*
+     * Loading methods
+     * 
+     */
+
+    private void loadExistingShop(String shopId) throws TownSystemException {
+	setShopId(shopId);
+	loadShopName();
+	loadShopSize();
+	loadShopItems();
+	loadShopLocation();
+	setupShopVillager();
+	loadShopVillagerProfession();
+    }
+
+    private void loadShopItems() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	itemNames = config.getStringList("ShopItemList");
+	for (String item : itemNames) {
+	    try {
+		loadShopItem(item);
+	    } catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
+		Bukkit.getLogger().warning("[Ultimate_Economy] " + "Failed to load shop item");
+		Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
+	    }
+	}
+    }
+
+    private void loadShopVillagerProfession() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	villager.setProfession(Profession.valueOf(config.getString("Profession")));
+    }
+
+    private void loadShopLocation() throws TownSystemException {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	World world = Bukkit.getWorld(config.getString("ShopLocation.World"));
+	checkForWorldExists(world);
+	location = new Location(world, config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
+		config.getDouble("ShopLocation.z"));
+    }
+
+    private void loadShopSize() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	size = config.getInt("ShopSize");
+    }
+
+    private void loadShopName() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	setName(config.getString("ShopName"));
+    }
+
+    private void loadShopItem(String itemString) throws ShopSystemException, PlayerException, GeneralEconomyException {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	if (!"ANVIL_0".equals(itemString) && !"CRAFTING_TABLE_0".equals(itemString)) {
+	    if (config.getString("ShopItems." + itemString + ".newSaveMethod") != null) {
+		if (!itemString.contains("SPAWNER_")) {
+		    loadItemNew(itemString);
+		} else {
+		    loadSpawner(itemString);
+		}
+	    } else {
+		// old loading, converts to new system
+		loadItemOld(itemString);
+	    }
+	}
+    }
+
+    private void loadItemNew(String itemString) {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	ItemStack itemStack = config.getItemStack("ShopItems." + itemString + ".Name");
+	addShopItemToInv(itemStack, config.getInt("ShopItems." + itemString + ".Amount"),
+		config.getInt("ShopItems." + itemString + ".Slot"),
+		config.getDouble("ShopItems." + itemString + ".sellPrice"),
+		config.getDouble("ShopItems." + itemString + ".buyPrice"));
+    }
+
+    private void loadSpawner(String itemString) {
+	String entityname = itemString.substring(8);
+	ItemStack itemStack = new ItemStack(Material.SPAWNER);
+	ItemMeta meta = itemStack.getItemMeta();
+	meta.setDisplayName(entityname);
+	itemStack.setItemMeta(meta);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	addShopItemToInv(itemStack, config.getInt("ShopItems." + itemString + ".Amount"),
+		config.getInt("ShopItems." + itemString + ".Slot"),
+		config.getDouble("ShopItems." + itemString + ".sellPrice"),
+		config.getDouble("ShopItems." + itemString + ".buyPrice"));
+    }
+
+    /*
+     * Validation check methods
+     * 
+     */
+
+    private void checkForOnePriceGreaterThenZero(String sellPrice, String buyPrice) throws ShopSystemException {
+	if (!"none".equals(sellPrice) && !"none".equals(buyPrice) && Double.valueOf(sellPrice) == 0
+		&& Double.valueOf(buyPrice) == 0) {
+	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_PRICES);
+	}
+    }
+
+    private void checkForPricesGreaterThenZero(double sellPrice, double buyPrice) throws ShopSystemException {
+	if (buyPrice == 0 && sellPrice == 0) {
+	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_PRICES);
+	}
+    }
+
+    private void checkForSlotIsNotEmpty(int slot) throws GeneralEconomyException, ShopSystemException {
+	if (isSlotEmpty(slot)) {
+	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVENTORY_SLOT_EMPTY);
+	}
+    }
+
+    private void checkForSlotIsEmpty(int slot) throws PlayerException, GeneralEconomyException {
+	if (!isSlotEmpty(slot)) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.INVENTORY_SLOT_OCCUPIED);
+	}
+    }
+
+    private void checkForValidAmount(String amount) throws GeneralEconomyException {
+	if (!"none".equals(amount) && (Integer.valueOf(amount) <= 0 || Integer.valueOf(amount) > 64)) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, amount);
+	}
+    }
+
+    private void checkForValidBuyPrice(String buyPrice) throws GeneralEconomyException {
+	if (!"none".equals(buyPrice) && Double.valueOf(buyPrice) < 0) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, buyPrice);
+	}
+    }
+
+    private void checkForValidSellPrice(String sellPrice) throws GeneralEconomyException {
+	checkForValidBuyPrice(sellPrice);
+    }
+
+    private void checkForItemExists(String itemName) throws ShopSystemException {
+	if (!itemNames.contains(itemName)) {
+	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
+	}
+    }
+
+    private void checkForValidSize(int newSize) throws GeneralEconomyException {
+	if (newSize % 9 != 0) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
+	}
+    }
+
+    private void checkForValidSlot(int slot) throws GeneralEconomyException {
+	if (slot > (size - 1)) {
+	    // +1 for player readable style
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, slot + 1);
+	}
+    }
+
+    private void checkForResizePossible(int newSize) throws ShopSystemException {
+	boolean possible = true;
+	int diff = size - newSize;
+	// number of reserved slots
+	int temp = 1;
+	if (inventory.getSize() > newSize) {
+	    for (int i = 1; i <= diff; i++) {
+		ItemStack stack = inventory.getItem(size - i - temp);
+		if (stack != null) {
+		    possible = false;
+		}
+	    }
+	}
+	if (!possible) {
+	    throw ShopSystemException.getException(ShopExceptionMessageEnum.RESIZING_FAILED);
+	}
+    }
+
+    private void checkForWorldExists(World world) throws TownSystemException {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	if (world == null) {
+	    throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST,
+		    config.getString("ShopLocation.World"));
+	}
+    }
+
+    private void checkForItemDoesNotExist(String itemString) throws ShopSystemException {
+	if (itemNames.contains(itemString)) {
+	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_ALREADY_EXISTS);
+	}
+    }
+
+    private void checkForItemCanBeDeleted(int slot) throws ShopSystemException {
+	if ((slot + 1) == size) {
+	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_CANNOT_BE_DELETED);
+	}
+    }
+
+    private void checkForRenamingSavefileIsPossible(File newFile) throws ShopSystemException {
+	if (newFile.exists()) {
+	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ERROR_ON_RENAMING);
+	}
+    }
+
+    /*
+     * Deprecated
+     * 
+     */
+
+    @Deprecated
+    private void loadItemOld(String itemString) throws ShopSystemException, PlayerException, GeneralEconomyException {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	if (config.getString("ShopItems." + itemString + ".Name") != null) {
+	    String string = config.getString("ShopItems." + itemString + ".Name");
+	    List<String> lore = config.getStringList("ShopItems." + itemString + ".lore");
+	    int damage = config.getInt("ShopItems." + itemString + ".damage");
+	    String displayName = "default";
+	    if (string.contains("|")) {
+		displayName = string.substring(0, string.indexOf("|"));
+		string = string.substring(string.indexOf("|") + 1);
+	    }
+	    ItemStack itemStack = null;
+	    if (string.contains("#Enchanted_")) {
+		itemStack = getEnchantedItemStackOld(itemString, string);
+	    } else if (string.contains("potion:")) {
+		itemStack = getPotionStackOld(itemString, string);
+	    } else if (!string.contains("SPAWNER")) {
+		itemStack = new ItemStack(Material.getMaterial(string),
+			config.getInt("ShopItems." + itemString + ".Amount"));
+	    }
+	    if (itemStack != null) {
+		ItemMeta meta2 = itemStack.getItemMeta();
+		if (lore != null && !lore.isEmpty()) {
+		    meta2.setLore(lore);
+		}
+		if (!"default".equals(displayName)) {
+		    meta2.setDisplayName(displayName);
+		}
+		if (damage > 0) {
+		    Damageable damageMeta = (Damageable) meta2;
+		    damageMeta.setDamage(damage);
+		    meta2 = (ItemMeta) damageMeta;
+		}
+		itemStack.setItemMeta(meta2);
+		// convert to new save method
+		itemStack.setAmount(config.getInt("ShopItems." + itemString + ".Amount"));
+		double sell = config.getDouble("ShopItems." + itemString + ".sellPrice");
+		double buy = config.getDouble("ShopItems." + itemString + ".buyPrice");
+		int slot = config.getInt("ShopItems." + itemString + ".Slot");
+		saveShopItem(itemStack, slot, 0, 0, true);
+		// add new item
+		addShopItem(slot, sell, buy, itemStack);
+	    }
+	}
+    }
+
+    @Deprecated
+    private void loadExistingShopOld() throws TownSystemException {
+	file = new File(UltimateEconomy.getInstance.getDataFolder(), name + ".yml");
+	try {
+	    changeSavefileName(UltimateEconomy.getInstance.getDataFolder(), shopId);
+	    loadExistingShop(shopId);
+	} catch (ShopSystemException e) {
+	    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to change savefile name to new save system");
+	    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+	}
+    }
+
+    @Deprecated
+    private ItemStack getEnchantedItemStackOld(String itemString, String string) {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	ItemStack itemStack = new ItemStack(Material.valueOf(string.substring(0, string.indexOf("#")).toUpperCase()),
+		config.getInt("ShopItems." + itemString + ".Amount"));
+	addEnchantments(itemStack,
+		new ArrayList<String>(config.getStringList("ShopItems." + itemString + ".enchantments")));
+	return itemStack;
+    }
+
+    @Deprecated
+    private ItemStack getPotionStackOld(String itemString, String string) {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	String name = config.getString("ShopItems." + itemString + ".Name");
+	ItemStack itemStack = new ItemStack(Material.valueOf(string.substring(0, string.indexOf(":")).toUpperCase()),
+		config.getInt("ShopItems." + itemString + ".Amount"));
+	PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
+	boolean extended = false;
+	boolean upgraded = false;
+	String property = name.substring(name.indexOf("#") + 1);
+	if ("extended".equalsIgnoreCase(property)) {
+	    extended = true;
+	} else if ("upgraded".equalsIgnoreCase(property)) {
+	    upgraded = true;
+	}
+	meta.setBasePotionData(new PotionData(
+		PotionType.valueOf(name.substring(name.indexOf(":") + 1, name.indexOf("#")).toUpperCase()), extended,
+		upgraded));
+	itemStack.setItemMeta(meta);
+	return itemStack;
+    }
 }

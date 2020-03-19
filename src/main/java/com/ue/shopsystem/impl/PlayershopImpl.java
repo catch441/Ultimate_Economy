@@ -1,6 +1,5 @@
 package com.ue.shopsystem.impl;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +50,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	super(name, shopId, spawnLocation, size);
 	shopMode = true;
 	// neccecsary for rentshops without a owner
-	if(owner != null) {
+	if (owner != null) {
 	    saveOwnerToFile(owner);
 	    villager.setCustomName(name + "_" + owner.getName());
 	}
@@ -64,13 +63,12 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      * Constructor for loading an existing playershop. No validation, if the shopId
      * is unique. If name != null then use old loading otherwise use new loading.
      * 
-     * @param dataFolder
      * @param name
      * @param shopId
      * @throws TownSystemException
      */
-    public PlayershopImpl(File dataFolder, String name, String shopId) throws TownSystemException {
-	super(dataFolder, name, shopId);
+    public PlayershopImpl(String name, String shopId) throws TownSystemException {
+	super(name, shopId);
 	shopMode = true;
 	try {
 	    // old loading, can be deleted in the future
@@ -168,7 +166,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		config = YamlConfiguration.loadConfiguration(file);
 		saveShopSizeToFile(newSize);
 		inventory = Bukkit.createInventory(null, size, getName());
-		reload();
+		reloadShopItems();
 		setupShopItems();
 	    } else {
 		throw ShopSystemException.getException(ShopExceptionMessageEnum.RESIZING_FAILED);
@@ -185,17 +183,11 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      */
     @Override
     public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
-	if (PlayershopController.getPlayerShopUniqueNameList().contains(name + owner.getName())
-		|| PlayershopController.getPlayerShopUniqueNameList().contains(name)) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
-		    name + owner.getName());
-	} else if (name.contains("_")) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
-	} else {
-	    saveShopNameToFile(name);
-	    villager.setCustomName(name + "_" + owner.getName());
-	    changeInventoryNames(name);
-	}
+	checkForShopNameIsFree(name);
+	checkForValidShopName(name);
+	saveShopNameToFile(name);
+	villager.setCustomName(name + "_" + owner.getName());
+	changeInventoryNames(name);
     }
 
     /**
@@ -212,12 +204,11 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	    }
 	    if (townworld.isChunkFree(location.getChunk())) {
 		throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
-	    } else {
-		Town town = townworld.getTownByChunk(location.getChunk());
-		if (!town.hasBuildPermissions(owner,
-			town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
-		    throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
-		}
+	    }
+	    Town town = townworld.getTownByChunk(location.getChunk());
+	    if (!town.hasBuildPermissions(owner,
+		    town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
+		throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
 	    }
 	}
 	saveLocationToFile(location);
@@ -233,7 +224,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	int value = 2;
 	for (int i = 0; i < (size - value); i++) {
 	    try {
-		if (slotIsEmpty(i + 1)) {
+		if (isSlotEmpty(i + 1)) {
 		    editor.setItem(i, getSkull(SLOTEMPTY, "Slot " + (i + 1)));
 		} else {
 		    editor.setItem(i, getSkull(SLOTFILLED, "Slot " + (i + 1)));
@@ -284,7 +275,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     protected void saveOwnerToFile(EconomyPlayer owner) {
 	this.owner = owner;
 	config = YamlConfiguration.loadConfiguration(file);
-	if(owner == null) {
+	if (owner == null) {
 	    config.set("Owner", "");
 	} else {
 	    config.set("Owner", owner.getName());
@@ -325,13 +316,9 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
     @Override
     public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException {
-	// validation, check if the new owner has already a shop with this name.
-	if (PlayershopController.getPlayerShopUniqueNameList().contains(getName() + "_" + newOwner)) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_CHANGEOWNER_ERROR);
-	} else {
-	    saveOwnerToFile(newOwner);
-	    villager.setCustomName(getName() + "_" + newOwner.getName());
-	}
+	checkForChangeOwnerIsPossible(newOwner);
+	saveOwnerToFile(newOwner);
+	villager.setCustomName(getName() + "_" + newOwner.getName());
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -418,5 +405,35 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	    return true;
 	}
 	return false;
+    }
+    
+    /*
+     * Save methods
+     * 
+     */
+
+    /*
+     * Validation check methods
+     * 
+     */
+
+    private void checkForChangeOwnerIsPossible(EconomyPlayer newOwner) throws ShopSystemException {
+	if (PlayershopController.getPlayerShopUniqueNameList().contains(getName() + "_" + newOwner.getName())) {
+	    throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_CHANGEOWNER_ERROR);
+	}
+    }
+    
+    private void checkForValidShopName(String name) throws ShopSystemException {
+	if (name.contains("_")) {
+	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
+	}
+    }
+    
+    private void checkForShopNameIsFree(String name) throws GeneralEconomyException {
+	if (PlayershopController.getPlayerShopUniqueNameList().contains(name + "_" + owner.getName())
+		|| PlayershopController.getPlayerShopUniqueNameList().contains(name)) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
+		    name + owner.getName());
+	}
     }
 }

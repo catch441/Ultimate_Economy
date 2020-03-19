@@ -326,7 +326,7 @@ public class UltimateEconomy extends JavaPlugin {
 	    throws JobSystemException, GeneralEconomyException {
 	if (args.length == 1) {
 	    if (ecoPlayer.hasJob(JobController.getJobByName(args[0]))) {
-		AdminshopController.getAdminShopByName(args[0]).openInv(player);
+		AdminshopController.getAdminShopByName(args[0]).openShopInventory(player);
 	    } else {
 		player.sendMessage(MessageWrapper.getErrorString("job_not_joined"));
 	    }

@@ -43,7 +43,7 @@ public enum EconomyVillager {
     ADMINSHOP {
 	@Override
 	void performOpenInventory(Entity entity, String id, Player player) throws GeneralEconomyException {
-	    AdminshopController.getAdminShopById(id).openInv(player);
+	    AdminshopController.getAdminShopById(id).openShopInventory(player);
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public enum EconomyVillager {
     PLAYERSHOP {
 	@Override
 	void performOpenInventory(Entity entity, String id, Player player) throws GeneralEconomyException {
-	    PlayershopController.getPlayerShopById(id).openInv(player);
+	    PlayershopController.getPlayerShopById(id).openShopInventory(player);
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public enum EconomyVillager {
 	    if (shop.isRentable()) {
 		shop.openRentGUI(player);
 	    } else {
-		shop.openInv(player);
+		shop.openShopInventory(player);
 	    }
 	}
 
@@ -152,7 +152,6 @@ public enum EconomyVillager {
 
     private static void handleShopInvClickEvent(AbstractShop abstractShop, Player player, InventoryClickEvent event) {
 	ItemMeta clickedItemMeta = event.getCurrentItem().getItemMeta();
-	try {
 	    if (event.getView().getTitle().equals(abstractShop.getName() + "-Editor")
 		    && clickedItemMeta.getDisplayName().contains("Slot")) {
 		int slot = Integer.valueOf(clickedItemMeta.getDisplayName().substring(5));
@@ -168,8 +167,6 @@ public enum EconomyVillager {
 	    } else {
 		handleBuySell(abstractShop, event, player);
 	    }
-	} catch (IllegalArgumentException | ShopSystemException | PlayerException | GeneralEconomyException e) {
-	}
     }
 
     private static void handleBuySell(AbstractShop abstractShop, InventoryClickEvent event, Player playe)

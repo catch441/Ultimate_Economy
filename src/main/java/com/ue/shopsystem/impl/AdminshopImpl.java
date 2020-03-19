@@ -1,6 +1,5 @@
 package com.ue.shopsystem.impl;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
@@ -33,43 +32,28 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	super(name, shopId, spawnLocation, size);
 	// set the tye of the villager
 	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.ADMINSHOP));
-	for (String item : itemNames) {
-	    try {
-		loadShopItem(item);
-	    } catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
-		Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
-	    }
-	}
     }
 
     /**
      * Constructor for loading an existing adminShop. No validation, if the shopId
      * is unique. If name != null then use old loading otherwise use new loading
      * 
-     * @param dataFolder
      * @param name
      * @param shopId
      * @throws TownSystemException
      */
-    public AdminshopImpl(File dataFolder, String name, String shopId) throws TownSystemException {
-	super(dataFolder, name, shopId);
+    public AdminshopImpl(String name, String shopId) throws TownSystemException {
+	super(name, shopId);
 	// set the tye of the villager
 	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.ADMINSHOP));
-	ArrayList<String> tempList = new ArrayList<>(itemNames);
-	for (String item : tempList) {
-	    try {
-		loadShopItem(item);
-	    } catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
-		Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
-	    }
-	}
     }
 
     @Override
     public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
 	checkForShopNameDoesNotExist(name);
 	checkForValidShopName(name);
-	saveShopNameToFile(name);
+	setName(name);
+	saveShopName();
 	changeInventoryNames(name);
 	villager.setCustomName(name);
     }
