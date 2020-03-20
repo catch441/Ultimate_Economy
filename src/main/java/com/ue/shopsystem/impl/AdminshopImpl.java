@@ -1,15 +1,11 @@
 package com.ue.shopsystem.impl;
 
-import java.util.ArrayList;
-
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
-import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
@@ -30,8 +26,8 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
      */
     public AdminshopImpl(String name, String shopId, Location spawnLocation, int size) {
 	super(name, shopId, spawnLocation, size);
-	// set the tye of the villager
-	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.ADMINSHOP));
+	getShopVillager().setMetadata("ue-type",
+		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.ADMINSHOP));
     }
 
     /**
@@ -44,9 +40,14 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
      */
     public AdminshopImpl(String name, String shopId) throws TownSystemException {
 	super(name, shopId);
-	// set the tye of the villager
-	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.ADMINSHOP));
+	getShopVillager().setMetadata("ue-type",
+		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.ADMINSHOP));
     }
+    
+    /*
+     * API methods
+     * 
+     */
 
     @Override
     public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
@@ -55,9 +56,9 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	setName(name);
 	saveShopName();
 	changeInventoryNames(name);
-	villager.setCustomName(name);
+	getShopVillager().setCustomName(name);
     }
-    
+
     /*
      * Validation check methods
      * 

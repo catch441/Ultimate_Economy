@@ -6,8 +6,10 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.ue.exceptions.GeneralEconomyException;
@@ -30,6 +32,20 @@ public abstract interface AbstractShop {
      * @return shopId
      */
     public String getShopId();
+    
+    /**
+     * Returns the shop inventory.
+     * 
+     * @return shopInventory
+     */
+    public Inventory getShopInventory();
+    
+    /**
+     * Returns the location of the shop.
+     * 
+     * @return location
+     */
+    public Location getShopLocation();
 
     /**
      * Returns the world in which the shop is.
@@ -63,11 +79,11 @@ public abstract interface AbstractShop {
     /**
      * This method returns the sellprice of a item.
      * 
-     * @param slot intern
+     * @param itemString
      * @return double
      * @throws ShopSystemException
      */
-    public double getItemSellPrice(int slot) throws ShopSystemException;
+    public double getItemSellPrice(String itemString) throws ShopSystemException;
 
     /**
      * Returns a itemstack from a itemstring.
@@ -81,20 +97,20 @@ public abstract interface AbstractShop {
     /**
      * This method returns the amount of a item.
      * 
-     * @param  slot intern
+     * @param  itemString
      * @return int
      * @throws ShopSystemException
      */
-    public int getItemAmount(int slot) throws ShopSystemException;
+    public int getItemAmount(String itemString) throws ShopSystemException;
 
     /**
      * This method returns the buyprice of a item.
      * 
-     * @param slot intern
+     * @param itemString
      * @return double
      * @throws ShopSystemException
      */
-    public double getItemBuyPrice(int slot) throws ShopSystemException;
+    public double getItemBuyPrice(String itemString) throws ShopSystemException;
 
     /**
      * This method adds a item to this shop.
@@ -192,12 +208,11 @@ public abstract interface AbstractShop {
      * 
      * @param player
      * @param slot internal
-     * @throws IllegalArgumentException
      * @throws ShopSystemException
      * @throws GeneralEconomyException
      */
     public void openSlotEditor(Player player, int slot)
-	    throws IllegalArgumentException, ShopSystemException, GeneralEconomyException;
+	    throws ShopSystemException, GeneralEconomyException;
 
     /**
      * Opens the editor GUI with occupied and free slots The 2 last slots are not
@@ -214,4 +229,31 @@ public abstract interface AbstractShop {
      * @param event
      */
     public void handleSlotEditor(InventoryClickEvent event);
+
+    /**
+     * Returns the size of the shop.
+     * 
+     * @return size
+     */
+    public int getSize();
+
+    /**
+     * Returns the shop villager.
+     * 
+     * @return shop villager
+     */
+    public Villager getShopVillager();
+
+    /**
+     * Returns the actual editor inventory.
+     * @return editor inventory
+     */
+    public Inventory getEditorInventory();
+
+    /**
+     * Returns the slot editor inventory.
+     * 
+     * @return slot editor inventory
+     */
+    public Inventory getSlotEditorInventory();
 }

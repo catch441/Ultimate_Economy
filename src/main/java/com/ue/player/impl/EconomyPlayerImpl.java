@@ -382,6 +382,12 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	config.set(getName() + ".Jobs", jobList);
 	save(config);
     }
+    
+    private void saveBankIban() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
+	config.set(getName() + ".Iban", bankAccount.getIban());
+	save(config);
+    }
 
     /*
      * Setup methods
@@ -396,6 +402,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
     private void setupBankAccount() {
 	bankAccount = BankController.createBankAccount(0.0);
+	saveBankIban();
     }
 
     private void setupScoreboardDisabled() {

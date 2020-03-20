@@ -18,8 +18,10 @@ import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.JavaPluginLoader;
 
 import com.bstats.metrics.Metrics;
 import com.ue.bank.api.BankController;
@@ -58,6 +60,8 @@ import com.ue.townsystem.townworld.impl.TownworldTabCompleter;
 import com.ue.vault.EconomyUltimateEconomy;
 import com.ue.vault.VaultHook;
 
+import be.seeseemelk.mockbukkit.UnimplementedOperationException;
+
 /**
  * @author Lukas Heubach (catch441)
  */
@@ -66,6 +70,25 @@ public class UltimateEconomy extends JavaPlugin {
     public static UltimateEconomy getInstance;
     public EconomyUltimateEconomy economyImplementer;
     private VaultHook vaultHook;
+
+    /**
+     * Constructor for MockBukkit.
+     */
+    public UltimateEconomy() {
+	super();
+    }
+
+    /**
+     * Constructor for MockBukkit.
+     * 
+     * @param loader
+     * @param description
+     * @param dataFolder
+     * @param file
+     */
+    public UltimateEconomy(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
+	super(loader, description, dataFolder, file);
+    }
 
     @Override
     public void onEnable() {
@@ -89,8 +112,11 @@ public class UltimateEconomy extends JavaPlugin {
     }
 
     private void setupBstatsMetrics() {
-	@SuppressWarnings("unused")
-	Metrics metrics = new Metrics(this);
+	try {
+	    @SuppressWarnings("unused")
+	    Metrics metrics = new Metrics(this);
+	} catch(Exception e) {
+	}
     }
 
     private void disableVault() {
@@ -231,9 +257,9 @@ public class UltimateEconomy extends JavaPlugin {
 	JobcenterController.loadAllJobCenters();
 	EconomyPlayerController.loadAllEconomyPlayers(getDataFolder());
 	TownworldController.loadAllTownWorlds(getDataFolder(), getConfig());
-	AdminshopController.loadAllAdminShops(getConfig(), getDataFolder());
-	PlayershopController.loadAllPlayerShops(getConfig(), getDataFolder());
-	RentshopController.loadAllRentShops(getConfig(), getDataFolder());
+	AdminshopController.loadAllAdminShops();
+	PlayershopController.loadAllPlayerShops(getConfig());
+	RentshopController.loadAllRentShops();
 
 	loadCommands();
 	loadSpawners();

@@ -82,9 +82,9 @@ public class EconomyPlayerController {
     public static void createEconomyPlayer(String playerName) throws PlayerException {
 	if (getEconomyPlayerNameList().contains(playerName)) {
 	    throw PlayerException.getException(PlayerExceptionMessageEnum.PLAYER_ALREADY_EXIST);
-	} else {
-	    YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+	} else { 
 	    economyPlayers.add(new EconomyPlayerImpl(playerName, true));
+	    YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
 	    config.set("Player", getEconomyPlayerNameList());
 	    try {
 		config.save(playerFile);
@@ -97,7 +97,7 @@ public class EconomyPlayerController {
     /**
      * This method loads all economyPlayers. !!! 
      * The jobs have to be loaded first.
-     * The banc accounts have to be loaded first.
+     * The banc accounts have to be loaded first.i
      * @param dataFolder
      */
     public static void loadAllEconomyPlayers(File dataFolder) {

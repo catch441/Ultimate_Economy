@@ -222,25 +222,24 @@ public class PlayershopController {
      * This method loads all playerShops. EconomyPlayer have to be loaded first.
      * 
      * @param fileConfig
-     * @param dataFolder
      */
-    public static void loadAllPlayerShops(FileConfiguration fileConfig, File dataFolder) {
+    public static void loadAllPlayerShops(FileConfiguration fileConfig) {
 	// old load system, can be deleted in the future
 	if (fileConfig.contains("PlayerShopNames")) {
-	    playerShopsOldLoadingAll(fileConfig, dataFolder);
+	    playerShopsOldLoadingAll(fileConfig);
 	}
 	// new load system
 	else {
-	    playerShopsNewLoadingAll(fileConfig, dataFolder);
+	    playerShopsNewLoadingAll(fileConfig);
 	}
     }
 
-    private static void playerShopsNewLoadingAll(FileConfiguration fileConfig, File dataFolder) {
+    private static void playerShopsNewLoadingAll(FileConfiguration fileConfig) {
 	for (String shopId : fileConfig.getStringList("PlayerShopIds")) {
-	    File file = new File(dataFolder, shopId + ".yml");
+	    File file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
 	    if (file.exists()) {
 		try {
-		    playerShopList.add(new PlayershopImpl(dataFolder, null, shopId));
+		    playerShopList.add(new PlayershopImpl(null, shopId));
 		} catch (TownSystemException e) {
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());	    
@@ -252,13 +251,13 @@ public class PlayershopController {
     }
 
     @Deprecated
-    private static void playerShopsOldLoadingAll(FileConfiguration fileConfig, File dataFolder) {
+    private static void playerShopsOldLoadingAll(FileConfiguration fileConfig) {
 	for (String shopName : fileConfig.getStringList("PlayerShopNames")) {
-	    File file = new File(dataFolder, shopName + ".yml");
+	    File file = new File(UltimateEconomy.getInstance.getDataFolder(), shopName + ".yml");
 	    if (file.exists()) {
 		String shopId = generateFreePlayerShopId();
 		try {
-		    playerShopList.add(new PlayershopImpl(dataFolder, shopName, shopId));
+		    playerShopList.add(new PlayershopImpl(shopName, shopId));
 		} catch (TownSystemException e) {
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopName);
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());

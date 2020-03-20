@@ -47,8 +47,7 @@ public enum EconomyVillager {
 	}
 
 	@Override
-	void performHandleInventoryClick(InventoryClickEvent event, String id)
-		throws GeneralEconomyException {
+	void performHandleInventoryClick(InventoryClickEvent event, String id) throws GeneralEconomyException {
 	    Adminshop adminshop = AdminshopController.getAdminShopById(id);
 	    handleShopInvClickEvent(adminshop, (Player) event.getWhoClicked(), event);
 	}
@@ -60,8 +59,7 @@ public enum EconomyVillager {
 	}
 
 	@Override
-	void performHandleInventoryClick(InventoryClickEvent event, String id)
-		throws GeneralEconomyException {
+	void performHandleInventoryClick(InventoryClickEvent event, String id) throws GeneralEconomyException {
 	    Playershop playershop = PlayershopController.getPlayerShopById(id);
 	    handleShopInvClickEvent(playershop, (Player) event.getWhoClicked(), event);
 	}
@@ -124,8 +122,7 @@ public enum EconomyVillager {
     },
     JOBCENTER {
 	@Override
-	void performOpenInventory(Entity entity, String id, Player player)
-		throws GeneralEconomyException {
+	void performOpenInventory(Entity entity, String id, Player player) throws GeneralEconomyException {
 	    JobcenterController.getJobCenterByName(entity.getCustomName()).openInv(player);
 	}
 
@@ -152,21 +149,30 @@ public enum EconomyVillager {
 
     private static void handleShopInvClickEvent(AbstractShop abstractShop, Player player, InventoryClickEvent event) {
 	ItemMeta clickedItemMeta = event.getCurrentItem().getItemMeta();
-	    if (event.getView().getTitle().equals(abstractShop.getName() + "-Editor")
-		    && clickedItemMeta.getDisplayName().contains("Slot")) {
-		int slot = Integer.valueOf(clickedItemMeta.getDisplayName().substring(5));
+	if (event.getView().getTitle().equals(abstractShop.getName() + "-Editor")
+		&& clickedItemMeta.getDisplayName().contains("Slot")) {
+	    int slot = Integer.valueOf(clickedItemMeta.getDisplayName().substring(5));
+	    try {
 		abstractShop.openSlotEditor(player, slot);
-	    } else if (event.getView().getTitle().equals(abstractShop.getName() + "-SlotEditor")) {
-		abstractShop.handleSlotEditor(event);
-		String command = clickedItemMeta.getDisplayName();
-		if ((ChatColor.RED + "remove item").equals(command)
-			|| (ChatColor.RED + "exit without save").equals(command)
-			|| (ChatColor.YELLOW + "save changes").equals(command)) {
-		    abstractShop.openEditor(player);
-		}
-	    } else {
-		handleBuySell(abstractShop, event, player);
+	    } catch (ShopSystemException | GeneralEconomyException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
 	    }
+	} else if (event.getView().getTitle().equals(abstractShop.getName() + "-SlotEditor")) {
+	    abstractShop.handleSlotEditor(event);
+	    String command = clickedItemMeta.getDisplayName();
+	    if ((ChatColor.RED + "remove item").equals(command) || (ChatColor.RED + "exit without save").equals(command)
+		    || (ChatColor.YELLOW + "save changes").equals(command)) {
+		abstractShop.openEditor(player);
+	    }
+	} else {
+	    try {
+		handleBuySell(abstractShop, event, player);
+	    } catch (PlayerException | GeneralEconomyException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
+	}
     }
 
     private static void handleBuySell(AbstractShop abstractShop, InventoryClickEvent event, Player playe)

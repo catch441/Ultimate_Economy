@@ -1,6 +1,5 @@
 package com.ue.shopsystem.impl;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -61,12 +60,11 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      * Constructor for loading an existing playershop. No validation, if the shopId
      * is unique.
      * 
-     * @param dataFolder
      * @param shopId
      * @throws TownSystemException
      */
-    public RentshopImpl(File dataFolder, String shopId) throws TownSystemException {
-	super(dataFolder, null, shopId);
+    public RentshopImpl(String shopId) throws TownSystemException {
+	super(null, shopId);
 	loadRentalFee();
 	loadRentable();
 	loadRentUntil();
@@ -83,8 +81,8 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      */
     @Override
     public void moveShop(Location location) throws TownSystemException {
-	saveLocationToFile(location);
-	villager.teleport(location);
+	setupShopLocation(location);
+	getShopVillager().teleport(location);
     }
 
     /**
@@ -97,12 +95,12 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 	} else {
 	    if (!isRentable()) {
-		saveShopNameToFile(name);
-		villager.setCustomName(name + "_" + owner.getName());
+		setupShopName(name);
+		getShopVillager().setCustomName(name + "_" + owner.getName());
 		changeInventoryNames(name);
 	    } else {
-		saveShopNameToFile(name);
-		villager.setCustomName(name + "#" + getShopId());
+		setupShopName(name);
+		getShopVillager().setCustomName(name + "#" + getShopId());
 	    }
 	}
     }
@@ -157,13 +155,13 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
     private void setupVillager() {
 	// set the type of the villager
-	villager.setMetadata("ue-type",
+	getShopVillager().setMetadata("ue-type",
 		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP_RENTABLE));
 	// if not rentable, then change to the custom name choosen by the tenant
 	if (!isRentable()) {
-	    villager.setCustomName(getName() + "_" + owner.getName());
+	    getShopVillager().setCustomName(getName() + "_" + owner.getName());
 	} else {
-	    villager.setCustomName("RentShop#" + getShopId());
+	    getShopVillager().setCustomName("RentShop#" + getShopId());
 	}
     }
 
@@ -184,9 +182,9 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      */
     private void saveRentableToFile(boolean rentable) {
 	this.rentable = rentable;
-	config = YamlConfiguration.loadConfiguration(file);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	config.set("Rentable", rentable);
-	save();
+	save(config);
     }
 
     /**
@@ -199,9 +197,9 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      * @param rentalFee
      */
     private void saveRentalFeeToFile(double rentalFee) {
-	config = YamlConfiguration.loadConfiguration(file);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	config.set("RentalFee", rentalFee);
-	save();
+	save(config);
     }
 
     /**
@@ -215,9 +213,9 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      */
     private void saveRentUntilTimeToFile(long timeUntil) {
 	rentUntil = timeUntil;
-	config = YamlConfiguration.loadConfiguration(file);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	config.set("RentUntil", timeUntil);
-	save();
+	save(config);
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -235,7 +233,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      * 
      */
     private void loadRentalFee() {
-	config = YamlConfiguration.loadConfiguration(file);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	rentalFee = config.getInt("RentalFee");
     }
 
@@ -246,7 +244,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      * 
      */
     private void loadRentable() {
-	config = YamlConfiguration.loadConfiguration(file);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	rentable = config.getBoolean("Rentable");
     }
 
@@ -257,7 +255,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      * 
      */
     private void loadRentUntil() {
-	config = YamlConfiguration.loadConfiguration(file);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	rentUntil = config.getLong("RentUntil");
     }
 
@@ -337,7 +335,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	    // cannot happen
 	}
 	// remove all shopitems
-	for (int i = 0; i < (size - 2); i++) {
+	for (int i = 0; i < (getSize() - 2); i++) {
 	    try {
 		removeShopItem(i);
 	    } catch (ShopSystemException | GeneralEconomyException e) {
@@ -369,7 +367,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      * 
      */
     private void setupRentShopGUI() {
-	rentShopGUIInv = Bukkit.createInventory(villager, size, getName());
+	rentShopGUIInv = Bukkit.createInventory(getShopVillager(), getSize(), getName());
 	List<String> loreList = new ArrayList<>();
 	loreList.add(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + getRentalFee());
 	ItemStack itemStack = new ItemStack(Material.GREEN_WOOL, 1);

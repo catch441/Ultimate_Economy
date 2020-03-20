@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
@@ -23,7 +22,7 @@ public class AdminshopController {
 
     /**
      * ONLY FOR THE COMMANDS
-     * 
+     * <p>
      * This method returns a AdminShop by it's name.
      * 
      * @param name
@@ -160,29 +159,30 @@ public class AdminshopController {
     /**
      * This method loads all adminShops.
      * 
-     * @param fileConfig
-     * @param dataFolder
      */
-    public static void loadAllAdminShops(FileConfiguration fileConfig, File dataFolder) {
+    public static void loadAllAdminShops() {
 	// old load system, can be deleted in the future
-	if (fileConfig.contains("ShopNames")) {
-	    loadAllAdminshopsOld(fileConfig, dataFolder);
+	if (UltimateEconomy.getInstance.getConfig().contains("ShopNames")) {
+	    loadAllAdminshopsOld();
 	}
 	// new load system
 	else {
-	    loadAllAdminshopsNew(fileConfig, dataFolder);
+	    loadAllAdminshopsNew();
 	}
     }
 
-    private static void loadAllAdminshopsNew(FileConfiguration fileConfig, File dataFolder) {
-	if (fileConfig.contains("AdminshopIds")) {
-	    fileConfig.set("AdminShopIds", fileConfig.get("AdminshopIds"));
+    private static void loadAllAdminshopsNew() {
+	// renaming, can be deleted later
+	if (UltimateEconomy.getInstance.getConfig().contains("AdminshopIds")) {
+	    UltimateEconomy.getInstance.getConfig().set("AdminShopIds",
+		    UltimateEconomy.getInstance.getConfig().get("AdminshopIds"));
 	}
-	for (String shopId : fileConfig.getStringList("AdminShopIds")) {
-	    File file = new File(dataFolder, shopId + ".yml");
+	
+	for (String shopId : UltimateEconomy.getInstance.getConfig().getStringList("AdminShopIds")) {
+	    File file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
 	    if (file.exists()) {
 		try {
-		    adminShopList.add(new AdminshopImpl(dataFolder, null, shopId));
+		    adminShopList.add(new AdminshopImpl(null, shopId));
 		} catch (TownSystemException e) {
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
@@ -194,12 +194,12 @@ public class AdminshopController {
     }
 
     @Deprecated
-    private static void loadAllAdminshopsOld(FileConfiguration fileConfig, File dataFolder) {
-	for (String shopName : fileConfig.getStringList("ShopNames")) {
-	    File file = new File(dataFolder, shopName + ".yml");
+    private static void loadAllAdminshopsOld() {
+	for (String shopName : UltimateEconomy.getInstance.getConfig().getStringList("ShopNames")) {
+	    File file = new File(UltimateEconomy.getInstance.getDataFolder(), shopName + ".yml");
 	    if (file.exists()) {
 		try {
-		    adminShopList.add(new AdminshopImpl(dataFolder, shopName, generateFreeAdminShopId()));
+		    adminShopList.add(new AdminshopImpl(shopName, generateFreeAdminShopId()));
 		} catch (TownSystemException e) {
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopName);
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
@@ -209,7 +209,7 @@ public class AdminshopController {
 	    }
 	}
 	// convert to new shopId save system
-	fileConfig.set("ShopNames", null);
-	fileConfig.set("AdminShopIds", getAdminshopIdList());
+	UltimateEconomy.getInstance.getConfig().set("ShopNames", null);
+	UltimateEconomy.getInstance.getConfig().set("AdminShopIds", getAdminshopIdList());
     }
 }

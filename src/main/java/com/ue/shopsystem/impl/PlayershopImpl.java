@@ -49,13 +49,12 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     public PlayershopImpl(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size) {
 	super(name, shopId, spawnLocation, size);
 	shopMode = true;
-	// neccecsary for rentshops without a owner
+	// neccessary for rentshops with a owner
 	if (owner != null) {
 	    saveOwnerToFile(owner);
-	    villager.setCustomName(name + "_" + owner.getName());
+	    getShopVillager().setCustomName(name + "_" + owner.getName());
 	}
-	// set the type of the villager
-	villager.setMetadata("ue-type",
+	getShopVillager().setMetadata("ue-type",
 		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP));
     }
 
@@ -74,8 +73,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	    // old loading, can be deleted in the future
 	    if (name != null) {
 		saveOwnerToFile(EconomyPlayerController.getEconomyPlayerByName(name.substring(name.indexOf("_") + 1)));
-		saveShopNameToFile(name.substring(0, name.indexOf("_")));
-
+		setupShopName(name.substring(0, name.indexOf("_")));
 	    }
 	    // new loading
 	    else {
@@ -84,21 +82,13 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	} catch (PlayerException e) {
 	}
 	// set the type of the villager
-	villager.setMetadata("ue-type",
+	getShopVillager().setMetadata("ue-type",
 		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP));
 	// update villager name to naming convention
 	if (owner == null) {
-	    villager.setCustomName(getName() + "_");
+	    getShopVillager().setCustomName(getName() + "_");
 	} else {
-	    villager.setCustomName(getName() + "_" + owner.getName());
-	}
-	// load shop items
-	for (String item : itemNames) {
-	    try {
-		loadShopItem(item);
-	    } catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
-		Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
-	    }
+	    getShopVillager().setCustomName(getName() + "_" + owner.getName());
 	}
     }
 
@@ -108,34 +98,12 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     /**
      * Overridden, because of the stock item.
      */
-    @Override
-    public void setupShopItems() {
-	super.setupShopItems();
+    private void setupShopInvDefaultStockItem() {
 	ItemStack itemStack = new ItemStack(Material.CRAFTING_TABLE);
 	ItemMeta meta = itemStack.getItemMeta();
 	meta.setDisplayName("Stock");
 	itemStack.setItemMeta(meta);
-	addShopItemToInv(itemStack, 1, size - 2, 0.0, 0.0);
-	itemNames.add("CRAFTING_TABLE_0");
-    }
-
-    /**
-     * Overridden, because of the stock value.
-     * 
-     * @throws PlayerException
-     * @throws GeneralEconomyException
-     */
-    @Override
-    public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack)
-	    throws ShopSystemException, PlayerException, GeneralEconomyException {
-	super.addShopItem(slot, sellPrice, buyPrice, itemStack);
-	// create a new ItemStack to avoid changes to the original stack
-	ItemStack itemStackCopy = new ItemStack(itemStack);
-	String itemString = itemStackCopy.toString();
-	// set and save shop item stock to 0
-	config = YamlConfiguration.loadConfiguration(file);
-	config.set("ShopItems." + itemString + ".stock", 0);
-	save();
+	addShopItemToInv(itemStack, 1, getSize() - 2, 0.0, 0.0);
     }
 
     /**
@@ -151,23 +119,22 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, newSize);
 	} else {
 	    boolean possible = true;
-	    int diff = size - newSize;
+	    int diff = getSize() - newSize;
 	    // number or reserved slots
 	    int temp = 2;
-	    if (inventory.getSize() > newSize) {
+	    if (getSize() > newSize) {
 		for (int i = 1; i <= diff; i++) {
-		    ItemStack stack = inventory.getItem(size - i - temp);
+		    ItemStack stack = getShopInventory().getItem(getSize() - i - temp);
 		    if (stack != null) {
 			possible = false;
 		    }
 		}
 	    }
 	    if (possible) {
-		config = YamlConfiguration.loadConfiguration(file);
-		saveShopSizeToFile(newSize);
-		inventory = Bukkit.createInventory(null, size, getName());
+		setupShopSize(newSize);
+		setupShopInventory();
+		setupShopInvDefaultStockItem();
 		reloadShopItems();
-		setupShopItems();
 	    } else {
 		throw ShopSystemException.getException(ShopExceptionMessageEnum.RESIZING_FAILED);
 	    }
@@ -185,8 +152,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
 	checkForShopNameIsFree(name);
 	checkForValidShopName(name);
-	saveShopNameToFile(name);
-	villager.setCustomName(name + "_" + owner.getName());
+	setupShopName(name);
+	getShopVillager().setCustomName(name + "_" + owner.getName());
 	changeInventoryNames(name);
     }
 
@@ -211,8 +178,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
 	    }
 	}
-	saveLocationToFile(location);
-	villager.teleport(location);
+	setupShopLocation(location);
+	getShopVillager().teleport(location);
     }
 
     /**
@@ -222,17 +189,17 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     public void openEditor(Player player) {
 	// value = reserved slots
 	int value = 2;
-	for (int i = 0; i < (size - value); i++) {
+	for (int i = 0; i < (getSize() - value); i++) {
 	    try {
 		if (isSlotEmpty(i + 1)) {
-		    editor.setItem(i, getSkull(SLOTEMPTY, "Slot " + (i + 1)));
+		    getEditorInventory().setItem(i, getSkull(SLOTEMPTY, "Slot " + (i + 1)));
 		} else {
-		    editor.setItem(i, getSkull(SLOTFILLED, "Slot " + (i + 1)));
+		    getEditorInventory().setItem(i, getSkull(SLOTFILLED, "Slot " + (i + 1)));
 		}
 	    } catch (GeneralEconomyException e) {
 	    }
 	}
-	player.openInventory(editor);
+	player.openInventory(getEditorInventory());
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -244,22 +211,22 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     @Override
     public void increaseStock(String itemString, int stock) {
 	if (stock >= 0) {
-	    config = YamlConfiguration.loadConfiguration(file);
+	    YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	    config.set("ShopItems." + itemString + ".stock",
 		    (config.getInt("ShopItems." + itemString + ".stock") + stock));
-	    save();
+	    save(config);
 	}
     }
 
     @Override
     public void decreaseStock(String itemString, int stock) {
 	if (stock >= 0) {
-	    config = YamlConfiguration.loadConfiguration(file);
+	    YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	    if ((config.getInt("ShopItems." + itemString + ".stock") - stock) >= 0) {
 		config.set("ShopItems." + itemString + ".stock",
 			(config.getInt("ShopItems." + itemString + ".stock") - stock));
 	    }
-	    save();
+	    save(config);
 	}
     }
 
@@ -274,13 +241,13 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      */
     protected void saveOwnerToFile(EconomyPlayer owner) {
 	this.owner = owner;
-	config = YamlConfiguration.loadConfiguration(file);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	if (owner == null) {
 	    config.set("Owner", "");
 	} else {
 	    config.set("Owner", owner.getName());
 	}
-	save();
+	save(config);
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -302,7 +269,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      * 
      */
     private void loadOwner() {
-	config = YamlConfiguration.loadConfiguration(file);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	try {
 	    owner = EconomyPlayerController.getEconomyPlayerByName(config.getString("Owner"));
 	} catch (PlayerException e) {
@@ -318,7 +285,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException {
 	checkForChangeOwnerIsPossible(newOwner);
 	saveOwnerToFile(newOwner);
-	villager.setCustomName(getName() + "_" + newOwner.getName());
+	getShopVillager().setCustomName(getName() + "_" + newOwner.getName());
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -330,7 +297,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	// switch to stockpile
 	if (shopMode) {
 	    shopMode = false;
-	    inventory.clear();
+	    getShopInventory().clear();
 	    setupStockpile();
 	    ItemStack stockpileSwitchItem = new ItemStack(Material.CRAFTING_TABLE, 1);
 	    ItemMeta meta = stockpileSwitchItem.getItemMeta();
@@ -342,13 +309,13 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	    meta.setLore(infos);
 	    meta.setDisplayName("Infos");
 	    stockpileSwitchItem.setItemMeta(meta);
-	    inventory.setItem(size - 1, stockpileSwitchItem);
+	    getShopInventory().setItem(getSize() - 1, stockpileSwitchItem);
 	}
 	// switch back to the shop
 	else {
 	    shopMode = true;
-	    inventory.clear();
-	    for (String item : itemNames) {
+	    getShopInventory().clear();
+	    for (String item : getItemList()) {
 		if (!"ANVIL_0".equals(item) && !"CRAFTING_TABLE_0".equals(item)) {
 		    try {
 			loadShopItem(item);
@@ -357,16 +324,23 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		    }
 		}
 	    }
-	    setupShopItems();
+	    setupShopInvDefaultItems();
+	    setupShopInvDefaultStockItem();
+	    try {
+		reloadShopItems();
+	    } catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+		Bukkit.getLogger().warning("[Ultimate_Economy] Failed to switch back to the shop inventory");
+		Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+	    }
 	}
     }
 
     @Override
     public void setupStockpile() {
 	if (!shopMode) {
-	    for (String item : itemNames) {
+	    for (String item : getItemList()) {
 		if (!"ANVIL_0".equals(item) && !"CRAFTING_TABLE_0".equals(item)) {
-		    config = YamlConfiguration.loadConfiguration(file);
+		    YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 		    ItemStack itemStack = config.getItemStack("ShopItems." + item + ".Name");
 		    int slot = config.getInt("ShopItems." + item + ".Slot");
 		    int stock = config.getInt("ShopItems." + item + ".stock");
@@ -382,7 +356,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		    }
 		    meta.setLore(list);
 		    itemStack.setItemMeta(meta);
-		    inventory.setItem(slot, itemStack);
+		    getShopInventory().setItem(slot, itemStack);
 		}
 	    }
 	}
@@ -391,7 +365,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     @Override
     public boolean isAvailable(String itemString) {
 	boolean available = false;
-	config = YamlConfiguration.loadConfiguration(file);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	if (config.getInt("ShopItems." + itemString + ".stock") >= config
 		.getInt("ShopItems." + itemString + ".Amount")) {
 	    available = true;
@@ -406,7 +380,27 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	}
 	return false;
     }
-    
+
+    /*
+     * API methods
+     * 
+     */
+
+    /*
+     * Overridden, because of the stock value.
+     */
+    @Override
+    public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack)
+	    throws ShopSystemException, PlayerException, GeneralEconomyException {
+	super.addShopItem(slot, sellPrice, buyPrice, itemStack);
+	ItemStack itemStackCopy = new ItemStack(itemStack);
+	String itemString = itemStackCopy.toString();
+
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	config.set("ShopItems." + itemString + ".stock", 0);
+	save(config);
+    }
+
     /*
      * Save methods
      * 
@@ -422,18 +416,18 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_CHANGEOWNER_ERROR);
 	}
     }
-    
+
     private void checkForValidShopName(String name) throws ShopSystemException {
 	if (name.contains("_")) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 	}
     }
-    
+
     private void checkForShopNameIsFree(String name) throws GeneralEconomyException {
-	if (PlayershopController.getPlayerShopUniqueNameList().contains(name + "_" + owner.getName())
+	if (PlayershopController.getPlayerShopUniqueNameList().contains(name + "_" + getOwner().getName())
 		|| PlayershopController.getPlayerShopUniqueNameList().contains(name)) {
 	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
-		    name + owner.getName());
+		    name + getOwner().getName());
 	}
     }
 }

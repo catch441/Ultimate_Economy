@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
@@ -172,16 +171,14 @@ public class RentshopController {
     /**
      * This method loads all rentShops. EconomyPlayers have to be loaded first.
      * 
-     * @param fileConfig
-     * @param dataFolder
      * @throws TownSystemException
      */
-    public static void loadAllRentShops(FileConfiguration fileConfig, File dataFolder) {
-	for (String shopId : fileConfig.getStringList("RentShopIds")) {
-	    File file = new File(dataFolder, shopId + ".yml");
+    public static void loadAllRentShops() {
+	for (String shopId : UltimateEconomy.getInstance.getConfig().getStringList("RentShopIds")) {
+	    File file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
 	    if (file.exists()) {
 		try {
-		    rentShopList.add(new RentshopImpl(dataFolder, shopId));
+		    rentShopList.add(new RentshopImpl(shopId));
 		} catch (TownSystemException e) {
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
