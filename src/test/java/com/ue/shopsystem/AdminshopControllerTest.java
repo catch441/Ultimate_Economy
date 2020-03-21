@@ -379,4 +379,6 @@ public class AdminshopControllerTest {
 	    assertTrue(false);
 	}
     }
+    
+    // TODO add more reload tests
 }
