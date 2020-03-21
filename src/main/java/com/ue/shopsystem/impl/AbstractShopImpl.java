@@ -242,7 +242,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	checkForValidAmount(newAmount);
 	checkForValidSellPrice(newSellPrice);
 	checkForValidBuyPrice(newBuyPrice);
-	checkForOnePriceGreaterThenZero(newSellPrice, newBuyPrice);
+	checkForOnePriceGreaterThenZeroIfBothAvailable(newSellPrice, newBuyPrice);
 	ItemStack itemStack = getShopInventory().getItem(slot);
 	String itemString = getItemString(itemStack, true);
 	String message = ChatColor.GOLD + "Updated ";
@@ -251,11 +251,11 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    message = message + ChatColor.GREEN + "amount ";
 	}
 	if (!"none".equals(newSellPrice)) {
-	    saveShopItemSellPrice(itemString, Integer.valueOf(newSellPrice));
+	    saveShopItemSellPrice(itemString, Double.valueOf(newSellPrice));
 	    message = message + ChatColor.GREEN + "sellPrice ";
 	}
 	if (!"none".equals(newBuyPrice)) {
-	    saveShopItemBuyPrice(itemString, Integer.valueOf(newBuyPrice));
+	    saveShopItemBuyPrice(itemString, Double.valueOf(newBuyPrice));
 	    message = message + ChatColor.GREEN + "buyPrice ";
 	}
 	loadShopItem(itemString);
@@ -447,10 +447,10 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
     private String getItemStringForNonSpawner(ItemStack itemStack) {
 	ItemMeta itemMeta = itemStack.getItemMeta();
-	if(itemMeta.hasLore()) {
+	if (itemMeta.hasLore()) {
 	    List<String> loreList = removeShopItemPriceLore(itemMeta.getLore());
-		itemMeta.setLore(loreList);
-		itemStack.setItemMeta(itemMeta);
+	    itemMeta.setLore(loreList);
+	    itemStack.setItemMeta(itemMeta);
 	}
 	return itemStack.toString();
     }
@@ -1173,7 +1173,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	ItemStack itemStack = config.getItemStack("ShopItems." + itemString + ".Name");
 	int slot = config.getInt("ShopItems." + itemString + ".Slot");
-	getEditorInventory().setItem(slot, getSkull(SLOTFILLED, "Slot " + slot));
+	// +1 for player readable slot
+	getEditorInventory().setItem(slot, getSkull(SLOTFILLED, "Slot " + (slot + 1)));
 	addShopItemToInv(itemStack, config.getInt("ShopItems." + itemString + ".Amount"), slot,
 		config.getDouble("ShopItems." + itemString + ".sellPrice"),
 		config.getDouble("ShopItems." + itemString + ".buyPrice"));
@@ -1198,7 +1199,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
      * 
      */
 
-    private void checkForOnePriceGreaterThenZero(String sellPrice, String buyPrice) throws ShopSystemException {
+    private void checkForOnePriceGreaterThenZeroIfBothAvailable(String sellPrice, String buyPrice)
+	    throws ShopSystemException {
 	if (!"none".equals(sellPrice) && !"none".equals(buyPrice) && Double.valueOf(sellPrice) == 0
 		&& Double.valueOf(buyPrice) == 0) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_PRICES);
