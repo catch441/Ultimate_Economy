@@ -15,13 +15,13 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager.Profession;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.persistence.PersistentDataType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.api.Adminshop;
@@ -35,12 +35,8 @@ import be.seeseemelk.mockbukkit.inventory.ChestInventoryMock;
 
 public class AdminshopControllerTest {
 
-    private static final String SLOTFILLED = "http://textures.minecraft.net/texture/"
-	    + "9e42f682e430b55b61204a6f8b76d5227d278ed9ec4d98bda4a7a4830a4b6";
     private static final String SLOTEMPTY = "http://textures.minecraft.net/texture/"
 	    + "b55d5019c8d55bcb9dc3494ccc3419757f89c3384cf3c9abec3f18831f35b0";
-    private static final String K_ON = "http://textures.minecraft.net/texture/"
-	    + "d42a4802b6b2deb49cfbb4b7e267e2f9ad45da24c73286f97bef91d21616496";
     private static final String K_OFF = "http://textures.minecraft.net/texture/"
 	    + "e883b5beb4e601c3cbf50505c8bd552e81b996076312cffe27b3cc1a29e3";
     private static ServerMock server;
@@ -142,6 +138,7 @@ public class AdminshopControllerTest {
 	    assertEquals(world, shop.getWorld());
 	    assertEquals("A0", shop.getShopId());
 	    assertEquals("myshop", shop.getName());
+	    assertEquals(EconomyVillager.ADMINSHOP, shop.getShopVillager().getMetadata("ue-type").get(0).value());
 	    assertEquals(0, shop.getItemList().size());
 	    assertEquals(location, shop.getShopLocation());
 	    assertEquals(Profession.NITWIT, shop.getShopVillager().getProfession());
@@ -348,6 +345,7 @@ public class AdminshopControllerTest {
 	    assertEquals(world, shop.getWorld());
 	    assertEquals("A0", shop.getShopId());
 	    assertEquals("myshop", shop.getName());
+	    assertEquals(EconomyVillager.ADMINSHOP, shop.getShopVillager().getMetadata("ue-type").get(0).value());
 	    assertEquals(0, shop.getItemList().size());
 	    assertEquals(location, shop.getShopLocation());
 	} catch (ShopSystemException | GeneralEconomyException e) {
