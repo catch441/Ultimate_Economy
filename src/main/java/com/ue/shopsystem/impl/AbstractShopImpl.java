@@ -174,17 +174,17 @@ public abstract class AbstractShopImpl implements AbstractShop {
     public File getSaveFile() {
 	return file;
     }
-    
+
     @Override
     public Villager getShopVillager() {
 	return villager;
     }
-    
+
     @Override
     public Inventory getEditorInventory() {
 	return editor;
     }
-    
+
     @Override
     public Inventory getSlotEditorInventory() {
 	return slotEditor;
@@ -214,6 +214,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	this.size = newSize;
 	saveShopSize();
 	setupShopInventory();
+	setupEditor();
 	reloadShopItems();
     }
 
@@ -268,9 +269,10 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	checkForValidSlot(slot);
 	checkForSlotIsNotEmpty(slot);
 	checkForItemCanBeDeleted(slot);
-	getShopInventory().clear(slot);
 	String itemString = getItemString(getShopInventory().getItem(slot), true);
+	getShopInventory().clear(slot);
 	getItemList().remove(itemString);
+	saveItemNames();
 	// +1 for player readable
 	getEditorInventory().setItem(slot, getSkull(SLOTEMPTY, "Slot " + (slot + 1)));
 	saveShopItem(getShopInventory().getItem(slot), slot, 0, 0, true);
@@ -445,9 +447,11 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
     private String getItemStringForNonSpawner(ItemStack itemStack) {
 	ItemMeta itemMeta = itemStack.getItemMeta();
-	List<String> loreList = removeShopItemPriceLore(itemMeta.getLore());
-	itemMeta.setLore(loreList);
-	itemStack.setItemMeta(itemMeta);
+	if(itemMeta.hasLore()) {
+	    List<String> loreList = removeShopItemPriceLore(itemMeta.getLore());
+		itemMeta.setLore(loreList);
+		itemStack.setItemMeta(itemMeta);
+	}
 	return itemStack.toString();
     }
 
@@ -801,7 +805,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    item.setItemMeta(meta);
 	    getSlotEditorInventory().setItem(0, item);
 	} else {
-	    ItemStack item = new ItemStack(getShopInventory().getItem(slot));
+	    ItemStack item = getShopInventory().getItem(slot).clone();
 	    ItemMeta meta = item.getItemMeta();
 	    List<String> lore = removeShopItemPriceLore(meta.getLore());
 	    meta.setLore(lore);
@@ -926,7 +930,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    config.set("ShopItems." + itemString + ".newSaveMethod", "true");
 	    save(config);
 	    saveShopItemSellPrice(itemString, sellPrice);
-	    saveShopItemBuyPrice(itemString, sellPrice);
+	    saveShopItemBuyPrice(itemString, buyPrice);
 	    saveShopItemAmount(itemString, amount);
 	}
     }
@@ -940,7 +944,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
     private void saveShopItemBuyPrice(String itemString, double buyPrice) {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	config.set("ShopItems." + itemString + ".buyPrice", buyPrice);
-
+	save(config);
     }
 
     private void saveShopItemAmount(String itemString, int amount) {
@@ -1039,7 +1043,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
     private void setupEditor() {
 	editor = Bukkit.createInventory(getShopVillager(), getSize(), getName() + "-Editor");
-	for(int i = 0; i<(getSize()-1); i++) {
+	for (int i = 0; i < (getSize() - 1); i++) {
 	    // +1 for player readable
 	    getEditorInventory().setItem(i, getSkull(SLOTEMPTY, "Slot " + (i + 1)));
 	}
@@ -1255,20 +1259,16 @@ public abstract class AbstractShopImpl implements AbstractShop {
     }
 
     private void checkForResizePossible(int newSize) throws ShopSystemException {
-	boolean possible = true;
 	int diff = getSize() - newSize;
 	// number of reserved slots
 	int temp = 1;
 	if (getSize() > newSize) {
 	    for (int i = 1; i <= diff; i++) {
 		ItemStack stack = shopInventory.getItem(getSize() - i - temp);
-		if (stack != null) {
-		    possible = false;
+		if (stack != null && stack.getType() != Material.AIR) {
+		    throw ShopSystemException.getException(ShopExceptionMessageEnum.RESIZING_FAILED);
 		}
 	    }
-	}
-	if (!possible) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.RESIZING_FAILED);
 	}
     }
 
