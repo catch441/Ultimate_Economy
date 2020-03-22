@@ -12,6 +12,11 @@
 			<id>spigot-repo</id>
 			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
 		</repository>
+		<repository>
+			<id>ProjectRepo</id>
+			<name>ProjectRepo</name>
+			<url>file://${project.basedir}/src/main/resources/libs</url>
+		</repository>
 	</repositories>
 
 	<properties>
@@ -36,18 +41,11 @@
 		<!--This adds the Spigot API artifact to the build -->
 
 		<dependency>
-			<groupId>org.spigotmc</groupId>
-			<artifactId>spigot-api</artifactId>
-			<version>1.15.2-R0.1-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>spigot</groupId>
 			<artifactId>spigot</artifactId>
 			<version>1.15.1</version>
 		</dependency>
-
+		
 		<dependency>
 			<groupId>MockBukkitUE</groupId>
 			<artifactId>MockBukkitUE</artifactId>
