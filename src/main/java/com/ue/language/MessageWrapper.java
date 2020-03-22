@@ -60,11 +60,11 @@ public class MessageWrapper {
 	try {
 	    List<String> colored = new ArrayList<>();
 	    for (Object object : params) {
-		colored.add("ง4" + object.toString() + "งc");
+		colored.add("ยง4" + object.toString() + "ยงc");
 	    }
-	    String message = "งc" + messages.getString(key);
+	    String message = "ยงc" + messages.getString(key);
 	    String newMessage = MessageFormat.format(message, colored.toArray());
-	    return ChatColor.translateAlternateColorCodes('ง', newMessage);
+	    return ChatColor.translateAlternateColorCodes('ยง', newMessage);
 	} catch (MissingResourceException e) {
 	    return '!' + key + '!';
 	}
@@ -94,12 +94,12 @@ public class MessageWrapper {
 	    List<String> colored = new ArrayList<>();
 	    
 	    for (Object object : params) {
-		colored.add("งa" + object.toString() + "ง6");
+		colored.add("ยงa" + object.toString() + "ยง6");
 	    }
 	    
-	    String message = "ง6" + messages.getString(key);
+	    String message = "ยง6" + messages.getString(key);
 	    String newMessage = MessageFormat.format(message, colored.toArray());
-	    return ChatColor.translateAlternateColorCodes('ง', newMessage);
+	    return ChatColor.translateAlternateColorCodes('ยง', newMessage);
 	} catch (MissingResourceException e) {
 	    return '!' + key + '!';
 	}
