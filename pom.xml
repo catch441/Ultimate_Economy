@@ -7,6 +7,11 @@
 	<version>1.2.6</version>
 	<name>Ultimate_Economy</name>
 	<repositories>
+		<!-- This adds the Spigot Maven repository to the build -->
+		<repository>
+			<id>spigot-repo</id>
+			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+		</repository>
 		<repository>
 			<id>ProjectRepo</id>
 			<name>ProjectRepo</name>
@@ -33,14 +38,27 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!--This adds the Spigot API artifact to the build -->
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.14</version>
+		</dependency>
 
 		<dependency>
-			<groupId>spigot</groupId>
-			<artifactId>spigot</artifactId>
-			<version>1.15.1</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.9</version>
 		</dependency>
+
+		<!--This adds the Spigot API artifact to the build -->
 		
+		<dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.15.2-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+    	</dependency>
+
 		<dependency>
 			<groupId>MockBukkitUE</groupId>
 			<artifactId>MockBukkitUE</artifactId>
