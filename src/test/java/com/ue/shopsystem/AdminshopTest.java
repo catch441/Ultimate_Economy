@@ -114,8 +114,8 @@ public class AdminshopTest {
 	    assertEquals(Material.STONE, shopItem.getType());
 	    assertEquals(16, shopItem.getAmount());
 	    assertEquals(2, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§616 buy for §a20.0 $", shopItem.getItemMeta().getLore().get(0));
-	    assertEquals("§616 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(1));
+	    assertEquals("ï¿½616 buy for ï¿½a20.0 $", shopItem.getItemMeta().getLore().get(0));
+	    assertEquals("ï¿½616 sell for ï¿½a10.0 $", shopItem.getItemMeta().getLore().get(1));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -164,8 +164,8 @@ public class AdminshopTest {
 	    assertEquals(3, shopItem.getItemMeta().getLore().size());
 	    assertEquals("custom name", shopItem.getItemMeta().getDisplayName());
 	    assertEquals("my lore", shopItem.getItemMeta().getLore().get(0));
-	    assertEquals("§616 buy for §a20.0 $", shopItem.getItemMeta().getLore().get(1));
-	    assertEquals("§616 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(2));
+	    assertEquals("ï¿½616 buy for ï¿½a20.0 $", shopItem.getItemMeta().getLore().get(1));
+	    assertEquals("ï¿½616 sell for ï¿½a10.0 $", shopItem.getItemMeta().getLore().get(2));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -206,7 +206,7 @@ public class AdminshopTest {
 	    assertEquals(Material.STONE, shopItem.getType());
 	    assertEquals(16, shopItem.getAmount());
 	    assertEquals(1, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§616 buy for §a20.0 $", shopItem.getItemMeta().getLore().get(0));
+	    assertEquals("ï¿½616 buy for ï¿½a20.0 $", shopItem.getItemMeta().getLore().get(0));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -247,7 +247,7 @@ public class AdminshopTest {
 	    assertEquals(Material.STONE, shopItem.getType());
 	    assertEquals(16, shopItem.getAmount());
 	    assertEquals(1, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§616 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(0));
+	    assertEquals("ï¿½616 sell for ï¿½a10.0 $", shopItem.getItemMeta().getLore().get(0));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -293,7 +293,7 @@ public class AdminshopTest {
 	    assertEquals(data,((CraftMetaPotionMock)shopItem.getItemMeta()).getBasePotionData());
 	    assertEquals(16, shopItem.getAmount());
 	    assertEquals(1, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§616 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(0));
+	    assertEquals("ï¿½616 sell for ï¿½a10.0 $", shopItem.getItemMeta().getLore().get(0));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -342,7 +342,7 @@ public class AdminshopTest {
 	    assertEquals(10, ((CraftMetaItemMock) item.getItemMeta()).getDamage());
 	    assertEquals(16, shopItem.getAmount());
 	    assertEquals(1, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§616 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(0));
+	    assertEquals("ï¿½616 sell for ï¿½a10.0 $", shopItem.getItemMeta().getLore().get(0));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -376,7 +376,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(e instanceof GeneralEconomyException);
-	    assertEquals("§cThe parameter §4-10.0§c is invalid!", e.getMessage());
+	    assertEquals("ï¿½cThe parameter ï¿½4-10.0ï¿½c is invalid!", e.getMessage());
 	}
     }
     
@@ -394,7 +394,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(e instanceof ShopSystemException);
-	    assertEquals("§cOne of the prices have to be above 0!", e.getMessage());
+	    assertEquals("ï¿½cOne of the prices have to be above 0!", e.getMessage());
 	}
     }
     
@@ -412,7 +412,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(e instanceof GeneralEconomyException);
-	    assertEquals("§cThe parameter §411§c is invalid!", e.getMessage());
+	    assertEquals("ï¿½cThe parameter ï¿½411ï¿½c is invalid!", e.getMessage());
 	}
     }
     
@@ -431,7 +431,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(e instanceof PlayerException);
-	    assertEquals("§cThis slot is occupied!", e.getMessage());
+	    assertEquals("ï¿½cThis slot is occupied!", e.getMessage());
 	}
     }
     
@@ -450,7 +450,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(e instanceof ShopSystemException);
-	    assertEquals("§cThis item already exists in this shop!", e.getMessage());
+	    assertEquals("ï¿½cThis item already exists in this shop!", e.getMessage());
 	}
     }
     
@@ -476,8 +476,8 @@ public class AdminshopTest {
 	    assertEquals(Material.STONE, shopItem.getType());
 	    assertEquals(8, shopItem.getAmount());
 	    assertEquals(2, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§68 buy for §a25.0 $", shopItem.getItemMeta().getLore().get(0));
-	    assertEquals("§68 sell for §a15.0 $", shopItem.getItemMeta().getLore().get(1));
+	    assertEquals("ï¿½68 buy for ï¿½a25.0 $", shopItem.getItemMeta().getLore().get(0));
+	    assertEquals("ï¿½68 sell for ï¿½a15.0 $", shopItem.getItemMeta().getLore().get(1));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -492,7 +492,7 @@ public class AdminshopTest {
 	    assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
 	    assertEquals(8, config.getInt("ShopItems." + itemString + ".Amount"));
 	    assertEquals(item, config.getItemStack("ShopItems." + itemString + ".Name"));
-	    // TODO assertequals message die zurückkommt
+	    // TODO assertequals message die zurï¿½ckkommt
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(false);
 	}
@@ -513,7 +513,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(e instanceof ShopSystemException);
-	    assertEquals("§cThis slot is empty!", e.getMessage());
+	    assertEquals("ï¿½cThis slot is empty!", e.getMessage());
 	}
     }
     
@@ -532,7 +532,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(e instanceof GeneralEconomyException);
-	    assertEquals("§cThe parameter §4-10§c is invalid!", e.getMessage());
+	    assertEquals("ï¿½cThe parameter ï¿½4-10ï¿½c is invalid!", e.getMessage());
 	}
     }
     
@@ -551,7 +551,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(e instanceof ShopSystemException);
-	    assertEquals("§cOne of the prices have to be above 0!", e.getMessage());
+	    assertEquals("ï¿½cOne of the prices have to be above 0!", e.getMessage());
 	}
     }
     
@@ -570,7 +570,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(e instanceof GeneralEconomyException);
-	    assertEquals("§cThe parameter §4100§c is invalid!", e.getMessage());
+	    assertEquals("ï¿½cThe parameter ï¿½4100ï¿½c is invalid!", e.getMessage());
 	}
     }
     
@@ -589,7 +589,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(e instanceof GeneralEconomyException);
-	    assertEquals("§cThe parameter §4-25.0§c is invalid!", e.getMessage());
+	    assertEquals("ï¿½cThe parameter ï¿½4-25.0ï¿½c is invalid!", e.getMessage());
 	}
     }
     
@@ -639,7 +639,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException e) {
 	    assertTrue(e instanceof ShopSystemException);
-	    assertEquals("§cThis slot is empty!", e.getMessage());
+	    assertEquals("ï¿½cThis slot is empty!", e.getMessage());
 	}
     }
 
@@ -656,7 +656,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException e) {
 	    assertTrue(e instanceof GeneralEconomyException);
-	    assertEquals("§cThe parameter §411§c is invalid!", e.getMessage());
+	    assertEquals("ï¿½cThe parameter ï¿½411ï¿½c is invalid!", e.getMessage());
 	}
     }
     
@@ -673,7 +673,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException e) {
 	    assertTrue(e instanceof ShopSystemException);
-	    assertEquals("§cThis item cannot be deleted!", e.getMessage());
+	    assertEquals("ï¿½cThis item cannot be deleted!", e.getMessage());
 	}
     }
     
@@ -760,7 +760,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException e) {
 	    assertTrue(e instanceof ShopSystemException);
-	    assertEquals("§cThis shopname is invalid! Use a name without _!", e.getMessage());
+	    assertEquals("ï¿½cThis shopname is invalid! Use a name without _!", e.getMessage());
 	}
     }
 
@@ -778,7 +778,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException e) {
 	    assertTrue(e instanceof GeneralEconomyException);
-	    assertEquals("§c§4newname§c already exists!", e.getMessage());
+	    assertEquals("ï¿½cï¿½4newnameï¿½c already exists!", e.getMessage());
 	}
     }
 
@@ -797,11 +797,11 @@ public class AdminshopTest {
 	    assertEquals(18, shop.getShopInventory().getSize());
 	    assertEquals(Material.ANVIL, shop.getShopInventory().getItem(17).getType());
 	    assertEquals("Info", shop.getShopInventory().getItem(17).getItemMeta().getDisplayName());
-	    assertEquals("§6Rightclick: §asell specified amount",
+	    assertEquals("ï¿½6Rightclick: ï¿½asell specified amount",
 		    shop.getShopInventory().getItem(17).getItemMeta().getLore().get(0));
-	    assertEquals("§6Shift-Rightclick: §asell all",
+	    assertEquals("ï¿½6Shift-Rightclick: ï¿½asell all",
 		    shop.getShopInventory().getItem(17).getItemMeta().getLore().get(1));
-	    assertEquals("§6Leftclick: §abuy", shop.getShopInventory().getItem(17).getItemMeta().getLore().get(2));
+	    assertEquals("ï¿½6Leftclick: ï¿½abuy", shop.getShopInventory().getItem(17).getItemMeta().getLore().get(2));
 	    Inventory editor = shop.getEditorInventory();
 	    assertEquals(18, shop.getEditorInventory().getSize());
 	    assertEquals(Material.PLAYER_HEAD, editor.getItem(0).getType());
@@ -896,11 +896,11 @@ public class AdminshopTest {
 	    assertEquals(9, shop.getSize());
 	    assertEquals(Material.ANVIL, shop.getShopInventory().getItem(8).getType());
 	    assertEquals("Info", shop.getShopInventory().getItem(8).getItemMeta().getDisplayName());
-	    assertEquals("§6Rightclick: §asell specified amount",
+	    assertEquals("ï¿½6Rightclick: ï¿½asell specified amount",
 		    shop.getShopInventory().getItem(8).getItemMeta().getLore().get(0));
-	    assertEquals("§6Shift-Rightclick: §asell all",
+	    assertEquals("ï¿½6Shift-Rightclick: ï¿½asell all",
 		    shop.getShopInventory().getItem(8).getItemMeta().getLore().get(1));
-	    assertEquals("§6Leftclick: §abuy", shop.getShopInventory().getItem(8).getItemMeta().getLore().get(2));
+	    assertEquals("ï¿½6Leftclick: ï¿½abuy", shop.getShopInventory().getItem(8).getItemMeta().getLore().get(2));
 	    Inventory editor = shop.getEditorInventory();
 	    assertEquals(9, shop.getEditorInventory().getSize());
 	    assertEquals(Material.PLAYER_HEAD, editor.getItem(0).getType());
@@ -955,7 +955,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(e instanceof GeneralEconomyException);
-	    assertEquals("§cThe parameter §45§c is invalid!", e.getMessage());
+	    assertEquals("ï¿½cThe parameter ï¿½45ï¿½c is invalid!", e.getMessage());
 	}
     }
 
@@ -973,7 +973,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(e instanceof ShopSystemException);
-	    assertEquals("§cChanging the shop size has failed due to occupied slots!", e.getMessage());
+	    assertEquals("ï¿½cChanging the shop size has failed due to occupied slots!", e.getMessage());
 	}
     }
 
@@ -1100,7 +1100,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException e) {
 	    assertTrue(e instanceof GeneralEconomyException);
-	    assertEquals("§cThe parameter §413§c is invalid!", e.getMessage());
+	    assertEquals("ï¿½cThe parameter ï¿½413ï¿½c is invalid!", e.getMessage());
 	}
     }
 

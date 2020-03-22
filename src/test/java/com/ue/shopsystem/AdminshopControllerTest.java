@@ -89,7 +89,7 @@ public class AdminshopControllerTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException e) {
 	    assertTrue(e instanceof GeneralEconomyException);
-	    assertEquals("§cThe parameter §45§c is invalid!", e.getMessage());
+	    assertEquals("ï¿½cThe parameter ï¿½45ï¿½c is invalid!", e.getMessage());
 	}
     }
 
@@ -105,7 +105,7 @@ public class AdminshopControllerTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException e) {
 	    assertTrue(e instanceof GeneralEconomyException);
-	    assertEquals("§c§4myshop§c already exists!", e.getMessage());
+	    assertEquals("ï¿½cï¿½4myshopï¿½c already exists!", e.getMessage());
 	}
     }
 
@@ -120,7 +120,7 @@ public class AdminshopControllerTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException e) {
 	    assertTrue(e instanceof ShopSystemException);
-	    assertEquals("§cThis shopname is invalid! Use a name without _!", e.getMessage());
+	    assertEquals("ï¿½cThis shopname is invalid! Use a name without _!", e.getMessage());
 	}
     }
 
@@ -157,9 +157,9 @@ public class AdminshopControllerTest {
 	    assertEquals(Material.AIR, shopInv.getItem(7).getType());
 	    assertEquals(Material.ANVIL, shopInv.getItem(8).getType());
 	    assertEquals("Info", shopInv.getItem(8).getItemMeta().getDisplayName());
-	    assertEquals("§6Rightclick: §asell specified amount", shopInv.getItem(8).getItemMeta().getLore().get(0));
-	    assertEquals("§6Shift-Rightclick: §asell all", shopInv.getItem(8).getItemMeta().getLore().get(1));
-	    assertEquals("§6Leftclick: §abuy", shopInv.getItem(8).getItemMeta().getLore().get(2));
+	    assertEquals("ï¿½6Rightclick: ï¿½asell specified amount", shopInv.getItem(8).getItemMeta().getLore().get(0));
+	    assertEquals("ï¿½6Shift-Rightclick: ï¿½asell all", shopInv.getItem(8).getItemMeta().getLore().get(1));
+	    assertEquals("ï¿½6Leftclick: ï¿½abuy", shopInv.getItem(8).getItemMeta().getLore().get(2));
 	    // check editor inventory
 	    ChestInventoryMock editor = (ChestInventoryMock) shop.getEditorInventory();
 	    assertEquals(9, editor.getSize());
@@ -207,11 +207,11 @@ public class AdminshopControllerTest {
 	    assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(12).getType());
 	    assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(21).getType());
 	    assertEquals(Material.BARRIER, slotEditor.getItem(26).getType());
-	    assertEquals("§cexit without save", slotEditor.getItem(7).getItemMeta().getDisplayName());
-	    assertEquals("§esave changes", slotEditor.getItem(8).getItemMeta().getDisplayName());
+	    assertEquals("ï¿½cexit without save", slotEditor.getItem(7).getItemMeta().getDisplayName());
+	    assertEquals("ï¿½esave changes", slotEditor.getItem(8).getItemMeta().getDisplayName());
 	    assertEquals("factor off", slotEditor.getItem(12).getItemMeta().getDisplayName());
 	    assertEquals("factor off", slotEditor.getItem(21).getItemMeta().getDisplayName());
-	    assertEquals("§cremove item", slotEditor.getItem(26).getItemMeta().getDisplayName());
+	    assertEquals("ï¿½cremove item", slotEditor.getItem(26).getItemMeta().getDisplayName());
 	    assertEquals(K_OFF, slotEditor.getItem(12).getItemMeta().getPersistentDataContainer().get(key,
 		    PersistentDataType.STRING));
 	    assertEquals(K_OFF, slotEditor.getItem(21).getItemMeta().getPersistentDataContainer().get(key,
@@ -261,7 +261,7 @@ public class AdminshopControllerTest {
 	    assertTrue(false);
 	} catch (GeneralEconomyException | ShopSystemException e) {
 	    assertTrue(e instanceof GeneralEconomyException);
-	    assertEquals("§c§4myshop2§c does not exist!", e.getMessage());
+	    assertEquals("ï¿½cï¿½4myshop2ï¿½c does not exist!", e.getMessage());
 	}
     }
 
@@ -307,7 +307,7 @@ public class AdminshopControllerTest {
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException e) {
 	    assertTrue(e instanceof GeneralEconomyException);
-	    assertEquals("§c§4A1§c does not exist!", e.getMessage());
+	    assertEquals("ï¿½cï¿½4A1ï¿½c does not exist!", e.getMessage());
 	}
     }
 
