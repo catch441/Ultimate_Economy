@@ -10,7 +10,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -36,7 +35,6 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.api.Adminshop;
 import com.ue.shopsystem.controller.AdminshopController;
-import com.ue.shopsystem.impl.AbstractShopImpl;
 import com.ue.shopsystem.impl.AdminshopImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -93,6 +91,8 @@ public class AdminshopTest {
 	}
     }
 
+
+    
     /**
      * Test add shop item with buy and sell price. Normal item.
      */
