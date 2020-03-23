@@ -91,8 +91,6 @@ public class AdminshopTest {
 	}
     }
 
-
-    
     /**
      * Test add shop item with buy and sell price. Normal item.
      */
@@ -119,7 +117,7 @@ public class AdminshopTest {
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-	    assertEquals("Slot 2",editor.getItem(1).getItemMeta().getDisplayName());
+	    assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
@@ -134,9 +132,10 @@ public class AdminshopTest {
 	    assertTrue(false);
 	}
     }
-    
+
     /**
-     * Test add shop item with buy and sell price. Normal item with lore and a custom name.
+     * Test add shop item with buy and sell price. Normal item with lore and a
+     * custom name.
      */
     @Test
     public void addShopItemTestWithLoreAndCustomName() {
@@ -169,7 +168,7 @@ public class AdminshopTest {
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-	    assertEquals("Slot 2",editor.getItem(1).getItemMeta().getDisplayName());
+	    assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
@@ -184,7 +183,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	}
     }
-    
+
     /**
      * Test add shop item with only buy price. Normal item.
      */
@@ -210,7 +209,7 @@ public class AdminshopTest {
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-	    assertEquals("Slot 2",editor.getItem(1).getItemMeta().getDisplayName());
+	    assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
@@ -225,7 +224,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	}
     }
-    
+
     /**
      * Test add shop item with only sell price. Normal item.
      */
@@ -251,7 +250,7 @@ public class AdminshopTest {
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-	    assertEquals("Slot 2",editor.getItem(1).getItemMeta().getDisplayName());
+	    assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
@@ -266,7 +265,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	}
     }
-    
+
     /**
      * Test add shop item with both prices. Potion.
      */
@@ -274,7 +273,7 @@ public class AdminshopTest {
     public void addShopItemTestWithPotion() {
 	ItemStack item = new ItemStack(Material.POTION, 16);
 	PotionMeta meta = (PotionMeta) item.getItemMeta();
-	PotionData data = new PotionData(PotionType.REGEN,true,false);
+	PotionData data = new PotionData(PotionType.REGEN, true, false);
 	meta.setBasePotionData(data);
 	item.setItemMeta(meta);
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -290,14 +289,14 @@ public class AdminshopTest {
 	    Inventory inv = shop.getShopInventory();
 	    ItemStack shopItem = inv.getItem(1);
 	    assertEquals(Material.POTION, shopItem.getType());
-	    assertEquals(data,((CraftMetaPotionMock)shopItem.getItemMeta()).getBasePotionData());
+	    assertEquals(data, ((CraftMetaPotionMock) shopItem.getItemMeta()).getBasePotionData());
 	    assertEquals(16, shopItem.getAmount());
 	    assertEquals(1, shopItem.getItemMeta().getLore().size());
 	    assertEquals("§616 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(0));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-	    assertEquals("Slot 2",editor.getItem(1).getItemMeta().getDisplayName());
+	    assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
@@ -312,7 +311,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	}
     }
-    
+
     /**
      * Test add shop item with both prices. Enchanted tool and damage.
      */
@@ -336,7 +335,7 @@ public class AdminshopTest {
 	    Inventory inv = shop.getShopInventory();
 	    ItemStack shopItem = inv.getItem(1);
 	    assertEquals(Material.DIAMOND_PICKAXE, shopItem.getType());
-	    assertEquals(1,shopItem.getEnchantments().size());
+	    assertEquals(1, shopItem.getEnchantments().size());
 	    assertTrue(shopItem.getEnchantments().containsKey(Enchantment.DURABILITY));
 	    assertTrue(shopItem.getEnchantments().containsValue(1));
 	    assertEquals(10, ((CraftMetaItemMock) item.getItemMeta()).getDamage());
@@ -346,7 +345,7 @@ public class AdminshopTest {
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-	    assertEquals("Slot 2",editor.getItem(1).getItemMeta().getDisplayName());
+	    assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
@@ -361,7 +360,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	}
     }
-    
+
     /**
      * Test add shop item with invalid price.
      */
@@ -379,7 +378,7 @@ public class AdminshopTest {
 	    assertEquals("§cThe parameter §4-10.0§c is invalid!", e.getMessage());
 	}
     }
-    
+
     /**
      * Test add shop item without prices.
      */
@@ -397,7 +396,7 @@ public class AdminshopTest {
 	    assertEquals("§cOne of the prices have to be above 0!", e.getMessage());
 	}
     }
-    
+
     /**
      * Test add shop item with invalid slot.
      */
@@ -415,7 +414,7 @@ public class AdminshopTest {
 	    assertEquals("§cThe parameter §411§c is invalid!", e.getMessage());
 	}
     }
-    
+
     /**
      * Test add shop item with occupied slot.
      */
@@ -434,7 +433,7 @@ public class AdminshopTest {
 	    assertEquals("§cThis slot is occupied!", e.getMessage());
 	}
     }
-    
+
     /**
      * Test add shop item with item already exists.
      */
@@ -453,7 +452,7 @@ public class AdminshopTest {
 	    assertEquals("§cThis item already exists in this shop!", e.getMessage());
 	}
     }
-    
+
     /**
      * Test edit shop item.
      */
@@ -465,11 +464,12 @@ public class AdminshopTest {
 	    AdminshopController.createAdminShop("myshop", location, 9);
 	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
 	    shop.addShopItem(1, 10, 20, item);
-	    shop.editShopItem(1, "8", "15.0", "25.0");
+	    String response = shop.editShopItem(1, "8", "15.0", "25.0");
 	    item.setAmount(1);
 	    String itemString = item.toString();
 	    assertEquals(1, shop.getItemList().size());
 	    assertEquals(itemString, shop.getItemList().get(0));
+	    assertEquals("§6Updated §aamount §asellPrice §abuyPrice §6for item §astone", response);
 	    // check shop inventory
 	    Inventory inv = shop.getShopInventory();
 	    ItemStack shopItem = inv.getItem(1);
@@ -481,7 +481,7 @@ public class AdminshopTest {
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-	    //assertEquals("Slot 2",editor.getItem(1).getItemMeta().getDisplayName());
+	    assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
@@ -492,14 +492,143 @@ public class AdminshopTest {
 	    assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
 	    assertEquals(8, config.getInt("ShopItems." + itemString + ".Amount"));
 	    assertEquals(item, config.getItemStack("ShopItems." + itemString + ".Name"));
-	    // TODO assertequals message die zur�ckkommt
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(false);
 	}
     }
-    
-    // TODO add more success cases with none values
-    
+
+    /**
+     * Test edit shop item with only amount.
+     */
+    @Test
+    public void editShopItemTestWithOnlyAmount() {
+	ItemStack item = new ItemStack(Material.STONE, 16);
+	Location location = new Location(world, 1.5, 2.3, 6.9);
+	try {
+	    AdminshopController.createAdminShop("myshop", location, 9);
+	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
+	    shop.addShopItem(1, 10, 20, item);
+	    String response = shop.editShopItem(1, "8", "none", "none");
+	    item.setAmount(1);
+	    String itemString = item.toString();
+	    assertEquals(1, shop.getItemList().size());
+	    assertEquals(itemString, shop.getItemList().get(0));
+	    assertEquals("§6Updated §aamount §6for item §astone", response);
+	    // check shop inventory
+	    Inventory inv = shop.getShopInventory();
+	    ItemStack shopItem = inv.getItem(1);
+	    assertEquals(Material.STONE, shopItem.getType());
+	    assertEquals(8, shopItem.getAmount());
+	    assertEquals(2, shopItem.getItemMeta().getLore().size());
+	    assertEquals("§68 buy for §a20.0 $", shopItem.getItemMeta().getLore().get(0));
+	    assertEquals("§68 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(1));
+	    // check editor inventory
+	    Inventory editor = shop.getEditorInventory();
+	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
+	    assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
+	    assertEquals(SLOTFILLED,
+		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+	    // check savefile
+	    File saveFile = shop.getSaveFile();
+	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
+	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
+	    assertEquals("20.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
+	    assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
+	    assertEquals(8, config.getInt("ShopItems." + itemString + ".Amount"));
+	    assertEquals(item, config.getItemStack("ShopItems." + itemString + ".Name"));
+	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+	    assertTrue(false);
+	}
+    }
+
+    /**
+     * Test edit shop item with only sellPrice.
+     */
+    @Test
+    public void editShopItemTestWithOnlySellPrice() {
+	ItemStack item = new ItemStack(Material.STONE, 16);
+	Location location = new Location(world, 1.5, 2.3, 6.9);
+	try {
+	    AdminshopController.createAdminShop("myshop", location, 9);
+	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
+	    shop.addShopItem(1, 10, 20, item);
+	    String response = shop.editShopItem(1, "none", "15", "none");
+	    item.setAmount(1);
+	    String itemString = item.toString();
+	    assertEquals(1, shop.getItemList().size());
+	    assertEquals(itemString, shop.getItemList().get(0));
+	    assertEquals("§6Updated §asellPrice §6for item §astone", response);
+	    // check shop inventory
+	    Inventory inv = shop.getShopInventory();
+	    ItemStack shopItem = inv.getItem(1);
+	    assertEquals(Material.STONE, shopItem.getType());
+	    assertEquals(16, shopItem.getAmount());
+	    assertEquals(2, shopItem.getItemMeta().getLore().size());
+	    assertEquals("§616 buy for §a20.0 $", shopItem.getItemMeta().getLore().get(0));
+	    assertEquals("§616 sell for §a15.0 $", shopItem.getItemMeta().getLore().get(1));
+	    // check editor inventory
+	    Inventory editor = shop.getEditorInventory();
+	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
+	    assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
+	    assertEquals(SLOTFILLED,
+		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+	    // check savefile
+	    File saveFile = shop.getSaveFile();
+	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
+	    assertEquals("15.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
+	    assertEquals("20.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
+	    assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
+	    assertEquals(16, config.getInt("ShopItems." + itemString + ".Amount"));
+	    assertEquals(item, config.getItemStack("ShopItems." + itemString + ".Name"));
+	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+	    assertTrue(false);
+	}
+    }
+
+    /**
+     * Test edit shop item with only buyPrice.
+     */
+    @Test
+    public void editShopItemTestWithOnlyBuyPrice() {
+	ItemStack item = new ItemStack(Material.STONE, 16);
+	Location location = new Location(world, 1.5, 2.3, 6.9);
+	try {
+	    AdminshopController.createAdminShop("myshop", location, 9);
+	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
+	    shop.addShopItem(1, 10, 20, item);
+	    String response = shop.editShopItem(1, "none", "none", "25");
+	    item.setAmount(1);
+	    String itemString = item.toString();
+	    assertEquals(1, shop.getItemList().size());
+	    assertEquals(itemString, shop.getItemList().get(0));
+	    assertEquals("§6Updated §abuyPrice §6for item §astone", response);
+	    // check shop inventory
+	    Inventory inv = shop.getShopInventory();
+	    ItemStack shopItem = inv.getItem(1);
+	    assertEquals(Material.STONE, shopItem.getType());
+	    assertEquals(16, shopItem.getAmount());
+	    assertEquals(2, shopItem.getItemMeta().getLore().size());
+	    assertEquals("§616 buy for §a25.0 $", shopItem.getItemMeta().getLore().get(0));
+	    assertEquals("§616 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(1));
+	    // check editor inventory
+	    Inventory editor = shop.getEditorInventory();
+	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
+	    assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
+	    assertEquals(SLOTFILLED,
+		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+	    // check savefile
+	    File saveFile = shop.getSaveFile();
+	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
+	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
+	    assertEquals("25.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
+	    assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
+	    assertEquals(16, config.getInt("ShopItems." + itemString + ".Amount"));
+	    assertEquals(item, config.getItemStack("ShopItems." + itemString + ".Name"));
+	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+	    assertTrue(false);
+	}
+    }
+
     /**
      * Test edit shop item with empty slot.
      */
@@ -516,7 +645,7 @@ public class AdminshopTest {
 	    assertEquals("§cThis slot is empty!", e.getMessage());
 	}
     }
-    
+
     /**
      * Test edit shop item with invalid buy price.
      */
@@ -535,7 +664,7 @@ public class AdminshopTest {
 	    assertEquals("§cThe parameter §4-10§c is invalid!", e.getMessage());
 	}
     }
-    
+
     /**
      * Test edit shop item with zero prices.
      */
@@ -554,7 +683,7 @@ public class AdminshopTest {
 	    assertEquals("§cOne of the prices have to be above 0!", e.getMessage());
 	}
     }
-    
+
     /**
      * Test edit shop item with invalid amount.
      */
@@ -573,7 +702,7 @@ public class AdminshopTest {
 	    assertEquals("§cThe parameter §4100§c is invalid!", e.getMessage());
 	}
     }
-    
+
     /**
      * Test edit shop item with invalid sell price.
      */
@@ -592,7 +721,52 @@ public class AdminshopTest {
 	    assertEquals("§cThe parameter §4-25.0§c is invalid!", e.getMessage());
 	}
     }
-    
+
+    /**
+     * Test add spawner.
+     * 
+     */
+    @Test
+    public void addSpawnerTest() {
+	ItemStack item = new ItemStack(Material.SPAWNER, 1);
+	ItemMeta meta = item.getItemMeta();
+	meta.setDisplayName("COW");
+	item.setItemMeta(meta);
+	Location location = new Location(world, 1.5, 2.3, 6.9);
+	try {
+	    AdminshopController.createAdminShop("myshop", location, 9);
+	    Adminshop shop = (AdminshopImpl) AdminshopController.getAdminshopList().get(0);
+	    shop.addShopItem(1, 0, 10, item);
+	    String itemString = "SPAWNER_COW";
+	    assertEquals(1, shop.getItemList().size());
+	    assertEquals("SPAWNER_COW", shop.getItemList().get(0));
+	    // check shop inventory
+	    Inventory inv = shop.getShopInventory();
+	    ItemStack shopItem = inv.getItem(1);
+	    assertEquals(Material.SPAWNER, shopItem.getType());
+	    assertEquals(1, shopItem.getAmount());
+	    assertEquals("COW", shopItem.getItemMeta().getDisplayName());
+	    assertEquals(1, shopItem.getItemMeta().getLore().size());
+	    assertEquals("§61 buy for §a10.0 $", shopItem.getItemMeta().getLore().get(0));
+	    // check editor inventory
+	    Inventory editor = shop.getEditorInventory();
+	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
+	    assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
+	    assertEquals(SLOTFILLED,
+		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+	    // check savefile
+	    File saveFile = shop.getSaveFile();
+	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
+	    assertEquals("0.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
+	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
+	    assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
+	    assertEquals(1, config.getInt("ShopItems." + itemString + ".Amount"));
+	    assertEquals(itemString, config.getString("ShopItems." + itemString + ".Name").toString());
+	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+	    assertTrue(false);
+	}
+    }
+
     /**
      * Test remove existing item.
      */
@@ -609,11 +783,11 @@ public class AdminshopTest {
 	    // check shop inventory
 	    Inventory inv = shop.getShopInventory();
 	    ItemStack shopItem = inv.getItem(1);
-	    assertEquals(Material.AIR,shopItem.getType());
+	    assertEquals(Material.AIR, shopItem.getType());
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-	    assertEquals("Slot 2",editor.getItem(1).getItemMeta().getDisplayName());
+	    assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 	    assertEquals(SLOTEMPTY,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
@@ -625,7 +799,7 @@ public class AdminshopTest {
 	    assertTrue(false);
 	}
     }
-    
+
     /**
      * Test remove item with a empty slot.
      */
@@ -659,7 +833,7 @@ public class AdminshopTest {
 	    assertEquals("§cThe parameter §411§c is invalid!", e.getMessage());
 	}
     }
-    
+
     /**
      * Test remove item with a invalid item.
      */
@@ -676,7 +850,7 @@ public class AdminshopTest {
 	    assertEquals("§cThis item cannot be deleted!", e.getMessage());
 	}
     }
-    
+
     /**
      * Test move shop.
      */
@@ -1072,7 +1246,7 @@ public class AdminshopTest {
 	try {
 	    AdminshopController.createAdminShop("myshop", location, 9);
 	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
-	    shop.addShopItem(0, 1, 2, new ItemStack(Material.COAL,3));
+	    shop.addShopItem(0, 1, 2, new ItemStack(Material.COAL, 3));
 	    PlayerMock player = server.addPlayer();
 	    shop.openSlotEditor(player, 0);
 	    Inventory inv = player.getOpenInventory().getTopInventory();

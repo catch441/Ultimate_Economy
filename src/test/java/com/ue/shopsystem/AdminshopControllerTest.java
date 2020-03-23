@@ -13,8 +13,12 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager.Profession;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -23,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
+import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.api.Adminshop;
 import com.ue.shopsystem.controller.AdminshopController;
@@ -32,11 +37,14 @@ import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
 import be.seeseemelk.mockbukkit.WorldMock;
 import be.seeseemelk.mockbukkit.inventory.ChestInventoryMock;
+import be.seeseemelk.mockbukkit.inventory.meta.CraftMetaItemMock;
 
 public class AdminshopControllerTest {
 
     private static final String SLOTEMPTY = "http://textures.minecraft.net/texture/"
 	    + "b55d5019c8d55bcb9dc3494ccc3419757f89c3384cf3c9abec3f18831f35b0";
+    private static final String SLOTFILLED = "http://textures.minecraft.net/texture/"
+	    + "9e42f682e430b55b61204a6f8b76d5227d278ed9ec4d98bda4a7a4830a4b6";
     private static final String K_OFF = "http://textures.minecraft.net/texture/"
 	    + "e883b5beb4e601c3cbf50505c8bd552e81b996076312cffe27b3cc1a29e3";
     private static ServerMock server;
@@ -352,6 +360,34 @@ public class AdminshopControllerTest {
 	    assertTrue(false);
 	}
     }
+    
+    /**
+     * Test loading all adminshops with custom profession.
+     */
+    @Test
+    public void loadAllAdminShopsTestWithProfession() {
+	try {
+	    Location location = new Location(world, 1.5, 2.3, 6.9);
+	    AdminshopController.createAdminShop("myshop", location, 9);
+	    AdminshopController.getAdminshopList().get(0).changeProfession(Profession.ARMORER);
+	    assertEquals(1, AdminshopController.getAdminshopList().size());
+	    AdminshopController.getAdminshopList().get(0).despawnVillager();
+	    AdminshopController.getAdminshopList().clear();
+	    assertEquals(0, AdminshopController.getAdminshopList().size());
+	    AdminshopController.loadAllAdminShops();
+	    assertEquals(1, AdminshopController.getAdminshopList().size());
+	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
+	    assertEquals(world, shop.getWorld());
+	    assertEquals("A0", shop.getShopId());
+	    assertEquals("myshop", shop.getName());
+	    assertEquals(Profession.ARMORER, shop.getShopVillager().getProfession());
+	    assertEquals(EconomyVillager.ADMINSHOP, shop.getShopVillager().getMetadata("ue-type").get(0).value());
+	    assertEquals(0, shop.getItemList().size());
+	    assertEquals(location, shop.getShopLocation());
+	} catch (ShopSystemException | GeneralEconomyException e) {
+	    assertTrue(false);
+	}
+    }
 
     /**
      * Test loading all adminshops with no shops.
@@ -359,6 +395,87 @@ public class AdminshopControllerTest {
     @Test
     public void loadAllAdminShopsNoShopTest() {
 	AdminshopController.loadAllAdminShops();
+    }
+    
+    /**
+     * Test reload shop items.
+     * 
+     */
+    @Test
+    public void loadAllAdminShopsTestWithItems() {
+	ItemStack spawner = new ItemStack(Material.SPAWNER, 1);
+	ItemMeta spawnerMeta = spawner.getItemMeta();
+	spawnerMeta.setDisplayName("COW");
+	spawner.setItemMeta(spawnerMeta);
+	ItemStack enchantedTool = new ItemStack(Material.DIAMOND_PICKAXE, 16);
+	enchantedTool.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
+	CraftMetaItemMock enchantedToolMeta = (CraftMetaItemMock) enchantedTool.getItemMeta();
+	enchantedToolMeta.setDamage(10);
+	enchantedTool.setItemMeta(enchantedToolMeta);
+	Location location = new Location(world, 1.5, 2.3, 6.9);
+	try {
+	    AdminshopController.createAdminShop("myshop", location, 9);
+	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
+	    shop.addShopItem(0, 5, 10, enchantedTool);
+	    shop.addShopItem(1, 0, 20, spawner);
+	    AdminshopController.getAdminshopList().get(0).despawnVillager();
+	    AdminshopController.getAdminshopList().clear();
+	    AdminshopController.loadAllAdminShops();
+	    Adminshop response = AdminshopController.getAdminshopList().get(0);
+	    enchantedTool.setAmount(1);
+	    String itemString = enchantedTool.toString();
+	    String itemStringSpawner = "SPAWNER_COW";
+	    assertEquals(2, response.getItemList().size());
+	    assertEquals(itemString, response.getItemList().get(0));
+	    // check shop inventory
+	    Inventory inv = response.getShopInventory();
+	    ItemStack shopItem = inv.getItem(0);
+	    assertEquals(Material.DIAMOND_PICKAXE, shopItem.getType());
+	    assertEquals(1, shopItem.getEnchantments().size());
+	    assertTrue(shopItem.getEnchantments().containsKey(Enchantment.DURABILITY));
+	    assertTrue(shopItem.getEnchantments().containsValue(1));
+	    assertEquals(10, ((CraftMetaItemMock) enchantedTool.getItemMeta()).getDamage());
+	    assertEquals(16, shopItem.getAmount());
+	    assertEquals(2, shopItem.getItemMeta().getLore().size());
+	    assertEquals("§616 buy for §a10.0 $", shopItem.getItemMeta().getLore().get(0));
+	    assertEquals("§616 sell for §a5.0 $", shopItem.getItemMeta().getLore().get(1));
+	    // check editor inventory
+	    Inventory editor = response.getEditorInventory();
+	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
+	    assertEquals("Slot 1", editor.getItem(0).getItemMeta().getDisplayName());
+	    assertEquals(SLOTFILLED,
+		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+	    // check savefile
+	    File saveFile = response.getSaveFile();
+	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
+	    assertEquals("5.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
+	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
+	    assertEquals(0, config.getInt("ShopItems." + itemString + ".Slot"));
+	    assertEquals(16, config.getInt("ShopItems." + itemString + ".Amount"));
+	    assertEquals(enchantedTool.toString(), config.getItemStack("ShopItems." + itemString + ".Name").toString());
+	    
+	    
+	    assertEquals("SPAWNER_COW", response.getItemList().get(1));
+	    // check shop inventory
+	    ItemStack shopItemSpawner = inv.getItem(1);
+	    assertEquals(Material.SPAWNER, shopItemSpawner.getType());
+	    assertEquals(1, shopItemSpawner.getAmount());
+	    assertEquals("COW", shopItemSpawner.getItemMeta().getDisplayName());
+	    assertEquals(1, shopItemSpawner.getItemMeta().getLore().size());
+	    assertEquals("§61 buy for §a20.0 $", shopItemSpawner.getItemMeta().getLore().get(0));
+	    // check editor inventory
+	    assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
+	    assertEquals(SLOTFILLED,
+		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+	    // check savefile
+	    assertEquals("0.0", String.valueOf(config.getDouble("ShopItems." + itemStringSpawner + ".sellPrice")));
+	    assertEquals("20.0", String.valueOf(config.getDouble("ShopItems." + itemStringSpawner + ".buyPrice")));
+	    assertEquals(1, config.getInt("ShopItems." + itemStringSpawner + ".Slot"));
+	    assertEquals(1, config.getInt("ShopItems." + itemStringSpawner + ".Amount"));
+	    assertEquals(itemStringSpawner, config.getString("ShopItems." + itemStringSpawner + ".Name").toString());
+	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+	    assertTrue(false);
+	}
     }
 
     /**
@@ -379,6 +496,4 @@ public class AdminshopControllerTest {
 	    assertTrue(false);
 	}
     }
-    
-    // TODO add more reload tests
 }
