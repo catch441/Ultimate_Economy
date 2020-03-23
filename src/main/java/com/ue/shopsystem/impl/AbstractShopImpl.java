@@ -447,7 +447,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
     private String getItemStringForNonSpawner(ItemStack itemStack) {
 	ItemMeta itemMeta = itemStack.getItemMeta();
-	if (itemMeta.hasLore()) {
+	if (itemMeta != null && itemMeta.hasLore()) {
 	    List<String> loreList = removeShopItemPriceLore(itemMeta.getLore());
 	    itemMeta.setLore(loreList);
 	    itemStack.setItemMeta(itemMeta);
@@ -918,14 +918,17 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	ItemStack itemStackCopy = stack.clone();
 	int amount = itemStackCopy.getAmount();
 	itemStackCopy.setAmount(1);
-	String itemString = itemStackCopy.toString();
+	String itemString = getItemString(itemStackCopy, true);
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	if (delete) {
 	    config.set("ShopItems." + itemString, null);
 	    save(config);
 	} else {
-	    // create a new ItemStack to avoid changes to the original stack
-	    config.set("ShopItems." + itemString + ".Name", itemStackCopy);
+	    if(stack.getType() == Material.SPAWNER) {
+		config.set("ShopItems." + itemString + ".Name", itemString);
+	    } else {
+		config.set("ShopItems." + itemString + ".Name", itemStackCopy);
+	    }
 	    config.set("ShopItems." + itemString + ".Slot", slot);
 	    config.set("ShopItems." + itemString + ".newSaveMethod", "true");
 	    save(config);
@@ -1188,7 +1191,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	itemStack.setItemMeta(meta);
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	int slot = config.getInt("ShopItems." + itemString + ".Slot");
-	getEditorInventory().setItem(slot, getSkull(SLOTFILLED, "Slot " + slot));
+	getEditorInventory().setItem(slot, getSkull(SLOTFILLED, "Slot " + (slot + 1)));
 	addShopItemToInv(itemStack, config.getInt("ShopItems." + itemString + ".Amount"), slot,
 		config.getDouble("ShopItems." + itemString + ".sellPrice"),
 		config.getDouble("ShopItems." + itemString + ".buyPrice"));
