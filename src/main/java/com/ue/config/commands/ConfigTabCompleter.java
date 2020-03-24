@@ -72,6 +72,8 @@ public class ConfigTabCompleter implements TabCompleter {
 	    list.add("ES");
 	} else if (args[1].equals("lt")) {
 	    list.add("LT");
+	} else if (args[1].equals("it")) {
+	    list.add("IT");
 	}
 	return list;
     }
@@ -101,6 +103,9 @@ public class ConfigTabCompleter implements TabCompleter {
 	}
 	if ("lt".contains(args[1])) {
 	    list.add("lt");
+	} 
+	if ("it".contains(args[1])) {
+	    list.add("it");
 	}
 	return list;
     }
@@ -115,6 +120,7 @@ public class ConfigTabCompleter implements TabCompleter {
 	list.add("ru");
 	list.add("es");
 	list.add("lt");
+	list.add("it");
 	return list;
     }
 
