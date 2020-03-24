@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -29,6 +30,7 @@ import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
+import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.api.Adminshop;
 import com.ue.shopsystem.controller.AdminshopController;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -68,7 +70,9 @@ public class AdminshopControllerTest {
     @AfterAll
     public static void deleteSavefiles() {
 	UltimateEconomy.getInstance.getDataFolder().delete();
+	server.setPlayers(0);
 	MockBukkit.unload();
+	EconomyPlayerController.getAllEconomyPlayers().clear();
     }
 
     /**
@@ -77,7 +81,7 @@ public class AdminshopControllerTest {
     @AfterEach
     public void unloadAdminshops() {
 	int size = AdminshopController.getAdminshopList().size();
-	for (int i = 1; i <= size; i++) {
+	for (int i = 0; i < size; i++) {
 	    try {
 		AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
 	    } catch (ShopSystemException e) {
@@ -90,7 +94,7 @@ public class AdminshopControllerTest {
      * Test create new adminshop with invalid size.
      */
     @Test
-    public void createNewAdminshopTestFail1() {
+    public void createNewAdminshopTestWithInvalidSize() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
 	try {
 	    AdminshopController.createAdminShop("myshop", location, 5);
@@ -105,7 +109,7 @@ public class AdminshopControllerTest {
      * Test create new adminshop with existing name.
      */
     @Test
-    public void createNewAdminshopTestFail2() {
+    public void createNewAdminshopTestWithExistingName() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
 	try {
 	    AdminshopController.createAdminShop("myshop", location, 9);
@@ -121,7 +125,7 @@ public class AdminshopControllerTest {
      * Test create new adminshop with invalid name.
      */
     @Test
-    public void createNewAdminshopTestFail3() {
+    public void createNewAdminshopTestWithInvalidName() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
 	try {
 	    AdminshopController.createAdminShop("my_shop", location, 9);
@@ -452,9 +456,7 @@ public class AdminshopControllerTest {
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
 	    assertEquals(0, config.getInt("ShopItems." + itemString + ".Slot"));
 	    assertEquals(16, config.getInt("ShopItems." + itemString + ".Amount"));
-	    assertEquals(enchantedTool.toString(), config.getItemStack("ShopItems." + itemString + ".Name").toString());
-	    
-	    
+	    assertEquals(enchantedTool.toString(), config.getItemStack("ShopItems." + itemString + ".Name").toString());    
 	    assertEquals("SPAWNER_COW", response.getItemList().get(1));
 	    // check shop inventory
 	    ItemStack shopItemSpawner = inv.getItem(1);

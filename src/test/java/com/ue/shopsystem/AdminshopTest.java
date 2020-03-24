@@ -33,6 +33,7 @@ import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.api.Adminshop;
 import com.ue.shopsystem.controller.AdminshopController;
 import com.ue.shopsystem.impl.AdminshopImpl;
@@ -55,6 +56,7 @@ public class AdminshopTest {
     private static ServerMock server;
     private static UltimateEconomy plugin;
     private static WorldMock world;
+    private static PlayerMock player;
 
     /**
      * Init shop for tests.
@@ -65,7 +67,8 @@ public class AdminshopTest {
 	plugin = (UltimateEconomy) MockBukkit.load(UltimateEconomy.class);
 	world = new WorldMock(Material.GRASS_BLOCK, 1);
 	server.addWorld(world);
-    }
+	player = server.addPlayer();
+	}
 
     /**
      * Unload mock bukkit.
@@ -73,7 +76,9 @@ public class AdminshopTest {
     @AfterAll
     public static void deleteSavefiles() {
 	UltimateEconomy.getInstance.getDataFolder().delete();
+	server.setPlayers(0);
 	MockBukkit.unload();
+	EconomyPlayerController.getAllEconomyPlayers().clear();
     }
 
     /**
@@ -82,7 +87,7 @@ public class AdminshopTest {
     @AfterEach
     public void unloadAdminshops() {
 	int size = AdminshopController.getAdminshopList().size();
-	for (int i = 1; i <= size; i++) {
+	for (int i = 0; i < size; i++) {
 	    try {
 		AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
 	    } catch (ShopSystemException e) {
@@ -1226,7 +1231,6 @@ public class AdminshopTest {
 	try {
 	    AdminshopController.createAdminShop("myshop", location, 9);
 	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
-	    PlayerMock player = server.addPlayer();
 	    shop.openSlotEditor(player, 0);
 	    Inventory inv = player.getOpenInventory().getTopInventory();
 	    assertNotNull(inv);
@@ -1247,7 +1251,6 @@ public class AdminshopTest {
 	    AdminshopController.createAdminShop("myshop", location, 9);
 	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
 	    shop.addShopItem(0, 1, 2, new ItemStack(Material.COAL, 3));
-	    PlayerMock player = server.addPlayer();
 	    shop.openSlotEditor(player, 0);
 	    Inventory inv = player.getOpenInventory().getTopInventory();
 	    assertNotNull(inv);
@@ -1269,7 +1272,6 @@ public class AdminshopTest {
 	try {
 	    AdminshopController.createAdminShop("myshop", location, 9);
 	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
-	    PlayerMock player = server.addPlayer();
 	    shop.openSlotEditor(player, 12);
 	    assertTrue(false);
 	} catch (ShopSystemException | GeneralEconomyException e) {
@@ -1287,7 +1289,6 @@ public class AdminshopTest {
 	try {
 	    AdminshopController.createAdminShop("myshop", location, 9);
 	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
-	    PlayerMock player = server.addPlayer();
 	    shop.openShopInventory(player);
 	    Inventory inv = player.getOpenInventory().getTopInventory();
 	    assertNotNull(inv);
@@ -1306,7 +1307,6 @@ public class AdminshopTest {
 	try {
 	    AdminshopController.createAdminShop("myshop", location, 9);
 	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
-	    PlayerMock player = server.addPlayer();
 	    shop.openEditor(player);
 	    Inventory inv = player.getOpenInventory().getTopInventory();
 	    assertNotNull(inv);
