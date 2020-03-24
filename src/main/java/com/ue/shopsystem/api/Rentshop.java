@@ -2,16 +2,16 @@ package com.ue.shopsystem.api;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
 
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
+import com.ue.player.api.EconomyPlayer;
 
 public interface Rentshop extends Playershop {
 
     /**
-     * --Get Method--
-     * <p>
      * Returns the rental until time in milliseconds.
      * 
      * @return rentUntil
@@ -19,8 +19,6 @@ public interface Rentshop extends Playershop {
     public double getRentUntil();
 
     /**
-     * --Get Method--
-     * <p>
      * Returns true, if this shop is not rented by a other player.
      * 
      * @return rentable
@@ -28,30 +26,61 @@ public interface Rentshop extends Playershop {
     public boolean isRentable();
 
     /**
-     * --RentShop Method--
-     * <p>
      * Resets the entire shop. Sets the shop back to the "rentable" state. Removes
      * all items from the shop.
+     * @throws GeneralEconomyException 
+     * @throws ShopSystemException 
      * 
      */
-    public void resetShop();
+    public void resetShop() throws ShopSystemException, GeneralEconomyException;
+    
+    /**
+     * Returns the rent shop gui inventory.
+     * 
+     * @return inventory
+     */
+    public Inventory getRentShopGuiInventory();
+    
+    /**
+     * Change the rental fee of this shop.
+     * 
+     * @param fee
+     * @throws GeneralEconomyException
+     */
+    public void changeRentalFee(double fee) throws GeneralEconomyException;
 
     /**
-     * --RentShop Method--
-     * <p>
+     * Rent this shop for a given player.
+     * 
+     * @param player
+     * @param duration
+     * @throws ShopSystemException
+     * @throws GeneralEconomyException
+     * @throws PlayerException
+     */
+    public void rentShop(EconomyPlayer player, int duration)
+	    throws ShopSystemException, GeneralEconomyException, PlayerException;
+
+    /**
      * Opens the rentshop GUI, if the shop is not rented.
      * 
      * @param player
+     * @throws ShopSystemException 
      */
-    public void openRentGUI(Player player);
+    public void openRentGUI(Player player) throws ShopSystemException;
 
     /**
-     * --RentShop Method--
-     * <p>
+     * Returns the rental fee amount.
+     * 
+     * @return rentalFee
+     */
+    public double getRentalFee();
+
+    /**
      * Handles the clickevent for the rentGUI.
      * 
      * @param event
-     *            InventoryClickEvent
+     *                  InventoryClickEvent
      * @throws PlayerException
      * @throws ShopSystemException
      * @throws GeneralEconomyException

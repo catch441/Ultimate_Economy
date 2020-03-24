@@ -97,8 +97,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	if (TownworldController.isTownWorld(location.getWorld().getName())) {
 	    checkForPlayerHasPermissionInLocation(location);
 	}
-	setupShopLocation(location);
-	getShopVillager().teleport(location);
+	super.moveShop(location);
     }
 
     /**
@@ -150,7 +149,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     @Override
     public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException {
 	checkForChangeOwnerIsPossible(newOwner);
-	this.owner = newOwner;
+	setOwner(newOwner);
 	saveOwner();
 	getShopVillager().setCustomName(getName() + "_" + newOwner.getName());
     }
@@ -165,7 +164,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
     @Override
     public void decreaseStock(int slot, int stock) throws GeneralEconomyException {
-	checkForValidStock(stock);
+	checkForPositiveValue(stock);
 	int entireStock = loadStock(slot);
 	checkForValidStockDecrease(entireStock, stock);
 	if ((entireStock - stock) >= 0) {
@@ -176,7 +175,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
     @Override
     public void increaseStock(int slot, int stock) throws GeneralEconomyException {
-	checkForValidStock(stock);
+	checkForPositiveValue(stock);
 	int entireStock = loadStock(slot);
 	saveStock(slot, entireStock - stock);
 	updateItemInStockpile(slot);
@@ -208,6 +207,10 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	    getStockpileInventory().setItem(slot, stack);
 	}
     }
+    
+    protected void setOwner(EconomyPlayer owner) {
+	this.owner = owner;
+    }
 
     /*
      * Save methods
@@ -221,12 +224,14 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	save(config);
     }
 
-    private void saveOwner() {
-	if (getOwner() != null) {
-	    YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+    protected void saveOwner() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	if (getOwner() != null) {    
 	    config.set("Owner", getOwner().getName());
-	    save(config);
+	} else {
+	    config.set("Owner", null);
 	}
+	save(config);
     }
 
     /*
@@ -272,7 +277,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
     private void setupShopOwner(EconomyPlayer owner) {
 	if (owner != null) {
-	    this.owner = owner;
+	    setOwner(owner);
 	    saveOwner();
 	    getShopVillager().setCustomName(getName() + "_" + owner.getName());
 	}
@@ -312,8 +317,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     private void loadOwner() throws PlayerException {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	if (config.isSet("Owner") && !config.getString("Owner").equals("")) {
-	    owner = EconomyPlayerController.getEconomyPlayerByName(config.getString("Owner"));
-	    getShopVillager().setCustomName(getName() + "_" + owner.getName());
+	    setOwner(EconomyPlayerController.getEconomyPlayerByName(config.getString("Owner")));
+	    getShopVillager().setCustomName(getName() + "_" + getOwner().getName());
 	}
     }
 
@@ -322,9 +327,9 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      * 
      */
 
-    private void checkForValidStock(int stock) throws GeneralEconomyException {
-	if (stock < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, stock);
+    protected void checkForPositiveValue(double value) throws GeneralEconomyException {
+	if (value < 0) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, value);
 	}
     }
 
@@ -340,7 +345,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	}
     }
 
-    private void checkForValidShopName(String name) throws ShopSystemException {
+    protected void checkForValidShopName(String name) throws ShopSystemException {
 	if (name.contains("_")) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 	}
@@ -357,7 +362,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     private void checkForPlayerHasPermissionInLocation(Location location) throws PlayerException, TownSystemException {
 	Townworld townworld = TownworldController.getTownWorldByName(location.getWorld().getName());
 	Town town = townworld.getTownByChunk(location.getChunk());
-	if (townworld.isChunkFree(location.getChunk()) || !town.hasBuildPermissions(owner,
+	if (townworld.isChunkFree(location.getChunk()) || !town.hasBuildPermissions(getOwner(),
 		town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
 	    throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
 	}
@@ -370,7 +375,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     
     @Deprecated
     private void loadOwnerOld(String name) throws PlayerException {
-	owner = EconomyPlayerController.getEconomyPlayerByName(name.substring(name.indexOf("_") + 1));
+	setOwner(EconomyPlayerController.getEconomyPlayerByName(name.substring(name.indexOf("_") + 1)));
 	saveOwner();
 	setupShopName(name.substring(0, name.indexOf("_")));
     }

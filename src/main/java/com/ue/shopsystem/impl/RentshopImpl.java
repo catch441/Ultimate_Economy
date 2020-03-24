@@ -20,7 +20,6 @@ import org.bukkit.metadata.FixedMetadataValue;
 import com.ue.config.api.ConfigController;
 import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
@@ -49,11 +48,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      */
     public RentshopImpl(Location spawnLocation, int size, String shopId, double rentalFee) {
 	super("RentShop#" + shopId, null, shopId, spawnLocation, size);
-	saveRentalFeeToFile(rentalFee);
-	this.rentalFee = rentalFee;
-	saveRentableToFile(true);
-	setupRentShopGUI();
-	setupVillager();
+	setupNewRentshop(rentalFee);
     }
 
     /**
@@ -62,22 +57,22 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      * 
      * @param shopId
      * @throws TownSystemException
+     * @throws PlayerException
      */
-    public RentshopImpl(String shopId) throws TownSystemException {
+    public RentshopImpl(String shopId) throws TownSystemException, PlayerException {
 	super(null, shopId);
-	loadRentalFee();
-	loadRentable();
-	loadRentUntil();
-	setupRentShopGUI();
-	setupVillager();
+	loadExistingRentshop();
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////// overridden
+    /*
+     * API methods
+     * 
+     */
 
     /**
      * Overridde, because the position didn't have to be validated for build
-     * permissions like the parent playershop.
+     * permissions like the parent playershop. 
+     * {@inheritDoc}
      */
     @Override
     public void moveShop(Location location) throws TownSystemException {
@@ -85,198 +80,9 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	getShopVillager().teleport(location);
     }
 
-    /**
-     * Overridden, because the naming convention is a other and a check for
-     * rentable.
-     */
-    @Override
-    public void changeShopName(String name) throws ShopSystemException {
-	if (name.contains("_")) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
-	} else {
-	    if (!isRentable()) {
-		setupShopName(name);
-		getShopVillager().setCustomName(name + "_" + owner.getName());
-		changeInventoryNames(name);
-	    } else {
-		setupShopName(name);
-		getShopVillager().setCustomName(name + "#" + getShopId());
-	    }
-	}
-    }
-
-    /**
-     * NOT FOR COMMERCIAL USE.
-     * <p>
-     * Overridden, because of the rentable validation. Only possible, if the shop is
-     * not rented.
-     * 
-     */
-    @Override
-    public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException {
-	if (isRentable()) {
-	    this.owner = newOwner;
-	    saveOwnerToFile(newOwner);
-	}
-    }
-
-    /**
-     * Overridden, because of the rentable validation. Returns null, if the shop is
-     * free.
-     * 
-     * @return owner
-     */
-    @Override
-    public EconomyPlayer getOwner() {
-	if (!rentable) {
-	    return owner;
-	} else {
-	    return null;
-	}
-    }
-
-    /**
-     * Only, if the shop is not rented.
-     * 
-     * @throws GeneralEconomyException
-     * @throws PlayerException
-     */
-    @Override
-    public void changeShopSize(int newSize) throws ShopSystemException, PlayerException, GeneralEconomyException {
-	if (isRentable()) {
-	    super.changeShopSize(newSize);
-	} else {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ALREADY_RENTED);
-	}
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// setup
-
-    private void setupVillager() {
-	// set the type of the villager
-	getShopVillager().setMetadata("ue-type",
-		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP_RENTABLE));
-	// if not rentable, then change to the custom name choosen by the tenant
-	if (!isRentable()) {
-	    getShopVillager().setCustomName(getName() + "_" + owner.getName());
-	} else {
-	    getShopVillager().setCustomName("RentShop#" + getShopId());
-	}
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// save
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// file
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// edit
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
-
-    /**
-     * --Save file edit method--
-     * <p>
-     * Not for commercial use.
-     * <p>
-     * Saves the rentable state of the shop to the savefile.
-     * 
-     * @param id
-     */
-    private void saveRentableToFile(boolean rentable) {
-	this.rentable = rentable;
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	config.set("Rentable", rentable);
-	save(config);
-    }
-
-    /**
-     * --Save file edit method--
-     * <p>
-     * Not for commercial use.
-     * <p>
-     * Saves the rental fee the shop to the savefile.
-     * 
-     * @param rentalFee
-     */
-    private void saveRentalFeeToFile(double rentalFee) {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	config.set("RentalFee", rentalFee);
-	save(config);
-    }
-
-    /**
-     * --Save file edit method--
-     * <p>
-     * Not for commercial use.
-     * <p>
-     * Saves the rent until time to the savefile.
-     * 
-     * @param timeUntil
-     */
-    private void saveRentUntilTimeToFile(long timeUntil) {
-	rentUntil = timeUntil;
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	config.set("RentUntil", timeUntil);
-	save(config);
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// Save
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// file
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// read
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// /
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// get
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
-
-    /**
-     * --Save file read method--
-     * <p>
-     * Reads the rental fee
-     * 
-     */
-    private void loadRentalFee() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	rentalFee = config.getInt("RentalFee");
-    }
-
-    /**
-     * --Save file read method--
-     * <p>
-     * Reads the rentable value.
-     * 
-     */
-    private void loadRentable() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	rentable = config.getBoolean("Rentable");
-    }
-
-    /**
-     * --Save file read method--
-     * <p>
-     * Reads the rent until value.
-     * 
-     */
-    private void loadRentUntil() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	rentUntil = config.getLong("RentUntil");
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// get
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
-
     @Override
     public boolean isRentable() {
 	return rentable;
-    }
-
-    /**
-     * --Get Method--
-     * <p>
-     * Returns the rental fee amount.
-     * 
-     * @return rentalFee
-     */
-    public double getRentalFee() {
-	return rentalFee;
     }
 
     @Override
@@ -284,131 +90,155 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	return rentUntil;
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// rent
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// shop
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
-
     @Override
-    public void openRentGUI(Player player) {
-	if (isRentable()) {
-	    player.openInventory(rentShopGUIInv);
-	}
+    public double getRentalFee() {
+	return rentalFee;
     }
 
     /**
-     * --RentShop Method--
-     * <p>
-     * Rent this shop for a given player.
-     * 
-     * @param player
-     * @param duration
-     * @throws ShopSystemException
-     *             should not be thrown
-     * @throws GeneralEconomyException
-     * @throws PlayerException
-     *             should not be thrown
+     * Overridden, because the naming convention is a other and a check for rentable
+     * is needed.
+     * {@inheritDoc}
      */
+    @Override
+    public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
+	checkForValidShopName(name);
+	if (!isRentable()) {
+	    super.changeShopName(name);
+	} else {
+	    setupShopName(name);
+	    getShopVillager().setCustomName(name + "#" + getShopId());
+	}
+    }
+
+    @Override
     public void rentShop(EconomyPlayer player, int duration)
 	    throws ShopSystemException, GeneralEconomyException, PlayerException {
-	if (isRentable()) {
-	    // throws a playerexception, if the player has not enough money.
-	    player.decreasePlayerAmount(duration * rentalFee, true);
-	    changeOwner(player);
-	    saveRentableToFile(false);
-	    saveRentUntilTimeToFile(Calendar.getInstance().getTimeInMillis() + (86400000 * duration));
-	    changeShopName("Shop#" + getShopId());
-	} else {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ALREADY_RENTED);
-	}
+	checkForIsRentable();
+	// throws a playerexception, if the player has not enough money.
+	player.decreasePlayerAmount(duration * getRentalFee(), true);
+	changeOwner(player);
+	changeShopName("Shop#" + getShopId());
+	rentable = false;
+	rentUntil = Calendar.getInstance().getTimeInMillis() + (86400000 * duration);
+	saveRentable();
+	saveRentUntil();
     }
-
+    
     @Override
-    public void resetShop() {
-	saveOwnerToFile(null);
-	saveRentUntilTimeToFile(0L);
-	saveRentableToFile(true);
-	changeProfession(Profession.NITWIT);
-	try {
-	    changeShopName("RentShop");
-	} catch (ShopSystemException e) {
-	    // cannot happen
-	}
-	// remove all shopitems
-	for (int i = 0; i < (getSize() - 2); i++) {
-	    try {
-		removeShopItem(i);
-	    } catch (ShopSystemException | GeneralEconomyException e) {
-	    }
-	}
-    }
-
-    /**
-     * --RentShop Method--
-     * <p>
-     * Change the rental fee of this shop.
-     * 
-     * @param fee
-     * @throws GeneralEconomyException
-     */
     public void changeRentalFee(double fee) throws GeneralEconomyException {
-	if (fee < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, fee);
-	} else {
-	    saveRentalFeeToFile(fee);
-	    rentalFee = fee;
+	checkForPositiveValue(fee);
+	rentalFee = fee;
+	saveRentalFee();
+    }
+    
+    /**
+     * Overriden, because of is not rented check.
+     */
+    @Override
+    public void changeShopSize(int newSize) throws ShopSystemException, PlayerException, GeneralEconomyException {
+	checkForIsRentable();
+	super.changeShopSize(newSize);
+    }
+    
+    /**
+     * Overridden, because of the rentable validation. Only possible, if the shop is
+     * not rented.
+     * {@inheritDoc}
+     */
+    @Override
+    public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException {
+	checkForIsRentable();
+	super.changeOwner(newOwner);
+    }
+    
+    @Override
+    public void openRentGUI(Player player) throws ShopSystemException {
+	checkForIsRentable();
+	player.openInventory(getRentShopGuiInventory());
+    }
+    
+    @Override
+    public Inventory getRentShopGuiInventory() {
+	return rentShopGUIInv;
+    }
+    
+    @Override
+    public void resetShop() throws ShopSystemException, GeneralEconomyException {
+	setOwner(null);
+	saveOwner();
+	rentUntil = 0L;
+	rentable = true;
+	saveRentUntil();
+	saveRentable();
+	changeProfession(Profession.NITWIT);
+	changeShopName("RentShop");
+	removeAllItems();
+    }
+
+    /*
+     * Utility methods
+     * 
+     */
+    
+    private void removeAllItems() throws ShopSystemException, GeneralEconomyException {
+	for (int i = 0; i < (getSize() - 2); i++) {
+	    removeShopItem(i);
 	}
     }
 
-    /**
-     * --RentShop Method--
-     * <p>
-     * Setup the rent shop GUI for a rentable shop.
+    /*
+     * Rentshop gui utility methods 
      * 
      */
-    private void setupRentShopGUI() {
-	rentShopGUIInv = Bukkit.createInventory(getShopVillager(), getSize(), getName());
+    
+    private void refreshRentalFeeOnRentGUI(int duration) {
 	List<String> loreList = new ArrayList<>();
-	loreList.add(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + getRentalFee());
-	ItemStack itemStack = new ItemStack(Material.GREEN_WOOL, 1);
-	ItemMeta meta = itemStack.getItemMeta();
-	meta.setDisplayName(ChatColor.YELLOW + "Rent");
+	loreList.add(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + (duration * getRentalFee()));
+	ItemStack stack = getRentShopGuiInventory().getItem(0);
+	ItemMeta meta = stack.getItemMeta();
 	meta.setLore(loreList);
-	itemStack.setItemMeta(meta);
-	rentShopGUIInv.setItem(0, itemStack);
-	loreList.clear();
-	loreList.add(ChatColor.GOLD + "Duration: " + ChatColor.GREEN + 1 + ChatColor.GOLD + " Day");
-	itemStack.setType(Material.CLOCK);
-	meta = itemStack.getItemMeta();
-	meta.setLore(loreList);
-	meta.setDisplayName(ChatColor.YELLOW + "Duration");
-	itemStack.setItemMeta(meta);
-	rentShopGUIInv.setItem(1, itemStack);
-	itemStack = getSkull(PLUS, "plus");
-	rentShopGUIInv.setItem(3, itemStack);
-	itemStack = getSkull(ONE, "one");
-	meta = itemStack.getItemMeta();
-	meta.setLore(loreList);
-	itemStack.setItemMeta(meta);
-	rentShopGUIInv.setItem(4, itemStack);
-	itemStack = getSkull(SEVEN, "seven");
-	meta = itemStack.getItemMeta();
-	meta.setLore(loreList);
-	itemStack.setItemMeta(meta);
-	rentShopGUIInv.setItem(5, itemStack);
+	stack.setItemMeta(meta);
     }
 
-    /**
-     * --RentShop Method--
-     * <p>
-     * Handles the clickevent for the rentGUI.
+    private void refreshDurationOnRentGUI(int duration) {
+	List<String> loreList = new ArrayList<>();
+	if (duration > 1) {
+	    loreList.add(ChatColor.GOLD + "Duration: " + ChatColor.GREEN + duration + ChatColor.GOLD + " Days");
+
+	} else {
+	    loreList.add(ChatColor.GOLD + "Duration: " + ChatColor.GREEN + duration + ChatColor.GOLD + " Day");
+	}
+	ItemStack stack = getRentShopGuiInventory().getItem(5);
+	ItemMeta meta = stack.getItemMeta();
+	meta.setLore(loreList);
+	stack.setItemMeta(meta);
+	stack = getRentShopGuiInventory().getItem(4);
+	meta = stack.getItemMeta();
+	meta.setLore(loreList);
+	stack.setItemMeta(meta);
+	stack = getRentShopGuiInventory().getItem(1);
+	meta = stack.getItemMeta();
+	meta.setLore(loreList);
+	stack.setItemMeta(meta);
+    }
+
+    private void switchPlusMinusRentGUI(String state) {
+	if ("plus".equals(state)) {
+	    ItemStack item = getSkull(MINUS, "minus");
+	    getRentShopGuiInventory().setItem(3, item);
+	} else {
+	    ItemStack item = getSkull(PLUS, "plus");
+	    getRentShopGuiInventory().setItem(3, item);
+	}
+    }
+    
+    /*
+     * Handle rentshop gui click
      * 
-     * @param event
-     *            InventoryClickEvent
-     * @throws PlayerException
-     * @throws ShopSystemException
-     * @throws GeneralEconomyException
      */
+    
+    @Override
     public void handleRentShopGUIClick(InventoryClickEvent event)
 	    throws ShopSystemException, GeneralEconomyException, PlayerException {
 	if (event.getCurrentItem().getItemMeta() != null) {
@@ -442,7 +272,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	    }
 	}
     }
-
+    
     private void handlePlusMinusSevenGuiClick(int duration, String operation) {
 	if ("plus".equals(operation)) {
 	    if (duration < ConfigController.getMaxRentedDays()) {
@@ -470,44 +300,131 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	refreshRentalFeeOnRentGUI(duration);
     }
 
-    private void refreshRentalFeeOnRentGUI(int duration) {
-	List<String> loreList = new ArrayList<>();
-	loreList.add(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + (duration * getRentalFee()));
-	ItemStack stack = rentShopGUIInv.getItem(0);
-	ItemMeta meta = stack.getItemMeta();
-	meta.setLore(loreList);
-	stack.setItemMeta(meta);
+    /*
+     * Save methods
+     * 
+     */
+
+    private void saveRentUntil() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	config.set("RentUntil", getRentUntil());
+	save(config);
     }
 
-    private void refreshDurationOnRentGUI(int duration) {
-	List<String> loreList = new ArrayList<>();
-	if (duration > 1) {
-	    loreList.add(ChatColor.GOLD + "Duration: " + ChatColor.GREEN + duration + ChatColor.GOLD + " Days");
+    private void saveRentalFee() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	config.set("RentalFee", getRentalFee());
+	save(config);
+    }
 
-	} else {
-	    loreList.add(ChatColor.GOLD + "Duration: " + ChatColor.GREEN + duration + ChatColor.GOLD + " Day");
+    private void saveRentable() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	config.set("Rentable", isRentable());
+	save(config);
+    }
+
+    /*
+     * Setup methods
+     * 
+     */
+    
+    private void setupNewRentshop(double rentalFee) {
+	setupRentalFee(rentalFee);
+	setupRentable();
+	setupRentShopGUI();
+	setupEconomyVillagerType();
+    }
+    
+    private void setupEconomyVillagerType() {
+	getShopVillager().setMetadata("ue-type",
+		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP_RENTABLE));
+    }
+    
+    private void setupVillagerName() {
+	if (isRentable()) {
+	    getShopVillager().setCustomName("RentShop#" + getShopId());
 	}
-	ItemStack stack = rentShopGUIInv.getItem(5);
-	ItemMeta meta = stack.getItemMeta();
+    }
+    
+    private void setupRentable() {
+	this.rentable = false;
+	saveRentable();
+    }
+    
+    private void setupRentalFee(double rentalFee) {
+	this.rentalFee = rentalFee;
+	saveRentalFee();
+    }
+    
+    private void setupRentShopGUI() {
+	rentShopGUIInv = Bukkit.createInventory(getShopVillager(), getSize(), getName());
+	List<String> loreList = new ArrayList<>();
+	loreList.add(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + getRentalFee());
+	ItemStack itemStack = new ItemStack(Material.GREEN_WOOL, 1);
+	ItemMeta meta = itemStack.getItemMeta();
+	meta.setDisplayName(ChatColor.YELLOW + "Rent");
 	meta.setLore(loreList);
-	stack.setItemMeta(meta);
-	stack = rentShopGUIInv.getItem(4);
-	meta = stack.getItemMeta();
+	itemStack.setItemMeta(meta);
+	getRentShopGuiInventory().setItem(0, itemStack);
+	loreList.clear();
+	loreList.add(ChatColor.GOLD + "Duration: " + ChatColor.GREEN + 1 + ChatColor.GOLD + " Day");
+	itemStack.setType(Material.CLOCK);
+	meta = itemStack.getItemMeta();
 	meta.setLore(loreList);
-	stack.setItemMeta(meta);
-	stack = rentShopGUIInv.getItem(1);
-	meta = stack.getItemMeta();
+	meta.setDisplayName(ChatColor.YELLOW + "Duration");
+	itemStack.setItemMeta(meta);
+	getRentShopGuiInventory().setItem(1, itemStack);
+	itemStack = getSkull(PLUS, "plus");
+	getRentShopGuiInventory().setItem(3, itemStack);
+	itemStack = getSkull(ONE, "one");
+	meta = itemStack.getItemMeta();
 	meta.setLore(loreList);
-	stack.setItemMeta(meta);
+	itemStack.setItemMeta(meta);
+	getRentShopGuiInventory().setItem(4, itemStack);
+	itemStack = getSkull(SEVEN, "seven");
+	meta = itemStack.getItemMeta();
+	meta.setLore(loreList);
+	itemStack.setItemMeta(meta);
+	getRentShopGuiInventory().setItem(5, itemStack);
     }
 
-    private void switchPlusMinusRentGUI(String state) {
-	if ("plus".equals(state)) {
-	    ItemStack item = getSkull(MINUS, "minus");
-	    rentShopGUIInv.setItem(3, item);
-	} else {
-	    ItemStack item = getSkull(PLUS, "plus");
-	    rentShopGUIInv.setItem(3, item);
+    /*
+     * Loading methods
+     * 
+     */
+    
+    private void loadExistingRentshop() {
+	loadRentalFee();
+	loadRentable();
+	loadRentUntil();
+	setupRentShopGUI();
+	setupEconomyVillagerType();
+	setupVillagerName();
+    }
+
+    private void loadRentable() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	rentable = config.getBoolean("Rentable");
+    }
+
+    private void loadRentUntil() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	rentUntil = config.getLong("RentUntil");
+    }
+
+    private void loadRentalFee() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	rentalFee = config.getInt("RentalFee");
+    }
+
+    /*
+     * Validation check methods
+     * 
+     */
+
+    private void checkForIsRentable() throws ShopSystemException {
+	if (!isRentable()) {
+	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ALREADY_RENTED);
 	}
     }
 }
