@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -32,9 +33,8 @@ import com.ue.ultimate_economy.UltimateEconomy;
 
 public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
-    protected EconomyPlayer owner;
-    // true = shop, false = stock
-    private boolean shopMode;
+    private EconomyPlayer owner;
+    private Inventory stockPile;
 
     /**
      * Constructor for creating a new playershop. No validation, if the shopId is
@@ -48,14 +48,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      */
     public PlayershopImpl(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size) {
 	super(name, shopId, spawnLocation, size);
-	shopMode = true;
-	// neccessary for rentshops with a owner
-	if (owner != null) {
-	    saveOwnerToFile(owner);
-	    getShopVillager().setCustomName(name + "_" + owner.getName());
-	}
-	getShopVillager().setMetadata("ue-type",
-		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP));
+	setupPlayerShop(owner);
     }
 
     /**
@@ -65,86 +58,51 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      * @param name
      * @param shopId
      * @throws TownSystemException
+     * @throws PlayerException 
      */
-    public PlayershopImpl(String name, String shopId) throws TownSystemException {
+    public PlayershopImpl(String name, String shopId) throws TownSystemException, PlayerException {
 	super(name, shopId);
-	shopMode = true;
-	try {
-	    // old loading, can be deleted in the future
-	    if (name != null) {
-		saveOwnerToFile(EconomyPlayerController.getEconomyPlayerByName(name.substring(name.indexOf("_") + 1)));
-		setupShopName(name.substring(0, name.indexOf("_")));
-	    }
-	    // new loading
-	    else {
-		loadOwner();
-	    }
-	} catch (PlayerException e) {
-	}
-	// set the type of the villager
-	getShopVillager().setMetadata("ue-type",
-		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP));
-	// update villager name to naming convention
-	if (owner == null) {
-	    getShopVillager().setCustomName(getName() + "_");
-	} else {
-	    getShopVillager().setCustomName(getName() + "_" + owner.getName());
-	}
+	loadExistingPlayerShop(name);
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////////// overridden
-
-    /**
-     * Overridden, because of the stock item.
-     */
-    private void setupShopInvDefaultStockItem() {
-	ItemStack itemStack = new ItemStack(Material.CRAFTING_TABLE);
-	ItemMeta meta = itemStack.getItemMeta();
-	meta.setDisplayName("Stock");
-	itemStack.setItemMeta(meta);
-	addShopItemToInv(itemStack, 1, getSize() - 2, 0.0, 0.0);
-    }
-
-    /**
-     * Overridden, because of the number of reserved slots.
+    /*
+     * API methods
      * 
-     * @throws ShopSystemException
-     * @throws PlayerException
-     * @throws GeneralEconomyException
+     */
+    
+    @Override
+    public void openStockpile(Player player) {
+	player.openInventory(stockPile);
+    }
+
+    /**
+     * Overridden, because of the number of reserved slots. {@inheritDoc}
      */
     @Override
     public void changeShopSize(int newSize) throws ShopSystemException, PlayerException, GeneralEconomyException {
-	if (newSize % 9 != 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, newSize);
-	} else {
-	    boolean possible = true;
-	    int diff = getSize() - newSize;
-	    // number or reserved slots
-	    int temp = 2;
-	    if (getSize() > newSize) {
-		for (int i = 1; i <= diff; i++) {
-		    ItemStack stack = getShopInventory().getItem(getSize() - i - temp);
-		    if (stack != null) {
-			possible = false;
-		    }
-		}
-	    }
-	    if (possible) {
-		setupShopSize(newSize);
-		setupShopInventory();
-		setupShopInvDefaultStockItem();
-		reloadShopItems();
-	    } else {
-		throw ShopSystemException.getException(ShopExceptionMessageEnum.RESIZING_FAILED);
-	    }
-	}
+	checkForValidSize(newSize);
+	checkForResizePossible(newSize, 2);
+	setSize(newSize);
+	saveShopSize();
+	setupShopInventory();
+	setupEditor(2);
+	reloadShopItems();
     }
 
     /**
-     * Overridden, because of the naming convention.
-     * <p>
-     * name_owner
+     * Overridden, because of the permission validation. {@inheritDoc}
+     */
+    @Override
+    public void moveShop(Location location) throws TownSystemException, PlayerException {
+	if (TownworldController.isTownWorld(location.getWorld().getName())) {
+	    checkForPlayerHasPermissionInLocation(location);
+	}
+	setupShopLocation(location);
+	getShopVillager().teleport(location);
+    }
+
+    /**
+     * Overridden, because of the naming convention. {@inheritDoc}
      * 
      * @throws GeneralEconomyException
      */
@@ -153,252 +111,102 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	checkForShopNameIsFree(name);
 	checkForValidShopName(name);
 	setupShopName(name);
-	getShopVillager().setCustomName(name + "_" + owner.getName());
+	getShopVillager().setCustomName(name + "_" + getOwner().getName());
 	changeInventoryNames(name);
     }
-
-    /**
-     * Overridden, because of the permission validation.
-     */
-    @Override
-    public void moveShop(Location location) throws TownSystemException, PlayerException {
-	if (TownworldController.isTownWorld(location.getWorld().getName())) {
-	    Townworld townworld = null;
-	    try {
-		townworld = TownworldController.getTownWorldByName(location.getWorld().getName());
-	    } catch (TownSystemException e) {
-		// should never happen
-	    }
-	    if (townworld.isChunkFree(location.getChunk())) {
-		throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
-	    }
-	    Town town = townworld.getTownByChunk(location.getChunk());
-	    if (!town.hasBuildPermissions(owner,
-		    town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
-		throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
-	    }
-	}
-	setupShopLocation(location);
-	getShopVillager().teleport(location);
-    }
-
-    /**
-     * Overridden, because if the reserved slots.
-     */
-    @Override
-    public void openEditor(Player player) {
-	// value = reserved slots
-	int value = 2;
-	for (int i = 0; i < (getSize() - value); i++) {
-	    try {
-		if (isSlotEmpty(i + 1)) {
-		    getEditorInventory().setItem(i, getSkull(SLOTEMPTY, "Slot " + (i + 1)));
-		} else {
-		    getEditorInventory().setItem(i, getSkull(SLOTFILLED, "Slot " + (i + 1)));
-		}
-	    } catch (GeneralEconomyException e) {
-	    }
-	}
-	player.openInventory(getEditorInventory());
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// Save
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// file
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// edit
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
-
-    @Override
-    public void increaseStock(String itemString, int stock) {
-	if (stock >= 0) {
-	    YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	    config.set("ShopItems." + itemString + ".stock",
-		    (config.getInt("ShopItems." + itemString + ".stock") + stock));
-	    save(config);
-	}
-    }
-
-    @Override
-    public void decreaseStock(String itemString, int stock) {
-	if (stock >= 0) {
-	    YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	    if ((config.getInt("ShopItems." + itemString + ".stock") - stock) >= 0) {
-		config.set("ShopItems." + itemString + ".stock",
-			(config.getInt("ShopItems." + itemString + ".stock") - stock));
-	    }
-	    save(config);
-	}
-    }
-
-    /**
-     * --Save file edit method--
-     * <p>
-     * NOT FOR COMMERCIAL USE.
-     * <p>
-     * Saves the owner to the savefile.
-     * 
-     * @param owner
-     */
-    protected void saveOwnerToFile(EconomyPlayer owner) {
-	this.owner = owner;
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	if (owner == null) {
-	    config.set("Owner", "");
-	} else {
-	    config.set("Owner", owner.getName());
-	}
-	save(config);
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// save
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// file
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// read/
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// get
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
 
     @Override
     public EconomyPlayer getOwner() {
 	return owner;
     }
 
-    /**
-     * --Save file read method--
-     * <p>
-     * Loads the shop owner from the savefile.
-     * 
-     */
-    private void loadOwner() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	try {
-	    owner = EconomyPlayerController.getEconomyPlayerByName(config.getString("Owner"));
-	} catch (PlayerException e) {
-	}
-
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// change
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
-
-    @Override
-    public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException {
-	checkForChangeOwnerIsPossible(newOwner);
-	saveOwnerToFile(newOwner);
-	getShopVillager().setCustomName(getName() + "_" + newOwner.getName());
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// stockpile
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////// methods
-
-    @Override
-    public void switchStockpile() {
-	// switch to stockpile
-	if (shopMode) {
-	    shopMode = false;
-	    getShopInventory().clear();
-	    setupStockpile();
-	    ItemStack stockpileSwitchItem = new ItemStack(Material.CRAFTING_TABLE, 1);
-	    ItemMeta meta = stockpileSwitchItem.getItemMeta();
-	    List<String> infos = new ArrayList<>();
-	    infos.add(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "close stockpile");
-	    infos.add(ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "add specified amount");
-	    infos.add(ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "add all");
-	    infos.add(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "get specified amount");
-	    meta.setLore(infos);
-	    meta.setDisplayName("Infos");
-	    stockpileSwitchItem.setItemMeta(meta);
-	    getShopInventory().setItem(getSize() - 1, stockpileSwitchItem);
-	}
-	// switch back to the shop
-	else {
-	    shopMode = true;
-	    getShopInventory().clear();
-	    for (String item : getItemList()) {
-		if (!"ANVIL_0".equals(item) && !"CRAFTING_TABLE_0".equals(item)) {
-		    try {
-			loadShopItem(item);
-		    } catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
-			Bukkit.getLogger().warning(e.getMessage());
-		    }
-		}
-	    }
-	    setupShopInvDefaultItems();
-	    setupShopInvDefaultStockItem();
-	    try {
-		reloadShopItems();
-	    } catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
-		Bukkit.getLogger().warning("[Ultimate_Economy] Failed to switch back to the shop inventory");
-		Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-	    }
-	}
-    }
-
-    @Override
-    public void setupStockpile() {
-	if (!shopMode) {
-	    for (String item : getItemList()) {
-		if (!"ANVIL_0".equals(item) && !"CRAFTING_TABLE_0".equals(item)) {
-		    YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-		    ItemStack itemStack = config.getItemStack("ShopItems." + item + ".Name");
-		    int slot = config.getInt("ShopItems." + item + ".Slot");
-		    int stock = config.getInt("ShopItems." + item + ".stock");
-		    ItemMeta meta = itemStack.getItemMeta();
-		    List<String> list = new ArrayList<>();
-		    if (meta.hasLore()) {
-			list.addAll(meta.getLore());
-		    }
-		    if (stock != 1) {
-			list.add(ChatColor.GREEN + String.valueOf(stock) + ChatColor.GOLD + " Items");
-		    } else {
-			list.add(ChatColor.GREEN + String.valueOf(stock) + ChatColor.GOLD + " Item");
-		    }
-		    meta.setLore(list);
-		    itemStack.setItemMeta(meta);
-		    getShopInventory().setItem(slot, itemStack);
-		}
-	    }
-	}
-    }
-
-    @Override
-    public boolean isAvailable(String itemString) {
-	boolean available = false;
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	if (config.getInt("ShopItems." + itemString + ".stock") >= config
-		.getInt("ShopItems." + itemString + ".Amount")) {
-	    available = true;
-	}
-	return available;
-    }
-
-    @Override
-    public boolean isOwner(EconomyPlayer ecoPlayer) {
-	if (ecoPlayer.equals(owner)) {
-	    return true;
-	}
-	return false;
-    }
-
     /*
-     * API methods
-     * 
-     */
-
-    /*
-     * Overridden, because of the stock value.
+     * Overridden, because of the stock value. {@inheritDoc}
      */
     @Override
     public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack)
 	    throws ShopSystemException, PlayerException, GeneralEconomyException {
 	super.addShopItem(slot, sellPrice, buyPrice, itemStack);
-	ItemStack itemStackCopy = new ItemStack(itemStack);
-	String itemString = itemStackCopy.toString();
+	saveStock(slot, 0);
+	updateItemInStockpile(slot);
+    }
 
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	config.set("ShopItems." + itemString + ".stock", 0);
-	save(config);
+    @Override
+    public void removeShopItem(int slot) throws ShopSystemException, GeneralEconomyException {
+	super.removeShopItem(slot);
+	updateItemInStockpile(slot);
+    }
+
+    @Override
+    public boolean isAvailable(int slot) throws ShopSystemException {
+	int stock = loadStock(slot);
+	int amount = getItemAmount(slot);
+	if (stock >= amount) {
+	    return true;
+	}
+	return false;
+    }
+
+    @Override
+    public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException {
+	checkForChangeOwnerIsPossible(newOwner);
+	this.owner = newOwner;
+	saveOwner();
+	getShopVillager().setCustomName(getName() + "_" + newOwner.getName());
+    }
+
+    @Override
+    public boolean isOwner(EconomyPlayer ecoPlayer) {
+	if (ecoPlayer.equals(getOwner())) {
+	    return true;
+	}
+	return false;
+    }
+
+    @Override
+    public void decreaseStock(int slot, int stock) throws GeneralEconomyException {
+	checkForValidStock(stock);
+	int entireStock = loadStock(slot);
+	checkForValidStockDecrease(entireStock, stock);
+	if ((entireStock - stock) >= 0) {
+	    saveStock(slot, entireStock - stock);
+	}
+	updateItemInStockpile(slot);
+    }
+
+    @Override
+    public void increaseStock(int slot, int stock) throws GeneralEconomyException {
+	checkForValidStock(stock);
+	int entireStock = loadStock(slot);
+	saveStock(slot, entireStock - stock);
+	updateItemInStockpile(slot);
+    }
+    
+    @Override
+    public Inventory getStockpileInventory() {
+	return stockPile;
+    }
+    
+    /*
+     * Utility methods
+     * 
+     */
+    
+    private void updateItemInStockpile(int slot) {
+	ItemStack stack = getShopInventory().getItem(slot).clone();
+	if (stack != null && stack.getType() != Material.AIR) {
+	    int stock = loadStock(slot);
+	    ItemMeta meta = stack.getItemMeta();
+	    List<String> list = removeShopItemPriceLore(meta.getLore());
+	    if (stock != 1) {
+		list.add(ChatColor.GREEN + String.valueOf(stock) + ChatColor.GOLD + " Items");
+	    } else {
+		list.add(ChatColor.GREEN + String.valueOf(stock) + ChatColor.GOLD + " Item");
+	    }
+	    meta.setLore(list);
+	    stack.setItemMeta(meta);
+	    getStockpileInventory().setItem(slot, stack);
+	}
     }
 
     /*
@@ -406,10 +214,125 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      * 
      */
 
+    private void saveStock(int slot, int stock) {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	String itemString = getItemString(getShopInventory().getItem(slot), true);
+	config.set("ShopItems." + itemString + ".stock", 0);
+	save(config);
+    }
+
+    private void saveOwner() {
+	if (getOwner() != null) {
+	    YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	    config.set("Owner", getOwner().getName());
+	    save(config);
+	}
+    }
+
+    /*
+     * Setup methods
+     * 
+     */
+    
+    private void setupPlayerShop(EconomyPlayer owner) {
+	setupShopInvDefaultStockItem();
+	setupShopOwner(owner);
+	setupEditor(2);
+	setupStockpile();
+	setupEconomyVillagerType();
+    }
+
+    private void setupStockpile() {
+	stockPile = Bukkit.createInventory(getShopVillager(), getSize());
+	ItemStack stockpileSwitchItem = new ItemStack(Material.CRAFTING_TABLE, 1);
+	ItemMeta meta = stockpileSwitchItem.getItemMeta();
+	List<String> infos = new ArrayList<>();
+	infos.add(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "close stockpile");
+	infos.add(ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "add specified amount");
+	infos.add(ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "add all");
+	infos.add(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "get specified amount");
+	meta.setLore(infos);
+	meta.setDisplayName("Infos");
+	stockpileSwitchItem.setItemMeta(meta);
+	getStockpileInventory().setItem(getSize() - 1, stockpileSwitchItem);
+    }
+
+    private void setupEconomyVillagerType() {
+	getShopVillager().setMetadata("ue-type",
+		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP));
+    }
+
+    private void setupShopInvDefaultStockItem() {
+	ItemStack itemStack = new ItemStack(Material.CRAFTING_TABLE);
+	ItemMeta meta = itemStack.getItemMeta();
+	meta.setDisplayName("Stock");
+	itemStack.setItemMeta(meta);
+	addShopItemToInv(itemStack, 1, getSize() - 2, 0.0, 0.0);
+    }
+
+    private void setupShopOwner(EconomyPlayer owner) {
+	if (owner != null) {
+	    this.owner = owner;
+	    saveOwner();
+	    getShopVillager().setCustomName(getName() + "_" + owner.getName());
+	}
+    }
+
+    /*
+     * Loading methods
+     * 
+     */
+    
+    private void loadExistingPlayerShop(String name) throws PlayerException {
+	if (name != null) {
+	    loadOwnerOld(name);
+	}
+	// new loading
+	else {
+	    loadOwner();
+	}
+	setupEditor(2);
+	loadStockpile();
+	setupEconomyVillagerType();
+    }
+
+    private int loadStock(int slot) {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	String itemString = getItemString(getShopInventory().getItem(slot), true);
+	return config.getInt("ShopItems." + itemString + ".stock");
+    }
+    
+    private void loadStockpile() {
+	setupStockpile();
+	for(int i = 0; i<(getSize()-2);i++) {
+	    updateItemInStockpile(i);
+	}
+    }
+
+    private void loadOwner() throws PlayerException {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	if (config.isSet("Owner") && !config.getString("Owner").equals("")) {
+	    owner = EconomyPlayerController.getEconomyPlayerByName(config.getString("Owner"));
+	    getShopVillager().setCustomName(getName() + "_" + owner.getName());
+	}
+    }
+
     /*
      * Validation check methods
      * 
      */
+
+    private void checkForValidStock(int stock) throws GeneralEconomyException {
+	if (stock < 0) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, stock);
+	}
+    }
+
+    private void checkForValidStockDecrease(int entireStock, int stock) throws GeneralEconomyException {
+	if ((entireStock - stock) < 0) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, stock);
+	}
+    }
 
     private void checkForChangeOwnerIsPossible(EconomyPlayer newOwner) throws ShopSystemException {
 	if (PlayershopController.getPlayerShopUniqueNameList().contains(getName() + "_" + newOwner.getName())) {
@@ -429,5 +352,26 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
 		    name + getOwner().getName());
 	}
+    }
+
+    private void checkForPlayerHasPermissionInLocation(Location location) throws PlayerException, TownSystemException {
+	Townworld townworld = TownworldController.getTownWorldByName(location.getWorld().getName());
+	Town town = townworld.getTownByChunk(location.getChunk());
+	if (townworld.isChunkFree(location.getChunk()) || !town.hasBuildPermissions(owner,
+		town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
+	}
+    }
+    
+    /*
+     * Deprecated
+     * 
+     */
+    
+    @Deprecated
+    private void loadOwnerOld(String name) throws PlayerException {
+	owner = EconomyPlayerController.getEconomyPlayerByName(name.substring(name.indexOf("_") + 1));
+	saveOwner();
+	setupShopName(name.substring(0, name.indexOf("_")));
     }
 }

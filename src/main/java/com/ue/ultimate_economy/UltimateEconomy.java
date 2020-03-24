@@ -60,8 +60,6 @@ import com.ue.townsystem.townworld.impl.TownworldTabCompleter;
 import com.ue.vault.EconomyUltimateEconomy;
 import com.ue.vault.VaultHook;
 
-import be.seeseemelk.mockbukkit.UnimplementedOperationException;
-
 /**
  * @author Lukas Heubach (catch441)
  */
@@ -258,7 +256,7 @@ public class UltimateEconomy extends JavaPlugin {
 	EconomyPlayerController.loadAllEconomyPlayers(getDataFolder());
 	TownworldController.loadAllTownWorlds(getDataFolder(), getConfig());
 	AdminshopController.loadAllAdminShops();
-	PlayershopController.loadAllPlayerShops(getConfig());
+	PlayershopController.loadAllPlayerShops();
 	RentshopController.loadAllRentShops();
 
 	loadCommands();

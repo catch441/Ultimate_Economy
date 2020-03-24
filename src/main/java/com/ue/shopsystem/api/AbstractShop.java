@@ -97,11 +97,11 @@ public abstract interface AbstractShop {
     /**
      * This method returns the amount of a item.
      * 
-     * @param  itemString
+     * @param  slot
      * @return int
      * @throws ShopSystemException
      */
-    public int getItemAmount(String itemString) throws ShopSystemException;
+    public int getItemAmount(int slot) throws ShopSystemException;
 
     /**
      * This method returns the buyprice of a item.

@@ -48,14 +48,8 @@ public class Property {
             signature.update(this.value.getBytes());
             return signature.verify(Base64.decodeBase64(this.signature));
         }
-        catch (NoSuchAlgorithmException e) {
+        catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             e.printStackTrace();
-        }
-        catch (InvalidKeyException e2) {
-            e2.printStackTrace();
-        }
-        catch (SignatureException e3) {
-            e3.printStackTrace();
         }
         return false;
     }

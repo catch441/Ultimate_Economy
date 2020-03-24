@@ -139,7 +139,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
     }
 
     @Override
-    public int getItemAmount(String itemString) throws ShopSystemException {
+    public int getItemAmount(int slot) throws ShopSystemException {
+	String itemString = getItemString(getShopInventory().getItem(slot), true);
 	checkForItemExists(itemString);
 	return YamlConfiguration.loadConfiguration(getSaveFile()).getInt("ShopItems." + itemString + ".Amount");
     }
@@ -210,11 +211,11 @@ public abstract class AbstractShopImpl implements AbstractShop {
     @Override
     public void changeShopSize(int newSize) throws ShopSystemException, GeneralEconomyException, PlayerException {
 	checkForValidSize(newSize);
-	checkForResizePossible(newSize);
-	this.size = newSize;
+	checkForResizePossible(newSize,1);
+	setSize(newSize);
 	saveShopSize();
 	setupShopInventory();
-	setupEditor();
+	setupEditor(1);
 	reloadShopItems();
     }
 
@@ -405,6 +406,10 @@ public abstract class AbstractShopImpl implements AbstractShop {
     protected void setName(String name) {
 	this.name = name;
     }
+    
+    protected void setSize(int size) {
+	this.size = size;
+    }
 
     protected boolean isSlotEmpty(int slot) throws GeneralEconomyException {
 	checkForValidSlot(slot);
@@ -433,7 +438,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	slotEditor = slotEditorNew;
     }
 
-    private String getItemString(ItemStack itemStack, boolean amountOne) {
+    protected String getItemString(ItemStack itemStack, boolean amountOne) {
 	ItemStack itemStackCpy = itemStack.clone();
 	if (amountOne) {
 	    itemStackCpy.setAmount(1);
@@ -455,7 +460,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	return itemStack.toString();
     }
 
-    private List<String> removeShopItemPriceLore(List<String> loreList) {
+    protected List<String> removeShopItemPriceLore(List<String> loreList) {
 	if (loreList != null) {
 	    Iterator<String> loreIter = loreList.iterator();
 	    while (loreIter.hasNext()) {
@@ -956,7 +961,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	save(config);
     }
 
-    private void saveShopSize() {
+    protected void saveShopSize() {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
 	config.set("ShopSize", getSize());
 	save(config);
@@ -1006,7 +1011,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	setupShopVillager();
 	setupShopInventory();
 	setupSlotEditor();
-	setupEditor();
+	setupEditor(1);
     }
 
     protected void setupShopLocation(Location location) {
@@ -1020,7 +1025,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
     }
 
     protected void setupShopSize(int size) {
-	this.size = size;
+	setSize(size);
 	saveShopSize();
     }
 
@@ -1044,9 +1049,9 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	getShopVillager().setProfession(Profession.NITWIT);
     }
 
-    private void setupEditor() {
+    protected void setupEditor(int reservedSlots) {
 	editor = Bukkit.createInventory(getShopVillager(), getSize(), getName() + "-Editor");
-	for (int i = 0; i < (getSize() - 1); i++) {
+	for (int i = 0; i < (getSize() - reservedSlots); i++) {
 	    // +1 for player readable
 	    getEditorInventory().setItem(i, getSkull(SLOTEMPTY, "Slot " + (i + 1)));
 	}
@@ -1118,7 +1123,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	loadShopVillagerProfession();
 	setupShopInventory();
 	setupSlotEditor();
-	setupEditor();
+	setupEditor(1);
 	loadShopItems();
     }
 
@@ -1155,7 +1160,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
     private void loadShopSize() {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	size = config.getInt("ShopSize");
+	setSize(config.getInt("ShopSize"));
     }
 
     private void loadShopName() {
@@ -1250,7 +1255,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
     }
 
-    private void checkForValidSize(int newSize) throws GeneralEconomyException {
+    protected void checkForValidSize(int newSize) throws GeneralEconomyException {
 	if (newSize % 9 != 0) {
 	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, newSize);
 	}
@@ -1263,13 +1268,12 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
     }
 
-    private void checkForResizePossible(int newSize) throws ShopSystemException {
+    protected void checkForResizePossible(int newSize,int reservedSlots) throws ShopSystemException {
 	int diff = getSize() - newSize;
 	// number of reserved slots
-	int temp = 1;
 	if (getSize() > newSize) {
 	    for (int i = 1; i <= diff; i++) {
-		ItemStack stack = shopInventory.getItem(getSize() - i - temp);
+		ItemStack stack = shopInventory.getItem(getSize() - i - reservedSlots);
 		if (stack != null && stack.getType() != Material.AIR) {
 		    throw ShopSystemException.getException(ShopExceptionMessageEnum.RESIZING_FAILED);
 		}

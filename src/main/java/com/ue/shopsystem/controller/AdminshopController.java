@@ -211,5 +211,6 @@ public class AdminshopController {
 	// convert to new shopId save system
 	UltimateEconomy.getInstance.getConfig().set("ShopNames", null);
 	UltimateEconomy.getInstance.getConfig().set("AdminShopIds", getAdminshopIdList());
+	UltimateEconomy.getInstance.saveConfig();
     }
 }

@@ -1,5 +1,9 @@
 package com.ue.shopsystem.api;
 
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+
+import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.player.api.EconomyPlayer;
@@ -7,8 +11,6 @@ import com.ue.player.api.EconomyPlayer;
 public interface Playershop extends AbstractShop {
 
     /**
-     * --Change Method--
-     * <p>
      * This method sets the owner of this shop. The owner and the shopname are
      * validated.
      * 
@@ -27,8 +29,6 @@ public interface Playershop extends AbstractShop {
     public boolean isOwner(EconomyPlayer ecoPlayer);
 
     /**
-     * --Get Method--
-     * <p>
      * Returns the shop owner.
      * 
      * @return EconomyPlayer
@@ -36,55 +36,42 @@ public interface Playershop extends AbstractShop {
     public EconomyPlayer getOwner();
 
     /**
-     * --Save file edit method--
-     * <p>
-     * For commercial use.
-     * <p>
      * This method decreases the stock of an shopitem in a playershop.
      * 
-     * @param itemString
-     * @param stock
-     *            (only positive)
+     * @param slot
+     * @param stock positive
+     * @exception GeneralEconomyException
      */
-    public void decreaseStock(String itemString, int stock);
+    public void decreaseStock(int slot, int stock) throws GeneralEconomyException;
 
     /**
-     * --Save file edit method--
-     * <p>
-     * For commercial use.
-     * <p>
      * This method increases the stock of an shopitem in a playershop.
      * 
-     * @param itemString
-     * @param stock
-     *            (only positive)
+     * @param slot
+     * @param stock positive
+     * @exception GeneralEconomyException
      */
-    public void increaseStock(String itemString, int stock);
+    public void increaseStock(int slot, int stock) throws GeneralEconomyException;
 
     /**
-     * --Stockpile Method--
-     * <p>
-     * This method returns true, if the stock of this item is positiv.
+     * This method returns true, if the stock of this item greater then the item amount.
      * 
-     * @param itemString
+     * @param slot
      * @return booelan
+     * @exception ShopSystemException
      */
-    public boolean isAvailable(String itemString);
+    public boolean isAvailable(int slot) throws ShopSystemException;
 
     /**
-     * --Stockpile Method--
-     * <p>
-     * This method switch in the playershop between the shop and the stockpile.
+     * This method opens the stockpile inventory.
      * 
+     * @param player
      */
-    public void switchStockpile();
-
+    public void openStockpile(Player player);
+    
     /**
-     * --Stockpile Method--
-     * <p>
-     * Setup/Build the stockpile GUI, if the stockpile mode is activated. (mode =
-     * false)
-     * 
+     * Returns the stockpile inventory.
+     * @return stockpile inventory
      */
-    public void setupStockpile();
+    public Inventory getStockpileInventory();
 }
