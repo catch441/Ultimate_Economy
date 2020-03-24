@@ -89,7 +89,7 @@ public class TownworldCommandExecutor implements CommandExecutor {
 
     private boolean handleEnableCommand(CommandSender sender, String label, String[] args) throws TownSystemException {
 	if (args.length == 2) {
-	    TownworldController.createTownWorld(plugin.getDataFolder(), args[1]);
+	    TownworldController.createTownWorld(args[1]);
 	    sender.sendMessage(MessageWrapper.getString("townworld_enable", args[1]));
 	} else {
 	    sender.sendMessage("/" + label + " enable <world>");

@@ -1,6 +1,5 @@
 package com.ue.townsystem.townworld.api;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BossBar;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
@@ -120,17 +118,16 @@ public class TownworldController {
     /**
      * This method should be used to create/enble a new townworld.
      * 
-     * @param mainDataFolder
      * @param world
      * @throws TownSystemException
      */
-    public static void createTownWorld(File mainDataFolder, String world) throws TownSystemException {
+    public static void createTownWorld(String world) throws TownSystemException {
 	if (Bukkit.getWorld(world) == null) {
 	    throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, world);
 	} else if (isTownWorld(world)) {
 	    throw TownSystemException.getException(TownExceptionMessageEnum.TOWNWORLD_ALREADY_EXIST);
 	} else {
-	    townWorldList.add(new TownworldImpl(mainDataFolder, world));
+	    townWorldList.add(new TownworldImpl(world));
 	    UltimateEconomy.getInstance.getConfig().set("TownWorlds", TownworldController.getTownWorldNameList());
 	    UltimateEconomy.getInstance.saveConfig();
 	}
@@ -161,13 +158,11 @@ public class TownworldController {
      * This method loads all townworlds from the save file. Loads all towns and
      * plots in the townworld as well. EconomyPlayers have to be loaded first.
      * 
-     * @param mainDataFolder
-     * @param fileConfig
      */
-    public static void loadAllTownWorlds(File mainDataFolder, FileConfiguration fileConfig) {
-	for (String townWorldName : fileConfig.getStringList("TownWorlds")) {
+    public static void loadAllTownWorlds() {
+	for (String townWorldName : UltimateEconomy.getInstance.getConfig().getStringList("TownWorlds")) {
 	    try {
-		TownworldImpl townworldImpl = new TownworldImpl(mainDataFolder, townWorldName);
+		TownworldImpl townworldImpl = new TownworldImpl(townWorldName);
 		List<Town> towns = new ArrayList<>();
 		for (String townName : townworldImpl.getTownNameList()) {
 		    towns.add(TownController.loadTown(townworldImpl, townName));

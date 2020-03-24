@@ -24,6 +24,7 @@ import com.ue.townsystem.town.api.Plot;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.town.api.TownController;
 import com.ue.townsystem.townworld.api.Townworld;
+import com.ue.ultimate_economy.UltimateEconomy;
 
 public class TownworldImpl implements Townworld {
 
@@ -36,13 +37,12 @@ public class TownworldImpl implements Townworld {
     /**
      * Represents a townworld.
      * 
-     * @param mainDataFolder
      * @param world
      */
-    public TownworldImpl(File mainDataFolder, String world) {
+    public TownworldImpl(String world) {
 	worldName = world;
 	towns = new ArrayList<>();
-	file = new File(mainDataFolder, world + "_TownWorld" + ".yml");
+	file = new File(UltimateEconomy.getInstance.getDataFolder(), world + "_TownWorld" + ".yml");
 	FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 	if (!file.exists()) {
 	    try {
