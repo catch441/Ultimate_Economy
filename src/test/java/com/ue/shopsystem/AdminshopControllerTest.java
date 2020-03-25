@@ -9,7 +9,6 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -50,7 +49,6 @@ public class AdminshopControllerTest {
     private static final String K_OFF = "http://textures.minecraft.net/texture/"
 	    + "e883b5beb4e601c3cbf50505c8bd552e81b996076312cffe27b3cc1a29e3";
     private static ServerMock server;
-    private static UltimateEconomy plugin;
     private static WorldMock world;
 
     /**
@@ -59,7 +57,7 @@ public class AdminshopControllerTest {
     @BeforeAll
     public static void initPlugin() {
 	server = MockBukkit.mock();
-	plugin = (UltimateEconomy) MockBukkit.load(UltimateEconomy.class);
+	MockBukkit.load(UltimateEconomy.class);
 	world = new WorldMock(Material.GRASS_BLOCK, 1);
 	server.addWorld(world);
     }
@@ -391,14 +389,6 @@ public class AdminshopControllerTest {
 	} catch (ShopSystemException | GeneralEconomyException e) {
 	    assertTrue(false);
 	}
-    }
-
-    /**
-     * Test loading all adminshops with no shops.
-     */
-    @Test
-    public void loadAllAdminShopsNoShopTest() {
-	AdminshopController.loadAllAdminShops();
     }
     
     /**

@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
+import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -39,7 +40,6 @@ import be.seeseemelk.mockbukkit.inventory.ChestInventoryMock;
 public class PlayershopControllerTest {
 
     private static ServerMock server;
-    private static UltimateEconomy plugin;
     private static WorldMock world;
 
     /**
@@ -48,7 +48,7 @@ public class PlayershopControllerTest {
     @BeforeAll
     public static void initPlugin() {
 	server = MockBukkit.mock();
-	plugin = (UltimateEconomy) MockBukkit.load(UltimateEconomy.class);
+	MockBukkit.load(UltimateEconomy.class);
 	world = new WorldMock(Material.GRASS_BLOCK, 1);
 	server.addWorld(world);
 	server.addPlayer("catch441");
@@ -373,7 +373,7 @@ public class PlayershopControllerTest {
 	    assertTrue(false);
 	}
     }
-    
+
     /**
      * Test delete a playershop.
      */
@@ -387,11 +387,70 @@ public class PlayershopControllerTest {
 	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "P0.yml");
 	    assertFalse(saveFile.exists());
 	    assertEquals(0, UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopIds").size());
-	    assertEquals(0, PlayershopController.getPlayerShops().size());;
+	    assertEquals(0, PlayershopController.getPlayerShops().size());
 	} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
 	    assertTrue(false);
 	}
     }
-    
-    // TODO loading tests
+
+    /**
+     * Test load all shops.
+     * 
+     */
+    @Test
+    public void loadAllPlayerShopsTest() {
+	Location location = new Location(world, 1.5, 2.3, 6.9);
+	try {
+	    PlayershopController.createPlayerShop("myshop", location, 9,
+		    EconomyPlayerController.getAllEconomyPlayers().get(0));
+	    PlayershopController.getPlayerShops().get(0).despawnVillager();
+	    assertEquals(1, PlayershopController.getPlayerShops().size());
+	    PlayershopController.getPlayerShops().clear();
+	    assertEquals(0, PlayershopController.getPlayerShops().size());
+	    PlayershopController.loadAllPlayerShops();
+	    assertEquals(1, PlayershopController.getPlayerShops().size());
+	    Playershop shop = PlayershopController.getPlayerShops().get(0);
+	    assertEquals(world, shop.getWorld());
+	    assertEquals("P0", shop.getShopId());
+	    assertEquals("myshop", shop.getName());
+	    assertEquals(EconomyVillager.PLAYERSHOP, shop.getShopVillager().getMetadata("ue-type").get(0).value());
+	    assertEquals(0, shop.getItemList().size());
+	    assertEquals(location, shop.getShopLocation());
+	} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+	    assertTrue(false);
+	}
+    }
+
+    /**
+     * Test load all shops with items.
+     * 
+     */
+    @Test
+    public void loadAllPlayerShopsTestWithItem() {
+	Location location = new Location(world, 1.5, 2.3, 6.9);
+	try {
+	    PlayershopController.createPlayerShop("myshop", location, 9,
+		    EconomyPlayerController.getAllEconomyPlayers().get(0));
+	    Playershop shop = PlayershopController.getPlayerShops().get(0);
+	    shop.addShopItem(0, 10, 10, new ItemStack(Material.STONE));
+	    shop.increaseStock(0, 25);
+	    shop.despawnVillager();
+	    PlayershopController.getPlayerShops().clear();
+	    assertEquals(0, PlayershopController.getPlayerShops().size());
+	    PlayershopController.loadAllPlayerShops();
+	    assertEquals(1, PlayershopController.getPlayerShops().size());
+	    Playershop response = PlayershopController.getPlayerShops().get(0);
+	    assertEquals(world, response.getWorld());
+	    assertEquals("P0", response.getShopId());
+	    assertEquals("myshop", response.getName());
+	    assertEquals(EconomyVillager.PLAYERSHOP, response.getShopVillager().getMetadata("ue-type").get(0).value());
+	    assertEquals(1, response.getItemList().size());
+	    assertEquals(location, response.getShopLocation());
+	    // TODO fix
+	    assertEquals(ChatColor.GREEN + "25" + ChatColor.GOLD + " Items",
+		    response.getStockpileInventory().getItem(0).getItemMeta().getLore().get(0));
+	} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+	    assertTrue(false);
+	}
+    }
 }

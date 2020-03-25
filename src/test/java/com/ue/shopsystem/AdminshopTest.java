@@ -54,7 +54,6 @@ public class AdminshopTest {
     private static final String SLOTFILLED = "http://textures.minecraft.net/texture/"
 	    + "9e42f682e430b55b61204a6f8b76d5227d278ed9ec4d98bda4a7a4830a4b6";
     private static ServerMock server;
-    private static UltimateEconomy plugin;
     private static WorldMock world;
     private static PlayerMock player;
 
@@ -64,7 +63,7 @@ public class AdminshopTest {
     @BeforeAll
     public static void initPlugin() {
 	server = MockBukkit.mock();
-	plugin = (UltimateEconomy) MockBukkit.load(UltimateEconomy.class);
+	MockBukkit.load(UltimateEconomy.class);
 	world = new WorldMock(Material.GRASS_BLOCK, 1);
 	server.addWorld(world);
 	player = server.addPlayer();
@@ -1199,9 +1198,10 @@ public class AdminshopTest {
 	try {
 	    AdminshopController.createAdminShop("myshop", location, 9);
 	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
-	    ItemStack item = shop.getItem(0);
-	    assertEquals(Material.AIR, item.getType());
-	} catch (ShopSystemException | GeneralEconomyException e) {
+	    shop.addShopItem(0, 0, 1, new ItemStack(Material.STONE));
+	    ItemStack item = shop.getShopItem(0);
+	    assertEquals(Material.STONE, item.getType());
+	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(false);
 	}
     }
