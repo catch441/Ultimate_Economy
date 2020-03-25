@@ -56,57 +56,51 @@ public class ConfigTabCompleter implements TabCompleter {
 
     private List<String> getMatchingCountry(String[] args) {
 	List<String> list = new ArrayList<>();
-	if (args[1].equals("de")) {
+	switch(args[1]) {
+	case "de": 
 	    list.add("DE");
-	} else if (args[1].equals("en")) {
+	    break;
+	case "en": 
 	    list.add("US");
-	} else if (args[1].equals("cs")) {
+	    break;
+	case "cs": 
 	    list.add("CZ");
-	} else if (args[1].equals("fr")) {
+	    break;
+	case "fr": 
 	    list.add("FR");
-	} else if (args[1].equals("zh")) {
+	    break;
+	case "zh": 
 	    list.add("CN");
-	} else if (args[1].equals("ru")) {
+	    break;
+	case "ru": 
 	    list.add("RU");
-	} else if (args[1].equals("es")) {
+	    break;
+	case "es": 
 	    list.add("ES");
-	} else if (args[1].equals("lt")) {
+	    break;
+	case "lt": 
 	    list.add("LT");
-	} else if (args[1].equals("it")) {
+	    break;
+	case "it": 
 	    list.add("IT");
+	    break;
+	default:
+	    break;
 	}
 	return list;
     }
 
     private List<String> getMatchingLanguages(String[] args) {
 	List<String> list = new ArrayList<>();
-	if ("de".contains(args[1])) {
-	    list.add("de");
-	}
-	if ("en".contains(args[1])) {
-	    list.add("us");
-	}
-	if ("cs".contains(args[1])) {
-	    list.add("cz");
-	}
-	if ("fr".contains(args[1])) {
-	    list.add("fr");
-	}
-	if ("zh".contains(args[1])) {
-	    list.add("cn");
-	}
-	if ("ru".contains(args[1])) {
-	    list.add("ru");
-	}
-	if ("es".contains(args[1])) {
-	    list.add("es");
-	}
-	if ("lt".contains(args[1])) {
-	    list.add("lt");
-	} 
-	if ("it".contains(args[1])) {
-	    list.add("it");
-	}
+	addIfContains(list,"de",args[1]);
+	addIfContains(list,"en",args[1]);
+	addIfContains(list,"cs",args[1]);
+	addIfContains(list,"fr",args[1]);
+	addIfContains(list,"zh",args[1]);
+	addIfContains(list,"ru",args[1]);
+	addIfContains(list,"es",args[1]);
+	addIfContains(list,"lt",args[1]);
+	addIfContains(list,"it",args[1]);
 	return list;
     }
 
@@ -150,37 +144,23 @@ public class ConfigTabCompleter implements TabCompleter {
 
     private List<String> getMatchingCommands(String[] args) {
 	List<String> list = new ArrayList<>();
-	if ("language".contains(args[0])) {
-	    list.add("language");
-	}
-	if ("maxHomes".contains(args[0])) {
-	    list.add("maxHomes");
-	}
-	if ("homes".contains(args[0])) {
-	    list.add("homes");
-	}
-	if ("maxRentedDays".contains(args[0])) {
-	    list.add("maxRentedDays");
-	}
-	if ("maxJobs".contains(args[0])) {
-	    list.add("maxJobs");
-	}
-	if ("maxJoinedTowns".contains(args[0])) {
-	    list.add("maxJoinedTowns");
-	}
-	if ("maxPlayershops".contains(args[0])) {
-	    list.add("maxPlayershops");
-	}
-	if ("extendedInteraction".contains(args[0])) {
-	    list.add("extendedInteraction");
-	}
-	if ("wildernessInteraction".contains(args[0])) {
-	    list.add("wildernessInteraction");
-	}
-	if ("currency".contains(args[0])) {
-	    list.add("currency");
-	}
+	addIfContains(list,"language",args[0]);
+	addIfContains(list,"maxHomes",args[0]);
+	addIfContains(list,"homes",args[0]);
+	addIfContains(list,"maxRentedDays",args[0]);
+	addIfContains(list,"maxJobs",args[0]);
+	addIfContains(list,"maxJoinedTowns",args[0]);
+	addIfContains(list,"maxPlayershops",args[0]);
+	addIfContains(list,"extendedInteraction",args[0]);
+	addIfContains(list,"wildernessInteraction",args[0]);
+	addIfContains(list,"currency",args[0]);
 	return list;
+    }
+    
+    private void addIfContains(List<String> list,String orig,String val) {
+	if (orig.contains(val)) {
+	    list.add(orig);
+	}
     }
 
     private List<String> getAllCommands() {

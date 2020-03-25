@@ -73,8 +73,10 @@ public abstract interface AbstractShop {
      * 
      * @param slot
      * @return itemstack
+     * @throws ShopSystemException 
+     * @throws GeneralEconomyException 
      */
-    public ItemStack getItem(int slot);
+    public ItemStack getShopItem(int slot) throws GeneralEconomyException, ShopSystemException;
 
     /**
      * This method returns the sellprice of a item.
@@ -100,8 +102,9 @@ public abstract interface AbstractShop {
      * @param  slot
      * @return int
      * @throws ShopSystemException
+     * @throws GeneralEconomyException 
      */
-    public int getItemAmount(int slot) throws ShopSystemException;
+    public int getItemAmount(int slot) throws ShopSystemException, GeneralEconomyException;
 
     /**
      * This method returns the buyprice of a item.

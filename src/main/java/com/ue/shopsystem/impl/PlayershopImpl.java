@@ -58,21 +58,23 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      * @param name
      * @param shopId
      * @throws TownSystemException
-     * @throws PlayerException 
+     * @throws PlayerException
+     * @throws ShopSystemException
+     * @throws GeneralEconomyException
      */
-    public PlayershopImpl(String name, String shopId) throws TownSystemException, PlayerException {
+    public PlayershopImpl(String name, String shopId)
+	    throws TownSystemException, PlayerException, GeneralEconomyException, ShopSystemException {
 	super(name, shopId);
 	loadExistingPlayerShop(name);
     }
-
     /*
      * API methods
      * 
      */
-    
+
     @Override
     public void openStockpile(Player player) {
-	player.openInventory(stockPile);
+	player.openInventory(getStockpileInventory());
     }
 
     /**
@@ -137,7 +139,9 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     }
 
     @Override
-    public boolean isAvailable(int slot) throws ShopSystemException {
+    public boolean isAvailable(int slot) throws ShopSystemException, GeneralEconomyException {
+	Bukkit.getLogger().info(slot + " davor");
+	checkForValidSlot(slot);
 	int stock = loadStock(slot);
 	int amount = getItemAmount(slot);
 	if (stock >= amount) {
@@ -163,8 +167,9 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     }
 
     @Override
-    public void decreaseStock(int slot, int stock) throws GeneralEconomyException {
+    public void decreaseStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException {
 	checkForPositiveValue(stock);
+	checkForValidSlot(slot);
 	int entireStock = loadStock(slot);
 	checkForValidStockDecrease(entireStock, stock);
 	if ((entireStock - stock) >= 0) {
@@ -174,24 +179,25 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     }
 
     @Override
-    public void increaseStock(int slot, int stock) throws GeneralEconomyException {
+    public void increaseStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException {
 	checkForPositiveValue(stock);
+	checkForValidSlot(slot);
 	int entireStock = loadStock(slot);
-	saveStock(slot, entireStock - stock);
+	saveStock(slot, entireStock + stock);
 	updateItemInStockpile(slot);
     }
-    
+
     @Override
     public Inventory getStockpileInventory() {
 	return stockPile;
     }
-    
+
     /*
      * Utility methods
      * 
      */
-    
-    private void updateItemInStockpile(int slot) {
+
+    private void updateItemInStockpile(int slot) throws GeneralEconomyException, ShopSystemException {
 	ItemStack stack = getShopInventory().getItem(slot).clone();
 	if (stack != null && stack.getType() != Material.AIR) {
 	    int stock = loadStock(slot);
@@ -207,7 +213,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	    getStockpileInventory().setItem(slot, stack);
 	}
     }
-    
+
     protected void setOwner(EconomyPlayer owner) {
 	this.owner = owner;
     }
@@ -217,16 +223,16 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      * 
      */
 
-    private void saveStock(int slot, int stock) {
+    private void saveStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	String itemString = getItemString(getShopInventory().getItem(slot), true);
-	config.set("ShopItems." + itemString + ".stock", 0);
+	String itemString = getItemString(getShopItem(slot), true);
+	config.set("ShopItems." + itemString + ".stock", stock);
 	save(config);
     }
 
     protected void saveOwner() {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	if (getOwner() != null) {    
+	if (getOwner() != null) {
 	    config.set("Owner", getOwner().getName());
 	} else {
 	    config.set("Owner", null);
@@ -238,7 +244,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      * Setup methods
      * 
      */
-    
+
     private void setupPlayerShop(EconomyPlayer owner) {
 	setupShopInvDefaultStockItem();
 	setupShopOwner(owner);
@@ -287,8 +293,9 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      * Loading methods
      * 
      */
-    
-    private void loadExistingPlayerShop(String name) throws PlayerException {
+
+    private void loadExistingPlayerShop(String name)
+	    throws PlayerException, GeneralEconomyException, ShopSystemException {
 	if (name != null) {
 	    loadOwnerOld(name);
 	}
@@ -296,20 +303,19 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	else {
 	    loadOwner();
 	}
-	setupEditor(2);
 	loadStockpile();
 	setupEconomyVillagerType();
     }
 
-    private int loadStock(int slot) {
+    private int loadStock(int slot) throws GeneralEconomyException, ShopSystemException {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	String itemString = getItemString(getShopInventory().getItem(slot), true);
+	String itemString = getItemString(getShopItem(slot), true);
 	return config.getInt("ShopItems." + itemString + ".stock");
     }
-    
-    private void loadStockpile() {
+
+    private void loadStockpile() throws GeneralEconomyException, ShopSystemException {
 	setupStockpile();
-	for(int i = 0; i<(getSize()-2);i++) {
+	for (int i = 0; i < (getSize() - 2); i++) {
 	    updateItemInStockpile(i);
 	}
     }
@@ -367,12 +373,19 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	    throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
 	}
     }
-    
+
+    private void checkForValidSlot(int slot) throws GeneralEconomyException {
+	if (slot > (getSize() - 2) || slot < 0) {
+	    // +1 for player readable style
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, slot + 1);
+	}
+    }
+
     /*
      * Deprecated
      * 
      */
-    
+
     @Deprecated
     private void loadOwnerOld(String name) throws PlayerException {
 	setOwner(EconomyPlayerController.getEconomyPlayerByName(name.substring(name.indexOf("_") + 1)));

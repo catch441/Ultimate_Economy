@@ -41,8 +41,9 @@ public interface Playershop extends AbstractShop {
      * @param slot
      * @param stock positive
      * @exception GeneralEconomyException
+     * @throws ShopSystemException 
      */
-    public void decreaseStock(int slot, int stock) throws GeneralEconomyException;
+    public void decreaseStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException;
 
     /**
      * This method increases the stock of an shopitem in a playershop.
@@ -50,8 +51,9 @@ public interface Playershop extends AbstractShop {
      * @param slot
      * @param stock positive
      * @exception GeneralEconomyException
+     * @throws ShopSystemException 
      */
-    public void increaseStock(int slot, int stock) throws GeneralEconomyException;
+    public void increaseStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException;
 
     /**
      * This method returns true, if the stock of this item greater then the item amount.
@@ -59,8 +61,9 @@ public interface Playershop extends AbstractShop {
      * @param slot
      * @return booelan
      * @exception ShopSystemException
+     * @throws GeneralEconomyException 
      */
-    public boolean isAvailable(int slot) throws ShopSystemException;
+    public boolean isAvailable(int slot) throws ShopSystemException, GeneralEconomyException;
 
     /**
      * This method opens the stockpile inventory.

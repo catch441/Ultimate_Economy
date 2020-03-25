@@ -139,8 +139,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
     }
 
     @Override
-    public int getItemAmount(int slot) throws ShopSystemException {
-	String itemString = getItemString(getShopInventory().getItem(slot), true);
+    public int getItemAmount(int slot) throws ShopSystemException, GeneralEconomyException {
+	String itemString = getItemString(getShopItem(slot), true);
 	checkForItemExists(itemString);
 	return YamlConfiguration.loadConfiguration(getSaveFile()).getInt("ShopItems." + itemString + ".Amount");
     }
@@ -192,7 +192,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
     }
 
     @Override
-    public ItemStack getItem(int slot) {
+    public ItemStack getShopItem(int slot) throws GeneralEconomyException, ShopSystemException {
+	checkForSlotIsNotEmpty(slot);
 	return getShopInventory().getItem(slot);
     }
 
@@ -211,7 +212,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
     @Override
     public void changeShopSize(int newSize) throws ShopSystemException, GeneralEconomyException, PlayerException {
 	checkForValidSize(newSize);
-	checkForResizePossible(newSize,1);
+	checkForResizePossible(newSize, 1);
 	setSize(newSize);
 	saveShopSize();
 	setupShopInventory();
@@ -244,7 +245,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	checkForValidSellPrice(newSellPrice);
 	checkForValidBuyPrice(newBuyPrice);
 	checkForOnePriceGreaterThenZeroIfBothAvailable(newSellPrice, newBuyPrice);
-	ItemStack itemStack = getShopInventory().getItem(slot);
+	ItemStack itemStack = getShopItem(slot);
 	String itemString = getItemString(itemStack, true);
 	String message = ChatColor.GOLD + "Updated ";
 	if (!"none".equals(newAmount)) {
@@ -270,13 +271,14 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	checkForValidSlot(slot);
 	checkForSlotIsNotEmpty(slot);
 	checkForItemCanBeDeleted(slot);
-	String itemString = getItemString(getShopInventory().getItem(slot), true);
+	ItemStack shopItem = getShopItem(slot);
+	String itemString = getItemString(shopItem, true);
 	getShopInventory().clear(slot);
 	getItemList().remove(itemString);
 	saveItemNames();
 	// +1 for player readable
 	getEditorInventory().setItem(slot, getSkull(SLOTEMPTY, "Slot " + (slot + 1)));
-	saveShopItem(getShopInventory().getItem(slot), slot, 0, 0, true);
+	saveShopItem(shopItem, slot, 0, 0, true);
     }
 
     @Override
@@ -406,12 +408,12 @@ public abstract class AbstractShopImpl implements AbstractShop {
     protected void setName(String name) {
 	this.name = name;
     }
-    
+
     protected void setSize(int size) {
 	this.size = size;
     }
 
-    protected boolean isSlotEmpty(int slot) throws GeneralEconomyException {
+    protected boolean isSlotEmpty(int slot) throws GeneralEconomyException, ShopSystemException {
 	checkForValidSlot(slot);
 	boolean isEmpty = false;
 	if (getShopInventory().getItem(slot) == null || getShopInventory().getItem(slot).getType() == Material.AIR) {
@@ -786,8 +788,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	double buyPrice = 0;
 	double sellPrice = 0;
 	if (!isSlotEmpty(slot)) {
-	    buyPrice = getItemBuyPrice(getItemString(getShopInventory().getItem(slot), true));
-	    sellPrice = getItemSellPrice(getItemString(getShopInventory().getItem(slot), true));
+	    buyPrice = getItemBuyPrice(getItemString(getShopItem(slot), true));
+	    sellPrice = getItemSellPrice(getItemString(getShopItem(slot), true));
 	}
 	List<String> listBuy = new ArrayList<String>();
 	List<String> listSell = new ArrayList<String>();
@@ -802,7 +804,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	setupSlotItemInSlotEditor(slot);
     }
 
-    private void setupSlotItemInSlotEditor(int slot) throws GeneralEconomyException {
+    private void setupSlotItemInSlotEditor(int slot) throws GeneralEconomyException, ShopSystemException {
 	if (isSlotEmpty(slot)) {
 	    ItemStack item = new ItemStack(Material.BARRIER);
 	    ItemMeta meta = item.getItemMeta();
@@ -810,7 +812,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    item.setItemMeta(meta);
 	    getSlotEditorInventory().setItem(0, item);
 	} else {
-	    ItemStack item = getShopInventory().getItem(slot).clone();
+	    ItemStack item = getShopItem(slot).clone();
 	    ItemMeta meta = item.getItemMeta();
 	    List<String> lore = removeShopItemPriceLore(meta.getLore());
 	    meta.setLore(lore);
@@ -929,7 +931,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    config.set("ShopItems." + itemString, null);
 	    save(config);
 	} else {
-	    if(stack.getType() == Material.SPAWNER) {
+	    if (stack.getType() == Material.SPAWNER) {
 		config.set("ShopItems." + itemString + ".Name", itemString);
 	    } else {
 		config.set("ShopItems." + itemString + ".Name", itemStackCopy);
@@ -1227,7 +1229,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
     }
 
-    private void checkForSlotIsEmpty(int slot) throws PlayerException, GeneralEconomyException {
+    private void checkForSlotIsEmpty(int slot) throws PlayerException, GeneralEconomyException, ShopSystemException {
 	if (!isSlotEmpty(slot)) {
 	    throw PlayerException.getException(PlayerExceptionMessageEnum.INVENTORY_SLOT_OCCUPIED);
 	}
@@ -1268,12 +1270,13 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
     }
 
-    protected void checkForResizePossible(int newSize,int reservedSlots) throws ShopSystemException {
+    protected void checkForResizePossible(int newSize, int reservedSlots)
+	    throws ShopSystemException, GeneralEconomyException {
 	int diff = getSize() - newSize;
 	// number of reserved slots
 	if (getSize() > newSize) {
 	    for (int i = 1; i <= diff; i++) {
-		ItemStack stack = shopInventory.getItem(getSize() - i - reservedSlots);
+		ItemStack stack = getShopInventory().getItem(getSize() - i - reservedSlots);
 		if (stack != null && stack.getType() != Material.AIR) {
 		    throw ShopSystemException.getException(ShopExceptionMessageEnum.RESIZING_FAILED);
 		}

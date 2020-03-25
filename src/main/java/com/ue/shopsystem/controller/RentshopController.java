@@ -180,7 +180,7 @@ public class RentshopController {
 	    if (file.exists()) {
 		try {
 		    rentShopList.add(new RentshopImpl(shopId));
-		} catch (TownSystemException | PlayerException e) {
+		} catch (TownSystemException | PlayerException | GeneralEconomyException | ShopSystemException e) {
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 		}

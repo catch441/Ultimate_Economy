@@ -58,8 +58,11 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      * @param shopId
      * @throws TownSystemException
      * @throws PlayerException
+     * @throws ShopSystemException
+     * @throws GeneralEconomyException
      */
-    public RentshopImpl(String shopId) throws TownSystemException, PlayerException {
+    public RentshopImpl(String shopId)
+	    throws TownSystemException, PlayerException, GeneralEconomyException, ShopSystemException {
 	super(null, shopId);
 	loadExistingRentshop();
     }
@@ -71,8 +74,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
     /**
      * Overridde, because the position didn't have to be validated for build
-     * permissions like the parent playershop. 
-     * {@inheritDoc}
+     * permissions like the parent playershop. {@inheritDoc}
      */
     @Override
     public void moveShop(Location location) throws TownSystemException {
@@ -97,8 +99,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
     /**
      * Overridden, because the naming convention is a other and a check for rentable
-     * is needed.
-     * {@inheritDoc}
+     * is needed. {@inheritDoc}
      */
     @Override
     public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
@@ -124,14 +125,14 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	saveRentable();
 	saveRentUntil();
     }
-    
+
     @Override
     public void changeRentalFee(double fee) throws GeneralEconomyException {
 	checkForPositiveValue(fee);
 	rentalFee = fee;
 	saveRentalFee();
     }
-    
+
     /**
      * Overriden, because of is not rented check.
      */
@@ -140,29 +141,28 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	checkForIsRentable();
 	super.changeShopSize(newSize);
     }
-    
+
     /**
      * Overridden, because of the rentable validation. Only possible, if the shop is
-     * not rented.
-     * {@inheritDoc}
+     * not rented. {@inheritDoc}
      */
     @Override
     public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException {
 	checkForIsRentable();
 	super.changeOwner(newOwner);
     }
-    
+
     @Override
     public void openRentGUI(Player player) throws ShopSystemException {
 	checkForIsRentable();
 	player.openInventory(getRentShopGuiInventory());
     }
-    
+
     @Override
     public Inventory getRentShopGuiInventory() {
 	return rentShopGUIInv;
     }
-    
+
     @Override
     public void resetShop() throws ShopSystemException, GeneralEconomyException {
 	setOwner(null);
@@ -180,7 +180,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      * Utility methods
      * 
      */
-    
+
     private void removeAllItems() throws ShopSystemException, GeneralEconomyException {
 	for (int i = 0; i < (getSize() - 2); i++) {
 	    removeShopItem(i);
@@ -188,10 +188,10 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
     }
 
     /*
-     * Rentshop gui utility methods 
+     * Rentshop gui utility methods
      * 
      */
-    
+
     private void refreshRentalFeeOnRentGUI(int duration) {
 	List<String> loreList = new ArrayList<>();
 	loreList.add(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + (duration * getRentalFee()));
@@ -232,12 +232,12 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	    getRentShopGuiInventory().setItem(3, item);
 	}
     }
-    
+
     /*
      * Handle rentshop gui click
      * 
      */
-    
+
     @Override
     public void handleRentShopGUIClick(InventoryClickEvent event)
 	    throws ShopSystemException, GeneralEconomyException, PlayerException {
@@ -272,7 +272,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	    }
 	}
     }
-    
+
     private void handlePlusMinusSevenGuiClick(int duration, String operation) {
 	if ("plus".equals(operation)) {
 	    if (duration < ConfigController.getMaxRentedDays()) {
@@ -327,35 +327,35 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      * Setup methods
      * 
      */
-    
+
     private void setupNewRentshop(double rentalFee) {
 	setupRentalFee(rentalFee);
 	setupRentable();
 	setupRentShopGUI();
 	setupEconomyVillagerType();
     }
-    
+
     private void setupEconomyVillagerType() {
 	getShopVillager().setMetadata("ue-type",
 		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP_RENTABLE));
     }
-    
+
     private void setupVillagerName() {
 	if (isRentable()) {
 	    getShopVillager().setCustomName("RentShop#" + getShopId());
 	}
     }
-    
+
     private void setupRentable() {
 	this.rentable = false;
 	saveRentable();
     }
-    
+
     private void setupRentalFee(double rentalFee) {
 	this.rentalFee = rentalFee;
 	saveRentalFee();
     }
-    
+
     private void setupRentShopGUI() {
 	rentShopGUIInv = Bukkit.createInventory(getShopVillager(), getSize(), getName());
 	List<String> loreList = new ArrayList<>();
@@ -392,7 +392,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      * Loading methods
      * 
      */
-    
+
     private void loadExistingRentshop() {
 	loadRentalFee();
 	loadRentable();

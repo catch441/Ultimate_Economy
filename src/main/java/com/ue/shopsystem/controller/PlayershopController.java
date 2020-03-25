@@ -184,7 +184,7 @@ public class PlayershopController {
 	    if (file.exists()) {
 		try {
 		    playerShopList.add(new PlayershopImpl(null, shopId));
-		} catch (TownSystemException | PlayerException e) {
+		} catch (TownSystemException | PlayerException | GeneralEconomyException | ShopSystemException e) {
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 		}
@@ -202,7 +202,7 @@ public class PlayershopController {
 		String shopId = generateFreePlayerShopId();
 		try {
 		    playerShopList.add(new PlayershopImpl(shopName, shopId));
-		} catch (TownSystemException | PlayerException e) {
+		} catch (TownSystemException | PlayerException | GeneralEconomyException | ShopSystemException e) {
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopName);
 		    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 		}
