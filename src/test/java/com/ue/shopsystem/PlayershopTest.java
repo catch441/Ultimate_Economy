@@ -246,7 +246,49 @@ public class PlayershopTest {
 	}
     }
     
+    /**
+     * Test change owner.
+     * 
+     */
+    @Test
+    public void changeOwnerTest() {
+	Location location = new Location(world, 1.5, 2.3, 6.9);
+	try {
+	    PlayershopController.createPlayerShop("myshop", location, 9,
+		    EconomyPlayerController.getAllEconomyPlayers().get(0));
+	    Playershop shop = PlayershopController.getPlayerShops().get(0);
+	    shop.changeOwner(EconomyPlayerController.getAllEconomyPlayers().get(1));
+	    assertEquals(EconomyPlayerController.getAllEconomyPlayers().get(1), shop.getOwner());
+	    // check save file
+	    File saveFile = shop.getSaveFile();
+	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
+	    assertEquals("Wulfgar", config.getString("Owner"));
+	} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+	    assertTrue(false);
+	}
+    }
+    
+    /**
+     * Test change owner with not possible.
+     * 
+     */
+    @Test
+    public void changeOwnerTestNoPossible() {
+	Location location = new Location(world, 1.5, 2.3, 6.9);
+	try {
+	    PlayershopController.createPlayerShop("myshop", location, 9,
+		    EconomyPlayerController.getAllEconomyPlayers().get(0));
+	    PlayershopController.createPlayerShop("myshop", location, 9,
+		    EconomyPlayerController.getAllEconomyPlayers().get(1));
+	    Playershop shop = PlayershopController.getPlayerShops().get(0);
+	    shop.changeOwner(EconomyPlayerController.getAllEconomyPlayers().get(1));
+	    assertTrue(false);
+	} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+	    assertTrue(e instanceof ShopSystemException);
+	    assertEquals("§cThe player has already a shop with the same name!", e.getMessage());
+	}
+    }
+    
     // addShopItem
     // removeShopItem
-    // changeOwner
 }
