@@ -34,3 +34,4 @@ jobs:
         ./cc-test-reporter upload-coverage
       env:
         CC_TEST_REPORTER_ID: e9a6854987df94ca96b39bca2e9426927eb5ee08ba9ebf629c156d5f56d31cfc
+        JACOCO_SOURCE_PATH:  src/main/java
