@@ -140,10 +140,14 @@
 						</goals>
 					</execution>
 					<execution>
-						<id>default-check</id>
+						<id>coverage-check</id>
 						<goals>
 							<goal>check</goal>
 						</goals>
+						<configuration>
+							<rules>
+							</rules>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
