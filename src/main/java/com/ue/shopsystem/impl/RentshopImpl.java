@@ -357,7 +357,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
     }
 
     private void setupRentShopGUI() {
-	rentShopGUIInv = Bukkit.createInventory(getShopVillager(), getSize(), getName());
+	rentShopGUIInv = Bukkit.createInventory(getShopVillager(), 9, getName());
 	List<String> loreList = new ArrayList<>();
 	loreList.add(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + getRentalFee());
 	ItemStack itemStack = new ItemStack(Material.GREEN_WOOL, 1);
