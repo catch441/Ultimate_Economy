@@ -45,7 +45,7 @@ public class TownImpl implements Town {
 
     private String townName;
     private EconomyPlayer mayor;
-    private ArrayList<EconomyPlayer> citizens, deputies = new ArrayList<>();
+    private ArrayList<EconomyPlayer> citizens = new ArrayList<>(), deputies = new ArrayList<>();
     private ArrayList<String> chunkCoords = new ArrayList<>();
     private Location townSpawn;
     private ArrayList<Plot> plots = new ArrayList<>();
@@ -82,9 +82,9 @@ public class TownImpl implements Town {
 	this.townworld = townworld;
 	this.townName = townName;
 	Chunk startChunk = location.getChunk();
-	
+
 	addPlot(new PlotImpl(this, mayor, startChunk.getX() + "/" + startChunk.getZ()));
-	
+
 	setupMayor(mayor);
 	setupTownManager(location);
 	setupTownBankAmount();
@@ -592,7 +592,7 @@ public class TownImpl implements Town {
 	tax = 0;
 	saveTax();
     }
-    
+
     private void setupTownManagerInventory() {
 	inventory = Bukkit.createInventory(villager, 9, getTownName() + " TownManager");
 	ItemStack itemStack = new ItemStack(Material.GREEN_WOOL, 1);
@@ -606,13 +606,13 @@ public class TownImpl implements Town {
 	itemStack.setItemMeta(meta);
 	inventory.setItem(1, itemStack);
     }
-    
+
     private void setupTownManager(Location location) {
 	setupTownManagerInventory();
 	spawnTownManagerVillager(location);
 	saveTownManagerLocation();
     }
-    
+
     private void setupMayor(EconomyPlayer mayor) throws PlayerException, TownSystemException {
 	this.mayor = mayor;
 	saveMayor(mayor);
@@ -691,7 +691,7 @@ public class TownImpl implements Town {
 	}
 	this.citizens = new ArrayList<>(citizens);
     }
-    
+
     private void loadTownManagerVillager() throws TownSystemException {
 	FileConfiguration config = YamlConfiguration.loadConfiguration(getTownworld().getSaveFile());
 	World world = Bukkit.getWorld(config.getString("World"));

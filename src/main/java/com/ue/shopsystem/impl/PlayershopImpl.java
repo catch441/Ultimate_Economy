@@ -87,8 +87,10 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	setSize(newSize);
 	saveShopSize();
 	setupShopInventory();
+	setupShopInvDefaultStockItem();
 	setupEditor(2);
 	reloadShopItems();
+	loadStockpile();
     }
 
     /**
@@ -121,7 +123,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	return owner;
     }
 
-    /*
+    /**
      * Overridden, because of the stock value. {@inheritDoc}
      */
     @Override
@@ -132,9 +134,13 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	updateItemInStockpile(slot);
     }
 
+    /**
+     * Overidden, because of stockpile.
+     * {@inheritDoc}
+     */
     @Override
     public void removeShopItem(int slot) throws ShopSystemException, GeneralEconomyException {
-	super.removeShopItem(slot);
+	super.removeShopItem(slot); 
 	updateItemInStockpile(slot);
     }
 
@@ -211,6 +217,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	    meta.setLore(list);
 	    stack.setItemMeta(meta);
 	    getStockpileInventory().setItem(slot, stack);
+	} else {
+	    getStockpileInventory().clear(slot);
 	}
     }
 
@@ -367,10 +375,14 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
     private void checkForPlayerHasPermissionInLocation(Location location) throws PlayerException, TownSystemException {
 	Townworld townworld = TownworldController.getTownWorldByName(location.getWorld().getName());
-	Town town = townworld.getTownByChunk(location.getChunk());
-	if (townworld.isChunkFree(location.getChunk()) || !town.hasBuildPermissions(getOwner(),
-		town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
+	if (townworld.isChunkFree(location.getChunk())) {
 	    throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
+	} else {
+	    Town town = townworld.getTownByChunk(location.getChunk());
+	    if (!town.hasBuildPermissions(getOwner(),
+		    town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
+		throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
+	    }
 	}
     }
 
