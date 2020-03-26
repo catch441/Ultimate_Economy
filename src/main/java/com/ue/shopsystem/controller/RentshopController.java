@@ -55,7 +55,7 @@ public class RentshopController {
      * 
      * @param id
      * @return RentShop
-     * @throws GeneralEconomyException 
+     * @throws GeneralEconomyException
      */
     public static Rentshop getRentShopById(String id) throws GeneralEconomyException {
 	for (Rentshop shop : rentShopList) {
@@ -63,7 +63,7 @@ public class RentshopController {
 		return shop;
 	    }
 	}
-	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,id);
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, id);
     }
 
     /**
@@ -75,7 +75,7 @@ public class RentshopController {
      * 
      * @param name
      * @return RentShop
-     * @throws GeneralEconomyException 
+     * @throws GeneralEconomyException
      */
     public static Rentshop getRentShopByUniqueName(String name) throws GeneralEconomyException {
 	for (Rentshop shop : rentShopList) {
@@ -89,7 +89,7 @@ public class RentshopController {
 		}
 	    }
 	}
-	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,name);
+	throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
     }
 
     /**
@@ -130,17 +130,13 @@ public class RentshopController {
      */
     public static Rentshop createRentShop(Location spawnLocation, int size, double rentalFee)
 	    throws GeneralEconomyException {
-	if (size % 9 != 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
-	} else if (rentalFee < 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, rentalFee);
-	} else {
-	    Rentshop shop = new RentshopImpl(spawnLocation, size, generateFreeRentShopId(), rentalFee);
-	    rentShopList.add(shop);
-	    UltimateEconomy.getInstance.getConfig().set("RentShopIds", RentshopController.getRentShopIdList());
-	    UltimateEconomy.getInstance.saveConfig();
-	    return shop;
-	}
+	checkForValidSize(size);
+	checkForPositiveValue(rentalFee);
+	Rentshop shop = new RentshopImpl(spawnLocation, size, generateFreeRentShopId(), rentalFee);
+	rentShopList.add(shop);
+	UltimateEconomy.getInstance.getConfig().set("RentShopIds", RentshopController.getRentShopIdList());
+	UltimateEconomy.getInstance.saveConfig();
+	return shop;
     }
 
     /**
@@ -187,6 +183,23 @@ public class RentshopController {
 	    } else {
 		Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
 	    }
+	}
+    }
+
+    /*
+     * Validation checks
+     * 
+     */
+    
+    private static void checkForPositiveValue(double value) throws GeneralEconomyException {
+	if (value < 0) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, value);
+	}
+    }
+
+    private static void checkForValidSize(int size) throws GeneralEconomyException {
+	if (size % 9 != 0) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
 	}
     }
 }

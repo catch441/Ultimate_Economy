@@ -347,7 +347,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
     }
 
     private void setupRentable() {
-	this.rentable = false;
+	this.rentable = true;
 	saveRentable();
     }
 
