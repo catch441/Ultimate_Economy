@@ -199,6 +199,11 @@ public class PlayershopControllerTest {
 	    assertEquals(ChatColor.RED + "Only for Shopowner", shopInv.getItem(7).getItemMeta().getLore().get(0));
 	    assertEquals(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile",
 		    shopInv.getItem(7).getItemMeta().getLore().get(1));
+	    assertEquals(Material.ANVIL, shopInv.getItem(8).getType());
+	    assertEquals("Info", shopInv.getItem(8).getItemMeta().getDisplayName());
+	    assertEquals("§6Rightclick: §asell specified amount", shopInv.getItem(8).getItemMeta().getLore().get(0));
+	    assertEquals("§6Shift-Rightclick: §asell all", shopInv.getItem(8).getItemMeta().getLore().get(1));
+	    assertEquals("§6Leftclick: §abuy", shopInv.getItem(8).getItemMeta().getLore().get(2));
 	    // check editor inventory
 	    ChestInventoryMock editor = (ChestInventoryMock) response.getEditorInventory();
 	    assertEquals(9, editor.getSize());
@@ -446,7 +451,6 @@ public class PlayershopControllerTest {
 	    assertEquals(EconomyVillager.PLAYERSHOP, response.getShopVillager().getMetadata("ue-type").get(0).value());
 	    assertEquals(1, response.getItemList().size());
 	    assertEquals(location, response.getShopLocation());
-	    // TODO fix
 	    assertEquals(ChatColor.GREEN + "25" + ChatColor.GOLD + " Items",
 		    response.getStockpileInventory().getItem(0).getItemMeta().getLore().get(0));
 	} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
