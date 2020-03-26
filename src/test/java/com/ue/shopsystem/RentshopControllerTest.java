@@ -2,20 +2,26 @@ package com.ue.shopsystem;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
+import org.bukkit.persistence.PersistentDataType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
@@ -28,9 +34,16 @@ import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
 import be.seeseemelk.mockbukkit.WorldMock;
 import be.seeseemelk.mockbukkit.entity.PlayerMock;
+import be.seeseemelk.mockbukkit.inventory.ChestInventoryMock;
 
 public class RentshopControllerTest {
 
+    private static final String ONE = "http://textures.minecraft.net/texture/"
+	    + "d2a6f0e84daefc8b21aa99415b16ed5fdaa6d8dc0c3cd591f49ca832b575";
+    private static final String SEVEN = "http://textures.minecraft.net/texture/"
+	    + "9e198fd831cb61f3927f21cf8a7463af5ea3c7e43bd3e8ec7d2948631cce879";
+    private static final String PLUS = "http://textures.minecraft.net/texture/"
+	    + "9a2d891c6ae9f6baa040d736ab84d48344bb6b70d7f1a280dd12cbac4d777";
     private static ServerMock server;
     private static WorldMock world;
     private static PlayerMock player;
@@ -185,7 +198,7 @@ public class RentshopControllerTest {
 	    assertTrue(false);
 	}
     }
-    
+
     /**
      * Test get rentshop by unique name without shop.
      * 
@@ -200,7 +213,7 @@ public class RentshopControllerTest {
 	    assertEquals("§c§4RentShop#R0§c does not exist!", e.getMessage());
 	}
     }
-    
+
     /**
      * Test get all rentshops.
      * 
@@ -220,7 +233,7 @@ public class RentshopControllerTest {
 	    assertTrue(false);
 	}
     }
-    
+
     /**
      * Test despawn all rentshop villagers.
      * 
@@ -230,18 +243,16 @@ public class RentshopControllerTest {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
 	try {
 	    Rentshop shop = RentshopController.createRentShop(location, 9, 10);
-	    Collection<Entity> entities1 = world
-		    .getNearbyEntities(shop.getShopLocation(), 0, 0, 0);
+	    Collection<Entity> entities1 = world.getNearbyEntities(shop.getShopLocation(), 0, 0, 0);
 	    RentshopController.despawnAllVillagers();
-	    Collection<Entity> entities2 = world
-		    .getNearbyEntities(shop.getShopLocation(), 0, 0, 0);
+	    Collection<Entity> entities2 = world.getNearbyEntities(shop.getShopLocation(), 0, 0, 0);
 	    assertEquals(1, entities1.size());
 	    assertEquals(0, entities2.size());
 	} catch (GeneralEconomyException e) {
 	    assertTrue(false);
 	}
     }
-    
+
     /**
      * Test delete a rentshop.
      * 
@@ -262,7 +273,7 @@ public class RentshopControllerTest {
 	    assertTrue(false);
 	}
     }
-    
+
     /**
      * Test create rentshop with a invalid size.
      * 
@@ -278,7 +289,7 @@ public class RentshopControllerTest {
 	    assertEquals("§cThe parameter §4-13§c is invalid!", e.getMessage());
 	}
     }
-    
+
     /**
      * Test create rentshop with a invalid rental fee.
      * 
@@ -294,13 +305,70 @@ public class RentshopControllerTest {
 	    assertEquals("§cThe parameter §4-5.0§c is invalid!", e.getMessage());
 	}
     }
-    
+
     /**
      * Test create rentshop.
      * 
      */
     @Test
     public void createRentshopTest() {
-	
+	Location location = new Location(world, 1.5, 2.3, 6.9);
+	try {
+	    Rentshop shop = RentshopController.createRentShop(location, 9, 5);
+	    assertEquals(world, shop.getWorld());
+	    assertEquals("R0", shop.getShopId());
+	    assertEquals("RentShop#R0", shop.getName());
+	    assertNull(shop.getOwner());
+	    assertEquals(EconomyVillager.PLAYERSHOP_RENTABLE,
+		    shop.getShopVillager().getMetadata("ue-type").get(0).value());
+	    assertEquals("5.0", String.valueOf(shop.getRentalFee()));
+	    assertTrue(shop.isRentable());
+	    assertEquals("0.0", String.valueOf(shop.getRentUntil()));
+	    // check rentshop gui
+	    ChestInventoryMock gui = (ChestInventoryMock) shop.getRentShopGuiInventory();
+	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
+	    assertEquals("RentShop#R0", gui.getName());
+	    assertEquals(9, gui.getSize());
+	    assertEquals(Material.GREEN_WOOL, gui.getItem(0).getType());
+	    assertEquals(ChatColor.YELLOW + "Rent", gui.getItem(0).getItemMeta().getDisplayName());
+	    assertEquals(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + 5.0,
+		    gui.getItem(0).getItemMeta().getLore().get(0));
+	    assertEquals(Material.CLOCK, gui.getItem(1).getType());
+	    assertEquals(1, gui.getItem(1).getItemMeta().getLore().size());
+	    assertEquals(ChatColor.YELLOW + "Duration", gui.getItem(1).getItemMeta().getDisplayName());
+	    assertEquals(ChatColor.GOLD + "Duration: " + ChatColor.GREEN + 1 + ChatColor.GOLD + " Day",
+		    gui.getItem(1).getItemMeta().getLore().get(0));
+	    assertEquals(Material.PLAYER_HEAD, gui.getItem(3).getType());
+	    assertNull(gui.getItem(3).getItemMeta().getLore());
+	    assertEquals("plus", gui.getItem(3).getItemMeta().getDisplayName());
+	    assertEquals(PLUS,
+		    gui.getItem(3).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+	    assertEquals(Material.PLAYER_HEAD, gui.getItem(4).getType());
+	    assertEquals(1, gui.getItem(4).getItemMeta().getLore().size());
+	    assertEquals("one", gui.getItem(4).getItemMeta().getDisplayName());
+	    assertEquals(ChatColor.GOLD + "Duration: " + ChatColor.GREEN + 1 + ChatColor.GOLD + " Day",
+		    gui.getItem(4).getItemMeta().getLore().get(0));
+	    assertEquals(ONE,
+		    gui.getItem(4).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+	    assertEquals(Material.PLAYER_HEAD, gui.getItem(4).getType());
+	    assertEquals(1, gui.getItem(5).getItemMeta().getLore().size());
+	    assertEquals("seven", gui.getItem(5).getItemMeta().getDisplayName());
+	    assertEquals(ChatColor.GOLD + "Duration: " + ChatColor.GREEN + 1 + ChatColor.GOLD + " Day",
+		    gui.getItem(5).getItemMeta().getLore().get(0));
+	    assertEquals(SEVEN,
+		    gui.getItem(5).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+	    // check savefile
+	    File saveFile = shop.getSaveFile();
+	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
+	    assertEquals("5.0", config.getString("RentalFee"));
+	    assertTrue(config.getBoolean("Rentable"));
+	    assertNull(config.getString("RentUntil"));
+	    assertEquals(1, UltimateEconomy.getInstance.getConfig().getStringList("RentShopIds").size());
+	    assertEquals("R0", UltimateEconomy.getInstance.getConfig().getStringList("RentShopIds").get(0));
+	} catch (GeneralEconomyException e) {
+	    assertTrue(false);
+	}
     }
+    
+    // TODO loading tests
 }
