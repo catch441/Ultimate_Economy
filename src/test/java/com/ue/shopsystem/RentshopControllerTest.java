@@ -49,9 +49,6 @@ public class RentshopControllerTest {
     private static ServerMock server;
     private static WorldMock world;
 
-    /**
-     * Init shop for tests.
-     */
     @BeforeAll
     public static void initPlugin() {
 	server = MockBukkit.mock();
@@ -90,10 +87,6 @@ public class RentshopControllerTest {
 	}
     }
 
-    /**
-     * Test generate free rentshop id.
-     * 
-     */
     @Test
     public void generateFreeRentShopIdTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -108,10 +101,6 @@ public class RentshopControllerTest {
 	}
     }
 
-    /**
-     * Test get rentshop id list.
-     * 
-     */
     @Test
     public void getRentShopIdListTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -125,10 +114,6 @@ public class RentshopControllerTest {
 	}
     }
 
-    /**
-     * Test get rentshop by shop id.
-     * 
-     */
     @Test
     public void getRentShopByIdTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -142,10 +127,6 @@ public class RentshopControllerTest {
 	}
     }
 
-    /**
-     * Test get rentshop by shop id with no shops.
-     * 
-     */
     @Test
     public void getRentShopByIdTestWithNoShop() {
 	try {
@@ -157,10 +138,6 @@ public class RentshopControllerTest {
 	}
     }
 
-    /**
-     * Test get unique rentshop name list.
-     * 
-     */
     @Test
     public void getRentShopUniqueNameListTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -178,10 +155,6 @@ public class RentshopControllerTest {
 	}
     }
 
-    /**
-     * Test get rentshop by unique name.
-     * 
-     */
     @Test
     public void getRentShopByUniqueNameTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -203,10 +176,6 @@ public class RentshopControllerTest {
 	}
     }
 
-    /**
-     * Test get rentshop by unique name without shop.
-     * 
-     */
     @Test
     public void getRentShopByUniqueNameTestWithoutShop() {
 	try {
@@ -218,10 +187,6 @@ public class RentshopControllerTest {
 	}
     }
 
-    /**
-     * Test get all rentshops.
-     * 
-     */
     @Test
     public void getRentShopsTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -238,10 +203,6 @@ public class RentshopControllerTest {
 	}
     }
 
-    /**
-     * Test despawn all rentshop villagers.
-     * 
-     */
     @Test
     public void despawnAllVillagersTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -257,10 +218,6 @@ public class RentshopControllerTest {
 	}
     }
 
-    /**
-     * Test delete a rentshop.
-     * 
-     */
     @Test
     public void deleteRentshopTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -278,10 +235,6 @@ public class RentshopControllerTest {
 	}
     }
 
-    /**
-     * Test create rentshop with a invalid size.
-     * 
-     */
     @Test
     public void createRentshopTestWithInvalidSize() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -294,10 +247,6 @@ public class RentshopControllerTest {
 	}
     }
 
-    /**
-     * Test create rentshop with a invalid rental fee.
-     * 
-     */
     @Test
     public void createRentshopTestWithInvalidRentalFee() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -310,10 +259,6 @@ public class RentshopControllerTest {
 	}
     }
 
-    /**
-     * Test create rentshop.
-     * 
-     */
     @Test
     public void createRentshopTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -374,10 +319,6 @@ public class RentshopControllerTest {
 	}
     }
     
-    /**
-     * Test load all rentshops with not rented.
-     * 
-     */
     @Test
     public void loadAllRentshopsTestWithNotRented() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -401,10 +342,6 @@ public class RentshopControllerTest {
 	}
     }
     
-    /**
-     * Test load all rentshops with rented.
-     * 
-     */
     @Test
     public void loadAllRentshopsTestWithRented() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);

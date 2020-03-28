@@ -98,9 +98,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test add shop item with buy and sell price. Normal item.
-     */
     @Test
     public void addShopItemTest() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -140,10 +137,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test add shop item with buy and sell price. Normal item with lore and a
-     * custom name.
-     */
     @Test
     public void addShopItemTestWithLoreAndCustomName() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -191,9 +184,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test add shop item with only buy price. Normal item.
-     */
     @Test
     public void addShopItemTestWithOnlyBuyPrice() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -232,9 +222,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test add shop item with only sell price. Normal item.
-     */
     @Test
     public void addShopItemTestWithOnlySellPrice() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -273,9 +260,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test add shop item with both prices. Potion.
-     */
     @Test
     public void addShopItemTestWithPotion() {
 	ItemStack item = new ItemStack(Material.POTION, 16);
@@ -319,9 +303,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test add shop item with both prices. Enchanted tool and damage.
-     */
     @Test
     public void addShopItemTestWithEnchantedTool() {
 	ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE, 16);
@@ -368,9 +349,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test add shop item with invalid price.
-     */
     @Test
     public void addShopItemTestWithInvalidPrice() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -386,9 +364,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test add shop item without prices.
-     */
     @Test
     public void addShopItemTestWithoutPrices() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -404,9 +379,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test add shop item with invalid slot.
-     */
     @Test
     public void addShopItemTestWithInvalidSlot() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -422,9 +394,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test add shop item with occupied slot.
-     */
     @Test
     public void addShopItemTestWithOccupiedSlot() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -441,9 +410,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test add shop item with item already exists.
-     */
     @Test
     public void addShopItemTestWithItemAlreadyExists() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -460,9 +426,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test edit shop item.
-     */
     @Test
     public void editShopItemTest() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -504,9 +467,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test edit shop item with only amount.
-     */
     @Test
     public void editShopItemTestWithOnlyAmount() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -548,9 +508,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test edit shop item with only sellPrice.
-     */
     @Test
     public void editShopItemTestWithOnlySellPrice() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -592,9 +549,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test edit shop item with only buyPrice.
-     */
     @Test
     public void editShopItemTestWithOnlyBuyPrice() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -636,9 +590,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test edit shop item with empty slot.
-     */
     @Test
     public void editShopItemTestWithEmptySlot() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -653,9 +604,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test edit shop item with invalid buy price.
-     */
     @Test
     public void editShopItemTestWithInvalidBuyPrice() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -672,9 +620,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test edit shop item with zero prices.
-     */
     @Test
     public void editShopItemTestWithZeroPrices() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -691,9 +636,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test edit shop item with invalid amount.
-     */
     @Test
     public void editShopItemTestWithInvalidAmount() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -710,9 +652,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test edit shop item with invalid sell price.
-     */
     @Test
     public void editShopItemTestWithInvalidSellPrice() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -729,10 +668,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test add spawner.
-     * 
-     */
     @Test
     public void addSpawnerTest() {
 	ItemStack item = new ItemStack(Material.SPAWNER, 1);
@@ -774,9 +709,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test remove existing item.
-     */
     @Test
     public void removeItemTest() {
 	ItemStack item = new ItemStack(Material.STONE, 16);
@@ -807,9 +739,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test remove item with a empty slot.
-     */
     @Test
     public void removeItemTestWithEmptySlot() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -824,9 +753,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test remove item with a invalid slot.
-     */
     @Test
     public void removeItemTestWithInvalidSlot() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -841,9 +767,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test remove item with a invalid item.
-     */
     @Test
     public void removeItemTestWithInvalidItem() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -858,9 +781,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test move shop.
-     */
     @Test
     public void moveShopTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -885,9 +805,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test change shop villager profession.
-     */
     @Test
     public void changeProfessionTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -905,9 +822,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test change shop name.
-     */
     @Test
     public void changeShopNameTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -928,9 +842,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test change shop name with a invalid name.
-     */
     @Test
     public void changeShopNameTestWithInvalidName() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -945,9 +856,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test change shop name with existing name.
-     */
     @Test
     public void changeShopNameTestWithExistingName() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -963,9 +871,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test change shop size to a greater size.
-     */
     @Test
     public void changeShopSizeTestWithGreaterSize() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1064,9 +969,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test change shop size to a smaller size.
-     */
     @Test
     public void changeShopSizeTestWithSmallerSize() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1123,9 +1025,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test change shop size with invalid size.
-     */
     @Test
     public void changeShopSizeTestWithInvalidSize() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1140,9 +1039,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test change shop size with occupiedSlots.
-     */
     @Test
     public void changeShopSizeTestWithOccupiedSlots() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1158,9 +1054,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test despawn shop villager.
-     */
     @Test
     public void despawnVillagerTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1175,9 +1068,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test get editor inventory.
-     */
     @Test
     public void getEditorInventoryTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1192,9 +1082,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test get item.
-     */
     @Test
     public void getItemTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1209,9 +1096,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test get world.
-     */
     @Test
     public void getWorldTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1225,9 +1109,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test open slot editor with empty slot.
-     */
     @Test
     public void openSlotEditorTestWithEmptySlot() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1244,9 +1125,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test open slot editor with occupied slot.
-     */
     @Test
     public void openSlotEditorTestWithOccupiedSlot() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1266,9 +1144,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test open slot editor with invalid slot.
-     */
     @Test
     public void openSlotEditorTestWithInvalidSlot() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1283,9 +1158,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test open shop inventory.
-     */
     @Test
     public void openShopInventoryTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1301,9 +1173,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test open editor inventory.
-     */
     @Test
     public void openEditorInventoryTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1319,9 +1188,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test get save file.
-     */
     @Test
     public void getSaveFileTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1335,9 +1201,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test get size.
-     */
     @Test
     public void getSizeTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1351,9 +1214,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test get shop id.
-     */
     @Test
     public void getShopIdTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1367,9 +1227,6 @@ public class AdminshopTest {
 	}
     }
 
-    /**
-     * Test get shop location.
-     */
     @Test
     public void getShopLocationTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -1382,5 +1239,4 @@ public class AdminshopTest {
 	    assertTrue(false);
 	}
     }
-
 }

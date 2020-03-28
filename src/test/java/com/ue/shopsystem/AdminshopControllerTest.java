@@ -91,9 +91,6 @@ public class AdminshopControllerTest {
 	}
     }
 
-    /**
-     * Test create new adminshop with invalid size.
-     */
     @Test
     public void createNewAdminshopTestWithInvalidSize() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -106,9 +103,6 @@ public class AdminshopControllerTest {
 	}
     }
 
-    /**
-     * Test create new adminshop with existing name.
-     */
     @Test
     public void createNewAdminshopTestWithExistingName() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -122,9 +116,6 @@ public class AdminshopControllerTest {
 	}
     }
 
-    /**
-     * Test create new adminshop with invalid name.
-     */
     @Test
     public void createNewAdminshopTestWithInvalidName() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -137,9 +128,6 @@ public class AdminshopControllerTest {
 	}
     }
 
-    /**
-     * Test create new adminshop.
-     */
     @Test
     public void createNewAdminshopTestSuccess() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -246,9 +234,6 @@ public class AdminshopControllerTest {
 	}
     }
 
-    /**
-     * Test delete a adminshop.
-     */
     @Test
     public void deleteAdminshopTest() {
 	try {
@@ -263,9 +248,6 @@ public class AdminshopControllerTest {
 	}
     }
 
-    /**
-     * Test get adminshop by name with shop does not exist.
-     */
     @Test
     public void getAdminShopByNameFailTest() {
 	try {
@@ -278,9 +260,6 @@ public class AdminshopControllerTest {
 	}
     }
 
-    /**
-     * Test get adminshop by name.
-     */
     @Test
     public void getAdminShopByNameTest() {
 	try {
@@ -294,9 +273,6 @@ public class AdminshopControllerTest {
 	}
     }
 
-    /**
-     * Test get adminshop by id.
-     */
     @Test
     public void getAdminshopByIdTest() {
 	try {
@@ -309,9 +285,6 @@ public class AdminshopControllerTest {
 	}
     }
 
-    /**
-     * Test get adminshop by id with shop does not exist.
-     */
     @Test
     public void getAdminshopByIdFailTest() {
 	try {
@@ -324,9 +297,6 @@ public class AdminshopControllerTest {
 	}
     }
 
-    /**
-     * Test generate free adminshop id.
-     */
     @Test
     public void generateFreeAdminShopIdTest() {
 	try {
@@ -340,9 +310,6 @@ public class AdminshopControllerTest {
 	}
     }
 
-    /**
-     * Test loading all adminshops (empty).
-     */
     @Test
     public void loadAllAdminShopsTest() {
 	try {
@@ -366,9 +333,6 @@ public class AdminshopControllerTest {
 	}
     }
     
-    /**
-     * Test loading all adminshops with custom profession.
-     */
     @Test
     public void loadAllAdminShopsTestWithProfession() {
 	try {
@@ -394,10 +358,6 @@ public class AdminshopControllerTest {
 	}
     }
     
-    /**
-     * Test reload shop items.
-     * 
-     */
     @Test
     public void loadAllAdminShopsTestWithItems() {
 	ItemStack spawner = new ItemStack(Material.SPAWNER, 1);
@@ -473,9 +433,6 @@ public class AdminshopControllerTest {
 	}
     }
 
-    /**
-     * Test despawn all shop villagers.
-     */
     @Test
     public void despawnAllVillagersTest() {
 	try {

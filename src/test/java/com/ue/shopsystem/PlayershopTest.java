@@ -44,9 +44,6 @@ public class PlayershopTest {
     private static WorldMock world;
     private static PlayerMock player;
 
-    /**
-     * Init shop for tests.
-     */
     @BeforeAll
     public static void initPlugin() {
 	server = MockBukkit.mock();
@@ -93,10 +90,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test is owner.
-     * 
-     */
     @Test
     public void isOwnerTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -111,10 +104,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test increase stock.
-     * 
-     */
     @Test
     public void increaseStockTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -135,10 +124,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test increase stock with invalid stock.
-     * 
-     */
     @Test
     public void increaseStockTestWithInvalidStock() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -156,10 +141,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test decrease stock.
-     * 
-     */
     @Test
     public void decreaseStockTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -181,10 +162,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test decrease stock with invalid stock.
-     * 
-     */
     @Test
     public void decreaseStockTestWithInvalidStock() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -202,10 +179,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test decrease stock with invalid stock.
-     * 
-     */
     @Test
     public void decreaseStockTestWithNegativeStockStock() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -224,10 +197,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test is available.
-     * 
-     */
     @Test
     public void isAvailableTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -245,10 +214,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test is available with invalid slot.
-     * 
-     */
     @Test
     public void isAvailableTestWithInvalidSlot() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -266,10 +231,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test change owner.
-     * 
-     */
     @Test
     public void changeOwnerTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -288,10 +249,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test change owner with not possible.
-     * 
-     */
     @Test
     public void changeOwnerTestNoPossible() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -309,10 +266,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test add item on a reserved slot.
-     * 
-     */
     @Test
     public void addItemTestWithReservedSlot() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -329,10 +282,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test change size.
-     * 
-     */
     @Test
     public void changeSizeTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -406,10 +355,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test change size with a occupied slot on reserved slot 2.
-     * 
-     */
     @Test
     public void changeSizeTestWithOccupiedSlot() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -427,10 +372,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test open stockpile inventory.
-     * 
-     */
     @Test
     public void openStockpileTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -448,10 +389,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test move shop.
-     * 
-     */
     @Test
     public void moveShopTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -477,10 +414,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test move shop with no plot permission.
-     * 
-     */
     @Test
     public void moveShopTestWithNoPlotPermission() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -497,19 +430,11 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test move shop with no plot permission in a town.
-     * 
-     */
     @Test
     public void moveShopTestWithNoPlotPermissionTown() {
 	// TODO if town is testd
     }
 
-    /**
-     * Test change shop name with invalid name.
-     * 
-     */
     @Test
     public void changeShopNameTestWithInvalidName() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -525,10 +450,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test change shop name with existing name.
-     * 
-     */
     @Test
     public void changeShopNameTestWithExistingName() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -546,10 +467,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test change shop name.
-     * 
-     */
     @Test
     public void changeShopNameTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -571,10 +488,6 @@ public class PlayershopTest {
 	}
     }
 
-    /**
-     * Test remove item test.
-     * 
-     */
     @Test
     public void removeItemTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);

@@ -42,9 +42,6 @@ public class PlayershopControllerTest {
     private static ServerMock server;
     private static WorldMock world;
 
-    /**
-     * Init shop for tests.
-     */
     @BeforeAll
     public static void initPlugin() {
 	server = MockBukkit.mock();
@@ -90,9 +87,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test create new playershop with invalid size.
-     */
     @Test
     public void createNewPlayershopTestWithInvalidSize() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -106,9 +100,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test create new playershop with existing name.
-     */
     @Test
     public void createNewAdminshopTestWithExistingName() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -125,9 +116,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test create new playershop with invalid name.
-     */
     @Test
     public void createNewAdminshopTestWithInvalidName() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -141,9 +129,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test create new playershop with invalid name.
-     */
     @Test
     public void createNewAdminshopTestWithMaxShopsReached() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -160,9 +145,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test create new playershop with no plot permission.
-     */
     @Test
     public void createNewAdminshopTestWithNoPlotPermission() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -177,9 +159,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test create new playershop.
-     */
     @Test
     public void createNewPlayershopTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -245,9 +224,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test generate free playershop id.
-     */
     @Test
     public void generateFreePlayerShopIdTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -263,9 +239,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test get playershop unique name list.
-     */
     @Test
     public void getPlayerShopUniqueNameListTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -280,9 +253,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test get playershop by unique name.
-     */
     @Test
     public void getPlayerShopByUniqueNameTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -299,9 +269,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test get playershop by unique name with no shop.
-     */
     @Test
     public void getPlayerShopByUniqueNameTestWithNoShop() {
 	try {
@@ -313,9 +280,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test get playershop by shopid.
-     */
     @Test
     public void getPlayerShopByIdTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -330,9 +294,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test get playershop by shopid with no shop.
-     */
     @Test
     public void getPlayerShopByIdTestWithNoShop() {
 	try {
@@ -344,9 +305,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test get id list.
-     */
     @Test
     public void getPlayershopIdListTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -361,9 +319,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test despawn villagers.
-     */
     @Test
     public void despawnAllVillagersTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -382,9 +337,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test delete a playershop.
-     */
     @Test
     public void deletePlayershopTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -401,10 +353,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test load all shops.
-     * 
-     */
     @Test
     public void loadAllPlayerShopsTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -429,10 +377,6 @@ public class PlayershopControllerTest {
 	}
     }
 
-    /**
-     * Test load all shops with items.
-     * 
-     */
     @Test
     public void loadAllPlayerShopsTestWithItem() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);

@@ -38,10 +38,7 @@ public class RentshopTest {
     private static ServerMock server;
     private static WorldMock world;
     private static PlayerMock player;
-
-    /**
-     * Init shop for tests.
-     */
+    
     @BeforeAll
     public static void initPlugin() {
 	server = MockBukkit.mock();
@@ -80,10 +77,6 @@ public class RentshopTest {
 	}
     }
     
-    /**
-     * Test move shop.
-     * 
-     */
     @Test
     public void moveShopTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -97,10 +90,6 @@ public class RentshopTest {
 	}
     }
     
-    /**
-     * Test is rentable.
-     * 
-     */
     @Test
     public void isRentableTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -115,10 +104,6 @@ public class RentshopTest {
 	}
     }
     
-    /**
-     * Test change shop name with not rented.
-     * 
-     */
     @Test
     public void changeShopNameTestWithNotRented() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -136,10 +121,6 @@ public class RentshopTest {
 	}
     }
     
-    /**
-     * Test change shop name with rented.
-     * 
-     */
     @Test
     public void changeShopNameTestWithRented() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -158,11 +139,7 @@ public class RentshopTest {
 	    assertTrue(false);
 	}
     }
-    
-    /**
-     * Test rent shop.
-     * 
-     */
+
     @Test
     public void rentShopTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -186,10 +163,6 @@ public class RentshopTest {
 	}
     }
     
-    /**
-     * Test rent shop with not enough money.
-     * 
-     */
     @Test
     public void rentShopTestWithNotEnoughMoney() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -203,10 +176,6 @@ public class RentshopTest {
 	}
     }
     
-    /**
-     * Test rent shop with already rented.
-     * 
-     */
     @Test
     public void rentShopTestWithAlreadyRented() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -223,10 +192,6 @@ public class RentshopTest {
 	}
     }
     
-    /**
-     * Test reset shop.
-     * 
-     */
     @Test
     public void resetShopTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -254,10 +219,6 @@ public class RentshopTest {
 	}
     }
     
-    /**
-     * Test change rental fee.
-     * 
-     */
     @Test
     public void changeRentalFee() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -274,10 +235,6 @@ public class RentshopTest {
 	}
     }
     
-    /**
-     * Test change rental fee with a negative value.
-     * 
-     */
     @Test
     public void changeRentalFeeWithNegativValue() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -291,10 +248,6 @@ public class RentshopTest {
 	}
     }
 
-    /**
-     * Test change shop size with not rented.
-     * 
-     */
     @Test
     public void changeShopSizeTestWithNotRented() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -307,10 +260,6 @@ public class RentshopTest {
 	}
     }
     
-    /**
-     * Test change shop size with rented.
-     * 
-     */
     @Test
     public void changeShopSizeTestWithRented() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -327,10 +276,6 @@ public class RentshopTest {
 	}
     }
 
-    /**
-     * Test get rental fee.
-     * 
-     */
     @Test
     public void getRentalFeeTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -342,10 +287,6 @@ public class RentshopTest {
 	}
     }
     
-    /**
-     * Test open rent gui.
-     * 
-     */
     @Test
     public void openRentGUITest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -358,10 +299,6 @@ public class RentshopTest {
 	}
     }
     
-    /**
-     * Test open rent gui with rented.
-     * 
-     */
     @Test
     public void openRentGUITestWithRented() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -377,11 +314,7 @@ public class RentshopTest {
 	    assertEquals("§cThis shop is rented!", e.getMessage());
 	}
     }
-    
-    /**
-     * Test change owner with rented.
-     * 
-     */
+
     @Test
     public void changeOwnerTest() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -395,10 +328,6 @@ public class RentshopTest {
 	}
     }
     
-    /**
-     * Test change owner with rented.
-     * 
-     */
     @Test
     public void changeOwnerTestWithRented() {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
