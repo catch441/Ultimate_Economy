@@ -65,7 +65,10 @@ public class PlayershopTest {
 	UltimateEconomy.getInstance.getDataFolder().delete();
 	server.setPlayers(0);
 	MockBukkit.unload();
-	EconomyPlayerController.getAllEconomyPlayers().clear();
+	int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+	for (int i = 0; i < size2; i++) {
+	    EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+	}
     }
 
     /**

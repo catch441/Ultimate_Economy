@@ -2,6 +2,7 @@ package com.ue.shopsystem;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -15,6 +16,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +27,7 @@ import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
+import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.api.Rentshop;
 import com.ue.shopsystem.controller.RentshopController;
@@ -33,7 +36,6 @@ import com.ue.ultimate_economy.UltimateEconomy;
 import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
 import be.seeseemelk.mockbukkit.WorldMock;
-import be.seeseemelk.mockbukkit.entity.PlayerMock;
 import be.seeseemelk.mockbukkit.inventory.ChestInventoryMock;
 
 public class RentshopControllerTest {
@@ -46,7 +48,6 @@ public class RentshopControllerTest {
 	    + "9a2d891c6ae9f6baa040d736ab84d48344bb6b70d7f1a280dd12cbac4d777";
     private static ServerMock server;
     private static WorldMock world;
-    private static PlayerMock player;
 
     /**
      * Init shop for tests.
@@ -57,7 +58,7 @@ public class RentshopControllerTest {
 	MockBukkit.load(UltimateEconomy.class);
 	world = new WorldMock(Material.GRASS_BLOCK, 1);
 	server.addWorld(world);
-	player = server.addPlayer("catch441");
+	server.addPlayer("catch441");
     }
 
     /**
@@ -68,7 +69,10 @@ public class RentshopControllerTest {
 	UltimateEconomy.getInstance.getDataFolder().delete();
 	server.setPlayers(0);
 	MockBukkit.unload();
-	EconomyPlayerController.getAllEconomyPlayers().clear();
+	int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+	for (int i = 0; i < size2; i++) {
+	    EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+	}
     }
 
     /**
@@ -323,7 +327,7 @@ public class RentshopControllerTest {
 		    shop.getShopVillager().getMetadata("ue-type").get(0).value());
 	    assertEquals("5.0", String.valueOf(shop.getRentalFee()));
 	    assertTrue(shop.isRentable());
-	    assertEquals("0.0", String.valueOf(shop.getRentUntil()));
+	    assertEquals(0L, shop.getRentUntil());
 	    // check rentshop gui
 	    ChestInventoryMock gui = (ChestInventoryMock) shop.getRentShopGuiInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -370,5 +374,64 @@ public class RentshopControllerTest {
 	}
     }
     
-    // TODO loading tests
+    /**
+     * Test load all rentshops with not rented.
+     * 
+     */
+    @Test
+    public void loadAllRentshopsTestWithNotRented() {
+	Location location = new Location(world, 1.5, 2.3, 6.9);
+	try {
+	    Rentshop shop = RentshopController.createRentShop(location, 9, 5);
+	    assertEquals(1,RentshopController.getRentShops().size());
+	    RentshopController.despawnAllVillagers();
+	    RentshopController.getRentShops().clear();
+	    assertEquals(0,RentshopController.getRentShops().size());
+	    assertEquals(world, shop.getWorld());
+	    assertEquals("R0", shop.getShopId());
+	    assertEquals("RentShop#R0", shop.getName());
+	    assertNull(shop.getOwner());
+	    assertEquals(EconomyVillager.PLAYERSHOP_RENTABLE,
+		    shop.getShopVillager().getMetadata("ue-type").get(0).value());
+	    assertEquals("5.0", String.valueOf(shop.getRentalFee()));
+	    assertTrue(shop.isRentable());
+	    assertEquals(0L, shop.getRentUntil());
+	} catch (GeneralEconomyException e) {
+	    assertTrue(false);
+	}
+    }
+    
+    /**
+     * Test load all rentshops with rented.
+     * 
+     */
+    @Test
+    public void loadAllRentshopsTestWithRented() {
+	Location location = new Location(world, 1.5, 2.3, 6.9);
+	try {
+	    Rentshop shop = RentshopController.createRentShop(location, 9, 5);
+	    EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+	    ecoPlayer.increasePlayerAmount(100, false);
+	    shop.rentShop(ecoPlayer, 10);
+	    shop.addShopItem(0, 1, 1, new ItemStack(Material.STONE));    
+	    assertEquals(1,RentshopController.getRentShops().size());
+	    RentshopController.despawnAllVillagers();
+	    RentshopController.getRentShops().clear();
+	    assertEquals(0,RentshopController.getRentShops().size());
+	    assertEquals(world, shop.getWorld());
+	    assertEquals("R0", shop.getShopId());
+	    assertEquals("Shop#R0", shop.getName());
+	    assertEquals(ecoPlayer, shop.getOwner());
+	    assertEquals(EconomyVillager.PLAYERSHOP_RENTABLE,
+		    shop.getShopVillager().getMetadata("ue-type").get(0).value());
+	    assertEquals("5.0", String.valueOf(shop.getRentalFee()));
+	    assertFalse(shop.isRentable());
+	    assertNotNull(shop.getRentUntil());
+	    assertEquals(1, shop.getItemList().size());
+	    assertEquals("ItemStack{STONE x 1}", shop.getItemList().get(0));
+	    assertEquals(Material.STONE, shop.getShopInventory().getItem(0).getType());
+	} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+	    assertTrue(false);
+	}
+    }
 }
