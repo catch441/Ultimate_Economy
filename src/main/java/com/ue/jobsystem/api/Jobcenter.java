@@ -70,9 +70,8 @@ public interface Jobcenter {
      * 
      * @param job
      * @return boolean
-     * @throws JobSystemException
      */
-    public boolean hasJob(Job job) throws JobSystemException;
+    public boolean hasJob(Job job);
 
     /**
      * Deletes savefile and despawns villager.

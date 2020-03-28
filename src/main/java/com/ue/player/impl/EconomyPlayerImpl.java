@@ -59,11 +59,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	    loadExistingPlayer(name);
 	}
 	bossBar = Bukkit.createBossBar("", BarColor.GREEN, BarStyle.SOLID);
-	bossBar.setVisible(false);
-    }
-
-    private void setName(String name) {
-	this.name = name;
+	getBossBar().setVisible(false);
     }
 
     @Override
@@ -97,7 +93,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
     }
 
     @Override
-    public void leaveJob(Job job, boolean sendMessage) throws PlayerException, JobSystemException {
+    public void leaveJob(Job job,boolean sendMessage) throws PlayerException {
 	checkForJobJoined(job);
 	getJobList().remove(job);
 	saveJoinedJobsList();
@@ -107,7 +103,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
     }
 
     @Override
-    public boolean hasJob(Job job) throws JobSystemException {
+    public boolean hasJob(Job job) {
 	if (getJobList().contains(job)) {
 	    return true;
 	} else {
@@ -265,22 +261,6 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	return bankAccount;
     }
 
-    /**
-     * Set the bank scoreboard of this player.
-     * 
-     * @param p
-     * @param score
-     */
-    private void setScoreboard(int score) {
-	if (!scoreBoardDisabled) {
-	    Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
-	    Objective o = board.registerNewObjective("bank", "dummy", MessageWrapper.getString("bank"));
-	    o.setDisplaySlot(DisplaySlot.SIDEBAR);
-	    o.getScore(ChatColor.GOLD + ConfigController.getCurrencyText(score)).setScore(score);
-	    getPlayer().setScoreboard(board);
-	}
-    }
-
     @Override
     public void updateScoreBoard() {
 	int score = (int) getBankAccount().getAmount();
@@ -296,25 +276,9 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
     @Override
     public void setPlayer(Player player) {
-	bossBar.removeAll();
+	getBossBar().removeAll();
 	this.player = player;
-	bossBar.addPlayer(player);
-    }
-
-    private void save(FileConfiguration config) {
-	try {
-	    config.save(EconomyPlayerController.getPlayerFile());
-	} catch (IOException e) {
-	    e.printStackTrace();
-	}
-    }
-
-    private class UpdateScoreboardRunnable extends BukkitRunnable {
-
-	@Override
-	public void run() {
-	    updateScoreBoard();
-	}
+	getBossBar().addPlayer(player);
     }
 
     @Override
@@ -328,6 +292,41 @@ public class EconomyPlayerImpl implements EconomyPlayer {
     public void denyWildernessPermission() {
 	if (isOnline()) {
 	    getPlayer().addAttachment(UltimateEconomy.getInstance).setPermission("ultimate_economy.wilderness", false);
+	}
+    }
+    
+    /*
+     * Utility methods/classes
+     * 
+     */
+    
+    private void setScoreboard(int score) {
+	if (!isScoreBoardDisabled()) {
+	    Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
+	    Objective o = board.registerNewObjective("bank", "dummy", MessageWrapper.getString("bank"));
+	    o.setDisplaySlot(DisplaySlot.SIDEBAR);
+	    o.getScore(ChatColor.GOLD + ConfigController.getCurrencyText(score)).setScore(score);
+	    getPlayer().setScoreboard(board);
+	}
+    }
+    
+    private void setName(String name) {
+	this.name = name;
+    }
+    
+    private void save(FileConfiguration config) {
+	try {
+	    config.save(EconomyPlayerController.getPlayerFile());
+	} catch (IOException e) {
+	    e.printStackTrace();
+	}
+    }
+
+    private class UpdateScoreboardRunnable extends BukkitRunnable {
+
+	@Override
+	public void run() {
+	    updateScoreBoard();
 	}
     }
 
@@ -382,7 +381,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
     
     private void saveBankIban() {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
-	config.set(getName() + ".Iban", bankAccount.getIban());
+	config.set(getName() + ".Iban", getBankAccount().getIban());
 	save(config);
     }
 
@@ -435,13 +434,12 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
     private void loadBankAccount() {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
-
 	if (config.isSet(getName() + ".account amount")) {
 	    // old loading, convert to new
 	    double amount = config.getDouble(getName() + ".account amount");
 	    bankAccount = BankController.createBankAccount(amount);
 	    config.set(getName() + ".account amount", null);
-	    config.set(getName() + ".Iban", bankAccount.getIban());
+	    config.set(getName() + ".Iban", getBankAccount().getIban());
 	    save(config);
 	} else {
 	    // new loading

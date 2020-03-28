@@ -12,6 +12,7 @@ import com.ue.bank.api.BankController;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.player.impl.EconomyPlayerImpl;
+import com.ue.ultimate_economy.UltimateEconomy;
 
 public class EconomyPlayerController {
 
@@ -25,7 +26,7 @@ public class EconomyPlayerController {
      */
     public static List<String> getEconomyPlayerNameList() {
 	List<String> list = new ArrayList<>();
-	for (EconomyPlayer economyPlayer : economyPlayers) {
+	for (EconomyPlayer economyPlayer : getAllEconomyPlayers()) {
 	    list.add(economyPlayer.getName());
 	}
 	return list;
@@ -57,7 +58,7 @@ public class EconomyPlayerController {
      * @throws PlayerException
      */
     public static EconomyPlayer getEconomyPlayerByName(String name) throws PlayerException {
-	for (EconomyPlayer economyPlayer : economyPlayers) {
+	for (EconomyPlayer economyPlayer : getAllEconomyPlayers()) {
 	    if (economyPlayer.getName().equals(name)) {
 		return economyPlayer;
 	    }
@@ -82,8 +83,8 @@ public class EconomyPlayerController {
      */
     public static void createEconomyPlayer(String playerName) throws PlayerException {
 	checkForPlayerDoesNotExist(playerName);
-	economyPlayers.add(new EconomyPlayerImpl(playerName, true));
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+	getAllEconomyPlayers().add(new EconomyPlayerImpl(playerName, true));
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getPlayerFile());
 	config.set("Player", getEconomyPlayerNameList());
 	save(config);
     }
@@ -94,8 +95,8 @@ public class EconomyPlayerController {
      * @param player
      */
     public static void deleteEconomyPlayer(EconomyPlayer player) {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
-	economyPlayers.remove(player);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getPlayerFile());
+	getAllEconomyPlayers().remove(player);
 	config.set("Player", getEconomyPlayerNameList());
 	config.set(player.getName(), null);
 	save(config);
@@ -108,28 +109,27 @@ public class EconomyPlayerController {
      * This method loads all economyPlayers. !!! The jobs have to be loaded first.
      * The banc accounts have to be loaded first.i
      * 
-     * @param dataFolder
      */
-    public static void loadAllEconomyPlayers(File dataFolder) {
-	playerFile = new File(dataFolder, "PlayerFile.yml");
-	if (!playerFile.exists()) {
+    public static void loadAllEconomyPlayers() {
+	playerFile = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
+	if (!getPlayerFile().exists()) {
 	    try {
-		playerFile.createNewFile();
+		getPlayerFile().createNewFile();
 	    } catch (IOException e) {
 		Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the playerfile");
 	    }
 	} else {
-	    YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+	    YamlConfiguration config = YamlConfiguration.loadConfiguration(getPlayerFile());
 	    List<String> playerList = config.getStringList("Player");
 	    for (String player : playerList) {
-		economyPlayers.add(new EconomyPlayerImpl(player, false));
+		getAllEconomyPlayers().add(new EconomyPlayerImpl(player, false));
 	    }
 	}
     }
 
     private static void save(YamlConfiguration config) {
 	try {
-	    config.save(playerFile);
+	    config.save(getPlayerFile());
 	} catch (IOException e) {
 	    e.printStackTrace();
 	}

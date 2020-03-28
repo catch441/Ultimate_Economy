@@ -190,10 +190,9 @@ public interface EconomyPlayer {
      * This method returns true if the player has this job.
      * 
      * @param job
-     * @throws JobSystemException
      * @return boolean
      */
-    public boolean hasJob(Job job) throws JobSystemException;
+    public boolean hasJob(Job job);
 
     /**
      * This method adds a job to this player.
@@ -213,9 +212,8 @@ public interface EconomyPlayer {
      * @param sendMessage
      *            when true then a message is send to the player
      * @throws PlayerException
-     * @throws JobSystemException
      */
-    public void leaveJob(Job job, boolean sendMessage) throws PlayerException, JobSystemException;
+    public void leaveJob(Job job, boolean sendMessage) throws PlayerException;
 
     /**
      * This method removes a town from the joined town list. Not necessary if the

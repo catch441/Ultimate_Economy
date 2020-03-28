@@ -103,7 +103,7 @@ public enum JobCommandEnum {
 	boolean perform(String label, String[] args, Player player)
 		throws JobSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 3) {
-		JobController.deleteJob(args[2]);
+		JobController.deleteJob(JobController.getJobByName(args[2]));
 		player.sendMessage(MessageWrapper.getString("jobcenter_delJob", args[2]));
 	    } else {
 		player.sendMessage("/jobcenter job delete <job>");

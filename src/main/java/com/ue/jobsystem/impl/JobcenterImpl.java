@@ -185,7 +185,7 @@ public class JobcenterImpl implements Jobcenter {
     }
 
     @Override
-    public boolean hasJob(Job job) throws JobSystemException {
+    public boolean hasJob(Job job) {
 	if (getJobList().contains(job)) {
 	    return true;
 	}

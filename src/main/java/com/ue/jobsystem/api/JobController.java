@@ -60,12 +60,11 @@ public class JobController {
     /**
      * This method deletes a job.
      * 
-     * @param jobName
+     * @param job
      * @throws JobSystemException
      * @throws GeneralEconomyException
      */
-    public static void deleteJob(String jobName) throws GeneralEconomyException, JobSystemException {
-	Job job = getJobByName(jobName);
+    public static void deleteJob(Job job) {
 	for (Jobcenter jobcenter : JobcenterController.getJobCenterList()) {
 	    if (jobcenter.hasJob(job)) {
 		try {
