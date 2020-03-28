@@ -16,7 +16,7 @@ public interface Rentshop extends Playershop {
      * 
      * @return rentUntil
      */
-    public double getRentUntil();
+    public long getRentUntil();
 
     /**
      * Returns true, if this shop is not rented by a other player.
@@ -42,7 +42,7 @@ public interface Rentshop extends Playershop {
     public Inventory getRentShopGuiInventory();
     
     /**
-     * Change the rental fee of this shop.
+     * Change the rental fee of this shop. Does not affect a active rent.
      * 
      * @param fee
      * @throws GeneralEconomyException

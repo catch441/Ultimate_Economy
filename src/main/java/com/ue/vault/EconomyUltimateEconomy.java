@@ -83,7 +83,7 @@ public class EconomyUltimateEconomy implements Economy {
     public double getBalance(OfflinePlayer player) {
 	// System.out.println("9 " + player.getName());
 	try {
-	    return EconomyPlayerController.getEconomyPlayerByName(player.getName()).getBankAmount();
+	    return EconomyPlayerController.getEconomyPlayerByName(player.getName()).getBankAccount().getAmount();
 	} catch (PlayerException e) {
 	    // System.out.println("9 error: " + e.getMessage());
 	    return 0;
@@ -101,7 +101,7 @@ public class EconomyUltimateEconomy implements Economy {
 	// System.out.println("11 " + owner);
 	try {
 	    if (EconomyPlayerController.getEconomyPlayerNameList().contains(owner)) {
-		return EconomyPlayerController.getEconomyPlayerByName(owner).getBankAmount();
+		return EconomyPlayerController.getEconomyPlayerByName(owner).getBankAccount().getAmount();
 	    } else {
 		return BankController.getBankAccountByIban(owner).getAmount();
 	    }
@@ -340,10 +340,10 @@ public class EconomyUltimateEconomy implements Economy {
 	// System.out.println("37 " + accountName + " " + player);
 	try {
 	    BankController.createExternalBankAccount(0, accountName);
-	    return new EconomyResponse(0, 0, ResponseType.SUCCESS,null);
+	    return new EconomyResponse(0, 0, ResponseType.SUCCESS, null);
 	} catch (GeneralEconomyException e) {
 	    // System.out.println("37 error: " + e.getMessage());
-	    return new EconomyResponse(0, 0, ResponseType.FAILURE,e.getMessage());
+	    return new EconomyResponse(0, 0, ResponseType.FAILURE, e.getMessage());
 	}
     }
 
@@ -351,11 +351,11 @@ public class EconomyUltimateEconomy implements Economy {
     public EconomyResponse deleteBank(String iban) {
 	// System.out.println("38 " + iban);
 	try {
-	    BankController.deleteBankAccount(iban);
-	    return new EconomyResponse(0, 0, ResponseType.SUCCESS,null);
+	    BankController.deleteBankAccount(BankController.getBankAccountByIban(iban));
+	    return new EconomyResponse(0, 0, ResponseType.SUCCESS, null);
 	} catch (GeneralEconomyException e) {
 	    // System.out.println("38 error: " + e.getMessage());
-	    return new EconomyResponse(0, 0, ResponseType.FAILURE,e.getMessage());
+	    return new EconomyResponse(0, 0, ResponseType.FAILURE, e.getMessage());
 	}
     }
 
@@ -368,24 +368,24 @@ public class EconomyUltimateEconomy implements Economy {
     @Override
     public EconomyResponse isBankMember(String arg0, String arg1) {
 	// System.out.println("40 " + arg0 + " " + arg1);
-	return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED,null);
+	return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, null);
     }
 
     @Override
     public EconomyResponse isBankMember(String arg0, OfflinePlayer arg1) {
 	// System.out.println("41 " + arg0 + " " + arg1);
-	return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED,null);
+	return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, null);
     }
 
     @Override
     public EconomyResponse isBankOwner(String arg0, String arg1) {
 	// System.out.println("42 " + arg0 + " " + arg1);
-	return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED,null);
+	return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, null);
     }
 
     @Override
     public EconomyResponse isBankOwner(String arg0, OfflinePlayer arg1) {
 	// System.out.println("43 " + arg0 + " " + arg1);
-	return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED,null);
+	return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, null);
     }
 }

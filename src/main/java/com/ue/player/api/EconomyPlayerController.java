@@ -8,6 +8,7 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import com.ue.bank.api.BankController;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.player.impl.EconomyPlayerImpl;
@@ -80,24 +81,33 @@ public class EconomyPlayerController {
      * @throws PlayerException
      */
     public static void createEconomyPlayer(String playerName) throws PlayerException {
-	if (getEconomyPlayerNameList().contains(playerName)) {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.PLAYER_ALREADY_EXIST);
-	} else { 
-	    economyPlayers.add(new EconomyPlayerImpl(playerName, true));
-	    YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
-	    config.set("Player", getEconomyPlayerNameList());
-	    try {
-		config.save(playerFile);
-	    } catch (IOException e) {
-		e.printStackTrace();
-	    }
-	}
+	checkForPlayerDoesNotExist(playerName);
+	economyPlayers.add(new EconomyPlayerImpl(playerName, true));
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+	config.set("Player", getEconomyPlayerNameList());
+	save(config);
     }
 
     /**
-     * This method loads all economyPlayers. !!! 
-     * The jobs have to be loaded first.
+     * Deletes a economy player.
+     * 
+     * @param player
+     */
+    public static void deleteEconomyPlayer(EconomyPlayer player) {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+	economyPlayers.remove(player);
+	config.set("Player", getEconomyPlayerNameList());
+	config.set(player.getName(), null);
+	save(config);
+	BankController.deleteBankAccount(player.getBankAccount());
+	// to remove all references
+	player = null;
+    }
+
+    /**
+     * This method loads all economyPlayers. !!! The jobs have to be loaded first.
      * The banc accounts have to be loaded first.i
+     * 
      * @param dataFolder
      */
     public static void loadAllEconomyPlayers(File dataFolder) {
@@ -114,6 +124,25 @@ public class EconomyPlayerController {
 	    for (String player : playerList) {
 		economyPlayers.add(new EconomyPlayerImpl(player, false));
 	    }
+	}
+    }
+
+    private static void save(YamlConfiguration config) {
+	try {
+	    config.save(playerFile);
+	} catch (IOException e) {
+	    e.printStackTrace();
+	}
+    }
+    
+    /*
+     * Validation methods
+     * 
+     */
+    
+    private static void checkForPlayerDoesNotExist(String playerName) throws PlayerException {
+	if (getEconomyPlayerNameList().contains(playerName)) {
+	    throw PlayerException.getException(PlayerExceptionMessageEnum.PLAYER_ALREADY_EXIST);
 	}
     }
 }

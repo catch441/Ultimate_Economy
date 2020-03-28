@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 
+import com.ue.bank.api.BankAccount;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
@@ -111,11 +112,11 @@ public interface EconomyPlayer {
     public boolean hasEnoughtMoney(double amount) throws GeneralEconomyException;
 
     /**
-     * Get the bank amount of this player.
+     * Get the bank account of this player.
      * 
      * @return bank account
      */
-    public double getBankAmount();
+    public BankAccount getBankAccount();
 
     /**
      * This method returns a home location by it's name.

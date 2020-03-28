@@ -260,13 +260,9 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	return getBankAccount().hasAmount(amount);
     }
 
-    private BankAccount getBankAccount() {
-	return bankAccount;
-    }
-
     @Override
-    public double getBankAmount() {
-	return bankAccount.getAmount();
+    public BankAccount getBankAccount() {
+	return bankAccount;
     }
 
     /**
@@ -342,6 +338,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
     private void saveScoreboardDisabled() {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(EconomyPlayerController.getPlayerFile());
+	// TODO refactor name
 	config.set(getName() + ".bank", isScoreBoardDisabled());
 	save(config);
     }

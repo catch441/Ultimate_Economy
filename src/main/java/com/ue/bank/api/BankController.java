@@ -51,20 +51,15 @@ public class BankController {
     }
 
     /**
-     * Delets a bank account by a iban.
+     * Deletes a bank account.
      * 
-     * @param iban
-     * @throws GeneralEconomyException
+     * @param account
      */
-    public static void deleteBankAccount(String iban) throws GeneralEconomyException {
-	if (!getIbanList().contains(iban)) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, iban);
-	}
-	BankAccount account = getBankAccountByIban(iban);
+    public static void deleteBankAccount(BankAccount account) {
 	accounts.remove(account);
 	FileConfiguration config = YamlConfiguration.loadConfiguration(bankFile);
 	config.set("Ibans", getIbanList());
-	config.set(iban, null);
+	config.set(account.getIban(), null);
 	saveConfig(config);
     }
 

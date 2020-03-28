@@ -88,7 +88,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
     }
 
     @Override
-    public double getRentUntil() {
+    public long getRentUntil() {
 	return rentUntil;
     }
 
@@ -144,7 +144,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
     /**
      * Overridden, because of the rentable validation. Only possible, if the shop is
-     * not rented. {@inheritDoc}
+     * not rented. Should not be used. Use the rentShop() method instead. {@inheritDoc}
      */
     @Override
     public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException {
@@ -183,7 +183,9 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
     private void removeAllItems() throws ShopSystemException, GeneralEconomyException {
 	for (int i = 0; i < (getSize() - 2); i++) {
-	    removeShopItem(i);
+	    if(!isSlotEmpty(i)) {
+		removeShopItem(i);
+	    }
 	}
     }
 

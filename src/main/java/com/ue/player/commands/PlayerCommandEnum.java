@@ -44,12 +44,14 @@ public enum PlayerCommandEnum {
 	    DecimalFormat dFormat = new DecimalFormat(".##");
 	    dFormat.setRoundingMode(RoundingMode.DOWN);
 	    if (args.length == 0) {
-		player.sendMessage(MessageWrapper.getString("money_info", dFormat.format(ecoPlayer.getBankAmount()),
-			ConfigController.getCurrencyText(ecoPlayer.getBankAmount())));
+		player.sendMessage(
+			MessageWrapper.getString("money_info", dFormat.format(ecoPlayer.getBankAccount().getAmount()),
+				ConfigController.getCurrencyText(ecoPlayer.getBankAccount().getAmount())));
 	    } else if (args.length == 1 && player.hasPermission("Ultimate_Economy.adminpay")) {
 		EconomyPlayer otherPlayer = EconomyPlayerController.getEconomyPlayerByName(args[0]);
-		player.sendMessage(MessageWrapper.getString("money_info", dFormat.format(otherPlayer.getBankAmount()),
-			ConfigController.getCurrencyText(otherPlayer.getBankAmount())));
+		player.sendMessage(
+			MessageWrapper.getString("money_info", dFormat.format(otherPlayer.getBankAccount().getAmount()),
+				ConfigController.getCurrencyText(otherPlayer.getBankAccount().getAmount())));
 	    } else if (player.hasPermission("Ultimate_Economy.adminpay")) {
 		player.sendMessage("/money or /money <player>");
 	    } else {
