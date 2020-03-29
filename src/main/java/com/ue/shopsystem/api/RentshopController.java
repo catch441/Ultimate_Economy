@@ -1,4 +1,4 @@
-package com.ue.shopsystem.controller;
+package com.ue.shopsystem.api;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,7 +12,6 @@ import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.shopsystem.api.Rentshop;
 import com.ue.shopsystem.impl.RentshopImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -84,7 +83,7 @@ public class RentshopController {
 		    return shop;
 		}
 	    } else {
-		if (name.equals(shop.getName() + "_" + shop.getOwner().getName())) {
+		if (name.equals(shop.getName())) {
 		    return shop;
 		}
 	    }

@@ -1,4 +1,4 @@
-package com.ue.shopsystem.controller;
+package com.ue.shopsystem.api;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,7 +12,6 @@ import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.shopsystem.api.Adminshop;
 import com.ue.shopsystem.impl.AdminshopImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
 

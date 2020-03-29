@@ -10,7 +10,7 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
-import com.ue.shopsystem.controller.PlayershopController;
+import com.ue.shopsystem.api.PlayershopController;
 
 public enum PlayershopCommandEnum {
 

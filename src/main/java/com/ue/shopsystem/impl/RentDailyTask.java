@@ -9,7 +9,7 @@ import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.Rentshop;
-import com.ue.shopsystem.controller.RentshopController;
+import com.ue.shopsystem.api.RentshopController;
 
 public class RentDailyTask extends BukkitRunnable {
 

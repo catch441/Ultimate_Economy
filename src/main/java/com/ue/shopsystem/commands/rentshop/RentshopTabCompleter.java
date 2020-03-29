@@ -9,7 +9,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Villager.Profession;
 
 import com.ue.shopsystem.api.Rentshop;
-import com.ue.shopsystem.controller.RentshopController;
+import com.ue.shopsystem.api.RentshopController;
 
 public class RentshopTabCompleter implements TabCompleter {
 

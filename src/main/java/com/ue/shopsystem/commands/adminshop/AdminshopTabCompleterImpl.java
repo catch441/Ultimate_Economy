@@ -13,7 +13,7 @@ import org.bukkit.entity.Villager.Profession;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
-import com.ue.shopsystem.controller.AdminshopController;
+import com.ue.shopsystem.api.AdminshopController;
 
 public class AdminshopTabCompleterImpl implements TabCompleter {
 

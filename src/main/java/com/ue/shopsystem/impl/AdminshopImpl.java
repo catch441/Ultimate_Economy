@@ -10,7 +10,7 @@ import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.api.Adminshop;
-import com.ue.shopsystem.controller.AdminshopController;
+import com.ue.shopsystem.api.AdminshopController;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class AdminshopImpl extends AbstractShopImpl implements Adminshop {

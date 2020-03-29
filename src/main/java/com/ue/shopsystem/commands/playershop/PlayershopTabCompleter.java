@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Villager.Profession;
 
-import com.ue.shopsystem.controller.PlayershopController;
+import com.ue.shopsystem.api.PlayershopController;
 
 public class PlayershopTabCompleter implements TabCompleter {
 

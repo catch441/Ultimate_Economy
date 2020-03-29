@@ -20,7 +20,7 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.Adminshop;
-import com.ue.shopsystem.controller.AdminshopController;
+import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.impl.AbstractShopImpl;
 
 public enum AdminshopCommandEnum {
