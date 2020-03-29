@@ -85,7 +85,7 @@ public class RentshopController {
 		    return shop;
 		}
 	    } else {
-		if (name.equals(shop.getName())) {
+		if (name.equals(shop.getName() + "_" + shop.getOwner().getName())) {
 		    return shop;
 		}
 	    }
