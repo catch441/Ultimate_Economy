@@ -35,7 +35,7 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.api.Adminshop;
-import com.ue.shopsystem.controller.AdminshopController;
+import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.impl.AdminshopImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
 

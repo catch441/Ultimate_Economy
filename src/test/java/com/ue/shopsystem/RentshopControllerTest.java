@@ -30,7 +30,7 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.api.Rentshop;
-import com.ue.shopsystem.controller.RentshopController;
+import com.ue.shopsystem.api.RentshopController;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
