@@ -445,7 +445,6 @@ public class UltimateEconomyEventHandler implements Listener {
 	    }
 	    EconomyPlayer economyPlayer = EconomyPlayerController.getEconomyPlayerByName(playername);
 	    economyPlayer.setPlayer(event.getPlayer());
-	    economyPlayer.updateScoreBoard();
 	    if (ConfigController.isWildernessInteraction()) {
 		economyPlayer.addWildernessPermission();
 	    }

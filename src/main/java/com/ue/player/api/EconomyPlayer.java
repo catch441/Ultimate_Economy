@@ -179,7 +179,7 @@ public interface EconomyPlayer {
 
     /**
      * This method adds a town to the joined town list of this player. Not necessary
-     * if the join method from the Town is used.
+     * if the join method from the Town is used. This only adds the town name. The town join method should be prefered.
      * 
      * @param townName
      * @throws PlayerException
@@ -244,10 +244,4 @@ public interface EconomyPlayer {
      * @param scoreBoardDisabled
      */
     public void setScoreBoardDisabled(boolean scoreBoardDisabled);
-
-    /**
-     * Update the bank scoreboard of a player.
-     * 
-     */
-    public void updateScoreBoard();
 }

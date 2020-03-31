@@ -262,14 +262,6 @@ public class EconomyPlayerImpl implements EconomyPlayer {
     }
 
     @Override
-    public void updateScoreBoard() {
-	int score = (int) getBankAccount().getAmount();
-	if (isOnline()) {
-	    setScoreboard(score);
-	}
-    }
-
-    @Override
     public Player getPlayer() {
 	return player;
     }
@@ -307,6 +299,13 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	    o.setDisplaySlot(DisplaySlot.SIDEBAR);
 	    o.getScore(ChatColor.GOLD + ConfigController.getCurrencyText(score)).setScore(score);
 	    getPlayer().setScoreboard(board);
+	}
+    }
+    
+    private void updateScoreBoard() {
+	int score = (int) getBankAccount().getAmount();
+	if (isOnline()) {
+	    setScoreboard(score);
 	}
     }
     
@@ -394,6 +393,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	setName(name);
 	setupScoreboardDisabled();
 	setupBankAccount();
+	updateScoreBoard();
     }
 
     private void setupBankAccount() {
@@ -418,6 +418,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	loadJoinedJobs();
 	loadJoinedTowns();
 	loadHomes();
+	updateScoreBoard();
     }
 
     private void loadScoreboardDisabled() {
