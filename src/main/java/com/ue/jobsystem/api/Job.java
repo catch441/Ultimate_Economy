@@ -17,13 +17,13 @@ public interface Job {
     public void deleteMob(String entity) throws JobSystemException, GeneralEconomyException;
 
     /**
-     * This method removes a item from a job.
+     * This method removes a block from a job.
      * 
      * @param material
      * @throws JobSystemException
      * @throws GeneralEconomyException
      */
-    public void deleteItem(String material) throws JobSystemException, GeneralEconomyException;
+    public void deleteBlock(String material) throws JobSystemException, GeneralEconomyException;
 
     /**
      * This method removes a loottype from this job. The loottype is for a
@@ -57,14 +57,14 @@ public interface Job {
     public void addMob(String entity, double price) throws JobSystemException, GeneralEconomyException;
 
     /**
-     * This method adds a item to a job.
+     * This method adds a block to a job.
      * 
      * @param material
      * @param price
      * @throws JobSystemException
      * @throws GeneralEconomyException
      */
-    public void addItem(String material, double price) throws JobSystemException, GeneralEconomyException;
+    public void addBlock(String material, double price) throws JobSystemException, GeneralEconomyException;
 
     /**
      * This method deletes the job saveFile.
@@ -79,14 +79,14 @@ public interface Job {
     public String getName();
 
     /**
-     * This method returns the price of a item in this job.
+     * This method returns the price of a block in this job.
      * 
      * @param material
      * @return double
      * @throws JobSystemException
      * @throws GeneralEconomyException
      */
-    public double getItemPrice(String material) throws JobSystemException, GeneralEconomyException;
+    public double getBlockPrice(String material) throws JobSystemException, GeneralEconomyException;
 
     /**
      * This method returns the price of a fisher lootType.
@@ -123,10 +123,10 @@ public interface Job {
     public List<String> getEntityList();
 
     /**
-     * This method returns the itemList.
+     * This method returns the block list.
      * 
      * @return List of Strings
      */
-    public List<String> getItemList();
+    public List<String> getBlockList();
 
 }

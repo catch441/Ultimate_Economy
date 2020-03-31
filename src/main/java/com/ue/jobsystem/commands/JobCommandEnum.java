@@ -145,7 +145,7 @@ public enum JobCommandEnum {
 		throws JobSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 5) {
 		Job job = JobController.getJobByName(args[2]);
-		job.addItem(args[3], Double.valueOf(args[4]));
+		job.addBlock(args[3], Double.valueOf(args[4]));
 		player.sendMessage(MessageWrapper.getString("jobcenter_addItem", args[3]));
 	    } else {
 		player.sendMessage("/jobcenter job addItem <job> <material> <price>");
@@ -159,7 +159,7 @@ public enum JobCommandEnum {
 		throws JobSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 4) {
 		Job job = JobController.getJobByName(args[2]);
-		job.deleteItem(args[3]);
+		job.deleteBlock(args[3]);
 		player.sendMessage(MessageWrapper.getString("jobcenter_removeItem", args[3]));
 	    } else {
 		player.sendMessage("/jobcenter job removeItem <job> <material>");

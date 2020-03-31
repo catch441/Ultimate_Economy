@@ -349,12 +349,12 @@ public class UltimateEconomyEventHandler implements Listener {
 				|| blockMaterial == Material.BEETROOTS || blockMaterial == Material.COCOA) {
 			    Ageable ageable = (Ageable) event.getBlock().getBlockData();
 			    if (ageable.getAge() == ageable.getMaximumAge()) {
-				double d = job.getItemPrice(blockMaterial.toString());
+				double d = job.getBlockPrice(blockMaterial.toString());
 				ecoPlayer.increasePlayerAmount(d, false);
 			    }
 			} else if (list.isEmpty()
 				|| !list.isEmpty() && !list.get(0).asString().contains(event.getPlayer().getName())) {
-			    double d = job.getItemPrice(blockMaterial.toString());
+			    double d = job.getBlockPrice(blockMaterial.toString());
 			    ecoPlayer.increasePlayerAmount(d, false);
 			}
 			break;

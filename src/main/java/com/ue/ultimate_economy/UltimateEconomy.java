@@ -316,9 +316,9 @@ public class UltimateEconomy extends JavaPlugin {
 	if (args.length == 1) {
 	    Job job = JobController.getJobByName(args[0]);
 	    player.sendMessage(MessageWrapper.getString("jobinfo_info", job.getName()));
-	    for (String string : job.getItemList()) {
+	    for (String string : job.getBlockList()) {
 		player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN
-			+ job.getItemPrice(string) + ConfigController.getCurrencyText(job.getItemPrice(string)));
+			+ job.getBlockPrice(string) + ConfigController.getCurrencyText(job.getBlockPrice(string)));
 	    }
 	    for (String string : job.getFisherList()) {
 		player.sendMessage(MessageWrapper.getString("jobinfo_fishingprice", string.toLowerCase(),

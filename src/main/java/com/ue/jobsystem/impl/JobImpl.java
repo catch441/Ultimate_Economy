@@ -21,7 +21,7 @@ import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobImpl implements Job {
 
-    private List<String> itemList, entityList, fisherList;
+    private List<String> blockList, entityList, fisherList;
     private File file;
     private FileConfiguration config;
     private String name;
@@ -32,7 +32,7 @@ public class JobImpl implements Job {
      * @param name
      */
     public JobImpl(String name) {
-	itemList = new ArrayList<>();
+	blockList = new ArrayList<>();
 	entityList = new ArrayList<>();
 	fisherList = new ArrayList<>();
 	this.name = name;
@@ -54,120 +54,86 @@ public class JobImpl implements Job {
 
     private void load() {
 	config = YamlConfiguration.loadConfiguration(file);
-	itemList = config.getStringList("Itemlist");
+	blockList = config.getStringList("Itemlist");
 	entityList = config.getStringList("Entitylist");
 	fisherList = config.getStringList("Fisherlist");
     }
 
     @Override
     public void addFisherLootType(String lootType, double price) throws JobSystemException, GeneralEconomyException {
-	if (!"treasure".equals(lootType) && !"junk".equals(lootType) && !"fish".equals(lootType)) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, lootType);
-	} else if (price <= 0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, price);
-	} else if (fisherList.contains(lootType)) {
-	    throw JobSystemException.getException(JobExceptionMessageEnum.LOOTTYPE_ALREADY_EXISTS);
-	} else {
-	    config = YamlConfiguration.loadConfiguration(file);
-	    config.set("Fisher." + lootType, price);
-	    fisherList.add(lootType);
-	    removedoubleObjects(entityList);
-	    config.set("Fisherlist", fisherList);
-	    save();
-	}
+	checkForValidFisherLootType(lootType);
+	checkForPositivValue(price);
+	checkForLoottypeNotInJob(lootType);
+	config = YamlConfiguration.loadConfiguration(file);
+	config.set("Fisher." + lootType, price);
+	fisherList.add(lootType);
+	removedoubleObjects(entityList);
+	config.set("Fisherlist", fisherList);
+	save();
     }
 
     @Override
     public void delFisherLootType(String lootType) throws JobSystemException, GeneralEconomyException {
-	if (!"treasure".equals(lootType) && !"junk".equals(lootType) && !"fish".equals(lootType)) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, lootType);
-	} else if (!fisherList.contains(lootType)) {
-	    throw JobSystemException.getException(JobExceptionMessageEnum.LOOTTYPE_DOES_NOT_EXIST);
-	} else {
-	    config = YamlConfiguration.loadConfiguration(file);
-	    config.set("Fisher." + lootType, null);
-	    fisherList.remove(lootType);
-	    removedoubleObjects(entityList);
-	    config.set("Fisherlist", fisherList);
-	    save();
-	}
-
+	checkForValidFisherLootType(lootType);
+	checkForLoottypeInJob(lootType);
+	config = YamlConfiguration.loadConfiguration(file);
+	config.set("Fisher." + lootType, null);
+	fisherList.remove(lootType);
+	removedoubleObjects(entityList);
+	config.set("Fisherlist", fisherList);
+	save();
     }
 
     @Override
     public void addMob(String entity, double price) throws JobSystemException, GeneralEconomyException {
 	entity = entity.toUpperCase();
-	try {
-	    EntityType.valueOf(entity);
-	} catch (IllegalArgumentException e) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, entity);
-	}
-	if (entityList.contains(entity)) {
-	    throw JobSystemException.getException(JobExceptionMessageEnum.ENTITY_ALREADY_EXISTS);
-	} else if (price <= 0.0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, price);
-	} else {
-	    entityList.add(entity);
-	    config = YamlConfiguration.loadConfiguration(file);
-	    config.set("JobEntitys." + entity + ".killprice", price);
-	    removedoubleObjects(entityList);
-	    config.set("Entitylist", entityList);
-	    save();
-	}
+	checkForValidEntityType(entity);
+	checkForEntityNotInJob(entity);
+	checkForPositivValue(price);
+	entityList.add(entity);
+	config = YamlConfiguration.loadConfiguration(file);
+	config.set("JobEntitys." + entity + ".killprice", price);
+	removedoubleObjects(entityList);
+	config.set("Entitylist", entityList);
+	save();
     }
 
     @Override
     public void deleteMob(String entity) throws JobSystemException, GeneralEconomyException {
-	try {
-	    EntityType.valueOf(entity.toUpperCase());
-	} catch (IllegalArgumentException e) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, entity);
-	}
 	entity = entity.toUpperCase();
-	if (entityList.contains(entity)) {
-	    entityList.remove(entity);
-	    config = YamlConfiguration.loadConfiguration(file);
-	    config.set("JobEntitys." + entity, null);
-	    config.set("Entitylist", entityList);
-	    save();
-	} else {
-	    throw JobSystemException.getException(JobExceptionMessageEnum.ENTITY_DOES_NOT_EXIST);
-	}
+	checkForValidEntityType(entity);
+	checkForEntityInJob(entity);
+	entityList.remove(entity);
+	config = YamlConfiguration.loadConfiguration(file);
+	config.set("JobEntitys." + entity, null);
+	config.set("Entitylist", entityList);
+	save();
     }
 
     @Override
-    public void addItem(String material, double price) throws JobSystemException, GeneralEconomyException {
+    public void addBlock(String material, double price) throws JobSystemException, GeneralEconomyException {
 	material = material.toUpperCase();
-	if (price <= 0.0) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, price);
-	} else if (Material.matchMaterial(material) == null) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, material);
-	} else if (itemList.contains(material)) {
-	    throw JobSystemException.getException(JobExceptionMessageEnum.ITEM_ALREADY_EXISTS);
-	} else {
-	    itemList.add(material);
-	    config = YamlConfiguration.loadConfiguration(file);
-	    config.set("JobItems." + material + ".breakprice", price);
-	    removedoubleObjects(itemList);
-	    config.set("Itemlist", itemList);
-	    save();
-	}
+	checkForValidMaterial(material);
+	checkForPositivValue(price);
+	checkForBlockNotInJob(material);
+	blockList.add(material);
+	config = YamlConfiguration.loadConfiguration(file);
+	config.set("JobItems." + material + ".breakprice", price);
+	removedoubleObjects(blockList);
+	config.set("Itemlist", blockList);
+	save();
     }
 
     @Override
-    public void deleteItem(String material) throws JobSystemException, GeneralEconomyException {
+    public void deleteBlock(String material) throws JobSystemException, GeneralEconomyException {
 	material = material.toUpperCase();
-	if (Material.matchMaterial(material) == null) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, material);
-	} else if (!itemList.contains(material)) {
-	    throw JobSystemException.getException(JobExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
-	} else {
-	    itemList.remove(material);
-	    config = YamlConfiguration.loadConfiguration(file);
-	    config.set("JobItems." + material, null);
-	    config.set("Itemlist", itemList);
-	    save();
-	}
+	checkForValidMaterial(material);
+	checkForBlockInJob(material);
+	blockList.remove(material);
+	config = YamlConfiguration.loadConfiguration(file);
+	config.set("JobItems." + material, null);
+	config.set("Itemlist", blockList);
+	save();
     }
 
     @Override
@@ -176,46 +142,32 @@ public class JobImpl implements Job {
     }
 
     @Override
-    public double getItemPrice(String material) throws JobSystemException, GeneralEconomyException {
-	if (Material.matchMaterial(material.toUpperCase()) == null) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, material);
-	} else if (!itemList.contains(material)) {
-	    throw JobSystemException.getException(JobExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
-	} else {
-	    config = YamlConfiguration.loadConfiguration(file);
-	    double price = config.getDouble("JobItems." + material + ".breakprice");
-	    return price;
-	}
+    public double getBlockPrice(String material) throws JobSystemException, GeneralEconomyException {
+	material = material.toUpperCase();
+	checkForValidMaterial(material);
+	checkForBlockInJob(material);
+	config = YamlConfiguration.loadConfiguration(file);
+	double price = config.getDouble("JobItems." + material + ".breakprice");
+	return price;
     }
 
     @Override
     public double getFisherPrice(String lootType) throws JobSystemException, GeneralEconomyException {
-	if (!"treasure".equals(lootType) && !"junk".equals(lootType) && !"fish".equals(lootType)) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, lootType);
-	} else if (!fisherList.contains(lootType)) {
-	    throw JobSystemException.getException(JobExceptionMessageEnum.LOOTTYPE_DOES_NOT_EXIST);
-	} else {
-	    config = YamlConfiguration.loadConfiguration(file);
-	    double price1 = config.getDouble("Fisher." + lootType);
-	    return price1;
-	}
+	checkForValidFisherLootType(lootType);
+	checkForLoottypeInJob(lootType);
+	config = YamlConfiguration.loadConfiguration(file);
+	double price1 = config.getDouble("Fisher." + lootType);
+	return price1;
     }
 
     @Override
     public double getKillPrice(String entityName) throws JobSystemException, GeneralEconomyException {
-	try {
-	    EntityType.valueOf(entityName.toUpperCase());
-	} catch (IllegalArgumentException e) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-		    entityName);
-	}
-	if (!entityList.contains(entityName)) {
-	    throw JobSystemException.getException(JobExceptionMessageEnum.ENTITY_DOES_NOT_EXIST);
-	} else {
-	    config = YamlConfiguration.loadConfiguration(file);
-	    double price2 = config.getDouble("JobEntitys." + entityName + ".killprice");
-	    return price2;
-	}
+	entityName = entityName.toUpperCase();
+	checkForValidEntityType(entityName);
+	checkForEntityInJob(entityName);
+	config = YamlConfiguration.loadConfiguration(file);
+	double price2 = config.getDouble("JobEntitys." + entityName + ".killprice");
+	return price2;
     }
 
     private void save() {
@@ -238,8 +190,8 @@ public class JobImpl implements Job {
     }
 
     @Override
-    public List<String> getItemList() {
-	return itemList;
+    public List<String> getBlockList() {
+	return blockList;
     }
 
     @Override
@@ -250,5 +202,73 @@ public class JobImpl implements Job {
     @Override
     public List<String> getFisherList() {
 	return fisherList;
+    }
+
+    /*
+     * Validation methods
+     * 
+     */
+
+    private void checkForValidMaterial(String material) throws GeneralEconomyException {
+	if (Material.matchMaterial(material) == null) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, material);
+	}
+    }
+
+    private void checkForValidEntityType(String entityName) throws GeneralEconomyException {
+	try {
+	    EntityType.valueOf(entityName);
+	} catch (IllegalArgumentException e) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
+		    entityName);
+	}
+    }
+
+    private void checkForPositivValue(double value) throws GeneralEconomyException {
+	if (value <= 0.0) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, value);
+	}
+    }
+
+    private void checkForValidFisherLootType(String lootType) throws GeneralEconomyException {
+	if (!"treasure".equals(lootType) && !"junk".equals(lootType) && !"fish".equals(lootType)) {
+	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, lootType);
+	}
+    }
+
+    private void checkForBlockNotInJob(String material) throws JobSystemException {
+	if (blockList.contains(material)) {
+	    throw JobSystemException.getException(JobExceptionMessageEnum.BLOCK_ALREADY_EXISTS);
+	}
+    }
+
+    private void checkForBlockInJob(String material) throws JobSystemException {
+	if (!blockList.contains(material)) {
+	    throw JobSystemException.getException(JobExceptionMessageEnum.BLOCK_DOES_NOT_EXIST);
+	}
+    }
+
+    private void checkForLoottypeNotInJob(String lootType) throws JobSystemException {
+	if (fisherList.contains(lootType)) {
+	    throw JobSystemException.getException(JobExceptionMessageEnum.LOOTTYPE_ALREADY_EXISTS);
+	}
+    }
+
+    private void checkForLoottypeInJob(String lootType) throws JobSystemException {
+	if (!fisherList.contains(lootType)) {
+	    throw JobSystemException.getException(JobExceptionMessageEnum.LOOTTYPE_DOES_NOT_EXIST);
+	}
+    }
+
+    private void checkForEntityNotInJob(String entity) throws JobSystemException {
+	if (entityList.contains(entity)) {
+	    throw JobSystemException.getException(JobExceptionMessageEnum.ENTITY_ALREADY_EXISTS);
+	}
+    }
+
+    private void checkForEntityInJob(String entityName) throws JobSystemException {
+	if (!entityList.contains(entityName)) {
+	    throw JobSystemException.getException(JobExceptionMessageEnum.ENTITY_DOES_NOT_EXIST);
+	}
     }
 }
