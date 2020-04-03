@@ -916,7 +916,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	try {
 	    config.save(getSaveFile());
 	} catch (IOException e) {
-	    Bukkit.getLogger().warning("[Ultimate_Economy] Error an save config to file");
+	    Bukkit.getLogger().warning("[Ultimate_Economy] Error on save config to file");
 	    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 	}
     }
@@ -1334,11 +1334,15 @@ public abstract class AbstractShopImpl implements AbstractShop {
     @Deprecated
     private void removeDefaultItemFromItemList() {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	if (config.getStringList("ShopItemList").contains("ANVIL_0")) {
-	    List<String> newList = config.getStringList("ShopItemList");
-	    newList.remove("ANVIL_0");
-	    config.set("ShopItemList", newList);
-	    save(config);
+	List<String> list = config.getStringList("ShopItemList");
+	Iterator<String> iterator = list.iterator();
+	while(iterator.hasNext()) {
+	    String element = iterator.next();
+	    if("ANVIL_0".equals(element) || "CRAFTING_TABLE_0".equals(element)) {
+		iterator.remove();
+	    }
 	}
+	config.set("ShopItemList", list);
+	save(config);
     }
 }

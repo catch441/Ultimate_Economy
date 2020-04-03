@@ -1,6 +1,7 @@
 package com.ue.jobsystem.api;
 
 import java.util.List;
+import java.util.Map;
 
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.JobSystemException;
@@ -113,20 +114,20 @@ public interface Job {
      * 
      * @return List of Strings
      */
-    public List<String> getFisherList();
+    public Map<String, Double> getFisherList();
 
     /**
      * This method returns the entityList.
      * 
      * @return List of Strings
      */
-    public List<String> getEntityList();
+    public Map<String, Double> getEntityList();
 
     /**
      * This method returns the block list.
      * 
      * @return List of Strings
      */
-    public List<String> getBlockList();
+    public Map<String, Double> getBlockList();
 
 }

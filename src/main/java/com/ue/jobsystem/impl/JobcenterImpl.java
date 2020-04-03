@@ -46,6 +46,7 @@ public class JobcenterImpl implements Jobcenter {
     private Villager villager;
     private Location location;
     private String name;
+    private int size;
     private List<Job> jobs = new ArrayList<>();
     private Inventory inventory;
 
@@ -60,7 +61,7 @@ public class JobcenterImpl implements Jobcenter {
     public JobcenterImpl(String name, Location spawnLocation, int size) throws JobSystemException {
 	file = new File(UltimateEconomy.getInstance.getDataFolder(), name + "-JobCenter.yml");
 	try {
-	    file.createNewFile();
+	    getSavefile().createNewFile();
 	    setupNewJobcenter(name, spawnLocation, size);
 	} catch (IOException e) {
 	    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create savefile");
@@ -78,13 +79,14 @@ public class JobcenterImpl implements Jobcenter {
 	loadExistingJobcenter(name);
     }
 
-    private void setName(String name) {
-	this.name = name;
-    }
+    /*
+     * API methods
+     * 
+     */
 
     @Override
     public void addJob(Job job, String itemMaterial, int slot)
-	    throws JobSystemException, GeneralEconomyException, PlayerException {
+	    throws PlayerException, GeneralEconomyException, JobSystemException {
 	checkForValidSlot(slot);
 	checkForFreeSlot(slot);
 	checkForJobDoesNotExistInJobcenter(job);
@@ -98,14 +100,14 @@ public class JobcenterImpl implements Jobcenter {
 	meta.setDisplayName(job.getName());
 	meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 	jobItem.setItemMeta(meta);
-	inventory.setItem(slot - 1, jobItem);
+	getInventory().setItem(slot, jobItem);
     }
 
     @Override
     public void removeJob(Job job) throws JobSystemException {
 	checkForJobExistsInJobcenter(job);
-	inventory.clear(getJobSlot(job) - 1);
-	jobs.remove(job);
+	getInventory().clear(getJobSlot(job));
+	getJobList().remove(job);
 	saveJob(job, null, 0);
 	saveJobNameList();
 	if (isJAvailableInOtherJobcenter(job)) {
@@ -114,14 +116,102 @@ public class JobcenterImpl implements Jobcenter {
 		    try {
 			ecoPlayer.leaveJob(job, false);
 		    } catch (PlayerException e) {
+			Bukkit.getLogger().warning("[Ultimate_Economy] Failed to leave the job " + job.getName());
+			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 		    }
 		}
 	    }
 	}
     }
 
+    @Override
+    public List<Job> getJobList() {
+	return jobs;
+    }
+
+    @Override
+    public void moveJobCenter(Location location) {
+	setupJobcenterLocation(location);
+	saveJobcenterLocation();
+    }
+
+    @Override
+    public String getName() {
+	return name;
+    }
+
+    @Override
+    public void despawnVillager() {
+	getVillager().remove();
+    }
+
+    @Override
+    public void deleteJobCenter() {
+	getSavefile().delete();
+	World world = getLocation().getWorld();
+	getVillager().remove();
+	world.save();
+    }
+
+    @Override
+    public void openInv(Player player) {
+	player.openInventory(getInventory());
+    }
+
+    @Override
+    public boolean hasJob(Job job) {
+	if (getJobList().contains(job)) {
+	    return true;
+	}
+	return false;
+    }
+
+    /*
+     * Utility methods
+     * 
+     */
+
+    private boolean isSlotEmpty(int slot) {
+	if (getInventory().getItem(slot) == null || getInventory().getItem(slot).getType() == Material.AIR) {
+	    return true;
+	}
+	return false;
+    }
+
+    private void setName(String name) {
+	this.name = name;
+    }
+
+    private Villager getVillager() {
+	return villager;
+    }
+
+    private Inventory getInventory() {
+	return inventory;
+    }
+
+    private Location getLocation() {
+	return location;
+    }
+
+    private File getSavefile() {
+	return file;
+    }
+
+    private int getSize() {
+	return size;
+    }
+
+    private List<String> getJobNameList() {
+	List<String> list = new ArrayList<>();
+	for (Job job : getJobList()) {
+	    list.add(job.getName());
+	}
+	return list;
+    }
+
     private int getJobSlot(Job job) {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
 	return config.getInt("Jobs." + job.getName() + ".ItemSlot");
     }
 
@@ -134,107 +224,40 @@ public class JobcenterImpl implements Jobcenter {
 	return false;
     }
 
-    private List<String> getJobNameList() {
-	List<String> list = new ArrayList<>();
-	for (Job job : getJobList()) {
-	    list.add(job.getName());
-	}
-	return list;
-    }
-
-    @Override
-    public List<Job> getJobList() {
-	return jobs;
-    }
-
-    @Override
-    public void moveJobCenter(Location location) {
-	saveJobcenterLocation(location);
-	villager.teleport(location);
-    }
-
-    @Override
-    public String getName() {
-	return name;
-    }
-
-    private void save(FileConfiguration config) {
-	try {
-	    config.save(file);
-	} catch (IOException e) {
-	    e.printStackTrace();
-	}
-    }
-
-    @Override
-    public void despawnVillager() {
-	villager.remove();
-    }
-
-    @Override
-    public void deleteJobCenter() {
-	file.delete();
-	World world = villager.getLocation().getWorld();
-	villager.remove();
-	world.save();
-    }
-
-    @Override
-    public void openInv(Player player) {
-	player.openInventory(inventory);
-    }
-
-    @Override
-    public boolean hasJob(Job job) {
-	if (getJobList().contains(job)) {
-	    return true;
-	}
-	return false;
-    }
-
-    private boolean isSlotEmpty(int slot) {
-	slot--;
-	boolean isEmpty = false;
-	if (inventory.getItem(slot) == null) {
-	    isEmpty = true;
-	}
-	return isEmpty;
-    }
-
     /*
      * Save methods
      * 
      */
 
     private void saveJobcenterSize(int size) {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-	config.set("JobCenterSize", size);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
+	config.set("JobCenterSize", getSize());
 	save(config);
     }
 
-    private void saveJobcenterName(String name) {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-	config.set("JobCenterName", name);
+    private void saveJobcenterName() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
+	config.set("JobCenterName", getName());
 	save(config);
     }
 
-    private void saveJobcenterLocation(Location location) {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-	config.set("JobcenterLocation.x", location.getX());
-	config.set("JobcenterLocation.y", location.getY());
-	config.set("JobcenterLocation.z", location.getZ());
-	config.set("JobcenterLocation.World", location.getWorld().getName());
+    private void saveJobcenterLocation() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
+	config.set("JobcenterLocation.x", getLocation().getX());
+	config.set("JobcenterLocation.y", getLocation().getY());
+	config.set("JobcenterLocation.z", getLocation().getZ());
+	config.set("JobcenterLocation.World", getLocation().getWorld().getName());
 	save(config);
     }
 
     private void saveJobNameList() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
 	config.set("Jobnames", getJobNameList());
 	save(config);
     }
 
     private void saveJob(Job job, String itemMaterial, int slot) {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
 	if (itemMaterial == null) {
 	    config.set("Jobs." + job.getName(), null);
 	} else {
@@ -244,6 +267,15 @@ public class JobcenterImpl implements Jobcenter {
 	save(config);
     }
 
+    private void save(FileConfiguration config) {
+	try {
+	    config.save(getSavefile());
+	} catch (IOException e) {
+	    Bukkit.getLogger().warning("[Ultimate_Economy] Error on save config to file");
+	    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+	}
+    }
+
     /*
      * Setup methods
      * 
@@ -251,29 +283,34 @@ public class JobcenterImpl implements Jobcenter {
 
     private void setupNewJobcenter(String name, Location spawnLocation, int size) {
 	setupJobcenterName(name);
-	saveJobcenterSize(size);
+	setupJobcenterSize(size);
 	setupJobcenterLocation(spawnLocation);
 	setupVillager();
-	setupInventory(size);
-	setupJobcenterInventory();
+	setupInventory();
     }
 
-    private void setupInventory(int size) {
-	inventory = Bukkit.createInventory(villager, size, getName());
+    private void setupJobcenterSize(int size) {
+	this.size = size;
+	saveJobcenterSize(size);
+    }
+
+    private void setupInventory() {
+	inventory = Bukkit.createInventory(getVillager(), getSize(), getName());
+	setupDefaultJobcenterInventory();
     }
 
     private void setupJobcenterName(String name) {
 	setName(name);
-	saveJobcenterName(name);
+	saveJobcenterName();
     }
 
     private void setupJobcenterLocation(Location spawnLocation) {
 	location = spawnLocation;
-	saveJobcenterLocation(spawnLocation);
+	saveJobcenterLocation();
     }
 
-    private void setupJobcenterInventory() {
-	int slot = inventory.getSize();
+    private void setupDefaultJobcenterInventory() {
+	int slot = getInventory().getSize();
 	ItemStack info = new ItemStack(Material.ANVIL);
 	ItemMeta meta = info.getItemMeta();
 	meta.setDisplayName("Info");
@@ -282,27 +319,28 @@ public class JobcenterImpl implements Jobcenter {
 	lore.add(ChatColor.GOLD + "Rightclick: " + ChatColor.RED + "Leave");
 	meta.setLore(lore);
 	info.setItemMeta(meta);
-	inventory.setItem(slot, info);
+	getInventory().setItem(slot, info);
     }
 
     private void setupVillager() {
-	location.getChunk().load();
-	Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10, 10, 10);
+	getLocation().getChunk().load();
+	Collection<Entity> entitys = getLocation().getWorld().getNearbyEntities(getLocation(), 10, 10, 10);
 	for (Entity e : entitys) {
-	    if (e.getName().equals(name)) {
+	    if (e.getName().equals(getName())) {
 		e.remove();
 	    }
 	}
-	villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
-	villager.setCustomName(name);
-	villager.setMetadata("ue-type", new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.JOBCENTER));
-	villager.setCustomNameVisible(true);
-	villager.setProfession(Villager.Profession.NITWIT);
-	villager.setSilent(true);
-	villager.setCollidable(false);
-	villager.setInvulnerable(true);
-	villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
-	villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
+	villager = (Villager) getLocation().getWorld().spawnEntity(location, EntityType.VILLAGER);
+	getVillager().setCustomName(name);
+	getVillager().setMetadata("ue-type",
+		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.JOBCENTER));
+	getVillager().setCustomNameVisible(true);
+	getVillager().setProfession(Villager.Profession.NITWIT);
+	getVillager().setSilent(true);
+	getVillager().setCollidable(false);
+	getVillager().setInvulnerable(true);
+	getVillager().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
+	getVillager().addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
     }
 
     /*
@@ -313,22 +351,22 @@ public class JobcenterImpl implements Jobcenter {
     private void loadExistingJobcenter(String name) {
 	setName(name);
 	loadJobcenterLocation();
+	loadJobcenterSize();
 	setupVillager();
-	loadInventory();
+	setupInventory();
 	loadJobs();
-	setupJobcenterInventory();
     }
 
-    private void loadInventory() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-	inventory = Bukkit.createInventory(villager, config.getInt("JobCenterSize"), getName());
+    private void loadJobcenterSize() {
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
+	size = config.getInt("JobCenterSize");
     }
 
     private void loadJobcenterLocation() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
 	if (config.isSet("ShopLocation.World")) {
 	    oldLoadJobcenterLocation(config);
-	    saveJobcenterLocation(location);
+	    saveJobcenterLocation();
 	} else {
 	    location = new Location(
 		    UltimateEconomy.getInstance.getServer().getWorld(config.getString("JobcenterLocation.World")),
@@ -337,16 +375,8 @@ public class JobcenterImpl implements Jobcenter {
 	}
     }
 
-    @Deprecated
-    private void oldLoadJobcenterLocation(YamlConfiguration config) {
-	location = new Location(
-		UltimateEconomy.getInstance.getServer().getWorld(config.getString("ShopLocation.World")),
-		config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
-		config.getDouble("ShopLocation.z"));
-    }
-
     private void loadJobs() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
 	for (String jobName : config.getStringList("Jobnames")) {
 	    try {
 		Job job = JobController.getJobByName(jobName);
@@ -357,10 +387,11 @@ public class JobcenterImpl implements Jobcenter {
 		meta.setDisplayName(job.getName());
 		meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 		jobItem.setItemMeta(meta);
-		inventory.setItem(config.getInt("Jobs." + job.getName() + ".ItemSlot") - 1, jobItem);
+		config = convertSlot(jobName, config);
+		getInventory().setItem(config.getInt("Jobs." + job.getName() + ".Slot"), jobItem);
 	    } catch (GeneralEconomyException e) {
-		Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the job " + jobName
-			+ " for the jobcenter " + getName());
+		Bukkit.getLogger().warning(
+			"[Ultimate_Economy] Failed to load the job " + jobName + " for the jobcenter " + getName());
 		Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 	    }
 	}
@@ -372,7 +403,7 @@ public class JobcenterImpl implements Jobcenter {
      */
 
     private void checkForValidSlot(int slot) throws GeneralEconomyException {
-	if (slot < 0 || slot > inventory.getSize()) {
+	if (slot < 0 || slot > getSize()) {
 	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, slot);
 	}
     }
@@ -400,5 +431,33 @@ public class JobcenterImpl implements Jobcenter {
 	if (!getJobList().contains(job)) {
 	    throw JobSystemException.getException(JobExceptionMessageEnum.JOB_NOT_EXIST_IN_JOBCENTER);
 	}
+    }
+
+    /*
+     * Deprecated
+     * 
+     */
+
+    @Deprecated
+    private void oldLoadJobcenterLocation(YamlConfiguration config) {
+	location = new Location(
+		UltimateEconomy.getInstance.getServer().getWorld(config.getString("ShopLocation.World")),
+		config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
+		config.getDouble("ShopLocation.z"));
+    }
+
+    /**
+     * @since 1.2.6
+     * @deprecated can be removed later
+     */
+    @Deprecated
+    private YamlConfiguration convertSlot(String jobName, YamlConfiguration config) {
+	if (config.contains("Jobs." + jobName + ".ItemSlot")) {
+	    int slot = config.getInt("Jobs." + jobName + ".ItemSlot");
+	    slot--;
+	    config.set("Jobs." + jobName + ".ItemSlot", null);
+	    config.set("Jobs." + jobName + ".Slot", slot);
+	}
+	return config;
     }
 }
