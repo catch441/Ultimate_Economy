@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.ue.exceptions.GeneralEconomyException;
@@ -26,6 +27,7 @@ public class ShopValidationHandler {
 
     /**
      * Check for one price greater then zero if both prices are available.
+     * 
      * @param sellPrice
      * @param buyPrice
      * @throws ShopSystemException
@@ -40,6 +42,7 @@ public class ShopValidationHandler {
 
     /**
      * Check for at least one price greater then zero.
+     * 
      * @param sellPrice
      * @param buyPrice
      * @throws ShopSystemException
@@ -64,6 +67,7 @@ public class ShopValidationHandler {
 
     /**
      * Check for valid amount.
+     * 
      * @param amount
      * @throws GeneralEconomyException
      */
@@ -75,6 +79,7 @@ public class ShopValidationHandler {
 
     /**
      * Check for valid price.
+     * 
      * @param price
      * @throws GeneralEconomyException
      */
@@ -84,14 +89,22 @@ public class ShopValidationHandler {
 	}
     }
 
-    public void checkForItemExists(String itemName) throws ShopSystemException {
-	if (!getItemList().contains(itemName)) {
+    /**
+     * Check for item exists in the shop.
+     * 
+     * @param itemName
+     * @param itemList
+     * @throws ShopSystemException
+     */
+    public void checkForItemExists(String itemName, List<String> itemList) throws ShopSystemException {
+	if (!itemList.contains(itemName)) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
 	}
     }
 
     /**
      * Check for valid size.
+     * 
      * @param size
      * @throws GeneralEconomyException
      */
@@ -101,20 +114,36 @@ public class ShopValidationHandler {
 	}
     }
 
-    public void checkForValidSlot(int slot) throws GeneralEconomyException {
-	if (slot > (getSize() - 1)) {
+    /**
+     * Check for valid slot.
+     * 
+     * @param slot
+     * @param size
+     * @param reservedSlots
+     * @throws GeneralEconomyException
+     */
+    public void checkForValidSlot(int slot, int size, int reservedSlots) throws GeneralEconomyException {
+	if (slot > (size - 1) || slot < 0) {
 	    // +1 for player readable style
 	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, slot + 1);
 	}
     }
 
-    public void checkForResizePossible(int newSize, int reservedSlots)
+    /**
+     * Check for resize possible.
+     * @param inventory
+     * @param oldSize
+     * @param newSize
+     * @param reservedSlots
+     * @throws ShopSystemException
+     * @throws GeneralEconomyException
+     */
+    public void checkForResizePossible(Inventory inventory, int oldSize, int newSize, int reservedSlots)
 	    throws ShopSystemException, GeneralEconomyException {
-	int diff = getSize() - newSize;
-	// number of reserved slots
-	if (getSize() > newSize) {
+	int diff = oldSize - newSize;
+	if (oldSize > newSize) {
 	    for (int i = 1; i <= diff; i++) {
-		ItemStack stack = getShopInventory().getItem(getSize() - i - reservedSlots);
+		ItemStack stack = inventory.getItem(oldSize - i - reservedSlots);
 		if (stack != null && stack.getType() != Material.AIR) {
 		    throw ShopSystemException.getException(ShopExceptionMessageEnum.RESIZING_FAILED);
 		}
@@ -124,6 +153,7 @@ public class ShopValidationHandler {
 
     /**
      * Check for world exists.
+     * 
      * @param world
      * @throws TownSystemException
      */
@@ -137,6 +167,7 @@ public class ShopValidationHandler {
 
     /**
      * Check for item does not exist in shop.
+     * 
      * @param itemString
      * @param itemList
      * @throws ShopSystemException
@@ -147,14 +178,22 @@ public class ShopValidationHandler {
 	}
     }
 
-    public void checkForItemCanBeDeleted(int slot) throws ShopSystemException {
-	if ((slot + 1) == getSize()) {
+    /**
+     * Check for item can be deleted.
+     * 
+     * @param slot
+     * @param size
+     * @throws ShopSystemException
+     */
+    public void checkForItemCanBeDeleted(int slot, int size) throws ShopSystemException {
+	if ((slot + 1) == size) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_CANNOT_BE_DELETED);
 	}
     }
-    
+
     /**
      * Check for positive value.
+     * 
      * @param value
      * @throws GeneralEconomyException
      */
@@ -166,6 +205,7 @@ public class ShopValidationHandler {
 
     /**
      * Check for valid stock decrease.
+     * 
      * @param entireStock
      * @param stock
      * @throws GeneralEconomyException
@@ -176,14 +216,22 @@ public class ShopValidationHandler {
 	}
     }
 
-    public void checkForChangeOwnerIsPossible(EconomyPlayer newOwner) throws ShopSystemException {
-	if (PlayershopController.getPlayerShopUniqueNameList().contains(getName() + "_" + newOwner.getName())) {
+    /**
+     * Check for change owner is possible.
+     * 
+     * @param newOwner
+     * @param shopName
+     * @throws ShopSystemException
+     */
+    public void checkForChangeOwnerIsPossible(EconomyPlayer newOwner, String shopName) throws ShopSystemException {
+	if (PlayershopController.getPlayerShopUniqueNameList().contains(shopName + "_" + newOwner.getName())) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOP_CHANGEOWNER_ERROR);
 	}
     }
 
     /**
      * Check for valid shop name.
+     * 
      * @param name
      * @throws ShopSystemException
      */
@@ -214,15 +262,9 @@ public class ShopValidationHandler {
 	}
     }
 
-    public void checkForValidSlot(int slot) throws GeneralEconomyException {
-	if (slot > (getSize() - 2) || slot < 0) {
-	    // +1 for player readable style
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, slot + 1);
-	}
-    }
-    
     /**
      * Check for is rentable.
+     * 
      * @param isRentable
      * @throws ShopSystemException
      */

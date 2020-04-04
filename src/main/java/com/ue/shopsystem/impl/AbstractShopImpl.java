@@ -129,7 +129,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
     @Override
     public double getItemSellPrice(String itemString) throws ShopSystemException {
-	checkForItemExists(itemString);
+	getValidationHandler().checkForItemExists(itemString);
 	return YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile())
 		.getDouble("ShopItems." + itemString + ".sellPrice");
     }
@@ -137,14 +137,14 @@ public abstract class AbstractShopImpl implements AbstractShop {
     @Override
     public int getItemAmount(int slot) throws ShopSystemException, GeneralEconomyException {
 	String itemString = getItemString(getShopItem(slot), true);
-	checkForItemExists(itemString);
+	getValidationHandler().checkForItemExists(itemString);
 	return YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile())
 		.getInt("ShopItems." + itemString + ".Amount");
     }
 
     @Override
     public double getItemBuyPrice(String itemString) throws ShopSystemException {
-	checkForItemExists(itemString);
+	getValidationHandler().checkForItemExists(itemString);
 	return YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile())
 		.getDouble("ShopItems." + itemString + ".buyPrice");
     }
@@ -191,13 +191,13 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
     @Override
     public ItemStack getShopItem(int slot) throws GeneralEconomyException, ShopSystemException {
-	checkForSlotIsNotEmpty(slot);
+	getValidationHandler().checkForSlotIsNotEmpty(slot);
 	return getShopInventory().getItem(slot);
     }
 
     @Override
     public ItemStack getItemStack(String itemString) throws ShopSystemException {
-	checkForItemExists(itemString);
+	getValidationHandler().checkForItemExists(itemString);
 	return YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile())
 		.getItemStack("ShopItems." + itemString + ".Name");
     }
@@ -210,8 +210,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
     @Override
     public void changeShopSize(int newSize) throws ShopSystemException, GeneralEconomyException, PlayerException {
-	checkForValidSize(newSize);
-	checkForResizePossible(newSize, 1);
+	getValidationHandler().checkForValidSize(newSize);
+	getValidationHandler().checkForResizePossible(newSize, 1);
 	setSize(newSize);
 	getSavefileHandler().saveShopSize(newSize);
 	setupShopInventory();
@@ -222,12 +222,12 @@ public abstract class AbstractShopImpl implements AbstractShop {
     @Override
     public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack)
 	    throws ShopSystemException, PlayerException, GeneralEconomyException {
-	checkForSlotIsEmpty(slot);
-	checkForValidSellPrice(String.valueOf(sellPrice));
-	checkForValidBuyPrice(String.valueOf(buyPrice));
-	checkForPricesGreaterThenZero(sellPrice, buyPrice);
+	getValidationHandler().checkForSlotIsEmpty(slot);
+	getValidationHandler().checkForValidSellPrice(String.valueOf(sellPrice));
+	getValidationHandler().checkForValidBuyPrice(String.valueOf(buyPrice));
+	getValidationHandler().checkForPricesGreaterThenZero(sellPrice, buyPrice);
 	String itemString = getItemString(itemStack, true);
-	checkForItemDoesNotExist(itemString);
+	getValidationHandler().checkForItemDoesNotExist(itemString);
 	getItemList().add(itemString);
 	// +1 for player readable
 	getEditorInventory().setItem(slot, getSkull(SLOTFILLED, "Slot " + (slot + 1)));
@@ -239,11 +239,11 @@ public abstract class AbstractShopImpl implements AbstractShop {
     @Override
     public String editShopItem(int slot, String newAmount, String newSellPrice, String newBuyPrice)
 	    throws ShopSystemException, PlayerException, GeneralEconomyException {
-	checkForSlotIsNotEmpty(slot);
-	checkForValidAmount(newAmount);
-	checkForValidSellPrice(newSellPrice);
-	checkForValidBuyPrice(newBuyPrice);
-	checkForOnePriceGreaterThenZeroIfBothAvailable(newSellPrice, newBuyPrice);
+	getValidationHandler().checkForSlotIsNotEmpty(slot);
+	getValidationHandler().checkForValidAmount(newAmount);
+	getValidationHandler().checkForValidSellPrice(newSellPrice);
+	getValidationHandler().checkForValidBuyPrice(newBuyPrice);
+	getValidationHandler().checkForOnePriceGreaterThenZeroIfBothAvailable(newSellPrice, newBuyPrice);
 	ItemStack itemStack = getShopItem(slot);
 	String itemString = getItemString(itemStack, true);
 	String message = ChatColor.GOLD + "Updated ";
@@ -267,9 +267,9 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
     @Override
     public void removeShopItem(int slot) throws ShopSystemException, GeneralEconomyException {
-	checkForValidSlot(slot);
-	checkForSlotIsNotEmpty(slot);
-	checkForItemCanBeDeleted(slot);
+	getValidationHandler().checkForValidSlot(slot);
+	getValidationHandler().checkForSlotIsNotEmpty(slot);
+	getValidationHandler().checkForItemCanBeDeleted(slot);
 	ItemStack shopItem = getShopItem(slot);
 	String itemString = getItemString(shopItem, true);
 	getShopInventory().clear(slot);
@@ -376,6 +376,10 @@ public abstract class AbstractShopImpl implements AbstractShop {
      * Utility methods
      * 
      */
+    
+    private ShopValidationHandler getValidationHandler() {
+	return validationHandler;
+    }
 
     protected ItemStack getSkull(String url, String name) {
 	ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
@@ -413,7 +417,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
     }
 
     protected boolean isSlotEmpty(int slot) throws GeneralEconomyException, ShopSystemException {
-	checkForValidSlot(slot);
+	getValidationHandler().checkForValidSlot(slot);
 	boolean isEmpty = false;
 	if (getShopInventory().getItem(slot) == null || getShopInventory().getItem(slot).getType() == Material.AIR) {
 	    isEmpty = true;
@@ -649,7 +653,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    throws ShopSystemException, PlayerException, GeneralEconomyException {
 	double buyPrice = Double.valueOf(inv.getItem(9).getItemMeta().getLore().get(0).substring(9));
 	double sellPrice = Double.valueOf(inv.getItem(18).getItemMeta().getLore().get(0).substring(9));
-	checkForPricesGreaterThenZero(sellPrice, buyPrice);
+	getValidationHandler().checkForPricesGreaterThenZero(sellPrice, buyPrice);
 	ItemStack itemStack = inv.getItem(0);
 	// make a copy of the edited/created item
 	ItemStack newItemStackCopy = new ItemStack(itemStack);
@@ -658,7 +662,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	// if the item changed
 	if (!newItemStackCopy.toString().equals(originalStackString)) {
 	    newItemStackCopy.setAmount(1);
-	    checkForItemDoesNotExist(newItemStackCopy.toString());
+	    getValidationHandler().checkForItemDoesNotExist(newItemStackCopy.toString());
 	    // the old item in the selected slot gets deleted
 	    handleRemoveItem(player, originStack);
 	    addShopItem(getSelectedEditorSlot(), sellPrice, buyPrice, itemStack);
@@ -1062,7 +1066,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
     private void loadShopLocation() throws TownSystemException {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
 	World world = Bukkit.getWorld(config.getString("ShopLocation.World"));
-	checkForWorldExists(world);
+	getValidationHandler().checkForWorldExists(world);
 	location = new Location(world, config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
 		config.getDouble("ShopLocation.z"));
     }
