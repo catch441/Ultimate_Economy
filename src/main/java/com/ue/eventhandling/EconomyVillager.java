@@ -383,7 +383,7 @@ public enum EconomyVillager {
 					// only playershop
 					if (isPlayershop) {
 					    playerShopOwner.decreasePlayerAmount(newprice, false);
-					    playershop.increaseStock(clickedItemString, amount);
+					    playershop.increaseStock(clickedItemString, itemAmount);
 					}
 					itemStack.setAmount(itemAmount);
 					removeItemFromInventory(inventoryplayer, itemStack, itemAmount);
