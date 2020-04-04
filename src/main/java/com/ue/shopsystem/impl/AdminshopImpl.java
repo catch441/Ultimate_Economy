@@ -55,7 +55,7 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	checkForShopNameDoesNotExist(name);
 	checkForValidShopName(name);
 	setName(name);
-	getSavefileManager().saveShopName(name);
+	getSavefileHandler().saveShopName(name);
 	changeInventoryNames(name);
 	getShopVillager().setCustomName(name);
     }

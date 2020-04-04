@@ -148,7 +148,7 @@ public class RentshopController {
 	rentShopList.remove(rentshop);
 	rentshop.despawnVillager();
 	rentshop.getWorld().save();
-	rentshop.getSavefileManager().getSaveFile().delete();
+	rentshop.getSavefileHandler().getSaveFile().delete();
 	// to make sure that all references are no more available
 	rentshop = null;
 	UltimateEconomy.getInstance.getConfig().set("RentShopIds", RentshopController.getRentShopIdList());

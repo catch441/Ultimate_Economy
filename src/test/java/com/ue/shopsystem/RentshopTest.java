@@ -113,7 +113,7 @@ public class RentshopTest {
 	    assertEquals("newname",shop.getName());
 	    assertEquals("newname#R0",shop.getShopVillager().getCustomName());
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("newname", config.getString("ShopName"));
 	} catch (GeneralEconomyException | ShopSystemException e) {
@@ -132,7 +132,7 @@ public class RentshopTest {
 	    assertEquals("newname",shop.getName());
 	    assertEquals("newname_catch441",shop.getShopVillager().getCustomName());
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("newname", config.getString("ShopName"));
 	} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
@@ -154,7 +154,7 @@ public class RentshopTest {
 	    assertFalse(shop.isRentable());
 	    // TODO rent until
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertFalse(config.getBoolean("Rentable"));
 	    assertNotNull(config.getString("RentUntil"));
@@ -209,7 +209,7 @@ public class RentshopTest {
 	    assertEquals("RentShop#R0",shop.getShopVillager().getCustomName());
 	    assertEquals(0,shop.getItemList().size());
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertTrue(config.getBoolean("Rentable"));
 	    assertEquals(0L,config.getLong("RentUntil"));
@@ -227,7 +227,7 @@ public class RentshopTest {
 	    shop.changeRentalFee(25);
 	    assertEquals("25.0", String.valueOf(shop.getRentalFee()));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("25.0",config.getString("RentalFee"));
 	} catch (GeneralEconomyException e) {

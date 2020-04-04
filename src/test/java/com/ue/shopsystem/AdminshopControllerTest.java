@@ -218,7 +218,7 @@ public class AdminshopControllerTest {
 	    assertEquals(K_OFF, slotEditor.getItem(21).getItemMeta().getPersistentDataContainer().get(key,
 		    PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals(0, config.getStringList("ShopItemList").size());
 	    assertEquals("1.5", String.valueOf(config.getDouble("ShopLocation.x")));
@@ -403,7 +403,7 @@ public class AdminshopControllerTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = response.getSavefileManager().getSaveFile();
+	    File saveFile = response.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("5.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));

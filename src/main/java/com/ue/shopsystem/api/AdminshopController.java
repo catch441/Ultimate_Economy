@@ -138,7 +138,7 @@ public class AdminshopController {
     public static void deleteAdminShop(Adminshop adminshop) throws ShopSystemException {
 	adminShopList.remove(adminshop);
 	adminshop.despawnVillager();
-	adminshop.getSavefileManager().getSaveFile().delete();
+	adminshop.getSavefileHandler().getSaveFile().delete();
 	adminshop.getWorld().save();
 	// to make sure that all references are no more available
 	adminshop = null;

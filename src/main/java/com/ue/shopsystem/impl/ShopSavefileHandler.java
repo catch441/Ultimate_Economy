@@ -17,7 +17,7 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-public class ShopSavefileManager {
+public class ShopSavefileHandler {
 
     private File file;
     
@@ -27,7 +27,7 @@ public class ShopSavefileManager {
      * @param createNewFile
      * @throws IOException
      */
-    public ShopSavefileManager(String id,boolean createNewFile) throws IOException {
+    public ShopSavefileHandler(String id,boolean createNewFile) throws IOException {
 	file = new File(UltimateEconomy.getInstance.getDataFolder(), id + ".yml");
 	if(createNewFile) {
 	    file.createNewFile();

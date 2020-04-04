@@ -15,7 +15,7 @@ import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.shopsystem.impl.ShopSavefileManager;
+import com.ue.shopsystem.impl.ShopSavefileHandler;
 
 public abstract interface AbstractShop {
 
@@ -55,11 +55,11 @@ public abstract interface AbstractShop {
     public World getWorld();
 
     /**
-     * Returns the savefile manager of this shop.
+     * Returns the savefile handler of this shop.
      * 
      * @return ShopSavefileManager
      */
-    public ShopSavefileManager getSavefileManager();
+    public ShopSavefileHandler getSavefileHandler();
 
     /**
      * Returns the itemslist of this shop.

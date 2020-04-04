@@ -125,7 +125,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("20.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -172,7 +172,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("20.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -210,7 +210,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("0.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("20.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -248,7 +248,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("0.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -291,7 +291,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("0.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -337,7 +337,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("0.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -455,7 +455,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("15.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("25.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -496,7 +496,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("20.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -537,7 +537,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("15.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("20.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -578,7 +578,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("25.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -697,7 +697,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("0.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -730,7 +730,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTEMPTY,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals(0, config.getStringList("ShopItemList").size());
 	    assertFalse(config.isSet("ShopItens." + item.toString()));
@@ -794,7 +794,7 @@ public class AdminshopTest {
 	    assertEquals(1, world.getNearbyEntities(newLoction, 0, 0, 0).size());
 	    assertEquals(newLoction, shop.getShopVillager().getLocation());
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("5.9", String.valueOf(config.getDouble("ShopLocation.x")));
 	    assertEquals("1.0", String.valueOf(config.getDouble("ShopLocation.y")));
@@ -814,7 +814,7 @@ public class AdminshopTest {
 	    shop.changeProfession(Profession.CARTOGRAPHER);
 	    assertEquals(Profession.CARTOGRAPHER, shop.getShopVillager().getProfession());
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("CARTOGRAPHER", config.getString("Profession"));
 	} catch (ShopSystemException | GeneralEconomyException e) {
@@ -834,7 +834,7 @@ public class AdminshopTest {
 	    assertEquals("newname-Editor", ((ChestInventoryMock) shop.getEditorInventory()).getName());
 	    assertEquals("newname-SlotEditor", ((ChestInventoryMock) shop.getSlotEditorInventory()).getName());
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("newname", config.getString("ShopName"));
 	} catch (ShopSystemException | GeneralEconomyException e) {
@@ -961,7 +961,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTEMPTY,
 		    editor.getItem(16).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileManager().getSaveFile();
+	    File saveFile = shop.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals(18, config.getInt("ShopSize"));
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
@@ -1194,7 +1194,7 @@ public class AdminshopTest {
 	try {
 	    AdminshopController.createAdminShop("myshop", location, 9);
 	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
-	    File file = shop.getSavefileManager().getSaveFile();
+	    File file = shop.getSavefileHandler().getSaveFile();
 	    assertEquals("A0.yml", file.getName());
 	} catch (ShopSystemException | GeneralEconomyException e) {
 	    assertTrue(false);

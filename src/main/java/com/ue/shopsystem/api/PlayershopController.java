@@ -147,7 +147,7 @@ public class PlayershopController {
 	playerShopList.remove(playershop);
 	playershop.despawnVillager();
 	playershop.getWorld().save();
-	playershop.getSavefileManager().getSaveFile().delete();
+	playershop.getSavefileHandler().getSaveFile().delete();
 	// to make sure that all references are no more available
 	playershop = null;
 	UltimateEconomy.getInstance.getConfig().set("PlayerShopIds", PlayershopController.getPlayershopIdList());

@@ -214,7 +214,7 @@ public class PlayershopControllerTest {
 	    assertEquals(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "get specified amount",
 		    stock.getItem(8).getItemMeta().getLore().get(3));
 	    // check savefile
-	    File saveFile = response.getSavefileManager().getSaveFile();
+	    File saveFile = response.getSavefileHandler().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("catch441", config.getString("Owner"));
 	    assertEquals(1, UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopIds").size());

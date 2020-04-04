@@ -122,15 +122,15 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	changeShopName("Shop#" + getShopId());
 	rentable = false;
 	rentUntil = Calendar.getInstance().getTimeInMillis() + (86400000 * duration);
-	getSavefileManager().saveRentable(isRentable());
-	getSavefileManager().saveRentUntil(getRentUntil());
+	getSavefileHandler().saveRentable(isRentable());
+	getSavefileHandler().saveRentUntil(getRentUntil());
     }
 
     @Override
     public void changeRentalFee(double fee) throws GeneralEconomyException {
 	checkForPositiveValue(fee);
 	rentalFee = fee;
-	getSavefileManager().saveRentalFee(fee);
+	getSavefileHandler().saveRentalFee(fee);
     }
 
     /**
@@ -166,11 +166,11 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
     @Override
     public void resetShop() throws ShopSystemException, GeneralEconomyException {
 	setOwner(null);
-	getSavefileManager().saveOwner(null);
+	getSavefileHandler().saveOwner(null);
 	rentUntil = 0L;
 	rentable = true;
-	getSavefileManager().saveRentUntil(0L);
-	getSavefileManager().saveRentable(true);
+	getSavefileHandler().saveRentUntil(0L);
+	getSavefileHandler().saveRentable(true);
 	changeProfession(Profession.NITWIT);
 	changeShopName("RentShop");
 	removeAllItems();
@@ -327,12 +327,12 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
     private void setupRentable() {
 	this.rentable = true;
-	getSavefileManager().saveRentable(true);
+	getSavefileHandler().saveRentable(true);
     }
 
     private void setupRentalFee(double rentalFee) {
 	this.rentalFee = rentalFee;
-	getSavefileManager().saveRentalFee(rentalFee);
+	getSavefileHandler().saveRentalFee(rentalFee);
     }
 
     private void setupRentShopGUI() {
@@ -382,28 +382,17 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
     }
 
     private void loadRentable() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileManager().getSaveFile());
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
 	rentable = config.getBoolean("Rentable");
     }
 
     private void loadRentUntil() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileManager().getSaveFile());
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
 	rentUntil = config.getLong("RentUntil");
     }
 
     private void loadRentalFee() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileManager().getSaveFile());
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
 	rentalFee = config.getInt("RentalFee");
-    }
-
-    /*
-     * Validation check methods
-     * 
-     */
-
-    private void checkForIsRentable() throws ShopSystemException {
-	if (!isRentable()) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ALREADY_RENTED);
-	}
     }
 }
