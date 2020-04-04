@@ -122,15 +122,15 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	changeShopName("Shop#" + getShopId());
 	rentable = false;
 	rentUntil = Calendar.getInstance().getTimeInMillis() + (86400000 * duration);
-	saveRentable();
-	saveRentUntil();
+	getSavefileManager().saveRentable(isRentable());
+	getSavefileManager().saveRentUntil(getRentUntil());
     }
 
     @Override
     public void changeRentalFee(double fee) throws GeneralEconomyException {
 	checkForPositiveValue(fee);
 	rentalFee = fee;
-	saveRentalFee();
+	getSavefileManager().saveRentalFee(fee);
     }
 
     /**
@@ -166,11 +166,11 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
     @Override
     public void resetShop() throws ShopSystemException, GeneralEconomyException {
 	setOwner(null);
-	saveOwner();
+	getSavefileManager().saveOwner(null);
 	rentUntil = 0L;
 	rentable = true;
-	saveRentUntil();
-	saveRentable();
+	getSavefileManager().saveRentUntil(0L);
+	getSavefileManager().saveRentable(true);
 	changeProfession(Profession.NITWIT);
 	changeShopName("RentShop");
 	removeAllItems();
@@ -303,29 +303,6 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
     }
 
     /*
-     * Save methods
-     * 
-     */
-
-    private void saveRentUntil() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	config.set("RentUntil", getRentUntil());
-	save(config);
-    }
-
-    private void saveRentalFee() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	config.set("RentalFee", getRentalFee());
-	save(config);
-    }
-
-    private void saveRentable() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	config.set("Rentable", isRentable());
-	save(config);
-    }
-
-    /*
      * Setup methods
      * 
      */
@@ -350,12 +327,12 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
     private void setupRentable() {
 	this.rentable = true;
-	saveRentable();
+	getSavefileManager().saveRentable(true);
     }
 
     private void setupRentalFee(double rentalFee) {
 	this.rentalFee = rentalFee;
-	saveRentalFee();
+	getSavefileManager().saveRentalFee(rentalFee);
     }
 
     private void setupRentShopGUI() {
@@ -405,17 +382,17 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
     }
 
     private void loadRentable() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileManager().getSaveFile());
 	rentable = config.getBoolean("Rentable");
     }
 
     private void loadRentUntil() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileManager().getSaveFile());
 	rentUntil = config.getLong("RentUntil");
     }
 
     private void loadRentalFee() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileManager().getSaveFile());
 	rentalFee = config.getInt("RentalFee");
     }
 

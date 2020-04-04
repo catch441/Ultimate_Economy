@@ -1,6 +1,5 @@
 package com.ue.shopsystem.api;
 
-import java.io.File;
 import java.util.List;
 
 import org.bukkit.Location;
@@ -16,6 +15,7 @@ import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.shopsystem.impl.ShopSavefileManager;
 
 public abstract interface AbstractShop {
 
@@ -55,11 +55,11 @@ public abstract interface AbstractShop {
     public World getWorld();
 
     /**
-     * Returns the savefile of this shop.
+     * Returns the savefile manager of this shop.
      * 
-     * @return File
+     * @return ShopSavefileManager
      */
-    public File getSaveFile();
+    public ShopSavefileManager getSavefileManager();
 
     /**
      * Returns the itemslist of this shop.

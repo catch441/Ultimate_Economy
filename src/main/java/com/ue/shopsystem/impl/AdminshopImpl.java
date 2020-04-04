@@ -1,5 +1,6 @@
 package com.ue.shopsystem.impl;
 
+
 import org.bukkit.Location;
 import org.bukkit.metadata.FixedMetadataValue;
 
@@ -54,7 +55,7 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	checkForShopNameDoesNotExist(name);
 	checkForValidShopName(name);
 	setName(name);
-	saveShopName();
+	getSavefileManager().saveShopName(name);
 	changeInventoryNames(name);
 	getShopVillager().setCustomName(name);
     }

@@ -307,7 +307,7 @@ public class RentshopControllerTest {
 	    assertEquals(SEVEN,
 		    gui.getItem(5).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSaveFile();
+	    File saveFile = shop.getSavefileManager().getSaveFile();
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("5.0", config.getString("RentalFee"));
 	    assertTrue(config.getBoolean("Rentable"));

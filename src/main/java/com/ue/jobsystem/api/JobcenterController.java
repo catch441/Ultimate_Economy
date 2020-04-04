@@ -10,10 +10,7 @@ import org.bukkit.Location;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.impl.JobcenterImpl;
-import com.ue.player.api.EconomyPlayer;
-import com.ue.player.api.EconomyPlayerController;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobcenterController {
@@ -28,7 +25,7 @@ public class JobcenterController {
      * @throws GeneralEconomyException
      */
     public static Jobcenter getJobCenterByName(String name) throws GeneralEconomyException {
-	for (Jobcenter jobcenter : jobCenterList) {
+	for (Jobcenter jobcenter : getJobCenterList()) {
 	    if (jobcenter.getName().equals(name)) {
 		return jobcenter;
 	    }
@@ -43,7 +40,7 @@ public class JobcenterController {
      */
     public static List<String> getJobCenterNameList() {
 	List<String> jobCenterNames = new ArrayList<>();
-	for (Jobcenter jobcenter : jobCenterList) {
+	for (Jobcenter jobcenter : getJobCenterList()) {
 	    jobCenterNames.add(jobcenter.getName());
 	}
 	return jobCenterNames;
@@ -66,25 +63,17 @@ public class JobcenterController {
      */
     public static void deleteJobCenter(Jobcenter jobcenter) throws JobSystemException {
 	jobcenter.deleteJobCenter();
-	jobCenterList.remove(jobcenter);
+	getJobCenterList().remove(jobcenter);
 	for (Job job : jobcenter.getJobList()) {
-	    if (otherJobcenterHasJob(job)) {
-		for (EconomyPlayer ecoPlayer : EconomyPlayerController.getAllEconomyPlayers()) {
-		    if (ecoPlayer.hasJob(job)) {
-			try {
-			    ecoPlayer.leaveJob(job, false);
-			} catch (PlayerException e) {
-			}
-		    }
-		}
+	    if (!otherJobcenterHasJob(job)) {
+		JobController.removeJobFromAllPlayers(job);
 	    }
 	}
-	UltimateEconomy.getInstance.getConfig().set("JobCenterNames", JobcenterController.getJobCenterNameList());
-	UltimateEconomy.getInstance.saveConfig();
+	saveJobcenterNameList();
     }
 
     private static boolean otherJobcenterHasJob(Job job) throws JobSystemException {
-	for (Jobcenter jobCenter2 : jobCenterList) {
+	for (Jobcenter jobCenter2 : getJobCenterList()) {
 	    if (jobCenter2.hasJob(job)) {
 		return true;
 	    }
@@ -105,9 +94,8 @@ public class JobcenterController {
 	    throws JobSystemException, GeneralEconomyException {
 	checkForJobcenterNameDoesNotExist(name);
 	checkForValidSize(size);
-	jobCenterList.add(new JobcenterImpl(name, spawnLocation, size));
-	UltimateEconomy.getInstance.getConfig().set("JobCenterNames", JobcenterController.getJobCenterNameList());
-	UltimateEconomy.getInstance.saveConfig();
+	getJobCenterList().add(new JobcenterImpl(name, spawnLocation, size));
+	saveJobcenterNameList();
     }
 
     /**
@@ -118,9 +106,10 @@ public class JobcenterController {
 	for (String jobCenterName : UltimateEconomy.getInstance.getConfig().getStringList("JobCenterNames")) {
 	    File file = new File(UltimateEconomy.getInstance.getDataFolder(), jobCenterName + "-JobCenter.yml");
 	    if (file.exists()) {
-		jobCenterList.add(new JobcenterImpl(jobCenterName));
+		getJobCenterList().add(new JobcenterImpl(jobCenterName));
 	    } else {
 		Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the jobcenter " + jobCenterName);
+		Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: No savefile found!");
 	    }
 	}
     }
@@ -129,9 +118,19 @@ public class JobcenterController {
      * This method despawns all jobcenter villager.
      */
     public static void despawnAllVillagers() {
-	for (Jobcenter jobcenter : jobCenterList) {
+	for (Jobcenter jobcenter : getJobCenterList()) {
 	    jobcenter.despawnVillager();
 	}
+    }
+    
+    /*
+     * Save methods
+     * 
+     */
+    
+    private static void saveJobcenterNameList() {
+	UltimateEconomy.getInstance.getConfig().set("JobCenterNames", JobcenterController.getJobCenterNameList());
+	UltimateEconomy.getInstance.saveConfig();
     }
 
     /*

@@ -65,22 +65,8 @@ public class JobController {
      * @throws GeneralEconomyException
      */
     public static void deleteJob(Job job) {
-	for (Jobcenter jobcenter : JobcenterController.getJobCenterList()) {
-	    if (jobcenter.hasJob(job)) {
-		try {
-		    jobcenter.removeJob(job);
-		} catch (JobSystemException e) {
-		}
-	    }
-	}
-	for (EconomyPlayer ecoPlayer : EconomyPlayerController.getAllEconomyPlayers()) {
-	    if (ecoPlayer.hasJob(job)) {
-		try {
-		    ecoPlayer.leaveJob(job, false);
-		} catch (PlayerException e) {
-		}
-	    }
-	}
+	removeJobFromAllJobcenters(job);
+	removeJobFromAllPlayers(job);
 	getJobList().remove(job);
 	job.deleteJob();
 	saveJobNameList();
@@ -109,6 +95,43 @@ public class JobController {
 		getJobList().add(new JobImpl(jobName));
 	    } else {
 		Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the job " + jobName);
+		Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: No savefile found!");
+	    }
+	}
+    }
+    
+    /**
+     * Remove a job from all economy players.
+     * 
+     * @param job
+     */
+    public static void removeJobFromAllPlayers(Job job) {
+	for (EconomyPlayer ecoPlayer : EconomyPlayerController.getAllEconomyPlayers()) {
+	    if (ecoPlayer.hasJob(job)) {
+		try {
+		    ecoPlayer.leaveJob(job, false);
+		} catch (PlayerException e) {
+		    Bukkit.getLogger().warning("[Ultimate_Economy] Failed leave the job " + job.getName());
+		    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+		}
+	    }
+	}
+    }
+    
+    /*
+     * Utility methods
+     * 
+     */
+    
+    private static void removeJobFromAllJobcenters(Job job) {
+	for (Jobcenter jobcenter : JobcenterController.getJobCenterList()) {
+	    if (jobcenter.hasJob(job)) {
+		try {
+		    jobcenter.removeJob(job);
+		} catch (JobSystemException e) {
+		    Bukkit.getLogger().warning("[Ultimate_Economy] Failed remove the job " + job.getName());
+		    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+		}
 	    }
 	}
     }
