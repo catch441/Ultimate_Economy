@@ -291,7 +291,7 @@ public enum EconomyVillager {
 	 * ConfigController.getCurrencyText(newprice))); }
 	 * ecoPlayer.increasePlayerAmount(newprice, false); // only playershop if
 	 * (isPlayershop) { playerShopOwner.decreasePlayerAmount(newprice, false);
-	 * playershop.increaseStock(clickedItemString, amount); }
+	 * playershop.increaseStock(clickedItemString, itemAmount); }
 	 * itemStack.setAmount(itemAmount); removeItemFromInventory(inventoryplayer,
 	 * itemStack, itemAmount); } // only playershop else if (isPlayershop) {
 	 * playe.sendMessage(MessageWrapper.getErrorString("shopowner_not_enough_money")
