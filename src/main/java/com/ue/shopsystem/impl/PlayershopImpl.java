@@ -16,18 +16,12 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.PlayerException;
-import com.ue.exceptions.PlayerExceptionMessageEnum;
-import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.api.Playershop;
-import com.ue.shopsystem.api.PlayershopController;
-import com.ue.townsystem.town.api.Town;
-import com.ue.townsystem.townworld.api.Townworld;
 import com.ue.townsystem.townworld.api.TownworldController;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -82,8 +76,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      */
     @Override
     public void changeShopSize(int newSize) throws ShopSystemException, PlayerException, GeneralEconomyException {
-	checkForValidSize(newSize);
-	checkForResizePossible(newSize, 2);
+	getValidationHandler().checkForValidSize(newSize);
+	getValidationHandler().checkForResizePossible(getShopInventory(),getSize(),newSize, 2);
 	setSize(newSize);
 	getSavefileHandler().saveShopSize(newSize);
 	setupShopInventory();
@@ -99,7 +93,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     @Override
     public void moveShop(Location location) throws TownSystemException, PlayerException {
 	if (TownworldController.isTownWorld(location.getWorld().getName())) {
-	    checkForPlayerHasPermissionInLocation(location);
+	    getValidationHandler().checkForPlayerHasPermissionAtLocation(location,getOwner());
 	}
 	super.moveShop(location);
     }
@@ -111,8 +105,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      */
     @Override
     public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
-	checkForShopNameIsFree(name);
-	checkForValidShopName(name);
+	getValidationHandler().checkForShopNameIsFree(name,getOwner());
+	getValidationHandler().checkForValidShopName(name);
 	setupShopName(name);
 	getShopVillager().setCustomName(name + "_" + getOwner().getName());
 	changeInventoryNames(name);
@@ -147,8 +141,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
     @Override
     public boolean isAvailable(int slot) throws ShopSystemException, GeneralEconomyException {
-	Bukkit.getLogger().info(slot + " davor");
-	checkForValidSlot(slot);
+	getValidationHandler().checkForValidSlot(slot,getSize(),2);
 	int stock = loadStock(slot);
 	int amount = getItemAmount(slot);
 	if (stock >= amount) {
@@ -159,7 +152,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
     @Override
     public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException {
-	checkForChangeOwnerIsPossible(newOwner);
+	getValidationHandler().checkForChangeOwnerIsPossible(newOwner,getName());
 	setOwner(newOwner);
 	getSavefileHandler().saveOwner(newOwner);
 	getShopVillager().setCustomName(getName() + "_" + newOwner.getName());
@@ -175,10 +168,10 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
     @Override
     public void decreaseStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException {
-	checkForPositiveValue(stock);
-	checkForValidSlot(slot);
+	getValidationHandler().checkForPositiveValue(stock);
+	getValidationHandler().checkForValidSlot(slot,getSize(),2);
 	int entireStock = loadStock(slot);
-	checkForValidStockDecrease(entireStock, stock);
+	getValidationHandler().checkForValidStockDecrease(entireStock, stock);
 	if ((entireStock - stock) >= 0) {
 	    getSavefileHandler().saveStock(getItemString(getShopItem(slot), true), entireStock - stock);
 	}
@@ -187,8 +180,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
     @Override
     public void increaseStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException {
-	checkForPositiveValue(stock);
-	checkForValidSlot(slot);
+	getValidationHandler().checkForPositiveValue(stock);
+	getValidationHandler().checkForValidSlot(slot,getSize(),2);
 	int entireStock = loadStock(slot);
 	getSavefileHandler().saveStock(getItemString(getShopItem(slot), true), entireStock + stock);
 	updateItemInStockpile(slot);

@@ -5,7 +5,6 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -53,16 +52,56 @@ public class ShopValidationHandler {
 	}
     }
 
-    public void checkForSlotIsNotEmpty(int slot) throws GeneralEconomyException, ShopSystemException {
-	if (isSlotEmpty(slot)) {
+    /**
+     * Check for slot is not empty.
+     * 
+     * @param slot
+     * @param inventory
+     * @param reservedSlots
+     * @throws GeneralEconomyException
+     * @throws ShopSystemException
+     */
+    public void checkForSlotIsNotEmpty(int slot, Inventory inventory, int reservedSlots)
+	    throws GeneralEconomyException, ShopSystemException {
+	if (isSlotEmpty(slot, inventory, reservedSlots)) {
 	    throw ShopSystemException.getException(ShopExceptionMessageEnum.INVENTORY_SLOT_EMPTY);
 	}
     }
 
-    public void checkForSlotIsEmpty(int slot) throws PlayerException, GeneralEconomyException, ShopSystemException {
-	if (!isSlotEmpty(slot)) {
+    /**
+     * Check for slot is empty.
+     * 
+     * @param slot
+     * @param inventory
+     * @param reservedSlots
+     * @throws PlayerException
+     * @throws GeneralEconomyException
+     * @throws ShopSystemException
+     */
+    public void checkForSlotIsEmpty(int slot, Inventory inventory, int reservedSlots)
+	    throws GeneralEconomyException, PlayerException {
+	if (!isSlotEmpty(slot, inventory, reservedSlots)) {
 	    throw PlayerException.getException(PlayerExceptionMessageEnum.INVENTORY_SLOT_OCCUPIED);
 	}
+    }
+
+    /**
+     * Returns, if the slot is empty or not.
+     * 
+     * @param slot
+     * @param inventory
+     * @param reservedSlots
+     * @return true, if the slot is empty, false, if the slot is not empty
+     * @throws GeneralEconomyException
+     * @throws ShopSystemException
+     */
+    public boolean isSlotEmpty(int slot, Inventory inventory, int reservedSlots) throws GeneralEconomyException {
+	checkForValidSlot(slot, inventory.getSize(), reservedSlots);
+	boolean isEmpty = false;
+	if (inventory.getItem(slot) == null || inventory.getItem(slot).getType() == Material.AIR) {
+	    isEmpty = true;
+	}
+	return isEmpty;
     }
 
     /**
@@ -83,7 +122,7 @@ public class ShopValidationHandler {
      * @param price
      * @throws GeneralEconomyException
      */
-    public void checkForValidBuyPrice(String price) throws GeneralEconomyException {
+    public void checkForValidPrice(String price) throws GeneralEconomyException {
 	if (!"none".equals(price) && Double.valueOf(price) < 0) {
 	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, price);
 	}
@@ -131,6 +170,7 @@ public class ShopValidationHandler {
 
     /**
      * Check for resize possible.
+     * 
      * @param inventory
      * @param oldSize
      * @param newSize
@@ -158,10 +198,8 @@ public class ShopValidationHandler {
      * @throws TownSystemException
      */
     public void checkForWorldExists(World world) throws TownSystemException {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
 	if (world == null) {
-	    throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST,
-		    config.getString("ShopLocation.World"));
+	    throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, "<unknown>");
 	}
     }
 
@@ -241,21 +279,37 @@ public class ShopValidationHandler {
 	}
     }
 
-    public void checkForShopNameIsFree(String name) throws GeneralEconomyException {
-	if (PlayershopController.getPlayerShopUniqueNameList().contains(name + "_" + getOwner().getName())
+    /**
+     * Check for shop name is free.
+     * 
+     * @param name
+     * @param owner
+     * @throws GeneralEconomyException
+     */
+    public void checkForShopNameIsFree(String name, EconomyPlayer owner) throws GeneralEconomyException {
+	if (PlayershopController.getPlayerShopUniqueNameList().contains(name + "_" + owner.getName())
 		|| PlayershopController.getPlayerShopUniqueNameList().contains(name)) {
 	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
-		    name + getOwner().getName());
+		    name + owner.getName());
 	}
     }
 
-    public void checkForPlayerHasPermissionInLocation(Location location) throws PlayerException, TownSystemException {
+    /**
+     * Check for player has permission at location.
+     * 
+     * @param location
+     * @param owner
+     * @throws PlayerException
+     * @throws TownSystemException
+     */
+    public void checkForPlayerHasPermissionAtLocation(Location location, EconomyPlayer owner)
+	    throws PlayerException, TownSystemException {
 	Townworld townworld = TownworldController.getTownWorldByName(location.getWorld().getName());
 	if (townworld.isChunkFree(location.getChunk())) {
 	    throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
 	} else {
 	    Town town = townworld.getTownByChunk(location.getChunk());
-	    if (!town.hasBuildPermissions(getOwner(),
+	    if (!town.hasBuildPermissions(owner,
 		    town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
 		throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
 	    }
