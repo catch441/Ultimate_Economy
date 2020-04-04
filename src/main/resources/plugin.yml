@@ -1,7 +1,7 @@
 name: Ultimate_Economy
 main: com.ue.ultimate_economy.UltimateEconomy
 author: catch441
-version: 1.2.5e
+version: 1.2.5f
 
 api-version: 1.14
 
@@ -19,75 +19,75 @@ permissions:
     default: false
     
   ultimate_economy.config:
-    description: 
+    description: ""
     default: op
 
   ultimate_economy.townworld:
-    description: 
+    description: ""
     default: op
 
   ultimate_economy.town:
-    description: 
+    description: ""
     default: true
 
   ultimate_economy.adminshop:
-    description: 
+    description: ""
     default: op
 
   ultimate_economy.playershop:
-    description: 
+    description: ""
     default: true
     
   ultimate_economy.rentshop.player:
-    description: 
+    description: ""
     default: true
     
   ultimate_economy.rentshop.admin:
-    description: 
+    description: ""
     default: op
 
   ultimate_economy.jobcenter:
-    description: 
+    description: ""
     default: op
 
   ultimate_economy.home:
-    description: 
+    description: ""
     default: true
 
   ultimate_economy.pay:
-    description: 
+    description: ""
     default: true
 
   ultimate_economy.adminpay:
-    description: 
+    description: ""
     default: op
 
   ultimate_economy.info.bank:
-    description: 
+    description: ""
     default: true
 
   ultimate_economy.info.money:
-    description: 
+    description: ""
     default: true
 
   ultimate_economy.info.shoplist:
-    description: 
+    description: ""
     default: true
 
   ultimate_economy.info.myjobs:
-    description: 
+    description: ""
     default: true
 
   ultimate_economy.info.jobinfo:
-    description: 
+    description: ""
     default: true
 
   ultimate_economy.fastshop:
-    description: 
+    description: ""
     default: true
 
   ultimate_economy.info.joblist:
-    description:
+    description: ""
     default: true
 
 commands:
@@ -186,5 +186,3 @@ commands:
     permission-message: You don't have the permission.
     description: Enables/disables scoreboard.
     usage: /<command> [on/off]
-    
-    
