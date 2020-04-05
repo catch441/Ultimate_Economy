@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -52,13 +51,13 @@ public class JobControllerTest {
      */
     @AfterAll
     public static void deleteSavefiles() {
-	UltimateEconomy.getInstance.getDataFolder().delete();
-	server.setPlayers(0);
-	MockBukkit.unload();
 	int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
 	for (int i = 0; i < size2; i++) {
 	    EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
 	}
+	UltimateEconomy.getInstance.getDataFolder().delete();
+	server.setPlayers(0);
+	MockBukkit.unload();
     }
 
     /**
@@ -108,7 +107,6 @@ public class JobControllerTest {
 	    assertTrue(result.getFisherList().containsKey("fish"));
 	    assertTrue(result.getFisherList().containsValue(2.0));
 	} catch (GeneralEconomyException | JobSystemException e) {
-	    Bukkit.getLogger().info(e.getMessage());
 	    assertTrue(false);
 	}
     }
