@@ -19,7 +19,9 @@ import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobImpl implements Job {
 
-    private Map<String, Double> entityList, blockList, fisherList = new HashMap<>();
+    private Map<String, Double> entityList = new HashMap<>();
+    private Map<String, Double> blockList = new HashMap<>();
+    private Map<String, Double> fisherList = new HashMap<>();
     private File file;
     private String name;
 

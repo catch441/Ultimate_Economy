@@ -310,7 +310,7 @@ public class JobcenterImpl implements Jobcenter {
     }
 
     private void setupDefaultJobcenterInventory() {
-	int slot = getInventory().getSize();
+	int slot = getInventory().getSize()-1;
 	ItemStack info = new ItemStack(Material.ANVIL);
 	ItemMeta meta = info.getItemMeta();
 	meta.setDisplayName("Info");
