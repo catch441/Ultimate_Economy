@@ -188,22 +188,29 @@ public class JobImpl implements Job {
 
     private void loadFisherList() {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	for (String key : config.getConfigurationSection("FisherList").getKeys(false)) {
-	    getFisherList().put(key, config.getDouble("FisherList." + key));
+	if (config.contains("FisherList")) {
+	    for (String key : config.getConfigurationSection("FisherList").getKeys(false)) {
+		getFisherList().put(key, config.getDouble("FisherList." + key));
+	    }
 	}
     }
 
     private void loadEntityList() {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	for (String key : config.getConfigurationSection("EntityList").getKeys(false)) {
-	    getEntityList().put(key, config.getDouble("EntityList." + key));
+	if (config.contains("EntityList")) {
+	    for (String key : config.getConfigurationSection("EntityList").getKeys(false)) {
+		getEntityList().put(key, config.getDouble("EntityList." + key));
+	    }
 	}
+
     }
 
     private void loadBlockList() {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
-	for (String key : config.getConfigurationSection("BlockList").getKeys(false)) {
-	    getBlockList().put(key, config.getDouble("BlockList." + key));
+	if (config.contains("BlockList")) {
+	    for (String key : config.getConfigurationSection("BlockList").getKeys(false)) {
+		getBlockList().put(key, config.getDouble("BlockList." + key));
+	    }
 	}
     }
 
@@ -225,6 +232,7 @@ public class JobImpl implements Job {
 
     private void saveBlockList() {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	config.set("BlockList", null);
 	for (String key : getBlockList().keySet()) {
 	    config.set("BlockList." + key, getBlockList().get(key));
 	}
@@ -233,6 +241,7 @@ public class JobImpl implements Job {
 
     private void saveFisherList() {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	config.set("FisherList", null);
 	for (String key : getFisherList().keySet()) {
 	    config.set("FisherList." + key, getFisherList().get(key));
 	}
@@ -241,6 +250,7 @@ public class JobImpl implements Job {
 
     private void saveEntityList() {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSaveFile());
+	config.set("EntityList", null);
 	for (String key : getEntityList().keySet()) {
 	    config.set("EntityList." + key, getEntityList().get(key));
 	}
@@ -345,7 +355,6 @@ public class JobImpl implements Job {
 	    config.set("JobItems", null);
 	    config.set("Itemlist", null);
 	}
-	saveBlockList();
     }
 
     /**

@@ -1,6 +1,5 @@
 package com.ue.jobsystem.api;
 
-import java.util.List;
 import java.util.Map;
 
 import com.ue.exceptions.GeneralEconomyException;
