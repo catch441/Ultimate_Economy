@@ -135,12 +135,12 @@ public class JobTabCompleter implements TabCompleter {
     }
 
     private List<String> getJobcenterNames(String arg) {
-	List<String> all = JobcenterController.getJobCenterNameList();
+	List<String> all = JobcenterController.getJobcenterNameList();
 	if ("".equals(arg)) {
 	    return all;
 	} else {
 	    List<String> list = new ArrayList<>();
-	    for (String jobname : JobcenterController.getJobCenterNameList()) {
+	    for (String jobname : JobcenterController.getJobcenterNameList()) {
 		if (jobname.contains(arg)) {
 		    list.add(jobname);
 		}

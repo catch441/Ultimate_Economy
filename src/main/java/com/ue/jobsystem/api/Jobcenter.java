@@ -37,7 +37,7 @@ public interface Jobcenter {
      * 
      * @param location
      */
-    public void moveJobCenter(Location location);
+    public void moveJobcenter(Location location);
 
     /**
      * This method returns the name of this jobcenter.
@@ -76,5 +76,11 @@ public interface Jobcenter {
     /**
      * Deletes savefile and despawns villager.
      */
-    public void deleteJobCenter();
+    public void deleteJobcenter();
+    
+    /**
+     * Returns the location of the jobcenter villager.
+     * @return location
+     */
+    public Location getJobcenterLocation();
 }

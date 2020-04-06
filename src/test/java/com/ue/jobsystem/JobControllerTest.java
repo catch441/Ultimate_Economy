@@ -69,10 +69,10 @@ public class JobControllerTest {
 	for (int i = 0; i < size; i++) {
 	    JobController.deleteJob(JobController.getJobList().get(0));
 	}
-	int size2 = JobcenterController.getJobCenterList().size();
+	int size2 = JobcenterController.getJobcenterList().size();
 	for (int i = 0; i < size2; i++) {
 	    try {
-		JobcenterController.deleteJobCenter(JobcenterController.getJobCenterList().get(0));
+		JobcenterController.deleteJobcenter(JobcenterController.getJobcenterList().get(0));
 	    } catch (JobSystemException e) {
 		assertTrue(false);
 	    }
@@ -163,9 +163,9 @@ public class JobControllerTest {
     @Test
     public void deleteJobTest() {
 	try {
-	    JobcenterController.createJobCenter("jobcenter", new Location(world, 1, 1, 1), 9);
+	    JobcenterController.createJobcenter("jobcenter", new Location(world, 1, 1, 1), 9);
 	    JobController.createJob("myjob");
-	    Jobcenter jobcenter = JobcenterController.getJobCenterList().get(0);
+	    Jobcenter jobcenter = JobcenterController.getJobcenterList().get(0);
 	    Job job = JobController.getJobList().get(0);
 	    EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
 	    jobcenter.addJob(job, "STONE", 0);

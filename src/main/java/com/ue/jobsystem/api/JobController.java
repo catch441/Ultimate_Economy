@@ -124,7 +124,7 @@ public class JobController {
      */
     
     private static void removeJobFromAllJobcenters(Job job) {
-	for (Jobcenter jobcenter : JobcenterController.getJobCenterList()) {
+	for (Jobcenter jobcenter : JobcenterController.getJobcenterList()) {
 	    if (jobcenter.hasJob(job)) {
 		try {
 		    jobcenter.removeJob(job);

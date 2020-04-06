@@ -24,8 +24,8 @@ public class JobcenterController {
      * @return JobCenter
      * @throws GeneralEconomyException
      */
-    public static Jobcenter getJobCenterByName(String name) throws GeneralEconomyException {
-	for (Jobcenter jobcenter : getJobCenterList()) {
+    public static Jobcenter getJobcenterByName(String name) throws GeneralEconomyException {
+	for (Jobcenter jobcenter : getJobcenterList()) {
 	    if (jobcenter.getName().equals(name)) {
 		return jobcenter;
 	    }
@@ -38,9 +38,9 @@ public class JobcenterController {
      * 
      * @return List of Strings
      */
-    public static List<String> getJobCenterNameList() {
+    public static List<String> getJobcenterNameList() {
 	List<String> jobCenterNames = new ArrayList<>();
-	for (Jobcenter jobcenter : getJobCenterList()) {
+	for (Jobcenter jobcenter : getJobcenterList()) {
 	    jobCenterNames.add(jobcenter.getName());
 	}
 	return jobCenterNames;
@@ -51,7 +51,7 @@ public class JobcenterController {
      * 
      * @return List of JobCenters
      */
-    public static List<Jobcenter> getJobCenterList() {
+    public static List<Jobcenter> getJobcenterList() {
 	return jobCenterList;
     }
 
@@ -61,9 +61,9 @@ public class JobcenterController {
      * @param jobcenter
      * @throws JobSystemException
      */
-    public static void deleteJobCenter(Jobcenter jobcenter) throws JobSystemException {
-	jobcenter.deleteJobCenter();
-	getJobCenterList().remove(jobcenter);
+    public static void deleteJobcenter(Jobcenter jobcenter) throws JobSystemException {
+	jobcenter.deleteJobcenter();
+	getJobcenterList().remove(jobcenter);
 	for (Job job : jobcenter.getJobList()) {
 	    if (!otherJobcenterHasJob(job)) {
 		JobController.removeJobFromAllPlayers(job);
@@ -73,7 +73,7 @@ public class JobcenterController {
     }
 
     private static boolean otherJobcenterHasJob(Job job) throws JobSystemException {
-	for (Jobcenter jobCenter2 : getJobCenterList()) {
+	for (Jobcenter jobCenter2 : getJobcenterList()) {
 	    if (jobCenter2.hasJob(job)) {
 		return true;
 	    }
@@ -90,11 +90,11 @@ public class JobcenterController {
      * @throws JobSystemException
      * @throws GeneralEconomyException
      */
-    public static void createJobCenter(String name, Location spawnLocation, int size)
+    public static void createJobcenter(String name, Location spawnLocation, int size)
 	    throws JobSystemException, GeneralEconomyException {
 	checkForJobcenterNameDoesNotExist(name);
 	checkForValidSize(size);
-	getJobCenterList().add(new JobcenterImpl(name, spawnLocation, size));
+	getJobcenterList().add(new JobcenterImpl(name, spawnLocation, size));
 	saveJobcenterNameList();
     }
 
@@ -102,11 +102,11 @@ public class JobcenterController {
      * This method loads all jobcenters from the save files. !!!
      * JobController.loadAllJobs() have to be executed before this method. !!!
      */
-    public static void loadAllJobCenters() {
+    public static void loadAllJobcenters() {
 	for (String jobCenterName : UltimateEconomy.getInstance.getConfig().getStringList("JobCenterNames")) {
 	    File file = new File(UltimateEconomy.getInstance.getDataFolder(), jobCenterName + "-JobCenter.yml");
 	    if (file.exists()) {
-		getJobCenterList().add(new JobcenterImpl(jobCenterName));
+		getJobcenterList().add(new JobcenterImpl(jobCenterName));
 	    } else {
 		Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the jobcenter " + jobCenterName);
 		Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: No savefile found!");
@@ -118,7 +118,7 @@ public class JobcenterController {
      * This method despawns all jobcenter villager.
      */
     public static void despawnAllVillagers() {
-	for (Jobcenter jobcenter : getJobCenterList()) {
+	for (Jobcenter jobcenter : getJobcenterList()) {
 	    jobcenter.despawnVillager();
 	}
     }
@@ -129,7 +129,7 @@ public class JobcenterController {
      */
     
     private static void saveJobcenterNameList() {
-	UltimateEconomy.getInstance.getConfig().set("JobCenterNames", JobcenterController.getJobCenterNameList());
+	UltimateEconomy.getInstance.getConfig().set("JobCenterNames", JobcenterController.getJobcenterNameList());
 	UltimateEconomy.getInstance.saveConfig();
     }
 
@@ -145,7 +145,7 @@ public class JobcenterController {
     }
 
     private static void checkForJobcenterNameDoesNotExist(String name) throws GeneralEconomyException {
-	if (getJobCenterNameList().contains(name)) {
+	if (getJobcenterNameList().contains(name)) {
 	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, name);
 	}
     }

@@ -252,7 +252,7 @@ public class UltimateEconomy extends JavaPlugin {
 	MessageWrapper.loadLanguage();
 	BankController.loadBankAccounts();
 	JobController.loadAllJobs();
-	JobcenterController.loadAllJobCenters();
+	JobcenterController.loadAllJobcenters();
 	EconomyPlayerController.loadAllEconomyPlayers();
 	TownworldController.loadAllTownWorlds();
 	AdminshopController.loadAllAdminShops();

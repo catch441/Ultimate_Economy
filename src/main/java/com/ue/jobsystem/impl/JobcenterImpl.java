@@ -130,8 +130,9 @@ public class JobcenterImpl implements Jobcenter {
     }
 
     @Override
-    public void moveJobCenter(Location location) {
-	setupJobcenterLocation(location);
+    public void moveJobcenter(Location location) {
+	getVillager().teleport(location);
+	this.location = location;
 	saveJobcenterLocation();
     }
 
@@ -146,9 +147,9 @@ public class JobcenterImpl implements Jobcenter {
     }
 
     @Override
-    public void deleteJobCenter() {
+    public void deleteJobcenter() {
 	getSavefile().delete();
-	World world = getLocation().getWorld();
+	World world = getJobcenterLocation().getWorld();
 	getVillager().remove();
 	world.save();
     }
@@ -164,6 +165,11 @@ public class JobcenterImpl implements Jobcenter {
 	    return true;
 	}
 	return false;
+    }
+
+    @Override
+    public Location getJobcenterLocation() {
+	return location;
     }
 
     /*
@@ -190,10 +196,6 @@ public class JobcenterImpl implements Jobcenter {
 	return inventory;
     }
 
-    private Location getLocation() {
-	return location;
-    }
-
     private File getSavefile() {
 	return file;
     }
@@ -216,7 +218,7 @@ public class JobcenterImpl implements Jobcenter {
     }
 
     private boolean isJAvailableInOtherJobcenter(Job job) throws JobSystemException {
-	for (Jobcenter jobcenter : JobcenterController.getJobCenterList()) {
+	for (Jobcenter jobcenter : JobcenterController.getJobcenterList()) {
 	    if (jobcenter.hasJob(job)) {
 		return true;
 	    }
@@ -243,10 +245,10 @@ public class JobcenterImpl implements Jobcenter {
 
     private void saveJobcenterLocation() {
 	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
-	config.set("JobcenterLocation.x", getLocation().getX());
-	config.set("JobcenterLocation.y", getLocation().getY());
-	config.set("JobcenterLocation.z", getLocation().getZ());
-	config.set("JobcenterLocation.World", getLocation().getWorld().getName());
+	config.set("JobcenterLocation.x", getJobcenterLocation().getX());
+	config.set("JobcenterLocation.y", getJobcenterLocation().getY());
+	config.set("JobcenterLocation.z", getJobcenterLocation().getZ());
+	config.set("JobcenterLocation.World", getJobcenterLocation().getWorld().getName());
 	save(config);
     }
 
@@ -262,7 +264,7 @@ public class JobcenterImpl implements Jobcenter {
 	    config.set("Jobs." + job.getName(), null);
 	} else {
 	    config.set("Jobs." + job.getName() + ".ItemMaterial", itemMaterial);
-	    config.set("Jobs." + job.getName() + ".ItemSlot", slot);
+	    config.set("Jobs." + job.getName() + ".Slot", slot);
 	}
 	save(config);
     }
@@ -310,7 +312,7 @@ public class JobcenterImpl implements Jobcenter {
     }
 
     private void setupDefaultJobcenterInventory() {
-	int slot = getInventory().getSize()-1;
+	int slot = getInventory().getSize() - 1;
 	ItemStack info = new ItemStack(Material.ANVIL);
 	ItemMeta meta = info.getItemMeta();
 	meta.setDisplayName("Info");
@@ -323,14 +325,15 @@ public class JobcenterImpl implements Jobcenter {
     }
 
     private void setupVillager() {
-	getLocation().getChunk().load();
-	Collection<Entity> entitys = getLocation().getWorld().getNearbyEntities(getLocation(), 10, 10, 10);
+	getJobcenterLocation().getChunk().load();
+	Collection<Entity> entitys = getJobcenterLocation().getWorld().getNearbyEntities(getJobcenterLocation(), 10, 10,
+		10);
 	for (Entity e : entitys) {
 	    if (e.getName().equals(getName())) {
 		e.remove();
 	    }
 	}
-	villager = (Villager) getLocation().getWorld().spawnEntity(location, EntityType.VILLAGER);
+	villager = (Villager) getJobcenterLocation().getWorld().spawnEntity(location, EntityType.VILLAGER);
 	getVillager().setCustomName(name);
 	getVillager().setMetadata("ue-type",
 		new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.JOBCENTER));

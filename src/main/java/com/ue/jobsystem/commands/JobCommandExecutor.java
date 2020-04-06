@@ -27,7 +27,7 @@ public class JobCommandExecutor implements CommandExecutor {
 	    } catch (JobSystemException | PlayerException | GeneralEconomyException e) {
 		player.sendMessage(e.getMessage());
 	    } catch (NumberFormatException e) {
-		player.sendMessage(MessageWrapper.getErrorString("invalid_parameter", ""));
+		player.sendMessage(MessageWrapper.getErrorString("invalid_parameter", "number"));
 	    }
 	}
 	return true;
