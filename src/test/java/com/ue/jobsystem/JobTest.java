@@ -24,6 +24,7 @@ import be.seeseemelk.mockbukkit.ServerMock;
 
 public class JobTest {
     
+    @SuppressWarnings("unused")
     private static ServerMock server;
 
     /**
