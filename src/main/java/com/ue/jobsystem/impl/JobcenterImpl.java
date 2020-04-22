@@ -1,6 +1,5 @@
 package com.ue.jobsystem.impl;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,8 +10,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -27,11 +24,8 @@ import org.bukkit.potion.PotionEffectType;
 
 import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
-import com.ue.exceptions.JobExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
-import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.Jobcenter;
@@ -42,13 +36,14 @@ import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobcenterImpl implements Jobcenter {
 
-    private File file;
     private Villager villager;
     private Location location;
     private String name;
     private int size;
     private List<Job> jobs = new ArrayList<>();
     private Inventory inventory;
+    private JobSystemValidationHandler validationHandler;
+    private JobcenterSavefileHandler savefileHandler;
 
     /**
      * Constructor for creating a new jobcenter.
@@ -59,9 +54,9 @@ public class JobcenterImpl implements Jobcenter {
      * @throws JobSystemException
      */
     public JobcenterImpl(String name, Location spawnLocation, int size) throws JobSystemException {
-	file = new File(UltimateEconomy.getInstance.getDataFolder(), name + "-JobCenter.yml");
+	validationHandler = new JobSystemValidationHandler();
 	try {
-	    getSavefile().createNewFile();
+	    savefileHandler = new JobcenterSavefileHandler(name, true);
 	    setupNewJobcenter(name, spawnLocation, size);
 	} catch (IOException e) {
 	    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create savefile");
@@ -75,8 +70,15 @@ public class JobcenterImpl implements Jobcenter {
      * @param name
      */
     public JobcenterImpl(String name) {
-	file = new File(UltimateEconomy.getInstance.getDataFolder(), name + "-JobCenter.yml");
-	loadExistingJobcenter(name);
+	validationHandler = new JobSystemValidationHandler();
+	try {
+	    savefileHandler = new JobcenterSavefileHandler(name, false);
+	    loadExistingJobcenter(name);
+	} catch (IOException e) {
+	    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load savefile");
+	    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+	}
+
     }
 
     /*
@@ -87,14 +89,14 @@ public class JobcenterImpl implements Jobcenter {
     @Override
     public void addJob(Job job, String itemMaterial, int slot)
 	    throws PlayerException, GeneralEconomyException, JobSystemException {
-	checkForValidSlot(slot);
-	checkForFreeSlot(slot);
-	checkForJobDoesNotExistInJobcenter(job);
+	getValidationHandler().checkForValidSlot(slot, getSize());
+	getValidationHandler().checkForFreeSlot(getInventory(), slot);
+	getValidationHandler().checkForJobDoesNotExistInJobcenter(getJobList(), job);
 	itemMaterial = itemMaterial.toUpperCase();
-	checkForValidMaterial(itemMaterial);
+	getValidationHandler().checkForValidMaterial(itemMaterial);
 	getJobList().add(job);
-	saveJobNameList();
-	saveJob(job, itemMaterial, slot);
+	getSavefileHandler().saveJobNameList(getJobNameList());
+	getSavefileHandler().saveJob(job, itemMaterial, slot);
 	ItemStack jobItem = new ItemStack(Material.valueOf(itemMaterial));
 	ItemMeta meta = jobItem.getItemMeta();
 	meta.setDisplayName(job.getName());
@@ -105,11 +107,11 @@ public class JobcenterImpl implements Jobcenter {
 
     @Override
     public void removeJob(Job job) throws JobSystemException {
-	checkForJobExistsInJobcenter(job);
+	getValidationHandler().checkForJobExistsInJobcenter(getJobList(), job);
 	getInventory().clear(getJobSlot(job));
 	getJobList().remove(job);
-	saveJob(job, null, 0);
-	saveJobNameList();
+	getSavefileHandler().saveJob(job, null, 0);
+	getSavefileHandler().saveJobNameList(getJobNameList());
 	if (isJAvailableInOtherJobcenter(job)) {
 	    for (EconomyPlayer ecoPlayer : EconomyPlayerController.getAllEconomyPlayers()) {
 		if (ecoPlayer.hasJob(job)) {
@@ -133,7 +135,7 @@ public class JobcenterImpl implements Jobcenter {
     public void moveJobcenter(Location location) {
 	getVillager().teleport(location);
 	this.location = location;
-	saveJobcenterLocation();
+	getSavefileHandler().saveJobcenterLocation(getJobcenterLocation());
     }
 
     @Override
@@ -148,7 +150,7 @@ public class JobcenterImpl implements Jobcenter {
 
     @Override
     public void deleteJobcenter() {
-	getSavefile().delete();
+	getSavefileHandler().deleteSavefile();
 	World world = getJobcenterLocation().getWorld();
 	getVillager().remove();
 	world.save();
@@ -177,11 +179,12 @@ public class JobcenterImpl implements Jobcenter {
      * 
      */
 
-    private boolean isSlotEmpty(int slot) {
-	if (getInventory().getItem(slot) == null || getInventory().getItem(slot).getType() == Material.AIR) {
-	    return true;
-	}
-	return false;
+    private JobcenterSavefileHandler getSavefileHandler() {
+	return savefileHandler;
+    }
+
+    private JobSystemValidationHandler getValidationHandler() {
+	return validationHandler;
     }
 
     private void setName(String name) {
@@ -194,10 +197,6 @@ public class JobcenterImpl implements Jobcenter {
 
     private Inventory getInventory() {
 	return inventory;
-    }
-
-    private File getSavefile() {
-	return file;
     }
 
     private int getSize() {
@@ -213,8 +212,7 @@ public class JobcenterImpl implements Jobcenter {
     }
 
     private int getJobSlot(Job job) {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
-	return config.getInt("Jobs." + job.getName() + ".ItemSlot");
+	return getSavefileHandler().loadJobSlot(job);
     }
 
     private boolean isJAvailableInOtherJobcenter(Job job) throws JobSystemException {
@@ -224,58 +222,6 @@ public class JobcenterImpl implements Jobcenter {
 	    }
 	}
 	return false;
-    }
-
-    /*
-     * Save methods
-     * 
-     */
-
-    private void saveJobcenterSize(int size) {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
-	config.set("JobCenterSize", getSize());
-	save(config);
-    }
-
-    private void saveJobcenterName() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
-	config.set("JobCenterName", getName());
-	save(config);
-    }
-
-    private void saveJobcenterLocation() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
-	config.set("JobcenterLocation.x", getJobcenterLocation().getX());
-	config.set("JobcenterLocation.y", getJobcenterLocation().getY());
-	config.set("JobcenterLocation.z", getJobcenterLocation().getZ());
-	config.set("JobcenterLocation.World", getJobcenterLocation().getWorld().getName());
-	save(config);
-    }
-
-    private void saveJobNameList() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
-	config.set("Jobnames", getJobNameList());
-	save(config);
-    }
-
-    private void saveJob(Job job, String itemMaterial, int slot) {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
-	if (itemMaterial == null) {
-	    config.set("Jobs." + job.getName(), null);
-	} else {
-	    config.set("Jobs." + job.getName() + ".ItemMaterial", itemMaterial);
-	    config.set("Jobs." + job.getName() + ".Slot", slot);
-	}
-	save(config);
-    }
-
-    private void save(FileConfiguration config) {
-	try {
-	    config.save(getSavefile());
-	} catch (IOException e) {
-	    Bukkit.getLogger().warning("[Ultimate_Economy] Error on save config to file");
-	    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-	}
     }
 
     /*
@@ -293,7 +239,7 @@ public class JobcenterImpl implements Jobcenter {
 
     private void setupJobcenterSize(int size) {
 	this.size = size;
-	saveJobcenterSize(size);
+	getSavefileHandler().saveJobcenterSize(size);
     }
 
     private void setupInventory() {
@@ -303,12 +249,12 @@ public class JobcenterImpl implements Jobcenter {
 
     private void setupJobcenterName(String name) {
 	setName(name);
-	saveJobcenterName();
+	getSavefileHandler().saveJobcenterName(getName());
     }
 
     private void setupJobcenterLocation(Location spawnLocation) {
 	location = spawnLocation;
-	saveJobcenterLocation();
+	getSavefileHandler().saveJobcenterLocation(getJobcenterLocation());
     }
 
     private void setupDefaultJobcenterInventory() {
@@ -353,114 +299,29 @@ public class JobcenterImpl implements Jobcenter {
 
     private void loadExistingJobcenter(String name) {
 	setName(name);
-	loadJobcenterLocation();
-	loadJobcenterSize();
+	location = getSavefileHandler().loadJobcenterLocation();
+	size = getSavefileHandler().loadJobcenterSize();
 	setupVillager();
 	setupInventory();
 	loadJobs();
     }
 
-    private void loadJobcenterSize() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
-	size = config.getInt("JobCenterSize");
-    }
-
-    private void loadJobcenterLocation() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
-	if (config.isSet("ShopLocation.World")) {
-	    oldLoadJobcenterLocation(config);
-	    saveJobcenterLocation();
-	} else {
-	    location = new Location(
-		    UltimateEconomy.getInstance.getServer().getWorld(config.getString("JobcenterLocation.World")),
-		    config.getDouble("JobcenterLocation.x"), config.getDouble("JobcenterLocation.y"),
-		    config.getDouble("JobcenterLocation.z"));
-	}
-    }
-
     private void loadJobs() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefile());
-	for (String jobName : config.getStringList("Jobnames")) {
+	for (String jobName : getSavefileHandler().loadJobNameList()) {
 	    try {
 		Job job = JobController.getJobByName(jobName);
 		getJobList().add(job);
-		ItemStack jobItem = new ItemStack(
-			Material.valueOf(config.getString("Jobs." + job.getName() + ".ItemMaterial")));
+		ItemStack jobItem = new ItemStack(getSavefileHandler().loadJobItemMaterial(job));
 		ItemMeta meta = jobItem.getItemMeta();
 		meta.setDisplayName(job.getName());
 		meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 		jobItem.setItemMeta(meta);
-		config = convertSlot(jobName, config);
-		getInventory().setItem(config.getInt("Jobs." + job.getName() + ".Slot"), jobItem);
+		getInventory().setItem(getSavefileHandler().loadJobSlot(job), jobItem);
 	    } catch (GeneralEconomyException e) {
 		Bukkit.getLogger().warning(
 			"[Ultimate_Economy] Failed to load the job " + jobName + " for the jobcenter " + getName());
 		Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 	    }
 	}
-    }
-
-    /*
-     * Validation check methods
-     * 
-     */
-
-    private void checkForValidSlot(int slot) throws GeneralEconomyException {
-	if (slot < 0 || slot > getSize()) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, slot);
-	}
-    }
-
-    private void checkForFreeSlot(int slot) throws PlayerException {
-	if (!isSlotEmpty(slot)) {
-	    throw PlayerException.getException(PlayerExceptionMessageEnum.INVENTORY_SLOT_OCCUPIED);
-	}
-    }
-
-    private void checkForValidMaterial(String itemMaterial) throws GeneralEconomyException {
-	if (Material.matchMaterial(itemMaterial) == null) {
-	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-		    itemMaterial);
-	}
-    }
-
-    private void checkForJobDoesNotExistInJobcenter(Job job) throws JobSystemException {
-	if (getJobList().contains(job)) {
-	    throw JobSystemException.getException(JobExceptionMessageEnum.JOB_ALREADY_EXIST_IN_JOBCENTER);
-	}
-    }
-
-    private void checkForJobExistsInJobcenter(Job job) throws JobSystemException {
-	if (!getJobList().contains(job)) {
-	    throw JobSystemException.getException(JobExceptionMessageEnum.JOB_NOT_EXIST_IN_JOBCENTER);
-	}
-    }
-
-    /*
-     * Deprecated
-     * 
-     */
-
-    @Deprecated
-    private void oldLoadJobcenterLocation(YamlConfiguration config) {
-	location = new Location(
-		UltimateEconomy.getInstance.getServer().getWorld(config.getString("ShopLocation.World")),
-		config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
-		config.getDouble("ShopLocation.z"));
-    }
-
-    /**
-     * @since 1.2.6
-     * @deprecated can be removed later
-     */
-    @Deprecated
-    private YamlConfiguration convertSlot(String jobName, YamlConfiguration config) {
-	if (config.contains("Jobs." + jobName + ".ItemSlot")) {
-	    int slot = config.getInt("Jobs." + jobName + ".ItemSlot");
-	    slot--;
-	    config.set("Jobs." + jobName + ".ItemSlot", null);
-	    config.set("Jobs." + jobName + ".Slot", slot);
-	}
-	return config;
     }
 }
