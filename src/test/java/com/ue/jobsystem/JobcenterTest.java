@@ -21,6 +21,7 @@ import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.Jobcenter;
 import com.ue.jobsystem.api.JobcenterController;
+import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -186,11 +187,13 @@ public class JobcenterTest {
     @Test
     public void removeJobTest() {
 	try {
+	    EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
 	    Location loc = new Location(world, 1, 1, 1);
 	    JobcenterController.createJobcenter("center", loc, 9);
 	    Jobcenter center = JobcenterController.getJobcenterList().get(0);
 	    JobController.createJob("myjob");
 	    Job job = JobController.getJobList().get(0);
+	    ecoPlayer.joinJob(job, false);
 	    center.addJob(job, "stone", 0);
 	    center.removeJob(job);
 	    assertEquals(0, center.getJobList().size());
@@ -203,11 +206,12 @@ public class JobcenterTest {
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 	    assertEquals(0, config.getStringList("Jobnames").size());
 	    assertFalse(config.contains("Jobs.myjob"));
+	    assertFalse(ecoPlayer.hasJob(job));
 	} catch (JobSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(false);
 	}
     }
-
+    
     @Test
     public void removeJobTestWithNoJob() {
 	try {
