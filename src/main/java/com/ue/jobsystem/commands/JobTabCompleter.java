@@ -31,43 +31,30 @@ public class JobTabCompleter implements TabCompleter {
 	case "create":
 	    return new ArrayList<>();
 	default:
-	    return handleDefaultMatchingTabComplete(args);
-	}
-    }
-
-    private List<String> handleDefaultMatchingTabComplete(String[] args) {
-	if (args.length == 1) {
 	    return getMatchingJobcenterCommands(args);
-	} else {
-	    return new ArrayList<>();
 	}
     }
 
     private List<String> handleJobTabComplete(String[] args) {
-	if (args.length >= 2) {
-	    switch (args[1]) {
-	    case "":
-		return getAllJobCommands();
-	    case "addItem":
-	    case "removeItem":
-		return handleAddRemoveItemTabComplete(args);
-	    case "addMob":
-	    case "deleteMob":
-		return handleAddDeleteMobTabComplete(args);
-	    case "addFisher":
-	    case "removeFisher":
-		return handleAddRemoveFisherTabComplete(args);
-	    case "delete":
-		return handleJobDeleteTabComplete(args);
-	    case "create":
-		return new ArrayList<>();
-	    default:
-		return getMatchingJobCommands(args);
-	    }
-	} else {
+	switch (args[1]) {
+	case "":
+	    return getAllJobCommands();
+	case "addItem":
+	case "removeItem":
+	    return handleAddRemoveItemTabComplete(args);
+	case "addMob":
+	case "deleteMob":
+	    return handleAddDeleteMobTabComplete(args);
+	case "addFisher":
+	case "removeFisher":
+	    return handleAddRemoveFisherTabComplete(args);
+	case "delete":
+	    return handleJobDeleteTabComplete(args);
+	case "create":
 	    return new ArrayList<>();
+	default:
+	    return getMatchingJobCommands(args);
 	}
-
     }
 
     private List<String> handleAddRemoveItemTabComplete(String[] args) {
@@ -186,8 +173,8 @@ public class JobTabCompleter implements TabCompleter {
 	if ("addFisher".contains(args[1])) {
 	    list.add("addFisher");
 	}
-	if ("delFisher".contains(args[1])) {
-	    list.add("delFisher");
+	if ("removeFisher".contains(args[1])) {
+	    list.add("removeFisher");
 	}
 	if ("addMob".contains(args[1])) {
 	    list.add("addMob");
