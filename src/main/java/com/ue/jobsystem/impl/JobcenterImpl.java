@@ -112,7 +112,7 @@ public class JobcenterImpl implements Jobcenter {
 	getJobList().remove(job);
 	getSavefileHandler().saveJob(job, null, 0);
 	getSavefileHandler().saveJobNameList(getJobNameList());
-	if (isJAvailableInOtherJobcenter(job)) {
+	if (!isJAvailableInOtherJobcenter(job)) {
 	    for (EconomyPlayer ecoPlayer : EconomyPlayerController.getAllEconomyPlayers()) {
 		if (ecoPlayer.hasJob(job)) {
 		    try {
