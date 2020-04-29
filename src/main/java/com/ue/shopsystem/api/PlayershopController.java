@@ -145,9 +145,7 @@ public class PlayershopController {
      */
     public static void deletePlayerShop(Playershop playershop) throws ShopSystemException {
 	playerShopList.remove(playershop);
-	playershop.despawnVillager();
-	playershop.getWorld().save();
-	playershop.getSavefileHandler().getSaveFile().delete();
+	playershop.deleteShop();
 	// to make sure that all references are no more available
 	playershop = null;
 	UltimateEconomy.getInstance.getConfig().set("PlayerShopIds", PlayershopController.getPlayershopIdList());

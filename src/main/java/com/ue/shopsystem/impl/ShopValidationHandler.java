@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -14,7 +13,6 @@ import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.player.api.EconomyPlayer;
 import com.ue.shopsystem.api.PlayershopController;
@@ -105,15 +103,12 @@ public class ShopValidationHandler {
 	}
     }
 
-    protected void checkForWorldExists(World world) throws TownSystemException {
-	if (world == null) {
-	    throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, "<unknown>");
-	}
-    }
-
-    protected void checkForItemDoesNotExist(String itemString, List<String> itemList) throws ShopSystemException {
-	if (itemList.contains(itemString)) {
-	    throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_ALREADY_EXISTS);
+    protected void checkForItemDoesNotExist(String itemString, List<ShopItem> itemList)
+	    throws ShopSystemException {
+	for (ShopItem item: itemList) {
+	    if (item.getItemString().equals(itemString)) {
+		throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_ALREADY_EXISTS);
+	    }
 	}
     }
 

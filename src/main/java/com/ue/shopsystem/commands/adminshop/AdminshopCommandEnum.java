@@ -148,7 +148,8 @@ public enum AdminshopCommandEnum {
 		throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 3) {
 		Adminshop shop = AdminshopController.getAdminShopByName(args[1]);
-		String itemName = shop.getShopItem(Integer.valueOf(args[2])).getType().toString().toLowerCase();
+		String itemName = shop.getShopItem(Integer.valueOf(args[2])).getItemStack().getType().toString()
+			.toLowerCase();
 		shop.removeShopItem(Integer.valueOf(args[2]) - 1);
 		player.sendMessage(MessageWrapper.getString("shop_removeItem", itemName));
 	    } else {
@@ -207,7 +208,8 @@ public enum AdminshopCommandEnum {
 		throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 3) {
 		Adminshop shop = AdminshopController.getAdminShopByName(args[1]);
-		String itemName = shop.getShopItem(Integer.valueOf(args[2])).getType().toString().toLowerCase();
+		String itemName = shop.getShopItem(Integer.valueOf(args[2])).getItemStack().getType().toString()
+			.toLowerCase();
 		shop.removeShopItem(Integer.valueOf(args[2]) - 1);
 		player.sendMessage(MessageWrapper.getString("shop_removeSpawner", itemName));
 	    } else {

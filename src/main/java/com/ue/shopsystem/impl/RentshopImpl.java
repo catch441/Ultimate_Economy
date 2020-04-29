@@ -8,7 +8,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -372,26 +371,11 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
      */
 
     private void loadExistingRentshop() {
-	loadRentalFee();
-	loadRentable();
-	loadRentUntil();
+	rentalFee = getSavefileHandler().loadRentalFee();
+	rentable = getSavefileHandler().loadRentable();
+	rentUntil = getSavefileHandler().loadRentUntil();
 	setupRentShopGUI();
 	setupEconomyVillagerType();
 	setupVillagerName();
-    }
-
-    private void loadRentable() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
-	rentable = config.getBoolean("Rentable");
-    }
-
-    private void loadRentUntil() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
-	rentUntil = config.getLong("RentUntil");
-    }
-
-    private void loadRentalFee() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
-	rentalFee = config.getInt("RentalFee");
     }
 }

@@ -15,6 +15,7 @@ import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.shopsystem.impl.ShopItem;
 import com.ue.shopsystem.impl.ShopSavefileHandler;
 
 public abstract interface AbstractShop {
@@ -64,9 +65,9 @@ public abstract interface AbstractShop {
     /**
      * Returns the itemslist of this shop.
      * 
-     * @return itemNames
+     * @return list of ShopItems
      */
-    public List<String> getItemList();
+    public List<ShopItem> getItemList();
 
     /**
      * Returns a itemstack by a given slot.
@@ -76,44 +77,7 @@ public abstract interface AbstractShop {
      * @throws ShopSystemException 
      * @throws GeneralEconomyException 
      */
-    public ItemStack getShopItem(int slot) throws GeneralEconomyException, ShopSystemException;
-
-    /**
-     * This method returns the sellprice of a item.
-     * 
-     * @param itemString
-     * @return double
-     * @throws ShopSystemException
-     */
-    public double getItemSellPrice(String itemString) throws ShopSystemException;
-
-    /**
-     * Returns a itemstack from a itemstring.
-     * 
-     * @param itemString
-     * @return itemstack
-     * @throws ShopSystemException
-     */
-    public ItemStack getItemStack(String itemString) throws ShopSystemException;
-
-    /**
-     * This method returns the amount of a item.
-     * 
-     * @param  slot
-     * @return int
-     * @throws ShopSystemException
-     * @throws GeneralEconomyException 
-     */
-    public int getItemAmount(int slot) throws ShopSystemException, GeneralEconomyException;
-
-    /**
-     * This method returns the buyprice of a item.
-     * 
-     * @param itemString
-     * @return double
-     * @throws ShopSystemException
-     */
-    public double getItemBuyPrice(String itemString) throws ShopSystemException;
+    public ShopItem getShopItem(int slot) throws GeneralEconomyException, ShopSystemException;
 
     /**
      * This method adds a item to this shop.
@@ -198,6 +162,11 @@ public abstract interface AbstractShop {
      * Despawns the shop villager.
      */
     public void despawnVillager();
+    
+    /**
+     * Despawns the shop villager.
+     */
+    public void deleteShop();
 
     /**
      * Opens the shop inventory.

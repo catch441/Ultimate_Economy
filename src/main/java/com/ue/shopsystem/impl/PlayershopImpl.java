@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -49,7 +48,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      * Constructor for loading an existing playershop. No validation, if the shopId
      * is unique. If name != null then use old loading otherwise use new loading.
      * 
-     * @param name deprecated
+     * @param name
+     *                   deprecated
      * @param shopId
      * @throws TownSystemException
      * @throws PlayerException
@@ -77,7 +77,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     @Override
     public void changeShopSize(int newSize) throws ShopSystemException, PlayerException, GeneralEconomyException {
 	getValidationHandler().checkForValidSize(newSize);
-	getValidationHandler().checkForResizePossible(getShopInventory(),getSize(),newSize, 2);
+	getValidationHandler().checkForResizePossible(getShopInventory(), getSize(), newSize, 2);
 	setSize(newSize);
 	getSavefileHandler().saveShopSize(newSize);
 	setupShopInventory();
@@ -93,7 +93,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     @Override
     public void moveShop(Location location) throws TownSystemException, PlayerException {
 	if (TownworldController.isTownWorld(location.getWorld().getName())) {
-	    getValidationHandler().checkForPlayerHasPermissionAtLocation(location,getOwner());
+	    getValidationHandler().checkForPlayerHasPermissionAtLocation(location, getOwner());
 	}
 	super.moveShop(location);
     }
@@ -105,14 +105,12 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
      */
     @Override
     public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
-	getValidationHandler().checkForShopNameIsFree(name,getOwner());
+	getValidationHandler().checkForShopNameIsFree(name, getOwner());
 	getValidationHandler().checkForValidShopName(name);
 	setupShopName(name);
 	getShopVillager().setCustomName(name + "_" + getOwner().getName());
 	changeInventoryNames(name);
     }
-    
-
 
     @Override
     public EconomyPlayer getOwner() {
@@ -126,7 +124,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack)
 	    throws ShopSystemException, PlayerException, GeneralEconomyException {
 	super.addShopItem(slot, sellPrice, buyPrice, itemStack);
-	getSavefileHandler().saveStock(getItemString(getShopItem(slot), true), 0);
+	ShopItem item = getShopItem(slot);
+	getSavefileHandler().saveStock(item.getItemString(), 0);
 	updateItemInStockpile(slot);
     }
 
@@ -141,10 +140,9 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
     @Override
     public boolean isAvailable(int slot) throws ShopSystemException, GeneralEconomyException {
-	getValidationHandler().checkForValidSlot(slot,getSize(),2);
-	int stock = loadStock(slot);
-	int amount = getItemAmount(slot);
-	if (stock >= amount) {
+	getValidationHandler().checkForValidSlot(slot, getSize(), 2);
+	ShopItem item = getShopItem(slot);
+	if (item.getStock() >= item.getAmount()) {
 	    return true;
 	}
 	return false;
@@ -152,7 +150,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
     @Override
     public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException {
-	getValidationHandler().checkForChangeOwnerIsPossible(newOwner,getName());
+	getValidationHandler().checkForChangeOwnerIsPossible(newOwner, getName());
 	setOwner(newOwner);
 	getSavefileHandler().saveOwner(newOwner);
 	getShopVillager().setCustomName(getName() + "_" + newOwner.getName());
@@ -169,21 +167,23 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     @Override
     public void decreaseStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException {
 	getValidationHandler().checkForPositiveValue(stock);
-	getValidationHandler().checkForValidSlot(slot,getSize(),2);
-	int entireStock = loadStock(slot);
+	getValidationHandler().checkForValidSlot(slot, getSize(), 2);
+	ShopItem item = getShopItem(slot);
+	int entireStock = item.getStock();
 	getValidationHandler().checkForValidStockDecrease(entireStock, stock);
-	if ((entireStock - stock) >= 0) {
-	    getSavefileHandler().saveStock(getItemString(getShopItem(slot), true), entireStock - stock);
-	}
+	item.setStock(entireStock - stock);
+	getSavefileHandler().saveStock(item.getItemString(), item.getStock());
 	updateItemInStockpile(slot);
     }
 
     @Override
     public void increaseStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException {
 	getValidationHandler().checkForPositiveValue(stock);
-	getValidationHandler().checkForValidSlot(slot,getSize(),2);
-	int entireStock = loadStock(slot);
-	getSavefileHandler().saveStock(getItemString(getShopItem(slot), true), entireStock + stock);
+	getValidationHandler().checkForValidSlot(slot, getSize(), 2);
+	ShopItem item = getShopItem(slot);
+	int entireStock = item.getStock();
+	item.setStock(entireStock + stock);
+	getSavefileHandler().saveStock(item.getItemString(), item.getStock());
 	updateItemInStockpile(slot);
     }
 
@@ -200,7 +200,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
     private void updateItemInStockpile(int slot) throws GeneralEconomyException, ShopSystemException {
 	ItemStack stack = getShopInventory().getItem(slot).clone();
 	if (stack != null && stack.getType() != Material.AIR) {
-	    int stock = loadStock(slot);
+	    int stock = getShopItem(slot).getStock();
 	    ItemMeta meta = stack.getItemMeta();
 	    List<String> list = removeShopItemPriceLore(meta.getLore());
 	    if (stock != 1) {
@@ -276,21 +276,16 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
     private void loadExistingPlayerShop(String name)
 	    throws PlayerException, GeneralEconomyException, ShopSystemException {
-	if (name != null) {
-	    loadOwnerOld(name);
-	}
-	// new loading
-	else {
-	    loadOwner();
-	}
+	loadStock();
+	loadOwner(name);
 	loadStockpile();
 	setupEconomyVillagerType();
     }
 
-    private int loadStock(int slot) throws GeneralEconomyException, ShopSystemException {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
-	String itemString = getItemString(getShopItem(slot), true);
-	return config.getInt("ShopItems." + itemString + ".stock");
+    private void loadStock() {
+	for(ShopItem item: getItemList()) {
+	    item.setStock(getSavefileHandler().loadStock(item.getItemString()));
+	}
     }
 
     private void loadStockpile() throws GeneralEconomyException, ShopSystemException {
@@ -300,24 +295,11 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	}
     }
 
-    private void loadOwner() throws PlayerException {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
-	if (config.isSet("Owner") && !config.getString("Owner").equals("")) {
-	    setOwner(EconomyPlayerController.getEconomyPlayerByName(config.getString("Owner")));
+    private void loadOwner(String oldName) throws PlayerException {
+	String owner = getSavefileHandler().loadOwner(oldName);
+	if (owner != null && !"".equals(owner)) {
+	    setOwner(EconomyPlayerController.getEconomyPlayerByName(owner));
 	    getShopVillager().setCustomName(getName() + "_" + getOwner().getName());
 	}
-    }
-
-    /*
-     * Deprecated
-     * 
-     */
-
-    @Deprecated
-    private void loadOwnerOld(String name) throws PlayerException {
-	EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(name.substring(name.indexOf("_") + 1));
-	setOwner(ecoPlayer);
-	getSavefileHandler().saveOwner(ecoPlayer);
-	setupShopName(name.substring(0, name.indexOf("_")));
     }
 }

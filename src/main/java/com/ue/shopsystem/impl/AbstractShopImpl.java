@@ -5,8 +5,10 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.Map.Entry;
 
@@ -16,7 +18,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -77,7 +78,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
     private Location location;
     private Inventory shopInventory, editor, slotEditor;
     private int size;
-    private List<String> itemNames = new ArrayList<>();
+    private Map<Integer, ShopItem> shopItems = new HashMap<>();
     private int selectedEditorSlot;
     private String name;
     private String shopId;
@@ -128,30 +129,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
      */
 
     @Override
-    public double getItemSellPrice(String itemString) throws ShopSystemException {
-	getValidationHandler().checkForItemExists(itemString,getItemList());
-	return YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile())
-		.getDouble("ShopItems." + itemString + ".sellPrice");
-    }
-
-    @Override
-    public int getItemAmount(int slot) throws ShopSystemException, GeneralEconomyException {
-	String itemString = getItemString(getShopItem(slot), true);
-	getValidationHandler().checkForItemExists(itemString,getItemList());
-	return YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile())
-		.getInt("ShopItems." + itemString + ".Amount");
-    }
-
-    @Override
-    public double getItemBuyPrice(String itemString) throws ShopSystemException {
-	getValidationHandler().checkForItemExists(itemString,getItemList());
-	return YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile())
-		.getDouble("ShopItems." + itemString + ".buyPrice");
-    }
-
-    @Override
-    public List<String> getItemList() {
-	return itemNames;
+    public List<ShopItem> getItemList() {
+	return new ArrayList<>(getShopItemMap().values());
     }
 
     @Override
@@ -190,16 +169,9 @@ public abstract class AbstractShopImpl implements AbstractShop {
     }
 
     @Override
-    public ItemStack getShopItem(int slot) throws GeneralEconomyException, ShopSystemException {
+    public ShopItem getShopItem(int slot) throws GeneralEconomyException, ShopSystemException {
 	getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
-	return getShopInventory().getItem(slot);
-    }
-
-    @Override
-    public ItemStack getItemStack(String itemString) throws ShopSystemException {
-	getValidationHandler().checkForItemExists(itemString,getItemList());
-	return YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile())
-		.getItemStack("ShopItems." + itemString + ".Name");
+	return getShopItemMap().get(slot);
     }
 
     @Override
@@ -211,7 +183,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
     @Override
     public void changeShopSize(int newSize) throws ShopSystemException, GeneralEconomyException, PlayerException {
 	getValidationHandler().checkForValidSize(newSize);
-	getValidationHandler().checkForResizePossible(getShopInventory(),getSize(),newSize, 1);
+	getValidationHandler().checkForResizePossible(getShopInventory(), getSize(), newSize, 1);
 	setSize(newSize);
 	getSavefileHandler().saveShopSize(newSize);
 	setupShopInventory();
@@ -226,14 +198,15 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	getValidationHandler().checkForValidPrice(String.valueOf(sellPrice));
 	getValidationHandler().checkForValidPrice(String.valueOf(buyPrice));
 	getValidationHandler().checkForPricesGreaterThenZero(sellPrice, buyPrice);
-	String itemString = getItemString(itemStack, true);
-	getValidationHandler().checkForItemDoesNotExist(itemString,getItemList());
-	getItemList().add(itemString);
+	ShopItem shopItem = new ShopItem(itemStack, itemStack.getAmount(), sellPrice, buyPrice);
+	String itemString = shopItem.getItemString();
+	getValidationHandler().checkForItemDoesNotExist(itemString, getItemList());
+	getShopItemMap().put(slot, shopItem);
 	// +1 for player readable
 	getEditorInventory().setItem(slot, getSkull(SLOTFILLED, "Slot " + (slot + 1)));
-	getSavefileHandler().saveItemNames(getItemList());
-	getSavefileHandler().saveShopItem(getItemString(itemStack, true), itemStack, slot, sellPrice, buyPrice, false);
-	addShopItemToInv(itemStack.clone(), itemStack.getAmount(), slot, sellPrice, buyPrice);
+	getSavefileHandler().saveItemNames(getUniqueItemStringList());
+	getSavefileHandler().saveShopItem(shopItem, slot, false);
+	addShopItemToInv(itemStack.clone(), shopItem.getAmount(), slot, sellPrice, buyPrice);
     }
 
     @Override
@@ -244,40 +217,43 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	getValidationHandler().checkForValidPrice(newSellPrice);
 	getValidationHandler().checkForValidPrice(newBuyPrice);
 	getValidationHandler().checkForOnePriceGreaterThenZeroIfBothAvailable(newSellPrice, newBuyPrice);
-	ItemStack itemStack = getShopItem(slot);
-	String itemString = getItemString(itemStack, true);
+	ShopItem shopItem = getShopItem(slot);
+	String itemString = shopItem.getItemString();
 	String message = ChatColor.GOLD + "Updated ";
 	if (!"none".equals(newAmount)) {
-	    getSavefileHandler().saveShopItemAmount(itemString, Integer.valueOf(newAmount));
+	    shopItem.setAmount(Integer.valueOf(newAmount));
+	    getSavefileHandler().saveShopItemAmount(itemString, shopItem.getAmount());
 	    message = message + ChatColor.GREEN + "amount ";
 	}
 	if (!"none".equals(newSellPrice)) {
-	    getSavefileHandler().saveShopItemSellPrice(itemString, Double.valueOf(newSellPrice));
+	    shopItem.setSellPrice(Double.valueOf(newSellPrice));
+	    getSavefileHandler().saveShopItemSellPrice(itemString, shopItem.getSellPrice());
 	    message = message + ChatColor.GREEN + "sellPrice ";
 	}
 	if (!"none".equals(newBuyPrice)) {
-	    getSavefileHandler().saveShopItemBuyPrice(itemString, Double.valueOf(newBuyPrice));
+	    shopItem.setBuyPrice(Double.valueOf(newBuyPrice));
+	    getSavefileHandler().saveShopItemBuyPrice(itemString, shopItem.getBuyPrice());
 	    message = message + ChatColor.GREEN + "buyPrice ";
 	}
 	loadShopItem(itemString);
-	message = message + ChatColor.GOLD + "for item " + ChatColor.GREEN + itemStack.getType().name().toLowerCase();
+	message = message + ChatColor.GOLD + "for item " + ChatColor.GREEN
+		+ shopItem.getItemStack().getType().name().toLowerCase();
 	return message;
 
     }
 
     @Override
     public void removeShopItem(int slot) throws ShopSystemException, GeneralEconomyException {
-	getValidationHandler().checkForValidSlot(slot,getSize(),1);
-	getValidationHandler().checkForSlotIsNotEmpty(slot,getShopInventory(),1);
-	getValidationHandler().checkForItemCanBeDeleted(slot,getSize());
-	ItemStack shopItem = getShopItem(slot);
-	String itemString = getItemString(shopItem, true);
+	getValidationHandler().checkForValidSlot(slot, getSize(), 1);
+	getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
+	getValidationHandler().checkForItemCanBeDeleted(slot, getSize());
+	ShopItem shopItem = getShopItem(slot);
 	getShopInventory().clear(slot);
-	getItemList().remove(itemString);
-	getSavefileHandler().saveItemNames(getItemList());
+	getShopItemMap().remove(slot);
+	getSavefileHandler().saveItemNames(getUniqueItemStringList());
 	// +1 for player readable
 	getEditorInventory().setItem(slot, getSkull(SLOTEMPTY, "Slot " + (slot + 1)));
-	getSavefileHandler().saveShopItem(getItemString(shopItem, true), shopItem, slot, 0, 0, true);
+	getSavefileHandler().saveShopItem(shopItem, slot, true);
     }
 
     @Override
@@ -295,6 +271,13 @@ public abstract class AbstractShopImpl implements AbstractShop {
     @Override
     public void despawnVillager() {
 	getShopVillager().remove();
+    }
+
+    @Override
+    public void deleteShop() {
+	despawnVillager();
+	getSavefileHandler().deleteFile();
+	getWorld().save();
     }
 
     @Override
@@ -381,6 +364,18 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	return validationHandler;
     }
 
+    private Map<Integer, ShopItem> getShopItemMap() {
+	return shopItems;
+    }
+
+    private List<String> getUniqueItemStringList() {
+	List<String> list = new ArrayList<>();
+	for (ShopItem item : getItemList()) {
+	    list.add(item.getItemString());
+	}
+	return list;
+    }
+
     protected ItemStack getSkull(String url, String name) {
 	ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
 	if (url.isEmpty()) {
@@ -400,8 +395,10 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    profileField.setAccessible(true);
 	    profileField.set(headMeta, profile);
 	} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-	    //Bukkit.getLogger().warning("[Ultimate_Economy] Failed to request skull texture from minecraft.");
-	    //Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+	    // Bukkit.getLogger().warning("[Ultimate_Economy] Failed to request skull
+	    // texture from minecraft.");
+	    // Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " +
+	    // e.getMessage());
 	}
 	headMeta.setDisplayName(name);
 	head.setItemMeta(headMeta);
@@ -417,7 +414,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
     }
 
     protected void reloadShopItems() throws GeneralEconomyException, ShopSystemException, PlayerException {
-	for (String item : getItemList()) {
+	for (String item : getUniqueItemStringList()) {
 	    loadShopItem(item);
 	}
     }
@@ -434,28 +431,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	slotEditor = slotEditorNew;
     }
 
-    protected String getItemString(ItemStack itemStack, boolean amountOne) {
-	ItemStack itemStackCpy = itemStack.clone();
-	if (amountOne) {
-	    itemStackCpy.setAmount(1);
-	}
-	if (itemStack.getType() == Material.SPAWNER) {
-	    return getItemStringForSpawner(itemStack.getItemMeta());
-	} else {
-	    return getItemStringForNonSpawner(itemStackCpy);
-	}
-    }
-
-    private String getItemStringForNonSpawner(ItemStack itemStack) {
-	ItemMeta itemMeta = itemStack.getItemMeta();
-	if (itemMeta != null && itemMeta.hasLore()) {
-	    List<String> loreList = removeShopItemPriceLore(itemMeta.getLore());
-	    itemMeta.setLore(loreList);
-	    itemStack.setItemMeta(itemMeta);
-	}
-	return itemStack.toString();
-    }
-
     protected List<String> removeShopItemPriceLore(List<String> loreList) {
 	if (loreList != null) {
 	    Iterator<String> loreIter = loreList.iterator();
@@ -467,10 +442,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    }
 	}
 	return loreList;
-    }
-
-    private String getItemStringForSpawner(ItemMeta meta) {
-	return "SPAWNER_" + meta.getDisplayName();
     }
 
     private double getPriceForHandleSlotEditor(InventoryClickEvent event, int slot) {
@@ -635,9 +606,9 @@ public abstract class AbstractShopImpl implements AbstractShop {
     }
 
     private void handleAddItemToSlotEditor(ItemStack clickedItem) {
-	ItemStack editorItemStack2 = new ItemStack(clickedItem);
-	editorItemStack2.setAmount(1);
-	getSlotEditorInventory().setItem(0, editorItemStack2);
+	ItemStack editorItemStack = new ItemStack(clickedItem);
+	editorItemStack.setAmount(1);
+	getSlotEditorInventory().setItem(0, editorItemStack);
     }
 
     private void handleSaveChanges(Inventory inv, Player player, ItemStack originStack)
@@ -648,12 +619,20 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	ItemStack itemStack = inv.getItem(0);
 	// make a copy of the edited/created item
 	ItemStack newItemStackCopy = new ItemStack(itemStack);
-	String originalStackString = getItemString(originStack, false);
+
+	ItemMeta itemMeta = originStack.getItemMeta();
+	if (itemMeta != null && itemMeta.hasLore()) {
+	    List<String> loreList = removeShopItemPriceLore(itemMeta.getLore());
+	    itemMeta.setLore(loreList);
+	    originStack.setItemMeta(itemMeta);
+	}
+	String originalStackString = originStack.toString();
+
 	newItemStackCopy.setAmount(originStack.getAmount());
 	// if the item changed
 	if (!newItemStackCopy.toString().equals(originalStackString)) {
 	    newItemStackCopy.setAmount(1);
-	    getValidationHandler().checkForItemDoesNotExist(newItemStackCopy.toString(),getItemList());
+	    getValidationHandler().checkForItemDoesNotExist(newItemStackCopy.toString(), getItemList());
 	    // the old item in the selected slot gets deleted
 	    handleRemoveItem(player, originStack);
 	    addShopItem(getSelectedEditorSlot(), sellPrice, buyPrice, itemStack);
@@ -781,9 +760,10 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    throws ShopSystemException, GeneralEconomyException {
 	double buyPrice = 0;
 	double sellPrice = 0;
-	if (!getValidationHandler().isSlotEmpty(slot,getShopInventory(),1)) {
-	    buyPrice = getItemBuyPrice(getItemString(getShopItem(slot), true));
-	    sellPrice = getItemSellPrice(getItemString(getShopItem(slot), true));
+	if (!getValidationHandler().isSlotEmpty(slot, getShopInventory(), 1)) {
+	    ShopItem item = getShopItem(slot);
+	    buyPrice = item.getBuyPrice();
+	    sellPrice = item.getSellPrice();
 	}
 	List<String> listBuy = new ArrayList<String>();
 	List<String> listSell = new ArrayList<String>();
@@ -799,19 +779,17 @@ public abstract class AbstractShopImpl implements AbstractShop {
     }
 
     private void setupSlotItemInSlotEditor(int slot) throws GeneralEconomyException, ShopSystemException {
-	if (getValidationHandler().isSlotEmpty(slot,getShopInventory(),1)) {
+	if (getValidationHandler().isSlotEmpty(slot, getShopInventory(), 1)) {
 	    ItemStack item = new ItemStack(Material.BARRIER);
 	    ItemMeta meta = item.getItemMeta();
 	    meta.setDisplayName(ChatColor.GREEN + "select item");
 	    item.setItemMeta(meta);
 	    getSlotEditorInventory().setItem(0, item);
 	} else {
-	    ItemStack item = getShopItem(slot).clone();
-	    ItemMeta meta = item.getItemMeta();
-	    List<String> lore = removeShopItemPriceLore(meta.getLore());
-	    meta.setLore(lore);
-	    item.setItemMeta(meta);
-	    getSlotEditorInventory().setItem(0, item);
+	    ShopItem item = getShopItem(slot);
+	    ItemStack stack = item.getItemStack();
+	    stack.setAmount(item.getAmount());
+	    getSlotEditorInventory().setItem(0, stack);
 	}
     }
 
@@ -1016,11 +994,11 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	try {
 	    savefileHandler = new ShopSavefileHandler(shopId, false);
 	    setShopId(shopId);
-	    loadShopName();
-	    loadShopSize();
-	    loadShopLocation();
+	    setName(getSavefileHandler().loadShopName());
+	    setSize(getSavefileHandler().loadShopSize());
+	    location = getSavefileHandler().loadShopLocation();
 	    setupShopVillager();
-	    loadShopVillagerProfession();
+	    getShopVillager().setProfession(getSavefileHandler().loadShopVillagerProfession());
 	    setupShopInventory();
 	    setupSlotEditor();
 	    setupEditor(1);
@@ -1032,10 +1010,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
     }
 
     private void loadShopItems() {
-	removeDefaultItemFromItemList();
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
-	itemNames = config.getStringList("ShopItemList");
-	for (String item : getItemList()) {
+	for (String item : getSavefileHandler().loadItemNameList()) {
 	    try {
 		loadShopItem(item);
 	    } catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
@@ -1045,65 +1020,15 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
     }
 
-    private void loadShopVillagerProfession() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
-	if (config.isSet("Profession")) {
-	    getShopVillager().setProfession(Profession.valueOf(config.getString("Profession")));
-	} else {
-	    getShopVillager().setProfession(Profession.NITWIT);
-	}
-    }
-
-    private void loadShopLocation() throws TownSystemException {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
-	World world = Bukkit.getWorld(config.getString("ShopLocation.World"));
-	getValidationHandler().checkForWorldExists(world);
-	location = new Location(world, config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
-		config.getDouble("ShopLocation.z"));
-    }
-
-    private void loadShopSize() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
-	setSize(config.getInt("ShopSize"));
-    }
-
-    private void loadShopName() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
-	setName(config.getString("ShopName"));
-    }
-
     protected void loadShopItem(String itemString)
 	    throws ShopSystemException, PlayerException, GeneralEconomyException {
-	if (!itemString.contains("SPAWNER_")) {
-	    loadItem(itemString);
-	} else {
-	    loadSpawner(itemString);
-	}
-    }
-
-    private void loadItem(String itemString) {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
-	ItemStack itemStack = config.getItemStack("ShopItems." + itemString + ".Name");
-	int slot = config.getInt("ShopItems." + itemString + ".Slot");
+	ShopItem shopItem = getSavefileHandler().loadItem(itemString);
+	int slot = getSavefileHandler().loadItemSlot(itemString);
+	getShopItemMap().put(slot, shopItem);
 	// +1 for player readable slot
 	getEditorInventory().setItem(slot, getSkull(SLOTFILLED, "Slot " + (slot + 1)));
-	addShopItemToInv(itemStack, config.getInt("ShopItems." + itemString + ".Amount"), slot,
-		config.getDouble("ShopItems." + itemString + ".sellPrice"),
-		config.getDouble("ShopItems." + itemString + ".buyPrice"));
-    }
-
-    private void loadSpawner(String itemString) {
-	String entityname = itemString.substring(8);
-	ItemStack itemStack = new ItemStack(Material.SPAWNER);
-	ItemMeta meta = itemStack.getItemMeta();
-	meta.setDisplayName(entityname);
-	itemStack.setItemMeta(meta);
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
-	int slot = config.getInt("ShopItems." + itemString + ".Slot");
-	getEditorInventory().setItem(slot, getSkull(SLOTFILLED, "Slot " + (slot + 1)));
-	addShopItemToInv(itemStack, config.getInt("ShopItems." + itemString + ".Amount"), slot,
-		config.getDouble("ShopItems." + itemString + ".sellPrice"),
-		config.getDouble("ShopItems." + itemString + ".buyPrice"));
+	addShopItemToInv(shopItem.getItemStack(), shopItem.getAmount(), slot, shopItem.getSellPrice(),
+		shopItem.getBuyPrice());
     }
 
     /*
@@ -1124,23 +1049,5 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create savefile");
 	    Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 	}
-    }
-
-    /**
-     * @since 1.2.6
-     * @deprecated can be removed later
-     */
-    @Deprecated
-    private void removeDefaultItemFromItemList() {
-	YamlConfiguration config = YamlConfiguration.loadConfiguration(getSavefileHandler().getSaveFile());
-	List<String> list = config.getStringList("ShopItemList");
-	Iterator<String> iterator = list.iterator();
-	while (iterator.hasNext()) {
-	    String element = iterator.next();
-	    if ("ANVIL_0".equals(element) || "CRAFTING_TABLE_0".equals(element)) {
-		iterator.remove();
-	    }
-	}
-	getSavefileHandler().saveItemNames(list);
     }
 }

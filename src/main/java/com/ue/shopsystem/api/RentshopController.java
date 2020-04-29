@@ -146,9 +146,7 @@ public class RentshopController {
      */
     public static void deleteRentShop(Rentshop rentshop) throws ShopSystemException {
 	rentShopList.remove(rentshop);
-	rentshop.despawnVillager();
-	rentshop.getWorld().save();
-	rentshop.getSavefileHandler().getSaveFile().delete();
+	rentshop.deleteShop();
 	// to make sure that all references are no more available
 	rentshop = null;
 	UltimateEconomy.getInstance.getConfig().set("RentShopIds", RentshopController.getRentShopIdList());

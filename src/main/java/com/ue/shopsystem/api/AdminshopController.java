@@ -137,9 +137,7 @@ public class AdminshopController {
      */
     public static void deleteAdminShop(Adminshop adminshop) throws ShopSystemException {
 	adminShopList.remove(adminshop);
-	adminshop.despawnVillager();
-	adminshop.getSavefileHandler().getSaveFile().delete();
-	adminshop.getWorld().save();
+	adminshop.deleteShop();
 	// to make sure that all references are no more available
 	adminshop = null;
 	UltimateEconomy.getInstance.getConfig().set("AdminShopIds", AdminshopController.getAdminshopIdList());
