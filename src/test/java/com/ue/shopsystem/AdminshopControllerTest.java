@@ -32,6 +32,7 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.api.Adminshop;
 import com.ue.shopsystem.api.AdminshopController;
+import com.ue.shopsystem.impl.ShopItem;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -218,7 +219,7 @@ public class AdminshopControllerTest {
 	    assertEquals(K_OFF, slotEditor.getItem(21).getItemMeta().getPersistentDataContainer().get(key,
 		    PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals(0, config.getStringList("ShopItemList").size());
 	    assertEquals("1.5", String.valueOf(config.getDouble("ShopLocation.x")));
@@ -383,7 +384,20 @@ public class AdminshopControllerTest {
 	    String itemString = enchantedTool.toString();
 	    String itemStringSpawner = "SPAWNER_COW";
 	    assertEquals(2, response.getItemList().size());
-	    assertEquals(itemString, response.getItemList().get(0));
+	    ShopItem item = response.getItemList().get(0);
+	    assertEquals(itemString, item.getItemString());
+	    assertEquals(16, item.getAmount());
+	    assertEquals("5.0", String.valueOf(item.getSellPrice()));
+	    assertEquals("10.0", String.valueOf(item.getBuyPrice()));
+	    assertEquals(0, item.getStock());
+	    assertEquals(Material.DIAMOND_PICKAXE, item.getItemStack().getType());
+	    ShopItem item2 = response.getItemList().get(1);
+	    assertEquals("SPAWNER_COW", item2.getItemString());
+	    assertEquals(1, item2.getAmount());
+	    assertEquals("0.0", String.valueOf(item2.getSellPrice()));
+	    assertEquals("20.0", String.valueOf(item2.getBuyPrice()));
+	    assertEquals(0, item2.getStock());
+	    assertEquals(Material.SPAWNER, item2.getItemStack().getType());
 	    // check shop inventory
 	    Inventory inv = response.getShopInventory();
 	    ItemStack shopItem = inv.getItem(0);
@@ -403,14 +417,13 @@ public class AdminshopControllerTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = response.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("5.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
 	    assertEquals(0, config.getInt("ShopItems." + itemString + ".Slot"));
 	    assertEquals(16, config.getInt("ShopItems." + itemString + ".Amount"));
 	    assertEquals(enchantedTool.toString(), config.getItemStack("ShopItems." + itemString + ".Name").toString());    
-	    assertEquals("SPAWNER_COW", response.getItemList().get(1));
 	    // check shop inventory
 	    ItemStack shopItemSpawner = inv.getItem(1);
 	    assertEquals(Material.SPAWNER, shopItemSpawner.getType());

@@ -37,6 +37,7 @@ import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.api.Adminshop;
 import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.impl.AdminshopImpl;
+import com.ue.shopsystem.impl.ShopItem;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -109,15 +110,21 @@ public class AdminshopTest {
 	    item.setAmount(1);
 	    String itemString = item.toString();
 	    assertEquals(1, shop.getItemList().size());
-	    assertEquals(itemString, shop.getItemList().get(0));
+	    ShopItem shopItem = shop.getItemList().get(0);
+	    assertEquals(itemString, shopItem.getItemString());
+	    assertEquals(16, shopItem.getAmount());
+	    assertEquals("10.0", String.valueOf(shopItem.getSellPrice()));
+	    assertEquals("20.0", String.valueOf(shopItem.getBuyPrice()));
+	    assertEquals(0, shopItem.getStock());
+	    assertEquals(Material.STONE, shopItem.getItemStack().getType());
 	    // check shop inventory
 	    Inventory inv = shop.getShopInventory();
-	    ItemStack shopItem = inv.getItem(1);
-	    assertEquals(Material.STONE, shopItem.getType());
-	    assertEquals(16, shopItem.getAmount());
-	    assertEquals(2, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§616 buy for §a20.0 $", shopItem.getItemMeta().getLore().get(0));
-	    assertEquals("§616 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(1));
+	    ItemStack shopItemStack = inv.getItem(1);
+	    assertEquals(Material.STONE, shopItemStack.getType());
+	    assertEquals(16, shopItemStack.getAmount());
+	    assertEquals(2, shopItemStack.getItemMeta().getLore().size());
+	    assertEquals("§616 buy for §a20.0 $", shopItemStack.getItemMeta().getLore().get(0));
+	    assertEquals("§616 sell for §a10.0 $", shopItemStack.getItemMeta().getLore().get(1));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -125,7 +132,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("20.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -154,17 +161,23 @@ public class AdminshopTest {
 	    item.setAmount(1);
 	    String itemString = item.toString();
 	    assertEquals(1, shop.getItemList().size());
-	    assertEquals(itemString, shop.getItemList().get(0));
+	    ShopItem shopItem = shop.getItemList().get(0);
+	    assertEquals(itemString, shopItem.getItemString());
+	    assertEquals(16, shopItem.getAmount());
+	    assertEquals("10.0", String.valueOf(shopItem.getSellPrice()));
+	    assertEquals("20.0", String.valueOf(shopItem.getBuyPrice()));
+	    assertEquals(0, shopItem.getStock());
+	    assertEquals(Material.STONE, shopItem.getItemStack().getType());
 	    // check shop inventory
 	    Inventory inv = shop.getShopInventory();
-	    ItemStack shopItem = inv.getItem(1);
-	    assertEquals(Material.STONE, shopItem.getType());
-	    assertEquals(16, shopItem.getAmount());
-	    assertEquals(3, shopItem.getItemMeta().getLore().size());
-	    assertEquals("custom name", shopItem.getItemMeta().getDisplayName());
-	    assertEquals("my lore", shopItem.getItemMeta().getLore().get(0));
-	    assertEquals("§616 buy for §a20.0 $", shopItem.getItemMeta().getLore().get(1));
-	    assertEquals("§616 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(2));
+	    ItemStack shopItemStack = inv.getItem(1);
+	    assertEquals(Material.STONE, shopItemStack.getType());
+	    assertEquals(16, shopItemStack.getAmount());
+	    assertEquals(3, shopItemStack.getItemMeta().getLore().size());
+	    assertEquals("custom name", shopItemStack.getItemMeta().getDisplayName());
+	    assertEquals("my lore", shopItemStack.getItemMeta().getLore().get(0));
+	    assertEquals("§616 buy for §a20.0 $", shopItemStack.getItemMeta().getLore().get(1));
+	    assertEquals("§616 sell for §a10.0 $", shopItemStack.getItemMeta().getLore().get(2));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -172,7 +185,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("20.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -195,14 +208,20 @@ public class AdminshopTest {
 	    item.setAmount(1);
 	    String itemString = item.toString();
 	    assertEquals(1, shop.getItemList().size());
-	    assertEquals(itemString, shop.getItemList().get(0));
+	    ShopItem shopItem = shop.getItemList().get(0);
+	    assertEquals(itemString, shopItem.getItemString());
+	    assertEquals(16, shopItem.getAmount());
+	    assertEquals("0.0", String.valueOf(shopItem.getSellPrice()));
+	    assertEquals("20.0", String.valueOf(shopItem.getBuyPrice()));
+	    assertEquals(0, shopItem.getStock());
+	    assertEquals(Material.STONE, shopItem.getItemStack().getType());
 	    // check shop inventory
 	    Inventory inv = shop.getShopInventory();
-	    ItemStack shopItem = inv.getItem(1);
-	    assertEquals(Material.STONE, shopItem.getType());
-	    assertEquals(16, shopItem.getAmount());
-	    assertEquals(1, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§616 buy for §a20.0 $", shopItem.getItemMeta().getLore().get(0));
+	    ItemStack shopItemStack = inv.getItem(1);
+	    assertEquals(Material.STONE, shopItemStack.getType());
+	    assertEquals(16, shopItemStack.getAmount());
+	    assertEquals(1, shopItemStack.getItemMeta().getLore().size());
+	    assertEquals("§616 buy for §a20.0 $", shopItemStack.getItemMeta().getLore().get(0));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -210,7 +229,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("0.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("20.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -233,14 +252,20 @@ public class AdminshopTest {
 	    item.setAmount(1);
 	    String itemString = item.toString();
 	    assertEquals(1, shop.getItemList().size());
-	    assertEquals(itemString, shop.getItemList().get(0));
+	    ShopItem shopItem = shop.getItemList().get(0);
+	    assertEquals(itemString, shopItem.getItemString());
+	    assertEquals(16, shopItem.getAmount());
+	    assertEquals("10.0", String.valueOf(shopItem.getSellPrice()));
+	    assertEquals("0.0", String.valueOf(shopItem.getBuyPrice()));
+	    assertEquals(0, shopItem.getStock());
+	    assertEquals(Material.STONE, shopItem.getItemStack().getType());
 	    // check shop inventory
 	    Inventory inv = shop.getShopInventory();
-	    ItemStack shopItem = inv.getItem(1);
-	    assertEquals(Material.STONE, shopItem.getType());
-	    assertEquals(16, shopItem.getAmount());
-	    assertEquals(1, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§616 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(0));
+	    ItemStack shopItemStack = inv.getItem(1);
+	    assertEquals(Material.STONE, shopItemStack.getType());
+	    assertEquals(16, shopItemStack.getAmount());
+	    assertEquals(1, shopItemStack.getItemMeta().getLore().size());
+	    assertEquals("§616 sell for §a10.0 $", shopItemStack.getItemMeta().getLore().get(0));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -248,7 +273,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("0.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -275,15 +300,21 @@ public class AdminshopTest {
 	    item.setAmount(1);
 	    String itemString = item.toString();
 	    assertEquals(1, shop.getItemList().size());
-	    assertEquals(itemString, shop.getItemList().get(0));
+	    ShopItem shopItem = shop.getItemList().get(0);
+	    assertEquals(itemString, shopItem.getItemString());
+	    assertEquals(16, shopItem.getAmount());
+	    assertEquals("10.0", String.valueOf(shopItem.getSellPrice()));
+	    assertEquals("0.0", String.valueOf(shopItem.getBuyPrice()));
+	    assertEquals(0, shopItem.getStock());
+	    assertEquals(Material.POTION, shopItem.getItemStack().getType());
 	    // check shop inventory
 	    Inventory inv = shop.getShopInventory();
-	    ItemStack shopItem = inv.getItem(1);
-	    assertEquals(Material.POTION, shopItem.getType());
-	    assertEquals(data, ((CraftMetaPotionMock) shopItem.getItemMeta()).getBasePotionData());
-	    assertEquals(16, shopItem.getAmount());
-	    assertEquals(1, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§616 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(0));
+	    ItemStack shopItemStack = inv.getItem(1);
+	    assertEquals(Material.POTION, shopItemStack.getType());
+	    assertEquals(data, ((CraftMetaPotionMock) shopItemStack.getItemMeta()).getBasePotionData());
+	    assertEquals(16, shopItemStack.getAmount());
+	    assertEquals(1, shopItemStack.getItemMeta().getLore().size());
+	    assertEquals("§616 sell for §a10.0 $", shopItemStack.getItemMeta().getLore().get(0));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -291,7 +322,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("0.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -318,18 +349,24 @@ public class AdminshopTest {
 	    item.setAmount(1);
 	    String itemString = item.toString();
 	    assertEquals(1, shop.getItemList().size());
-	    assertEquals(itemString, shop.getItemList().get(0));
+	    ShopItem shopItem = shop.getItemList().get(0);
+	    assertEquals(itemString, shopItem.getItemString());
+	    assertEquals(16, shopItem.getAmount());
+	    assertEquals("10.0", String.valueOf(shopItem.getSellPrice()));
+	    assertEquals("0.0", String.valueOf(shopItem.getBuyPrice()));
+	    assertEquals(0, shopItem.getStock());
+	    assertEquals(Material.DIAMOND_PICKAXE, shopItem.getItemStack().getType());
 	    // check shop inventory
 	    Inventory inv = shop.getShopInventory();
-	    ItemStack shopItem = inv.getItem(1);
-	    assertEquals(Material.DIAMOND_PICKAXE, shopItem.getType());
-	    assertEquals(1, shopItem.getEnchantments().size());
-	    assertTrue(shopItem.getEnchantments().containsKey(Enchantment.DURABILITY));
-	    assertTrue(shopItem.getEnchantments().containsValue(1));
-	    assertEquals(10, ((CraftMetaItemMock) item.getItemMeta()).getDamage());
-	    assertEquals(16, shopItem.getAmount());
-	    assertEquals(1, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§616 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(0));
+	    ItemStack shopItemStack = inv.getItem(1);
+	    assertEquals(Material.DIAMOND_PICKAXE, shopItemStack.getType());
+	    assertEquals(1, shopItemStack.getEnchantments().size());
+	    assertTrue(shopItemStack.getEnchantments().containsKey(Enchantment.DURABILITY));
+	    assertTrue(shopItemStack.getEnchantments().containsValue(1));
+	    assertEquals(10, ((CraftMetaItemMock) shopItemStack.getItemMeta()).getDamage());
+	    assertEquals(16, shopItemStack.getAmount());
+	    assertEquals(1, shopItemStack.getItemMeta().getLore().size());
+	    assertEquals("§616 sell for §a10.0 $", shopItemStack.getItemMeta().getLore().get(0));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -337,7 +374,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("0.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -438,16 +475,22 @@ public class AdminshopTest {
 	    item.setAmount(1);
 	    String itemString = item.toString();
 	    assertEquals(1, shop.getItemList().size());
-	    assertEquals(itemString, shop.getItemList().get(0));
+	    ShopItem shopItem = shop.getItemList().get(0);
+	    assertEquals(itemString, shopItem.getItemString());
+	    assertEquals(8, shopItem.getAmount());
+	    assertEquals("15.0", String.valueOf(shopItem.getSellPrice()));
+	    assertEquals("25.0", String.valueOf(shopItem.getBuyPrice()));
+	    assertEquals(0, shopItem.getStock());
+	    assertEquals(Material.STONE, shopItem.getItemStack().getType());
 	    assertEquals("§6Updated §aamount §asellPrice §abuyPrice §6for item §astone", response);
 	    // check shop inventory
 	    Inventory inv = shop.getShopInventory();
-	    ItemStack shopItem = inv.getItem(1);
-	    assertEquals(Material.STONE, shopItem.getType());
-	    assertEquals(8, shopItem.getAmount());
-	    assertEquals(2, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§68 buy for §a25.0 $", shopItem.getItemMeta().getLore().get(0));
-	    assertEquals("§68 sell for §a15.0 $", shopItem.getItemMeta().getLore().get(1));
+	    ItemStack shopItemStack = inv.getItem(1);
+	    assertEquals(Material.STONE, shopItemStack.getType());
+	    assertEquals(8, shopItemStack.getAmount());
+	    assertEquals(2, shopItemStack.getItemMeta().getLore().size());
+	    assertEquals("§68 buy for §a25.0 $", shopItemStack.getItemMeta().getLore().get(0));
+	    assertEquals("§68 sell for §a15.0 $", shopItemStack.getItemMeta().getLore().get(1));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -455,7 +498,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("15.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("25.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -479,16 +522,22 @@ public class AdminshopTest {
 	    item.setAmount(1);
 	    String itemString = item.toString();
 	    assertEquals(1, shop.getItemList().size());
-	    assertEquals(itemString, shop.getItemList().get(0));
+	    ShopItem shopItem = shop.getItemList().get(0);
+	    assertEquals(itemString, shopItem.getItemString());
+	    assertEquals(8, shopItem.getAmount());
+	    assertEquals("10.0", String.valueOf(shopItem.getSellPrice()));
+	    assertEquals("20.0", String.valueOf(shopItem.getBuyPrice()));
+	    assertEquals(0, shopItem.getStock());
+	    assertEquals(Material.STONE, shopItem.getItemStack().getType());
 	    assertEquals("§6Updated §aamount §6for item §astone", response);
 	    // check shop inventory
 	    Inventory inv = shop.getShopInventory();
-	    ItemStack shopItem = inv.getItem(1);
-	    assertEquals(Material.STONE, shopItem.getType());
-	    assertEquals(8, shopItem.getAmount());
-	    assertEquals(2, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§68 buy for §a20.0 $", shopItem.getItemMeta().getLore().get(0));
-	    assertEquals("§68 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(1));
+	    ItemStack shopItemStack = inv.getItem(1);
+	    assertEquals(Material.STONE, shopItemStack.getType());
+	    assertEquals(8, shopItemStack.getAmount());
+	    assertEquals(2, shopItemStack.getItemMeta().getLore().size());
+	    assertEquals("§68 buy for §a20.0 $", shopItemStack.getItemMeta().getLore().get(0));
+	    assertEquals("§68 sell for §a10.0 $", shopItemStack.getItemMeta().getLore().get(1));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -496,7 +545,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("20.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -520,16 +569,22 @@ public class AdminshopTest {
 	    item.setAmount(1);
 	    String itemString = item.toString();
 	    assertEquals(1, shop.getItemList().size());
-	    assertEquals(itemString, shop.getItemList().get(0));
+	    ShopItem shopItem = shop.getItemList().get(0);
+	    assertEquals(itemString, shopItem.getItemString());
+	    assertEquals(16, shopItem.getAmount());
+	    assertEquals("15.0", String.valueOf(shopItem.getSellPrice()));
+	    assertEquals("20.0", String.valueOf(shopItem.getBuyPrice()));
+	    assertEquals(0, shopItem.getStock());
+	    assertEquals(Material.STONE, shopItem.getItemStack().getType());
 	    assertEquals("§6Updated §asellPrice §6for item §astone", response);
 	    // check shop inventory
 	    Inventory inv = shop.getShopInventory();
-	    ItemStack shopItem = inv.getItem(1);
-	    assertEquals(Material.STONE, shopItem.getType());
-	    assertEquals(16, shopItem.getAmount());
-	    assertEquals(2, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§616 buy for §a20.0 $", shopItem.getItemMeta().getLore().get(0));
-	    assertEquals("§616 sell for §a15.0 $", shopItem.getItemMeta().getLore().get(1));
+	    ItemStack shopItemStack = inv.getItem(1);
+	    assertEquals(Material.STONE, shopItemStack.getType());
+	    assertEquals(16, shopItemStack.getAmount());
+	    assertEquals(2, shopItemStack.getItemMeta().getLore().size());
+	    assertEquals("§616 buy for §a20.0 $", shopItemStack.getItemMeta().getLore().get(0));
+	    assertEquals("§616 sell for §a15.0 $", shopItemStack.getItemMeta().getLore().get(1));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -537,7 +592,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("15.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("20.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -561,16 +616,22 @@ public class AdminshopTest {
 	    item.setAmount(1);
 	    String itemString = item.toString();
 	    assertEquals(1, shop.getItemList().size());
-	    assertEquals(itemString, shop.getItemList().get(0));
+	    ShopItem shopItem = shop.getItemList().get(0);
+	    assertEquals(itemString, shopItem.getItemString());
+	    assertEquals(16, shopItem.getAmount());
+	    assertEquals("10.0", String.valueOf(shopItem.getSellPrice()));
+	    assertEquals("25.0", String.valueOf(shopItem.getBuyPrice()));
+	    assertEquals(0, shopItem.getStock());
+	    assertEquals(Material.STONE, shopItem.getItemStack().getType());
 	    assertEquals("§6Updated §abuyPrice §6for item §astone", response);
 	    // check shop inventory
 	    Inventory inv = shop.getShopInventory();
-	    ItemStack shopItem = inv.getItem(1);
-	    assertEquals(Material.STONE, shopItem.getType());
-	    assertEquals(16, shopItem.getAmount());
-	    assertEquals(2, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§616 buy for §a25.0 $", shopItem.getItemMeta().getLore().get(0));
-	    assertEquals("§616 sell for §a10.0 $", shopItem.getItemMeta().getLore().get(1));
+	    ItemStack shopItemStack = inv.getItem(1);
+	    assertEquals(Material.STONE, shopItemStack.getType());
+	    assertEquals(16, shopItemStack.getAmount());
+	    assertEquals(2, shopItemStack.getItemMeta().getLore().size());
+	    assertEquals("§616 buy for §a25.0 $", shopItemStack.getItemMeta().getLore().get(0));
+	    assertEquals("§616 sell for §a10.0 $", shopItemStack.getItemMeta().getLore().get(1));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -578,7 +639,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("25.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -681,15 +742,21 @@ public class AdminshopTest {
 	    shop.addShopItem(1, 0, 10, item);
 	    String itemString = "SPAWNER_COW";
 	    assertEquals(1, shop.getItemList().size());
-	    assertEquals("SPAWNER_COW", shop.getItemList().get(0));
+	    ShopItem shopItem = shop.getItemList().get(0);
+	    assertEquals(itemString, shopItem.getItemString());
+	    assertEquals(1, shopItem.getAmount());
+	    assertEquals("0.0", String.valueOf(shopItem.getSellPrice()));
+	    assertEquals("10.0", String.valueOf(shopItem.getBuyPrice()));
+	    assertEquals(0, shopItem.getStock());
+	    assertEquals(Material.SPAWNER, shopItem.getItemStack().getType());
 	    // check shop inventory
 	    Inventory inv = shop.getShopInventory();
-	    ItemStack shopItem = inv.getItem(1);
-	    assertEquals(Material.SPAWNER, shopItem.getType());
-	    assertEquals(1, shopItem.getAmount());
-	    assertEquals("COW", shopItem.getItemMeta().getDisplayName());
-	    assertEquals(1, shopItem.getItemMeta().getLore().size());
-	    assertEquals("§61 buy for §a10.0 $", shopItem.getItemMeta().getLore().get(0));
+	    ItemStack shopItemStack = inv.getItem(1);
+	    assertEquals(Material.SPAWNER, shopItemStack.getType());
+	    assertEquals(1, shopItemStack.getAmount());
+	    assertEquals("COW", shopItemStack.getItemMeta().getDisplayName());
+	    assertEquals(1, shopItemStack.getItemMeta().getLore().size());
+	    assertEquals("§61 buy for §a10.0 $", shopItemStack.getItemMeta().getLore().get(0));
 	    // check editor inventory
 	    Inventory editor = shop.getEditorInventory();
 	    NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -697,7 +764,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTFILLED,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("0.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
 	    assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
@@ -730,7 +797,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTEMPTY,
 		    editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals(0, config.getStringList("ShopItemList").size());
 	    assertFalse(config.isSet("ShopItens." + item.toString()));
@@ -794,7 +861,7 @@ public class AdminshopTest {
 	    assertEquals(1, world.getNearbyEntities(newLoction, 0, 0, 0).size());
 	    assertEquals(newLoction, shop.getShopVillager().getLocation());
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("5.9", String.valueOf(config.getDouble("ShopLocation.x")));
 	    assertEquals("1.0", String.valueOf(config.getDouble("ShopLocation.y")));
@@ -814,7 +881,7 @@ public class AdminshopTest {
 	    shop.changeProfession(Profession.CARTOGRAPHER);
 	    assertEquals(Profession.CARTOGRAPHER, shop.getShopVillager().getProfession());
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("CARTOGRAPHER", config.getString("Profession"));
 	} catch (ShopSystemException | GeneralEconomyException e) {
@@ -834,7 +901,7 @@ public class AdminshopTest {
 	    assertEquals("newname-Editor", ((ChestInventoryMock) shop.getEditorInventory()).getName());
 	    assertEquals("newname-SlotEditor", ((ChestInventoryMock) shop.getSlotEditorInventory()).getName());
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("newname", config.getString("ShopName"));
 	} catch (ShopSystemException | GeneralEconomyException e) {
@@ -961,7 +1028,7 @@ public class AdminshopTest {
 	    assertEquals(SLOTEMPTY,
 		    editor.getItem(16).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals(18, config.getInt("ShopSize"));
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
@@ -1089,8 +1156,12 @@ public class AdminshopTest {
 	    AdminshopController.createAdminShop("myshop", location, 9);
 	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
 	    shop.addShopItem(0, 0, 1, new ItemStack(Material.STONE));
-	    ItemStack item = shop.getShopItem(0);
-	    assertEquals(Material.STONE, item.getType());
+	    ShopItem item = shop.getShopItem(0);
+	    assertEquals(1, item.getAmount());
+	    assertEquals("0.0", String.valueOf(item.getSellPrice()));
+	    assertEquals("1.0", String.valueOf(item.getBuyPrice()));
+	    assertEquals(0, item.getStock());
+	    assertEquals(Material.STONE, item.getItemStack().getType());
 	} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 	    assertTrue(false);
 	}
@@ -1193,9 +1264,8 @@ public class AdminshopTest {
 	Location location = new Location(world, 1.5, 2.3, 6.9);
 	try {
 	    AdminshopController.createAdminShop("myshop", location, 9);
-	    Adminshop shop = AdminshopController.getAdminshopList().get(0);
-	    File file = shop.getSavefileHandler().getSaveFile();
-	    assertEquals("A0.yml", file.getName());
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
+	    assertEquals("A0.yml", saveFile.getName());
 	} catch (ShopSystemException | GeneralEconomyException e) {
 	    assertTrue(false);
 	}

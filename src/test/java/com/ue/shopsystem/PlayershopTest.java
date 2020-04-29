@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -116,7 +117,7 @@ public class PlayershopTest {
 	    shop.increaseStock(0, 30);
 	    assertEquals("§a30§6 Items", shop.getStockpileInventory().getItem(0).getItemMeta().getLore().get(0));
 	    // check save file
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"P0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals(30, config.getInt("ShopItems." + stack.toString() + ".stock"));
 	} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
@@ -154,10 +155,11 @@ public class PlayershopTest {
 	    shop.decreaseStock(0, 10);
 	    assertEquals("§a20§6 Items", shop.getStockpileInventory().getItem(0).getItemMeta().getLore().get(0));
 	    // check save file
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"P0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals(20, config.getInt("ShopItems." + stack.toString() + ".stock"));
 	} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+	    Bukkit.getLogger().info(e.getMessage());
 	    assertTrue(false);
 	}
     }
@@ -241,7 +243,7 @@ public class PlayershopTest {
 	    shop.changeOwner(EconomyPlayerController.getAllEconomyPlayers().get(1));
 	    assertEquals(EconomyPlayerController.getAllEconomyPlayers().get(1), shop.getOwner());
 	    // check save file
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"P0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("Wulfgar", config.getString("Owner"));
 	} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
@@ -403,7 +405,7 @@ public class PlayershopTest {
 	    assertEquals(1, world.getNearbyEntities(newLoction, 0, 0, 0).size());
 	    assertEquals(newLoction, shop.getShopVillager().getLocation());
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"P0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("5.9", String.valueOf(config.getDouble("ShopLocation.x")));
 	    assertEquals("1.0", String.valueOf(config.getDouble("ShopLocation.y")));
@@ -480,7 +482,7 @@ public class PlayershopTest {
 	    assertEquals("newshop-Editor", ((ChestInventoryMock) shop.getEditorInventory()).getName());
 	    assertEquals("newshop-SlotEditor", ((ChestInventoryMock) shop.getSlotEditorInventory()).getName());
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"P0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("newshop", config.getString("ShopName"));
 	} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {

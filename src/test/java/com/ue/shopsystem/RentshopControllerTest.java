@@ -31,6 +31,7 @@ import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.api.Rentshop;
 import com.ue.shopsystem.api.RentshopController;
+import com.ue.shopsystem.impl.ShopItem;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -307,7 +308,7 @@ public class RentshopControllerTest {
 	    assertEquals(SEVEN,
 		    gui.getItem(5).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	    // check savefile
-	    File saveFile = shop.getSavefileHandler().getSaveFile();
+	    File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"R0.yml");
 	    YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 	    assertEquals("5.0", config.getString("RentalFee"));
 	    assertTrue(config.getBoolean("Rentable"));
@@ -365,7 +366,14 @@ public class RentshopControllerTest {
 	    assertFalse(shop.isRentable());
 	    assertNotNull(shop.getRentUntil());
 	    assertEquals(1, shop.getItemList().size());
-	    assertEquals("ItemStack{STONE x 1}", shop.getItemList().get(0));
+	    ShopItem shopItem = shop.getItemList().get(0);
+	    assertEquals("ItemStack{STONE x 1}", shopItem.getItemString());
+	    assertEquals(1, shopItem.getAmount());
+	    assertEquals("1.0", String.valueOf(shopItem.getSellPrice()));
+	    assertEquals("1.0", String.valueOf(shopItem.getBuyPrice()));
+	    assertEquals(0, shopItem.getStock());
+	    assertEquals(Material.STONE, shopItem.getItemStack().getType());
+	    // inventory
 	    assertEquals(Material.STONE, shop.getShopInventory().getItem(0).getType());
 	} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
 	    assertTrue(false);
