@@ -134,6 +134,7 @@ public class TownImpl implements Town {
 	config.set("Towns." + newName + ".chunks", chunkCoords);
 	config.set("Towns." + newName + ".owner", mayor.getName());
 	config.set("Towns." + newName + ".coOwners", deputyList);
+	config.set("Towns." + newName + ".Plots", ""); // TODO FIXME add plots on renameing
 	config.set("Towns." + townName, null);
 	for (EconomyPlayer citizen : citizens) {
 	    citizen.removeJoinedTown(townName);
