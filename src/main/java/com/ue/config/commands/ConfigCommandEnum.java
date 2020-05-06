@@ -16,11 +16,12 @@ public enum ConfigCommandEnum {
 	    if (args.length == 3) {
 		if (!args[1].equals("cs") && !args[1].equals("de") && !args[1].equals("en") && !args[1].equals("fr")
 			&& !args[1].equals("zh") && !args[1].equals("ru") && !args[1].equals("es")
-			&& !args[1].equals("lt") && !args[1].equals("it")) {
+			&& !args[1].equals("lt") && !args[1].equals("it") && !args[1].equals("pl")) {
 		    sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter", args[1]));
 		} else if (!args[2].equals("CZ") && !args[2].equals("DE") && !args[2].equals("US")
 			&& !args[2].equals("FR") && !args[2].equals("CN") && !args[2].equals("RU")
-			&& !args[2].equals("ES") && !args[2].equals("LT") && !args[2].equals("IT")) {
+			&& !args[2].equals("ES") && !args[2].equals("LT") && !args[2].equals("IT")
+			&& !args[1].equals("PL")) {
 		    sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter", args[2]));
 		} else {
 		    UltimateEconomy.getInstance.getConfig().set("localeLanguage", args[1]);
@@ -162,11 +163,11 @@ public enum ConfigCommandEnum {
 	}
 	return null;
     }
-    
+
     private static boolean stringToBoolean(String string) {
-	if("true".equalsIgnoreCase(string)) {
+	if ("true".equalsIgnoreCase(string)) {
 	    return true;
-	} else if("false".equalsIgnoreCase(string)) {
+	} else if ("false".equalsIgnoreCase(string)) {
 	    return false;
 	} else {
 	    throw new IllegalArgumentException();

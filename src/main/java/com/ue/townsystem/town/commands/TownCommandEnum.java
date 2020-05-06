@@ -63,12 +63,12 @@ public enum TownCommandEnum {
 	@Override
 	boolean perform(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 		throws TownSystemException, PlayerException, GeneralEconomyException {
-	    if (args.length == 3) {
+	    /*if (args.length == 3) {
 		Town town = TownController.getTown(args[1]);
 		town.renameTown(args[2], ecoPlayer, true);
 	    } else {
 		player.sendMessage("/" + label + " rename <old name> <new name>");
-	    }
+	    }*/
 	    return true;
 	}
     },
