@@ -84,6 +84,9 @@ public class ConfigTabCompleter implements TabCompleter {
 	case "it": 
 	    list.add("IT");
 	    break;
+	case "pl": 
+	    list.add("PL");
+	    break;
 	default:
 	    break;
 	}
@@ -101,6 +104,7 @@ public class ConfigTabCompleter implements TabCompleter {
 	addIfContains(list,"es",args[1]);
 	addIfContains(list,"lt",args[1]);
 	addIfContains(list,"it",args[1]);
+	addIfContains(list,"pl",args[1]);
 	return list;
     }
 
@@ -115,6 +119,7 @@ public class ConfigTabCompleter implements TabCompleter {
 	list.add("es");
 	list.add("lt");
 	list.add("it");
+	list.add("PL");
 	return list;
     }
 
