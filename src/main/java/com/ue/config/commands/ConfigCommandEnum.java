@@ -21,7 +21,7 @@ public enum ConfigCommandEnum {
 		} else if (!args[2].equals("CZ") && !args[2].equals("DE") && !args[2].equals("US")
 			&& !args[2].equals("FR") && !args[2].equals("CN") && !args[2].equals("RU")
 			&& !args[2].equals("ES") && !args[2].equals("LT") && !args[2].equals("IT")
-			&& !args[1].equals("PL")) {
+			&& !args[2].equals("PL")) {
 		    sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter", args[2]));
 		} else {
 		    UltimateEconomy.getInstance.getConfig().set("localeLanguage", args[1]);
