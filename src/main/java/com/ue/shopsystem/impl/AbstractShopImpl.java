@@ -395,7 +395,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	    profileField.setAccessible(true);
 	    profileField.set(headMeta, profile);
 	} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-	    // Bukkit.getLogger().warning("[Ultimate_Economy] Failed to request skull
+	    // TODO Bukkit.getLogger().warning("[Ultimate_Economy] Failed to request skull
 	    // texture from minecraft.");
 	    // Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " +
 	    // e.getMessage());

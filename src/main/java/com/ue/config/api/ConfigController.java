@@ -43,81 +43,81 @@ public class ConfigController {
 
     private static void setupMaxRentedDays(FileConfiguration fileConfig) throws GeneralEconomyException {
 	if (!fileConfig.isSet("MaxRentedDays")) {
-	setMaxRentedDays(14);
+	    setMaxRentedDays(14);
 	} else {
-	maxRentedDays = fileConfig.getInt("MaxRentedDays");
+	    maxRentedDays = fileConfig.getInt("MaxRentedDays");
 	}
     }
 
     private static void setupExtendedInteraction(FileConfiguration fileConfig) {
 	if (!fileConfig.isSet("ExtendedInteraction")) {
-	setExtendedInteraction(false);
+	    setExtendedInteraction(false);
 	} else {
-	extendedInteraction = fileConfig.getBoolean("ExtendedInteraction");
+	    extendedInteraction = fileConfig.getBoolean("ExtendedInteraction");
 	}
     }
 
     private static void setupWildernessInteraction(FileConfiguration fileConfig) {
 	if (!fileConfig.isSet("WildernessInteraction")) {
-	setWildernessInteraction(false);
+	    setWildernessInteraction(false);
 	} else {
-	wildernessInteraction = fileConfig.getBoolean("WildernessInteraction");
+	    wildernessInteraction = fileConfig.getBoolean("WildernessInteraction");
 	}
     }
 
     private static void setupCurrencyPl(FileConfiguration fileConfig) {
 	if (!fileConfig.isSet("currencyPl")) {
-	setCurrencyPl("$");
+	    setCurrencyPl("$");
 	} else {
-	setCurrencyPl(fileConfig.getString("currencyPl"));
+	    setCurrencyPl(fileConfig.getString("currencyPl"));
 	}
     }
 
     private static void setupCurrencySg(FileConfiguration fileConfig) {
 	if (!fileConfig.isSet("currencySg")) {
-	setCurrencySg("$");
+	    setCurrencySg("$");
 	} else {
-	setCurrencySg(fileConfig.getString("currencySg"));
+	    setCurrencySg(fileConfig.getString("currencySg"));
 	}
     }
 
     private static void setupHomesFeature(FileConfiguration fileConfig) {
 	if (!fileConfig.isSet("homes")) {
-	setHomeSystem(true);
+	    setHomeSystem(true);
 	} else {
-	homesSystem = fileConfig.getBoolean("homes");
+	    homesSystem = fileConfig.getBoolean("homes");
 	}
     }
 
     private static void setupMaxPlayershops(FileConfiguration fileConfig) throws GeneralEconomyException {
 	if (!fileConfig.isSet("MaxPlayershops")) {
-	setMaxPlayershops(3);
+	    setMaxPlayershops(3);
 	} else {
-	maxPlayershops = fileConfig.getInt("MaxPlayershops");
+	    maxPlayershops = fileConfig.getInt("MaxPlayershops");
 	}
     }
 
     private static void setupMaxJoinedTowns(FileConfiguration fileConfig) throws GeneralEconomyException {
 	if (!fileConfig.isSet("MaxJoinedTowns")) {
-	setMaxJoinedTowns(1);
+	    setMaxJoinedTowns(1);
 	} else {
-	maxJoinedTowns = fileConfig.getInt("MaxJoinedTowns");
+	    maxJoinedTowns = fileConfig.getInt("MaxJoinedTowns");
 	}
     }
 
     private static void setupMaxJobs(FileConfiguration fileConfig) throws GeneralEconomyException {
 	if (!fileConfig.isSet("MaxJobs")) {
-	setMaxJobs(2);
+	    setMaxJobs(2);
 	} else {
-	maxJobs = fileConfig.getInt("MaxJobs");
+	    maxJobs = fileConfig.getInt("MaxJobs");
 	}
     }
 
     private static void setupMaxHomes(FileConfiguration fileConfig) throws GeneralEconomyException {
 	if (!fileConfig.isSet("MaxHomes")) {
-	setMaxHomes(3);
+	    setMaxHomes(3);
 	} else {
-	maxHomes = fileConfig.getInt("MaxHomes");
+	    maxHomes = fileConfig.getInt("MaxHomes");
 	}
     }
 
@@ -359,7 +359,7 @@ public class ConfigController {
      * Returns the singular for amount = 1 and plural for != 1.
      * 
      * @param value
-     *            money amount
+     *                  money amount
      * @return currency text
      */
     public static String getCurrencyText(double value) {
