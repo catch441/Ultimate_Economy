@@ -12,11 +12,9 @@ import org.junit.jupiter.api.Test;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
 
 public class ConfigTabCompleterTest {
     
-    private static ServerMock server;
     private static ConfigTabCompleter tabCompleter;
 
     /**
@@ -24,7 +22,7 @@ public class ConfigTabCompleterTest {
      */
     @BeforeAll
     public static void initPlugin() {
-	server = MockBukkit.mock();
+	MockBukkit.mock();
 	MockBukkit.load(UltimateEconomy.class);
 	tabCompleter = new ConfigTabCompleter();
 	;
