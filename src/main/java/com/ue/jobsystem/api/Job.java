@@ -24,6 +24,15 @@ public interface Job {
      * @throws GeneralEconomyException
      */
     public void deleteBlock(String material) throws JobSystemException, GeneralEconomyException;
+    
+    /**
+     * This method removes a breedable entity from a job.
+     * 
+     * @param entity
+     * @throws JobSystemException
+     * @throws GeneralEconomyException
+     */
+    public void deleteBreedable(String entity) throws JobSystemException, GeneralEconomyException;
 
     /**
      * This method removes a loottype from this job. The loottype is for a
@@ -65,6 +74,16 @@ public interface Job {
      * @throws GeneralEconomyException
      */
     public void addBlock(String material, double price) throws JobSystemException, GeneralEconomyException;
+    
+    /**
+     * This method adds a breedable entity to a job.
+     * 
+     * @param entity
+     * @param price
+     * @throws JobSystemException
+     * @throws GeneralEconomyException
+     */
+    public void addBreedable(String entity, double price) throws JobSystemException, GeneralEconomyException;
 
     /**
      * This method deletes the job saveFile.
@@ -107,6 +126,16 @@ public interface Job {
      * @throws GeneralEconomyException
      */
     public double getKillPrice(String entityName) throws JobSystemException, GeneralEconomyException;
+    
+    /**
+     * This method returns the price for breeding a new baby entity.
+     * 
+     * @param entityName
+     * @return double
+     * @throws JobSystemException
+     * @throws GeneralEconomyException
+     */
+    public double getBreedablePrice(String entityName) throws JobSystemException, GeneralEconomyException;
 
     /**
      * This method returns the fisherList.
@@ -129,4 +158,10 @@ public interface Job {
      */
     public Map<String, Double> getBlockList();
 
+    /**
+     * This method returns the breedable entity list.
+     * 
+     * @return List of Strings
+     */
+    public Map<String, Double> getBreedableList();
 }

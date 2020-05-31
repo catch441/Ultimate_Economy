@@ -52,6 +52,14 @@ public class JobSavefileHandler {
 	save();
     }
     
+	public void saveBreedableList(Map<String, Double> breedableList) {
+	getConfig().set("BreedableList", null);
+	for (String key : breedableList.keySet()) {
+		   getConfig().set("BreedableList." + key, breedableList.get(key));
+	}
+	save();
+	}
+    
     protected String loadJobName() {
 	return getConfig().getString("Jobname");
     }
@@ -73,6 +81,16 @@ public class JobSavefileHandler {
 	if (getConfig().contains("EntityList")) {
 	    for (String key : getConfig().getConfigurationSection("EntityList").getKeys(false)) {
 		list.put(key, getConfig().getDouble("EntityList." + key));
+	    }
+	}
+	return list;
+    }
+    
+    protected Map<String, Double> loadBreedableList() {
+	Map<String, Double> list = new HashMap<>();
+	if (getConfig().contains("BreedableList")) {
+	    for (String key : getConfig().getConfigurationSection("BreedableList").getKeys(false)) {
+		list.put(key, getConfig().getDouble("BreedableList." + key));
 	    }
 	}
 	return list;

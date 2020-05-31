@@ -17,6 +17,7 @@ public class JobImpl implements Job {
     private Map<String, Double> entityList = new HashMap<>();
     private Map<String, Double> blockList = new HashMap<>();
     private Map<String, Double> fisherList = new HashMap<>();
+    private Map<String, Double> breedableList = new HashMap<>();
     private String name;
     private JobSystemValidationHandler validationHandler;
     private JobSavefileHandler savefileHandler;
@@ -89,6 +90,25 @@ public class JobImpl implements Job {
 	getBlockList().remove(material);
 	getSavefileHandler().saveBlockList(getBlockList());
     }
+    
+	@Override
+	public void addBreedable(String entity, double price) throws JobSystemException, GeneralEconomyException {
+		entity = entity.toUpperCase();
+		getValidationHandler().checkForValidEntityType(entity);
+		getValidationHandler().checkForEntityNotInJob(getBreedableList(), entity);
+		getValidationHandler().checkForPositivValue(price);
+		getBreedableList().put(entity, price);
+		getSavefileHandler().saveBreedableList(getBreedableList());
+	}
+    
+	@Override
+	public void deleteBreedable(String entity) throws JobSystemException, GeneralEconomyException {
+		entity = entity.toUpperCase();
+		getValidationHandler().checkForValidEntityType(entity);
+		getValidationHandler().checkForEntityInJob(getEntityList(), entity);
+		getBreedableList().remove(entity);
+		getSavefileHandler().saveBreedableList(getBreedableList());
+	}
 
     @Override
     public String getName() {
@@ -117,6 +137,14 @@ public class JobImpl implements Job {
 	getValidationHandler().checkForEntityInJob(getEntityList(), entityName);
 	return getEntityList().get(entityName);
     }
+    
+	@Override
+	public double getBreedablePrice(String entityName) throws JobSystemException, GeneralEconomyException {
+		entityName = entityName.toUpperCase();
+		getValidationHandler().checkForValidEntityType(entityName);
+		getValidationHandler().checkForEntityInJob(getBreedableList(), entityName);
+		return getBreedableList().get(entityName);
+	}
 
     @Override
     public void deleteJob() {
@@ -138,6 +166,11 @@ public class JobImpl implements Job {
 	return fisherList;
     }
 
+    @Override
+    public Map<String, Double> getBreedableList() {
+	return breedableList;
+    }
+    
     /*
      * Utility methods
      * 
@@ -182,6 +215,7 @@ public class JobImpl implements Job {
 	    fisherList = getSavefileHandler().loadFisherList();
 	    entityList = getSavefileHandler().loadEntityList();
 	    blockList = getSavefileHandler().loadBlockList();
+	    breedableList = getSavefileHandler().loadBreedableList();
 	    this.name = getSavefileHandler().loadJobName();
 	} catch (IOException e) {
 	    Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load job :" + name);

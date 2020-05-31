@@ -24,6 +24,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
@@ -548,6 +549,32 @@ public class UltimateEconomyEventHandler implements Listener {
 		    event.getTo().getChunk(), event.getPlayer().getName());
 	}
     }
+    
+    @EventHandler()
+    public void onBreedMobEvent(EntityBreedEvent event){
+    	Entity entity = event.getEntity();
+    	LivingEntity breeder = event.getBreeder();
+    	Player player = breeder instanceof Player ? (Player) breeder : null;
+    	
+    	if (!event.isCancelled() && player != null && player.getGameMode() == GameMode.SURVIVAL){
+    		try {
+    			EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(breeder.getName());
+    			List<Job> jobList = ecoPlayer.getJobList();
+    			if (!jobList.isEmpty()) {
+    			    for (Job job : jobList) {
+    			    	try {
+    			    		Double price = job.getBreedablePrice(entity.getName());
+    			    		ecoPlayer.increasePlayerAmount(price,  false);
+    			    		break;
+    			    		} catch (JobSystemException | GeneralEconomyException e){
+    			    			
+    			    		}
+    			    }
+    			}
+    		    } catch (ClassCastException | PlayerException e) {
+    		    }
+    	}
+    	}
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
