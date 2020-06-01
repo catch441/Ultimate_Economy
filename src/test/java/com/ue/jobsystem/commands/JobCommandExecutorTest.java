@@ -611,7 +611,7 @@ public class JobCommandExecutorTest {
 	String[] args = { "job"};
 	executor.onCommand(player, null, "jobcenter", args);
 	String message = player.nextMessage();
-	assertEquals("/jobcenter job [create/delete/addItem/removeItem/addMob/removeMob/addFisher/removeFisher]", message);
+	assertEquals("/jobcenter job [create/delete/addItem/removeItem/addMob/removeMob/addFisher/removeFisher/addBreedable/removeBreedable]", message);
 	assertNull(player.nextMessage());
     }
     
@@ -620,7 +620,7 @@ public class JobCommandExecutorTest {
 	String[] args = { "job", "test"};
 	executor.onCommand(player, null, "jobcenter", args);
 	String message = player.nextMessage();
-	assertEquals("/jobcenter job [create/delete/addItem/removeItem/addMob/removeMob/addFisher/removeFisher]", message);
+	assertEquals("/jobcenter job [create/delete/addItem/removeItem/addMob/removeMob/addFisher/removeFisher/addBreedable/removeBreedable]", message);
 	assertNull(player.nextMessage());
     }
     

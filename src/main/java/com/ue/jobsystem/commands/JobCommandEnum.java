@@ -195,20 +195,48 @@ public enum JobCommandEnum {
 	    return true;
 	}
     },
+    JOB_ADDBREEDABLE {
+	@Override
+	boolean perform(String label, String[] args, Player player)
+		throws JobSystemException, PlayerException, GeneralEconomyException {
+	    if (args.length == 5) {
+		Job job = JobController.getJobByName(args[2]);
+		job.addMob(args[3], Double.valueOf(args[4]));
+		player.sendMessage(MessageWrapper.getString("jobcenter_addBreedable", args[3]));
+	    } else {
+		player.sendMessage("/jobcenter job addBreedable <job> <entity> <price>");
+	    }
+	    return true;
+	}
+    },
+    JOB_REMOVEBREEDABLE {
+	@Override
+	boolean perform(String label, String[] args, Player player)
+		throws JobSystemException, PlayerException, GeneralEconomyException {
+	    if (args.length == 4) {
+		Job job = JobController.getJobByName(args[2]);
+		job.deleteMob(args[3]);
+		player.sendMessage(MessageWrapper.getString("jobcenter_removeBreedable", args[3]));
+	    } else {
+		player.sendMessage("/jobcenter job removeBreedable <jobname> <entity>");
+	    }
+	    return true;
+	}
+    },
     JOB {
 	@Override
 	boolean perform(String label, String[] args, Player player)
 		throws JobSystemException, PlayerException, GeneralEconomyException {
 	    if (args.length == 1) {
 		player.sendMessage("/jobcenter job [create/delete/addItem/removeItem/"
-			+ "addMob/removeMob/addFisher/removeFisher]");
+			+ "addMob/removeMob/addFisher/removeFisher/addBreedable/removeBreedable]");
 	    } else {
 		JobCommandEnum commandEnum = JobCommandEnum.getEnum("JOB_" + args[1]);
 		if(commandEnum != null) {
 		    return commandEnum.perform(label, args, player);
 		} else {
 		    player.sendMessage("/jobcenter job [create/delete/addItem/removeItem/"
-			    + "addMob/removeMob/addFisher/removeFisher]");
+			    + "addMob/removeMob/addFisher/removeFisher/addBreedable/removeBreedable]");
 		}
 	    }
 	    return true;
