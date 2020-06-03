@@ -48,6 +48,9 @@ public class JobTabCompleter implements TabCompleter {
 	case "addFisher":
 	case "removeFisher":
 	    return handleAddRemoveFisherTabComplete(args);
+	case "addBreedable":
+	case "removeBreedable":
+		return handleAddRemoveBreedableTabComplete(args);
 	case "delete":
 	    return handleJobDeleteTabComplete(args);
 	case "create":
@@ -57,7 +60,7 @@ public class JobTabCompleter implements TabCompleter {
 	}
     }
 
-    private List<String> handleAddRemoveItemTabComplete(String[] args) {
+	private List<String> handleAddRemoveItemTabComplete(String[] args) {
 	if (args.length == 4) {
 	    return getMaterialList(args[3]);
 	} else if (args.length == 3) {
@@ -85,6 +88,16 @@ public class JobTabCompleter implements TabCompleter {
 	} else {
 	    return new ArrayList<>();
 	}
+    }
+    
+    private List<String> handleAddRemoveBreedableTabComplete(String[] args) {
+    if (args.length == 4) {
+    	return getEntityList(args[3]);
+    } else if (args.length == 3) {
+    	return getJobList(args[2]);
+    } else {
+    	return new ArrayList<>();
+    }
     }
 
     private List<String> handleJobDeleteTabComplete(String[] args) {
@@ -182,6 +195,12 @@ public class JobTabCompleter implements TabCompleter {
 	if ("removeMob".contains(args[1])) {
 	    list.add("removeMob");
 	}
+	if ("addBreedable".contains(args[1])) {
+	    list.add("addBreedable");
+	}
+	if ("removeBreedable".contains(args[1])) {
+	    list.add("removeBreedable");
+	}
 	return list;
     }
 
@@ -195,6 +214,8 @@ public class JobTabCompleter implements TabCompleter {
 	list.add("removeFisher");
 	list.add("addMob");
 	list.add("removeMob");
+	list.add("addBreedable");
+	list.add("removeBreedable");
 	return list;
     }
 

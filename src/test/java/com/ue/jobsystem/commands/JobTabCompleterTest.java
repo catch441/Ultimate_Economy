@@ -175,7 +175,7 @@ public class JobTabCompleterTest {
     public void jobArgTest() {
 	String[] args = { "job", "" };
 	List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-	assertEquals(8, result.size());
+	assertEquals(10, result.size());
 	assertEquals("create", result.get(0));
 	assertEquals("delete", result.get(1));
 	assertEquals("addItem", result.get(2));
@@ -184,20 +184,25 @@ public class JobTabCompleterTest {
 	assertEquals("removeFisher", result.get(5));
 	assertEquals("addMob", result.get(6));
 	assertEquals("removeMob", result.get(7));
+	assertEquals("addBreedable", result.get(8));
+	assertEquals("removeBreedable", result.get(9));
     }
 
     @Test
     public void jobArgTestWithMatching() {
 	String[] args = { "job", "e" };
 	List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-	assertEquals(7, result.size());
+	assertEquals(9, result.size());
 	assertEquals("create", result.get(0));
 	assertEquals("delete", result.get(1));
 	assertEquals("addItem", result.get(2));
 	assertEquals("removeItem", result.get(3));
 	assertEquals("addFisher", result.get(4));
 	assertEquals("removeFisher", result.get(5));
-	assertEquals("removeMob", result.get(6));
+	assertEquals("addMob", result.get(6));
+	assertEquals("removeMob", result.get(7));
+	assertEquals("addBreedable", result.get(8));
+	assertEquals("removeBreedable", result.get(9));
     }
 
     @Test
