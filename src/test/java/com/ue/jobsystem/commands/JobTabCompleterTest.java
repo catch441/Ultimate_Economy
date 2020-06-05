@@ -199,10 +199,9 @@ public class JobTabCompleterTest {
 	assertEquals("removeItem", result.get(3));
 	assertEquals("addFisher", result.get(4));
 	assertEquals("removeFisher", result.get(5));
-	assertEquals("addMob", result.get(6));
-	assertEquals("removeMob", result.get(7));
-	assertEquals("addBreedable", result.get(8));
-	assertEquals("removeBreedable", result.get(9));
+	assertEquals("removeMob", result.get(6));
+	assertEquals("addBreedable", result.get(7));
+	assertEquals("removeBreedable", result.get(8));
     }
 
     @Test
