@@ -4,6 +4,7 @@ public enum JobExceptionMessageEnum {
 
     ENTITY_ALREADY_EXISTS ("entity_already_exists"),
     ENTITY_DOES_NOT_EXIST ("entity_does_not_exist"),
+    ENTITY_CANNOT_BREED ("entity_cannot_breed"),
     BLOCK_ALREADY_EXISTS ("item_already_exists_in_job"), // TODO rename to block
     BLOCK_DOES_NOT_EXIST ("item_does_not_exist_in_job"), // TODO rename to block
     JOB_NOT_EXIST_IN_JOBCENTER ("job_not_exist_in_jobcenter"),

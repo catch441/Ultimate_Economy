@@ -95,6 +95,7 @@ public class JobImpl implements Job {
 	public void addBreedable(String entity, double price) throws JobSystemException, GeneralEconomyException {
 		entity = entity.toUpperCase();
 		getValidationHandler().checkForValidEntityType(entity);
+		getValidationHandler().checkForEntityCanBreed(getBreedableList(), entity);
 		getValidationHandler().checkForEntityNotInJob(getBreedableList(), entity);
 		getValidationHandler().checkForPositivValue(price);
 		getBreedableList().put(entity, price);

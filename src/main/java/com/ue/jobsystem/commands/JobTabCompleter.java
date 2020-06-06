@@ -11,6 +11,7 @@ import org.bukkit.entity.EntityType;
 
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.JobcenterController;
+import com.ue.jobsystem.impl.JobSystemValidationHandler;
 
 public class JobTabCompleter implements TabCompleter {
 
@@ -36,7 +37,8 @@ public class JobTabCompleter implements TabCompleter {
     }
 
     private List<String> handleJobTabComplete(String[] args) {
-	switch (args[1]) {
+    
+    try {switch (args[1]) {
 	case "":
 	    return getAllJobCommands();
 	case "addItem":
@@ -58,6 +60,9 @@ public class JobTabCompleter implements TabCompleter {
 	default:
 	    return getMatchingJobCommands(args);
 	}
+    } catch (ArrayIndexOutOfBoundsException e){
+    	return new ArrayList<>();
+    }
     }
 
 	private List<String> handleAddRemoveItemTabComplete(String[] args) {
@@ -92,7 +97,7 @@ public class JobTabCompleter implements TabCompleter {
     
     private List<String> handleAddRemoveBreedableTabComplete(String[] args) {
     if (args.length == 4) {
-    	return getEntityList(args[3]);
+    	return getBreedableList(args[3]);
     } else if (args.length == 3) {
     	return getJobList(args[2]);
     } else {
@@ -290,7 +295,24 @@ public class JobTabCompleter implements TabCompleter {
 	EntityType[] entityTypes = EntityType.values();
 	if ("".equals(arg)) {
 	    for (EntityType entityname : entityTypes) {
-		list.add(entityname.name().toLowerCase());
+	    	if(entityname.isAlive()) list.add(entityname.name().toLowerCase());
+	    }
+	} else {
+	    for (EntityType entityname : entityTypes) {
+		if (entityname.name().toLowerCase().contains(arg)) {
+		    list.add(entityname.name().toLowerCase());
+		}
+	    }
+	}
+	return list;
+    }
+    
+    private static List<String> getBreedableList(String arg) {
+	List<String> list = new ArrayList<>();
+	ArrayList<EntityType> entityTypes = JobSystemValidationHandler.getBreedableTypes();
+	if ("".equals(arg)) {
+	    for (EntityType entityname : entityTypes) {
+	    	list.add(entityname.name().toLowerCase());
 	    }
 	} else {
 	    for (EntityType entityname : entityTypes) {

@@ -1,5 +1,7 @@
 package com.ue.jobsystem.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +19,22 @@ import com.ue.jobsystem.api.Job;
 
 public class JobSystemValidationHandler {
 
+	/*
+	 * EntityTypes that correspond to entities that can be bred by the player.
+	 * 
+	 * TODO put this list definition somewhere that actually makes sense
+	 * */
+	private static final ArrayList<EntityType> breedableTypes = new ArrayList<EntityType>(Arrays.asList(EntityType.BEE, EntityType.CAT, EntityType.CHICKEN,
+			EntityType.COW, EntityType.MUSHROOM_COW, EntityType.HORSE, EntityType.DONKEY, EntityType.SHEEP,
+			EntityType.FOX, EntityType.PIG, EntityType.WOLF, EntityType.OCELOT, EntityType.RABBIT,
+			EntityType.LLAMA, EntityType.TURTLE, EntityType.PANDA));
+	// TODO EntityType.HOGLIN, EntityType.STRIDER needed for 1.16
+	
+	public static ArrayList<EntityType> getBreedableTypes()
+	{
+		return breedableTypes;
+	}
+	
     protected void checkForValidMaterial(String material) throws GeneralEconomyException {
 	if (Material.matchMaterial(material) == null) {
 	    throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, material);
@@ -109,5 +127,14 @@ public class JobSystemValidationHandler {
 	    return true;
 	}
 	return false;
+    }
+    
+    protected void checkForEntityCanBreed(Map<String, Double> entityList, String entityName) throws JobSystemException {
+    if(entityList.containsKey(entityName)) {
+    	if (!getBreedableTypes().contains(EntityType.valueOf(entityName)))
+    	{
+    		throw JobSystemException.getException(JobExceptionMessageEnum.ENTITY_CANNOT_BREED);
+    	}
+    }
     }
 }
