@@ -635,7 +635,7 @@ public class JobTabCompleterTest {
     public void jobAddMobArgTestWithMobArg() {
 	String[] args = { "job", "addMob", "myjob", "" };
 	List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-	assertEquals(104, result.size());
+	assertEquals(67, result.size()); // previous 104, new 67 accounts for only EntityTypes that are "Alive"
     }
     
     @Test
