@@ -84,7 +84,6 @@ public class TownImpl implements Town {
 	Chunk startChunk = location.getChunk();
 
 	addPlot(new PlotImpl(this, mayor, startChunk.getX() + "/" + startChunk.getZ()));
-
 	setupMayor(mayor);
 	setupTownManager(location);
 	setupTownBankAmount();

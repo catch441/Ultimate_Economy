@@ -12,24 +12,24 @@ import com.ue.language.MessageWrapper;
 
 public class JobCommandExecutor implements CommandExecutor {
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-	if (sender instanceof Player) {
-	    Player player = (Player) sender;
-	    try {
-		if (args.length != 0) {
-		    JobCommandEnum commandEnum = JobCommandEnum.getEnum(args[0]);
-		    if(commandEnum != null) {
-			return commandEnum.perform(label, args, player);
-		    }
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if (sender instanceof Player) {
+			Player player = (Player) sender;
+			try {
+				if (args.length != 0) {
+					JobCommandEnum commandEnum = JobCommandEnum.getEnum(args[0]);
+					if (commandEnum != null) {
+						return commandEnum.perform(label, args, player);
+					}
+				}
+				return false;
+			} catch (JobSystemException | PlayerException | GeneralEconomyException e) {
+				player.sendMessage(e.getMessage());
+			} catch (NumberFormatException e) {
+				player.sendMessage(MessageWrapper.getErrorString("invalid_parameter", "number"));
+			}
 		}
-		return false;
-	    } catch (JobSystemException | PlayerException | GeneralEconomyException e) {
-		player.sendMessage(e.getMessage());
-	    } catch (NumberFormatException e) {
-		player.sendMessage(MessageWrapper.getErrorString("invalid_parameter", "number"));
-	    }
+		return true;
 	}
-	return true;
-    }
 }
