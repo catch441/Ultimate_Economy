@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -79,10 +80,6 @@ public class JobControllerTest {
 		}
 	}
 
-	/*
-	 * loadAllJobs
-	 */
-
 	@Test
 	public void loadAllJobsTest() {
 		try {
@@ -107,6 +104,22 @@ public class JobControllerTest {
 			assertTrue(result.getFisherList().containsKey("fish"));
 			assertTrue(result.getFisherList().containsValue(2.0));
 		} catch (GeneralEconomyException | JobSystemException e) {
+			assertTrue(false);
+		}
+	}
+	
+	@Test
+	public void loadAllJobsTestWithLoadingError() {
+		try {
+			JobController.createJob("myjob");
+			JobController.getJobList().get(0);
+			JobController.getJobList().clear();
+			assertEquals(0, JobController.getJobList().size());
+			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "myjob-Job.yml");
+			file.delete();
+			JobController.loadAllJobs();
+			assertEquals(0, JobController.getJobList().size());
+		} catch (GeneralEconomyException e) {
 			assertTrue(false);
 		}
 	}
@@ -148,6 +161,20 @@ public class JobControllerTest {
 
 	@Test
 	public void removeJobFromAllPlayers() {
+		try {
+			JobController.createJob("myjob");
+			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			Job job = JobController.getJobList().get(0);
+			ecoPlayer.joinJob(job, false);
+			JobController.removeJobFromAllPlayers(job);
+			assertEquals(0, ecoPlayer.getJobList().size());
+		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+			assertTrue(false);
+		}
+	}
+	
+	@Test
+	public void removeJobFromAllPlayersWith() {
 		try {
 			JobController.createJob("myjob");
 			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
@@ -215,9 +242,10 @@ public class JobControllerTest {
 	@Test
 	public void getJobByNameTest() {
 		try {
+			JobController.createJob("other");
 			JobController.createJob("myjob");
 			Job job = JobController.getJobByName("myjob");
-			assertEquals(JobController.getJobList().get(0), job);
+			assertEquals(JobController.getJobList().get(1), job);
 			assertEquals("myjob", job.getName());
 		} catch (GeneralEconomyException e) {
 			assertTrue(false);

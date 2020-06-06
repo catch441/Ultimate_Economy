@@ -25,9 +25,11 @@ import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.player.api.EconomyPlayer;
 import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.api.Playershop;
 import com.ue.shopsystem.api.PlayershopController;
+import com.ue.townsystem.town.api.TownController;
 import com.ue.townsystem.townworld.api.TownworldController;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -158,6 +160,28 @@ public class PlayershopTest {
 			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "P0.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertEquals(20, config.getInt("ShopItems." + stack.toString() + ".stock"));
+		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+			Bukkit.getLogger().info(e.getMessage());
+			assertTrue(false);
+		}
+	}
+	
+	@Test
+	public void decreaseStockTestWithToSingular() {
+		Location location = new Location(world, 1.5, 2.3, 6.9);
+		try {
+			PlayershopController.createPlayerShop("myshop", location, 9,
+					EconomyPlayerController.getAllEconomyPlayers().get(0));
+			Playershop shop = PlayershopController.getPlayerShops().get(0);
+			ItemStack stack = new ItemStack(Material.STONE);
+			shop.addShopItem(0, 0, 1, stack);
+			shop.increaseStock(0, 30);
+			shop.decreaseStock(0, 29);
+			assertEquals("§a1§6 Item", shop.getStockpileInventory().getItem(0).getItemMeta().getLore().get(0));
+			// check save file
+			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "P0.yml");
+			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
+			assertEquals(1, config.getInt("ShopItems." + stack.toString() + ".stock"));
 		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
 			Bukkit.getLogger().info(e.getMessage());
 			assertTrue(false);
@@ -429,6 +453,24 @@ public class PlayershopTest {
 		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
 			assertTrue(e instanceof PlayerException);
 			assertEquals("§cYou dont have the permission to do that!", e.getMessage());
+		}
+	}
+	
+	@Test
+	public void moveShopTestWithPermission() {
+		Location location = new Location(world, 1.5, 2.3, 6.9);
+		try {
+			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			PlayershopController.createPlayerShop("myshop", location, 18,ecoPlayer);
+			TownworldController.createTownWorld(world.getName());
+			TownController.createTown(
+					TownworldController.getTownWorldList().get(0), "newtown", location, ecoPlayer);
+			Playershop shop = PlayershopController.getPlayerShops().get(0);
+			Location newLoc = new Location(world, 10, 10, 10);
+			shop.moveShop(newLoc);
+			assertEquals(newLoc, shop.getShopLocation());
+		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+			assertTrue(false);
 		}
 	}
 
