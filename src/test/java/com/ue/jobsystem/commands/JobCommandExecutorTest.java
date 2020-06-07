@@ -58,6 +58,10 @@ public class JobCommandExecutorTest {
 		server.setPlayers(0);
 		MockBukkit.unload();
 	}
+	UltimateEconomy.getInstance.getDataFolder().delete();
+	server.setPlayers(0);
+	MockBukkit.unload();
+    }
 
 	/**
 	 * Unload all.
@@ -76,6 +80,20 @@ public class JobCommandExecutorTest {
 				assertTrue(false);
 			}
 		}
+	}
+	
+	@Test
+	public void zeroArgs() {
+		String[] args = {};
+		executor.onCommand(player, null, "jobcenter", args);
+		assertNull(player.nextMessage());
+	}
+	
+	@Test
+	public void invalidArg() {
+		String[] args = {"foo"};
+		executor.onCommand(player, null, "jobcenter", args);
+		assertNull(player.nextMessage());
 	}
 
 	@Test
@@ -99,11 +117,11 @@ public class JobCommandExecutorTest {
 	}
 
 	@Test
-	public void createCommandTestWithInvalidArgumentNumber() {
-		String[] args = { "create", "center" };
+	public void deleteCommandTestWithInvalidArgumentNumber() {
+		String[] args = { "delete", "center", "test" };
 		executor.onCommand(player, null, "jobcenter", args);
 		String message = player.nextMessage();
-		assertEquals("/jobcenter create <jobcenter> <size> <- size have to be a multible of 9", message);
+		assertEquals("/jobcenter delete <jobcenter>", message);
 		assertNull(player.nextMessage());
 	}
 
@@ -180,6 +198,10 @@ public class JobCommandExecutorTest {
 		assertEquals("§6The job §amyjob§6 was added to the JobCenter §acenter.", message);
 		assertNull(player.nextMessage());
 	}
+	String message = player.nextMessage();
+	assertEquals("§6The job §amyjob§6 was added to the JobCenter §acenter.", message);
+	assertNull(player.nextMessage());
+    }
 
 	@Test
 	public void addJobCommandTestWithInvalidArgumentNumber() {
@@ -236,6 +258,10 @@ public class JobCommandExecutorTest {
 		assertEquals("§6The job §amyjob§6 was removed.", message);
 		assertNull(player.nextMessage());
 	}
+	String message = player.nextMessage();
+	assertEquals("§6The job §amyjob§6 was removed.", message);
+	assertNull(player.nextMessage());
+    }
 
 	@Test
 	public void removeJobCommandTestWithInvalidArgumentNumber() {
@@ -278,6 +304,10 @@ public class JobCommandExecutorTest {
 		assertEquals("§6The job §amyjob§6 was created.", message);
 		assertNull(player.nextMessage());
 	}
+	String message = player.nextMessage();
+	assertEquals("§6The job §amyjob§6 was created.", message);
+	assertNull(player.nextMessage());
+    }
 
 	@Test
 	public void createJobCommandTestWithInvalidArgumentNumber() {
@@ -331,36 +361,162 @@ public class JobCommandExecutorTest {
 		assertEquals("§6The loottype §afish§6 was added to the job.", message);
 		assertNull(player.nextMessage());
 	}
-
-	@Test
-	public void jobAddFisherCommandTestInvalidArgumentNumber() {
-		createJob();
-		String[] args = { "job", "addFisher", "myjob", "fish" };
-		executor.onCommand(player, null, "jobcenter", args);
-		String message = player.nextMessage();
-		assertEquals("/jobcenter job addFisher <job> [fish/treasure/junk] <price>", message);
-		assertNull(player.nextMessage());
+	String message = player.nextMessage();
+	assertEquals("§6The loottype §afish§6 was added to the job.", message);
+	assertNull(player.nextMessage());
+    }
+    
+    @Test
+    public void jobAddFisherCommandTestInvalidArgumentNumber() {
+	createJob();
+	String[] args = { "job", "addFisher", "myjob", "fish"};
+	executor.onCommand(player, null, "jobcenter", args);
+	String message = player.nextMessage();
+	assertEquals("/jobcenter job addFisher <job> [fish/treasure/junk] <price>", message);
+	assertNull(player.nextMessage());
+    }
+    
+    @Test
+    public void jobAddFisherCommandTestInvalidDouble() {
+	createJob();
+	String[] args = { "job", "addFisher", "myjob", "fish","a"};
+	executor.onCommand(player, null, "jobcenter", args);
+	String message = player.nextMessage();
+	assertEquals("§cThe parameter §4number§c is invalid!", message);
+	assertNull(player.nextMessage());
+    }
+    
+    @Test
+    public void jobAddFisherCommandTestInvalidFisherType() {
+	createJob();
+	String[] args = { "job", "addFisher", "myjob", "test","1.5"};
+	executor.onCommand(player, null, "jobcenter", args);
+	String message = player.nextMessage();
+	assertEquals("§cThe parameter §4test§c is invalid!", message);
+	assertNull(player.nextMessage());
+    }
+    
+    @Test
+    public void jobAddFisherCommandTestInvalidJob() {
+	String[] args = { "job", "addFisher", "myjob", "fish","1.5"};
+	executor.onCommand(player, null, "jobcenter", args);
+	String message = player.nextMessage();
+	assertEquals("§c§4myjob§c does not exist!", message);
+	assertNull(player.nextMessage());
+    }
+    
+    @Test
+    public void jobAddItemCommandTest() {
+	createJob();
+	String[] args = { "job", "addItem", "myjob", "stone", "1.5" };
+	executor.onCommand(player, null, "jobcenter", args);
+	try {
+	    assertEquals("1.5", String.valueOf(JobController.getJobByName("myjob").getBlockList().get("STONE")));
+	} catch (GeneralEconomyException e) {
+	    assertTrue(false);
 	}
-
-	@Test
-	public void jobAddFisherCommandTestInvalidDouble() {
-		createJob();
-		String[] args = { "job", "addFisher", "myjob", "fish", "a" };
-		executor.onCommand(player, null, "jobcenter", args);
-		String message = player.nextMessage();
-		assertEquals("§cThe parameter §4number§c is invalid!", message);
-		assertNull(player.nextMessage());
+	String message = player.nextMessage();
+	assertEquals("§6The item §astone§6 was added to the job.", message);
+	assertNull(player.nextMessage());
+    }
+    
+    @Test
+    public void jobAddItemCommandTestWithInvalidArgumentNumber() {
+	createJob();
+	String[] args = { "job", "addItem", "myjob", "stone"};
+	executor.onCommand(player, null, "jobcenter", args);
+	String message = player.nextMessage();
+	assertEquals("/jobcenter job addItem <job> <material> <price>", message);
+	assertNull(player.nextMessage());
+    }
+    
+    @Test
+    public void jobAddItemCommandTestWithInvalidDouble() {
+	createJob();
+	String[] args = { "job", "addItem", "myjob", "stone", "a"};
+	executor.onCommand(player, null, "jobcenter", args);
+	String message = player.nextMessage();
+	assertEquals("§cThe parameter §4number§c is invalid!", message);
+	assertNull(player.nextMessage());
+    }
+    
+    @Test
+    public void jobAddItemCommandTestWithInvalidJob() {
+	String[] args = { "job", "addItem", "myjob", "stone", "1.5"};
+	executor.onCommand(player, null, "jobcenter", args);
+	String message = player.nextMessage();
+	assertEquals("§c§4myjob§c does not exist!", message);
+	assertNull(player.nextMessage());
+    }
+    
+    @Test
+    public void jobAddMobCommandTest() {
+	createJob();
+	String[] args = { "job", "addMob", "myjob", "cow", "1.5" };
+	executor.onCommand(player, null, "jobcenter", args);
+	try {
+	    assertEquals("1.5", String.valueOf(JobController.getJobByName("myjob").getEntityList().get("COW")));
+	} catch (GeneralEconomyException e) {
+	    assertTrue(false);
 	}
-
-	@Test
-	public void jobAddFisherCommandTestInvalidFisherType() {
-		createJob();
-		String[] args = { "job", "addFisher", "myjob", "test", "1.5" };
-		executor.onCommand(player, null, "jobcenter", args);
-		String message = player.nextMessage();
-		assertEquals("§cThe parameter §4test§c is invalid!", message);
-		assertNull(player.nextMessage());
+	String message = player.nextMessage();
+	assertEquals("§6The entity §acow§6 was added to the job.", message);
+	assertNull(player.nextMessage());
+    }
+    
+    @Test
+    public void jobAddMobCommandTestWithInvalidArgumentNumber() {
+	String[] args = { "job", "addMob", "myjob", "cow"};
+	executor.onCommand(player, null, "jobcenter", args);
+	String message = player.nextMessage();
+	assertEquals("/jobcenter job addMob <job> <entity> <price>", message);
+	assertNull(player.nextMessage());
+    }
+    
+    @Test
+    public void jobAddMobCommandTestWithInvalidDouble() {
+	createJob();
+	String[] args = { "job", "addMob", "myjob", "cow", "a"};
+	executor.onCommand(player, null, "jobcenter", args);
+	String message = player.nextMessage();
+	assertEquals("§cThe parameter §4number§c is invalid!", message);
+	assertNull(player.nextMessage());
+    }
+    
+    @Test
+    public void jobAddMobCommandTestWithInvalidEntity() {
+	createJob();
+	String[] args = { "job", "addMob", "myjob", "test", "1.5"};
+	executor.onCommand(player, null, "jobcenter", args);
+	String message = player.nextMessage();
+	assertEquals("§cThe parameter §4TEST§c is invalid!", message);
+	assertNull(player.nextMessage());
+    }
+    
+    @Test
+    public void jobAddMobCommandTestWithInvalidJob() {
+	String[] args = { "job", "addMob", "myjob", "test", "1.5"};
+	executor.onCommand(player, null, "jobcenter", args);
+	String message = player.nextMessage();
+	assertEquals("§c§4myjob§c does not exist!", message);
+	assertNull(player.nextMessage());
+    }
+    
+    @Test
+    public void jobRemoveMobCommandTest() {
+	createJob();
+	addMob();
+	String[] args = { "job", "removeMob", "myjob", "cow"};
+	executor.onCommand(player, null, "jobcenter", args);
+	try {
+	    assertEquals(0, JobController.getJobByName("myjob").getEntityList().size());
+	} catch (GeneralEconomyException e) {
+	    assertTrue(false);
 	}
+	String message = player.nextMessage();
+	assertEquals("§6The entity §acow§6 was removed from the job.", message);
+	assertNull(player.nextMessage());
+    }
 
 	@Test
 	public void jobAddFisherCommandTestInvalidJob() {
@@ -370,6 +526,10 @@ public class JobCommandExecutorTest {
 		assertEquals("§c§4myjob§c does not exist!", message);
 		assertNull(player.nextMessage());
 	}
+	String message = player.nextMessage();
+	assertEquals("§6The loottype §afish§6 was removed from the job.", message);
+	assertNull(player.nextMessage());
+    }
 
 	@Test
 	public void jobAddItemCommandTest() {
@@ -385,6 +545,10 @@ public class JobCommandExecutorTest {
 		assertEquals("§6The item §astone§6 was added to the job.", message);
 		assertNull(player.nextMessage());
 	}
+	String message = player.nextMessage();
+	assertEquals("§6The item §astone§6 was deleted from the job.", message);
+	assertNull(player.nextMessage());
+    }
 
 	@Test
 	public void jobAddItemCommandTestWithInvalidArgumentNumber() {

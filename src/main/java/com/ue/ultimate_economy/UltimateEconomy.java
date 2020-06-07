@@ -121,6 +121,8 @@ public class UltimateEconomy extends JavaPlugin {
 			vaultHook.unhook();
 		}
 	}
+==== BASE ====
+    }
 
 	private void loadSpawners() {
 		File spawner = new File(getDataFolder(), "SpawnerLocations.yml");
@@ -150,14 +152,28 @@ public class UltimateEconomy extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new UltimateEconomyEventHandler(this, spawnerlist, spawner),
 				this);
 	}
-
-	private void setupVault() {
-		if (Bukkit.getServer().getPluginManager().getPlugin("Vault") != null) {
-			economyImplementer = new EconomyUltimateEconomy();
-			vaultHook = new VaultHook();
-			vaultHook.hook();
-		}
+==== BASE ====
+	// spawn all spawners
+	List<String> spawnerlist = new ArrayList<>();
+	FileConfiguration spawnerconfig = YamlConfiguration.loadConfiguration(spawner);
+	for (String spawnername : getConfig().getStringList("Spawnerlist")) {
+	    spawnerlist.add(spawnername);
+	    World world = getServer().getWorld(spawnerconfig.getString(spawnername + ".World"));
+	    Location location = new Location(world, spawnerconfig.getDouble(spawnername + ".X"),
+		    spawnerconfig.getDouble(spawnername + ".Y"), spawnerconfig.getDouble(spawnername + ".Z"));
+	    world.getBlockAt(location).setMetadata("name",
+		    new FixedMetadataValue(this, spawnerconfig.getString(spawnername + ".player")));
+	    world.getBlockAt(location).setMetadata("entity",
+		    new FixedMetadataValue(this, spawnerconfig.getString(spawnername + ".EntityType")));
+==== BASE ====
 	}
+==== BASE ====
+	getConfig().options().copyDefaults(true);
+	saveConfig();
+	// setup eventhandler
+	getServer().getPluginManager().registerEvents(new UltimateEconomyEventHandler(this, spawnerlist, spawner),
+		this);
+    }
 
 	private void loadCommands() {
 		PlayerCommandExecutor playerCommandExecutor = setupCommandExecutors();
@@ -175,6 +191,8 @@ public class UltimateEconomy extends JavaPlugin {
 			}
 		}
 	}
+==== BASE ====
+    }
 
 	private void setupSetHomeCommand(PlayerCommandExecutor playerCommandExecutor, CommandMap map) {
 		UltimateEconomyCommand setHome = new UltimateEconomyCommand("sethome", this);
@@ -186,6 +204,8 @@ public class UltimateEconomy extends JavaPlugin {
 		map.register("ultimate_economy", setHome);
 		setHome.setExecutor(playerCommandExecutor);
 	}
+==== BASE ====
+    }
 
 	private void setupDeleteHomeCommand(PlayerCommandExecutor playerCommandExecutor,
 			PlayerTabCompleter playerTabCompleter, CommandMap map) {
@@ -261,6 +281,17 @@ public class UltimateEconomy extends JavaPlugin {
 		loadCommands();
 		loadSpawners();
 	}
+==== BASE ====
+	setupPlugin();
+	MessageWrapper.loadLanguage();
+	BankController.loadBankAccounts();
+	JobController.loadAllJobs();
+	JobcenterController.loadAllJobcenters();
+	EconomyPlayerController.loadAllEconomyPlayers();
+	TownworldController.loadAllTownWorlds();
+	AdminshopController.loadAllAdminShops();
+	PlayershopController.loadAllPlayerShops();
+	RentshopController.loadAllRentShops();
 
 	private void setupPlugin() {
 		ConfigController.setupConfig();
@@ -282,6 +313,9 @@ public class UltimateEconomy extends JavaPlugin {
 		}
 		return list;
 	}
+==== BASE ====
+	return list;
+    }
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -309,6 +343,9 @@ public class UltimateEconomy extends JavaPlugin {
 		}
 		return true;
 	}
+==== BASE ====
+	return true;
+    }
 
     private boolean handleJobInfoCommand(String[] args, Player player)
 	    throws JobSystemException, GeneralEconomyException {
@@ -316,8 +353,8 @@ public class UltimateEconomy extends JavaPlugin {
 	    Job job = JobController.getJobByName(args[0]);
 	    player.sendMessage(MessageWrapper.getString("jobinfo_info", job.getName()));
 	    for (String string : job.getBlockList().keySet()) {
-		player.sendMessage(MessageWrapper.getString("jobinfo_blockprice", string.toLowerCase(),
-				job.getBlockPrice(string), ConfigController.getCurrencyText(job.getBlockPrice(string))));
+		player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN
+			+ job.getBlockPrice(string) + ConfigController.getCurrencyText(job.getBlockPrice(string)));
 	    }
 	    for (String string : job.getFisherList().keySet()) {
 		player.sendMessage(MessageWrapper.getString("jobinfo_fishingprice", string.toLowerCase(),
@@ -327,13 +364,9 @@ public class UltimateEconomy extends JavaPlugin {
 		player.sendMessage(MessageWrapper.getString("jobinfo_killprice", string.toLowerCase(),
 			job.getKillPrice(string), ConfigController.getCurrencyText(job.getKillPrice(string))));
 	    }
-	    
-	    for (String string : job.getBreedableList().keySet()) {
-			player.sendMessage(MessageWrapper.getString("jobinfo_breedingprice", string.toLowerCase(),
-				job.getBreedablePrice(string), ConfigController.getCurrencyText(job.getBreedablePrice(string))));
-		    }
 	} else {
 	    return false;
+==== BASE ====
 	}
 	return true;
     }
@@ -363,6 +396,9 @@ public class UltimateEconomy extends JavaPlugin {
 		}
 		return true;
 	}
+==== BASE ====
+	return true;
+    }
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -383,6 +419,9 @@ public class UltimateEconomy extends JavaPlugin {
 		}
 		return list;
 	}
+==== BASE ====
+	return list;
+    }
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////

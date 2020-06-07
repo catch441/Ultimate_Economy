@@ -291,7 +291,8 @@ public class JobTabCompleter implements TabCompleter {
 				}
 			}
 		}
-		return list;
+	    }
+==== BASE ====
 	}
 
 	private static List<String> getEntityList(String arg) {
@@ -308,7 +309,8 @@ public class JobTabCompleter implements TabCompleter {
 				}
 			}
 		}
-		return list;
+	    }
+==== BASE ====
 	}
 
 	private static List<String> getBreedableList(String arg) {
@@ -325,6 +327,11 @@ public class JobTabCompleter implements TabCompleter {
 				}
 			}
 		}
-		return list;
+	    }
+==== BASE ====
 	}
+==== BASE ====
+	return list;
+    }
 }
+==== BASE ====
