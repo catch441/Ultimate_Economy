@@ -55,10 +55,6 @@ public class JobTabCompleterTest {
 		server.setPlayers(0);
 		MockBukkit.unload();
 	}
-	UltimateEconomy.getInstance.getDataFolder().delete();
-	server.setPlayers(0);
-	MockBukkit.unload();
-    }
 
 	/**
 	 * Unload all.
@@ -78,15 +74,6 @@ public class JobTabCompleterTest {
 			}
 		}
 	}
-	int size2 = JobcenterController.getJobcenterList().size();
-	for (int i = 0; i < size2; i++) {
-	    try {
-		JobcenterController.deleteJobcenter(JobcenterController.getJobcenterList().get(0));
-	    } catch (JobSystemException e) {
-		assertTrue(false);
-	    }
-	}
-    }
 
 	@Test
 	public void zeroArgsTest() {
@@ -99,7 +86,7 @@ public class JobTabCompleterTest {
 		assertEquals("job", result.get(3));
 		assertEquals("addJob", result.get(4));
 		assertEquals("removeJob", result.get(5));
-    }
+	}
 
 	@Test
 	public void zeroArgsTestWithMatching1() {
@@ -129,10 +116,6 @@ public class JobTabCompleterTest {
 		assertEquals("job", result.get(0));
 	}
 
-
-	}
-
-
 	@Test
 	public void createArgTest() {
 		String[] args = { "create" };
@@ -155,26 +138,26 @@ public class JobTabCompleterTest {
 		}
 	}
 
-    @Test
-    public void removeJobArgTestWithThreeArgs() {
-	try {
-	    JobController.createJob("job1");
-	    JobController.createJob("job2");
-	    String[] args = { "removeJob", "jobcenter", "1" };
-	    List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-	    assertEquals(1, result.size());
-	    assertEquals("job1", result.get(0));
-	} catch (GeneralEconomyException e) {
-	    assertTrue(false);
+	@Test
+	public void removeJobArgTestWithThreeArgs() {
+		try {
+			JobController.createJob("job1");
+			JobController.createJob("job2");
+			String[] args = { "removeJob", "jobcenter", "1" };
+			List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+			assertEquals(1, result.size());
+			assertEquals("job1", result.get(0));
+		} catch (GeneralEconomyException e) {
+			assertTrue(false);
+		}
 	}
-    }
 
-    @Test
-    public void removeJobArgTestWithMoreArgs() {
-	String[] args = { "removeJob", "jobcenter", "myjob", "" };
-	List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-	assertEquals(0, result.size());
-    }
+	@Test
+	public void removeJobArgTestWithMoreArgs() {
+		String[] args = { "removeJob", "jobcenter", "myjob", "" };
+		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+		assertEquals(0, result.size());
+	}
 
     @Test
     public void removeJobArgTestWithTwoArgs() {
@@ -203,6 +186,7 @@ public class JobTabCompleterTest {
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(false);
 		}
+	}
 
 
 	@Test	
@@ -681,35 +665,6 @@ public class JobTabCompleterTest {
 	assertEquals("ender_dragon", result.get(0));
     }
     
-    @Test
-    public void jobAddMobArgTestWithMobArg() {
-	String[] args = { "job", "addMob", "myjob", "" };
-	List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-	assertEquals(104, result.size());
-    }
-    
-    @Test
-    public void jobAddMobArgTestWithMoreArgs() {
-	String[] args = { "job", "addMob", "myjob", "cow","" };
-	List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-	assertEquals(0, result.size());
-    }
-    
-    @Test
-    public void jobRemoveMobArgTest() {
-	try {
-	    JobController.createJob("job1");
-	    JobController.createJob("job2");
-	    String[] args = { "job", "deleteMob", "" };
-	    List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-	    assertEquals(2, result.size());
-	    assertEquals("job1", result.get(0));
-	    assertEquals("job2", result.get(1));
-	} catch (GeneralEconomyException e) {
-	    assertTrue(false);
-	}
-    }
-
 	@Test
 	public void jobAddMobArgTestWithMobArg() {
 		String[] args = { "job", "addMob", "myjob", "" };
@@ -717,21 +672,55 @@ public class JobTabCompleterTest {
 		assertEquals(67, result.size()); // previous 104, new 67 accounts for
 											// only EntityTypes that are "Alive"
 	}
-    }
 
-    @Test
-    public void jobRemoveMobArgTestWithMobArgMatching() {
-	String[] args = { "job", "deleteMob", "myjob", "_drag" };
-	List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-	assertEquals(1, result.size());
-	assertEquals("ender_dragon", result.get(0));
-    }
-    
-    @Test
-    public void jobRemoveMobArgTestWithMoreArgs() {
-	String[] args = { "job", "deleteMob", "myjob", "cow","" };
-	List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-	assertEquals(0, result.size());
-    }
-==== BASE ====
+	@Test
+	public void jobAddMobArgTestWithMoreArgs() {
+		String[] args = { "job", "addMob", "myjob", "cow", "" };
+		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+		assertEquals(0, result.size());
+	}
+
+	@Test
+	public void jobRemoveMobArgTest() {
+		try {
+			JobController.createJob("job1");
+			JobController.createJob("job2");
+			String[] args = { "job", "deleteMob", "" };
+			List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+			assertEquals(2, result.size());
+			assertEquals("job1", result.get(0));
+			assertEquals("job2", result.get(1));
+		} catch (GeneralEconomyException e) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	public void jobRemoveMobArgTestWithMatching() {
+		try {
+			JobController.createJob("job1");
+			JobController.createJob("job2");
+			String[] args = { "job", "deleteMob", "1" };
+			List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+			assertEquals(1, result.size());
+			assertEquals("job1", result.get(0));
+		} catch (GeneralEconomyException e) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	public void jobRemoveMobArgTestWithMobArgMatching() {
+		String[] args = { "job", "deleteMob", "myjob", "_drag" };
+		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+		assertEquals(1, result.size());
+		assertEquals("ender_dragon", result.get(0));
+	}
+
+	@Test
+	public void jobRemoveMobArgTestWithMoreArgs() {
+		String[] args = { "job", "deleteMob", "myjob", "cow", "" };
+		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+		assertEquals(0, result.size());
+	}
 }

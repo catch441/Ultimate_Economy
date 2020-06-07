@@ -291,8 +291,7 @@ public class JobTabCompleter implements TabCompleter {
 				}
 			}
 		}
-	    }
-==== BASE ====
+		return list;
 	}
 
 	private static List<String> getEntityList(String arg) {
@@ -300,17 +299,16 @@ public class JobTabCompleter implements TabCompleter {
 		EntityType[] entityTypes = EntityType.values();
 		if ("".equals(arg)) {
 			for (EntityType entityname : entityTypes) {
-				list.add(entityname.name().toLowerCase());
+				if(entityname.isAlive()) list.add(entityname.name().toLowerCase());
 			}
 		} else {
 			for (EntityType entityname : entityTypes) {
 				if (entityname.name().toLowerCase().contains(arg)) {
-					list.add(entityname.name().toLowerCase());
+					if(entityname.isAlive()) list.add(entityname.name().toLowerCase());
 				}
 			}
 		}
-	    }
-==== BASE ====
+		return list;
 	}
 
 	private static List<String> getBreedableList(String arg) {
@@ -327,11 +325,7 @@ public class JobTabCompleter implements TabCompleter {
 				}
 			}
 		}
-	    }
-==== BASE ====
-	}
-==== BASE ====
-	return list;
+		return list;
     }
 }
-==== BASE ====
+
