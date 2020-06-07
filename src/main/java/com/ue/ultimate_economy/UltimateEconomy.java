@@ -317,8 +317,8 @@ public class UltimateEconomy extends JavaPlugin {
 	    Job job = JobController.getJobByName(args[0]);
 	    player.sendMessage(MessageWrapper.getString("jobinfo_info", job.getName()));
 	    for (String string : job.getBlockList().keySet()) {
-		player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN
-			+ job.getBlockPrice(string) + ConfigController.getCurrencyText(job.getBlockPrice(string)));
+		player.sendMessage(MessageWrapper.getString("jobinfo_blockprice", string.toLowerCase(),
+				job.getBlockPrice(string), ConfigController.getCurrencyText(job.getBlockPrice(string))));
 	    }
 	    for (String string : job.getFisherList().keySet()) {
 		player.sendMessage(MessageWrapper.getString("jobinfo_fishingprice", string.toLowerCase(),
@@ -328,6 +328,11 @@ public class UltimateEconomy extends JavaPlugin {
 		player.sendMessage(MessageWrapper.getString("jobinfo_killprice", string.toLowerCase(),
 			job.getKillPrice(string), ConfigController.getCurrencyText(job.getKillPrice(string))));
 	    }
+	    
+	    for (String string : job.getBreedableList().keySet()) {
+			player.sendMessage(MessageWrapper.getString("jobinfo_breedingprice", string.toLowerCase(),
+				job.getBreedablePrice(string), ConfigController.getCurrencyText(job.getBreedablePrice(string))));
+		    }
 	} else {
 	    return false;
 	}
