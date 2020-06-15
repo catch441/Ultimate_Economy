@@ -445,11 +445,19 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		} else {
 			// new loading
 			String iban = config.getString(getName() + ".Iban");
+			// at this code step if the iban is null the player has no existing account, make a new one
+			// safely handles a state where a player name has no account information causing an NPE
+			if (iban == null) {
+				bankAccount = BankController.createBankAccount(0);
+				config.set(getName() + ".Iban", getBankAccount().getIban());
+				save(config);
+			} else {
 			try {
 				bankAccount = BankController.getBankAccountByIban(iban);
 			} catch (GeneralEconomyException e) {
 				Bukkit.getLogger().warning(
 						"[Ultimate_Economy] Failed to load the bank account " + iban + " for the player " + getName());
+			}
 			}
 		}
 		save(config);
