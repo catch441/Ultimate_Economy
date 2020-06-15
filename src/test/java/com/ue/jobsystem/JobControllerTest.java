@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -172,25 +171,12 @@ public class JobControllerTest {
 			assertTrue(false);
 		}
 	}
-	
-	@Test
-	public void removeJobFromAllPlayersWith() {
-		try {
-			JobController.createJob("myjob");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
-			Job job = JobController.getJobList().get(0);
-			ecoPlayer.joinJob(job, false);
-			JobController.removeJobFromAllPlayers(job);
-			assertEquals(0, ecoPlayer.getJobList().size());
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
-			assertTrue(false);
-		}
-	}
 
 	@Test
 	public void deleteJobTest() {
 		try {
 			JobcenterController.createJobcenter("jobcenter", new Location(world, 1, 1, 1), 9);
+			JobcenterController.createJobcenter("other", new Location(world, 10, 1, 1), 9);
 			JobController.createJob("myjob");
 			Jobcenter jobcenter = JobcenterController.getJobcenterList().get(0);
 			Job job = JobController.getJobList().get(0);
