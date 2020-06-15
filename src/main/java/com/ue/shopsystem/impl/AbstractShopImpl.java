@@ -36,7 +36,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.Property;
+import com.mojang.authlib.properties.Property;
 import com.ue.config.api.ConfigController;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
