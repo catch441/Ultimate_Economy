@@ -908,7 +908,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		getShopLocation().getChunk().load();
 		Collection<Entity> entitys = getShopLocation().getWorld().getNearbyEntities(getShopLocation(), 10, 10, 10);
 		for (Entity entity : entitys) {
-			if (entity.getName().contains(getName())) {
+			if (getName() != null && getName().equals(entity.getCustomName())) {
 				entity.remove();
 			}
 		}

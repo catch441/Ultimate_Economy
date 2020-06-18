@@ -1,6 +1,5 @@
 package com.ue.jobsystem.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -55,13 +54,8 @@ public class JobcenterImpl implements Jobcenter {
 	 */
 	public JobcenterImpl(String name, Location spawnLocation, int size) throws JobSystemException {
 		validationHandler = new JobSystemValidationHandler();
-		try {
-			savefileHandler = new JobcenterSavefileHandler(name, true);
-			setupNewJobcenter(name, spawnLocation, size);
-		} catch (IOException e) {
-			Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create savefile");
-			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-		}
+		savefileHandler = new JobcenterSavefileHandler(name, true);
+		setupNewJobcenter(name, spawnLocation, size);
 	}
 
 	/**
@@ -71,14 +65,8 @@ public class JobcenterImpl implements Jobcenter {
 	 */
 	public JobcenterImpl(String name) {
 		validationHandler = new JobSystemValidationHandler();
-		try {
-			savefileHandler = new JobcenterSavefileHandler(name, false);
-			loadExistingJobcenter(name);
-		} catch (IOException e) {
-			Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load savefile");
-			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-		}
-
+		savefileHandler = new JobcenterSavefileHandler(name, false);
+		loadExistingJobcenter(name);
 	}
 
 	/*
@@ -275,7 +263,7 @@ public class JobcenterImpl implements Jobcenter {
 		Collection<Entity> entitys = getJobcenterLocation().getWorld().getNearbyEntities(getJobcenterLocation(), 10, 10,
 				10);
 		for (Entity e : entitys) {
-			if (e.getName().equals(getName())) {
+			if (getName().equals(e.getCustomName())) {
 				e.remove();
 			}
 		}
