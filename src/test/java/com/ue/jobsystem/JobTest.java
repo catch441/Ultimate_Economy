@@ -3,6 +3,7 @@ package com.ue.jobsystem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.Map;
@@ -55,6 +56,29 @@ public class JobTest {
 			JobController.deleteJob(JobController.getJobList().get(0));
 		}
 	}
+	
+	@Test
+	public void loadExistingShopTest() {
+		try {
+			JobController.createJob("myjob");
+			Job job = JobController.getJobList().get(0);
+			job.addBlock("dirt", 1.0);
+			job.addFisherLootType("fish", 2.0);
+			job.addMob("cow", 3.0);
+			JobController.getJobList().clear();
+			JobController.createJob("myjob");
+			Job result = JobController.getJobList().get(0);
+			assertTrue(result.getBlockList().containsKey("DIRT"));
+			assertTrue(result.getBlockList().containsValue(1.0));
+			assertTrue(result.getFisherList().containsKey("fish"));
+			assertTrue(result.getFisherList().containsValue(2.0));
+			assertTrue(result.getEntityList().containsKey("COW"));
+			assertTrue(result.getEntityList().containsValue(3.0));
+			assertEquals("myjob",result.getName());
+		} catch (GeneralEconomyException | JobSystemException e) {
+			fail();
+		}
+	}
 
 	@Test
 	public void getBlockListTest() {
@@ -67,7 +91,7 @@ public class JobTest {
 			assertTrue(list.containsKey("STONE"));
 			assertTrue(list.containsValue(1.0));
 		} catch (GeneralEconomyException | JobSystemException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -82,7 +106,7 @@ public class JobTest {
 			assertTrue(list.containsKey("COW"));
 			assertTrue(list.containsValue(1.0));
 		} catch (GeneralEconomyException | JobSystemException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -97,7 +121,7 @@ public class JobTest {
 			assertTrue(list.containsKey("treasure"));
 			assertTrue(list.containsValue(1.0));
 		} catch (GeneralEconomyException | JobSystemException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -109,7 +133,7 @@ public class JobTest {
 			job.addMob("cow", 1.0);
 			assertEquals("1.0", String.valueOf(job.getKillPrice("cow")));
 		} catch (GeneralEconomyException | JobSystemException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -121,7 +145,7 @@ public class JobTest {
 			job.addFisherLootType("fish", 1.0);
 			assertEquals("1.0", String.valueOf(job.getFisherPrice("fish")));
 		} catch (GeneralEconomyException | JobSystemException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -133,7 +157,7 @@ public class JobTest {
 			job.addBlock("stone", 1.0);
 			assertEquals("1.0", String.valueOf(job.getBlockPrice("stone")));
 		} catch (GeneralEconomyException | JobSystemException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -144,7 +168,7 @@ public class JobTest {
 			Job job = JobController.getJobList().get(0);
 			assertEquals("myjob", job.getName());
 		} catch (GeneralEconomyException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -154,7 +178,7 @@ public class JobTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addBlock("dsadas", 1.0);
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4DSADAS§c is invalid!", e.getMessage());
@@ -167,7 +191,7 @@ public class JobTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addBlock("stone", -1.0);
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4-1.0§c is invalid!", e.getMessage());
@@ -181,7 +205,7 @@ public class JobTest {
 			Job job = JobController.getJobList().get(0);
 			job.addBlock("stone", 1.0);
 			job.addBlock("stone", 1.0);
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof JobSystemException);
 			assertEquals("§cThis item already exists in this job!", e.getMessage());
@@ -202,7 +226,7 @@ public class JobTest {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			assertEquals("1.0", config.getString("BlockList.STONE"));
 		} catch (GeneralEconomyException | JobSystemException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -212,7 +236,7 @@ public class JobTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addMob("dsadas", 1.0);
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4DSADAS§c is invalid!", e.getMessage());
@@ -225,7 +249,7 @@ public class JobTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addMob("cow", -1.0);
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4-1.0§c is invalid!", e.getMessage());
@@ -239,7 +263,7 @@ public class JobTest {
 			Job job = JobController.getJobList().get(0);
 			job.addMob("cow", 1.0);
 			job.addMob("cow", 1.0);
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof JobSystemException);
 			assertEquals("§cThis entity already exists in this job!", e.getMessage());
@@ -260,7 +284,7 @@ public class JobTest {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			assertEquals("1.0", config.getString("EntityList.COW"));
 		} catch (GeneralEconomyException | JobSystemException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -270,7 +294,7 @@ public class JobTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addFisherLootType("dsadas", 1.0);
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4dsadas§c is invalid!", e.getMessage());
@@ -283,7 +307,7 @@ public class JobTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addFisherLootType("fish", -1.0);
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4-1.0§c is invalid!", e.getMessage());
@@ -297,7 +321,7 @@ public class JobTest {
 			Job job = JobController.getJobList().get(0);
 			job.addFisherLootType("fish", 1.0);
 			job.addFisherLootType("fish", 1.0);
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof JobSystemException);
 			assertEquals("§cThis loottype for a fisherjob already exists in this job!", e.getMessage());
@@ -318,7 +342,7 @@ public class JobTest {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			assertEquals("1.0", config.getString("FisherList.fish"));
 		} catch (GeneralEconomyException | JobSystemException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -328,7 +352,7 @@ public class JobTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.deleteBlock("ddada");
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4DDADA§c is invalid!", e.getMessage());
@@ -341,7 +365,7 @@ public class JobTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.deleteBlock("stone");
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof JobSystemException);
 			assertEquals("§cThis item does not exist in this job!", e.getMessage());
@@ -361,7 +385,7 @@ public class JobTest {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			assertFalse(config.contains("BlockList.STONE"));
 		} catch (GeneralEconomyException | JobSystemException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -371,7 +395,7 @@ public class JobTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.deleteMob("DDADA");
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4DDADA§c is invalid!", e.getMessage());
@@ -384,7 +408,7 @@ public class JobTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.deleteMob("cow");
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof JobSystemException);
 			assertEquals("§cThis entity does not exist in this job!", e.getMessage());
@@ -404,7 +428,7 @@ public class JobTest {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			assertFalse(config.contains("EntityList.COW"));
 		} catch (GeneralEconomyException | JobSystemException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -414,7 +438,7 @@ public class JobTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.delFisherLootType("DDADA");
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4DDADA§c is invalid!", e.getMessage());
@@ -427,7 +451,7 @@ public class JobTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.delFisherLootType("fish");
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException | JobSystemException e) {
 			assertTrue(e instanceof JobSystemException);
 			assertEquals("§cThis loottype for a fisherjob does not exist in this job!", e.getMessage());
@@ -447,7 +471,7 @@ public class JobTest {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			assertFalse(config.contains("FisherList.fish"));
 		} catch (GeneralEconomyException | JobSystemException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -459,10 +483,10 @@ public class JobTest {
 			job.deleteJob();
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "myjob-Job.yml");
 			if (file.exists()) {
-				assertTrue(false);
+				fail();
 			}
 		} catch (GeneralEconomyException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 }
