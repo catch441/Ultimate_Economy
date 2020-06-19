@@ -6,6 +6,10 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.AfterAll;
@@ -47,6 +51,9 @@ public class JobSavefileHandlerTest {
 	 */
 	@AfterEach
 	public void unload() {
+		File file = new File(UltimateEconomy.getInstance.getDataFolder(),"kthjob-Job.yml");
+		file.delete();
+		savefileHandler = new JobSavefileHandler("kthjob", true);
 	}
 	
 	@Test
@@ -77,6 +84,138 @@ public class JobSavefileHandlerTest {
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(),"kthjob-Job.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals("myjob", config.get("Jobname"));
-		assertEquals("kthjob", savefileHandler.loadJobName());
+		savefileHandler.saveJobName(null);
+	}
+	
+	@Test
+	public void saveBlocklistTest() {
+		Map<String,Double> list = new HashMap<>();
+		list.put("dirt", 2.0);
+		savefileHandler.saveBlockList(list);
+		File file = new File(UltimateEconomy.getInstance.getDataFolder(),"kthjob-Job.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		assertEquals("2.0", config.getString("BlockList.dirt"));
+	}
+	
+	@Test
+	public void saveFisherlistTest() {
+		Map<String,Double> list = new HashMap<>();
+		list.put("fish", 2.0);
+		savefileHandler.saveFisherList(list);
+		File file = new File(UltimateEconomy.getInstance.getDataFolder(),"kthjob-Job.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		assertEquals("2.0", config.getString("FisherList.fish"));
+	}
+	
+	@Test
+	public void saveEntitylistTest() {
+		Map<String,Double> list = new HashMap<>();
+		list.put("cow", 2.0);
+		savefileHandler.saveEntityList(list);
+		File file = new File(UltimateEconomy.getInstance.getDataFolder(),"kthjob-Job.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		assertEquals("2.0", config.getString("EntityList.cow"));
+	}
+	
+	@Test
+	public void loadJobNameTest() {
+		savefileHandler.saveJobName("myjob1");
+		assertEquals("myjob1", savefileHandler.loadJobName());
+		savefileHandler.saveJobName(null);
+	}
+	
+	@Test
+	public void loadBlocklistTest() {
+		assertTrue(savefileHandler.loadBlockList().isEmpty());
+		Map<String,Double> list = new HashMap<>();
+		list.put("dirt", 2.0);
+		savefileHandler.saveBlockList(list);
+		savefileHandler = new JobSavefileHandler("kthjob", false);
+		Map<String,Double> result = savefileHandler.loadBlockList(); 
+		assertTrue(result.containsKey("dirt"));
+		assertTrue(result.containsValue(2.0));
+		assertEquals(1, result.size());
+	}
+	
+	@Test
+	public void loadFisherlistTest() {
+		assertTrue(savefileHandler.loadFisherList().isEmpty());
+		Map<String,Double> list = new HashMap<>();
+		list.put("fish1", 2.0);
+		savefileHandler.saveFisherList(list);
+		savefileHandler = new JobSavefileHandler("kthjob", false);
+		Map<String,Double> result = savefileHandler.loadFisherList(); 
+		assertTrue(result.containsKey("fish1"));
+		assertTrue(result.containsValue(2.0));
+		assertEquals(1, result.size());
+	}
+	
+	@Test
+	public void loadEntitylistTest() {
+		assertTrue(savefileHandler.loadEntityList().isEmpty());
+		Map<String,Double> list = new HashMap<>();
+		list.put("cow", 2.0);
+		savefileHandler.saveEntityList(list);
+		savefileHandler = new JobSavefileHandler("kthjob", false);
+		Map<String,Double> result = savefileHandler.loadEntityList(); 
+		assertTrue(result.containsKey("cow"));
+		assertTrue(result.containsValue(2.0));
+		assertEquals(1, result.size());
+	}
+	
+	@Test
+	public void loadBlocklistDeprecatedTest() {
+		File file = new File(UltimateEconomy.getInstance.getDataFolder(),"kthjob-Job.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		List<String> list = new ArrayList<>();
+		list.add("dirt");
+		config.set("Itemlist", list);
+		config.set("JobItems.dirt", 2.0);
+		save(file,config);
+		savefileHandler = new JobSavefileHandler("kthjob", false);
+		Map<String,Double> result = savefileHandler.loadBlockList();
+		assertTrue(result.containsKey("dirt"));
+		assertTrue(result.containsValue(2.0));
+		assertEquals(1, result.size());
+	}
+	
+	@Test
+	public void loadFisherlistDeprecatedTest() {
+		File file = new File(UltimateEconomy.getInstance.getDataFolder(),"kthjob-Job.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		List<String> list = new ArrayList<>();
+		list.add("fish");
+		config.set("Fisherlist", list);
+		config.set("Fisher.fish", 2.0);
+		save(file,config);
+		savefileHandler = new JobSavefileHandler("kthjob", false);
+		Map<String,Double> result = savefileHandler.loadFisherList();
+		assertTrue(result.containsKey("fish"));
+		assertTrue(result.containsValue(2.0));
+		assertEquals(1, result.size());
+	}
+	
+	@Test
+	public void loadEntitylistDeprecatedTest() {
+		File file = new File(UltimateEconomy.getInstance.getDataFolder(),"kthjob-Job.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		List<String> list = new ArrayList<>();
+		list.add("cow");
+		config.set("Entitylist", list);
+		config.set("JobEntitys.cow", 2.0);
+		save(file,config);
+		savefileHandler = new JobSavefileHandler("kthjob", false);
+		Map<String,Double> result = savefileHandler.loadEntityList();
+		assertTrue(result.containsKey("cow"));
+		assertTrue(result.containsValue(2.0));
+		assertEquals(1, result.size());
+	}
+	
+	private void save(File file, YamlConfiguration config) {
+		try {
+			config.save(file);
+		} catch (IOException e) {
+			fail();
+		}
 	}
 }
