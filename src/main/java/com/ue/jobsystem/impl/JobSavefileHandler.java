@@ -15,7 +15,12 @@ public class JobSavefileHandler {
 	private File file;
 	private YamlConfiguration config;
 
-	protected JobSavefileHandler(String name, boolean createFile) {
+	/**
+	 * Constructor for creating a new SavefileHandler.
+	 * @param name
+	 * @param createFile if true, then a new save file is create, else a existing file gets loaded
+	 */
+	public JobSavefileHandler(String name, boolean createFile) {
 		file = new File(UltimateEconomy.getInstance.getDataFolder(), name + "-Job.yml");
 		if (createFile) {
 			try {
@@ -28,12 +33,20 @@ public class JobSavefileHandler {
 		config = YamlConfiguration.loadConfiguration(getSavefile());
 	}
 
-	protected void saveJobName(String name) {
+	/**
+	 * Saves a job name.
+	 * @param name
+	 */
+	public void saveJobName(String name) {
 		getConfig().set("Jobname", name);
 		save();
 	}
 
-	protected void saveBlockList(Map<String, Double> blockList) {
+	/**
+	 * Saves the block list (map) for a job.
+	 * @param blockList
+	 */
+	public void saveBlockList(Map<String, Double> blockList) {
 		getConfig().set("BlockList", null);
 		for (String key : blockList.keySet()) {
 			getConfig().set("BlockList." + key, blockList.get(key));
@@ -41,7 +54,11 @@ public class JobSavefileHandler {
 		save();
 	}
 
-	protected void saveFisherList(Map<String, Double> fisherList) {
+	/**
+	 * Saves the fisher list (map) for a job.
+	 * @param fisherList
+	 */
+	public void saveFisherList(Map<String, Double> fisherList) {
 		getConfig().set("FisherList", null);
 		for (String key : fisherList.keySet()) {
 			getConfig().set("FisherList." + key, fisherList.get(key));
@@ -49,7 +66,11 @@ public class JobSavefileHandler {
 		save();
 	}
 
-	protected void saveEntityList(Map<String, Double> entityList) {
+	/**
+	 * Saves the entity list (map) for a job.
+	 * @param entityList
+	 */
+	public void saveEntityList(Map<String, Double> entityList) {
 		getConfig().set("EntityList", null);
 		for (String key : entityList.keySet()) {
 			getConfig().set("EntityList." + key, entityList.get(key));
@@ -57,11 +78,19 @@ public class JobSavefileHandler {
 		save();
 	}
 
-	protected String loadJobName() {
+	/**
+	 * Loads the job name.
+	 * @return job name as String
+	 */
+	public String loadJobName() {
 		return getConfig().getString("Jobname");
 	}
 
-	protected Map<String, Double> loadBlockList() {
+	/**
+	 * Loads the block list (map) of a job
+	 * @return block list as Map
+	 */
+	public Map<String, Double> loadBlockList() {
 		Map<String, Double> list = new HashMap<>();
 		convertBlockList();
 		if (getConfig().contains("BlockList")) {
@@ -72,7 +101,11 @@ public class JobSavefileHandler {
 		return list;
 	}
 
-	protected Map<String, Double> loadEntityList() {
+	/**
+	 * Loads the entity list (map) of a job
+	 * @return entity list as Map
+	 */
+	public Map<String, Double> loadEntityList() {
 		Map<String, Double> list = new HashMap<>();
 		convertEntityList();
 		if (getConfig().contains("EntityList")) {
@@ -83,7 +116,11 @@ public class JobSavefileHandler {
 		return list;
 	}
 
-	protected Map<String, Double> loadFisherList() {
+	/**
+	 * Loads the fisher list (map) of a job
+	 * @return fisher list as Map
+	 */
+	public Map<String, Double> loadFisherList() {
 		Map<String, Double> list = new HashMap<>();
 		convertFisherList();
 		if (getConfig().contains("FisherList")) {
@@ -94,7 +131,10 @@ public class JobSavefileHandler {
 		return list;
 	}
 
-	protected void deleteSavefile() {
+	/**
+	 * Deletes the savefile.
+	 */
+	public void deleteSavefile() {
 		getSavefile().delete();
 	}
 
