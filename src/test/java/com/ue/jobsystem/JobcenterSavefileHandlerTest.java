@@ -61,7 +61,7 @@ public class JobcenterSavefileHandlerTest {
 	 */
 	@AfterEach
 	public void unload() {
-		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
+		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 		file.delete();
 		savefileHandler = new JobcenterSavefileHandler("kthcenter", true);
 		int size = JobController.getJobList().size();
@@ -72,21 +72,19 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void constructorNewTest() {
-		System.out.println("constructorNewTest");
 		JobcenterSavefileHandler savefileHandler1 = new JobcenterSavefileHandler("kthcenter", true);
-		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
+		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 		assertTrue(file.exists());
 		savefileHandler1.deleteSavefile();
 	}
 
 	@Test
 	public void constructorLoadTest() {
-		System.out.println("constructorLoadTest");
 		try {
-			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
+			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 			file.createNewFile();
 			JobcenterSavefileHandler savefileHandler1 = new JobcenterSavefileHandler("kthcenter", false);
-			File result = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
+			File result = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 			assertTrue(result.exists());
 			savefileHandler1.deleteSavefile();
 		} catch (IOException e) {
@@ -96,28 +94,25 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void saveJobcenterSizeTest() {
-		System.out.println("saveJobcenterSizeTest");
 		savefileHandler.saveJobcenterSize(9);
-		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
+		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals(9, config.getInt("JobCenterSize"));
 	}
 
 	@Test
 	public void saveJobcenterNameTest() {
-		System.out.println("saveJobcenterNameTest");
 		savefileHandler.saveJobcenterName("myname");
-		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
+		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals("myname", config.getString("JobCenterName"));
 	}
 
 	@Test
 	public void saveJobcenterLocationTest() {
-		System.out.println("saveJobcenterLocationTest");
 		Location loc = new Location(world, 1, 2, 3);
 		savefileHandler.saveJobcenterLocation(loc);
-		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
+		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals("World", config.getString("JobcenterLocation.World"));
 		assertEquals(1, config.getInt("JobcenterLocation.x"));
@@ -127,11 +122,10 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void saveJobNameListTest() {
-		System.out.println("saveJobNameListTest");
 		List<String> list = new ArrayList<>();
 		list.add("myjob");
 		savefileHandler.saveJobNameList(list);
-		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
+		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals(1, config.getStringList("Jobnames").size());
 		assertEquals("myjob", config.getStringList("Jobnames").get(0));
@@ -139,12 +133,11 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void saveJobTest() {
-		System.out.println("saveJobTest");
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			savefileHandler.saveJob(job, "stone", 4);
-			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
+			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			assertEquals("stone", config.getString("Jobs.myjob.ItemMaterial"));
 			assertEquals(4, config.getInt("Jobs.myjob.Slot"));
@@ -155,13 +148,12 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void saveJobTestWithDelete() {
-		System.out.println("saveJobTestWithDelete");
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			savefileHandler.saveJob(job, "stone", 4);
 			savefileHandler.saveJob(job, null, 4);
-			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
+			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			assertFalse(config.isSet("Jobs.myjob"));
 		} catch (GeneralEconomyException e) {
@@ -171,7 +163,6 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void loadJobcenterSizeTest() {
-		System.out.println("loadJobcenterSizeTest");
 		savefileHandler.saveJobcenterSize(9);
 		savefileHandler = new JobcenterSavefileHandler("kthcenter", false);
 		assertEquals(9, savefileHandler.loadJobcenterSize());
@@ -179,7 +170,6 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void loadJobcenterLocationTest() {
-		System.out.println("loadJobcenterLocationTest");
 		Location loc = new Location(world, 1, 2, 3);
 		savefileHandler.saveJobcenterLocation(loc);
 		savefileHandler = new JobcenterSavefileHandler("kthcenter", false);
@@ -192,8 +182,7 @@ public class JobcenterSavefileHandlerTest {
 	
 	@Test
 	public void loadJobcenterLocationDeprecatedTest() {
-		System.out.println("loadJobcenterLocationDeprecatedTest");
-		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
+		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		config.set("ShopLocation.World", "World");
 		config.set("ShopLocation.x",1);
@@ -210,7 +199,6 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void loadJobSlotTest() {
-		System.out.println("loadJobSlotTest");
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
@@ -224,11 +212,10 @@ public class JobcenterSavefileHandlerTest {
 	
 	@Test
 	public void loadJobSlotDeprecatedTest() {
-		System.out.println("loadJobSlotDeprecatedTest");
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
-			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
+			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			config.set("Jobs.myjob.ItemSlot", 9);
 			save(file,config);
@@ -241,7 +228,6 @@ public class JobcenterSavefileHandlerTest {
 	
 	@Test
 	public void loadJobNameListTest() {
-		System.out.println("loadJobNameListTest");
 		List<String> list = new ArrayList<>();
 		list.add("myjob");
 		savefileHandler.saveJobNameList(list);
@@ -252,7 +238,6 @@ public class JobcenterSavefileHandlerTest {
 	
 	@Test
 	public void loadJobItemMaterialTest() {
-		System.out.println("loadJobItemMaterialTest");
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
