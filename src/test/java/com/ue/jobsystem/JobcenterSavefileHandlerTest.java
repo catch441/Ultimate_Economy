@@ -72,6 +72,7 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void constructorNewTest() {
+		System.out.println("constructorNewTest");
 		JobcenterSavefileHandler savefileHandler1 = new JobcenterSavefileHandler("kthcenter", true);
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
 		assertTrue(file.exists());
@@ -80,6 +81,7 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void constructorLoadTest() {
+		System.out.println("constructorLoadTest");
 		try {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
 			file.createNewFile();
@@ -94,6 +96,7 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void saveJobcenterSizeTest() {
+		System.out.println("saveJobcenterSizeTest");
 		savefileHandler.saveJobcenterSize(9);
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -102,6 +105,7 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void saveJobcenterNameTest() {
+		System.out.println("saveJobcenterNameTest");
 		savefileHandler.saveJobcenterName("myname");
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -110,6 +114,7 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void saveJobcenterLocationTest() {
+		System.out.println("saveJobcenterLocationTest");
 		Location loc = new Location(world, 1, 2, 3);
 		savefileHandler.saveJobcenterLocation(loc);
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
@@ -122,6 +127,7 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void saveJobNameListTest() {
+		System.out.println("saveJobNameListTest");
 		List<String> list = new ArrayList<>();
 		list.add("myjob");
 		savefileHandler.saveJobNameList(list);
@@ -133,6 +139,7 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void saveJobTest() {
+		System.out.println("saveJobTest");
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
@@ -148,6 +155,7 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void saveJobTestWithDelete() {
+		System.out.println("saveJobTestWithDelete");
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
@@ -163,6 +171,7 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void loadJobcenterSizeTest() {
+		System.out.println("loadJobcenterSizeTest");
 		savefileHandler.saveJobcenterSize(9);
 		savefileHandler = new JobcenterSavefileHandler("kthcenter", false);
 		assertEquals(9, savefileHandler.loadJobcenterSize());
@@ -170,6 +179,7 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void loadJobcenterLocationTest() {
+		System.out.println("loadJobcenterLocationTest");
 		Location loc = new Location(world, 1, 2, 3);
 		savefileHandler.saveJobcenterLocation(loc);
 		savefileHandler = new JobcenterSavefileHandler("kthcenter", false);
@@ -182,6 +192,7 @@ public class JobcenterSavefileHandlerTest {
 	
 	@Test
 	public void loadJobcenterLocationDeprecatedTest() {
+		System.out.println("loadJobcenterLocationDeprecatedTest");
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-Jobcenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		config.set("ShopLocation.World", "World");
@@ -199,6 +210,7 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void loadJobSlotTest() {
+		System.out.println("loadJobSlotTest");
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
@@ -212,6 +224,7 @@ public class JobcenterSavefileHandlerTest {
 	
 	@Test
 	public void loadJobSlotDeprecatedTest() {
+		System.out.println("loadJobSlotDeprecatedTest");
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
@@ -228,6 +241,7 @@ public class JobcenterSavefileHandlerTest {
 	
 	@Test
 	public void loadJobNameListTest() {
+		System.out.println("loadJobNameListTest");
 		List<String> list = new ArrayList<>();
 		list.add("myjob");
 		savefileHandler.saveJobNameList(list);
@@ -238,6 +252,7 @@ public class JobcenterSavefileHandlerTest {
 	
 	@Test
 	public void loadJobItemMaterialTest() {
+		System.out.println("loadJobItemMaterialTest");
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
