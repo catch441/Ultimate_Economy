@@ -1,7 +1,8 @@
 # Eclipse Specific
 .classpath
 .project
-.settings/
+.settings
+logs/**
 
 # java related
 target/**
