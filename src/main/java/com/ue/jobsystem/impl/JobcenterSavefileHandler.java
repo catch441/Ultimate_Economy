@@ -17,7 +17,12 @@ public class JobcenterSavefileHandler {
 	private File file;
 	private YamlConfiguration config;
 
-	protected JobcenterSavefileHandler(String name, boolean createFile) {
+	/**
+	 * Constructor for creating a new jonbcenter savefile handler.
+	 * @param name
+	 * @param createFile
+	 */
+	public JobcenterSavefileHandler(String name, boolean createFile) {
 		file = new File(UltimateEconomy.getInstance.getDataFolder(), name + "-JobCenter.yml");
 		if (createFile) {
 			try {
@@ -30,17 +35,29 @@ public class JobcenterSavefileHandler {
 		config = YamlConfiguration.loadConfiguration(getSavefile());
 	}
 
-	protected void saveJobcenterSize(int size) {
+	/**
+	 * Saves the jobcenter size.
+	 * @param size
+	 */
+	public void saveJobcenterSize(int size) {
 		getConfig().set("JobCenterSize", size);
 		save();
 	}
 
-	protected void saveJobcenterName(String name) {
+	/**
+	 * Saves the jobcenter name.
+	 * @param name
+	 */
+	public void saveJobcenterName(String name) {
 		getConfig().set("JobCenterName", name);
 		save();
 	}
 
-	protected void saveJobcenterLocation(Location location) {
+	/**
+	 * Saves the location of a jobcenter.
+	 * @param location
+	 */
+	public void saveJobcenterLocation(Location location) {
 		getConfig().set("JobcenterLocation.x", location.getX());
 		getConfig().set("JobcenterLocation.y", location.getY());
 		getConfig().set("JobcenterLocation.z", location.getZ());
@@ -48,12 +65,22 @@ public class JobcenterSavefileHandler {
 		save();
 	}
 
-	protected void saveJobNameList(List<String> jobNameList) {
+	/**
+	 * Saves a job name list.
+	 * @param jobNameList
+	 */
+	public void saveJobNameList(List<String> jobNameList) {
 		getConfig().set("Jobnames", jobNameList);
 		save();
 	}
 
-	protected void saveJob(Job job, String itemMaterial, int slot) {
+	/**
+	 * Saves a job inside a jobcenter. If materialname is null, then the job gets deleted.
+	 * @param job
+	 * @param itemMaterial
+	 * @param slot
+	 */
+	public void saveJob(Job job, String itemMaterial, int slot) {
 		if (itemMaterial == null) {
 			getConfig().set("Jobs." + job.getName(), null);
 		} else {
@@ -63,7 +90,10 @@ public class JobcenterSavefileHandler {
 		save();
 	}
 
-	protected void deleteSavefile() {
+	/**
+	 * Deletes the savefile.
+	 */
+	public void deleteSavefile() {
 		getSavefile().delete();
 	}
 
@@ -80,11 +110,19 @@ public class JobcenterSavefileHandler {
 		}
 	}
 
-	protected int loadJobcenterSize() {
+	/**
+	 * Loads the jobcenter size.
+	 * @return size as integer
+	 */
+	public int loadJobcenterSize() {
 		return getConfig().getInt("JobCenterSize");
 	}
 
-	protected Location loadJobcenterLocation() {
+	/**
+	 * Loads the location of a jobcenter.
+	 * @return location as Location
+	 */
+	public Location loadJobcenterLocation() {
 		convertOldJobcenterLocation();
 		return new Location(                      
 				UltimateEconomy.getInstance.getServer().getWorld(getConfig().getString("JobcenterLocation.World")),
@@ -92,16 +130,30 @@ public class JobcenterSavefileHandler {
 				getConfig().getDouble("JobcenterLocation.z"));
 	}
 
-	protected int loadJobSlot(Job job) {
+	/**
+	 * Loads the slot of a job inside a jobcenter.
+	 * @param job
+	 * @return slot as integer
+	 */
+	public int loadJobSlot(Job job) {
 		convertSlot(job.getName());
 		return getConfig().getInt("Jobs." + job.getName() + ".Slot");
 	}
 
-	protected List<String> loadJobNameList() {
+	/**
+	 * Load Jobname list.
+	 * @return jobnames
+	 */
+	public List<String> loadJobNameList() {
 		return config.getStringList("Jobnames");
 	}
 
-	protected Material loadJobItemMaterial(Job job) {
+	/**
+	 * Load the item material that represenst the job in the jobcenter.
+	 * @param job
+	 * @return material name as Material
+	 */
+	public Material loadJobItemMaterial(Job job) {
 		return Material.valueOf(config.getString("Jobs." + job.getName() + ".ItemMaterial"));
 	}
 
