@@ -4,13 +4,13 @@ import java.util.UUID;
 
 import com.ue.bank.api.BankAccount;
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 
 public class BankAccountImpl implements BankAccount {
 
 	private double amount;
 	private final String iban;
-	private BankAccountSavefileHandler savefileHandler;
+	private BankSavefileHandler savefileHandler;
+	private BankValidationHandler validationHandler;
 
 	/**
 	 * Constructor for creating a new bank account.
@@ -19,7 +19,8 @@ public class BankAccountImpl implements BankAccount {
 	 */
 	public BankAccountImpl(double startAmount) {
 		iban = UUID.randomUUID().toString();
-		savefileHandler = new BankAccountSavefileHandler(getIban());
+		savefileHandler = new BankSavefileHandler(getIban());
+		validationHandler = new BankValidationHandler();
 		setAmount(startAmount);
 		getSavefileHandler().saveAmount(getAmount());
 	}
@@ -32,7 +33,8 @@ public class BankAccountImpl implements BankAccount {
 	 */
 	public BankAccountImpl(double startAmount, String externalIban) {
 		iban = externalIban;
-		savefileHandler = new BankAccountSavefileHandler(getIban());
+		savefileHandler = new BankSavefileHandler(getIban());
+		validationHandler = new BankValidationHandler();
 		setAmount(startAmount);
 		getSavefileHandler().saveAmount(getAmount());
 	}
@@ -44,37 +46,29 @@ public class BankAccountImpl implements BankAccount {
 	 */
 	public BankAccountImpl(String iban) {
 		this.iban = iban;
-		savefileHandler = new BankAccountSavefileHandler(getIban());
+		savefileHandler = new BankSavefileHandler(getIban());
+		validationHandler = new BankValidationHandler();
 		setAmount(getSavefileHandler().loadAmount());
 	}
 
 	@Override
 	public void decreaseAmount(double amount) throws GeneralEconomyException {
-		checkForPositiveAmount(amount);
-		if (getAmount() < amount) {
-			throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.NOT_ENOUGH_MONEY);
-		} else {
-			setAmount(getAmount() - amount);
-			getSavefileHandler().saveAmount(getAmount());
-		}
+		getValidationHandler().checkForPositiveAmount(amount);
+		getValidationHandler().checkForHasEnoughMoney(getAmount(), amount);
+		setAmount(getAmount() - amount);
+		getSavefileHandler().saveAmount(getAmount());
 	}
 
 	@Override
 	public void increaseAmount(double amount) throws GeneralEconomyException {
-		checkForPositiveAmount(amount);
+		getValidationHandler().checkForPositiveAmount(amount);
 		setAmount(getAmount() + amount);
 		getSavefileHandler().saveAmount(getAmount());
 	}
 
-	private void checkForPositiveAmount(double amount) throws GeneralEconomyException {
-		if (amount < 0) {
-			throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, amount);
-		}
-	}
-
 	@Override
 	public boolean hasAmount(double amount) throws GeneralEconomyException {
-		checkForPositiveAmount(amount);
+		getValidationHandler().checkForPositiveAmount(amount);
 		if (getAmount() < amount) {
 			return false;
 		} else {
@@ -96,7 +90,11 @@ public class BankAccountImpl implements BankAccount {
 		return iban;
 	}
 
-	private BankAccountSavefileHandler getSavefileHandler() {
+	private BankSavefileHandler getSavefileHandler() {
 		return savefileHandler;
+	}
+
+	private BankValidationHandler getValidationHandler() {
+		return validationHandler;
 	}
 }

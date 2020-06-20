@@ -3,7 +3,7 @@ package com.ue.bank.api;
 import java.util.ArrayList;
 import java.util.List;
 import com.ue.bank.impl.BankAccountImpl;
-import com.ue.bank.impl.BankAccountSavefileHandler;
+import com.ue.bank.impl.BankSavefileHandler;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 
@@ -20,7 +20,7 @@ public class BankController {
 	public static BankAccount createBankAccount(double startAmount) {
 		BankAccount account = new BankAccountImpl(startAmount);
 		getBankAccounts().add(account);
-		BankAccountSavefileHandler.saveIbanList(getIbanList());
+		BankSavefileHandler.saveIbanList(getIbanList());
 		return account;
 	}
 
@@ -37,7 +37,7 @@ public class BankController {
 			throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, externalIban);
 		}
 		getBankAccounts().add(new BankAccountImpl(startAmount, externalIban));
-		BankAccountSavefileHandler.saveIbanList(getIbanList());
+		BankSavefileHandler.saveIbanList(getIbanList());
 	}
 
 	/**
@@ -47,16 +47,16 @@ public class BankController {
 	 */
 	public static void deleteBankAccount(BankAccount account) {
 		getBankAccounts().remove(account);
-		BankAccountSavefileHandler.saveIbanList(getIbanList());
-		BankAccountSavefileHandler.deleteAccount(account.getIban());
+		BankSavefileHandler.saveIbanList(getIbanList());
+		BankSavefileHandler.deleteAccount(account.getIban());
 	}
 
 	/**
 	 * Loads all bank accounts.
 	 */
 	public static void loadBankAccounts() {
-		BankAccountSavefileHandler.setupSavefile();
-		for (String iban : BankAccountSavefileHandler.loadIbanList()) {
+		BankSavefileHandler.setupSavefile();
+		for (String iban : BankSavefileHandler.loadIbanList()) {
 			getBankAccounts().add(new BankAccountImpl(iban));
 		}
 	}

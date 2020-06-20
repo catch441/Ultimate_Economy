@@ -10,13 +10,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ue.ultimate_economy.UltimateEconomy;
 
-public class BankAccountSavefileHandler {
+public class BankSavefileHandler {
 
 	private static File file;
 	private static YamlConfiguration config;
 	private String iban;
 	
-	public BankAccountSavefileHandler(String iban) {
+	public BankSavefileHandler(String iban) {
 		this.iban = iban;
 	}
 	
