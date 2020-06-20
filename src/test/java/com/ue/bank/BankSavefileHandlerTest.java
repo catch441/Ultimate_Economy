@@ -42,6 +42,10 @@ public class BankSavefileHandlerTest {
 	public static void deleteSavefiles() {
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		MockBukkit.unload();
+		int size = BankController.getBankAccounts().size();
+		for (int i = 0; i < size; i++) {
+			BankController.deleteBankAccount(BankController.getBankAccounts().get(0));
+		}
 	}
 
 	/**
