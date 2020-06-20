@@ -59,6 +59,7 @@ public class BankSavefileHandler {
 	 */
 	public static void deleteAccount(String iban) {
 		config.set(iban, null);
+		save();
 	}
 	
 	private static File getSavefile() {
