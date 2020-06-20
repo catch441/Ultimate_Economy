@@ -8,3 +8,6 @@ target/**
 
 # Javadoc
 /doc
+
+# Logs
+/logs
