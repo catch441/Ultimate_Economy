@@ -31,7 +31,7 @@ import com.ue.config.commands.ConfigTabCompleter;
 import com.ue.economyplayer.api.EconomyPlayer;
 import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.economyplayer.commands.PlayerCommandExecutor;
-import com.ue.economyplayer.commands.PlayerTabCompleter;
+import com.ue.economyplayer.commands.EconomyPlayerTabCompleter;
 import com.ue.eventhandling.UltimateEconomyEventHandler;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.JobSystemException;
@@ -162,17 +162,19 @@ public class UltimateEconomy extends JavaPlugin {
 
 	private void loadCommands() {
 		PlayerCommandExecutor playerCommandExecutor = setupCommandExecutors();
-		PlayerTabCompleter playerTabCompleter = setupTabCompleters();
+		EconomyPlayerTabCompleter economyPlayerTabCompleter = setupTabCompleters();
 		if (ConfigController.isHomeSystem()) {
 			try {
 				Field commandMapField = SimplePluginManager.class.getDeclaredField("commandMap");
 				commandMapField.setAccessible(true);
 				CommandMap map = (CommandMap) commandMapField.get(Bukkit.getServer().getPluginManager());
-				setupHomeCommand(playerCommandExecutor, playerTabCompleter, map);
+				setupHomeCommand(playerCommandExecutor, economyPlayerTabCompleter, map);
 				setupSetHomeCommand(playerCommandExecutor, map);
-				setupDeleteHomeCommand(playerCommandExecutor, playerTabCompleter, map);
+				setupDeleteHomeCommand(playerCommandExecutor, economyPlayerTabCompleter, map);
 			} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-		// TODO einkommentieren		Bukkit.getLogger().warning("[Ultimate_Economy] Error on enable homes feature.");
+		// TODO einkommentieren		
+				//Bukkit.getLogger().warning("[Ultimate_Economy] Error on enable homes feature.");
+				//Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}
@@ -189,7 +191,7 @@ public class UltimateEconomy extends JavaPlugin {
 	}
 
 	private void setupDeleteHomeCommand(PlayerCommandExecutor playerCommandExecutor,
-			PlayerTabCompleter playerTabCompleter, CommandMap map) {
+			EconomyPlayerTabCompleter economyPlayerTabCompleter, CommandMap map) {
 		UltimateEconomyCommand delHome = new UltimateEconomyCommand("delhome", this);
 		delHome.setDescription("Remove a homepoint.");
 		delHome.setPermission("ultimate_economy.home");
@@ -198,10 +200,10 @@ public class UltimateEconomy extends JavaPlugin {
 		delHome.setUsage("/<command> [home]");
 		map.register("ultimate_economy", delHome);
 		delHome.setExecutor(playerCommandExecutor);
-		delHome.setTabCompleter(playerTabCompleter);
+		delHome.setTabCompleter(economyPlayerTabCompleter);
 	}
 
-	private void setupHomeCommand(PlayerCommandExecutor playerCommandExecutor, PlayerTabCompleter playerTabCompleter,
+	private void setupHomeCommand(PlayerCommandExecutor playerCommandExecutor, EconomyPlayerTabCompleter economyPlayerTabCompleter,
 			CommandMap map) {
 		UltimateEconomyCommand home = new UltimateEconomyCommand("home", this);
 		home.setDescription("Teleports you to a homepoint.");
@@ -210,10 +212,10 @@ public class UltimateEconomy extends JavaPlugin {
 		home.setPermissionMessage("You don't have the permission.");
 		map.register("ultimate_economy", home);
 		home.setExecutor(playerCommandExecutor);
-		home.setTabCompleter(playerTabCompleter);
+		home.setTabCompleter(economyPlayerTabCompleter);
 	}
 
-	private PlayerTabCompleter setupTabCompleters() {
+	private EconomyPlayerTabCompleter setupTabCompleters() {
 		getCommand("jobcenter").setTabCompleter(new JobTabCompleter());
 		getCommand("town").setTabCompleter(new TownTabCompleter());
 		getCommand("townworld").setTabCompleter(new TownworldTabCompleter());
@@ -221,9 +223,9 @@ public class UltimateEconomy extends JavaPlugin {
 		getCommand("playershop").setTabCompleter(new PlayershopTabCompleter());
 		getCommand("rentshop").setTabCompleter(new RentshopTabCompleter());
 		getCommand("ue-config").setTabCompleter(new ConfigTabCompleter());
-		PlayerTabCompleter playerTabCompleter = new PlayerTabCompleter();
-		getCommand("bank").setTabCompleter(playerTabCompleter);
-		return playerTabCompleter;
+		EconomyPlayerTabCompleter economyPlayerTabCompleter = new EconomyPlayerTabCompleter();
+		getCommand("bank").setTabCompleter(economyPlayerTabCompleter);
+		return economyPlayerTabCompleter;
 	}
 
 	private PlayerCommandExecutor setupCommandExecutors() {
