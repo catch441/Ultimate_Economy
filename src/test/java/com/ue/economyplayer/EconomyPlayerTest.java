@@ -1,11 +1,15 @@
-package com.ue.player;
+package com.ue.economyplayer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import com.ue.bank.api.BankController;
 import com.ue.economyplayer.api.EconomyPlayer;
 import com.ue.economyplayer.api.EconomyPlayerController;
+import com.ue.economyplayer.impl.EconomyPlayerImpl;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
@@ -71,6 +76,57 @@ public class EconomyPlayerTest {
 		int size2 = JobController.getJobList().size();
 		for (int i = 0; i < size2; i++) {
 			JobController.deleteJob(JobController.getJobList().get(0));
+		}
+		int size3 = BankController.getBankAccounts().size();
+		for (int i = 0; i < size3; i++) {
+			BankController.deleteBankAccount(BankController.getBankAccounts().get(0));
+		}
+	}
+	
+	@Test
+	public void constructorLoadTest() {
+		try {
+			JobController.createJob("myjob");
+			Job job = JobController.getJobList().get(0);
+			EconomyPlayerController.createEconomyPlayer("kthschnll");
+			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			ecoPlayer.addHome("myhome", new Location(world, 1, 2, 3), false);
+			ecoPlayer.joinJob(job, false);
+			EconomyPlayerController.getAllEconomyPlayers().clear();
+			EconomyPlayer result = new EconomyPlayerImpl("kthschnll", false);
+			assertEquals("kthschnll", result.getName());
+			assertTrue(result.isScoreBoardDisabled());
+			assertEquals(ecoPlayer.getBankAccount(), result.getBankAccount());
+			assertTrue(result.getHomeList().containsKey("myhome"));
+			assertEquals("1.0",String.valueOf(result.getHomeList().get("myhome").getX()));
+			assertEquals("2.0",String.valueOf(result.getHomeList().get("myhome").getY()));
+			assertEquals("3.0",String.valueOf(result.getHomeList().get("myhome").getZ()));
+			assertEquals(1, result.getHomeList().size());
+			assertEquals(1, result.getJobList().size());
+			assertEquals(job, result.getJobList().get(0));
+		} catch (PlayerException | GeneralEconomyException | JobSystemException e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void constructorLoadTestWithInvalidBankAndJob() {
+		try {
+			EconomyPlayerController.createEconomyPlayer("kthschnll");
+			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
+			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
+			List<String> list = new ArrayList<>();
+			list.add("myjob");
+			config.set("kthschnll.Jobs", list);
+			config.set("kthschnll.Iban", "myiban123");
+			config.save(saveFile);
+			EconomyPlayerController.getAllEconomyPlayers().clear();
+			BankController.deleteBankAccount(BankController.getBankAccounts().get(0));
+			EconomyPlayer result = new EconomyPlayerImpl("kthschnll", false);
+			assertEquals(0, result.getJobList().size());
+			assertNull(result.getBankAccount());
+		} catch (PlayerException | IOException e) {
+			fail();
 		}
 	}
 
@@ -125,7 +181,7 @@ public class EconomyPlayerTest {
 			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertEquals(1, config.getStringList("catch441.Home.Homelist").size());
-			//assertEquals("myhome", config.getStringList("catch441.Home.Homelist").get(0));
+			assertEquals("myhome", config.getStringList("catch441.Home.Homelist").get(0));
 			assertEquals("myhome", config.getString("catch441.Home.myhome.Name"));
 			assertEquals("World", config.getString("catch441.Home.myhome.World"));
 			assertEquals("1.0", config.getString("catch441.Home.myhome.X"));

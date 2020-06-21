@@ -311,7 +311,10 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	private void updateScoreBoard() {
-		int score = (int) getBankAccount().getAmount();
+		int score = 0;
+		if(getBankAccount() != null) {
+			score = (int) getBankAccount().getAmount();
+		}
 		if (isOnline()) {
 			setScoreboard(score);
 		}
