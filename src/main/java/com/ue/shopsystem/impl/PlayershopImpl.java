@@ -13,13 +13,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
+import com.ue.economyplayer.api.EconomyPlayer;
+import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.player.api.EconomyPlayer;
-import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.api.Playershop;
 import com.ue.townsystem.townworld.api.TownworldController;
 import com.ue.ultimate_economy.UltimateEconomy;

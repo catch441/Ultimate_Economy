@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.ue.config.api.ConfigController;
-import com.ue.player.api.EconomyPlayerController;
+import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;

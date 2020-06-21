@@ -1,4 +1,4 @@
-package com.ue.player.api;
+package com.ue.economyplayer.api;
 
 import java.util.List;
 import java.util.Map;

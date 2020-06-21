@@ -3,13 +3,13 @@ package com.ue.townsystem.town.commands;
 import org.bukkit.entity.Player;
 
 import com.ue.config.api.ConfigController;
+import com.ue.economyplayer.api.EconomyPlayer;
+import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
-import com.ue.player.api.EconomyPlayer;
-import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.town.api.Plot;
 import com.ue.townsystem.town.api.Town;
 import com.ue.townsystem.town.api.TownController;

@@ -6,13 +6,13 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 
+import com.ue.economyplayer.api.EconomyPlayer;
+import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.impl.JobImpl;
-import com.ue.player.api.EconomyPlayer;
-import com.ue.player.api.EconomyPlayerController;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobController {

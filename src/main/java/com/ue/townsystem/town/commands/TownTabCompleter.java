@@ -8,8 +8,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
+import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.exceptions.PlayerException;
-import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.town.api.TownController;
 
 public class TownTabCompleter implements TabCompleter {

@@ -3,13 +3,13 @@ package com.ue.shopsystem.commands.playershop;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
 
+import com.ue.economyplayer.api.EconomyPlayer;
+import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
-import com.ue.player.api.EconomyPlayer;
-import com.ue.player.api.EconomyPlayerController;
 import com.ue.shopsystem.api.PlayershopController;
 
 public enum PlayershopCommandEnum {

@@ -1,4 +1,4 @@
-package com.ue.player.commands;
+package com.ue.economyplayer.commands;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +7,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
+import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.exceptions.PlayerException;
-import com.ue.player.api.EconomyPlayerController;
 
 public class PlayerTabCompleter implements TabCompleter {
 

@@ -7,9 +7,9 @@ import org.bukkit.OfflinePlayer;
 import com.ue.bank.api.BankAccount;
 import com.ue.bank.api.BankController;
 import com.ue.config.api.ConfigController;
+import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
-import com.ue.player.api.EconomyPlayerController;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import net.milkbowl.vault.economy.Economy;

@@ -5,9 +5,9 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import com.ue.economyplayer.api.EconomyPlayer;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.player.api.EconomyPlayer;
 
 public interface Plot {
 

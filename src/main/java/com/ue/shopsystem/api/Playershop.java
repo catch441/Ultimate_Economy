@@ -3,10 +3,10 @@ package com.ue.shopsystem.api;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
+import com.ue.economyplayer.api.EconomyPlayer;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.player.api.EconomyPlayer;
 
 public interface Playershop extends AbstractShop {
 

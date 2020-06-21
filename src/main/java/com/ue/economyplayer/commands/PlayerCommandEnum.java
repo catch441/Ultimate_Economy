@@ -1,4 +1,4 @@
-package com.ue.player.commands;
+package com.ue.economyplayer.commands;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -9,12 +9,12 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import com.ue.config.api.ConfigController;
+import com.ue.economyplayer.api.EconomyPlayer;
+import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.api.Job;
 import com.ue.language.MessageWrapper;
-import com.ue.player.api.EconomyPlayer;
-import com.ue.player.api.EconomyPlayerController;
 import com.ue.townsystem.townworld.api.TownworldController;
 
 public enum PlayerCommandEnum {
