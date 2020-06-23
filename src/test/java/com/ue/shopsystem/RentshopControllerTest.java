@@ -80,11 +80,7 @@ public class RentshopControllerTest {
 	public void unload() {
 		int size = RentshopController.getRentShops().size();
 		for (int i = 0; i < size; i++) {
-			try {
-				RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
-			} catch (ShopSystemException e) {
-				assertTrue(false);
-			}
+			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
 		}
 	}
 
@@ -235,7 +231,7 @@ public class RentshopControllerTest {
 			assertEquals(0, RentshopController.getRentShops().size());
 			assertEquals(0, RentshopController.getRentShopIdList().size());
 			assertEquals(0, RentshopController.getRentShopUniqueNameList().size());
-		} catch (GeneralEconomyException | ShopSystemException e) {
+		} catch (GeneralEconomyException e) {
 			assertTrue(false);
 		}
 	}

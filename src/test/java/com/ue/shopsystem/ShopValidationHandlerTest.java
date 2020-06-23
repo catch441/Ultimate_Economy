@@ -74,11 +74,7 @@ public class ShopValidationHandlerTest {
 	public void unload() {
 		int size = PlayershopController.getPlayerShops().size();
 		for (int i = 0; i < size; i++) {
-			try {
-				PlayershopController.deletePlayerShop(PlayershopController.getPlayerShops().get(0));
-			} catch (ShopSystemException e) {
-				assertTrue(false);
-			}
+			PlayershopController.deletePlayerShop(PlayershopController.getPlayerShops().get(0));
 		}
 		if (TownworldController.getTownWorldList().size() != 0) {
 			try {

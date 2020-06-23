@@ -142,9 +142,8 @@ public class RentshopController {
 	 * This method should be used to delete a rentshop.
 	 * 
 	 * @param rentshop
-	 * @throws ShopSystemException
 	 */
-	public static void deleteRentShop(Rentshop rentshop) throws ShopSystemException {
+	public static void deleteRentShop(Rentshop rentshop) {
 		getRentShops().remove(rentshop);
 		rentshop.deleteShop();
 		// to make sure that all references are no more available

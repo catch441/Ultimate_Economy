@@ -64,11 +64,7 @@ public class RentshopTabCompleterTest {
 		server.setPlayers(0);
 		int size = RentshopController.getRentShops().size();
 		for (int i = 0; i < size; i++) {
-			try {
-				RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
-			} catch (ShopSystemException e) {
-				fail();
-			}
+			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
 		}
 		MockBukkit.unload();
 	}
