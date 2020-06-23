@@ -43,7 +43,7 @@ public class RentshopController {
 	 */
 	public static List<String> getRentShopIdList() {
 		List<String> list = new ArrayList<>();
-		for (Rentshop shop : rentShopList) {
+		for (Rentshop shop : getRentShops()) {
 			list.add(shop.getShopId());
 		}
 		return list;
@@ -57,7 +57,7 @@ public class RentshopController {
 	 * @throws GeneralEconomyException
 	 */
 	public static Rentshop getRentShopById(String id) throws GeneralEconomyException {
-		for (Rentshop shop : rentShopList) {
+		for (Rentshop shop : getRentShops()) {
 			if (shop.getShopId().equals(id)) {
 				return shop;
 			}
@@ -77,7 +77,7 @@ public class RentshopController {
 	 * @throws GeneralEconomyException
 	 */
 	public static Rentshop getRentShopByUniqueName(String name) throws GeneralEconomyException {
-		for (Rentshop shop : rentShopList) {
+		for (Rentshop shop : getRentShops()) {
 			if (shop.isRentable()) {
 				if (("RentShop#" + shop.getShopId()).equals(name)) {
 					return shop;
@@ -99,7 +99,7 @@ public class RentshopController {
 	 */
 	public static List<String> getRentShopUniqueNameList() {
 		List<String> list = new ArrayList<>();
-		for (Rentshop shop : rentShopList) {
+		for (Rentshop shop : getRentShops()) {
 			if (shop.isRentable()) {
 				list.add("RentShop#" + shop.getShopId());
 			} else {
@@ -132,7 +132,7 @@ public class RentshopController {
 		checkForValidSize(size);
 		checkForPositiveValue(rentalFee);
 		Rentshop shop = new RentshopImpl(spawnLocation, size, generateFreeRentShopId(), rentalFee);
-		rentShopList.add(shop);
+		getRentShops().add(shop);
 		UltimateEconomy.getInstance.getConfig().set("RentShopIds", RentshopController.getRentShopIdList());
 		UltimateEconomy.getInstance.saveConfig();
 		return shop;
@@ -145,7 +145,7 @@ public class RentshopController {
 	 * @throws ShopSystemException
 	 */
 	public static void deleteRentShop(Rentshop rentshop) throws ShopSystemException {
-		rentShopList.remove(rentshop);
+		getRentShops().remove(rentshop);
 		rentshop.deleteShop();
 		// to make sure that all references are no more available
 		rentshop = null;
@@ -172,7 +172,7 @@ public class RentshopController {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
 			if (file.exists()) {
 				try {
-					rentShopList.add(new RentshopImpl(shopId));
+					getRentShops().add(new RentshopImpl(shopId));
 				} catch (TownSystemException | PlayerException | GeneralEconomyException | ShopSystemException e) {
 					Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
 					Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
