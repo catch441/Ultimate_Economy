@@ -29,7 +29,7 @@ public class AdminshopController {
 	 * @throws GeneralEconomyException
 	 */
 	public static Adminshop getAdminShopByName(String name) throws GeneralEconomyException {
-		for (Adminshop shop : adminShopList) {
+		for (Adminshop shop : getAdminshopList()) {
 			if (shop.getName().equals(name)) {
 				return shop;
 			}
@@ -45,7 +45,7 @@ public class AdminshopController {
 	 * @throws GeneralEconomyException
 	 */
 	public static Adminshop getAdminShopById(String id) throws GeneralEconomyException {
-		for (Adminshop shop : adminShopList) {
+		for (Adminshop shop : getAdminshopList()) {
 			if (shop.getShopId().equals(id)) {
 				return shop;
 			}
@@ -60,7 +60,7 @@ public class AdminshopController {
 	 */
 	public static List<String> getAdminshopIdList() {
 		List<String> list = new ArrayList<>();
-		for (Adminshop shop : adminShopList) {
+		for (Adminshop shop : getAdminshopList()) {
 			list.add(shop.getShopId());
 		}
 		return list;
@@ -123,7 +123,7 @@ public class AdminshopController {
 		} else if (size % 9 != 0) {
 			throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
 		} else {
-			adminShopList.add(new AdminshopImpl(name, generateFreeAdminShopId(), spawnLocation, size));
+			getAdminshopList().add(new AdminshopImpl(name, generateFreeAdminShopId(), spawnLocation, size));
 			UltimateEconomy.getInstance.getConfig().set("AdminShopIds", AdminshopController.getAdminshopIdList());
 			UltimateEconomy.getInstance.saveConfig();
 		}
@@ -136,7 +136,7 @@ public class AdminshopController {
 	 * @throws ShopSystemException
 	 */
 	public static void deleteAdminShop(Adminshop adminshop) throws ShopSystemException {
-		adminShopList.remove(adminshop);
+		getAdminshopList().remove(adminshop);
 		adminshop.deleteShop();
 		// to make sure that all references are no more available
 		adminshop = null;
@@ -148,7 +148,7 @@ public class AdminshopController {
 	 * This method despawns all adminshop villager.
 	 */
 	public static void despawnAllVillagers() {
-		for (Adminshop shop : adminShopList) {
+		for (Adminshop shop : getAdminshopList()) {
 			shop.despawnVillager();
 		}
 	}
@@ -181,7 +181,7 @@ public class AdminshopController {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
 			if (file.exists()) {
 				try {
-					adminShopList.add(new AdminshopImpl(null, shopId));
+					getAdminshopList().add(new AdminshopImpl(null, shopId));
 				} catch (TownSystemException e) {
 					Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
 					Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
@@ -198,7 +198,7 @@ public class AdminshopController {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), shopName + ".yml");
 			if (file.exists()) {
 				try {
-					adminShopList.add(new AdminshopImpl(shopName, generateFreeAdminShopId()));
+					getAdminshopList().add(new AdminshopImpl(shopName, generateFreeAdminShopId()));
 				} catch (TownSystemException e) {
 					Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopName);
 					Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
