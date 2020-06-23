@@ -173,6 +173,8 @@ public class AdminshopController {
 		if (UltimateEconomy.getInstance.getConfig().contains("AdminshopIds")) {
 			UltimateEconomy.getInstance.getConfig().set("AdminShopIds",
 					UltimateEconomy.getInstance.getConfig().get("AdminshopIds"));
+			UltimateEconomy.getInstance.getConfig().set("AdminshopIds", null);
+			UltimateEconomy.getInstance.saveConfig();
 		}
 
 		for (String shopId : UltimateEconomy.getInstance.getConfig().getStringList("AdminShopIds")) {
