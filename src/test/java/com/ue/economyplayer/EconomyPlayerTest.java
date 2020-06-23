@@ -746,7 +746,7 @@ public class EconomyPlayerTest {
 			// check savefile
 			File saveFile1 = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
 			YamlConfiguration config1 = YamlConfiguration.loadConfiguration(saveFile1);
-			assertTrue(config1.getBoolean("catch441.bank"));
+			assertTrue(config1.getBoolean("catch441.scoreboardDisabled"));
 			assertEquals(1, player.getScoreboard().getObjectives().size());
 			assertNotNull("0", String.valueOf(player.getScoreboard().getObjective("bank")));
 		} catch (PlayerException e) {
