@@ -150,8 +150,7 @@ public class EconomyPlayerSavefileHandler {
 	 * Saves the scoreboard disabled value.
 	 */
 	public void saveScoreboardDisabled() {
-		// TODO refactor name
-		getConfig().set(getEconomyPlayer().getName() + ".bank", getEconomyPlayer().isScoreBoardDisabled());
+		getConfig().set(getEconomyPlayer().getName() + ".scoreboardDisabled", getEconomyPlayer().isScoreBoardDisabled());
 		save();
 	}
 	
@@ -176,7 +175,8 @@ public class EconomyPlayerSavefileHandler {
 	 * @return boolean
 	 */
 	public boolean loadScoreboardDisabled() {
-		return getConfig().getBoolean(getEconomyPlayer().getName() + ".bank");
+		convertBankToScoreboardBool();
+		return getConfig().getBoolean(getEconomyPlayer().getName() + ".scoreboardDisabled");
 	}
 	
 	/**
@@ -216,10 +216,23 @@ public class EconomyPlayerSavefileHandler {
 	private void convertToIban() {
 		if (getConfig().isSet(getEconomyPlayer().getName() + ".account amount")) {
 			// old loading, convert to new
-			double amount = config.getDouble(getEconomyPlayer().getName() + ".account amount");
+			double amount = getConfig().getDouble(getEconomyPlayer().getName() + ".account amount");
 			BankAccount bankAccount = BankController.createBankAccount(amount);
 			getConfig().set(getEconomyPlayer().getName() + ".account amount", null);
 			getConfig().set(getEconomyPlayer().getName() + ".Iban", bankAccount.getIban());
+			save();
+		}
+	}
+	
+	/**
+	 * @since 1.2.6
+	 * @deprecated can be removed later
+	 */
+	private void convertBankToScoreboardBool() {
+		if(getConfig().contains(getEconomyPlayer().getName() + ".bank")) {
+			boolean isDisabled = getConfig().getBoolean(getEconomyPlayer().getName() + ".bank");
+			getConfig().set(getEconomyPlayer().getName() + ".bank", null);
+			getConfig().set(getEconomyPlayer().getName() + ".scoreboardDisabled", isDisabled);
 			save();
 		}
 	}

@@ -88,7 +88,7 @@ public class EconomyPlayerControllerTest {
 			assertEquals(1, config.getStringList("Player").size());
 			assertEquals("catch441", config.getStringList("Player").get(0));
 			assertEquals(BankController.getBankAccounts().get(0).getIban(), config.getString("catch441.Iban"));
-			assertTrue(config.getBoolean("catch441.bank"));
+			assertTrue(config.getBoolean("catch441.scoreboardDisabled"));
 		} catch (PlayerException e) {
 			assertTrue(false);
 		}
