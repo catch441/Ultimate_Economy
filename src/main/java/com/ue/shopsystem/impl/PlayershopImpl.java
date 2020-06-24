@@ -198,7 +198,9 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
 	private void updateItemInStockpile(int slot) throws GeneralEconomyException, ShopSystemException {
 		ItemStack stack = null;
-		if (getShopInventory().getItem(slot) != null) stack = getShopInventory().getItem(slot).clone();
+		if (getShopInventory().getItem(slot) != null){
+			stack = getShopInventory().getItem(slot).clone();
+		}
 		if (stack != null && stack.getType() != Material.AIR) {
 			int stock = getShopItem(slot).getStock();
 			ItemMeta meta = stack.getItemMeta();

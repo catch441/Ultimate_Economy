@@ -229,6 +229,29 @@ public class JobTabCompleterTest {
 		assertEquals(1, result.size());
 		assertEquals("addMob", result.get(0));
 	}
+	
+	@Test
+	public void jobArgTestBreedableListMatching() {
+		String[] args = { "job", "addBreedable", "!", "bee" };
+		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+		assertEquals(1, result.size());
+		assertEquals("bee", result.get(0)); // "bee" is valid result
+	}
+	
+	public void jobArgTestBreedableListMatching2() {
+		String[] args = { "job", "addBreedable", "!", "arrow" };
+		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+		assertEquals(0, result.size()); // "arrow" is invalid result
+	}
+	
+	public void jobArgTestBreedableListMatching3() {
+		String[] args = { "job", "addBreedable", "!", " " };
+		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+		assertEquals(15, result.size()); // TODO Change to 17 in MC 1.16
+		assertEquals("addBreedable", result.get(0));
+		assertEquals("bee", result.get(1));	// list is alphabetized, bee first, wolf last
+		assertEquals("wolf", result.get(15)); // TODO index will be 17 in MC 1.16
+	}
 
 	@Test
 	public void addJobArgTest() {

@@ -21,13 +21,14 @@ public class JobSystemValidationHandler {
 
 	/*
 	 * EntityTypes that correspond to entities that can be bred by the player.
+	 * Alphabetized.
 	 * 
 	 * TODO put this list definition somewhere that actually makes sense
 	 * */
-	private static final ArrayList<EntityType> breedableTypes = new ArrayList<EntityType>(Arrays.asList(EntityType.BEE, EntityType.CAT, EntityType.CHICKEN,
-			EntityType.COW, EntityType.MUSHROOM_COW, EntityType.HORSE, EntityType.DONKEY, EntityType.SHEEP,
-			EntityType.FOX, EntityType.PIG, EntityType.WOLF, EntityType.OCELOT, EntityType.RABBIT,
-			EntityType.LLAMA, EntityType.TURTLE, EntityType.PANDA));
+	private static final ArrayList<EntityType> breedableTypes = new ArrayList<EntityType>(Arrays.asList(EntityType.BEE,
+			EntityType.CAT, EntityType.CHICKEN, EntityType.COW, EntityType.DONKEY, EntityType.FOX, EntityType.HORSE,
+			EntityType.LLAMA, EntityType.MUSHROOM_COW, EntityType.OCELOT, EntityType.PANDA, EntityType.PIG,
+			EntityType.RABBIT, EntityType.SHEEP, EntityType.TURTLE, EntityType.WOLF));
 	// TODO EntityType.HOGLIN, EntityType.STRIDER needed for 1.16
 	
 	public static ArrayList<EntityType> getBreedableTypes()
