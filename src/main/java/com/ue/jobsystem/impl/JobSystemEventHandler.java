@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -97,7 +96,6 @@ public class JobSystemEventHandler {
 				List<MetadataValue> list = event.getBlock().getMetadata("placedBy");
 				payForBreakJob(ecoPlayer, event.getBlock(), list);
 			} catch (PlayerException e) {
-				Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
 			}
 		}
 	}
@@ -107,14 +105,12 @@ public class JobSystemEventHandler {
 			try {
 				if (crops.contains(block.getType())) {
 					payForCrops(block, ecoPlayer, job);
-				} else if (list.isEmpty() || !list.get(0).asString().equals(ecoPlayer.getName())) {
+				} else if (list.isEmpty()) {
 					double d = job.getBlockPrice(block.getType().toString());
 					ecoPlayer.increasePlayerAmount(d, false);
 				}
 				break;
-			} catch (JobSystemException e) {
-			} catch (GeneralEconomyException e) {
-				Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
+			} catch (JobSystemException | GeneralEconomyException e) {
 			}
 		}
 	}
@@ -142,7 +138,7 @@ public class JobSystemEventHandler {
 					Item caught = (Item) event.getCaught();
 					if (caught != null) {
 						String lootType = getFishingLootType(caught);
-						payHorFisherJob(ecoPlayer, jobList, lootType);
+						payForFisherJob(ecoPlayer, jobList, lootType);
 					}
 				}
 			} catch (ClassCastException | PlayerException e) {
@@ -150,7 +146,7 @@ public class JobSystemEventHandler {
 		}
 	}
 
-	private void payHorFisherJob(EconomyPlayer ecoPlayer, List<Job> jobList, String lootType) {
+	private void payForFisherJob(EconomyPlayer ecoPlayer, List<Job> jobList, String lootType) {
 		for (Job job : jobList) {
 			try {
 				Double price = job.getFisherPrice(lootType);
@@ -183,7 +179,7 @@ public class JobSystemEventHandler {
 			String displayname = event.getCurrentItem().getItemMeta().getDisplayName();
 			if (displayname != null) {
 				if (event.getClick() == ClickType.RIGHT) {
-					if (!"Info".equals(displayname) && !ecoPlayer.getJobList().isEmpty()) {
+					if (!"Info".equals(displayname)) {
 						ecoPlayer.leaveJob(JobController.getJobByName(displayname), true);
 					}
 				} else if (event.getClick() == ClickType.LEFT) {
@@ -192,6 +188,7 @@ public class JobSystemEventHandler {
 			}
 		} catch (JobSystemException | GeneralEconomyException e) {
 		} catch (PlayerException e) {
+			
 			event.getWhoClicked().sendMessage(ChatColor.RED + e.getMessage());
 		}
 	}
