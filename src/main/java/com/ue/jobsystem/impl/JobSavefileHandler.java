@@ -87,7 +87,7 @@ public class JobSavefileHandler {
 	}
 
 	/**
-	 * Loads the block list (map) of a job
+	 * Loads the block list (map) of a job.
 	 * @return block list as Map
 	 */
 	public Map<String, Double> loadBlockList() {
@@ -102,7 +102,7 @@ public class JobSavefileHandler {
 	}
 
 	/**
-	 * Loads the entity list (map) of a job
+	 * Loads the entity list (map) of a job.
 	 * @return entity list as Map
 	 */
 	public Map<String, Double> loadEntityList() {
@@ -117,7 +117,7 @@ public class JobSavefileHandler {
 	}
 
 	/**
-	 * Loads the fisher list (map) of a job
+	 * Loads the fisher list (map) of a job.
 	 * @return fisher list as Map
 	 */
 	public Map<String, Double> loadFisherList() {

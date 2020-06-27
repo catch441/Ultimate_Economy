@@ -16,10 +16,18 @@ public class BankSavefileHandler {
 	private static YamlConfiguration config;
 	private String iban;
 	
+	/**
+	 * Constructor for creating a new bank savefile handler for a given iban.
+	 * @param iban
+	 */
 	public BankSavefileHandler(String iban) {
 		this.iban = iban;
 	}
 	
+	/**
+	 * Creates a new savefile if no one exists and loads an existing file if the
+	 * savefile already exists.
+	 */
 	public static void setupSavefile() {
 		file = new File(UltimateEconomy.getInstance.getDataFolder(), "BankAccounts.yml");
 		if(!file.exists()) {
@@ -87,6 +95,10 @@ public class BankSavefileHandler {
 		return config.getDouble(iban + ".amount");
 	}
 
+	/**
+	 * Saves the money amount.
+	 * @param amount
+	 */
 	public void saveAmount(double amount) {
 		config.set(iban + ".amount", amount);
 		save();

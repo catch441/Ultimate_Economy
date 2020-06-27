@@ -21,6 +21,12 @@ public class EconomyPlayerSavefileHandler {
 	private static YamlConfiguration config;
 	private EconomyPlayer ecoPlayer;
 
+	/**
+	 * Constructor for creating a economy player savefile handler for a given
+	 * economy player.
+	 * 
+	 * @param ecoPlayer
+	 */
 	public EconomyPlayerSavefileHandler(EconomyPlayer ecoPlayer) {
 		this.ecoPlayer = ecoPlayer;
 	}
@@ -87,21 +93,23 @@ public class EconomyPlayerSavefileHandler {
 			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 		}
 	}
-	
+
 	private EconomyPlayer getEconomyPlayer() {
 		return ecoPlayer;
 	}
-	
+
 	/**
 	 * Saves the home list.
 	 */
 	public void saveHomeList() {
-		getConfig().set(getEconomyPlayer().getName() + ".Home.Homelist", new ArrayList<String>(getEconomyPlayer().getHomeList().keySet()));
+		getConfig().set(getEconomyPlayer().getName() + ".Home.Homelist",
+				new ArrayList<String>(getEconomyPlayer().getHomeList().keySet()));
 		save();
 	}
-	
+
 	/**
 	 * Saves a home location. If location is null, then the location gets deleted.
+	 * 
 	 * @param homeName
 	 * @param location
 	 */
@@ -110,22 +118,23 @@ public class EconomyPlayerSavefileHandler {
 			getConfig().set(getEconomyPlayer().getName() + ".Home." + homeName, null);
 		} else {
 			getConfig().set(getEconomyPlayer().getName() + ".Home." + homeName + ".Name", homeName);
-			getConfig().set(getEconomyPlayer().getName() + ".Home." + homeName + ".World", location.getWorld().getName());
+			getConfig().set(getEconomyPlayer().getName() + ".Home." + homeName + ".World",
+					location.getWorld().getName());
 			getConfig().set(getEconomyPlayer().getName() + ".Home." + homeName + ".X", location.getX());
 			getConfig().set(getEconomyPlayer().getName() + ".Home." + homeName + ".Y", location.getY());
 			getConfig().set(getEconomyPlayer().getName() + ".Home." + homeName + ".Z", location.getZ());
 		}
 		save();
 	}
-	
+
 	/**
-	 * Saves the bank imab
+	 * Saves the bank iban.
 	 */
 	public void saveBankIban() {
 		getConfig().set(getEconomyPlayer().getName() + ".Iban", getEconomyPlayer().getBankAccount().getIban());
 		save();
 	}
-	
+
 	/**
 	 * Save the joined job list.
 	 */
@@ -137,7 +146,7 @@ public class EconomyPlayerSavefileHandler {
 		getConfig().set(getEconomyPlayer().getName() + ".Jobs", jobList);
 		save();
 	}
-	
+
 	/**
 	 * Saves the joined town list.
 	 */
@@ -145,42 +154,47 @@ public class EconomyPlayerSavefileHandler {
 		getConfig().set(getEconomyPlayer().getName() + ".joinedTowns", getEconomyPlayer().getJoinedTownList());
 		save();
 	}
-	
+
 	/**
 	 * Saves the scoreboard disabled value.
 	 */
 	public void saveScoreboardDisabled() {
-		getConfig().set(getEconomyPlayer().getName() + ".scoreboardDisabled", getEconomyPlayer().isScoreBoardDisabled());
+		getConfig().set(getEconomyPlayer().getName() + ".scoreboardDisabled",
+				getEconomyPlayer().isScoreBoardDisabled());
 		save();
 	}
-	
+
 	/**
 	 * Loads the joined towns name list.
+	 * 
 	 * @return list of joined towns
 	 */
 	public List<String> loadJoinedTowns() {
 		return getConfig().getStringList(getEconomyPlayer().getName() + ".joinedTowns");
 	}
-	
+
 	/**
 	 * Loads the name list of all joined jobs.
+	 * 
 	 * @return list of joined jobs
 	 */
 	public List<String> loadJobsList() {
 		return getConfig().getStringList(getEconomyPlayer().getName() + ".Jobs");
 	}
-	
+
 	/**
 	 * Load the scoreboard disabled value.
+	 * 
 	 * @return boolean
 	 */
 	public boolean loadScoreboardDisabled() {
 		convertBankToScoreboardBool();
 		return getConfig().getBoolean(getEconomyPlayer().getName() + ".scoreboardDisabled");
 	}
-	
+
 	/**
 	 * Load a home location.
+	 * 
 	 * @param homeName
 	 * @return location
 	 */
@@ -191,28 +205,31 @@ public class EconomyPlayerSavefileHandler {
 				getConfig().getDouble(getEconomyPlayer().getName() + ".Home." + homeName + ".Y"),
 				getConfig().getDouble(getEconomyPlayer().getName() + ".Home." + homeName + ".Z"));
 	}
-	
+
 	/**
 	 * Load all home names.
+	 * 
 	 * @return home name list
 	 */
 	public List<String> loadHomeList() {
 		return getConfig().getStringList(getEconomyPlayer().getName() + ".Home.Homelist");
 	}
-	
+
 	/**
 	 * Loads the bank iban.
+	 * 
 	 * @return iban
 	 */
 	public String loadBankIban() {
 		convertToIban();
 		return getConfig().getString(getEconomyPlayer().getName() + ".Iban");
 	}
-	
+
 	/**
 	 * @since 1.2.5
 	 * @deprecated can be removed later
 	 */
+	@Deprecated
 	private void convertToIban() {
 		if (getConfig().isSet(getEconomyPlayer().getName() + ".account amount")) {
 			// old loading, convert to new
@@ -223,13 +240,14 @@ public class EconomyPlayerSavefileHandler {
 			save();
 		}
 	}
-	
+
 	/**
 	 * @since 1.2.6
 	 * @deprecated can be removed later
 	 */
+	@Deprecated
 	private void convertBankToScoreboardBool() {
-		if(getConfig().contains(getEconomyPlayer().getName() + ".bank")) {
+		if (getConfig().contains(getEconomyPlayer().getName() + ".bank")) {
 			boolean isDisabled = getConfig().getBoolean(getEconomyPlayer().getName() + ".bank");
 			getConfig().set(getEconomyPlayer().getName() + ".bank", null);
 			getConfig().set(getEconomyPlayer().getName() + ".scoreboardDisabled", isDisabled);
