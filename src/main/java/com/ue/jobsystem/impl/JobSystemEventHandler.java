@@ -50,7 +50,7 @@ public class JobSystemEventHandler {
 	 */
 	public void handleSetBlock(BlockPlaceEvent event) {
 		if (event.getPlayer().getGameMode() == GameMode.SURVIVAL
-				&& !(event.getBlock().getBlockData().getMaterial() == Material.SPAWNER)) {
+				&& !(event.getBlock().getType() == Material.SPAWNER)) {
 			event.getBlock().setMetadata("placedBy",
 					new FixedMetadataValue(UltimateEconomy.getInstance, event.getPlayer().getName()));
 		}
