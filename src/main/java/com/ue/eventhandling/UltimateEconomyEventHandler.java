@@ -9,13 +9,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.data.Ageable;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
@@ -46,11 +43,10 @@ import com.ue.economyplayer.api.EconomyPlayer;
 import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.economyplayer.impl.EconomyPlayerSavefileHandler;
 import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.jobsystem.api.Job;
+import com.ue.jobsystem.impl.JobSystemEventHandler;
 import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.impl.Spawner;
 import com.ue.townsystem.town.api.Town;
@@ -67,6 +63,7 @@ public class UltimateEconomyEventHandler implements Listener {
 	private UpdateResult updateResult;
 	private List<String> spawnerlist;
 	private File spawner;
+	private JobSystemEventHandler jobSystemEventHandler;
 
 	/**
 	 * Constructor of ultimate economy event handler.
@@ -82,6 +79,7 @@ public class UltimateEconomyEventHandler implements Listener {
 		updateResult = Updater.checkForUpdate(plugin.getDescription().getVersion());
 		this.spawnerlist = spawnerlist;
 		this.spawner = spawner;
+		jobSystemEventHandler = new JobSystemEventHandler();
 	}
 
 	/**
@@ -164,11 +162,28 @@ public class UltimateEconomyEventHandler implements Listener {
 			if (entity.hasMetadata("ue-id")) {
 				shopId = (String) entity.getMetadata("ue-id").get(0).value();
 			}
-			EconomyVillager type = (EconomyVillager) entity.getMetadata("ue-type").get(0).value();
+			EconomyVillager economyVillager = (EconomyVillager) entity.getMetadata("ue-type").get(0).value();
 			event.setCancelled(true);
+			switch (economyVillager) {
+			case JOBCENTER:
+				jobSystemEventHandler.handleOpenInventory(event);
+				break;
+			case ADMINSHOP:
+				break;
+			case PLAYERSHOP:
+				break;
+			case PLAYERSHOP_RENTABLE:
+				break;
+			case PLOTSALE:
+				break;
+			case TOWNMANAGER:
+				break;
+			default:
+				break;
+			}
 			try {
-				type.performOpenInventory(entity, shopId, event.getPlayer());
-			} catch (TownSystemException | ShopSystemException | JobSystemException | GeneralEconomyException e) {
+				economyVillager.performOpenInventory(entity, shopId, event.getPlayer());
+			} catch (TownSystemException | ShopSystemException | GeneralEconomyException e) {
 			}
 		}
 	}
@@ -211,23 +226,7 @@ public class UltimateEconomyEventHandler implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onEntityDeath(EntityDeathEvent event) {
-		LivingEntity entity = event.getEntity();
-		if (entity.getKiller() instanceof Player) {
-			try {
-				EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(entity.getKiller().getName());
-				if (!ecoPlayer.getJobList().isEmpty() && entity.getKiller().getGameMode() == GameMode.SURVIVAL) {
-					for (Job job : ecoPlayer.getJobList()) {
-						try {
-							double d = job.getKillPrice(entity.getType().toString());
-							ecoPlayer.increasePlayerAmount(d, false);
-							break;
-						} catch (JobSystemException | GeneralEconomyException e) {
-						}
-					}
-				}
-			} catch (PlayerException e) {
-			}
-		}
+		jobSystemEventHandler.handleEntityDeath(event);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -255,9 +254,26 @@ public class UltimateEconomyEventHandler implements Listener {
 				}
 				EconomyVillager economyVillager = (EconomyVillager) entity.getMetadata("ue-type").get(0).value();
 				event.setCancelled(true);
+				switch (economyVillager) {
+				case JOBCENTER:
+					jobSystemEventHandler.handleInventoryClick(event);
+					break;
+				case ADMINSHOP:
+					break;
+				case PLAYERSHOP:
+					break;
+				case PLAYERSHOP_RENTABLE:
+					break;
+				case PLOTSALE:
+					break;
+				case TOWNMANAGER:
+					break;
+				default:
+					break;
+				}
 				try {
 					economyVillager.performHandleInventoryClick(event, shopId);
-				} catch (TownSystemException | JobSystemException | ShopSystemException | IllegalArgumentException
+				} catch (TownSystemException | ShopSystemException | IllegalArgumentException
 						| GeneralEconomyException e) {
 				} catch (PlayerException e) {
 					player.sendMessage(ChatColor.RED + e.getMessage());
@@ -327,44 +343,10 @@ public class UltimateEconomyEventHandler implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void breakBlockEvent(BlockBreakEvent event) {
 		if (!event.isCancelled()) {
-			List<MetadataValue> list = event.getBlock().getMetadata("placedBy");
 			if (event.getBlock().getBlockData().getMaterial() == Material.SPAWNER) {
 				handleBreakSpawner(event);
 			} else {
-				handleBreakBlock(event, list);
-			}
-		}
-	}
-
-	private void handleBreakBlock(BlockBreakEvent event, List<MetadataValue> list) {
-		if (event.getPlayer().getGameMode() == GameMode.SURVIVAL) {
-			try {
-				EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(event.getPlayer().getName());
-				List<Job> jobList = ecoPlayer.getJobList();
-				Material blockMaterial = event.getBlock().getBlockData().getMaterial();
-				for (Job job : jobList) {
-					try {
-						if (blockMaterial == Material.POTATOES || blockMaterial == Material.CARROTS
-								|| blockMaterial == Material.WHEAT || blockMaterial == Material.NETHER_WART_BLOCK
-								|| blockMaterial == Material.BEETROOTS || blockMaterial == Material.COCOA) {
-							Ageable ageable = (Ageable) event.getBlock().getBlockData();
-							if (ageable.getAge() == ageable.getMaximumAge()) {
-								double d = job.getBlockPrice(blockMaterial.toString());
-								ecoPlayer.increasePlayerAmount(d, false);
-							}
-						} else if (list.isEmpty()
-								|| !list.isEmpty() && !list.get(0).asString().contains(event.getPlayer().getName())) {
-							double d = job.getBlockPrice(blockMaterial.toString());
-							ecoPlayer.increasePlayerAmount(d, false);
-						}
-						break;
-					} catch (JobSystemException e) {
-					} catch (GeneralEconomyException e) {
-						Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
-					}
-				}
-			} catch (PlayerException e) {
-				Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
+				jobSystemEventHandler.handleBreakBlock(event);
 			}
 		}
 	}
@@ -470,52 +452,7 @@ public class UltimateEconomyEventHandler implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onFishingEvent(PlayerFishEvent event) {
-		if (event.getState().equals(PlayerFishEvent.State.CAUGHT_FISH)) {
-			try {
-				EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(event.getPlayer().getName());
-				List<Job> jobList = ecoPlayer.getJobList();
-				if (!jobList.isEmpty()) {
-					String lootType = "";
-					Item caught = (Item) event.getCaught();
-					if (caught != null) {
-						lootType = getFishingLootType(caught);
-						for (Job job : jobList) {
-							try {
-								Double price = job.getFisherPrice(lootType);
-								ecoPlayer.increasePlayerAmount(price, false);
-								break;
-							} catch (JobSystemException | GeneralEconomyException e) {
-							}
-						}
-					}
-				}
-			} catch (ClassCastException | PlayerException e) {
-			}
-		}
-	}
-
-	private String getFishingLootType(Item caught) {
-		String lootType;
-		switch (caught.getItemStack().getType().toString()) {
-		case "COD":
-		case "SALMON":
-		case "TROPICAL_FISH":
-		case "PUFFERFISH":
-			lootType = "fish";
-			break;
-		case "BOW":
-		case "ENCHANTED_BOOK":
-		case "FISHING_ROD":
-		case "NAME_TAG":
-		case "NAUTILUS_SHELL":
-		case "SADDLE":
-		case "LILY_PAD":
-			lootType = "treasure";
-			break;
-		default:
-			lootType = "junk";
-		}
-		return lootType;
+		jobSystemEventHandler.handleFishing(event);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
