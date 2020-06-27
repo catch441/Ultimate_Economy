@@ -1,4 +1,4 @@
-package com.ue.townsystem.impl;
+package com.ue.townsystem.commands;
 
 import java.util.ArrayList;
 import java.util.List;

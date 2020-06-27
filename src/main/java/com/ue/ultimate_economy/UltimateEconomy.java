@@ -55,8 +55,8 @@ import com.ue.shopsystem.impl.RentDailyTask;
 import com.ue.townsystem.api.TownworldController;
 import com.ue.townsystem.commands.TownCommandExecutor;
 import com.ue.townsystem.commands.TownTabCompleter;
-import com.ue.townsystem.impl.TownworldCommandExecutor;
-import com.ue.townsystem.impl.TownworldTabCompleter;
+import com.ue.townsystem.commands.TownworldCommandExecutor;
+import com.ue.townsystem.commands.TownworldTabCompleter;
 import com.ue.vault.EconomyUltimateEconomy;
 import com.ue.vault.VaultHook;
 
