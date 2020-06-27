@@ -14,11 +14,13 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
 import com.ue.economyplayer.api.EconomyPlayer;
@@ -29,6 +31,7 @@ import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.JobcenterController;
+import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobSystemEventHandler {
 
@@ -39,6 +42,19 @@ public class JobSystemEventHandler {
 					Material.NAUTILUS_SHELL, Material.SADDLE, Material.LILY_PAD));
 	private final ArrayList<Material> crops = new ArrayList<>(Arrays.asList(Material.POTATOES, Material.CARROTS,
 			Material.WHEAT, Material.NETHER_WART_BLOCK, Material.BEETROOTS, Material.COCOA));
+
+	/**
+	 * Handles the set bloc kevent for the jobsystem.
+	 * 
+	 * @param event
+	 */
+	public void handleSetBlock(BlockPlaceEvent event) {
+		if (event.getPlayer().getGameMode() == GameMode.SURVIVAL
+				&& !(event.getBlock().getBlockData().getMaterial() == Material.SPAWNER)) {
+			event.getBlock().setMetadata("placedBy",
+					new FixedMetadataValue(UltimateEconomy.getInstance, event.getPlayer().getName()));
+		}
+	}
 
 	/**
 	 * Handles the entity death event for the jobsystem.
@@ -155,7 +171,7 @@ public class JobSystemEventHandler {
 			return "junk";
 		}
 	}
-	
+
 	/**
 	 * Handles the jobcenter inventory click.
 	 * 
@@ -165,7 +181,7 @@ public class JobSystemEventHandler {
 		try {
 			EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(event.getWhoClicked().getName());
 			String displayname = event.getCurrentItem().getItemMeta().getDisplayName();
-			if(displayname != null) {
+			if (displayname != null) {
 				if (event.getClick() == ClickType.RIGHT) {
 					if (!"Info".equals(displayname) && !ecoPlayer.getJobList().isEmpty()) {
 						ecoPlayer.leaveJob(JobController.getJobByName(displayname), true);
@@ -175,11 +191,11 @@ public class JobSystemEventHandler {
 				}
 			}
 		} catch (JobSystemException | GeneralEconomyException e) {
-		} catch(PlayerException e) {
+		} catch (PlayerException e) {
 			event.getWhoClicked().sendMessage(ChatColor.RED + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Hnadles the open jobcenter inventory.
 	 * 

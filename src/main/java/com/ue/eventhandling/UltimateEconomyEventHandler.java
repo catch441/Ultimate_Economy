@@ -7,7 +7,6 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -18,7 +17,6 @@ import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -49,9 +47,7 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.jobsystem.impl.JobSystemEventHandler;
 import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.impl.Spawner;
-import com.ue.townsystem.api.Town;
-import com.ue.townsystem.api.Townworld;
-import com.ue.townsystem.api.TownworldController;
+import com.ue.townsystem.impl.TownsystemEventHandler;
 import com.ue.ultimate_economy.UltimateEconomy;
 import com.ue.updater.Updater;
 import com.ue.updater.Updater.UpdateResult;
@@ -64,6 +60,7 @@ public class UltimateEconomyEventHandler implements Listener {
 	private List<String> spawnerlist;
 	private File spawner;
 	private JobSystemEventHandler jobSystemEventHandler;
+	private TownsystemEventHandler townSystemEventHandler;
 
 	/**
 	 * Constructor of ultimate economy event handler.
@@ -89,12 +86,9 @@ public class UltimateEconomyEventHandler implements Listener {
 	 */
 	@EventHandler
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
-		TownworldController.handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
-				event.getTo().getChunk(), event.getPlayer().getName());
+		townSystemEventHandler.handlePlayerTeleport(event);
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Handles player interact event.
 	 * 
@@ -102,49 +96,7 @@ public class UltimateEconomyEventHandler implements Listener {
 	 */
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
-		if (event.getClickedBlock() != null) {
-			Location location = event.getClickedBlock().getLocation();
-			try {
-				Townworld townworld = TownworldController.getTownWorldByName(location.getWorld().getName());
-				EconomyPlayer economyPlayer = EconomyPlayerController
-						.getEconomyPlayerByName(event.getPlayer().getName());
-				if (townworld.isChunkFree(location.getChunk())) {
-					if (!event.getPlayer().hasPermission("ultimate_economy.wilderness")) {
-						event.setCancelled(true);
-						event.getPlayer().sendMessage(MessageWrapper.getErrorString("wilderness"));
-					}
-				} else {
-					Town town = townworld.getTownByChunk(location.getChunk());
-					if (hasNoBuildPermission(event, location, economyPlayer, town)) {
-						event.setCancelled(true);
-						event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
-					}
-				}
-			} catch (TownSystemException | PlayerException e) {
-			}
-		}
-	}
-
-	private boolean hasNoBuildPermission(PlayerInteractEvent event, Location location, EconomyPlayer economyPlayer,
-			Town town) throws TownSystemException {
-		if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")
-				&& !town.hasBuildPermissions(economyPlayer,
-						town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))
-				|| (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) && isDoorOrGate(event)
-						&& ConfigController.isExtendedInteraction())) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private boolean isDoorOrGate(PlayerInteractEvent event) {
-		if (event.getClickedBlock().getType().toString().contains("DOOR")
-				|| event.getClickedBlock().getType().toString().contains("GATE")) {
-			return true;
-		} else {
-			return false;
-		}
+		townSystemEventHandler.handlePlayerInteract(event);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -175,8 +127,10 @@ public class UltimateEconomyEventHandler implements Listener {
 			case PLAYERSHOP_RENTABLE:
 				break;
 			case PLOTSALE:
+				townSystemEventHandler.handleOpenPlotSaleInventory(event);
 				break;
 			case TOWNMANAGER:
+				townSystemEventHandler.handleOpenTownmanagerInventory(event);
 				break;
 			default:
 				break;
@@ -200,25 +154,11 @@ public class UltimateEconomyEventHandler implements Listener {
 		if (event.getDamager() instanceof Player && event.getEntity() instanceof Villager
 				&& event.getEntity().hasMetadata("ue-type")) {
 			Player damager = (Player) event.getDamager();
-			EconomyVillager type = (EconomyVillager) event.getEntity().getMetadata("ue-type").get(0).value();
+			damager.sendMessage(MessageWrapper.getErrorString("villager_hitevent"));
 			event.setCancelled(true);
-			switch (type) {
-			case PLOTSALE:
-			case TOWNMANAGER:
-			case ADMINSHOP:
-			case PLAYERSHOP_RENTABLE:
-			case PLAYERSHOP:
-			case JOBCENTER:
-				damager.sendMessage(MessageWrapper.getErrorString("villager_hitevent"));
-				break;
-			default:
-				break;
-			}
 		}
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Handles entity death event.
 	 * 
@@ -265,8 +205,8 @@ public class UltimateEconomyEventHandler implements Listener {
 				case PLAYERSHOP_RENTABLE:
 					break;
 				case PLOTSALE:
-					break;
 				case TOWNMANAGER:
+					townSystemEventHandler.handleInventoryClick(event);
 					break;
 				default:
 					break;
@@ -295,10 +235,9 @@ public class UltimateEconomyEventHandler implements Listener {
 			if (event.getBlock().getBlockData().getMaterial() == Material.SPAWNER
 					&& event.getItemInHand().getItemMeta().getDisplayName().contains("-")) {
 				handleSetSpawner(event);
-			} else if (!(event.getBlock().getBlockData().getMaterial() == Material.SPAWNER)) {
-				event.getBlock().setMetadata("placedBy", new FixedMetadataValue(plugin, event.getPlayer().getName()));
-			}
+			} 
 		}
+		jobSystemEventHandler.handleSetBlock(event);
 	}
 
 	private void handleSetSpawner(BlockPlaceEvent event) {
@@ -430,8 +369,7 @@ public class UltimateEconomyEventHandler implements Listener {
 			if (ConfigController.isWildernessInteraction()) {
 				economyPlayer.addWildernessPermission();
 			}
-			TownworldController.handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
-					event.getPlayer().getLocation().getChunk(), event.getPlayer().getName());
+			townSystemEventHandler.handlePlayerJoin(event);
 		} catch (PlayerException e) {
 			Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
 		}
@@ -455,8 +393,6 @@ public class UltimateEconomyEventHandler implements Listener {
 		jobSystemEventHandler.handleFishing(event);
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Handles entity transform event.
 	 * 
@@ -469,8 +405,6 @@ public class UltimateEconomyEventHandler implements Listener {
 		}
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Handles player move event.
 	 * 
@@ -478,12 +412,7 @@ public class UltimateEconomyEventHandler implements Listener {
 	 */
 	@EventHandler()
 	public void onPlayerMoveEvent(PlayerMoveEvent event) {
-		// check, if player positions changed the chunk
-		if (event.getFrom().getChunk().getX() != event.getTo().getChunk().getX()
-				|| event.getFrom().getChunk().getZ() != event.getTo().getChunk().getZ()) {
-			TownworldController.handleTownWorldLocationCheck(event.getTo().getWorld().getName(),
-					event.getTo().getChunk(), event.getPlayer().getName());
-		}
+		townSystemEventHandler.handlerPlayerMove(event);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////

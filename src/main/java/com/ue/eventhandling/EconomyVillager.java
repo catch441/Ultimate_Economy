@@ -20,10 +20,6 @@ import com.ue.shopsystem.api.Playershop;
 import com.ue.shopsystem.api.PlayershopController;
 import com.ue.shopsystem.api.Rentshop;
 import com.ue.shopsystem.api.RentshopController;
-import com.ue.townsystem.api.Plot;
-import com.ue.townsystem.api.Town;
-import com.ue.townsystem.api.Townworld;
-import com.ue.townsystem.api.TownworldController;
 
 public enum EconomyVillager {
 
@@ -77,35 +73,26 @@ public enum EconomyVillager {
 	PLOTSALE {
 		@Override
 		void performOpenInventory(Entity entity, String id, Player player) throws TownSystemException {
-			Townworld townworld = TownworldController.getTownWorldByName(entity.getWorld().getName());
-			Town town = townworld.getTownByChunk(entity.getLocation().getChunk());
-			Plot plot = town.getPlotByChunk(
-					entity.getLocation().getChunk().getX() + "/" + entity.getLocation().getChunk().getZ());
-			plot.openSaleVillagerInv(player);
+			// TODO remove
 		}
 
 		@Override
 		void performHandleInventoryClick(InventoryClickEvent event, String id)
 				throws TownSystemException, PlayerException, GeneralEconomyException {
-			TownworldController.getTownWorldByName(event.getWhoClicked().getWorld().getName())
-					.handleTownVillagerInvClick(event);
-
+			// TODO remove
 		}
 	},
 	TOWNMANAGER {
 		@Override
 		void performOpenInventory(Entity entity, String id, Player player)
 				throws TownSystemException, ShopSystemException {
-			Townworld townworld2 = TownworldController.getTownWorldByName(entity.getWorld().getName());
-			Town town2 = townworld2.getTownByChunk(entity.getLocation().getChunk());
-			town2.openTownManagerVillagerInv(player);
+			// TODO remove
 		}
 
 		@Override
 		void performHandleInventoryClick(InventoryClickEvent event, String id)
 				throws TownSystemException, PlayerException, GeneralEconomyException {
-			TownworldController.getTownWorldByName(event.getWhoClicked().getWorld().getName())
-					.handleTownVillagerInvClick(event);
+			// TODO remove
 		}
 	},
 	JOBCENTER {

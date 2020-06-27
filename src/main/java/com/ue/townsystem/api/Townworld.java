@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 
 import org.bukkit.Chunk;
-import org.bukkit.event.inventory.InventoryClickEvent;
 
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
@@ -131,18 +130,6 @@ public interface Townworld {
      * @return boolean
      */
     public boolean isChunkFree(Chunk chunk);
-
-    /**
-     * Handles clicks in a town villager. Handles payment too.
-     * 
-     * @param event
-     *            InventoryClickEvent
-     * @throws TownSystemException
-     * @throws PlayerException
-     * @throws GeneralEconomyException
-     */
-    public void handleTownVillagerInvClick(InventoryClickEvent event)
-	    throws TownSystemException, PlayerException, GeneralEconomyException;
 
     /**
      * Delets all save files and towns.

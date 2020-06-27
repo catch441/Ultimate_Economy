@@ -6,22 +6,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Villager;
-import org.bukkit.event.inventory.InventoryClickEvent;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.PlayerException;
-import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.api.Plot;
 import com.ue.townsystem.api.Town;
 import com.ue.townsystem.api.TownController;
 import com.ue.townsystem.api.Townworld;
@@ -210,43 +203,5 @@ public class TownworldImpl implements Townworld {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public void handleTownVillagerInvClick(InventoryClickEvent event)
-			throws TownSystemException, PlayerException, GeneralEconomyException {
-		Chunk chunk = ((Villager) event.getClickedInventory().getHolder()).getLocation().getChunk();
-		EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(event.getWhoClicked().getName());
-		Town town = getTownByChunk(chunk);
-		Plot plot = town.getPlotByChunk(chunk.getX() + "/" + chunk.getZ());
-		switch (event.getCurrentItem().getItemMeta().getDisplayName()) {
-		case "Buy":
-			if (!ecoPlayer.hasEnoughtMoney(plot.getSalePrice())) {
-				throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
-			} else {
-				EconomyPlayer receiver = plot.getOwner();
-				ecoPlayer.payToOtherPlayer(receiver, plot.getSalePrice(), false);
-				town.buyPlot(ecoPlayer, chunk.getX(), chunk.getZ());
-				event.getWhoClicked().sendMessage(ChatColor.GOLD + "Congratulation! You bought this plot!");
-			}
-			break;
-		case "Cancel Sale":
-			if (plot.isOwner(ecoPlayer)) {
-				plot.removeFromSale(ecoPlayer);
-				event.getWhoClicked().sendMessage(ChatColor.GOLD + "You removed this plot from sale!");
-			}
-			break;
-		case "Join":
-			town.joinTown(ecoPlayer);
-			event.getWhoClicked().sendMessage(ChatColor.GOLD + "You joined the town " + town.getTownName() + ".");
-			break;
-		case "Leave":
-			town.leaveTown(ecoPlayer);
-			event.getWhoClicked().sendMessage(ChatColor.GOLD + "You left the town " + town.getTownName() + ".");
-			break;
-		default:
-			break;
-		}
-		event.getWhoClicked().closeInventory();
 	}
 }
