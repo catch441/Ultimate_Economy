@@ -77,6 +77,7 @@ public class UltimateEconomyEventHandler implements Listener {
 		this.spawnerlist = spawnerlist;
 		this.spawner = spawner;
 		jobSystemEventHandler = new JobSystemEventHandler();
+		townSystemEventHandler = new TownsystemEventHandler();
 	}
 
 	/**
