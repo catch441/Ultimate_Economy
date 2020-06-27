@@ -1,4 +1,4 @@
-package com.ue.townsystem.town.api;
+package com.ue.townsystem.api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +13,8 @@ import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.town.impl.PlotImpl;
-import com.ue.townsystem.town.impl.TownImpl;
+import com.ue.townsystem.impl.PlotImpl;
+import com.ue.townsystem.impl.TownImpl;
 
 public class PlotController {
 

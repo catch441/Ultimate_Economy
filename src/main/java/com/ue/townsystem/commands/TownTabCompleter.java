@@ -1,4 +1,4 @@
-package com.ue.townsystem.town.commands;
+package com.ue.townsystem.commands;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.bukkit.command.TabCompleter;
 
 import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.exceptions.PlayerException;
-import com.ue.townsystem.town.api.TownController;
+import com.ue.townsystem.api.TownController;
 
 public class TownTabCompleter implements TabCompleter {
 

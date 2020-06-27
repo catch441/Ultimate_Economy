@@ -1,4 +1,4 @@
-package com.ue.townsystem.town.api;
+package com.ue.townsystem.api;
 
 import java.util.ArrayList;
 
@@ -10,7 +10,6 @@ import com.ue.economyplayer.api.EconomyPlayer;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.townworld.api.Townworld;
 
 public interface Town {
 

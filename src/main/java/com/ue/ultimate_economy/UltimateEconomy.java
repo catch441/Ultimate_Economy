@@ -52,11 +52,11 @@ import com.ue.shopsystem.commands.playershop.PlayershopTabCompleter;
 import com.ue.shopsystem.commands.rentshop.RentshopCommandExecutor;
 import com.ue.shopsystem.commands.rentshop.RentshopTabCompleter;
 import com.ue.shopsystem.impl.RentDailyTask;
-import com.ue.townsystem.town.commands.TownCommandExecutor;
-import com.ue.townsystem.town.commands.TownTabCompleter;
-import com.ue.townsystem.townworld.api.TownworldController;
-import com.ue.townsystem.townworld.impl.TownworldCommandExecutor;
-import com.ue.townsystem.townworld.impl.TownworldTabCompleter;
+import com.ue.townsystem.api.TownworldController;
+import com.ue.townsystem.commands.TownCommandExecutor;
+import com.ue.townsystem.commands.TownTabCompleter;
+import com.ue.townsystem.impl.TownworldCommandExecutor;
+import com.ue.townsystem.impl.TownworldTabCompleter;
 import com.ue.vault.EconomyUltimateEconomy;
 import com.ue.vault.VaultHook;
 

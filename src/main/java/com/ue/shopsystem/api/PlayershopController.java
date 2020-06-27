@@ -17,9 +17,9 @@ import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.impl.PlayershopImpl;
-import com.ue.townsystem.town.api.Town;
-import com.ue.townsystem.townworld.api.Townworld;
-import com.ue.townsystem.townworld.api.TownworldController;
+import com.ue.townsystem.api.Town;
+import com.ue.townsystem.api.Townworld;
+import com.ue.townsystem.api.TownworldController;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class PlayershopController {

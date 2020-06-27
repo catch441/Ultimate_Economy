@@ -1,4 +1,4 @@
-package com.ue.townsystem.town.api;
+package com.ue.townsystem.api;
 
 import java.util.List;
 

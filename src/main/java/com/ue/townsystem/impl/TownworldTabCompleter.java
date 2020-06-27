@@ -1,4 +1,4 @@
-package com.ue.townsystem.townworld.impl;
+package com.ue.townsystem.impl;
 
 import java.util.ArrayList;
 import java.util.List;

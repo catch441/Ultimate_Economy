@@ -1,4 +1,4 @@
-package com.ue.townsystem.town.commands;
+package com.ue.townsystem.commands;
 
 import org.bukkit.entity.Player;
 
@@ -10,11 +10,11 @@ import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
-import com.ue.townsystem.town.api.Plot;
-import com.ue.townsystem.town.api.Town;
-import com.ue.townsystem.town.api.TownController;
-import com.ue.townsystem.townworld.api.Townworld;
-import com.ue.townsystem.townworld.api.TownworldController;
+import com.ue.townsystem.api.Plot;
+import com.ue.townsystem.api.Town;
+import com.ue.townsystem.api.TownController;
+import com.ue.townsystem.api.Townworld;
+import com.ue.townsystem.api.TownworldController;
 
 public enum TownCommandEnum {
 

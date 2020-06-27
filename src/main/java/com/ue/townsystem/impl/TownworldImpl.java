@@ -1,4 +1,4 @@
-package com.ue.townsystem.townworld.impl;
+package com.ue.townsystem.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,10 +21,10 @@ import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.town.api.Plot;
-import com.ue.townsystem.town.api.Town;
-import com.ue.townsystem.town.api.TownController;
-import com.ue.townsystem.townworld.api.Townworld;
+import com.ue.townsystem.api.Plot;
+import com.ue.townsystem.api.Town;
+import com.ue.townsystem.api.TownController;
+import com.ue.townsystem.api.Townworld;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class TownworldImpl implements Townworld {

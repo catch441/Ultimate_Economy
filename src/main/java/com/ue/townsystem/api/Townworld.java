@@ -1,4 +1,4 @@
-package com.ue.townsystem.townworld.api;
+package com.ue.townsystem.api;
 
 import java.io.File;
 import java.util.List;
@@ -9,7 +9,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.town.api.Town;
 
 public interface Townworld {
     

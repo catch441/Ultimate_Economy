@@ -1,4 +1,4 @@
-package com.ue.townsystem.townworld.api;
+package com.ue.townsystem.api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +13,7 @@ import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.town.api.Town;
-import com.ue.townsystem.town.api.TownController;
-import com.ue.townsystem.townworld.impl.TownworldImpl;
+import com.ue.townsystem.impl.TownworldImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class TownworldController {

@@ -1,4 +1,4 @@
-package com.ue.townsystem.town.commands;
+package com.ue.townsystem.commands;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

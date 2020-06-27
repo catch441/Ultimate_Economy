@@ -1,4 +1,4 @@
-package com.ue.townsystem.townworld.impl;
+package com.ue.townsystem.impl;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -9,7 +9,7 @@ import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
-import com.ue.townsystem.townworld.api.TownworldController;
+import com.ue.townsystem.api.TownworldController;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class TownworldCommandExecutor implements CommandExecutor {

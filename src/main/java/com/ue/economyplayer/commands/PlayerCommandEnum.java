@@ -15,7 +15,7 @@ import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.api.Job;
 import com.ue.language.MessageWrapper;
-import com.ue.townsystem.townworld.api.TownworldController;
+import com.ue.townsystem.api.TownworldController;
 
 public enum PlayerCommandEnum {
 

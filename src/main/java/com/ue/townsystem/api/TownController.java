@@ -1,4 +1,4 @@
-package com.ue.townsystem.town.api;
+package com.ue.townsystem.api;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,9 +18,7 @@ import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.town.impl.TownImpl;
-import com.ue.townsystem.townworld.api.Townworld;
-import com.ue.townsystem.townworld.api.TownworldController;
+import com.ue.townsystem.impl.TownImpl;
 
 public class TownController {
 
