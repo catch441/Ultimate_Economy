@@ -60,6 +60,10 @@ public class RentshopTabCompleterTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
+		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		for (int i = 0; i < size2; i++) {
+			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
 		int size = RentshopController.getRentShops().size();

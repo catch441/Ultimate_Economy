@@ -44,7 +44,7 @@ public class PlayershopTabCompleterTest {
 		MockBukkit.load(UltimateEconomy.class);
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
-		player = server.addPlayer("kthschnll");
+		player = server.addPlayer("kthschnll1");
 		tabCompleter = new PlayershopTabCompleter();
 		try {
 			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
@@ -194,8 +194,8 @@ public class PlayershopTabCompleterTest {
 		String[] args = { "deleteOther", "" };
 		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
 		assertEquals(2,list.size());
-		assertEquals("myshop1_kthschnll", list.get(0));
-		assertEquals("myshop2_kthschnll", list.get(1));
+		assertEquals("myshop1_kthschnll1", list.get(0));
+		assertEquals("myshop2_kthschnll1", list.get(1));
 	}
 	
 	@Test

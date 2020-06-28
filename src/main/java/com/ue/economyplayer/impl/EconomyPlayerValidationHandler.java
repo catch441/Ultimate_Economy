@@ -26,7 +26,7 @@ public class EconomyPlayerValidationHandler {
 	 * @throws GeneralEconomyException
 	 */
 	public void checkForEnoughMoney(double amount, boolean personal) throws PlayerException, GeneralEconomyException {
-		if (!ecoPlayer.getBankAccount().hasAmount(amount)) {
+		if (!getEconomyPlayer().getBankAccount().hasAmount(amount)) {
 			if (personal) {
 				throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
 			} else {
@@ -41,7 +41,7 @@ public class EconomyPlayerValidationHandler {
 	 * @throws PlayerException
 	 */
 	public void checkForExistingHome(String homeName) throws PlayerException {
-		if (!ecoPlayer.getHomeList().containsKey(homeName)) {
+		if (!getEconomyPlayer().getHomeList().containsKey(homeName)) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.HOME_DOES_NOT_EXIST);
 		}
 	}
@@ -51,7 +51,7 @@ public class EconomyPlayerValidationHandler {
 	 * @throws PlayerException
 	 */
 	public void checkForNotReachedMaxHomes() throws PlayerException {
-		if (ecoPlayer.reachedMaxHomes()) {
+		if (getEconomyPlayer().reachedMaxHomes()) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
 		}
 	}
@@ -62,7 +62,7 @@ public class EconomyPlayerValidationHandler {
 	 * @throws PlayerException
 	 */
 	public void checkForNotExistingHome(String homeName) throws PlayerException {
-		if (ecoPlayer.getHomeList().containsKey(homeName)) {
+		if (getEconomyPlayer().getHomeList().containsKey(homeName)) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.HOME_ALREADY_EXIST);
 		}
 	}
@@ -73,7 +73,7 @@ public class EconomyPlayerValidationHandler {
 	 * @throws PlayerException
 	 */
 	public void checkForJoinedTown(String townName) throws PlayerException {
-		if (!ecoPlayer.getJoinedTownList().contains(townName)) {
+		if (!getEconomyPlayer().getJoinedTownList().contains(townName)) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.TOWN_NOT_JOINED);
 		}
 	}
@@ -83,7 +83,7 @@ public class EconomyPlayerValidationHandler {
 	 * @throws PlayerException
 	 */
 	public void checkForNotReachedMaxJoinedTowns() throws PlayerException {
-		if (ecoPlayer.reachedMaxJoinedTowns()) {
+		if (getEconomyPlayer().reachedMaxJoinedTowns()) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
 		}
 	}
@@ -94,7 +94,7 @@ public class EconomyPlayerValidationHandler {
 	 * @throws PlayerException
 	 */
 	public void checkForTownNotJoined(String townName) throws PlayerException {
-		if (ecoPlayer.getJoinedTownList().contains(townName)) {
+		if (getEconomyPlayer().getJoinedTownList().contains(townName)) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.TOWN_ALREADY_JOINED);
 		}
 	}
@@ -105,7 +105,7 @@ public class EconomyPlayerValidationHandler {
 	 * @throws PlayerException
 	 */
 	public void checkForJobJoined(Job job) throws PlayerException {
-		if (!ecoPlayer.getJobList().contains(job)) {
+		if (!getEconomyPlayer().getJobList().contains(job)) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.JOB_NOT_JOINED);
 		}
 	}
@@ -115,7 +115,7 @@ public class EconomyPlayerValidationHandler {
 	 * @throws PlayerException
 	 */
 	public void checkForNotReachedMaxJoinedJobs() throws PlayerException {
-		if (ecoPlayer.reachedMaxJoinedJobs()) {
+		if (getEconomyPlayer().reachedMaxJoinedJobs()) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
 		}
 	}
@@ -126,8 +126,12 @@ public class EconomyPlayerValidationHandler {
 	 * @throws PlayerException
 	 */
 	public void checkForJobNotJoined(Job job) throws PlayerException {
-		if (ecoPlayer.getJobList().contains(job)) {
+		if (getEconomyPlayer().getJobList().contains(job)) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.JOB_ALREADY_JOINED);
 		}
+	}
+	
+	private EconomyPlayer getEconomyPlayer() {
+		return ecoPlayer;
 	}
 }
