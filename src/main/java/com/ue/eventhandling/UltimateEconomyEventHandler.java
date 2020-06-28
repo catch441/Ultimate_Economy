@@ -36,10 +36,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
-import com.ue.config.api.ConfigController;
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.economyplayer.impl.EconomyPlayerSavefileHandler;
+import com.ue.economyplayer.impl.EconomyPlayerEventHandler;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
@@ -55,12 +52,12 @@ import com.ue.updater.Updater.UpdateResult;
 public class UltimateEconomyEventHandler implements Listener {
 
 	private UltimateEconomy plugin;
-	private List<String> playerlist;
 	private UpdateResult updateResult;
 	private List<String> spawnerlist;
 	private File spawner;
 	private JobSystemEventHandler jobSystemEventHandler;
 	private TownsystemEventHandler townSystemEventHandler;
+	private EconomyPlayerEventHandler ecoPlayerEventHandler;
 
 	/**
 	 * Constructor of ultimate economy event handler.
@@ -71,13 +68,13 @@ public class UltimateEconomyEventHandler implements Listener {
 	 */
 	public UltimateEconomyEventHandler(UltimateEconomy plugin, List<String> spawnerlist, File spawner) {
 		this.plugin = plugin;
-		playerlist = EconomyPlayerSavefileHandler.loadPlayerList();
 		// version check
 		updateResult = Updater.checkForUpdate(plugin.getDescription().getVersion());
 		this.spawnerlist = spawnerlist;
 		this.spawner = spawner;
 		jobSystemEventHandler = new JobSystemEventHandler();
 		townSystemEventHandler = new TownsystemEventHandler();
+		ecoPlayerEventHandler = new EconomyPlayerEventHandler();
 	}
 
 	/**
@@ -359,17 +356,8 @@ public class UltimateEconomyEventHandler implements Listener {
 	 */
 	@EventHandler
 	public void onJoinEvent(PlayerJoinEvent event) {
-		String playername = event.getPlayer().getName();
 		try {
-			if (!playerlist.contains(playername)) {
-				playerlist.add(playername);
-				EconomyPlayerController.createEconomyPlayer(playername);
-			}
-			EconomyPlayer economyPlayer = EconomyPlayerController.getEconomyPlayerByName(playername);
-			economyPlayer.setPlayer(event.getPlayer());
-			if (ConfigController.isWildernessInteraction()) {
-				economyPlayer.addWildernessPermission();
-			}
+			ecoPlayerEventHandler.handleJoin(event);
 			townSystemEventHandler.handlePlayerJoin(event);
 		} catch (PlayerException e) {
 			Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
@@ -382,8 +370,6 @@ public class UltimateEconomyEventHandler implements Listener {
 		}
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Handles player fish event.
 	 * 
