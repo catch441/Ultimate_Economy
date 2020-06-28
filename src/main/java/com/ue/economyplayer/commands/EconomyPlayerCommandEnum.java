@@ -2,8 +2,10 @@ package com.ue.economyplayer.commands;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -41,7 +43,10 @@ public enum EconomyPlayerCommandEnum {
 	MONEY {
 		@Override
 		boolean perform(String[] args, Player player, EconomyPlayer ecoPlayer) throws PlayerException {
-			DecimalFormat dFormat = new DecimalFormat("#.##");
+			DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.ROOT);
+			otherSymbols.setDecimalSeparator('.');
+			otherSymbols.setGroupingSeparator(','); 
+			DecimalFormat dFormat = new DecimalFormat("#.##",otherSymbols);
 			dFormat.setRoundingMode(RoundingMode.DOWN);
 			if (args.length == 0) {
 				player.sendMessage(

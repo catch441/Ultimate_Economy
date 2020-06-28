@@ -125,7 +125,7 @@ public class EconomyPlayerCommandExecutorTest {
 	public void moneyCommandTestZeroArgs() {
 		String[] args = {};
 		boolean result = executor.onCommand(player, null, "money", args);
-		assertEquals("§6Money: §a21,12§6 §a$§6", player.nextMessage());
+		assertEquals("§6Money: §a21.12§6 §a$§6", player.nextMessage());
 		assertTrue(result);
 	}
 
@@ -152,7 +152,7 @@ public class EconomyPlayerCommandExecutorTest {
 		player.addAttachment(UltimateEconomy.getInstance).setPermission("ultimate_economy.adminpay", true);
 		String[] args = { "catch441" };
 		boolean result = executor.onCommand(player, null, "money", args);
-		assertEquals("§6Money: §a21,12§6 §a$§6", player.nextMessage());
+		assertEquals("§6Money: §a21.12§6 §a$§6", player.nextMessage());
 		assertTrue(result);
 	}
 
