@@ -270,7 +270,9 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	public void setPlayer(Player player) {
 		getBossBar().removeAll();
 		this.player = player;
-		getBossBar().addPlayer(player);
+		if(isOnline()) {
+			getBossBar().addPlayer(player);
+		}
 	}
 
 	@Override
