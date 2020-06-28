@@ -11,17 +11,17 @@ import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.language.MessageWrapper;
 
-public class PlayerCommandExecutor implements CommandExecutor {
+public class EconomyPlayerCommandExecutor implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		try {
 			if ("givemoney".equals(label)) {
-				return PlayerCommandEnum.GIVEMONEY.perform(args, null, null);
+				return EconomyPlayerCommandEnum.GIVEMONEY.perform(args, null, null);
 			} else if (sender instanceof Player) {
 				Player player = (Player) sender;
 				EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(player.getName());
-				PlayerCommandEnum commandEnum = PlayerCommandEnum.getEnum(label);
+				EconomyPlayerCommandEnum commandEnum = EconomyPlayerCommandEnum.getEnum(label);
 				if (commandEnum != null) {
 					return commandEnum.perform(args, player, ecoPlayer);
 				}
