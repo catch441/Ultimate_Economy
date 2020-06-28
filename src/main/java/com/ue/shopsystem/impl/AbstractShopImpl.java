@@ -1,6 +1,5 @@
 package com.ue.shopsystem.impl;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -95,13 +94,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 */
 	public AbstractShopImpl(String name, String shopId, Location spawnLocation, int size) {
 		validationHandler = new ShopValidationHandler();
-		try {
-			savefileHandler = new ShopSavefileHandler(shopId, true);
-			setupNewShop(name, shopId, spawnLocation, size);
-		} catch (IOException e) {
-			Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create savefile");
-			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-		}
+		savefileHandler = new ShopSavefileHandler(shopId);
+		setupNewShop(name, shopId, spawnLocation, size);
 	}
 
 	/**
@@ -990,8 +984,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 */
 
 	private void loadExistingShop(String shopId) throws TownSystemException {
-		try {
-			savefileHandler = new ShopSavefileHandler(shopId, false);
+			savefileHandler = new ShopSavefileHandler(shopId);
 			setShopId(shopId);
 			setName(getSavefileHandler().loadShopName());
 			setSize(getSavefileHandler().loadShopSize());
@@ -1002,10 +995,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 			setupSlotEditor();
 			setupEditor(1);
 			loadShopItems();
-		} catch (IOException e) {
-			Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create savefile");
-			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-		}
 	}
 
 	private void loadShopItems() {
@@ -1038,14 +1027,11 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	@Deprecated
 	private void loadExistingShopOld(String name, String shopId) throws TownSystemException {
 		try {
-			savefileHandler = new ShopSavefileHandler(name, false);
+			savefileHandler = new ShopSavefileHandler(name);
 			getSavefileHandler().changeSavefileName(UltimateEconomy.getInstance.getDataFolder(), shopId);
 			loadExistingShop(shopId);
 		} catch (ShopSystemException e) {
 			Bukkit.getLogger().warning("[Ultimate_Economy] Failed to change savefile name to new save system");
-			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-		} catch (IOException e) {
-			Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create savefile");
 			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 		}
 	}
