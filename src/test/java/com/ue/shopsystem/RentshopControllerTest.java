@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.Collection;
@@ -16,6 +17,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.junit.jupiter.api.AfterAll;
@@ -49,6 +51,7 @@ public class RentshopControllerTest {
 			+ "9a2d891c6ae9f6baa040d736ab84d48344bb6b70d7f1a280dd12cbac4d777";
 	private static ServerMock server;
 	private static WorldMock world;
+	private static Player player;
 
 	@BeforeAll
 	public static void initPlugin() {
@@ -56,7 +59,7 @@ public class RentshopControllerTest {
 		MockBukkit.load(UltimateEconomy.class);
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
-		server.addPlayer("catch441");
+		player = server.addPlayer("catch441");
 	}
 
 	/**
@@ -94,7 +97,7 @@ public class RentshopControllerTest {
 			assertEquals("R0", id1);
 			assertEquals("R1", id2);
 		} catch (GeneralEconomyException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -107,7 +110,7 @@ public class RentshopControllerTest {
 			assertEquals(1, list.size());
 			assertEquals("R0", list.get(0));
 		} catch (GeneralEconomyException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -121,7 +124,7 @@ public class RentshopControllerTest {
 			assertEquals(shop, response);
 			assertEquals("R1", response.getShopId());
 		} catch (GeneralEconomyException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -129,7 +132,7 @@ public class RentshopControllerTest {
 	public void getRentShopByIdTestWithNoShop() {
 		try {
 			RentshopController.getRentShopById("R0");
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§c§4R0§c does not exist!", e.getMessage());
@@ -149,7 +152,7 @@ public class RentshopControllerTest {
 			assertEquals("RentShop#R0", list.get(0));
 			assertEquals("Shop#R1_catch441", list.get(1));
 		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -173,7 +176,7 @@ public class RentshopControllerTest {
 			assertEquals("R2", response2.getShopId());
 			assertEquals("Shop#R2", response2.getName());
 		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -181,7 +184,7 @@ public class RentshopControllerTest {
 	public void getRentShopByUniqueNameTestWithoutShop() {
 		try {
 			RentshopController.getRentShopByUniqueName("RentShop#R0");
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§c§4RentShop#R0§c does not exist!", e.getMessage());
@@ -200,7 +203,7 @@ public class RentshopControllerTest {
 			assertEquals(shop, shops.get(0));
 			assertEquals(shop2, shops.get(1));
 		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -215,7 +218,7 @@ public class RentshopControllerTest {
 			assertEquals(1, entities1.size());
 			assertEquals(0, entities2.size());
 		} catch (GeneralEconomyException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -232,7 +235,7 @@ public class RentshopControllerTest {
 			assertEquals(0, RentshopController.getRentShopIdList().size());
 			assertEquals(0, RentshopController.getRentShopUniqueNameList().size());
 		} catch (GeneralEconomyException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -241,7 +244,7 @@ public class RentshopControllerTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			RentshopController.createRentShop(location, -13, 10);
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4-13§c is invalid!", e.getMessage());
@@ -253,7 +256,7 @@ public class RentshopControllerTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			RentshopController.createRentShop(location, 9, -5);
-			assertTrue(false);
+			fail();
 		} catch (GeneralEconomyException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4-5.0§c is invalid!", e.getMessage());
@@ -275,7 +278,9 @@ public class RentshopControllerTest {
 			assertTrue(shop.isRentable());
 			assertEquals(0L, shop.getRentUntil());
 			// check rentshop gui
-			ChestInventoryMock gui = (ChestInventoryMock) shop.getRentShopGuiInventory();
+			shop.openRentGUI(player);
+			ChestInventoryMock gui = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals("RentShop#R0", gui.getName());
 			assertEquals(9, gui.getSize());
@@ -315,8 +320,8 @@ public class RentshopControllerTest {
 			assertEquals(1, UltimateEconomy.getInstance.getConfig().getStringList("RentShopIds").size());
 			assertEquals("R0", UltimateEconomy.getInstance.getConfig().getStringList("RentShopIds").get(0));
 			assertNull(config.getString("RentUntil"));
-		} catch (GeneralEconomyException e) {
-			assertTrue(false);
+		} catch (GeneralEconomyException | ShopSystemException e) {
+			fail();
 		}
 	}
 
@@ -342,7 +347,7 @@ public class RentshopControllerTest {
 			assertTrue(loaded.isRentable());
 			assertEquals(shop.getRentUntil(), shop.getRentUntil());
 		} catch (GeneralEconomyException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -383,7 +388,7 @@ public class RentshopControllerTest {
 			// inventory
 			assertEquals(loaded.getShopInventory().getItem(0).getType(), shop.getShopInventory().getItem(0).getType());
 		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 	
@@ -400,7 +405,7 @@ public class RentshopControllerTest {
 			RentshopController.loadAllRentShops();
 			assertEquals(0, RentshopController.getRentShops().size());
 		} catch (GeneralEconomyException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 	
@@ -421,7 +426,7 @@ public class RentshopControllerTest {
 			EconomyPlayerController.getAllEconomyPlayers().add(ecoPlayer);
 			RentshopController.getRentShops().add(shop);
 		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 }

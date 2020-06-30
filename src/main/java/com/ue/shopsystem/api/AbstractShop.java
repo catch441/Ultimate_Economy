@@ -7,7 +7,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Villager.Profession;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -196,13 +195,6 @@ public abstract interface AbstractShop {
     public void openEditor(Player player);
 
     /**
-     * This method handles the SlotEditor for the InventoryClickEvent.
-     * 
-     * @param event
-     */
-    public void handleSlotEditor(InventoryClickEvent event);
-
-    /**
      * Returns the size of the shop.
      * 
      * @return size
@@ -215,17 +207,4 @@ public abstract interface AbstractShop {
      * @return shop villager
      */
     public Villager getShopVillager();
-
-    /**
-     * Returns the actual editor inventory.
-     * @return editor inventory
-     */
-    public Inventory getEditorInventory();
-
-    /**
-     * Returns the slot editor inventory.
-     * 
-     * @return slot editor inventory
-     */
-    public Inventory getSlotEditorInventory();
 }

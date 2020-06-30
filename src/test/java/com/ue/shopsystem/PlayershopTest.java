@@ -326,7 +326,9 @@ public class PlayershopTest {
 			assertEquals(ChatColor.RED + "Only for Shopowner", shopInv.getItem(7).getItemMeta().getLore().get(0));
 			assertEquals(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile",
 					shopInv.getItem(7).getItemMeta().getLore().get(1));
-			Inventory editor = shop.getEditorInventory();
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			assertEquals(9, editor.getSize());
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(0).getType());
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(1).getType());
@@ -517,8 +519,14 @@ public class PlayershopTest {
 			shop.changeShopName("newshop");
 			assertEquals("newshop", shop.getName());
 			assertEquals("newshop", ((ChestInventoryMock) shop.getShopInventory()).getName());
-			assertEquals("newshop-Editor", ((ChestInventoryMock) shop.getEditorInventory()).getName());
-			assertEquals("newshop-SlotEditor", ((ChestInventoryMock) shop.getSlotEditorInventory()).getName());
+			shop.openEditor(player);
+			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			player.closeInventory();
+			assertEquals("newshop-Editor", editor.getName());
+			shop.openSlotEditor(player, 0);
+			ChestInventoryMock slotEditor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			assertEquals("newshop-SlotEditor", slotEditor.getName());
+			player.closeInventory();
 			// check savefile
 			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "P0.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);

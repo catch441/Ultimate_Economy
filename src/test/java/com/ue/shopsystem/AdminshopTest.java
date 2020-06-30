@@ -126,7 +126,9 @@ public class AdminshopTest {
 			assertEquals("§616 buy for §a20.0 $", shopItemStack.getItemMeta().getLore().get(0));
 			assertEquals("§616 sell for §a10.0 $", shopItemStack.getItemMeta().getLore().get(1));
 			// check editor inventory
-			Inventory editor = shop.getEditorInventory();
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 			assertEquals(SLOTFILLED,
@@ -179,7 +181,9 @@ public class AdminshopTest {
 			assertEquals("§616 buy for §a20.0 $", shopItemStack.getItemMeta().getLore().get(1));
 			assertEquals("§616 sell for §a10.0 $", shopItemStack.getItemMeta().getLore().get(2));
 			// check editor inventory
-			Inventory editor = shop.getEditorInventory();
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 			assertEquals(SLOTFILLED,
@@ -223,7 +227,9 @@ public class AdminshopTest {
 			assertEquals(1, shopItemStack.getItemMeta().getLore().size());
 			assertEquals("§616 buy for §a20.0 $", shopItemStack.getItemMeta().getLore().get(0));
 			// check editor inventory
-			Inventory editor = shop.getEditorInventory();
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 			assertEquals(SLOTFILLED,
@@ -267,7 +273,9 @@ public class AdminshopTest {
 			assertEquals(1, shopItemStack.getItemMeta().getLore().size());
 			assertEquals("§616 sell for §a10.0 $", shopItemStack.getItemMeta().getLore().get(0));
 			// check editor inventory
-			Inventory editor = shop.getEditorInventory();
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 			assertEquals(SLOTFILLED,
@@ -316,7 +324,9 @@ public class AdminshopTest {
 			assertEquals(1, shopItemStack.getItemMeta().getLore().size());
 			assertEquals("§616 sell for §a10.0 $", shopItemStack.getItemMeta().getLore().get(0));
 			// check editor inventory
-			Inventory editor = shop.getEditorInventory();
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 			assertEquals(SLOTFILLED,
@@ -368,7 +378,9 @@ public class AdminshopTest {
 			assertEquals(1, shopItemStack.getItemMeta().getLore().size());
 			assertEquals("§616 sell for §a10.0 $", shopItemStack.getItemMeta().getLore().get(0));
 			// check editor inventory
-			Inventory editor = shop.getEditorInventory();
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 			assertEquals(SLOTFILLED,
@@ -492,7 +504,9 @@ public class AdminshopTest {
 			assertEquals("§68 buy for §a25.0 $", shopItemStack.getItemMeta().getLore().get(0));
 			assertEquals("§68 sell for §a15.0 $", shopItemStack.getItemMeta().getLore().get(1));
 			// check editor inventory
-			Inventory editor = shop.getEditorInventory();
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 			assertEquals(SLOTFILLED,
@@ -539,7 +553,9 @@ public class AdminshopTest {
 			assertEquals("§68 buy for §a20.0 $", shopItemStack.getItemMeta().getLore().get(0));
 			assertEquals("§68 sell for §a10.0 $", shopItemStack.getItemMeta().getLore().get(1));
 			// check editor inventory
-			Inventory editor = shop.getEditorInventory();
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 			assertEquals(SLOTFILLED,
@@ -586,7 +602,9 @@ public class AdminshopTest {
 			assertEquals("§616 buy for §a20.0 $", shopItemStack.getItemMeta().getLore().get(0));
 			assertEquals("§616 sell for §a15.0 $", shopItemStack.getItemMeta().getLore().get(1));
 			// check editor inventory
-			Inventory editor = shop.getEditorInventory();
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 			assertEquals(SLOTFILLED,
@@ -633,7 +651,9 @@ public class AdminshopTest {
 			assertEquals("§616 buy for §a25.0 $", shopItemStack.getItemMeta().getLore().get(0));
 			assertEquals("§616 sell for §a10.0 $", shopItemStack.getItemMeta().getLore().get(1));
 			// check editor inventory
-			Inventory editor = shop.getEditorInventory();
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 			assertEquals(SLOTFILLED,
@@ -758,7 +778,9 @@ public class AdminshopTest {
 			assertEquals(1, shopItemStack.getItemMeta().getLore().size());
 			assertEquals("§61 buy for §a10.0 $", shopItemStack.getItemMeta().getLore().get(0));
 			// check editor inventory
-			Inventory editor = shop.getEditorInventory();
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 			assertEquals(SLOTFILLED,
@@ -791,7 +813,9 @@ public class AdminshopTest {
 			ItemStack shopItem = inv.getItem(1);
 			assertEquals(Material.AIR, shopItem.getType());
 			// check editor inventory
-			Inventory editor = shop.getEditorInventory();
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 			assertEquals(SLOTEMPTY,
@@ -899,8 +923,14 @@ public class AdminshopTest {
 			shop.changeShopName("newname");
 			assertEquals("newname", shop.getName());
 			assertEquals("newname", ((ChestInventoryMock) shop.getShopInventory()).getName());
-			assertEquals("newname-Editor", ((ChestInventoryMock) shop.getEditorInventory()).getName());
-			assertEquals("newname-SlotEditor", ((ChestInventoryMock) shop.getSlotEditorInventory()).getName());
+			shop.openEditor(player);
+			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			player.closeInventory();
+			assertEquals("newname-Editor", editor.getName());
+			shop.openSlotEditor(player,0);
+			ChestInventoryMock slotEditor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			player.closeInventory();
+			assertEquals("newname-SlotEditor", slotEditor.getName());
 			// check savefile
 			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "A0.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
@@ -956,8 +986,10 @@ public class AdminshopTest {
 			assertEquals("§6Shift-Rightclick: §asell all",
 					shop.getShopInventory().getItem(17).getItemMeta().getLore().get(1));
 			assertEquals("§6Leftclick: §abuy", shop.getShopInventory().getItem(17).getItemMeta().getLore().get(2));
-			Inventory editor = shop.getEditorInventory();
-			assertEquals(18, shop.getEditorInventory().getSize());
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
+			assertEquals(18, editor.getSize());
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(0).getType());
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(1).getType());
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(2).getType());
@@ -1052,8 +1084,10 @@ public class AdminshopTest {
 			assertEquals("§6Shift-Rightclick: §asell all",
 					shop.getShopInventory().getItem(8).getItemMeta().getLore().get(1));
 			assertEquals("§6Leftclick: §abuy", shop.getShopInventory().getItem(8).getItemMeta().getLore().get(2));
-			Inventory editor = shop.getEditorInventory();
-			assertEquals(9, shop.getEditorInventory().getSize());
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
+			assertEquals(9, editor.getSize());
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(0).getType());
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(1).getType());
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(2).getType());
@@ -1142,7 +1176,9 @@ public class AdminshopTest {
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
 			Adminshop shop = AdminshopController.getAdminshopList().get(0);
-			ChestInventoryMock editor = (ChestInventoryMock) shop.getEditorInventory();
+			shop.openEditor(player);
+			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			assertNotNull(editor);
 			assertEquals("myshop-Editor", editor.getName());
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -1190,7 +1226,6 @@ public class AdminshopTest {
 			shop.openSlotEditor(player, 0);
 			Inventory inv = player.getOpenInventory().getTopInventory();
 			assertNotNull(inv);
-			assertEquals(inv, shop.getSlotEditorInventory());
 			assertEquals(Material.BARRIER, inv.getItem(0).getType());
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			assertTrue(false);
@@ -1207,10 +1242,9 @@ public class AdminshopTest {
 			shop.openSlotEditor(player, 0);
 			Inventory inv = player.getOpenInventory().getTopInventory();
 			assertNotNull(inv);
-			assertEquals(inv, shop.getSlotEditorInventory());
-			assertEquals(Material.COAL, shop.getSlotEditorInventory().getItem(0).getType());
-			assertEquals(3, shop.getSlotEditorInventory().getItem(0).getAmount());
-			assertNull(shop.getSlotEditorInventory().getItem(0).getItemMeta().getLore());
+			assertEquals(Material.COAL, inv.getItem(0).getType());
+			assertEquals(3, inv.getItem(0).getAmount());
+			assertNull(inv.getItem(0).getItemMeta().getLore());
 		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 			assertTrue(false);
 		}
@@ -1254,7 +1288,6 @@ public class AdminshopTest {
 			shop.openEditor(player);
 			Inventory inv = player.getOpenInventory().getTopInventory();
 			assertNotNull(inv);
-			assertEquals(inv, shop.getEditorInventory());
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			assertTrue(false);
 		}

@@ -51,6 +51,7 @@ import com.ue.shopsystem.commands.playershop.PlayershopCommandExecutor;
 import com.ue.shopsystem.commands.playershop.PlayershopTabCompleter;
 import com.ue.shopsystem.commands.rentshop.RentshopCommandExecutor;
 import com.ue.shopsystem.commands.rentshop.RentshopTabCompleter;
+import com.ue.shopsystem.impl.CustomSkullService;
 import com.ue.shopsystem.impl.RentDailyTask;
 import com.ue.townsystem.api.TownworldController;
 import com.ue.townsystem.commands.TownCommandExecutor;
@@ -267,6 +268,7 @@ public class UltimateEconomy extends JavaPlugin {
 
 	private void setupPlugin() {
 		ConfigController.setupConfig();
+		CustomSkullService.setup();
 		// setup and start RentDailyTask
 		new RentDailyTask().runTaskTimerAsynchronously(this, 1, 1000);
 	}

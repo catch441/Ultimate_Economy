@@ -1,8 +1,6 @@
 package com.ue.shopsystem.api;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 
 import com.ue.economyplayer.api.EconomyPlayer;
 import com.ue.exceptions.GeneralEconomyException;
@@ -33,13 +31,6 @@ public interface Rentshop extends Playershop {
      * 
      */
     public void resetShop() throws ShopSystemException, GeneralEconomyException;
-    
-    /**
-     * Returns the rent shop gui inventory.
-     * 
-     * @return inventory
-     */
-    public Inventory getRentShopGuiInventory();
     
     /**
      * Change the rental fee of this shop. Does not affect a active rent.
@@ -75,16 +66,4 @@ public interface Rentshop extends Playershop {
      * @return rentalFee
      */
     public double getRentalFee();
-
-    /**
-     * Handles the clickevent for the rentGUI.
-     * 
-     * @param event
-     *                  InventoryClickEvent
-     * @throws PlayerException
-     * @throws ShopSystemException
-     * @throws GeneralEconomyException
-     */
-    public void handleRentShopGUIClick(InventoryClickEvent event)
-	    throws ShopSystemException, PlayerException, GeneralEconomyException;
 }

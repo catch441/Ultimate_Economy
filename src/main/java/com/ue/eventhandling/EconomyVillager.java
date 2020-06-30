@@ -64,7 +64,7 @@ public enum EconomyVillager {
 				throws ShopSystemException, GeneralEconomyException, PlayerException {
 			Rentshop rentshop = RentshopController.getRentShopById(id);
 			if (rentshop.isRentable()) {
-				rentshop.handleRentShopGUIClick(event);
+				//rentshop.handleRentShopGUIClick(event);
 			} else {
 				handleShopInvClickEvent(rentshop, (Player) event.getWhoClicked(), event);
 			}
@@ -116,8 +116,7 @@ public enum EconomyVillager {
 
 	private static void handleShopInvClickEvent(AbstractShop abstractShop, Player player, InventoryClickEvent event) {
 		ItemMeta clickedItemMeta = event.getCurrentItem().getItemMeta();
-		if (event.getView().getTitle().equals(abstractShop.getName() + "-Editor")
-				&& clickedItemMeta.getDisplayName().contains("Slot")) {
+		if (event.getView().getTitle().equals(abstractShop.getName() + "-Editor")) {
 			int slot = Integer.valueOf(clickedItemMeta.getDisplayName().substring(5));
 			try {
 				abstractShop.openSlotEditor(player, slot);
@@ -126,7 +125,8 @@ public enum EconomyVillager {
 				e.printStackTrace();
 			}
 		} else if (event.getView().getTitle().equals(abstractShop.getName() + "-SlotEditor")) {
-			abstractShop.handleSlotEditor(event);
+			// TODO [UE-62] 
+			//abstractShop.handleSlotEditor(event);
 			String command = clickedItemMeta.getDisplayName();
 			if ((ChatColor.RED + "remove item").equals(command) || (ChatColor.RED + "exit without save").equals(command)
 					|| (ChatColor.YELLOW + "save changes").equals(command)) {

@@ -41,6 +41,7 @@ import com.ue.ultimate_economy.UltimateEconomy;
 import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
 import be.seeseemelk.mockbukkit.WorldMock;
+import be.seeseemelk.mockbukkit.entity.PlayerMock;
 import be.seeseemelk.mockbukkit.inventory.ChestInventoryMock;
 import be.seeseemelk.mockbukkit.inventory.meta.CraftMetaItemMock;
 
@@ -54,6 +55,7 @@ public class AdminshopControllerTest {
 			+ "e883b5beb4e601c3cbf50505c8bd552e81b996076312cffe27b3cc1a29e3";
 	private static ServerMock server;
 	private static WorldMock world;
+	private static PlayerMock player;
 
 	/**
 	 * Init shop for tests.
@@ -64,6 +66,7 @@ public class AdminshopControllerTest {
 		MockBukkit.load(UltimateEconomy.class);
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
+		player = server.addPlayer("catch441");
 	}
 
 	/**
@@ -71,6 +74,10 @@ public class AdminshopControllerTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
+		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		for (int i = 0; i < size2; i++) {
+			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
 		MockBukkit.unload();
@@ -166,7 +173,9 @@ public class AdminshopControllerTest {
 			assertEquals("§6Shift-Rightclick: §asell all", shopInv.getItem(8).getItemMeta().getLore().get(1));
 			assertEquals("§6Leftclick: §abuy", shopInv.getItem(8).getItemMeta().getLore().get(2));
 			// check editor inventory
-			ChestInventoryMock editor = (ChestInventoryMock) shop.getEditorInventory();
+			shop.openEditor(player);
+			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			assertEquals(9, editor.getSize());
 			assertEquals("myshop-Editor", editor.getName());
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(0).getType());
@@ -204,7 +213,9 @@ public class AdminshopControllerTest {
 			assertEquals(SLOTEMPTY,
 					editor.getItem(7).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 			// check slot editor inventory
-			ChestInventoryMock slotEditor = (ChestInventoryMock) shop.getSlotEditorInventory();
+			shop.openSlotEditor(player,0);
+			ChestInventoryMock slotEditor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			assertEquals(27, slotEditor.getSize());
 			assertEquals("myshop-SlotEditor", slotEditor.getName());
 			assertEquals(Material.RED_WOOL, slotEditor.getItem(7).getType());
@@ -414,7 +425,9 @@ public class AdminshopControllerTest {
 			assertEquals("§616 buy for §a10.0 $", shopItem.getItemMeta().getLore().get(0));
 			assertEquals("§616 sell for §a5.0 $", shopItem.getItemMeta().getLore().get(1));
 			// check editor inventory
-			Inventory editor = response.getEditorInventory();
+			shop.openEditor(player);
+			Inventory editor = player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals("Slot 1", editor.getItem(0).getItemMeta().getDisplayName());
 			assertEquals(SLOTFILLED,

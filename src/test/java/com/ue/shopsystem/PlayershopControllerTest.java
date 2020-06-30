@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -41,6 +42,7 @@ public class PlayershopControllerTest {
 
 	private static ServerMock server;
 	private static WorldMock world;
+	private static Player player;
 
 	@BeforeAll
 	public static void initPlugin() {
@@ -48,7 +50,7 @@ public class PlayershopControllerTest {
 		MockBukkit.load(UltimateEconomy.class);
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
-		server.addPlayer("catch441");
+		player = server.addPlayer("catch441");
 	}
 
 	/**
@@ -184,7 +186,9 @@ public class PlayershopControllerTest {
 			assertEquals("§6Shift-Rightclick: §asell all", shopInv.getItem(8).getItemMeta().getLore().get(1));
 			assertEquals("§6Leftclick: §abuy", shopInv.getItem(8).getItemMeta().getLore().get(2));
 			// check editor inventory
-			ChestInventoryMock editor = (ChestInventoryMock) response.getEditorInventory();
+			response.openEditor(player);
+			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			player.closeInventory();
 			assertEquals(9, editor.getSize());
 			assertEquals("myshop-Editor", editor.getName());
 			assertEquals(Material.AIR, editor.getItem(7).getType());

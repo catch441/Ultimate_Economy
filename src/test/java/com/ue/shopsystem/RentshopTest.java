@@ -289,8 +289,8 @@ public class RentshopTest {
 		try {
 			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
 			shop.openRentGUI(player);
-			assertEquals((ChestInventoryMock) shop.getRentShopGuiInventory(),
-					player.getOpenInventory().getTopInventory());
+			assertNotNull(player.getOpenInventory());
+			assertEquals("RentShop#R0", ((ChestInventoryMock) player.getOpenInventory().getTopInventory()).getName());
 		} catch (GeneralEconomyException | ShopSystemException e) {
 			assertTrue(false);
 		}

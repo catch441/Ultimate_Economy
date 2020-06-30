@@ -81,7 +81,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		getSavefileHandler().saveShopSize(newSize);
 		setupShopInventory();
 		setupShopInvDefaultStockItem();
-		setupEditor(2);
+		getEditorHandler().setup(2);
 		reloadShopItems();
 		loadStockpile();
 	}
@@ -227,7 +227,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	private void setupPlayerShop(EconomyPlayer owner) {
 		setupShopInvDefaultStockItem();
 		setupShopOwner(owner);
-		setupEditor(2);
+		getEditorHandler().setup(2);
 		setupStockpile();
 		setupEconomyVillagerType();
 	}
