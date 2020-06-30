@@ -69,7 +69,7 @@ public class RentshopRentGuiHandler {
 	 * Returns the rent gui inventory.
 	 * @return gui inventory
 	 */
-	public Inventory getRentGui() {
+	protected Inventory getRentGui() {
 		return rentShopGUIInv;
 	}
 	

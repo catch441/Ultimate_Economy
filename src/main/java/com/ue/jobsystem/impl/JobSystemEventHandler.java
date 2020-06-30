@@ -48,8 +48,7 @@ public class JobSystemEventHandler {
 	 * @param event
 	 */
 	public void handleSetBlock(BlockPlaceEvent event) {
-		if (event.getPlayer().getGameMode() == GameMode.SURVIVAL
-				&& !(event.getBlock().getType() == Material.SPAWNER)) {
+		if (event.getPlayer().getGameMode() == GameMode.SURVIVAL && !(event.getBlock().getType() == Material.SPAWNER)) {
 			event.getBlock().setMetadata("placedBy",
 					new FixedMetadataValue(UltimateEconomy.getInstance, event.getPlayer().getName()));
 		}
@@ -174,22 +173,25 @@ public class JobSystemEventHandler {
 	 * @param event
 	 */
 	public void handleInventoryClick(InventoryClickEvent event) {
-		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(event.getWhoClicked().getName());
-			String displayname = event.getCurrentItem().getItemMeta().getDisplayName();
-			if (displayname != null) {
-				if (event.getClick() == ClickType.RIGHT) {
-					if (!"Info".equals(displayname)) {
-						ecoPlayer.leaveJob(JobController.getJobByName(displayname), true);
+		if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
+			event.setCancelled(true);
+			try {
+				EconomyPlayer ecoPlayer = EconomyPlayerController
+						.getEconomyPlayerByName(event.getWhoClicked().getName());
+				String displayname = event.getCurrentItem().getItemMeta().getDisplayName();
+				if (displayname != null) {
+					if (event.getClick() == ClickType.RIGHT) {
+						if (!"Info".equals(displayname)) {
+							ecoPlayer.leaveJob(JobController.getJobByName(displayname), true);
+						}
+					} else if (event.getClick() == ClickType.LEFT) {
+						ecoPlayer.joinJob(JobController.getJobByName(displayname), true);
 					}
-				} else if (event.getClick() == ClickType.LEFT) {
-					ecoPlayer.joinJob(JobController.getJobByName(displayname), true);
 				}
+			} catch (JobSystemException | GeneralEconomyException e) {
+			} catch (PlayerException e) {
+				event.getWhoClicked().sendMessage(ChatColor.RED + e.getMessage());
 			}
-		} catch (JobSystemException | GeneralEconomyException e) {
-		} catch (PlayerException e) {
-			
-			event.getWhoClicked().sendMessage(ChatColor.RED + e.getMessage());
 		}
 	}
 
@@ -200,6 +202,7 @@ public class JobSystemEventHandler {
 	 */
 	public void handleOpenInventory(PlayerInteractEntityEvent event) {
 		try {
+			event.setCancelled(true);
 			JobcenterController.getJobcenterByName(event.getRightClicked().getCustomName()).openInv(event.getPlayer());
 		} catch (GeneralEconomyException e) {
 		}

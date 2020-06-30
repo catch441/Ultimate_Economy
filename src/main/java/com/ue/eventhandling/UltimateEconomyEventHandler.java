@@ -37,12 +37,10 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
 import com.ue.economyplayer.impl.EconomyPlayerEventHandler;
-import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
-import com.ue.exceptions.ShopSystemException;
-import com.ue.exceptions.TownSystemException;
 import com.ue.jobsystem.impl.JobSystemEventHandler;
 import com.ue.language.MessageWrapper;
+import com.ue.shopsystem.impl.ShopEventHandler;
 import com.ue.shopsystem.impl.Spawner;
 import com.ue.townsystem.impl.TownsystemEventHandler;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -58,6 +56,7 @@ public class UltimateEconomyEventHandler implements Listener {
 	private JobSystemEventHandler jobSystemEventHandler;
 	private TownsystemEventHandler townSystemEventHandler;
 	private EconomyPlayerEventHandler ecoPlayerEventHandler;
+	private ShopEventHandler shopEventHandler;
 
 	/**
 	 * Constructor of ultimate economy event handler.
@@ -75,6 +74,7 @@ public class UltimateEconomyEventHandler implements Listener {
 		jobSystemEventHandler = new JobSystemEventHandler();
 		townSystemEventHandler = new TownsystemEventHandler();
 		ecoPlayerEventHandler = new EconomyPlayerEventHandler();
+		shopEventHandler = new ShopEventHandler();
 	}
 
 	/**
@@ -97,8 +97,6 @@ public class UltimateEconomyEventHandler implements Listener {
 		townSystemEventHandler.handlePlayerInteract(event);
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Handles player interact entity event.
 	 * 
@@ -107,41 +105,33 @@ public class UltimateEconomyEventHandler implements Listener {
 	@EventHandler
 	public void onNPCOpenInv(PlayerInteractEntityEvent event) {
 		Entity entity = event.getRightClicked();
-		if (entity instanceof Villager && entity.hasMetadata("ue-type")) {
-			String shopId = "";
-			if (entity.hasMetadata("ue-id")) {
-				shopId = (String) entity.getMetadata("ue-id").get(0).value();
-			}
-			EconomyVillager economyVillager = (EconomyVillager) entity.getMetadata("ue-type").get(0).value();
-			event.setCancelled(true);
-			switch (economyVillager) {
-			case JOBCENTER:
-				jobSystemEventHandler.handleOpenInventory(event);
-				break;
-			case ADMINSHOP:
-				break;
-			case PLAYERSHOP:
-				break;
-			case PLAYERSHOP_RENTABLE:
-				break;
-			case PLOTSALE:
-				townSystemEventHandler.handleOpenPlotSaleInventory(event);
-				break;
-			case TOWNMANAGER:
-				townSystemEventHandler.handleOpenTownmanagerInventory(event);
-				break;
-			default:
-				break;
-			}
-			try {
-				economyVillager.performOpenInventory(entity, shopId, event.getPlayer());
-			} catch (TownSystemException | ShopSystemException | GeneralEconomyException e) {
-			}
+		if (entity instanceof Villager && entity.hasMetadata("ue-type")) {	
+			handleEconomyVillagerOpenInv(event, entity);
 		}
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	private void handleEconomyVillagerOpenInv(PlayerInteractEntityEvent event, Entity entity) {
+		EconomyVillager economyVillager = EconomyVillager.getEnum(entity.getMetadata("ue-type").get(0).value().toString());
+		switch (economyVillager) {
+		case JOBCENTER:
+			jobSystemEventHandler.handleOpenInventory(event);
+			break;
+		case ADMINSHOP:				
+		case PLAYERSHOP:
+		case PLAYERSHOP_RENTABLE:
+			shopEventHandler.handleOpenInventory(event);
+			break;
+		case PLOTSALE:
+			townSystemEventHandler.handleOpenPlotSaleInventory(event);
+			break;
+		case TOWNMANAGER:
+			townSystemEventHandler.handleOpenTownmanagerInventory(event);
+			break;
+		default:
+			break;
+		}
+	}
+
 	/**
 	 * Handle entity damabe by entity event.
 	 * 
@@ -167,8 +157,6 @@ public class UltimateEconomyEventHandler implements Listener {
 		jobSystemEventHandler.handleEntityDeath(event);
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Handles inventory click event.
 	 * 
@@ -176,46 +164,39 @@ public class UltimateEconomyEventHandler implements Listener {
 	 */
 	@EventHandler
 	public void onInvClickEvent(InventoryClickEvent event) {
-		Player player = (Player) event.getWhoClicked();
 		InventoryHolder holder = event.getInventory().getHolder();
 		if (holder instanceof Entity) {
 			Entity entity = (Entity) holder;
-			// prevents that spawners can be renamed in a anvil
-			if (event.getCurrentItem() != null && event.getInventory().getType() == InventoryType.ANVIL
-					&& event.getCurrentItem().getType() == Material.SPAWNER) {
-				event.setCancelled(true);
-			} else if (entity.hasMetadata("ue-type") && event.getCurrentItem() != null
-					&& event.getCurrentItem().getItemMeta() != null) {
-				String shopId = "";
-				if (entity.hasMetadata("ue-id")) {
-					shopId = (String) entity.getMetadata("ue-id").get(0).value();
-				}
-				EconomyVillager economyVillager = (EconomyVillager) entity.getMetadata("ue-type").get(0).value();
-				event.setCancelled(true);
-				switch (economyVillager) {
-				case JOBCENTER:
-					jobSystemEventHandler.handleInventoryClick(event);
-					break;
-				case ADMINSHOP:
-					break;
-				case PLAYERSHOP:
-					break;
-				case PLAYERSHOP_RENTABLE:
-					break;
-				case PLOTSALE:
-				case TOWNMANAGER:
-					townSystemEventHandler.handleInventoryClick(event);
-					break;
-				default:
-					break;
-				}
-				try {
-					economyVillager.performHandleInventoryClick(event, shopId);
-				} catch (TownSystemException | ShopSystemException | IllegalArgumentException
-						| GeneralEconomyException e) {
-				} catch (PlayerException e) {
-					player.sendMessage(ChatColor.RED + e.getMessage());
-				}
+			preventSpawnerRenaming(event);
+			handleEconomyVillagerInvClick(event, entity);
+		}
+	}
+
+	private void preventSpawnerRenaming(InventoryClickEvent event) {
+		if (event.getCurrentItem() != null && event.getInventory().getType() == InventoryType.ANVIL
+				&& event.getCurrentItem().getType() == Material.SPAWNER) {
+			event.setCancelled(true);
+		}
+	}
+
+	private void handleEconomyVillagerInvClick(InventoryClickEvent event, Entity entity) {
+		if (entity.hasMetadata("ue-type")) {
+			EconomyVillager economyVillager = (EconomyVillager) entity.getMetadata("ue-type").get(0).value();
+			switch (economyVillager) {
+			case JOBCENTER:
+				jobSystemEventHandler.handleInventoryClick(event);
+				break;
+			case ADMINSHOP:
+			case PLAYERSHOP:
+			case PLAYERSHOP_RENTABLE:
+				shopEventHandler.handleInventoryClick(event);
+				break;
+			case PLOTSALE:
+			case TOWNMANAGER:
+				townSystemEventHandler.handleInventoryClick(event);
+				break;
+			default:
+				break;
 			}
 		}
 	}

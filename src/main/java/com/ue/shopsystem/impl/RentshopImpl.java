@@ -171,7 +171,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		}
 	}
 	
-	private RentshopRentGuiHandler getRentGuiHandler() {
+	protected RentshopRentGuiHandler getRentGuiHandler() {
 		return rentGuiHandler;
 	}
 

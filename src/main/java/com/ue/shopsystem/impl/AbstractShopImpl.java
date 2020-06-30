@@ -313,7 +313,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		return validationHandler;
 	}
 	
-	private ShopSlotEditorHandler getSlotEditorHandler() {
+	protected ShopSlotEditorHandler getSlotEditorHandler() {
 		return slotEditorHandler;
 	}
 	

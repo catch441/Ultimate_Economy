@@ -1,7 +1,5 @@
 package com.ue.eventhandling;
 
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -11,135 +9,41 @@ import org.bukkit.inventory.meta.Repairable;
 
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
-import com.ue.exceptions.ShopSystemException;
-import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.api.AbstractShop;
-import com.ue.shopsystem.api.Adminshop;
-import com.ue.shopsystem.api.AdminshopController;
-import com.ue.shopsystem.api.Playershop;
-import com.ue.shopsystem.api.PlayershopController;
-import com.ue.shopsystem.api.Rentshop;
-import com.ue.shopsystem.api.RentshopController;
 
 public enum EconomyVillager {
 
-	ADMINSHOP {
-		@Override
-		void performOpenInventory(Entity entity, String id, Player player) throws GeneralEconomyException {
-			AdminshopController.getAdminShopById(id).openShopInventory(player);
-		}
+	ADMINSHOP("adminshop"),
+	PLAYERSHOP("playershop"),
+	PLAYERSHOP_RENTABLE("playershop_rentable"),
+	PLOTSALE("plotsale"),
+	TOWNMANAGER("townmanager"),
+	JOBCENTER("jobcenter"),
+	UNDEFINED("undefined");
 
-		@Override
-		void performHandleInventoryClick(InventoryClickEvent event, String id) throws GeneralEconomyException {
-			Adminshop adminshop = AdminshopController.getAdminShopById(id);
-			handleShopInvClickEvent(adminshop, (Player) event.getWhoClicked(), event);
-		}
-	},
-	PLAYERSHOP {
-		@Override
-		void performOpenInventory(Entity entity, String id, Player player) throws GeneralEconomyException {
-			PlayershopController.getPlayerShopById(id).openShopInventory(player);
-		}
+	private String value;
 
-		@Override
-		void performHandleInventoryClick(InventoryClickEvent event, String id) throws GeneralEconomyException {
-			Playershop playershop = PlayershopController.getPlayerShopById(id);
-			handleShopInvClickEvent(playershop, (Player) event.getWhoClicked(), event);
-		}
-	},
-	PLAYERSHOP_RENTABLE {
-		@Override
-		void performOpenInventory(Entity entity, String id, Player player)
-				throws GeneralEconomyException, ShopSystemException {
-			Rentshop shop = RentshopController.getRentShopById(id);
-			if (shop.isRentable()) {
-				shop.openRentGUI(player);
-			} else {
-				shop.openShopInventory(player);
+	private EconomyVillager(String value) {
+		this.value = value;
+	}
+
+	private String getValue() {
+		return value;
+	}
+
+	/**
+	 * Returns a economy villager enum. Return UNDEFINED, if no enum found.
+	 * 
+	 * @param value
+	 * @return economy villager type
+	 */
+	public static EconomyVillager getEnum(String value) {
+		for (EconomyVillager v : values()) {
+			if (v.getValue().equalsIgnoreCase(value)) {
+				return v;
 			}
-		}
-
-		@Override
-		void performHandleInventoryClick(InventoryClickEvent event, String id)
-				throws ShopSystemException, GeneralEconomyException, PlayerException {
-			Rentshop rentshop = RentshopController.getRentShopById(id);
-			if (rentshop.isRentable()) {
-				//rentshop.handleRentShopGUIClick(event);
-			} else {
-				handleShopInvClickEvent(rentshop, (Player) event.getWhoClicked(), event);
-			}
-		}
-	},
-	PLOTSALE {
-		@Override
-		void performOpenInventory(Entity entity, String id, Player player) throws TownSystemException {
-			// TODO remove
-		}
-
-		@Override
-		void performHandleInventoryClick(InventoryClickEvent event, String id)
-				throws TownSystemException, PlayerException, GeneralEconomyException {
-			// TODO remove
-		}
-	},
-	TOWNMANAGER {
-		@Override
-		void performOpenInventory(Entity entity, String id, Player player)
-				throws TownSystemException, ShopSystemException {
-			// TODO remove
-		}
-
-		@Override
-		void performHandleInventoryClick(InventoryClickEvent event, String id)
-				throws TownSystemException, PlayerException, GeneralEconomyException {
-			// TODO remove
-		}
-	},
-	JOBCENTER {
-		@Override
-		void performOpenInventory(Entity entity, String id, Player player) throws GeneralEconomyException {
-			// TODO remove
-		}
-
-		@Override
-		void performHandleInventoryClick(InventoryClickEvent event, String id) {
-			// TODO remove
-		}
-
-	};
-
-	abstract void performOpenInventory(Entity entity, String id, Player player)
-			throws TownSystemException, ShopSystemException, GeneralEconomyException;
-
-	abstract void performHandleInventoryClick(InventoryClickEvent event, String id) throws TownSystemException,
-			ShopSystemException, PlayerException, GeneralEconomyException;
-
-	private static void handleShopInvClickEvent(AbstractShop abstractShop, Player player, InventoryClickEvent event) {
-		ItemMeta clickedItemMeta = event.getCurrentItem().getItemMeta();
-		if (event.getView().getTitle().equals(abstractShop.getName() + "-Editor")) {
-			int slot = Integer.valueOf(clickedItemMeta.getDisplayName().substring(5));
-			try {
-				abstractShop.openSlotEditor(player, slot);
-			} catch (ShopSystemException | GeneralEconomyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} else if (event.getView().getTitle().equals(abstractShop.getName() + "-SlotEditor")) {
-			// TODO [UE-62] 
-			//abstractShop.handleSlotEditor(event);
-			String command = clickedItemMeta.getDisplayName();
-			if ((ChatColor.RED + "remove item").equals(command) || (ChatColor.RED + "exit without save").equals(command)
-					|| (ChatColor.YELLOW + "save changes").equals(command)) {
-				abstractShop.openEditor(player);
-			}
-		} else {
-			try {
-				handleBuySell(abstractShop, event, player);
-			} catch (PlayerException | GeneralEconomyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		}	
+		return EconomyVillager.UNDEFINED;
 	}
 
 	private static void handleBuySell(AbstractShop abstractShop, InventoryClickEvent event, Player playe)
