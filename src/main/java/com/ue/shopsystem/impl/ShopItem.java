@@ -11,6 +11,7 @@ public class ShopItem {
 	private double sellPrice;
 	private double buyPrice;
 	private int stock;
+	private int slot;
 
 	/**
 	 * Creates a new ShopItem.
@@ -20,13 +21,14 @@ public class ShopItem {
 	 * @param sellPrice
 	 * @param buyPrice
 	 */
-	public ShopItem(ItemStack itemStack, int amount, double sellPrice, double buyPrice) {
+	public ShopItem(ItemStack itemStack, int amount, double sellPrice, double buyPrice,int slot) {
 		itemStack.setAmount(1);
 		setAmount(amount);
 		setBuyPrice(buyPrice);
 		setSellPrice(sellPrice);
 		setItemStack(itemStack.clone());
 		setStock(0);
+		setSlot(slot);
 		if (itemStack.getType() == Material.SPAWNER) {
 			setItemString("SPAWNER_" + itemStack.getItemMeta().getDisplayName());
 		} else {
@@ -140,6 +142,24 @@ public class ShopItem {
 	 */
 	public void setStock(int stock) {
 		this.stock = stock;
+	}
+
+	/**
+	 * Returns the slot.
+	 * 
+	 * @return slot
+	 */
+	public int getSlot() {
+		return slot;
+	}
+
+	/**
+	 * Set the slot.
+	 * 
+	 * @param slot
+	 */
+	public void setSlot(int slot) {
+		this.slot = slot;
 	}
 
 }

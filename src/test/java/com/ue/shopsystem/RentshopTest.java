@@ -252,6 +252,7 @@ public class RentshopTest {
 			shop.changeShopSize(18);
 			assertEquals(18, shop.getSize());
 		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+			e.printStackTrace();
 			assertTrue(false);
 		}
 	}

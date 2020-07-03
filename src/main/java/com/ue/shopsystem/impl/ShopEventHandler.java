@@ -8,12 +8,15 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.ue.economyplayer.api.EconomyPlayer;
+import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.api.AbstractShop;
 import com.ue.shopsystem.api.AdminshopController;
+import com.ue.shopsystem.api.Playershop;
 import com.ue.shopsystem.api.PlayershopController;
 import com.ue.shopsystem.api.Rentshop;
 import com.ue.shopsystem.api.RentshopController;
@@ -73,10 +76,52 @@ public class ShopEventHandler {
 					abstractShop.openEditor(player);
 				}
 			} else {
-				// TODO [UE-61]
-				// handleBuySell(abstractShop, event, player);
+				EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(player.getName());
+				handleBuySell(abstractShop, event, ecoPlayer);
 			}
-		} catch (GeneralEconomyException | ShopSystemException e) {
+		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+			player.sendMessage(e.getMessage());
+		}
+	}
+
+	private void handleBuySell(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
+			throws ShopSystemException, GeneralEconomyException, PlayerException {
+		Entity entity = (Entity) event.getInventory().getHolder();
+		EconomyVillager economyVillager = (EconomyVillager) entity.getMetadata("ue-type").get(0).value();
+		switch (event.getClick()) {
+		case MIDDLE:
+			if (economyVillager == EconomyVillager.PLAYERSHOP) {
+				((Playershop) abstractShop).openStockpile(ecoPlayer.getPlayer());
+			}
+			break;
+		case LEFT:
+			if (event.getClickedInventory() != event.getWhoClicked().getInventory()) {
+				int slot = event.getSlot();
+				abstractShop.buyShopItem(slot, ecoPlayer, true);
+			}
+			break;
+		case RIGHT:
+			ShopItem shopItem1 = abstractShop.getShopItem(event.getCurrentItem());
+			abstractShop.sellShopItem(shopItem1.getSlot(), shopItem1.getAmount(), ecoPlayer, true);
+			break;
+		case SHIFT_RIGHT:
+			ShopItem shopItem2 = abstractShop.getShopItem(event.getCurrentItem());
+			ItemStack original = shopItem2.getItemStack().clone();
+			original.setAmount(1);
+			int sellAmount = 0;
+			for (ItemStack is : event.getWhoClicked().getInventory().getStorageContents()) {
+				if (is != null) {
+					ItemStack stack = new ItemStack(is);
+					stack.setAmount(1);
+					if (stack.equals(original)) {
+						sellAmount = sellAmount + is.getAmount();
+					}
+				}
+			}
+			abstractShop.sellShopItem(shopItem2.getSlot(), sellAmount, ecoPlayer, true);
+			break;
+		default:
+			break;
 		}
 	}
 

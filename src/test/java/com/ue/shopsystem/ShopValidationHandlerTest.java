@@ -451,8 +451,8 @@ public class ShopValidationHandlerTest {
 	public void checkForItemDoesNotExistTest() {
 		try {
 			List<ShopItem> items = new ArrayList<>();
-			ShopItem item = new ShopItem(new ItemStack(Material.STONE), 1, 1, 1);
-			ShopItem item2 = new ShopItem(new ItemStack(Material.DIRT), 1, 1, 1);
+			ShopItem item = new ShopItem(new ItemStack(Material.STONE), 1, 1, 1,0);
+			ShopItem item2 = new ShopItem(new ItemStack(Material.DIRT), 1, 1, 1,1);
 			items.add(item);
 			items.add(item2);
 			validationHandler.checkForItemDoesNotExist(item2.getItemString(), items);
@@ -466,8 +466,8 @@ public class ShopValidationHandlerTest {
 	public void checkForItemDoesNotExistTestValid() {
 		try {
 			List<ShopItem> items = new ArrayList<>();
-			ShopItem item = new ShopItem(new ItemStack(Material.STONE), 1, 1, 1);
-			ShopItem item2 = new ShopItem(new ItemStack(Material.DIRT), 1, 1, 1);
+			ShopItem item = new ShopItem(new ItemStack(Material.STONE), 1, 1, 1,0);
+			ShopItem item2 = new ShopItem(new ItemStack(Material.DIRT), 1, 1, 1,1);
 			items.add(item);
 			validationHandler.checkForItemDoesNotExist(item2.getItemString(), items);
 		} catch (ShopSystemException e) {

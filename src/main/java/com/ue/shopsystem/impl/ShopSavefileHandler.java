@@ -180,11 +180,8 @@ public class ShopSavefileHandler {
 		int amount = getConfig().getInt("ShopItems." + itemString + ".Amount");
 		double sellPrice = getConfig().getInt("ShopItems." + itemString + ".sellPrice");
 		double buyPrice = getConfig().getInt("ShopItems." + itemString + ".buyPrice");
-		return new ShopItem(stack, amount, sellPrice, buyPrice);
-	}
-
-	protected int loadItemSlot(String itemString) {
-		return getConfig().getInt("ShopItems." + itemString + ".Slot");
+		int slot = getConfig().getInt("ShopItems." + itemString + ".Slot");
+		return new ShopItem(stack, amount, sellPrice, buyPrice, slot);
 	}
 
 	protected List<String> loadItemNameList() {

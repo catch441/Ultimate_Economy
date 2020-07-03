@@ -12,7 +12,9 @@ public enum ShopExceptionMessageEnum {
     ITEM_UNAVAILABLE ("item_unavailable"), 
     ERROR_ON_RENAMING ("error_on_rename"), 
     ALREADY_RENTED ("already_rented"), 
-    RESIZING_FAILED ("resizing_failed");
+    NOT_RENTED("not_rented"),
+    RESIZING_FAILED ("resizing_failed"),
+    SHOPOWNER_NOT_ENOUGH_MONEY("shopowner_not_enough_money");
 
     private String value;
 

@@ -1,14 +1,20 @@
 package com.ue.shopsystem.impl;
 
 import org.bukkit.Location;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
+import com.ue.config.api.ConfigController;
+import com.ue.economyplayer.api.EconomyPlayer;
 import com.ue.eventhandling.EconomyVillager;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
+import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.Adminshop;
 import com.ue.shopsystem.api.AdminshopController;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -57,6 +63,45 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 		getSavefileHandler().saveShopName(name);
 		changeInventoryNames(name);
 		getShopVillager().setCustomName(name);
+	}
+	
+	/**
+	 * Overridden, because of custom shopitem spawner name. {@inheritDoc}
+	 */
+	@Override
+	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
+			throws GeneralEconomyException, PlayerException, ShopSystemException {
+		getValidationHandler().checkForValidSlot(slot, getSize(), 1);
+		getValidationHandler().checkForPlayerIsOnline(ecoPlayer);
+		getValidationHandler().checkForPlayerInventoryNotFull(ecoPlayer.getPlayer().getInventory());
+		// no action, if slot is not filled
+		if (!getValidationHandler().isSlotEmpty(slot, getShopInventory(), 1)) {
+
+			ShopItem shopItem = getShopItem(slot);
+			// if player has not enough money, then the decrease method throws a
+			// playerexception
+			ecoPlayer.decreasePlayerAmount(shopItem.getBuyPrice(), true);
+			if (sendMessage) {
+				ItemStack stack = shopItem.getItemStack().clone();
+				ItemMeta meta = stack.getItemMeta();
+				meta.setDisplayName(
+						meta.getDisplayName() + "-" + ecoPlayer.getName());
+				stack.setItemMeta(meta);
+				ecoPlayer.getPlayer().getInventory().addItem(stack);
+				if (shopItem.getAmount() > 1) {
+					ecoPlayer.getPlayer()
+							.sendMessage(MessageWrapper.getString("shop_buy_plural",
+									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
+									ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+				} else {
+					ecoPlayer.getPlayer()
+							.sendMessage(MessageWrapper.getString("shop_buy_singular",
+									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
+									ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+				}
+			}
+
+		}
 	}
 
 	/*

@@ -1,10 +1,12 @@
 package com.ue.shopsystem.impl;
 
 import java.util.Calendar;
+import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import com.ue.economyplayer.api.EconomyPlayer;
@@ -57,6 +59,116 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * API methods
 	 * 
 	 */
+	
+	/**
+	 * Overridden, because of rentable value. {@inheritDoc}
+	 */
+	@Override
+	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack)
+			throws ShopSystemException, PlayerException, GeneralEconomyException {
+		getValidationHandler().checkForIsRented(isRentable());
+		super.addShopItem(slot, sellPrice, buyPrice, itemStack);
+	}
+	
+	/**
+	 * Overridden, because of rentable value. {@inheritDoc}
+	 */
+	@Override
+	public String editShopItem(int slot, String newAmount, String newSellPrice, String newBuyPrice)
+			throws ShopSystemException, PlayerException, GeneralEconomyException {
+		getValidationHandler().checkForIsRented(isRentable());
+		return super.editShopItem(slot, newAmount, newSellPrice, newBuyPrice);
+	}
+	
+	/**
+	 * Overridden, because of rentable value. {@inheritDoc}
+	 */
+	@Override
+	public ShopItem getShopItem(int slot) throws GeneralEconomyException, ShopSystemException {
+		getValidationHandler().checkForIsRented(isRentable());
+		return super.getShopItem(slot);
+	}
+	
+	/**
+	 * Overridden, because of rentable value. {@inheritDoc}
+	 */
+	@Override
+	public ShopItem getShopItem(ItemStack stack) throws ShopSystemException {
+		getValidationHandler().checkForIsRented(isRentable());
+		return super.getShopItem(stack);
+	}
+	
+	/**
+	 * Overridden, because of rentable value. {@inheritDoc}
+	 */
+	@Override
+	public boolean isAvailable(int slot) throws ShopSystemException, GeneralEconomyException {
+		getValidationHandler().checkForIsRented(isRentable());
+		return super.isAvailable(slot);
+	}
+	
+	/**
+	 * Overridden, because of rentable value. {@inheritDoc}
+	 */
+	@Override
+	public void openShopInventory(Player player) throws ShopSystemException {
+		getValidationHandler().checkForIsRented(isRentable());
+		super.openShopInventory(player);
+	}
+	
+	/**
+	 * Overridden, because of rentable value. {@inheritDoc}
+	 */
+	@Override
+	public void decreaseStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException {
+		getValidationHandler().checkForIsRented(isRentable());
+		super.decreaseStock(slot, stock);
+	}
+	
+	/**
+	 * Overridden, because of rentable value. {@inheritDoc}
+	 */
+	@Override
+	public void increaseStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException {
+		getValidationHandler().checkForIsRented(isRentable());
+		super.increaseStock(slot, stock);
+	}
+	
+	/**
+	 * Overridden, because of rentable value. {@inheritDoc}
+	 */
+	@Override
+	public void removeShopItem(int slot) throws ShopSystemException, GeneralEconomyException {
+		getValidationHandler().checkForIsRented(isRentable());
+		super.removeShopItem(slot);
+	}
+	
+	/**
+	 * Overridden, because of rentable value. {@inheritDoc}
+	 */
+	@Override
+	public void openStockpile(Player player) throws ShopSystemException {
+		getValidationHandler().checkForIsRented(isRentable());
+		super.openStockpile(player);
+	}
+	
+	/**
+	 * Overridden, because of rentable value. {@inheritDoc}
+	 */
+	@Override
+	public void openSlotEditor(Player player, int slot) throws ShopSystemException, GeneralEconomyException {
+		getValidationHandler().checkForIsRented(isRentable());
+		super.openSlotEditor(player, slot);
+	}
+	
+	/**
+	 * Overridden, because of rentable value. {@inheritDoc}
+	 */
+	@Override
+	public void openEditor(Player player) throws ShopSystemException {
+		getValidationHandler().checkForIsRented(isRentable());
+		super.openEditor(player);
+	}
 
 	/**
 	 * Overridde, because the position didn't have to be validated for build
@@ -66,6 +178,26 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	public void moveShop(Location location) throws TownSystemException {
 		setupShopLocation(location);
 		getShopVillager().teleport(location);
+	}
+	
+	/**
+	 * Overridden, because of rentable value. {@inheritDoc}
+	 */
+	@Override
+	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
+			throws GeneralEconomyException, PlayerException, ShopSystemException {
+		getValidationHandler().checkForIsRented(isRentable());
+		super.buyShopItem(slot, ecoPlayer, sendMessage);
+	}
+	
+	/**
+	 * Overridden, because of rentable value. {@inheritDoc}
+	 */
+	@Override
+	public void sellShopItem(int slot, int amount, EconomyPlayer ecoPlayer, boolean sendMessage)
+			throws GeneralEconomyException, ShopSystemException, PlayerException {
+		getValidationHandler().checkForIsRented(isRentable());
+		super.sellShopItem(slot, amount, ecoPlayer, sendMessage);
 	}
 
 	@Override

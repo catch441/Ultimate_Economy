@@ -69,12 +69,14 @@ public interface Playershop extends AbstractShop {
      * This method opens the stockpile inventory.
      * 
      * @param player
+     * @throws ShopSystemException 
      */
-    public void openStockpile(Player player);
+    public void openStockpile(Player player) throws ShopSystemException;
     
     /**
      * Returns the stockpile inventory.
      * @return stockpile inventory
+     * @throws ShopSystemException 
      */
-    public Inventory getStockpileInventory();
+    public Inventory getStockpileInventory() throws ShopSystemException;
 }

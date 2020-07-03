@@ -26,7 +26,9 @@ public enum PlayerExceptionMessageEnum {
     INVENTORY_SLOT_OCCUPIED ("inventory_slot_occupied"),
     MAX_REACHED ("max_reached"),
     NOT_ENOUGH_MONEY_PERSONAL ("not_enough_money_personal"),
-    NOT_ENOUGH_MONEY_NON_PERSONAL ("not_enough_money_non_personal");
+    NOT_ENOUGH_MONEY_NON_PERSONAL ("not_enough_money_non_personal"),
+	NOT_ONLINE("not_online"),
+	INVENTORY_FULL("inventory_full");
 	
     private String value; 
     

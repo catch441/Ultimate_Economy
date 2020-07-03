@@ -24,6 +24,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for one price is greater then zero if both prices are available.
+	 * 
 	 * @param sellPrice
 	 * @param buyPrice
 	 * @throws ShopSystemException
@@ -31,12 +32,13 @@ public class ShopValidationHandler {
 	public void checkForOnePriceGreaterThenZeroIfBothAvailable(String sellPrice, String buyPrice)
 			throws ShopSystemException {
 		if (!"none".equals(sellPrice) && !"none".equals(buyPrice)) {
-			checkForPricesGreaterThenZero(Double.valueOf(sellPrice),Double.valueOf(buyPrice));
+			checkForPricesGreaterThenZero(Double.valueOf(sellPrice), Double.valueOf(buyPrice));
 		}
 	}
 
 	/**
 	 * Check for both prices greater then zero.
+	 * 
 	 * @param sellPrice
 	 * @param buyPrice
 	 * @throws ShopSystemException
@@ -49,6 +51,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for slot is not empty.
+	 * 
 	 * @param slot
 	 * @param inventory
 	 * @param reservedSlots
@@ -64,6 +67,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for slot is empty.
+	 * 
 	 * @param slot
 	 * @param inventory
 	 * @param reservedSlots
@@ -79,6 +83,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Returns true, if the slot is empty.
+	 * 
 	 * @param slot
 	 * @param inventory
 	 * @param reservedSlots
@@ -96,6 +101,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for a valid amount.
+	 * 
 	 * @param amount
 	 * @throws GeneralEconomyException
 	 */
@@ -107,6 +113,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for a valid price.
+	 * 
 	 * @param price
 	 * @throws GeneralEconomyException
 	 */
@@ -118,6 +125,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for a valid inventory size.
+	 * 
 	 * @param size
 	 * @throws GeneralEconomyException
 	 */
@@ -129,13 +137,14 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for a valid slot.
+	 * 
 	 * @param slot
 	 * @param size
 	 * @param reservedSlots
 	 * @throws GeneralEconomyException
 	 */
 	public void checkForValidSlot(int slot, int size, int reservedSlots) throws GeneralEconomyException {
-		if (slot > (size - 1- reservedSlots) || slot < 0) {
+		if (slot > (size - 1 - reservedSlots) || slot < 0) {
 			// +1 for player readable style
 			throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, slot + 1);
 		}
@@ -143,6 +152,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for resize is possible.
+	 * 
 	 * @param inventory
 	 * @param oldSize
 	 * @param newSize
@@ -166,6 +176,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for item does not exist.
+	 * 
 	 * @param itemString
 	 * @param itemList
 	 * @throws ShopSystemException
@@ -180,6 +191,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for item can be deleted.
+	 * 
 	 * @param slot
 	 * @param size
 	 * @throws ShopSystemException
@@ -191,7 +203,8 @@ public class ShopValidationHandler {
 	}
 
 	/**
-	 * 	Check for positive value.
+	 * Check for positive value.
+	 * 
 	 * @param value
 	 * @throws GeneralEconomyException
 	 */
@@ -203,6 +216,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for valid stock decrease.
+	 * 
 	 * @param entireStock
 	 * @param stock
 	 * @throws GeneralEconomyException
@@ -215,6 +229,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for change owner is possible.
+	 * 
 	 * @param newOwner
 	 * @param shopName
 	 * @throws ShopSystemException
@@ -227,6 +242,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for a valid shop name.
+	 * 
 	 * @param name
 	 * @throws ShopSystemException
 	 */
@@ -238,6 +254,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for shop name is available.
+	 * 
 	 * @param name
 	 * @param owner
 	 * @throws GeneralEconomyException
@@ -251,6 +268,7 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for player has permissions at a specific location.
+	 * 
 	 * @param location
 	 * @param owner
 	 * @throws PlayerException
@@ -272,12 +290,64 @@ public class ShopValidationHandler {
 
 	/**
 	 * Check for is rentable.
+	 * 
 	 * @param isRentable
 	 * @throws ShopSystemException
 	 */
 	public void checkForIsRentable(boolean isRentable) throws ShopSystemException {
 		if (!isRentable) {
 			throw ShopSystemException.getException(ShopExceptionMessageEnum.ALREADY_RENTED);
+		}
+	}
+
+	/**
+	 * Check for is rented.
+	 * 
+	 * @param isRentable
+	 * @throws ShopSystemException
+	 */
+	public void checkForIsRented(boolean isRentable) throws ShopSystemException {
+		if (isRentable) {
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.NOT_RENTED);
+		}
+	}
+
+	/**
+	 * Check if player is online.
+	 * 
+	 * @param ecoPlayer
+	 * @throws PlayerException
+	 */
+	public void checkForPlayerIsOnline(EconomyPlayer ecoPlayer) throws PlayerException {
+		if (!ecoPlayer.isOnline()) {
+			throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ONLINE);
+		}
+	}
+
+	/**
+	 * Check if the player inventory is not full.
+	 * 
+	 * @param inventory
+	 * @throws PlayerException
+	 */
+	public void checkForPlayerInventoryNotFull(Inventory inventory) throws PlayerException {
+		if (inventory.firstEmpty() == -1) {
+			throw PlayerException.getException(PlayerExceptionMessageEnum.INVENTORY_FULL);
+		}
+	}
+
+	/**
+	 * Check if the shop owner has enough money.
+	 * 
+	 * @param ecoPlayer
+	 * @param money
+	 * @throws GeneralEconomyException
+	 * @throws ShopSystemException
+	 */
+	public void checkForShopOwnerHasEnoughMoney(EconomyPlayer ecoPlayer, double money)
+			throws GeneralEconomyException, ShopSystemException {
+		if (!ecoPlayer.hasEnoughtMoney(money)) {
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.SHOPOWNER_NOT_ENOUGH_MONEY);
 		}
 	}
 }

@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
+import com.ue.config.api.ConfigController;
 import com.ue.economyplayer.api.EconomyPlayer;
 import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.eventhandling.EconomyVillager;
@@ -20,6 +21,7 @@ import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.Playershop;
 import com.ue.townsystem.api.TownworldController;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -60,14 +62,88 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		super(name, shopId);
 		loadExistingPlayerShop(name);
 	}
+
 	/*
 	 * API methods
 	 * 
 	 */
-
 	@Override
-	public void openStockpile(Player player) {
+	public void openStockpile(Player player) throws ShopSystemException {
 		player.openInventory(getStockpileInventory());
+	}
+
+	/**
+	 * Overridden, because of the shop owner. {@inheritDoc}
+	 */
+	@Override
+	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
+			throws GeneralEconomyException, PlayerException, ShopSystemException {
+		super.buyShopItem(slot, ecoPlayer, false);
+		ShopItem shopItem = getShopItem(slot);
+		// throws an error, if stock is not available.
+		decreaseStock(slot, shopItem.getAmount());
+		if(!isOwner(ecoPlayer)) {
+			getOwner().increasePlayerAmount(shopItem.getBuyPrice(), false);
+		}
+		if (sendMessage) {
+			if (isOwner(ecoPlayer)) {
+				if (shopItem.getAmount() > 1) {
+					getOwner().getPlayer().sendMessage(
+							MessageWrapper.getString("shop_got_item_plural", String.valueOf(shopItem.getAmount())));
+				} else {
+					getOwner().getPlayer().sendMessage(
+							MessageWrapper.getString("shop_got_item_singular", String.valueOf(shopItem.getAmount())));
+				}
+			} else {
+				if (shopItem.getAmount() > 1) {
+					ecoPlayer.getPlayer()
+							.sendMessage(MessageWrapper.getString("shop_buy_plural",
+									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
+									ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+				} else {
+					ecoPlayer.getPlayer()
+							.sendMessage(MessageWrapper.getString("shop_buy_singular",
+									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
+									ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void sellShopItem(int slot, int amount, EconomyPlayer ecoPlayer, boolean sendMessage)
+			throws GeneralEconomyException, ShopSystemException, PlayerException {
+		ShopItem shopItem = getShopItem(slot);
+		double sellPrice = shopItem.getSellPrice() / shopItem.getAmount() * amount;
+		getValidationHandler().checkForShopOwnerHasEnoughMoney(getOwner(), sellPrice);
+		super.sellShopItem(slot, amount, ecoPlayer, false);
+		increaseStock(slot, amount);
+		if(!isOwner(ecoPlayer)) {
+			getOwner().decreasePlayerAmount(sellPrice, false);
+		}
+		if (sendMessage) {
+			if (isOwner(ecoPlayer)) {
+				if (shopItem.getAmount() > 1) {
+					getOwner().getPlayer().sendMessage(
+							MessageWrapper.getString("shop_added_item_plural", String.valueOf(shopItem.getAmount())));
+				} else {
+					getOwner().getPlayer().sendMessage(
+							MessageWrapper.getString("shop_added_item_singular", String.valueOf(shopItem.getAmount())));
+				}
+			} else {
+				if (shopItem.getAmount() > 1) {
+					ecoPlayer.getPlayer()
+							.sendMessage(MessageWrapper.getString("shop_sell_plural",
+									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
+									ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+				} else {
+					ecoPlayer.getPlayer()
+							.sendMessage(MessageWrapper.getString("shop_sell_singular",
+									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
+									ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+				}
+			}
+		}
 	}
 
 	/**
@@ -187,7 +263,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	}
 
 	@Override
-	public Inventory getStockpileInventory() {
+	public Inventory getStockpileInventory() throws ShopSystemException {
 		return stockPile;
 	}
 
@@ -244,7 +320,11 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		meta.setLore(infos);
 		meta.setDisplayName("Infos");
 		stockpileSwitchItem.setItemMeta(meta);
-		getStockpileInventory().setItem(getSize() - 1, stockpileSwitchItem);
+		try {
+			getStockpileInventory().setItem(getSize() - 1, stockpileSwitchItem);
+		} catch (ShopSystemException e) {
+			// only rentshop
+		}
 	}
 
 	private void setupEconomyVillagerType() {
@@ -282,8 +362,12 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	}
 
 	private void loadStock() {
-		for (ShopItem item : getItemList()) {
-			item.setStock(getSavefileHandler().loadStock(item.getItemString()));
+		try {
+			for (ShopItem item : getItemList()) {
+				item.setStock(getSavefileHandler().loadStock(item.getItemString()));
+			}
+		} catch (ShopSystemException e) {
+			// only rentshop
 		}
 	}
 

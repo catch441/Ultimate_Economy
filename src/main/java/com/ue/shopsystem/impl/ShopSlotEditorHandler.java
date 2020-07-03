@@ -18,13 +18,14 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.language.MessageWrapper;
 
 public class ShopSlotEditorHandler {
-	
+
 	private Inventory slotEditor;
 	private int selectedEditorSlot;
 	private AbstractShopImpl shop;
-	
+
 	/**
 	 * Constructor for a new Slot Editor handler.
+	 * 
 	 * @param shop
 	 */
 	public ShopSlotEditorHandler(AbstractShopImpl shop) {
@@ -32,7 +33,7 @@ public class ShopSlotEditorHandler {
 		selectedEditorSlot = 0;
 		setupSlotEditor();
 	}
-	
+
 	private void setupSlotEditor() {
 		slotEditor = Bukkit.createInventory(getShop().getShopVillager(), 27, getShop().getName() + "-SlotEditor");
 		setupFactorItem();
@@ -70,7 +71,7 @@ public class ShopSlotEditorHandler {
 		item.setItemMeta(meta);
 		getSlotEditorInventory().setItem(8, item);
 	}
-	
+
 	/**
 	 * Returns the slot editor inventory.
 	 * 
@@ -79,7 +80,7 @@ public class ShopSlotEditorHandler {
 	public Inventory getSlotEditorInventory() {
 		return slotEditor;
 	}
-	
+
 	/**
 	 * Renames the slot editor inventory.
 	 * 
@@ -90,7 +91,7 @@ public class ShopSlotEditorHandler {
 		slotEditorNew.setContents(getSlotEditorInventory().getContents());
 		slotEditor = slotEditorNew;
 	}
-	
+
 	/**
 	 * Set the selected editor slot.
 	 * 
@@ -99,15 +100,15 @@ public class ShopSlotEditorHandler {
 	public void setSelectedSlot(int slot) {
 		selectedEditorSlot = slot;
 	}
-	
+
 	private int getSelectedSlot() {
 		return selectedEditorSlot;
 	}
-	
+
 	private AbstractShopImpl getShop() {
 		return shop;
 	}
-	
+
 	/**
 	 * Setups the slot editor for a specific slot.
 	 * 
@@ -115,8 +116,7 @@ public class ShopSlotEditorHandler {
 	 * @throws ShopSystemException
 	 * @throws GeneralEconomyException
 	 */
-	public void setupSlotEditorWithShopItemInformations(int slot)
-			throws ShopSystemException, GeneralEconomyException {
+	public void setupSlotEditorWithShopItemInformations(int slot) throws ShopSystemException, GeneralEconomyException {
 		double buyPrice = 0;
 		double sellPrice = 0;
 		if (!getShop().getValidationHandler().isSlotEmpty(slot, getShop().getShopInventory(), 1)) {
@@ -136,7 +136,7 @@ public class ShopSlotEditorHandler {
 		addSkullToSlotEditor("sellprice", 18, listSell, "SELL");
 		setupSlotItemInSlotEditor(slot);
 	}
-	
+
 	private void setupSlotItemInSlotEditor(int slot) throws GeneralEconomyException, ShopSystemException {
 		if (getShop().getValidationHandler().isSlotEmpty(slot, getShop().getShopInventory(), 1)) {
 			ItemStack item = new ItemStack(Material.BARRIER);
@@ -220,17 +220,18 @@ public class ShopSlotEditorHandler {
 	public void handleSlotEditor(InventoryClickEvent event) {
 		if (event.getCurrentItem().getItemMeta() != null) {
 			Player player = (Player) event.getWhoClicked();
-			ItemStack originStack = new ItemStack(getShop().getShopInventory().getItem(getSelectedSlot()));
-			int slot = event.getSlot();
-			int factor = 1;
-			if (event.getInventory().getItem(12).getItemMeta().getDisplayName().equals("factor on")) {
-				factor = 1000;
-			}
-			String operator = getOperatorForHandleSlotEditor(event, slot);
-			double price = getPriceForHandleSlotEditor(event, slot);
-			ItemStack editorItemStack = slotEditor.getItem(0);
-			String command = event.getCurrentItem().getItemMeta().getDisplayName();
 			try {
+				ItemStack originStack = new ItemStack(getShop().getShopInventory().getItem(getSelectedSlot()));
+				int slot = event.getSlot();
+				int factor = 1;
+				if (event.getInventory().getItem(12).getItemMeta().getDisplayName().equals("factor on")) {
+					factor = 1000;
+				}
+				String operator = getOperatorForHandleSlotEditor(event, slot);
+				double price = getPriceForHandleSlotEditor(event, slot);
+				ItemStack editorItemStack = slotEditor.getItem(0);
+				String command = event.getCurrentItem().getItemMeta().getDisplayName();
+
 				handleSlotEditorCommand(event, player, originStack, slot, factor, operator, price, editorItemStack,
 						command);
 			} catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
@@ -302,7 +303,8 @@ public class ShopSlotEditorHandler {
 		// if the item changed
 		if (!newItemStackCopy.toString().equals(originalStackString)) {
 			newItemStackCopy.setAmount(1);
-			getShop().getValidationHandler().checkForItemDoesNotExist(newItemStackCopy.toString(), getShop().getItemList());
+			getShop().getValidationHandler().checkForItemDoesNotExist(newItemStackCopy.toString(),
+					getShop().getItemList());
 			// the old item in the selected slot gets deleted
 			handleRemoveItem(player, originStack);
 			getShop().addShopItem(getSelectedSlot(), sellPrice, buyPrice, itemStack);
@@ -454,7 +456,7 @@ public class ShopSlotEditorHandler {
 			return null;
 		}
 	}
-	
+
 	private void updateEditorPrice(int a, int b, int c, int d, int e, Double price) {
 		List<String> list = new ArrayList<>();
 		list.add(ChatColor.GOLD + "Price: " + price);

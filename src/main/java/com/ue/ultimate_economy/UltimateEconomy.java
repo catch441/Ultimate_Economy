@@ -36,6 +36,7 @@ import com.ue.eventhandling.UltimateEconomyEventHandler;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.JobSystemException;
 import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.ShopSystemException;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.JobcenterController;
@@ -308,7 +309,7 @@ public class UltimateEconomy extends JavaPlugin {
 				default:
 					break;
 				}
-			} catch (PlayerException | JobSystemException | GeneralEconomyException e) {
+			} catch (PlayerException | JobSystemException | GeneralEconomyException | ShopSystemException e) {
 				player.sendMessage(e.getMessage());
 			}
 		}
@@ -351,7 +352,7 @@ public class UltimateEconomy extends JavaPlugin {
 	}
 
 	private boolean handleShopCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
-			throws JobSystemException, GeneralEconomyException {
+			throws JobSystemException, GeneralEconomyException, ShopSystemException {
 		if (args.length == 1) {
 			if (ecoPlayer.hasJob(JobController.getJobByName(args[0]))) {
 				AdminshopController.getAdminShopByName(args[0]).openShopInventory(player);

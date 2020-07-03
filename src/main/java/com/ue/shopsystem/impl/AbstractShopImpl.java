@@ -29,10 +29,13 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import com.ue.config.api.ConfigController;
+import com.ue.economyplayer.api.EconomyPlayer;
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
+import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.AbstractShop;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -90,7 +93,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 */
 
 	@Override
-	public List<ShopItem> getItemList() {
+	public List<ShopItem> getItemList() throws ShopSystemException {
 		return new ArrayList<>(getShopItemMap().values());
 	}
 
@@ -126,6 +129,32 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	@Override
+	public ShopItem getShopItem(ItemStack stack) throws ShopSystemException {
+		ItemStack original = new ItemStack(stack);
+		ItemMeta itemMeta = original.getItemMeta();
+		if (itemMeta.hasLore()) {
+			List<String> loreList = itemMeta.getLore();
+			Iterator<String> loreIter = loreList.iterator();
+			while (loreIter.hasNext()) {
+				String lore = loreIter.next();
+				if (lore.contains(" buy for ") || lore.contains(" sell for ")) {
+					loreIter.remove();
+				}
+			}
+			itemMeta.setLore(loreList);
+			original.setItemMeta(itemMeta);
+		}
+		original.setAmount(1);
+		String clickedItemString = original.toString();
+		for (ShopItem item : getShopItemMap().values()) {
+			if (item.getItemString().equals(clickedItemString)) {
+				return item;
+			}
+		}
+		throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_DOES_NOT_EXIST);
+	}
+
+	@Override
 	public void changeProfession(Profession profession) {
 		getShopVillager().setProfession(profession);
 		getSavefileHandler().saveProfession(profession);
@@ -149,7 +178,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		getValidationHandler().checkForValidPrice(String.valueOf(sellPrice));
 		getValidationHandler().checkForValidPrice(String.valueOf(buyPrice));
 		getValidationHandler().checkForPricesGreaterThenZero(sellPrice, buyPrice);
-		ShopItem shopItem = new ShopItem(itemStack, itemStack.getAmount(), sellPrice, buyPrice);
+		ShopItem shopItem = new ShopItem(itemStack, itemStack.getAmount(), sellPrice, buyPrice, slot);
 		String itemString = shopItem.getItemString();
 		getValidationHandler().checkForItemDoesNotExist(itemString, getItemList());
 		getShopItemMap().put(slot, shopItem);
@@ -206,7 +235,64 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	@Override
-	public void openEditor(Player player) {
+	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
+			throws GeneralEconomyException, PlayerException, ShopSystemException {
+		getValidationHandler().checkForValidSlot(slot, getSize(), 1);
+		getValidationHandler().checkForPlayerIsOnline(ecoPlayer);
+		getValidationHandler().checkForPlayerInventoryNotFull(ecoPlayer.getPlayer().getInventory());
+		// no action, if slot is not filled
+		if (!getValidationHandler().isSlotEmpty(slot, getShopInventory(), 1)) {
+			ShopItem shopItem = getShopItem(slot);
+			// if player has not enough money, then the decrease method throws a
+			// playerexception
+			ecoPlayer.decreasePlayerAmount(shopItem.getBuyPrice(), sendMessage);
+			if (sendMessage) {
+				ecoPlayer.getPlayer().getInventory().addItem(shopItem.getItemStack().clone());
+				if (shopItem.getAmount() > 1) {
+					ecoPlayer.getPlayer()
+							.sendMessage(MessageWrapper.getString("shop_buy_plural",
+									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
+									ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+				} else {
+					ecoPlayer.getPlayer()
+							.sendMessage(MessageWrapper.getString("shop_buy_singular",
+									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
+									ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+				}
+			}
+		}
+	}
+
+	@Override
+	public void sellShopItem(int slot, int amount, EconomyPlayer ecoPlayer, boolean sendMessage)
+			throws GeneralEconomyException, ShopSystemException, PlayerException {
+		getValidationHandler().checkForValidSlot(slot, getSize(), 1);
+		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
+		getValidationHandler().checkForPlayerIsOnline(ecoPlayer);
+		// no action, if slot is not filled
+		if (!getValidationHandler().isSlotEmpty(slot, getShopInventory(), 1)) {
+			ShopItem shopItem = getShopItem(slot);
+			double sellPrice = shopItem.getSellPrice() / shopItem.getAmount() * amount;
+			ecoPlayer.increasePlayerAmount(sellPrice, sendMessage);
+			if (sendMessage) {
+				removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack().clone(), amount);
+				if (amount > 1) {
+					ecoPlayer.getPlayer()
+							.sendMessage(MessageWrapper.getString("shop_buy_plural",
+									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
+									ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+				} else {
+					ecoPlayer.getPlayer()
+							.sendMessage(MessageWrapper.getString("shop_sell_singular",
+									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
+									ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+				}
+			}
+		}
+	}
+
+	@Override
+	public void openEditor(Player player) throws ShopSystemException {
 		player.openInventory(getEditorHandler().getEditorInventory());
 	}
 
@@ -230,7 +316,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	@Override
-	public void openShopInventory(Player player) {
+	public void openShopInventory(Player player) throws ShopSystemException {
 		player.openInventory(getShopInventory());
 	}
 
@@ -247,7 +333,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	@Override
-	public Inventory getShopInventory() {
+	public Inventory getShopInventory() throws ShopSystemException {
 		return shopInventory;
 	}
 
@@ -309,14 +395,38 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 * 
 	 */
 
+	private void removeItemFromInventory(Inventory inventory, ItemStack item, int removeAmount) {
+		ItemStack original = item.clone();
+		for (ItemStack s : inventory.getStorageContents()) {
+			if (s != null) {
+				ItemStack stack = new ItemStack(s);
+				original.setAmount(1);
+				int amountStack = stack.getAmount();
+				stack.setAmount(1);
+				if (item.equals(stack) && removeAmount != 0) {
+					if (removeAmount >= amountStack) {
+						stack.setAmount(amountStack);
+						inventory.removeItem(stack);
+						removeAmount -= amountStack;
+					} else {
+						int diff = amountStack - removeAmount;
+						stack.setAmount(diff);
+						inventory.removeItem(stack);
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	protected ShopValidationHandler getValidationHandler() {
 		return validationHandler;
 	}
-	
+
 	protected ShopSlotEditorHandler getSlotEditorHandler() {
 		return slotEditorHandler;
 	}
-	
+
 	protected ShopEditorHandler getEditorHandler() {
 		return editorHandler;
 	}
@@ -327,8 +437,12 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	private List<String> getUniqueItemStringList() {
 		List<String> list = new ArrayList<>();
-		for (ShopItem item : getItemList()) {
-			list.add(item.getItemString());
+		try {
+			for (ShopItem item : getItemList()) {
+				list.add(item.getItemString());
+			}
+		} catch (ShopSystemException e) {
+			// only rentshop
 		}
 		return list;
 	}
@@ -374,7 +488,11 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		meta.setLore(loreList);
 		itemStack.setItemMeta(meta);
 		itemStack.setAmount(amount);
-		getShopInventory().setItem(slot, itemStack);
+		try {
+			getShopInventory().setItem(slot, itemStack);
+		} catch (ShopSystemException e) {
+			// only rentshop
+		}
 	}
 
 	private List<String> createItemLoreList(ItemMeta meta, int amount, double sellPrice, double buyPrice) {
@@ -492,17 +610,17 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 */
 
 	private void loadExistingShop(String shopId) throws TownSystemException {
-			savefileHandler = new ShopSavefileHandler(shopId);
-			setShopId(shopId);
-			setName(getSavefileHandler().loadShopName());
-			editorHandler = new ShopEditorHandler(this);
-			slotEditorHandler = new ShopSlotEditorHandler(this);
-			setSize(getSavefileHandler().loadShopSize());
-			location = getSavefileHandler().loadShopLocation();
-			setupShopVillager();
-			getShopVillager().setProfession(getSavefileHandler().loadShopVillagerProfession());
-			setupShopInventory();
-			loadShopItems();
+		savefileHandler = new ShopSavefileHandler(shopId);
+		setShopId(shopId);
+		setName(getSavefileHandler().loadShopName());
+		editorHandler = new ShopEditorHandler(this);
+		slotEditorHandler = new ShopSlotEditorHandler(this);
+		setSize(getSavefileHandler().loadShopSize());
+		location = getSavefileHandler().loadShopLocation();
+		setupShopVillager();
+		getShopVillager().setProfession(getSavefileHandler().loadShopVillagerProfession());
+		setupShopInventory();
+		loadShopItems();
 	}
 
 	private void loadShopItems() {
@@ -519,10 +637,9 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	protected void loadShopItem(String itemString)
 			throws ShopSystemException, PlayerException, GeneralEconomyException {
 		ShopItem shopItem = getSavefileHandler().loadItem(itemString);
-		int slot = getSavefileHandler().loadItemSlot(itemString);
-		getShopItemMap().put(slot, shopItem);
-		getEditorHandler().setOccupied(true, slot);
-		addShopItemToInv(shopItem.getItemStack(), shopItem.getAmount(), slot, shopItem.getSellPrice(),
+		getShopItemMap().put(shopItem.getSlot(), shopItem);
+		getEditorHandler().setOccupied(true, shopItem.getSlot());
+		addShopItemToInv(shopItem.getItemStack(), shopItem.getAmount(), shopItem.getSlot(), shopItem.getSellPrice(),
 				shopItem.getBuyPrice());
 	}
 
