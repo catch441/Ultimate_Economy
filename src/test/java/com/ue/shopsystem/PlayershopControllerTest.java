@@ -3,6 +3,7 @@ package com.ue.shopsystem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -191,20 +192,20 @@ public class PlayershopControllerTest {
 			player.closeInventory();
 			assertEquals(9, editor.getSize());
 			assertEquals("myshop-Editor", editor.getName());
-			assertEquals(Material.AIR, editor.getItem(7).getType());
-			assertEquals(Material.AIR, editor.getItem(8).getType());
+			assertNull(editor.getItem(7));
+			assertNull(editor.getItem(8));
 			// check stock inventory
 			ChestInventoryMock stock = (ChestInventoryMock) response.getStockpileInventory();
 			assertEquals(9, stock.getSize());
 			assertEquals("Inventory", stock.getName());
-			assertEquals(Material.AIR, stock.getItem(0).getType());
-			assertEquals(Material.AIR, stock.getItem(1).getType());
-			assertEquals(Material.AIR, stock.getItem(2).getType());
-			assertEquals(Material.AIR, stock.getItem(3).getType());
-			assertEquals(Material.AIR, stock.getItem(4).getType());
-			assertEquals(Material.AIR, stock.getItem(5).getType());
-			assertEquals(Material.AIR, stock.getItem(6).getType());
-			assertEquals(Material.AIR, stock.getItem(7).getType());
+			assertNull(stock.getItem(0));
+			assertNull(stock.getItem(1));
+			assertNull(stock.getItem(2));
+			assertNull(stock.getItem(3));
+			assertNull(stock.getItem(4));
+			assertNull(stock.getItem(5));
+			assertNull(stock.getItem(6));
+			assertNull(stock.getItem(7));
 			assertEquals("Infos", stock.getItem(8).getItemMeta().getDisplayName());
 			assertEquals(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "close stockpile",
 					stock.getItem(8).getItemMeta().getLore().get(0));

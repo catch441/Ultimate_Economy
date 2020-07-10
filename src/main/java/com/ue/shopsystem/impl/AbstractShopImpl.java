@@ -134,13 +134,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		ItemMeta itemMeta = original.getItemMeta();
 		if (itemMeta.hasLore()) {
 			List<String> loreList = itemMeta.getLore();
-			Iterator<String> loreIter = loreList.iterator();
-			while (loreIter.hasNext()) {
-				String lore = loreIter.next();
-				if (lore.contains(" buy for ") || lore.contains(" sell for ")) {
-					loreIter.remove();
-				}
-			}
+			loreList = removeShopItemPriceLore(loreList);
 			itemMeta.setLore(loreList);
 			original.setItemMeta(itemMeta);
 		}
@@ -245,20 +239,12 @@ public abstract class AbstractShopImpl implements AbstractShop {
 			ShopItem shopItem = getShopItem(slot);
 			// if player has not enough money, then the decrease method throws a
 			// playerexception
-			ecoPlayer.decreasePlayerAmount(shopItem.getBuyPrice(), sendMessage);
+			ecoPlayer.decreasePlayerAmount(shopItem.getBuyPrice(), true);
+			ItemStack stack = shopItem.getItemStack().clone();
+			stack.setAmount(shopItem.getAmount());
+			ecoPlayer.getPlayer().getInventory().addItem(stack);
 			if (sendMessage) {
-				ecoPlayer.getPlayer().getInventory().addItem(shopItem.getItemStack().clone());
-				if (shopItem.getAmount() > 1) {
-					ecoPlayer.getPlayer()
-							.sendMessage(MessageWrapper.getString("shop_buy_plural",
-									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
-									ConfigController.getCurrencyText(shopItem.getBuyPrice())));
-				} else {
-					ecoPlayer.getPlayer()
-							.sendMessage(MessageWrapper.getString("shop_buy_singular",
-									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
-									ConfigController.getCurrencyText(shopItem.getBuyPrice())));
-				}
+				sendBuySellPlayerMessage(shopItem.getAmount(), ecoPlayer, shopItem.getBuyPrice(), "sell");
 			}
 		}
 	}
@@ -274,19 +260,9 @@ public abstract class AbstractShopImpl implements AbstractShop {
 			ShopItem shopItem = getShopItem(slot);
 			double sellPrice = shopItem.getSellPrice() / shopItem.getAmount() * amount;
 			ecoPlayer.increasePlayerAmount(sellPrice, sendMessage);
+			removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack().clone(), amount);
 			if (sendMessage) {
-				removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack().clone(), amount);
-				if (amount > 1) {
-					ecoPlayer.getPlayer()
-							.sendMessage(MessageWrapper.getString("shop_buy_plural",
-									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
-									ConfigController.getCurrencyText(shopItem.getBuyPrice())));
-				} else {
-					ecoPlayer.getPlayer()
-							.sendMessage(MessageWrapper.getString("shop_sell_singular",
-									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
-									ConfigController.getCurrencyText(shopItem.getBuyPrice())));
-				}
+				sendBuySellPlayerMessage(amount, ecoPlayer, sellPrice, "sell");
 			}
 		}
 	}
@@ -394,12 +370,26 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 * Utility methods
 	 * 
 	 */
+	
+	protected void sendBuySellPlayerMessage(int amount, EconomyPlayer ecoPlayer, double price, String sellBuy) {
+		if (amount > 1) {
+			ecoPlayer.getPlayer()
+					.sendMessage(MessageWrapper.getString("shop_" + sellBuy + "_plural",
+							String.valueOf(amount), price,
+							ConfigController.getCurrencyText(price)));
+		} else {
+			ecoPlayer.getPlayer()
+					.sendMessage(MessageWrapper.getString("shop_" + sellBuy + "_singular",
+							String.valueOf(amount), price,
+							ConfigController.getCurrencyText(price)));
+		}
+	}
 
-	private void removeItemFromInventory(Inventory inventory, ItemStack item, int removeAmount) {
+	protected void removeItemFromInventory(Inventory inventory, ItemStack item, int removeAmount) {
 		ItemStack original = item.clone();
 		for (ItemStack s : inventory.getStorageContents()) {
 			if (s != null) {
-				ItemStack stack = new ItemStack(s);
+				ItemStack stack = s.clone();
 				original.setAmount(1);
 				int amountStack = stack.getAmount();
 				stack.setAmount(1);
@@ -409,8 +399,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 						inventory.removeItem(stack);
 						removeAmount -= amountStack;
 					} else {
-						int diff = amountStack - removeAmount;
-						stack.setAmount(diff);
+						stack.setAmount(removeAmount);
 						inventory.removeItem(stack);
 						break;
 					}
