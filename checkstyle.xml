@@ -165,7 +165,7 @@
   <module name="LineLength">
     <property name="severity" value="warning"/>
     <property name="fileExtensions" value=".java"/>
-    <property name="max" value="145"/>
+    <property name="max" value="160"/>
   </module>
   <module name="Translation">
     <property name="severity" value="warning"/>
