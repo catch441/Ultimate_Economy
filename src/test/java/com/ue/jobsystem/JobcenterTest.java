@@ -2,6 +2,7 @@ package com.ue.jobsystem;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -263,7 +264,7 @@ public class JobcenterTest {
 			// check inventory
 			center.openInv(player);
 			ChestInventoryMock inv = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
-			assertEquals(Material.AIR, inv.getItem(0).getType());
+			assertNull(inv.getItem(0));
 			// check savefile
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "center-JobCenter.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);

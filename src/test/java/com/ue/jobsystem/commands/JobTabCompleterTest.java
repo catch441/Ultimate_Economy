@@ -563,7 +563,7 @@ public class JobTabCompleterTest {
 	public void jobAddItemArgTestItemArg() {
 		String[] args = { "job", "addItem", "myjob", "" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-		assertEquals(1438, result.size());
+		assertEquals(1539, result.size());
 	}
 
 	@Test
@@ -659,7 +659,7 @@ public class JobTabCompleterTest {
 	public void jobAddMobArgTestWithMobArg() {
 		String[] args = { "job", "addMob", "myjob", "" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-		assertEquals(104, result.size());
+		assertEquals(108, result.size());
 	}
 
 	@Test

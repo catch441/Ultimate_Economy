@@ -347,7 +347,7 @@ public class AdminshopTest {
 	@Test
 	public void addShopItemTestWithEnchantedTool() {
 		ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE, 16);
-		item.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
+		item.addUnsafeEnchantment(Enchantment.MENDING, 1);
 		CraftMetaItemMock meta = (CraftMetaItemMock) item.getItemMeta();
 		meta.setDamage(10);
 		item.setItemMeta(meta);
@@ -371,7 +371,7 @@ public class AdminshopTest {
 			ItemStack shopItemStack = inv.getItem(1);
 			assertEquals(Material.DIAMOND_PICKAXE, shopItemStack.getType());
 			assertEquals(1, shopItemStack.getEnchantments().size());
-			assertTrue(shopItemStack.getEnchantments().containsKey(Enchantment.DURABILITY));
+			assertTrue(shopItemStack.getEnchantments().containsKey(Enchantment.MENDING));
 			assertTrue(shopItemStack.getEnchantments().containsValue(1));
 			assertEquals(10, ((CraftMetaItemMock) shopItemStack.getItemMeta()).getDamage());
 			assertEquals(16, shopItemStack.getAmount());
@@ -810,8 +810,7 @@ public class AdminshopTest {
 			assertEquals(0, shop.getItemList().size());
 			// check shop inventory
 			Inventory inv = shop.getShopInventory();
-			ItemStack shopItem = inv.getItem(1);
-			assertEquals(Material.AIR, shopItem.getType());
+			assertNull(inv.getItem(1));
 			// check editor inventory
 			shop.openEditor(player);
 			Inventory editor = player.getOpenInventory().getTopInventory();
@@ -1007,7 +1006,7 @@ public class AdminshopTest {
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(14).getType());
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(15).getType());
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(16).getType());
-			assertEquals(Material.AIR, editor.getItem(17).getType());
+			assertNull(editor.getItem(17));
 			assertEquals("Slot 1", editor.getItem(0).getItemMeta().getDisplayName());
 			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 			assertEquals("Slot 3", editor.getItem(2).getItemMeta().getDisplayName());
@@ -1096,7 +1095,7 @@ public class AdminshopTest {
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(5).getType());
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(6).getType());
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(7).getType());
-			assertEquals(Material.AIR, editor.getItem(8).getType());
+			assertNull(editor.getItem(8));
 			assertEquals("Slot 1", editor.getItem(0).getItemMeta().getDisplayName());
 			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
 			assertEquals("Slot 3", editor.getItem(2).getItemMeta().getDisplayName());

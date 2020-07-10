@@ -20,6 +20,7 @@ public class ShopItem {
 	 * @param amount
 	 * @param sellPrice
 	 * @param buyPrice
+	 * @param slot
 	 */
 	public ShopItem(ItemStack itemStack, int amount, double sellPrice, double buyPrice,int slot) {
 		itemStack.setAmount(1);

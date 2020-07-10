@@ -87,7 +87,7 @@ public class ShopValidationHandler {
 	 * @param slot
 	 * @param inventory
 	 * @param reservedSlots
-	 * @return
+	 * @return isEmpzy
 	 * @throws GeneralEconomyException
 	 */
 	public boolean isSlotEmpty(int slot, Inventory inventory, int reservedSlots) throws GeneralEconomyException {

@@ -1,6 +1,7 @@
 package com.ue.jobsystem;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -217,14 +218,14 @@ public class JobcenterControllerTest {
 			ChestInventoryMock inv = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			assertEquals(9, inv.getSize());
 			assertEquals("center", inv.getName());
-			assertEquals(Material.AIR, inv.getItem(0).getType());
-			assertEquals(Material.AIR, inv.getItem(1).getType());
-			assertEquals(Material.AIR, inv.getItem(2).getType());
-			assertEquals(Material.AIR, inv.getItem(3).getType());
-			assertEquals(Material.AIR, inv.getItem(4).getType());
-			assertEquals(Material.AIR, inv.getItem(5).getType());
-			assertEquals(Material.AIR, inv.getItem(6).getType());
-			assertEquals(Material.AIR, inv.getItem(7).getType());
+			assertNull(inv.getItem(0));
+			assertNull(inv.getItem(1));
+			assertNull(inv.getItem(2));
+			assertNull(inv.getItem(3));
+			assertNull(inv.getItem(4));
+			assertNull(inv.getItem(5));
+			assertNull(inv.getItem(6));
+			assertNull(inv.getItem(7));
 			assertEquals(Material.ANVIL, inv.getItem(8).getType());
 			assertEquals("Info", inv.getItem(8).getItemMeta().getDisplayName());
 			assertEquals(2, inv.getItem(8).getItemMeta().getLore().size());
@@ -268,13 +269,13 @@ public class JobcenterControllerTest {
 			assertEquals("center", inv.getName());
 			assertEquals(Material.STONE, inv.getItem(0).getType());
 			assertEquals("myjob", inv.getItem(0).getItemMeta().getDisplayName());
-			assertEquals(Material.AIR, inv.getItem(1).getType());
-			assertEquals(Material.AIR, inv.getItem(2).getType());
-			assertEquals(Material.AIR, inv.getItem(3).getType());
-			assertEquals(Material.AIR, inv.getItem(4).getType());
-			assertEquals(Material.AIR, inv.getItem(5).getType());
-			assertEquals(Material.AIR, inv.getItem(6).getType());
-			assertEquals(Material.AIR, inv.getItem(7).getType());
+			assertNull(inv.getItem(1));
+			assertNull(inv.getItem(2));
+			assertNull(inv.getItem(3));
+			assertNull(inv.getItem(4));
+			assertNull(inv.getItem(5));
+			assertNull(inv.getItem(6));
+			assertNull(inv.getItem(7));
 			assertEquals(Material.ANVIL, inv.getItem(8).getType());
 			assertEquals("Info", inv.getItem(8).getItemMeta().getDisplayName());
 			assertEquals(2, inv.getItem(8).getItemMeta().getLore().size());
