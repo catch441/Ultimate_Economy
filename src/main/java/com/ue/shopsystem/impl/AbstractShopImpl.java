@@ -178,7 +178,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		getShopItemMap().put(slot, shopItem);
 		getEditorHandler().setOccupied(true, slot);
 		getSavefileHandler().saveItemNames(getUniqueItemStringList());
-		getSavefileHandler().saveShopItem(shopItem, slot, false);
+		getSavefileHandler().saveShopItem(shopItem, false);
 		addShopItemToInv(itemStack.clone(), shopItem.getAmount(), slot, sellPrice, buyPrice);
 	}
 
@@ -225,7 +225,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		getShopItemMap().remove(slot);
 		getSavefileHandler().saveItemNames(getUniqueItemStringList());
 		getEditorHandler().setOccupied(false, slot);
-		getSavefileHandler().saveShopItem(shopItem, slot, true);
+		getSavefileHandler().saveShopItem(shopItem, true);
 	}
 
 	@Override
