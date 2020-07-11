@@ -45,8 +45,8 @@ public enum EconomyPlayerCommandEnum {
 		boolean perform(String[] args, Player player, EconomyPlayer ecoPlayer) throws PlayerException {
 			DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.ROOT);
 			otherSymbols.setDecimalSeparator('.');
-			otherSymbols.setGroupingSeparator(','); 
-			DecimalFormat dFormat = new DecimalFormat("#.##",otherSymbols);
+			otherSymbols.setGroupingSeparator(',');
+			DecimalFormat dFormat = new DecimalFormat("#.##", otherSymbols);
 			dFormat.setRoundingMode(RoundingMode.DOWN);
 			if (args.length == 0) {
 				player.sendMessage(
@@ -136,7 +136,7 @@ public enum EconomyPlayerCommandEnum {
 	GIVEMONEY {
 		@Override
 		boolean perform(String[] args, Player player, EconomyPlayer ecoPlayer)
-				throws PlayerException, NumberFormatException, GeneralEconomyException {
+				throws PlayerException, GeneralEconomyException {
 			if (args.length == 2) {
 				double amount = Double.valueOf(args[1]);
 				EconomyPlayer receiver = EconomyPlayerController.getEconomyPlayerByName(args[0]);
@@ -150,13 +150,20 @@ public enum EconomyPlayerCommandEnum {
 			}
 			return true;
 		}
+	},
+	UNKNOWN {
+		@Override
+		boolean perform(String[] args, Player player, EconomyPlayer ecoPlayer) {
+			return false;
+		}
 	};
 
 	abstract boolean perform(String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws PlayerException, NumberFormatException, GeneralEconomyException;
 
 	/**
-	 * Returns a enum. Return null, if no enum is found.
+	 * Returns a enum. Returns EconomyPlayerCommandEnum.UNKNOWN, if no enum is
+	 * found.
 	 * 
 	 * @param value
 	 * @return player command enum
@@ -167,6 +174,6 @@ public enum EconomyPlayerCommandEnum {
 				return command;
 			}
 		}
-		return null;
+		return EconomyPlayerCommandEnum.UNKNOWN;
 	}
 }

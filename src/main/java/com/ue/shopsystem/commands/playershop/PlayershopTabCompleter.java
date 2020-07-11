@@ -74,10 +74,8 @@ public class PlayershopTabCompleter implements TabCompleter {
 		for (Profession profession : Profession.values()) {
 			if (args[2].equals("")) {
 				list.add(profession.name().toLowerCase());
-			} else {
-				if (profession.name().toLowerCase().contains(args[2])) {
-					list.add(profession.name().toLowerCase());
-				}
+			} else if (profession.name().toLowerCase().contains(args[2])) {
+				list.add(profession.name().toLowerCase());
 			}
 		}
 		return list;
@@ -101,20 +99,20 @@ public class PlayershopTabCompleter implements TabCompleter {
 
 	private List<String> getMatchingCommands(CommandSender sender, String[] args) {
 		List<String> list = new ArrayList<>();
-		addIfMatching(list,"create",args[0]);
-		addIfMatching(list,"delete",args[0]);
-		addIfMatching(list,"move",args[0]);
-		addIfMatching(list,"editShop",args[0]);
-		addIfMatching(list,"rename",args[0]);
-		addIfMatching(list,"resize",args[0]);
-		addIfMatching(list,"changeProfession",args[0]);
-		addIfMatching(list,"changeOwner",args[0]);
+		addIfMatching(list, "create", args[0]);
+		addIfMatching(list, "delete", args[0]);
+		addIfMatching(list, "move", args[0]);
+		addIfMatching(list, "editShop", args[0]);
+		addIfMatching(list, "rename", args[0]);
+		addIfMatching(list, "resize", args[0]);
+		addIfMatching(list, "changeProfession", args[0]);
+		addIfMatching(list, "changeOwner", args[0]);
 		if (sender.hasPermission("ultimate_economy.adminshop")) {
-			addIfMatching(list,"deleteOther",args[0]);
+			addIfMatching(list, "deleteOther", args[0]);
 		}
 		return list;
 	}
-	
+
 	private void addIfMatching(List<String> list, String command, String arg) {
 		if (command.contains(arg)) {
 			list.add(command);
@@ -122,20 +120,22 @@ public class PlayershopTabCompleter implements TabCompleter {
 	}
 
 	private List<String> getPlayerShopList(String arg, String playerName) {
-		List<String> temp = PlayershopController.getPlayerShopUniqueNameList();
 		List<String> list = new ArrayList<>();
-		if ("".equals(arg)) {
-			for (String shopName : temp) {
-				if (shopName.substring(shopName.indexOf("_") + 1).equals(playerName)) {
-					list.add(shopName.substring(0, shopName.indexOf("_")));
-				}
+		for (String shopName : getPlayershopNameListForPlayer(playerName)) {
+			if ("".equals(arg)) {
+				list.add(shopName);
+			} else if(shopName.contains(arg)) {
+				list.add(shopName);
 			}
-		} else {
-			for (String shopName : temp) {
-				if (shopName.substring(0, shopName.indexOf("_")).contains(arg)
-						&& shopName.substring(shopName.indexOf("_") + 1).equals(playerName)) {
-					list.add(shopName.substring(0, shopName.indexOf("_")));
-				}
+		}
+		return list;
+	}
+
+	private List<String> getPlayershopNameListForPlayer(String playerName) {
+		List<String> list = new ArrayList<>();
+		for (String shopName : PlayershopController.getPlayerShopUniqueNameList()) {
+			if (shopName.substring(shopName.indexOf("_") + 1).equals(playerName)) {
+				list.add(shopName.substring(0, shopName.indexOf("_")));
 			}
 		}
 		return list;

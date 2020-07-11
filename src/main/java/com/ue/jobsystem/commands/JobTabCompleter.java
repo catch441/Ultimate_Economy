@@ -128,9 +128,7 @@ public class JobTabCompleter implements TabCompleter {
 		} else {
 			List<String> list = new ArrayList<>();
 			for (String jobname : JobcenterController.getJobcenterNameList()) {
-				if (jobname.contains(arg)) {
-					list.add(jobname);
-				}
+				addIfMatching(list, jobname, arg);
 			}
 			return list;
 		}
@@ -143,45 +141,23 @@ public class JobTabCompleter implements TabCompleter {
 			list.add("treasure");
 			list.add("junk");
 		} else {
-			if ("fish".contains(arg)) {
-				list.add("fish");
-			}
-			if ("treasure".contains(arg)) {
-				list.add("treasure");
-			}
-			if ("junk".contains(arg)) {
-				list.add("junk");
-			}
+			addIfMatching(list, "fish", arg);
+			addIfMatching(list, "treasure", arg);
+			addIfMatching(list, "junk", arg);
 		}
 		return list;
 	}
 
 	private List<String> getMatchingJobCommands(String[] args) {
 		List<String> list = new ArrayList<>();
-		if ("create".contains(args[1])) {
-			list.add("create");
-		}
-		if ("delete".contains(args[1])) {
-			list.add("delete");
-		}
-		if ("addItem".contains(args[1])) {
-			list.add("addItem");
-		}
-		if ("removeItem".contains(args[1])) {
-			list.add("removeItem");
-		}
-		if ("addFisher".contains(args[1])) {
-			list.add("addFisher");
-		}
-		if ("removeFisher".contains(args[1])) {
-			list.add("removeFisher");
-		}
-		if ("addMob".contains(args[1])) {
-			list.add("addMob");
-		}
-		if ("removeMob".contains(args[1])) {
-			list.add("removeMob");
-		}
+		addIfMatching(list, "create", args[1]);
+		addIfMatching(list, "delete", args[1]);
+		addIfMatching(list, "addItem", args[1]);
+		addIfMatching(list, "removeItem", args[1]);
+		addIfMatching(list, "addFisher", args[1]);
+		addIfMatching(list, "removeFisher", args[1]);
+		addIfMatching(list, "addMob", args[1]);
+		addIfMatching(list, "removeMob", args[1]);
 		return list;
 	}
 
@@ -200,25 +176,19 @@ public class JobTabCompleter implements TabCompleter {
 
 	private List<String> getMatchingJobcenterCommands(String[] args) {
 		List<String> list = new ArrayList<>();
-		if ("create".contains(args[0])) {
-			list.add("create");
-		}
-		if ("delete".contains(args[0])) {
-			list.add("delete");
-		}
-		if ("move".contains(args[0])) {
-			list.add("move");
-		}
-		if ("job".contains(args[0])) {
-			list.add("job");
-		}
-		if ("addJob".contains(args[0])) {
-			list.add("addJob");
-		}
-		if ("removeJob".contains(args[0])) {
-			list.add("removeJob");
-		}
+		addIfMatching(list,"create",args[0]);
+		addIfMatching(list,"delete",args[0]);
+		addIfMatching(list,"move",args[0]);
+		addIfMatching(list,"job",args[0]);
+		addIfMatching(list,"addJob",args[0]);
+		addIfMatching(list,"removeJob",args[0]);
 		return list;
+	}
+	
+	private void addIfMatching(List<String> list, String command, String arg) {
+		if (command.contains(arg)) {
+			list.add(command);
+		}
 	}
 
 	private List<String> getAllJobcenterCommands() {
@@ -239,9 +209,7 @@ public class JobTabCompleter implements TabCompleter {
 			list = temp;
 		} else {
 			for (String jobname : temp) {
-				if (jobname.contains(arg)) {
-					list.add(jobname);
-				}
+				addIfMatching(list, jobname, arg);
 			}
 		}
 		return list;

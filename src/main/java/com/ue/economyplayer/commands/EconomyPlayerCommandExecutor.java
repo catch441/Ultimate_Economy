@@ -19,13 +19,8 @@ public class EconomyPlayerCommandExecutor implements CommandExecutor {
 			if ("givemoney".equals(label)) {
 				return EconomyPlayerCommandEnum.GIVEMONEY.perform(args, null, null);
 			} else if (sender instanceof Player) {
-				Player player = (Player) sender;
-				EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(player.getName());
-				EconomyPlayerCommandEnum commandEnum = EconomyPlayerCommandEnum.getEnum(label);
-				if (commandEnum != null) {
-					return commandEnum.perform(args, player, ecoPlayer);
-				}
-				return false;
+				EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(sender.getName());
+				return EconomyPlayerCommandEnum.getEnum(label).perform(args, (Player) sender, ecoPlayer);
 			}
 		} catch (PlayerException | GeneralEconomyException e) {
 			sender.sendMessage(e.getMessage());

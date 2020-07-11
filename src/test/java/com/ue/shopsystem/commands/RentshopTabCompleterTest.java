@@ -1,4 +1,4 @@
-package com.ue.shopsystem.commands.rentshop;
+package com.ue.shopsystem.commands;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -19,6 +19,7 @@ import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.api.Rentshop;
 import com.ue.shopsystem.api.RentshopController;
+import com.ue.shopsystem.commands.rentshop.RentshopTabCompleter;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;

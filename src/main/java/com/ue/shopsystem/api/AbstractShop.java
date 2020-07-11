@@ -80,6 +80,15 @@ public abstract interface AbstractShop {
 	 * @throws GeneralEconomyException
 	 */
 	public ShopItem getShopItem(int slot) throws GeneralEconomyException, ShopSystemException;
+	
+	/**
+	 * Returns a shop item.
+	 * 
+	 * @param stack
+	 * @return ShopItem
+	 * @throws ShopSystemException
+	 */
+	public ShopItem getShopItem(ItemStack stack) throws ShopSystemException;
 
 	/**
 	 * This method adds a item to this shop.
@@ -238,13 +247,4 @@ public abstract interface AbstractShop {
 	 * @return shop villager
 	 */
 	public Villager getShopVillager();
-
-	/**
-	 * Returns a shop item.
-	 * 
-	 * @param stack
-	 * @return
-	 * @throws ShopSystemException
-	 */
-	public ShopItem getShopItem(ItemStack stack) throws ShopSystemException;
 }

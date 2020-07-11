@@ -13,23 +13,31 @@ import com.ue.shopsystem.api.RentshopController;
 
 public class RentDailyTask extends BukkitRunnable {
 
-    @Override
-    public void run() {
-	for (Rentshop shop : RentshopController.getRentShops()) {
-	    if (!shop.isRentable()) {
-		if (Calendar.getInstance().getTimeInMillis() >= shop.getRentUntil()) {
-		    try {
+	@Override
+	public void run() {
+		for (Rentshop shop : RentshopController.getRentShops()) {
+			if (!shop.isRentable()) {
+				if (Calendar.getInstance().getTimeInMillis() >= shop.getRentUntil()) {
+					resetShop(shop);
+				} else if ((shop.getRentUntil() - Calendar.getInstance().getTimeInMillis()) < 600000) {
+					sendReminder(shop);
+				}
+			}
+		}
+	}
+
+	private void sendReminder(Rentshop shop) {
+		if (shop.getOwner().isOnline()) {
+			shop.getOwner().getPlayer().sendMessage(MessageWrapper.getString("rent_reminder"));
+		}
+	}
+
+	private void resetShop(Rentshop shop) {
+		try {
 			shop.resetShop();
-		    } catch (ShopSystemException | GeneralEconomyException e) {
+		} catch (ShopSystemException | GeneralEconomyException e) {
 			Bukkit.getLogger().warning("[Ultimate_Economy] Error on rent task");
 			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-		    }
-		} else if ((shop.getRentUntil() - Calendar.getInstance().getTimeInMillis()) < 600000) {
-		    if (shop.getOwner().isOnline()) {
-			shop.getOwner().getPlayer().sendMessage(MessageWrapper.getString("rent_reminder"));
-		    }
 		}
-	    }
 	}
-    }
 }

@@ -47,7 +47,7 @@ import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.api.PlayershopController;
 import com.ue.shopsystem.api.RentshopController;
 import com.ue.shopsystem.commands.adminshop.AdminshopCommandExecutor;
-import com.ue.shopsystem.commands.adminshop.AdminshopTabCompleterImpl;
+import com.ue.shopsystem.commands.adminshop.AdminshopTabCompleter;
 import com.ue.shopsystem.commands.playershop.PlayershopCommandExecutor;
 import com.ue.shopsystem.commands.playershop.PlayershopTabCompleter;
 import com.ue.shopsystem.commands.rentshop.RentshopCommandExecutor;
@@ -221,7 +221,7 @@ public class UltimateEconomy extends JavaPlugin {
 		getCommand("jobcenter").setTabCompleter(new JobTabCompleter());
 		getCommand("town").setTabCompleter(new TownTabCompleter());
 		getCommand("townworld").setTabCompleter(new TownworldTabCompleter());
-		getCommand("adminshop").setTabCompleter(new AdminshopTabCompleterImpl());
+		getCommand("adminshop").setTabCompleter(new AdminshopTabCompleter());
 		getCommand("playershop").setTabCompleter(new PlayershopTabCompleter());
 		getCommand("rentshop").setTabCompleter(new RentshopTabCompleter());
 		getCommand("ue-config").setTabCompleter(new ConfigTabCompleter());

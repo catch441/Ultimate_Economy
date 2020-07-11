@@ -174,7 +174,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * permissions like the parent playershop. {@inheritDoc}
 	 */
 	@Override
-	public void moveShop(Location location) throws TownSystemException {
+	public void moveShop(Location location) {
 		setupShopLocation(location);
 		getShopVillager().teleport(location);
 	}
