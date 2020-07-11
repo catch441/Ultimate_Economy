@@ -28,8 +28,12 @@ public class ShopSavefileHandler {
 	private File file;
 	private YamlConfiguration config;
 
-	protected ShopSavefileHandler(String id) {
-		file = new File(UltimateEconomy.getInstance.getDataFolder(), id + ".yml");
+	/**
+	 * Constructor for a new shop savefile handler.
+	 * @param shopId
+	 */
+	public ShopSavefileHandler(String shopId) {
+		file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
 		if (!getSaveFile().exists()) {
 			try {
 				getSaveFile().createNewFile();
@@ -41,12 +45,21 @@ public class ShopSavefileHandler {
 		config = YamlConfiguration.loadConfiguration(getSaveFile());
 	}
 
-	protected void saveShopName(String name) {
+	/**
+	 * Saves the shopname.
+	 * @param name
+	 */
+	public void saveShopName(String name) {
 		getConfig().set("ShopName", name);
 		save();
 	}
 
-	protected void saveShopItem(ShopItem shopItem, int slot, boolean delete) {
+	/**
+	 * Saves a shopitem.
+	 * @param shopItem
+	 * @param delete
+	 */
+	public void saveShopItem(ShopItem shopItem, boolean delete) {
 		if (delete) {
 			getConfig().set("ShopItems." + shopItem.getItemString(), null);
 			save();
@@ -56,7 +69,7 @@ public class ShopSavefileHandler {
 			} else {
 				getConfig().set("ShopItems." + shopItem.getItemString() + ".Name", shopItem.getItemStack());
 			}
-			getConfig().set("ShopItems." + shopItem.getItemString() + ".Slot", slot);
+			getConfig().set("ShopItems." + shopItem.getItemString() + ".Slot", shopItem.getSlot());
 			getConfig().set("ShopItems." + shopItem.getItemString() + ".newSaveMethod", "true");
 			save();
 			saveShopItemSellPrice(shopItem.getItemString(), shopItem.getSellPrice());
@@ -65,50 +78,90 @@ public class ShopSavefileHandler {
 		}
 	}
 
-	protected void saveShopItemSellPrice(String itemString, double sellPrice) {
+	/**
+	 * Saves a shop item sell price.
+	 * @param itemString
+	 * @param sellPrice
+	 */
+	public void saveShopItemSellPrice(String itemString, double sellPrice) {
 		getConfig().set("ShopItems." + itemString + ".sellPrice", sellPrice);
 		save();
 	}
 
-	protected void saveShopItemBuyPrice(String itemString, double buyPrice) {
+	/**
+	 * Saves a shop item buy price.
+	 * @param itemString
+	 * @param buyPrice
+	 */
+	public void saveShopItemBuyPrice(String itemString, double buyPrice) {
 		getConfig().set("ShopItems." + itemString + ".buyPrice", buyPrice);
 		save();
 	}
 
-	protected void saveShopItemAmount(String itemString, int amount) {
+	/**
+	 * Saves a shop item amount.
+	 * @param itemString
+	 * @param amount
+	 */
+	public void saveShopItemAmount(String itemString, int amount) {
 		getConfig().set("ShopItems." + itemString + ".Amount", amount);
 		save();
 	}
 
-	protected void saveShopSize(int size) {
+	/**
+	 * Saves the shop size.
+	 * @param size
+	 */
+	public void saveShopSize(int size) {
 		getConfig().set("ShopSize", size);
 		save();
 	}
 
-	protected void saveShopLocation(Location location) {
+	/**
+	 * Saves the shop location.
+	 * @param location
+	 */
+	public void saveShopLocation(Location location) {
 		getConfig().set("ShopLocation.x", location.getX());
 		getConfig().set("ShopLocation.y", location.getY());
 		getConfig().set("ShopLocation.z", location.getZ());
 		getConfig().set("ShopLocation.World", location.getWorld().getName());
 		save();
 	}
-
-	protected void saveItemNames(List<String> itemList) {
+	
+	/**
+	 * Saves the item name list.
+	 * @param itemList
+	 */
+	public void saveItemNames(List<String> itemList) {
 		getConfig().set("ShopItemList", itemList);
 		save();
 	}
 
-	protected void saveProfession(Profession profession) {
+	/**
+	 * Saves the shop villager profession.
+	 * @param profession
+	 */
+	public void saveProfession(Profession profession) {
 		getConfig().set("Profession", profession.name());
 		save();
 	}
 
-	protected void saveStock(String itemString, int stock) {
+	/**
+	 * Saves the stock for a item.
+	 * @param itemString
+	 * @param stock
+	 */
+	public void saveStock(String itemString, int stock) {
 		getConfig().set("ShopItems." + itemString + ".stock", stock);
 		save();
 	}
 
-	protected void saveOwner(EconomyPlayer ecoPlayer) {
+	/**
+	 * Saves the shop owner.
+	 * @param ecoPlayer
+	 */
+	public void saveOwner(EconomyPlayer ecoPlayer) {
 		if (ecoPlayer != null) {
 			getConfig().set("Owner", ecoPlayer.getName());
 		} else {
@@ -117,22 +170,40 @@ public class ShopSavefileHandler {
 		save();
 	}
 
-	protected void saveRentUntil(long rentUntil) {
+	/**
+	 * Saves the rent until time.
+	 * @param rentUntil
+	 */
+	public void saveRentUntil(long rentUntil) {
 		getConfig().set("RentUntil", rentUntil);
 		save();
 	}
 
-	protected void saveRentalFee(double fee) {
+	/**
+	 * Saves the rental fee.
+	 * @param fee
+	 */
+	public void saveRentalFee(double fee) {
 		getConfig().set("RentalFee", fee);
 		save();
 	}
 
-	protected void saveRentable(boolean isRentable) {
+	/**
+	 * Saves if the shop is rentable.
+	 * @param isRentable
+	 */
+	public void saveRentable(boolean isRentable) {
 		getConfig().set("Rentable", isRentable);
 		save();
 	}
 
-	protected void changeSavefileName(File dataFolder, String newName) throws ShopSystemException {
+	/**
+	 * Changes the savefile name.
+	 * @param dataFolder
+	 * @param newName
+	 * @throws ShopSystemException
+	 */
+	public void changeSavefileName(File dataFolder, String newName) throws ShopSystemException {
 		File newFile = new File(dataFolder, newName + ".yml");
 		checkForRenamingSavefileIsPossible(newFile);
 		getSaveFile().delete();
@@ -144,7 +215,11 @@ public class ShopSavefileHandler {
 	 * Loading methods
 	 */
 
-	protected Profession loadShopVillagerProfession() {
+	/**
+	 * Loads the shop villager profession.
+	 * @return profession
+	 */
+	public Profession loadShopVillagerProfession() {
 		if (getConfig().isSet("Profession")) {
 			return Profession.valueOf(config.getString("Profession"));
 		} else {
@@ -152,27 +227,46 @@ public class ShopSavefileHandler {
 		}
 	}
 
-	protected int loadShopSize() {
+	/**
+	 * Loads the shop size.
+	 * @return shop size
+	 */
+	public int loadShopSize() {
 		return getConfig().getInt("ShopSize");
 	}
 
-	protected String loadShopName() {
+	/**
+	 * Loads the shop name.
+	 * @return shop name
+	 */
+	public String loadShopName() {
 		return getConfig().getString("ShopName");
 	}
 
-	protected Location loadShopLocation() throws TownSystemException {
+	/**
+	 * Loads the shop location.
+	 * @return location
+	 * @throws TownSystemException
+	 */
+	public Location loadShopLocation() throws TownSystemException {
 		World world = Bukkit.getWorld(getConfig().getString("ShopLocation.World"));
 		checkForWorldExists(world);
 		return new Location(world, getConfig().getDouble("ShopLocation.x"), getConfig().getDouble("ShopLocation.y"),
 				getConfig().getDouble("ShopLocation.z"));
 	}
 
-	protected ShopItem loadItem(String itemString) {
+	/**
+	 * Loads a shop item.
+	 * @param itemString
+	 * @return shop item
+	 */
+	public ShopItem loadItem(String itemString) {
 		ItemStack stack = null;
 		if (itemString.contains("SPAWNER_")) {
 			stack = new ItemStack(Material.SPAWNER, 1);
 			ItemMeta meta = stack.getItemMeta();
-			meta.setDisplayName("COW");
+			String name = getConfig().getString("ShopItems." + itemString + ".Name");
+			meta.setDisplayName(name.substring(8));
 			stack.setItemMeta(meta);
 		} else {
 			stack = getConfig().getItemStack("ShopItems." + itemString + ".Name");
@@ -184,30 +278,56 @@ public class ShopSavefileHandler {
 		return new ShopItem(stack, amount, sellPrice, buyPrice, slot);
 	}
 
-	protected List<String> loadItemNameList() {
+	/**
+	 * Loads the item name list.
+	 * @return list of strings
+	 */
+	public List<String> loadItemNameList() {
 		removeDefaultItemFromItemList();
 		return getConfig().getStringList("ShopItemList");
 	}
 
-	protected int loadStock(String itemString) {
+	/**
+	 * Loads the stock of a item.
+	 * @param itemString
+	 * @return stock
+	 */
+	public int loadStock(String itemString) {
 		return getConfig().getInt("ShopItems." + itemString + ".stock");
 	}
 
-	protected String loadOwner(String name) throws PlayerException {
+	/**
+	 * Loads the shop owner.
+	 * @param name
+	 * @return owner name
+	 */
+	public String loadOwner(String name) {
 		convertToNewOwnerSaving(name);
 		return getConfig().getString("Owner");
 	}
 
-	protected boolean loadRentable() {
+	/**
+	 * Loads if the shop is rentable.
+	 * @return rentable
+	 */
+	public boolean loadRentable() {
 		return getConfig().getBoolean("Rentable");
 	}
 
-	protected long loadRentUntil() {
+	/**
+	 * Loads the rent until time.
+	 * @return rent until
+	 */
+	public long loadRentUntil() {
 		return getConfig().getLong("RentUntil");
 	}
 
-	protected double loadRentalFee() {
-		return getConfig().getInt("RentalFee");
+	/**
+	 * Loads the rental fee.
+	 * @return rental fee
+	 */
+	public double loadRentalFee() {
+		return getConfig().getDouble("RentalFee");
 	}
 
 	private File getSaveFile() {
@@ -218,7 +338,7 @@ public class ShopSavefileHandler {
 		return config;
 	}
 
-	protected void save() {
+	private void save() {
 		try {
 			getConfig().save(getSaveFile());
 		} catch (IOException e) {
@@ -228,9 +348,9 @@ public class ShopSavefileHandler {
 	}
 
 	/**
-	 * Deletes the
+	 * Deletes the savefile.
 	 */
-	protected void deleteFile() {
+	public void deleteFile() {
 		getSaveFile().delete();
 	}
 
