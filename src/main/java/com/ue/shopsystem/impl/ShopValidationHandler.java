@@ -129,7 +129,7 @@ public class ShopValidationHandler {
 	 * @param size
 	 * @throws GeneralEconomyException
 	 */
-	public void checkForValidSize(int size) throws GeneralEconomyException {
+	public static void checkForValidSize(int size) throws GeneralEconomyException {
 		if (size % 9 != 0 || size > 54) {
 			throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
 		}
@@ -246,7 +246,7 @@ public class ShopValidationHandler {
 	 * @param name
 	 * @throws ShopSystemException
 	 */
-	public void checkForValidShopName(String name) throws ShopSystemException {
+	public static void checkForValidShopName(String name) throws ShopSystemException {
 		if (name.contains("_")) {
 			throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 		}
@@ -259,10 +259,10 @@ public class ShopValidationHandler {
 	 * @param owner
 	 * @throws GeneralEconomyException
 	 */
-	public void checkForShopNameIsFree(String name, EconomyPlayer owner) throws GeneralEconomyException {
+	public static void checkForShopNameIsFree(String name, EconomyPlayer owner) throws GeneralEconomyException {
 		if (PlayershopController.getPlayerShopUniqueNameList().contains(name + "_" + owner.getName())) {
 			throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
-					name + owner.getName());
+					name + "_" + owner.getName());
 		}
 	}
 

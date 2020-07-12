@@ -135,7 +135,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 */
 	@Override
 	public void changeShopSize(int newSize) throws ShopSystemException, PlayerException, GeneralEconomyException {
-		getValidationHandler().checkForValidSize(newSize);
+		getValidationHandler();
+		ShopValidationHandler.checkForValidSize(newSize);
 		getValidationHandler().checkForResizePossible(getShopInventory(), getSize(), newSize, 2);
 		setSize(newSize);
 		getSavefileHandler().saveShopSize(newSize);
@@ -164,8 +165,10 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 */
 	@Override
 	public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
-		getValidationHandler().checkForShopNameIsFree(name, getOwner());
-		getValidationHandler().checkForValidShopName(name);
+		getValidationHandler();
+		ShopValidationHandler.checkForShopNameIsFree(name, getOwner());
+		getValidationHandler();
+		ShopValidationHandler.checkForValidShopName(name);
 		setupShopName(name);
 		getShopVillager().setCustomName(name + "_" + getOwner().getName());
 		changeInventoryNames(name);

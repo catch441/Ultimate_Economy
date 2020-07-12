@@ -285,7 +285,7 @@ public class ShopValidationHandlerTest {
 	@Test
 	public void checkForValidSizeTest1() {
 		try {
-			validationHandler.checkForValidSize(90);
+			ShopValidationHandler.checkForValidSize(90);
 			fail();
 		} catch (GeneralEconomyException e) {
 			assertEquals("§cThe parameter §490§c is invalid!", e.getMessage());
@@ -295,7 +295,7 @@ public class ShopValidationHandlerTest {
 	@Test
 	public void checkForValidSizeTest2() {
 		try {
-			validationHandler.checkForValidSize(5);
+			ShopValidationHandler.checkForValidSize(5);
 			fail();
 		} catch (GeneralEconomyException e) {
 			assertEquals("§cThe parameter §45§c is invalid!", e.getMessage());
@@ -305,7 +305,7 @@ public class ShopValidationHandlerTest {
 	@Test
 	public void checkForValidSizeTestValid() {
 		try {
-			validationHandler.checkForValidSize(18);
+			ShopValidationHandler.checkForValidSize(18);
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -391,7 +391,7 @@ public class ShopValidationHandlerTest {
 	@Test
 	public void checkForValidShopNameTest() {
 		try {
-			validationHandler.checkForValidShopName("invalid_");
+			ShopValidationHandler.checkForValidShopName("invalid_");
 			fail();
 		} catch (ShopSystemException e) {
 			assertEquals("§cThis shopname is invalid! Use a name without _!", e.getMessage());
@@ -401,7 +401,7 @@ public class ShopValidationHandlerTest {
 	@Test
 	public void checkForValidShopNameTestValid() {
 		try {
-			validationHandler.checkForValidShopName("valid");
+			ShopValidationHandler.checkForValidShopName("valid");
 		} catch (ShopSystemException e) {
 			fail();
 		}
@@ -517,10 +517,10 @@ public class ShopValidationHandlerTest {
 		try {
 			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
 			PlayershopController.createPlayerShop("myshop", new Location(world, 1, 1, 1), 9, ecoPlayer);
-			validationHandler.checkForShopNameIsFree("myshop",ecoPlayer);
+			ShopValidationHandler.checkForShopNameIsFree("myshop",ecoPlayer);
 			fail();
 		} catch (GeneralEconomyException e) {
-			assertEquals("§c§4myshopcatch441§c already exists!", e.getMessage());
+			assertEquals("§c§4myshop_catch441§c already exists!", e.getMessage());
 		} catch (PlayerException | TownSystemException | ShopSystemException e) {
 			fail();
 		}
@@ -530,7 +530,7 @@ public class ShopValidationHandlerTest {
 	public void checkForShopNameIsFreeTestValid() {
 		try {
 			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
-			validationHandler.checkForShopNameIsFree("myshop",ecoPlayer);	
+			ShopValidationHandler.checkForShopNameIsFree("myshop",ecoPlayer);	
 		} catch (GeneralEconomyException e) {
 			fail();
 		}

@@ -13,10 +13,10 @@ import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.PlayerExceptionMessageEnum;
-import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.impl.PlayershopImpl;
+import com.ue.shopsystem.impl.ShopValidationHandler;
 import com.ue.townsystem.api.Town;
 import com.ue.townsystem.api.Townworld;
 import com.ue.townsystem.api.TownworldController;
@@ -126,12 +126,11 @@ public class PlayershopController {
 	 */
 	public static void createPlayerShop(String name, Location spawnLocation, int size, EconomyPlayer ecoPlayer)
 			throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
-		checkForValidShopName(name);
+		ShopValidationHandler.checkForValidShopName(name);
 		checkForMaxPlayershopsForPlayer(ecoPlayer);
 		checkForTownworldPlotPermission(spawnLocation, ecoPlayer);
-		checkForUniqueShopnameForPlayer(name, ecoPlayer);
-		checkForValidSize(size);
-
+		ShopValidationHandler.checkForShopNameIsFree(name, ecoPlayer);
+		ShopValidationHandler.checkForValidSize(size);
 		getPlayerShops().add(new PlayershopImpl(name, ecoPlayer, generateFreePlayerShopId(), spawnLocation, size));
 		UltimateEconomy.getInstance.getConfig().set("PlayerShopIds", PlayershopController.getPlayershopIdList());
 		UltimateEconomy.getInstance.saveConfig();
@@ -218,20 +217,6 @@ public class PlayershopController {
 	 * 
 	 */
 
-	private static void checkForValidSize(int size) throws GeneralEconomyException {
-		if (size % 9 != 0) {
-			throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
-		}
-	}
-
-	private static void checkForUniqueShopnameForPlayer(String name, EconomyPlayer ecoPlayer)
-			throws GeneralEconomyException {
-		if (getPlayerShopUniqueNameList().contains(name + "_" + ecoPlayer.getName())) {
-			throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
-					name + "_" + ecoPlayer.getName());
-		}
-	}
-
 	private static void checkForTownworldPlotPermission(Location spawnLocation, EconomyPlayer ecoPlayer)
 			throws PlayerException, TownSystemException {
 		if (TownworldController.isTownWorld(spawnLocation.getWorld().getName())) {
@@ -257,12 +242,6 @@ public class PlayershopController {
 		}
 		if (actualNumber >= ConfigController.getMaxPlayershops()) {
 			throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
-		}
-	}
-
-	private static void checkForValidShopName(String name) throws ShopSystemException {
-		if (name.contains("_")) {
-			throw ShopSystemException.getException(ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 		}
 	}
 }

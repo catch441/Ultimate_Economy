@@ -1011,7 +1011,7 @@ public class PlayershopTest {
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
 			assertTrue(e instanceof GeneralEconomyException);
-			assertEquals("§c§4newshopcatch441§c already exists!", e.getMessage());
+			assertEquals("§c§4newshop_catch441§c already exists!", e.getMessage());
 		}
 	}
 
