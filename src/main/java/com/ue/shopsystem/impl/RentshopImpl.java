@@ -278,6 +278,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
 	@Override
 	public void resetShop() throws ShopSystemException, GeneralEconomyException {
+		removeAllItems();
 		setOwner(null);
 		getSavefileHandler().saveOwner(null);
 		rentUntil = 0L;
@@ -285,8 +286,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		getSavefileHandler().saveRentUntil(0L);
 		getSavefileHandler().saveRentable(true);
 		changeProfession(Profession.NITWIT);
-		changeShopName("RentShop");
-		removeAllItems();
+		changeShopName("RentShop");	
 	}
 
 	/*
