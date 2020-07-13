@@ -1,12 +1,16 @@
 package com.ue.shopsystem.commands.adminshop;
 
 import java.util.ArrayList;
+import java.util.Map.Entry;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
@@ -296,7 +300,7 @@ public enum AdminshopCommandEnum {
 					enchantmentList.add(args[i + 6].toLowerCase() + "-" + args[i + 7]);
 				}
 				ItemStack iStack = new ItemStack(Material.valueOf(args[2].toUpperCase()), Integer.valueOf(args[4]));
-				ArrayList<String> newEnchantmentList = AbstractShopImpl.addEnchantments(iStack, enchantmentList);
+				ArrayList<String> newEnchantmentList = addEnchantments(iStack, enchantmentList);
 				if (newEnchantmentList.size() < enchantmentList.size()) {
 					p.sendMessage(ChatColor.RED + "Not all enchantments could be used!");
 				}
@@ -306,5 +310,53 @@ public enum AdminshopCommandEnum {
 				throw PlayerException.getException(PlayerExceptionMessageEnum.ENCHANTMENTLIST_INCOMPLETE);
 			}
 		}
+	}
+	
+	/**
+	 * --Utils Method--
+	 * <p>
+	 * This Method adds a list of enchantments to a given itemstack and returns a
+	 * list of all valid used enchantments.
+	 * 
+	 * @param itemStack
+	 * @param enchantmentList
+	 * @return list of used enachantments
+	 */
+	public static ArrayList<String> addEnchantments(ItemStack itemStack, ArrayList<String> enchantmentList) {
+		Enchantment e = null;
+		int lvl = 0;
+		ArrayList<String> newList = new ArrayList<>();
+		for (String enchantment : enchantmentList) {
+			e = Enchantment.getByKey(NamespacedKey.minecraft(enchantment.substring(0, enchantment.indexOf("-"))));
+			lvl = Integer.valueOf(enchantment.substring(enchantment.indexOf("-") + 1));
+			if (e.getMaxLevel() < lvl) {
+				lvl = e.getMaxLevel();
+				enchantment = enchantment.substring(0, enchantment.indexOf("-") + 1) + String.valueOf(lvl);
+			}
+			if (itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
+				EnchantmentStorageMeta meta = (EnchantmentStorageMeta) itemStack.getItemMeta();
+				meta.addStoredEnchant(e, lvl, true);
+				itemStack.setItemMeta(meta);
+			} else if (e.canEnchantItem(itemStack)) {
+				itemStack.addEnchantment(e, lvl);
+			}
+		}
+		if (itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
+			EnchantmentStorageMeta meta = (EnchantmentStorageMeta) itemStack.getItemMeta();
+			for (Entry<Enchantment, Integer> map : meta.getStoredEnchants().entrySet()) {
+				newList.add(
+						map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1)
+								+ "-" + map.getValue().intValue());
+				newList.sort(String.CASE_INSENSITIVE_ORDER);
+			}
+		} else {
+			for (Entry<Enchantment, Integer> map : itemStack.getEnchantments().entrySet()) {
+				newList.add(
+						map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1)
+								+ "-" + map.getValue().intValue());
+				newList.sort(String.CASE_INSENSITIVE_ORDER);
+			}
+		}
+		return newList;
 	}
 }

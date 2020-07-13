@@ -105,6 +105,90 @@ public class AdminshopTest {
 	}
 	
 	@Test
+	public void sellShopItemTestWithInvalidSlot() {
+		Location location = new Location(world, 1.5, 2.3, 6.9);
+		try {
+			AdminshopController.createAdminShop("myshop", location, 9);
+			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			shop.sellShopItem(-20, 20, null, true);
+			fail();
+		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+			assertTrue(e instanceof GeneralEconomyException);
+			assertEquals("§cThe parameter §4-19§c is invalid!", e.getMessage());
+		}
+	}
+	
+	@Test
+	public void sellShopItemTestWithOfflinePlayer() {
+		Location location = new Location(world, 1.5, 2.3, 6.9);
+		try {
+			AdminshopController.createAdminShop("myshop", location, 9);
+			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			shop.addShopItem(0, 1, 2, new ItemStack(Material.STONE));
+			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			ecoPlayer.setPlayer(null);
+			shop.sellShopItem(0, 1, ecoPlayer, true);
+			fail();
+		} catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
+			assertTrue(e instanceof PlayerException);
+			assertEquals("§cThe player is not online!", e.getMessage());
+			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			ecoPlayer.setPlayer(player);
+		}
+	}
+	
+	@Test
+	public void sellShopItemTestPlural() {
+		Location location = new Location(world, 1.5, 2.3, 6.9);
+		try {
+			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			AdminshopController.createAdminShop("myshop", location, 9);
+			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			ItemStack stack = new ItemStack(Material.STONE);
+			stack.setAmount(4);
+			shop.addShopItem(0, 1, 2, stack);
+			stack.setAmount(20);
+			player.getInventory().setItem(0,stack);
+			stack.setAmount(64);
+			player.getInventory().setItem(1, new ItemStack(Material.STICK));
+			player.getInventory().setItem(2, stack);;
+			shop.sellShopItem(0, 30, ecoPlayer, true);
+			assertEquals(54, player.getInventory().getItem(2).getAmount());
+			assertNull(player.getInventory().getItem(0));
+			assertEquals("7.5", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
+			assertEquals("§6§a30§6 items were sold for §a7.5§6 §a$§6.", player.nextMessage());
+			assertNull(player.nextMessage());
+			ecoPlayer.decreasePlayerAmount(5, false);
+			player.getInventory().clear();
+		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void sellShopItemTestSingular() {
+		Location location = new Location(world, 1.5, 2.3, 6.9);
+		try {
+			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			AdminshopController.createAdminShop("myshop", location, 9);
+			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			ItemStack stack = new ItemStack(Material.STONE);
+			shop.addShopItem(0, 1, 2, stack);
+			stack.setAmount(1);
+			player.getInventory().addItem(stack);
+			shop.sellShopItem(0, 1, ecoPlayer, true);
+			assertNull(player.getInventory().getItem(0));
+			assertEquals("1.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
+			assertEquals("§6§a1§6 item was sold for §a1.0§6 §a$§6.", player.nextMessage());
+			assertNull(player.nextMessage());
+			ecoPlayer.decreasePlayerAmount(1, false);
+			player.getInventory().clear();
+		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+			fail();
+		}
+	}
+	
+	@Test
 	public void constructorLoadTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
@@ -1497,7 +1581,7 @@ public class AdminshopTest {
 	}
 
 	@Test
-	public void getItemTest() {
+	public void getShopTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
@@ -1511,6 +1595,63 @@ public class AdminshopTest {
 			assertEquals(Material.STONE, item.getItemStack().getType());
 		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 			fail();
+		}
+	}
+	
+	@Test
+	public void getShopTestWithEmptySlot() {
+		Location location = new Location(world, 1.5, 2.3, 6.9);
+		try {
+			AdminshopController.createAdminShop("myshop", location, 9);
+			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			shop.getShopItem(0);
+			fail();
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			assertTrue(e instanceof ShopSystemException);
+			assertEquals("§cThis slot is empty!", e.getMessage());
+		}
+	}
+	
+	@Test
+	public void getShopTestWithStack() {
+		Location location = new Location(world, 1.5, 2.3, 6.9);
+		try {
+			AdminshopController.createAdminShop("myshop", location, 9);
+			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			ItemStack stack = new ItemStack(Material.STONE);
+			ItemMeta meta = stack.getItemMeta();
+			List<String> lore = new ArrayList<>();
+			lore.add("kthschnll");
+			meta.setLore(lore);
+			stack.setItemMeta(meta);
+			stack.setAmount(10);
+			shop.addShopItem(2, 10, 1, stack);
+			shop.addShopItem(0, 10, 1, new ItemStack(Material.STONE));
+			ShopItem result = shop.getShopItem(stack);
+			assertEquals(10, result.getAmount());
+			assertEquals("1.0", String.valueOf(result.getBuyPrice()));
+			assertEquals("10.0", String.valueOf(result.getSellPrice()));
+			assertEquals("ItemStack{STONE x 1, UNSPECIFIC_META:{meta-type=UNSPECIFIC, lore=[kthschnll]}}", result.getItemString());
+			assertEquals(2, result.getSlot());
+			assertEquals(0, result.getStock());
+			stack.setAmount(1);
+			assertEquals(stack, result.getItemStack());
+		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void getShopTestWithStackEmptySlot() {
+		Location location = new Location(world, 1.5, 2.3, 6.9);
+		try {
+			AdminshopController.createAdminShop("myshop", location, 9);
+			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			shop.getShopItem(new ItemStack(Material.STONE));
+			fail();
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			assertTrue(e instanceof ShopSystemException);
+			assertEquals("§cThis item does not exist in this shop!", e.getMessage());
 		}
 	}
 

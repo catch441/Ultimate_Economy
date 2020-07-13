@@ -6,15 +6,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.World;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -22,7 +19,6 @@ import org.bukkit.entity.Villager;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
@@ -230,25 +226,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	@Override
-	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
-			throws GeneralEconomyException, PlayerException, ShopSystemException {
-		getValidationHandler().checkForValidSlot(slot, getSize(), 1);
-		getValidationHandler().checkForPlayerIsOnline(ecoPlayer);
-		getValidationHandler().checkForPlayerInventoryNotFull(ecoPlayer.getPlayer().getInventory());
-		// no action, if slot is not filled
-		if (!getValidationHandler().isSlotEmpty(slot, getShopInventory(), 1)) {
-			ShopItem shopItem = getShopItem(slot);
-			// if player has not enough money, then the decrease method throws a
-			// playerexception
-			ecoPlayer.decreasePlayerAmount(shopItem.getBuyPrice(), true);
-			ItemStack stack = shopItem.getItemStack().clone();
-			stack.setAmount(shopItem.getAmount());
-			ecoPlayer.getPlayer().getInventory().addItem(stack);
-			if (sendMessage) {
-				sendBuySellPlayerMessage(shopItem.getAmount(), ecoPlayer, shopItem.getBuyPrice(), "sell");
-			}
-		}
-	}
+	public abstract void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
+			throws GeneralEconomyException, PlayerException, ShopSystemException;
 
 	@Override
 	public void sellShopItem(int slot, int amount, EconomyPlayer ecoPlayer, boolean sendMessage)
@@ -256,15 +235,12 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		getValidationHandler().checkForValidSlot(slot, getSize(), 1);
 		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
 		getValidationHandler().checkForPlayerIsOnline(ecoPlayer);
-		// no action, if slot is not filled
-		if (!getValidationHandler().isSlotEmpty(slot, getShopInventory(), 1)) {
-			ShopItem shopItem = getShopItem(slot);
-			double sellPrice = shopItem.getSellPrice() / shopItem.getAmount() * amount;
-			ecoPlayer.increasePlayerAmount(sellPrice, sendMessage);
-			removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack().clone(), amount);
-			if (sendMessage) {
-				sendBuySellPlayerMessage(amount, ecoPlayer, sellPrice, "sell");
-			}
+		ShopItem shopItem = getShopItem(slot);
+		double sellPrice = shopItem.getSellPrice() / shopItem.getAmount() * amount;
+		ecoPlayer.increasePlayerAmount(sellPrice, false);
+		removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack().clone(), amount);
+		if (sendMessage) {
+			sendBuySellPlayerMessage(amount, ecoPlayer, sellPrice, "sell");
 		}
 	}
 
@@ -319,70 +295,18 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		return size;
 	}
 
-	/**
-	 * --Utils Method--
-	 * <p>
-	 * This Method adds a list of enchantments to a given itemstack and returns a
-	 * list of all valid used enchantments.
-	 * 
-	 * @param itemStack
-	 * @param enchantmentList
-	 * @return list of used enachantments
-	 */
-	public static ArrayList<String> addEnchantments(ItemStack itemStack, ArrayList<String> enchantmentList) {
-		Enchantment e = null;
-		int lvl = 0;
-		ArrayList<String> newList = new ArrayList<>();
-		for (String enchantment : enchantmentList) {
-			e = Enchantment.getByKey(NamespacedKey.minecraft(enchantment.substring(0, enchantment.indexOf("-"))));
-			lvl = Integer.valueOf(enchantment.substring(enchantment.indexOf("-") + 1));
-			if (e.getMaxLevel() < lvl) {
-				lvl = e.getMaxLevel();
-				enchantment = enchantment.substring(0, enchantment.indexOf("-") + 1) + String.valueOf(lvl);
-			}
-			if (itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
-				EnchantmentStorageMeta meta = (EnchantmentStorageMeta) itemStack.getItemMeta();
-				meta.addStoredEnchant(e, lvl, true);
-				itemStack.setItemMeta(meta);
-			} else if (e.canEnchantItem(itemStack)) {
-				itemStack.addEnchantment(e, lvl);
-			}
-		}
-		if (itemStack.getType().toString().equals("ENCHANTED_BOOK")) {
-			EnchantmentStorageMeta meta = (EnchantmentStorageMeta) itemStack.getItemMeta();
-			for (Entry<Enchantment, Integer> map : meta.getStoredEnchants().entrySet()) {
-				newList.add(
-						map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1)
-								+ "-" + map.getValue().intValue());
-				newList.sort(String.CASE_INSENSITIVE_ORDER);
-			}
-		} else {
-			for (Entry<Enchantment, Integer> map : itemStack.getEnchantments().entrySet()) {
-				newList.add(
-						map.getKey().getKey().toString().substring(map.getKey().getKey().toString().indexOf(":") + 1)
-								+ "-" + map.getValue().intValue());
-				newList.sort(String.CASE_INSENSITIVE_ORDER);
-			}
-		}
-		return newList;
-	}
-
 	/*
 	 * Utility methods
 	 * 
 	 */
-	
+
 	protected void sendBuySellPlayerMessage(int amount, EconomyPlayer ecoPlayer, double price, String sellBuy) {
 		if (amount > 1) {
-			ecoPlayer.getPlayer()
-					.sendMessage(MessageWrapper.getString("shop_" + sellBuy + "_plural",
-							String.valueOf(amount), price,
-							ConfigController.getCurrencyText(price)));
+			ecoPlayer.getPlayer().sendMessage(MessageWrapper.getString("shop_" + sellBuy + "_plural",
+					String.valueOf(amount), price, ConfigController.getCurrencyText(price)));
 		} else {
-			ecoPlayer.getPlayer()
-					.sendMessage(MessageWrapper.getString("shop_" + sellBuy + "_singular",
-							String.valueOf(amount), price,
-							ConfigController.getCurrencyText(price)));
+			ecoPlayer.getPlayer().sendMessage(MessageWrapper.getString("shop_" + sellBuy + "_singular",
+					String.valueOf(amount), price, ConfigController.getCurrencyText(price)));
 		}
 	}
 
@@ -615,17 +539,11 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	private void loadShopItems() {
 		for (String item : getSavefileHandler().loadItemNameList()) {
-			try {
-				loadShopItem(item);
-			} catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
-				Bukkit.getLogger().warning("[Ultimate_Economy] " + "Failed to load shop item");
-				Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
-			}
+			loadShopItem(item);
 		}
 	}
 
-	protected void loadShopItem(String itemString)
-			throws ShopSystemException, PlayerException, GeneralEconomyException {
+	protected void loadShopItem(String itemString) {
 		ShopItem shopItem = getSavefileHandler().loadItem(itemString);
 		getShopItemMap().put(shopItem.getSlot(), shopItem);
 		getEditorHandler().setOccupied(true, shopItem.getSlot());
