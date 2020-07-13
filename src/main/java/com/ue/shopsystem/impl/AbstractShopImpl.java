@@ -156,7 +156,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	@Override
 	public void changeShopSize(int newSize) throws ShopSystemException, GeneralEconomyException, PlayerException {
-		getValidationHandler().checkForValidSize(newSize);
+		getValidationHandler();
+		ShopValidationHandler.checkForValidSize(newSize);
 		getValidationHandler().checkForResizePossible(getShopInventory(), getSize(), newSize, 1);
 		setSize(newSize);
 		getSavefileHandler().saveShopSize(newSize);
@@ -602,9 +603,9 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		savefileHandler = new ShopSavefileHandler(shopId);
 		setShopId(shopId);
 		setName(getSavefileHandler().loadShopName());
+		setSize(getSavefileHandler().loadShopSize());
 		editorHandler = new ShopEditorHandler(this);
 		slotEditorHandler = new ShopSlotEditorHandler(this);
-		setSize(getSavefileHandler().loadShopSize());
 		location = getSavefileHandler().loadShopLocation();
 		setupShopVillager();
 		getShopVillager().setProfession(getSavefileHandler().loadShopVillagerProfession());
