@@ -37,7 +37,7 @@ import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.shopsystem.api.Adminshop;
+import com.ue.shopsystem.api.AbstractShop;
 import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.impl.AdminshopImpl;
 import com.ue.shopsystem.impl.ShopItem;
@@ -109,7 +109,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.sellShopItem(-20, 20, null, true);
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
@@ -123,7 +123,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(0, 1, 2, new ItemStack(Material.STONE));
 			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
 			ecoPlayer.setPlayer(null);
@@ -143,7 +143,7 @@ public class AdminshopTest {
 		try {
 			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			ItemStack stack = new ItemStack(Material.STONE);
 			stack.setAmount(4);
 			shop.addShopItem(0, 1, 2, stack);
@@ -171,7 +171,7 @@ public class AdminshopTest {
 		try {
 			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			ItemStack stack = new ItemStack(Material.STONE);
 			shop.addShopItem(0, 1, 2, stack);
 			stack.setAmount(1);
@@ -193,7 +193,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop before = AdminshopController.getAdminshopList().get(0);
+			AbstractShop before = AdminshopController.getAdminshopList().get(0);
 			before.addShopItem(0, 1, 2, new ItemStack(Material.STONE));
 			ItemStack stack = new ItemStack(Material.SPAWNER);
 			ItemMeta meta = stack.getItemMeta();
@@ -201,7 +201,7 @@ public class AdminshopTest {
 			stack.setItemMeta(meta);
 			stack.setAmount(3);
 			before.addShopItem(1, 1, 2, stack);
-			Adminshop shop = new AdminshopImpl(null, "A0");
+			AbstractShop shop = new AdminshopImpl(null, "A0");
 			
 			assertEquals(world, shop.getWorld());
 			assertEquals("A0", shop.getShopId());
@@ -307,7 +307,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.buyShopItem(9, null, false);
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
@@ -321,7 +321,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			EconomyPlayer player = EconomyPlayerController.getAllEconomyPlayers().get(0);
 			shop.buyShopItem(6, player, false);
 			fail();
@@ -336,7 +336,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(0, 1, 2, new ItemStack(Material.STONE));
 			EconomyPlayer player = EconomyPlayerController.getAllEconomyPlayers().get(0);
 			player.setPlayer(null);
@@ -354,7 +354,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-				Adminshop shop = AdminshopController.getAdminshopList().get(0);
+				AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(0, 1, 2, new ItemStack(Material.ACACIA_BOAT));
 			player.getInventory().setItem(0, new ItemStack(Material.STONE));
 			player.getInventory().setItem(1, new ItemStack(Material.STONE));
@@ -411,7 +411,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			ItemStack stack = new ItemStack(Material.STONE);
 			shop.addShopItem(0, 1, 1, stack);
 			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
@@ -431,7 +431,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			ItemStack stack = new ItemStack(Material.STONE);
 			shop.addShopItem(0, 1, 1, stack);
 			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
@@ -452,7 +452,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			ItemStack stack = new ItemStack(Material.STONE);
 			stack.setAmount(10);
 			shop.addShopItem(0, 1, 2, stack);
@@ -474,7 +474,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(2, false);
 			ItemStack stack = new ItemStack(Material.SPAWNER);
@@ -501,7 +501,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 20, item);
 			item.setAmount(1);
 			String itemString = item.toString();
@@ -554,7 +554,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 20, item);
 			item.setAmount(1);
 			String itemString = item.toString();
@@ -603,7 +603,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 0, 20, item);
 			item.setAmount(1);
 			String itemString = item.toString();
@@ -649,7 +649,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 0, item);
 			item.setAmount(1);
 			String itemString = item.toString();
@@ -699,7 +699,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 0, item);
 			item.setAmount(1);
 			String itemString = item.toString();
@@ -750,7 +750,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = (AdminshopImpl) AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = (AdminshopImpl) AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 0, item);
 			item.setAmount(1);
 			String itemString = item.toString();
@@ -800,7 +800,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, -10, 20, item);
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
@@ -815,7 +815,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 0, 0, item);
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
@@ -830,7 +830,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(10, 10, 20, item);
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
@@ -845,7 +845,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 20, new ItemStack(Material.COBBLESTONE, 16));
 			shop.addShopItem(1, 10, 20, item);
 			fail();
@@ -861,7 +861,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 20, item);
 			shop.addShopItem(2, 10, 20, item);
 			fail();
@@ -877,7 +877,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 20, item);
 			String response = shop.editShopItem(1, "8", "15.0", "25.0");
 			item.setAmount(1);
@@ -926,7 +926,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 20, item);
 			String response = shop.editShopItem(1, "8", "none", "none");
 			item.setAmount(1);
@@ -975,7 +975,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 20, item);
 			String response = shop.editShopItem(1, "none", "15", "none");
 			item.setAmount(1);
@@ -1024,7 +1024,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 20, item);
 			String response = shop.editShopItem(1, "none", "none", "25");
 			item.setAmount(1);
@@ -1072,7 +1072,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.editShopItem(1, "8", "10", "25.0");
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
@@ -1087,7 +1087,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 20, item);
 			shop.editShopItem(1, "8", "-10", "25.0");
 			fail();
@@ -1103,7 +1103,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 20, item);
 			shop.editShopItem(1, "8", "0", "0");
 			fail();
@@ -1119,7 +1119,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 20, item);
 			shop.editShopItem(1, "100", "10.0", "25.0");
 			fail();
@@ -1135,7 +1135,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 20, item);
 			shop.editShopItem(1, "8", "10.0", "-25.0");
 			fail();
@@ -1154,7 +1154,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = (AdminshopImpl) AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = (AdminshopImpl) AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 0, 10, item);
 			String itemString = "SPAWNER_COW";
 			assertEquals(1, shop.getItemList().size());
@@ -1200,7 +1200,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 10, 20, item);
 			shop.removeShopItem(1);
 			assertEquals(0, shop.getItemList().size());
@@ -1230,7 +1230,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.removeShopItem(0);
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -1244,7 +1244,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.removeShopItem(10);
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -1258,7 +1258,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.removeShopItem(8);
 			fail();
 		} catch (Exception e) {
@@ -1272,7 +1272,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			Location newLoction = new Location(world, 5.9, 1.0, 6.3);
 			shop.moveShop(newLoction);
 			assertEquals(newLoction, shop.getShopLocation());
@@ -1296,7 +1296,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.changeProfession(Profession.CARTOGRAPHER);
 			assertEquals(Profession.CARTOGRAPHER, shop.getShopVillager().getProfession());
 			// check savefile
@@ -1313,7 +1313,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.changeShopName("newname");
 			assertEquals("newname", shop.getName());
 			assertEquals("newname", ((ChestInventoryMock) shop.getShopInventory()).getName());
@@ -1339,7 +1339,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.changeShopName("newname_");
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -1354,7 +1354,7 @@ public class AdminshopTest {
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
 			AdminshopController.createAdminShop("newname", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.changeShopName("newname");
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -1368,7 +1368,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.changeShopSize(18);
 			assertEquals(18, shop.getSize());
 			// check inventories
@@ -1468,7 +1468,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 18);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.changeShopSize(9);
 			assertEquals(9, shop.getSize());
 			assertEquals(Material.ANVIL, shop.getShopInventory().getItem(8).getType());
@@ -1526,7 +1526,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.changeShopSize(5);
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
@@ -1540,7 +1540,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 18);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(15, 0, 1, new ItemStack(Material.STONE));
 			shop.changeShopSize(9);
 			fail();
@@ -1555,7 +1555,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			assertEquals(1, world.getNearbyEntities(location, 0, 0, 0).size());
 			shop.despawnVillager();
 			assertEquals(0, world.getNearbyEntities(location, 0, 0, 0).size());
@@ -1569,7 +1569,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.openEditor(player);
 			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			player.closeInventory();
@@ -1585,7 +1585,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(0, 0, 1, new ItemStack(Material.STONE));
 			ShopItem item = shop.getShopItem(0);
 			assertEquals(1, item.getAmount());
@@ -1603,7 +1603,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.getShopItem(0);
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -1617,7 +1617,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			ItemStack stack = new ItemStack(Material.STONE);
 			ItemMeta meta = stack.getItemMeta();
 			List<String> lore = new ArrayList<>();
@@ -1646,7 +1646,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.getShopItem(new ItemStack(Material.STONE));
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -1660,7 +1660,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			World world1 = shop.getWorld();
 			assertEquals(world, world1);
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -1673,7 +1673,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.openSlotEditor(player, 0);
 			Inventory inv = player.getOpenInventory().getTopInventory();
 			assertNotNull(inv);
@@ -1688,7 +1688,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(0, 1, 2, new ItemStack(Material.COAL, 3));
 			shop.openSlotEditor(player, 0);
 			Inventory inv = player.getOpenInventory().getTopInventory();
@@ -1706,7 +1706,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.openSlotEditor(player, 12);
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -1720,7 +1720,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.openShopInventory(player);
 			Inventory inv = player.getOpenInventory().getTopInventory();
 			assertNotNull(inv);
@@ -1735,7 +1735,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.openEditor(player);
 			Inventory inv = player.getOpenInventory().getTopInventory();
 			assertNotNull(inv);
@@ -1761,7 +1761,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			int size = shop.getSize();
 			assertEquals(9, size);
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -1774,7 +1774,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			String id = shop.getShopId();
 			assertEquals("A0", id);
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -1787,7 +1787,7 @@ public class AdminshopTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			Location loc = shop.getShopLocation();
 			assertEquals(location, loc);
 		} catch (ShopSystemException | GeneralEconomyException e) {
