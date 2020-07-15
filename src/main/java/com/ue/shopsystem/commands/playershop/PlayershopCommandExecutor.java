@@ -21,6 +21,7 @@ public class PlayershopCommandExecutor implements CommandExecutor {
 				if (args.length != 0) {
 					return PlayershopCommandEnum.getEnum(args[0]).perform(label, args, player);
 				}
+				return false;
 			} catch (TownSystemException | PlayerException | ShopSystemException | GeneralEconomyException e) {
 				player.sendMessage(e.getMessage());
 			} catch (IllegalArgumentException e) {
