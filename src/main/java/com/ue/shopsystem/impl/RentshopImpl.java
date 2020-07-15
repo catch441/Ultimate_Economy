@@ -220,11 +220,12 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 */
 	@Override
 	public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
-		getValidationHandler().checkForValidShopName(name);
+		ShopValidationHandler.checkForValidShopName(name);
 		if (!isRentable()) {
 			super.changeShopName(name);
 		} else {
 			setupShopName(name);
+			changeInventoryNames(name);
 			getShopVillager().setCustomName(name + "#" + getShopId());
 		}
 	}

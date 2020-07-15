@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
@@ -68,22 +69,23 @@ public class RentshopController {
 	/**
 	 * This method returns a rentshop by a unique name.
 	 * <p>
-	 * rented: name = name_owner unique name.
+	 * rented: name = name  and param player
 	 * <p>
 	 * not rented: name = RentShop# + shopId
 	 * 
 	 * @param name
+	 * @param player only necessary if rented
 	 * @return RentShop
 	 * @throws GeneralEconomyException
 	 */
-	public static Rentshop getRentShopByUniqueName(String name) throws GeneralEconomyException {
+	public static Rentshop getRentShopByUniqueName(String name, Player player) throws GeneralEconomyException {
 		for (Rentshop shop : getRentShops()) {
 			if (shop.isRentable()) {
 				if (("RentShop#" + shop.getShopId()).equals(name)) {
 					return shop;
 				}
 			} else {
-				if (name.equals(shop.getName() + "_" + shop.getOwner().getName())) {
+				if ((name + "_" + player.getName()).equals(shop.getName() + "_" + shop.getOwner().getName())) {
 					return shop;
 				}
 			}

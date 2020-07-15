@@ -167,8 +167,8 @@ public class RentshopControllerTest {
 					10);
 			shop3.rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0),
 					10);
-			Rentshop response = RentshopController.getRentShopByUniqueName("RentShop#R0");
-			Rentshop response2 = RentshopController.getRentShopByUniqueName("Shop#R2_catch441");
+			Rentshop response = RentshopController.getRentShopByUniqueName("RentShop#R0",null);
+			Rentshop response2 = RentshopController.getRentShopByUniqueName("Shop#R2", player);
 			assertEquals(shop, response);
 			assertEquals("R0", response.getShopId());
 			assertEquals("RentShop#R0", response.getName());
@@ -183,7 +183,7 @@ public class RentshopControllerTest {
 	@Test
 	public void getRentShopByUniqueNameTestWithoutShop() {
 		try {
-			RentshopController.getRentShopByUniqueName("RentShop#R0");
+			RentshopController.getRentShopByUniqueName("RentShop#R0",null);
 			fail();
 		} catch (GeneralEconomyException e) {
 			assertTrue(e instanceof GeneralEconomyException);
