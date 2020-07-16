@@ -239,7 +239,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		changeOwner(player);
 		changeShopName("Shop#" + getShopId());
 		rentable = false;
-		rentUntil = Calendar.getInstance().getTimeInMillis() + (86400000 * duration);
+		setRentUntil(Calendar.getInstance().getTimeInMillis() + (86400000 * duration));
 		getSavefileHandler().saveRentable(isRentable());
 		getSavefileHandler().saveRentUntil(getRentUntil());
 	}
@@ -282,7 +282,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		removeAllItems();
 		setOwner(null);
 		getSavefileHandler().saveOwner(null);
-		rentUntil = 0L;
+		setRentUntil(0L);
 		rentable = true;
 		getSavefileHandler().saveRentUntil(0L);
 		getSavefileHandler().saveRentable(true);
@@ -305,6 +305,14 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	
 	protected RentshopRentGuiHandler getRentGuiHandler() {
 		return rentGuiHandler;
+	}
+	
+	/**
+	 * Set the rent until value. Only public for unit tests.
+	 * @param rentUntil
+	 */
+	public void setRentUntil(long rentUntil) {
+		this.rentUntil = rentUntil;
 	}
 
 	/*
@@ -348,7 +356,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	private void loadExistingRentshop() {
 		rentalFee = getSavefileHandler().loadRentalFee();
 		rentable = getSavefileHandler().loadRentable();
-		rentUntil = getSavefileHandler().loadRentUntil();
+		setRentUntil(getSavefileHandler().loadRentUntil());
 		rentGuiHandler = new RentshopRentGuiHandler(this);
 		setupEconomyVillagerType();
 		setupVillagerName();

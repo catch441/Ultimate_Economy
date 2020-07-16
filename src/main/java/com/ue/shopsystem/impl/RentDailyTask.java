@@ -17,9 +17,9 @@ public class RentDailyTask extends BukkitRunnable {
 	public void run() {
 		for (Rentshop shop : RentshopController.getRentShops()) {
 			if (!shop.isRentable()) {
-				if (Calendar.getInstance().getTimeInMillis() >= shop.getRentUntil()) {
+				if (getActualTime() >= shop.getRentUntil()) {
 					resetShop(shop);
-				} else if ((shop.getRentUntil() - Calendar.getInstance().getTimeInMillis()) < 600000) {
+				} else if ((shop.getRentUntil() - getActualTime()) < 600000) {
 					sendReminder(shop);
 				}
 			}
@@ -39,5 +39,9 @@ public class RentDailyTask extends BukkitRunnable {
 			Bukkit.getLogger().warning("[Ultimate_Economy] Error on rent task");
 			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 		}
+	}
+
+	private long getActualTime() {
+		return Calendar.getInstance().getTimeInMillis();
 	}
 }
