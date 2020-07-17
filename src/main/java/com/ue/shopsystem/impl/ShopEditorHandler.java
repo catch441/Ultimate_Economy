@@ -1,8 +1,13 @@
 package com.ue.shopsystem.impl;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import com.ue.exceptions.GeneralEconomyException;
+import com.ue.exceptions.ShopSystemException;
 
 public class ShopEditorHandler {
 
@@ -38,7 +43,12 @@ public class ShopEditorHandler {
 	 * @param event
 	 */
 	public void handleInventoryClick(InventoryClickEvent event) {
-		// TODO
+		ItemMeta clickedItemMeta = event.getCurrentItem().getItemMeta();
+		int slot = Integer.valueOf(clickedItemMeta.getDisplayName().substring(5));
+		try {
+			getShop().openSlotEditor((Player) event.getWhoClicked(), slot);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+		}
 	}
 
 	/**

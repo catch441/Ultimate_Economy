@@ -1,12 +1,10 @@
 package com.ue.shopsystem.impl;
 
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import com.ue.economyplayer.api.EconomyPlayer;
 import com.ue.economyplayer.api.EconomyPlayerController;
@@ -61,20 +59,11 @@ public class ShopEventHandler {
 	private void handleShopInvClickEvent(AbstractShop abstractShop, InventoryClickEvent event) {
 		String inventoryName = event.getView().getTitle();
 		Player player = (Player) event.getWhoClicked();
-		ItemStack clickedItem = event.getCurrentItem();
-		ItemMeta clickedItemMeta = clickedItem.getItemMeta();
 		try {
 			if ((abstractShop.getName() + "-Editor").equals(inventoryName)) {
-				int slot = Integer.valueOf(clickedItemMeta.getDisplayName().substring(5));
-				abstractShop.openSlotEditor(player, slot);
+				((AbstractShopImpl) abstractShop).getEditorHandler().handleInventoryClick(event);
 			} else if ((abstractShop.getName() + "-SlotEditor").equals(inventoryName)) {
 				((AbstractShopImpl) abstractShop).getSlotEditorHandler().handleSlotEditor(event);
-				String command = clickedItemMeta.getDisplayName();
-				if ((ChatColor.RED + "remove item").equals(command)
-						|| (ChatColor.RED + "exit without save").equals(command)
-						|| (ChatColor.YELLOW + "save changes").equals(command)) {
-					abstractShop.openEditor(player);
-				}
 			} else {
 				EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(player.getName());
 				handleBuySell(abstractShop, event, ecoPlayer);
@@ -90,39 +79,59 @@ public class ShopEventHandler {
 		EconomyVillager economyVillager = (EconomyVillager) entity.getMetadata("ue-type").get(0).value();
 		switch (event.getClick()) {
 		case MIDDLE:
-			if (economyVillager == EconomyVillager.PLAYERSHOP) {
-				((Playershop) abstractShop).openStockpile(ecoPlayer.getPlayer());
-			}
+			handleSwitchStockpile(abstractShop, ecoPlayer, economyVillager);
 			break;
 		case LEFT:
-			if (event.getClickedInventory() != event.getWhoClicked().getInventory()) {
-				int slot = event.getSlot();
-				abstractShop.buyShopItem(slot, ecoPlayer, true);
-			}
+			handleBuy(abstractShop, event, ecoPlayer);
 			break;
 		case RIGHT:
-			ShopItem shopItem1 = abstractShop.getShopItem(event.getCurrentItem());
-			abstractShop.sellShopItem(shopItem1.getSlot(), shopItem1.getAmount(), ecoPlayer, true);
+			handleSellSpecific(abstractShop, event, ecoPlayer);
 			break;
 		case SHIFT_RIGHT:
-			ShopItem shopItem2 = abstractShop.getShopItem(event.getCurrentItem());
-			ItemStack original = shopItem2.getItemStack().clone();
-			original.setAmount(1);
-			int sellAmount = 0;
-			for (ItemStack is : event.getWhoClicked().getInventory().getStorageContents()) {
-				if (is != null) {
-					ItemStack stack = new ItemStack(is);
-					stack.setAmount(1);
-					if (stack.equals(original)) {
-						sellAmount = sellAmount + is.getAmount();
-					}
-				}
-			}
-			abstractShop.sellShopItem(shopItem2.getSlot(), sellAmount, ecoPlayer, true);
+			handleSellAll(abstractShop, event, ecoPlayer);
 			break;
 		default:
 			break;
 		}
+	}
+
+	private void handleSwitchStockpile(AbstractShop abstractShop, EconomyPlayer ecoPlayer,
+			EconomyVillager economyVillager) throws ShopSystemException {
+		if (economyVillager == EconomyVillager.PLAYERSHOP) {
+			((Playershop) abstractShop).openStockpile(ecoPlayer.getPlayer());
+		}
+	}
+
+	private void handleBuy(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
+			throws GeneralEconomyException, PlayerException, ShopSystemException {
+		if (event.getClickedInventory() != event.getWhoClicked().getInventory()) {
+			int slot = event.getSlot();
+			abstractShop.buyShopItem(slot, ecoPlayer, true);
+		}
+	}
+
+	private void handleSellSpecific(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
+			throws ShopSystemException, GeneralEconomyException, PlayerException {
+		ShopItem shopItem1 = abstractShop.getShopItem(event.getCurrentItem());
+		abstractShop.sellShopItem(shopItem1.getSlot(), shopItem1.getAmount(), ecoPlayer, true);
+	}
+
+	private void handleSellAll(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
+			throws ShopSystemException, GeneralEconomyException, PlayerException {
+		ShopItem shopItem = abstractShop.getShopItem(event.getCurrentItem());
+		ItemStack original = shopItem.getItemStack().clone();
+		original.setAmount(1);
+		int sellAmount = 0;
+		for (ItemStack is : event.getWhoClicked().getInventory().getStorageContents()) {
+			if (is != null) {
+				ItemStack stack = new ItemStack(is);
+				stack.setAmount(1);
+				if (stack.equals(original)) {
+					sellAmount = sellAmount + is.getAmount();
+				}
+			}
+		}
+		abstractShop.sellShopItem(shopItem.getSlot(), sellAmount, ecoPlayer, true);
 	}
 
 	/**

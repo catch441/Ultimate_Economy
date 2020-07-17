@@ -243,8 +243,7 @@ public class ShopSlotEditorHandler {
 	private void handleSlotEditorCommand(InventoryClickEvent event, Player player, ItemStack originStack, int slot,
 			int factor, String operator, double price, ItemStack editorItemStack, String command)
 			throws ShopSystemException, PlayerException, GeneralEconomyException {
-		command = ChatColor.stripColor(command);
-		switch (command) {
+		switch (ChatColor.stripColor(command)) {
 		case "minus":
 		case "plus":
 			handleSwitchPlusMinus(slot, command);
@@ -264,9 +263,12 @@ public class ShopSlotEditorHandler {
 			break;
 		case "save changes":
 			handleSaveChanges(event.getInventory(), player, originStack);
+			getShop().openEditor(player);
 			break;
 		case "remove item":
 			handleRemoveItem(player, originStack);
+		case "exit without save":
+			getShop().openEditor(player);
 			break;
 		default:
 			if (!"buyprice".equals(command) && !"sellprice".equals(command)) {
@@ -290,7 +292,6 @@ public class ShopSlotEditorHandler {
 		ItemStack itemStack = inv.getItem(0);
 		// make a copy of the edited/created item
 		ItemStack newItemStackCopy = new ItemStack(itemStack);
-
 		ItemMeta itemMeta = originStack.getItemMeta();
 		if (itemMeta != null && itemMeta.hasLore()) {
 			List<String> loreList = getShop().removeShopItemPriceLore(itemMeta.getLore());
@@ -298,7 +299,6 @@ public class ShopSlotEditorHandler {
 			originStack.setItemMeta(itemMeta);
 		}
 		String originalStackString = originStack.toString();
-
 		newItemStackCopy.setAmount(originStack.getAmount());
 		// if the item changed
 		if (!newItemStackCopy.toString().equals(originalStackString)) {
