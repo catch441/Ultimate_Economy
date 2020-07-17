@@ -8,9 +8,10 @@ import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import com.ue.common.utils.SaveFileUtils;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-public class JobSavefileHandler {
+public class JobSavefileHandler extends SaveFileUtils {
 
 	private File file;
 	private YamlConfiguration config;
@@ -39,7 +40,7 @@ public class JobSavefileHandler {
 	 */
 	public void saveJobName(String name) {
 		getConfig().set("Jobname", name);
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -51,7 +52,7 @@ public class JobSavefileHandler {
 		for (String key : blockList.keySet()) {
 			getConfig().set("BlockList." + key, blockList.get(key));
 		}
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -63,7 +64,7 @@ public class JobSavefileHandler {
 		for (String key : fisherList.keySet()) {
 			getConfig().set("FisherList." + key, fisherList.get(key));
 		}
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -75,7 +76,7 @@ public class JobSavefileHandler {
 		for (String key : entityList.keySet()) {
 			getConfig().set("EntityList." + key, entityList.get(key));
 		}
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -136,15 +137,6 @@ public class JobSavefileHandler {
 	 */
 	public void deleteSavefile() {
 		getSavefile().delete();
-	}
-
-	private void save() {
-		try {
-			getConfig().save(getSavefile());
-		} catch (IOException e) {
-			Bukkit.getLogger().warning("[Ultimate_Economy] Error an save config to file");
-			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-		}
 	}
 
 	private File getSavefile() {

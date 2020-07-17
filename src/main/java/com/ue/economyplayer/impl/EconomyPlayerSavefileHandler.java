@@ -11,11 +11,12 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ue.bank.api.BankAccount;
 import com.ue.bank.api.BankController;
+import com.ue.common.utils.SaveFileUtils;
 import com.ue.economyplayer.api.EconomyPlayer;
 import com.ue.jobsystem.api.Job;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-public class EconomyPlayerSavefileHandler {
+public class EconomyPlayerSavefileHandler extends SaveFileUtils {
 
 	private static File file;
 	private static YamlConfiguration config;
@@ -55,7 +56,7 @@ public class EconomyPlayerSavefileHandler {
 	 */
 	public static void savePlayerList(List<String> playerList) {
 		getConfig().set("Player", playerList);
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -74,7 +75,7 @@ public class EconomyPlayerSavefileHandler {
 	 */
 	public static void deleteEconomyPlayer(EconomyPlayer ecoPlayer) {
 		getConfig().set(ecoPlayer.getName(), null);
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	private static File getSavefile() {
@@ -83,15 +84,6 @@ public class EconomyPlayerSavefileHandler {
 
 	private static YamlConfiguration getConfig() {
 		return config;
-	}
-
-	private static void save() {
-		try {
-			getConfig().save(getSavefile());
-		} catch (IOException e) {
-			Bukkit.getLogger().warning("[Ultimate_Economy] Error on save config to file");
-			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-		}
 	}
 
 	private EconomyPlayer getEconomyPlayer() {
@@ -104,7 +96,7 @@ public class EconomyPlayerSavefileHandler {
 	public void saveHomeList() {
 		getConfig().set(getEconomyPlayer().getName() + ".Home.Homelist",
 				new ArrayList<String>(getEconomyPlayer().getHomeList().keySet()));
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -124,7 +116,7 @@ public class EconomyPlayerSavefileHandler {
 			getConfig().set(getEconomyPlayer().getName() + ".Home." + homeName + ".Y", location.getY());
 			getConfig().set(getEconomyPlayer().getName() + ".Home." + homeName + ".Z", location.getZ());
 		}
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -132,7 +124,7 @@ public class EconomyPlayerSavefileHandler {
 	 */
 	public void saveBankIban() {
 		getConfig().set(getEconomyPlayer().getName() + ".Iban", getEconomyPlayer().getBankAccount().getIban());
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -144,7 +136,7 @@ public class EconomyPlayerSavefileHandler {
 			jobList.add(job.getName());
 		}
 		getConfig().set(getEconomyPlayer().getName() + ".Jobs", jobList);
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -152,7 +144,7 @@ public class EconomyPlayerSavefileHandler {
 	 */
 	public void saveJoinedTowns() {
 		getConfig().set(getEconomyPlayer().getName() + ".joinedTowns", getEconomyPlayer().getJoinedTownList());
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -161,7 +153,7 @@ public class EconomyPlayerSavefileHandler {
 	public void saveScoreboardDisabled() {
 		getConfig().set(getEconomyPlayer().getName() + ".scoreboardDisabled",
 				getEconomyPlayer().isScoreBoardDisabled());
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -237,7 +229,7 @@ public class EconomyPlayerSavefileHandler {
 			BankAccount bankAccount = BankController.createBankAccount(amount);
 			getConfig().set(getEconomyPlayer().getName() + ".account amount", null);
 			getConfig().set(getEconomyPlayer().getName() + ".Iban", bankAccount.getIban());
-			save();
+			save(getConfig(),getSavefile());
 		}
 	}
 
@@ -251,7 +243,7 @@ public class EconomyPlayerSavefileHandler {
 			boolean isDisabled = getConfig().getBoolean(getEconomyPlayer().getName() + ".bank");
 			getConfig().set(getEconomyPlayer().getName() + ".bank", null);
 			getConfig().set(getEconomyPlayer().getName() + ".scoreboardDisabled", isDisabled);
-			save();
+			save(getConfig(),getSavefile());
 		}
 	}
 }

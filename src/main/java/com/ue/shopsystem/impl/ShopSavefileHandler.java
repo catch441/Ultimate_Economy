@@ -14,6 +14,7 @@ import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.ue.common.utils.SaveFileUtils;
 import com.ue.economyplayer.api.EconomyPlayer;
 import com.ue.economyplayer.api.EconomyPlayerController;
 import com.ue.exceptions.PlayerException;
@@ -23,7 +24,7 @@ import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-public class ShopSavefileHandler {
+public class ShopSavefileHandler extends SaveFileUtils {
 
 	private File file;
 	private YamlConfiguration config;
@@ -34,15 +35,15 @@ public class ShopSavefileHandler {
 	 */
 	public ShopSavefileHandler(String shopId) {
 		file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
-		if (!getSaveFile().exists()) {
+		if (!getSavefile().exists()) {
 			try {
-				getSaveFile().createNewFile();
+				getSavefile().createNewFile();
 			} catch (IOException e) {
 				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create savefile");
 				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
-		config = YamlConfiguration.loadConfiguration(getSaveFile());
+		config = YamlConfiguration.loadConfiguration(getSavefile());
 	}
 
 	/**
@@ -51,7 +52,7 @@ public class ShopSavefileHandler {
 	 */
 	public void saveShopName(String name) {
 		getConfig().set("ShopName", name);
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -62,7 +63,7 @@ public class ShopSavefileHandler {
 	public void saveShopItem(ShopItem shopItem, boolean delete) {
 		if (delete) {
 			getConfig().set("ShopItems." + shopItem.getItemString(), null);
-			save();
+			save(getConfig(),getSavefile());
 		} else {
 			if (shopItem.getItemStack().getType() == Material.SPAWNER) {
 				getConfig().set("ShopItems." + shopItem.getItemString() + ".Name", shopItem.getItemString());
@@ -71,7 +72,7 @@ public class ShopSavefileHandler {
 			}
 			getConfig().set("ShopItems." + shopItem.getItemString() + ".Slot", shopItem.getSlot());
 			getConfig().set("ShopItems." + shopItem.getItemString() + ".newSaveMethod", "true");
-			save();
+			save(getConfig(),getSavefile());
 			saveShopItemSellPrice(shopItem.getItemString(), shopItem.getSellPrice());
 			saveShopItemBuyPrice(shopItem.getItemString(), shopItem.getBuyPrice());
 			saveShopItemAmount(shopItem.getItemString(), shopItem.getAmount());
@@ -85,7 +86,7 @@ public class ShopSavefileHandler {
 	 */
 	public void saveShopItemSellPrice(String itemString, double sellPrice) {
 		getConfig().set("ShopItems." + itemString + ".sellPrice", sellPrice);
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -95,7 +96,7 @@ public class ShopSavefileHandler {
 	 */
 	public void saveShopItemBuyPrice(String itemString, double buyPrice) {
 		getConfig().set("ShopItems." + itemString + ".buyPrice", buyPrice);
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -105,7 +106,7 @@ public class ShopSavefileHandler {
 	 */
 	public void saveShopItemAmount(String itemString, int amount) {
 		getConfig().set("ShopItems." + itemString + ".Amount", amount);
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -114,7 +115,7 @@ public class ShopSavefileHandler {
 	 */
 	public void saveShopSize(int size) {
 		getConfig().set("ShopSize", size);
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -126,7 +127,7 @@ public class ShopSavefileHandler {
 		getConfig().set("ShopLocation.y", location.getY());
 		getConfig().set("ShopLocation.z", location.getZ());
 		getConfig().set("ShopLocation.World", location.getWorld().getName());
-		save();
+		save(getConfig(),getSavefile());
 	}
 	
 	/**
@@ -135,7 +136,7 @@ public class ShopSavefileHandler {
 	 */
 	public void saveItemNames(List<String> itemList) {
 		getConfig().set("ShopItemList", itemList);
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -144,7 +145,7 @@ public class ShopSavefileHandler {
 	 */
 	public void saveProfession(Profession profession) {
 		getConfig().set("Profession", profession.name());
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -154,7 +155,7 @@ public class ShopSavefileHandler {
 	 */
 	public void saveStock(String itemString, int stock) {
 		getConfig().set("ShopItems." + itemString + ".stock", stock);
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -167,7 +168,7 @@ public class ShopSavefileHandler {
 		} else {
 			getConfig().set("Owner", null);
 		}
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -176,7 +177,7 @@ public class ShopSavefileHandler {
 	 */
 	public void saveRentUntil(long rentUntil) {
 		getConfig().set("RentUntil", rentUntil);
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -185,7 +186,7 @@ public class ShopSavefileHandler {
 	 */
 	public void saveRentalFee(double fee) {
 		getConfig().set("RentalFee", fee);
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -194,7 +195,7 @@ public class ShopSavefileHandler {
 	 */
 	public void saveRentable(boolean isRentable) {
 		getConfig().set("Rentable", isRentable);
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/**
@@ -206,9 +207,9 @@ public class ShopSavefileHandler {
 	public void changeSavefileName(File dataFolder, String newName) throws ShopSystemException {
 		File newFile = new File(dataFolder, newName + ".yml");
 		checkForRenamingSavefileIsPossible(newFile);
-		getSaveFile().delete();
+		getSavefile().delete();
 		file = newFile;
-		save();
+		save(getConfig(),getSavefile());
 	}
 
 	/*
@@ -330,7 +331,7 @@ public class ShopSavefileHandler {
 		return getConfig().getDouble("RentalFee");
 	}
 
-	private File getSaveFile() {
+	private File getSavefile() {
 		return file;
 	}
 
@@ -338,20 +339,11 @@ public class ShopSavefileHandler {
 		return config;
 	}
 
-	private void save() {
-		try {
-			getConfig().save(getSaveFile());
-		} catch (IOException e) {
-			Bukkit.getLogger().warning("[Ultimate_Economy] Error on save config to file");
-			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-		}
-	}
-
 	/**
 	 * Deletes the savefile.
 	 */
 	public void deleteFile() {
-		getSaveFile().delete();
+		getSavefile().delete();
 	}
 
 	private void checkForRenamingSavefileIsPossible(File newFile) throws ShopSystemException {
