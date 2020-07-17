@@ -1,6 +1,7 @@
 package com.ue.shopsystem.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -128,10 +129,10 @@ public class ShopSlotEditorHandler {
 		List<String> listSell = new ArrayList<String>();
 		listBuy.add(ChatColor.GOLD + "Price: " + buyPrice);
 		listSell.add(ChatColor.GOLD + "Price: " + sellPrice);
-		setupPlusItemInSlotEditor(listBuy, listSell);
-		setupOneNumberItemsInSlotEditor(listBuy, listSell);
-		setupTenNumberItemsInSlotEditor(listBuy, listSell);
-		setupTwentyNumberItemsInSlotEditor(listBuy, listSell);
+		setupItemsInSlotEditor(new ArrayList<>(Arrays.asList(2,11,20)),"plus",listBuy, listSell);
+		setupItemsInSlotEditor(new ArrayList<>(Arrays.asList(6,15,24)),"twenty",listBuy, listSell);
+		setupItemsInSlotEditor(new ArrayList<>(Arrays.asList(5,14,23)),"ten",listBuy, listSell);
+		setupItemsInSlotEditor(new ArrayList<>(Arrays.asList(4,13,22)),"one",listBuy, listSell);
 		addSkullToSlotEditor("buyprice", 9, listBuy, "BUY");
 		addSkullToSlotEditor("sellprice", 18, listSell, "SELL");
 		setupSlotItemInSlotEditor(slot);
@@ -160,56 +161,18 @@ public class ShopSlotEditorHandler {
 		getSlotEditorInventory().setItem(slot, item);
 	}
 
-	private void setupPlusItemInSlotEditor(List<String> listBuy, List<String> listSell) {
-		ItemStack item = CustomSkullService.getSkullWithName("PLUS", "plus");
-		getSlotEditorInventory().setItem(2, item);
+	private void setupItemsInSlotEditor(List<Integer> slots, String skullName, List<String> listBuy,
+			List<String> listSell) {
+		ItemStack item = CustomSkullService.getSkullWithName(skullName.toUpperCase(), skullName.toLowerCase());
+		getSlotEditorInventory().setItem(slots.get(0), item);
 		ItemMeta meta = item.getItemMeta();
 		meta.setLore(listBuy);
 		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(11, item);
+		getSlotEditorInventory().setItem(slots.get(1), item);
 		meta = item.getItemMeta();
 		meta.setLore(listSell);
 		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(20, item);
-	}
-
-	private void setupTwentyNumberItemsInSlotEditor(List<String> listBuy, List<String> listSell) {
-		ItemStack item = CustomSkullService.getSkullWithName("TWENTY", "twenty");
-		getSlotEditorInventory().setItem(6, item);
-		ItemMeta meta = item.getItemMeta();
-		meta.setLore(listBuy);
-		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(15, item);
-		meta = item.getItemMeta();
-		meta.setLore(listSell);
-		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(24, item);
-	}
-
-	private void setupTenNumberItemsInSlotEditor(List<String> listBuy, List<String> listSell) {
-		ItemStack item = CustomSkullService.getSkullWithName("TEN", "ten");
-		getSlotEditorInventory().setItem(5, item);
-		ItemMeta meta = item.getItemMeta();
-		meta.setLore(listBuy);
-		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(14, item);
-		meta = item.getItemMeta();
-		meta.setLore(listSell);
-		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(23, item);
-	}
-
-	private void setupOneNumberItemsInSlotEditor(List<String> listBuy, List<String> listSell) {
-		ItemStack item = CustomSkullService.getSkullWithName("ONE", "one");
-		getSlotEditorInventory().setItem(4, item);
-		ItemMeta meta = item.getItemMeta();
-		meta.setLore(listBuy);
-		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(13, item);
-		meta = item.getItemMeta();
-		meta.setLore(listSell);
-		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(22, item);
+		getSlotEditorInventory().setItem(slots.get(2), item);
 	}
 
 	/**
@@ -308,10 +271,12 @@ public class ShopSlotEditorHandler {
 			// the old item in the selected slot gets deleted
 			handleRemoveItem(player, originStack);
 			getShop().addShopItem(getSelectedSlot(), sellPrice, buyPrice, itemStack);
-			if(itemStack.getType() != Material.SPAWNER) {
-				player.sendMessage(MessageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
+			if (itemStack.getType() != Material.SPAWNER) {
+				player.sendMessage(
+						MessageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
 			} else {
-				player.sendMessage(MessageWrapper.getString("shop_removeSpawner", itemStack.getItemMeta().getDisplayName().toLowerCase()));
+				player.sendMessage(MessageWrapper.getString("shop_removeSpawner",
+						itemStack.getItemMeta().getDisplayName().toLowerCase()));
 			}
 		}
 		// if the item doesn't changed
