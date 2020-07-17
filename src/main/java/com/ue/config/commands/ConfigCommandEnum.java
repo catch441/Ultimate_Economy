@@ -183,23 +183,20 @@ public enum ConfigCommandEnum {
 			if ("CZ".equals(country)) {
 				return true;
 			}
-			return false;
 		case "en":
 			if ("US".equals(country)) {
 				return true;
 			}
-			return false;
 		case "zh":
 			if ("CN".equals(country)) {
 				return true;
 			}
-			return false;
 		default:
 			if (lang.toUpperCase().equals(country)) {
 				return true;
 			}
-			return false;
 		}
+		return false;
 	}
 
 	private static boolean stringToBoolean(String string) {
