@@ -129,10 +129,10 @@ public class ShopSlotEditorHandler {
 		List<String> listSell = new ArrayList<String>();
 		listBuy.add(ChatColor.GOLD + "Price: " + buyPrice);
 		listSell.add(ChatColor.GOLD + "Price: " + sellPrice);
-		setupItemsInSlotEditor(new ArrayList<>(Arrays.asList(2,11,20)),"plus",listBuy, listSell);
-		setupItemsInSlotEditor(new ArrayList<>(Arrays.asList(6,15,24)),"twenty",listBuy, listSell);
-		setupItemsInSlotEditor(new ArrayList<>(Arrays.asList(5,14,23)),"ten",listBuy, listSell);
-		setupItemsInSlotEditor(new ArrayList<>(Arrays.asList(4,13,22)),"one",listBuy, listSell);
+		setupItemsInSlotEditor(Arrays.asList(2,11,20),"plus",listBuy, listSell);
+		setupItemsInSlotEditor(Arrays.asList(6,15,24),"twenty",listBuy, listSell);
+		setupItemsInSlotEditor(Arrays.asList(5,14,23),"ten",listBuy, listSell);
+		setupItemsInSlotEditor(Arrays.asList(4,13,22),"one",listBuy, listSell);
 		addSkullToSlotEditor("buyprice", 9, listBuy, "BUY");
 		addSkullToSlotEditor("sellprice", 18, listSell, "SELL");
 		setupSlotItemInSlotEditor(slot);
@@ -216,13 +216,13 @@ public class ShopSlotEditorHandler {
 			handleSwitchFactor(slot, command);
 			break;
 		case "one":
-			handlePlusMinusOne(slot, factor, operator, price, editorItemStack);
+			handlePlusMinusNumber(Arrays.asList(4,13,22), slot, factor, operator, price, editorItemStack);
 			break;
 		case "ten":
-			handlePlusMinusTen(slot, factor, operator, price, editorItemStack);
+			handlePlusMinusNumber(Arrays.asList(5,14,23), slot, factor, operator, price, editorItemStack);
 			break;
 		case "twenty":
-			handlePlusMinusTwenty(slot, factor, operator, price, editorItemStack);
+			handlePlusMinusNumber(Arrays.asList(6,15,24), slot, factor, operator, price, editorItemStack);
 			break;
 		case "save changes":
 			handleSaveChanges(event.getInventory(), player, originStack);
@@ -312,51 +312,13 @@ public class ShopSlotEditorHandler {
 		}
 	}
 
-	private void handlePlusMinusOne(int slot, int factor, String operator, double price, ItemStack editorItemStack) {
-		switch (slot) {
-		case 4:
+	private void handlePlusMinusNumber(List<Integer> slots, int slot, int factor, String operator, double price, ItemStack editorItemStack) {
+		if(slots.get(0) == slot) {
 			handlePlusMinusAmount(1, operator, editorItemStack);
-			break;
-		case 13:
+		} else if(slots.get(1) == slot) {
 			handlePlusMinusSellPrice(1, factor, operator, price);
-			break;
-		case 22:
+		} else if(slots.get(1) == slot) {
 			handlePlusMinusBuyPrice(1, factor, operator, price);
-			break;
-		default:
-			break;
-		}
-	}
-
-	private void handlePlusMinusTen(int slot, int factor, String operator, double price, ItemStack editorItemStack) {
-		switch (slot) {
-		case 5:
-			handlePlusMinusAmount(10, operator, editorItemStack);
-			break;
-		case 14:
-			handlePlusMinusSellPrice(10, factor, operator, price);
-			break;
-		case 23:
-			handlePlusMinusBuyPrice(10, factor, operator, price);
-			break;
-		default:
-			break;
-		}
-	}
-
-	private void handlePlusMinusTwenty(int slot, int factor, String operator, double price, ItemStack editorItemStack) {
-		switch (slot) {
-		case 6:
-			handlePlusMinusAmount(20, operator, editorItemStack);
-			break;
-		case 15:
-			handlePlusMinusSellPrice(20, factor, operator, price);
-			break;
-		case 24:
-			handlePlusMinusBuyPrice(20, factor, operator, price);
-			break;
-		default:
-			break;
 		}
 	}
 
