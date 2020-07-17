@@ -21,6 +21,7 @@ public class AdminshopCommandExecutor implements CommandExecutor {
 				if (args.length != 0) {
 					return AdminshopCommandEnum.getEnum(args[0]).perform(label, args, player);
 				}
+				return false;
 			} catch (TownSystemException | ShopSystemException | PlayerException | GeneralEconomyException e) {
 				player.sendMessage(e.getMessage());
 			} catch (NumberFormatException e) {

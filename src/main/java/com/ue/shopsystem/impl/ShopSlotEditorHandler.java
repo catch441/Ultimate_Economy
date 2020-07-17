@@ -308,7 +308,11 @@ public class ShopSlotEditorHandler {
 			// the old item in the selected slot gets deleted
 			handleRemoveItem(player, originStack);
 			getShop().addShopItem(getSelectedSlot(), sellPrice, buyPrice, itemStack);
-			player.sendMessage(MessageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
+			if(itemStack.getType() != Material.SPAWNER) {
+				player.sendMessage(MessageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
+			} else {
+				player.sendMessage(MessageWrapper.getString("shop_removeSpawner", itemStack.getItemMeta().getDisplayName().toLowerCase()));
+			}
 		}
 		// if the item doesn't changed
 		else {

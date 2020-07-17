@@ -327,7 +327,7 @@ public class RentshopCommandExecutorTest {
 	}
 	
 	@Test
-	public void renameProfessionCommandTestRented() {
+	public void renameCommandTestRented() {
 		createRentshop();
 		Location loc = new Location(world, 10,11,12);
 		player.setLocation(loc);
@@ -347,7 +347,7 @@ public class RentshopCommandExecutorTest {
 	}
 	
 	@Test
-	public void renameProfessionCommandTestRentedWithNotOwner() {
+	public void renameCommandTestRentedWithNotOwner() {
 		createRentshop();
 		Location loc = new Location(world, 10,11,12);
 		player.setLocation(loc);
@@ -367,7 +367,7 @@ public class RentshopCommandExecutorTest {
 	}
 	
 	@Test
-	public void renameProfessionCommandTestNotRented() {
+	public void renameCommandTestNotRented() {
 		createRentshop();
 		Location loc = new Location(world, 10,11,12);
 		player.setLocation(loc);
@@ -390,7 +390,7 @@ public class RentshopCommandExecutorTest {
 	}
 	
 	@Test
-	public void editShopProfessionCommandTestRented() {
+	public void editShopCommandTestRented() {
 		createRentshop();
 		Location loc = new Location(world, 10,11,12);
 		player.setLocation(loc);
@@ -410,7 +410,7 @@ public class RentshopCommandExecutorTest {
 	}
 	
 	@Test
-	public void editShopProfessionCommandTestNotOwner() {
+	public void editShopCommandTestNotOwner() {
 		createRentshop();
 		Location loc = new Location(world, 10,11,12);
 		player.setLocation(loc);
@@ -430,7 +430,7 @@ public class RentshopCommandExecutorTest {
 	}
 	
 	@Test
-	public void editShopProfessionCommandTestNotRented() {
+	public void editShopCommandTestNotRented() {
 		createRentshop();
 		Location loc = new Location(world, 10,11,12);
 		player.setLocation(loc);

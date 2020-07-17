@@ -1,6 +1,7 @@
 package com.ue.shopsystem.commands.adminshop;
 
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
@@ -11,7 +12,6 @@ import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.language.MessageWrapper;
-import com.ue.shopsystem.api.Adminshop;
 import com.ue.shopsystem.api.AdminshopController;
 
 public enum AdminshopCommandEnum {
@@ -110,52 +110,25 @@ public enum AdminshopCommandEnum {
 			return true;
 		}
 	},
-	REMOVEITEM {
-		@Override
-		boolean perform(String label, String[] args, Player player)
-				throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
-			if (args.length == 3) {
-				Adminshop shop = AdminshopController.getAdminShopByName(args[1]);
-				String itemName = shop.getShopItem(Integer.valueOf(args[2])).getItemStack().getType().toString()
-						.toLowerCase();
-				shop.removeShopItem(Integer.valueOf(args[2]) - 1);
-				player.sendMessage(MessageWrapper.getString("shop_removeItem", itemName));
-			} else {
-				player.sendMessage("/" + label + " removeItem <shopname> <slot (> 0)>");
-			}
-			return true;
-		}
-	},
 	ADDSPAWNER {
 		@Override
 		boolean perform(String label, String[] args, Player player)
 				throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
 			if (args.length == 5) {
-				ItemStack itemStack = new ItemStack(Material.SPAWNER, 1);
-				ItemMeta meta = itemStack.getItemMeta();
-				meta.setDisplayName(args[2].toUpperCase());
-				itemStack.setItemMeta(meta);
-				AdminshopController.getAdminShopByName(args[1]).addShopItem(Integer.valueOf(args[3]) - 1, 0.0,
-						Double.valueOf(args[4]), itemStack);
-				player.sendMessage(MessageWrapper.getString("shop_addSpawner", args[2]));
+				try {
+					EntityType.valueOf(args[2].toUpperCase());
+					ItemStack itemStack = new ItemStack(Material.SPAWNER, 1);
+					ItemMeta meta = itemStack.getItemMeta();
+					meta.setDisplayName(args[2].toUpperCase());
+					itemStack.setItemMeta(meta);
+					AdminshopController.getAdminShopByName(args[1]).addShopItem(Integer.valueOf(args[3]) - 1, 0.0,
+							Double.valueOf(args[4]), itemStack);
+					player.sendMessage(MessageWrapper.getString("shop_addSpawner", args[2]));
+				} catch (IllegalArgumentException e) {
+					player.sendMessage(MessageWrapper.getErrorString("invalid_parameter", args[2]));
+				}
 			} else {
 				player.sendMessage("/" + label + " addSpawner <shopname> <entity type> <slot> <buyPrice>");
-			}
-			return true;
-		}
-	},
-	REMOVESPAWNER {
-		@Override
-		boolean perform(String label, String[] args, Player player)
-				throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
-			if (args.length == 3) {
-				Adminshop shop = AdminshopController.getAdminShopByName(args[1]);
-				String itemName = shop.getShopItem(Integer.valueOf(args[2])).getItemStack().getType().toString()
-						.toLowerCase();
-				shop.removeShopItem(Integer.valueOf(args[2]) - 1);
-				player.sendMessage(MessageWrapper.getString("shop_removeSpawner", itemName));
-			} else {
-				player.sendMessage("/" + label + " removeSpawner <shopname> <slot>");
 			}
 			return true;
 		}

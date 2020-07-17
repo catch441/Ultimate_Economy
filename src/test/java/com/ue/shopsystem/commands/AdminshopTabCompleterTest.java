@@ -79,7 +79,7 @@ public class AdminshopTabCompleterTest {
 	public void zeroArgsTest() {
 		String[] args = { "" };
 		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(9, list.size());
+		assertEquals(8, list.size());
 		assertEquals("create", list.get(0));
 		assertEquals("delete", list.get(1));
 		assertEquals("move", list.get(2));
@@ -88,20 +88,18 @@ public class AdminshopTabCompleterTest {
 		assertEquals("resize", list.get(5));
 		assertEquals("changeProfession", list.get(6));
 		assertEquals("addSpawner", list.get(7));
-		assertEquals("removeSpawner", list.get(8));
 	}
 
 	@Test
 	public void zeroArgsTestWithMatching() {
 		String[] args = { "r" };
 		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(6, list.size());
+		assertEquals(5, list.size());
 		assertEquals("create", list.get(0));
 		assertEquals("rename", list.get(1));
 		assertEquals("resize", list.get(2));
 		assertEquals("changeProfession", list.get(3));
 		assertEquals("addSpawner", list.get(4));
-		assertEquals("removeSpawner", list.get(5));
 	}
 
 	@Test
@@ -220,30 +218,6 @@ public class AdminshopTabCompleterTest {
 	@Test
 	public void renameTestWithMoreArgs() {
 		String[] args = { "rename", "myshop1", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(0, list.size());
-	}
-
-	@Test
-	public void removeSpawnerItemTest() {
-		String[] args = { "removeSpawner", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(2, list.size());
-		assertEquals("myshop1", list.get(0));
-		assertEquals("myshop2", list.get(1));
-	}
-
-	@Test
-	public void removeSpawnerTestWithMatching() {
-		String[] args = { "removeSpawner", "1" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(1, list.size());
-		assertEquals("myshop1", list.get(0));
-	}
-
-	@Test
-	public void removeSpawnerTestWithMoreArgs() {
-		String[] args = { "removeSpawner", "myshop1", "" };
 		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
 		assertEquals(0, list.size());
 	}

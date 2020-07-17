@@ -78,7 +78,6 @@ public class AdminshopTabCompleter implements TabCompleter {
 		addIfMatching(list, "changeProfession", args[0]);
 		addIfMatching(list, "editShop", args[0]);
 		addIfMatching(list, "addSpawner", args[0]);
-		addIfMatching(list, "removeSpawner", args[0]);
 		return list;
 	}
 
@@ -98,7 +97,6 @@ public class AdminshopTabCompleter implements TabCompleter {
 		list.add("resize");
 		list.add("changeProfession");
 		list.add("addSpawner");
-		list.add("removeSpawner");
 		return list;
 	}
 
