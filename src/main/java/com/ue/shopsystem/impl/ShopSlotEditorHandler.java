@@ -184,7 +184,6 @@ public class ShopSlotEditorHandler {
 		if (event.getCurrentItem().getItemMeta() != null) {
 			Player player = (Player) event.getWhoClicked();
 			try {
-				ItemStack originStack = new ItemStack(getShop().getShopInventory().getItem(getSelectedSlot()));
 				int slot = event.getSlot();
 				int factor = 1;
 				if (event.getInventory().getItem(12).getItemMeta().getDisplayName().equals("factor on")) {
@@ -194,8 +193,7 @@ public class ShopSlotEditorHandler {
 				double price = getPriceForHandleSlotEditor(event, slot);
 				ItemStack editorItemStack = slotEditor.getItem(0);
 				String command = event.getCurrentItem().getItemMeta().getDisplayName();
-
-				handleSlotEditorCommand(event, player, originStack, slot, factor, operator, price, editorItemStack,
+				handleSlotEditorCommand(event, player, slot, factor, operator, price, editorItemStack,
 						command);
 			} catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
 				player.sendMessage(e.getMessage());
@@ -203,7 +201,7 @@ public class ShopSlotEditorHandler {
 		}
 	}
 
-	private void handleSlotEditorCommand(InventoryClickEvent event, Player player, ItemStack originStack, int slot,
+	private void handleSlotEditorCommand(InventoryClickEvent event, Player player, int slot,
 			int factor, String operator, double price, ItemStack editorItemStack, String command)
 			throws ShopSystemException, PlayerException, GeneralEconomyException {
 		switch (ChatColor.stripColor(command)) {
@@ -225,11 +223,11 @@ public class ShopSlotEditorHandler {
 			handlePlusMinusNumber(Arrays.asList(6,15,24), slot, factor, operator, price, editorItemStack);
 			break;
 		case "save changes":
-			handleSaveChanges(event.getInventory(), player, originStack);
+			handleSaveChanges(player);
 			getShop().openEditor(player);
 			break;
 		case "remove item":
-			handleRemoveItem(player, originStack);
+			handleRemoveItem(player);
 		case "exit without save":
 			getShop().openEditor(player);
 			break;
@@ -247,49 +245,50 @@ public class ShopSlotEditorHandler {
 		getSlotEditorInventory().setItem(0, editorItemStack);
 	}
 
-	private void handleSaveChanges(Inventory inv, Player player, ItemStack originStack)
-			throws ShopSystemException, PlayerException, GeneralEconomyException {
-		double buyPrice = Double.valueOf(inv.getItem(9).getItemMeta().getLore().get(0).substring(9));
-		double sellPrice = Double.valueOf(inv.getItem(18).getItemMeta().getLore().get(0).substring(9));
+	private void handleSaveChanges(Player player) throws ShopSystemException, PlayerException, GeneralEconomyException {
+		double buyPrice = Double.valueOf(getSlotEditorInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
+		double sellPrice = Double.valueOf(getSlotEditorInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
 		getShop().getValidationHandler().checkForPricesGreaterThenZero(sellPrice, buyPrice);
-		ItemStack itemStack = inv.getItem(0);
+		ItemStack itemStack = getSlotEditorInventory().getItem(0);
 		// make a copy of the edited/created item
-		ItemStack newItemStackCopy = new ItemStack(itemStack);
-		ItemMeta itemMeta = originStack.getItemMeta();
-		if (itemMeta != null && itemMeta.hasLore()) {
-			List<String> loreList = getShop().removeShopItemPriceLore(itemMeta.getLore());
-			itemMeta.setLore(loreList);
-			originStack.setItemMeta(itemMeta);
-		}
-		String originalStackString = originStack.toString();
-		newItemStackCopy.setAmount(originStack.getAmount());
-		// if the item changed
-		if (!newItemStackCopy.toString().equals(originalStackString)) {
-			newItemStackCopy.setAmount(1);
-			getShop().getValidationHandler().checkForItemDoesNotExist(newItemStackCopy.toString(),
-					getShop().getItemList());
-			// the old item in the selected slot gets deleted
-			handleRemoveItem(player, originStack);
-			getShop().addShopItem(getSelectedSlot(), sellPrice, buyPrice, itemStack);
-			if (itemStack.getType() != Material.SPAWNER) {
-				player.sendMessage(
-						MessageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
+		ItemStack stackInEditor = new ItemStack(itemStack);
+		stackInEditor.setAmount(1);
+		try {
+			ShopItem shopItem = getShop().getShopItem(getSelectedSlot());
+			// slot is occupied, check if item changed
+			if(shopItem.getItemString().equals(stackInEditor.toString())) {
+				// remove and add
+				handleRemoveItem(player);
+				getShop().addShopItem(getSelectedSlot(), sellPrice, buyPrice, itemStack);
+				sendAddMessage(player, itemStack);
 			} else {
-				player.sendMessage(MessageWrapper.getString("shop_removeSpawner",
-						itemStack.getItemMeta().getDisplayName().toLowerCase()));
+				// edit
+				player.sendMessage(getShop().editShopItem(getSelectedSlot(), String.valueOf(itemStack.getAmount()),
+						String.valueOf(sellPrice), String.valueOf(buyPrice)));
 			}
-		}
-		// if the item doesn't changed
-		else {
-			player.sendMessage(getShop().editShopItem(getSelectedSlot(), String.valueOf(itemStack.getAmount()),
-					String.valueOf(sellPrice), String.valueOf(buyPrice)));
+		} catch (GeneralEconomyException | ShopSystemException e) {
+			// item is new
+			getShop().getValidationHandler().checkForItemDoesNotExist(stackInEditor.toString(),
+					getShop().getItemList());
+			getShop().addShopItem(getSelectedSlot(), sellPrice, buyPrice, itemStack);
+			sendAddMessage(player, itemStack);
 		}
 	}
 
-	private void handleRemoveItem(Player player, ItemStack originStack)
+	private void sendAddMessage(Player player, ItemStack itemStack) {
+		if (itemStack.getType() != Material.SPAWNER) {
+			player.sendMessage(
+					MessageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
+		} else {
+			player.sendMessage(MessageWrapper.getString("shop_removeSpawner",
+					itemStack.getItemMeta().getDisplayName().toLowerCase()));
+		}
+	}
+
+	private void handleRemoveItem(Player player)
 			throws ShopSystemException, GeneralEconomyException {
 		getShop().removeShopItem(getSelectedSlot() - 1);
-		player.sendMessage(MessageWrapper.getString("shop_removeItem", originStack.getType().toString().toLowerCase()));
+		player.sendMessage(MessageWrapper.getString("shop_removeItem", getSlotEditorInventory().getItem(0).getType().toString().toLowerCase()));
 	}
 
 	private void handleSwitchFactor(int slot, String state) {
