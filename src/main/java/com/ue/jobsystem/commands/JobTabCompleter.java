@@ -150,14 +150,9 @@ public class JobTabCompleter implements TabCompleter {
 
 	private List<String> getMatchingJobCommands(String[] args) {
 		List<String> list = new ArrayList<>();
-		addIfMatching(list, "create", args[1]);
-		addIfMatching(list, "delete", args[1]);
-		addIfMatching(list, "addItem", args[1]);
-		addIfMatching(list, "removeItem", args[1]);
-		addIfMatching(list, "addFisher", args[1]);
-		addIfMatching(list, "removeFisher", args[1]);
-		addIfMatching(list, "addMob", args[1]);
-		addIfMatching(list, "removeMob", args[1]);
+		for(String cmd: getAllJobCommands()) {
+			addIfMatching(list, cmd, args[1]);
+		}
 		return list;
 	}
 
@@ -176,12 +171,9 @@ public class JobTabCompleter implements TabCompleter {
 
 	private List<String> getMatchingJobcenterCommands(String[] args) {
 		List<String> list = new ArrayList<>();
-		addIfMatching(list,"create",args[0]);
-		addIfMatching(list,"delete",args[0]);
-		addIfMatching(list,"move",args[0]);
-		addIfMatching(list,"job",args[0]);
-		addIfMatching(list,"addJob",args[0]);
-		addIfMatching(list,"removeJob",args[0]);
+		for(String cmd: getAllJobcenterCommands()) {
+			addIfMatching(list, cmd, args[0]);
+		}
 		return list;
 	}
 	

@@ -70,14 +70,9 @@ public class AdminshopTabCompleter implements TabCompleter {
 
 	private List<String> handleDefaultMatchingTabComplete(String[] args) {
 		List<String> list = new ArrayList<>();
-		addIfMatching(list, "create", args[0]);
-		addIfMatching(list, "delete", args[0]);
-		addIfMatching(list, "move", args[0]);
-		addIfMatching(list, "rename", args[0]);
-		addIfMatching(list, "resize", args[0]);
-		addIfMatching(list, "changeProfession", args[0]);
-		addIfMatching(list, "editShop", args[0]);
-		addIfMatching(list, "addSpawner", args[0]);
+		for(String cmd: getAllCommands()) {
+			addIfMatching(list, cmd, args[0]);
+		}
 		return list;
 	}
 
