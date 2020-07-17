@@ -7,11 +7,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Villager.Profession;
 
+import com.ue.common.utils.TabCompleterUtils;
 import com.ue.shopsystem.api.AdminshopController;
 
-public class AdminshopTabCompleter implements TabCompleter {
+public class AdminshopTabCompleter extends TabCompleterUtils implements TabCompleter {
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -43,20 +43,6 @@ public class AdminshopTabCompleter implements TabCompleter {
 			return new ArrayList<>();
 		}
 	}
-	
-	private List<String> getProfessions(String arg) {
-		List<String> list = new ArrayList<>();
-		for (Profession profession : Profession.values()) {
-			if ("".equals(arg)) {
-				list.add(profession.name().toLowerCase());
-			} else {
-				if (profession.name().toLowerCase().contains(arg)) {
-					list.add(profession.name().toLowerCase());
-				}
-			}
-		}
-		return list;
-	}
 
 	private List<String> handlerAddSpawnerTabComplete(String[] args) {
 		if (args.length == 2) {
@@ -74,12 +60,6 @@ public class AdminshopTabCompleter implements TabCompleter {
 			addIfMatching(list, cmd, args[0]);
 		}
 		return list;
-	}
-
-	private void addIfMatching(List<String> list, String command, String arg) {
-		if (command.contains(arg)) {
-			list.add(command);
-		}
 	}
 
 	private List<String> getAllCommands() {

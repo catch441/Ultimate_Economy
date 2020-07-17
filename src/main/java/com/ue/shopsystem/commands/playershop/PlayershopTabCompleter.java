@@ -6,11 +6,11 @@ import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Villager.Profession;
 
+import com.ue.common.utils.TabCompleterUtils;
 import com.ue.shopsystem.api.PlayershopController;
 
-public class PlayershopTabCompleter implements TabCompleter {
+public class PlayershopTabCompleter extends TabCompleterUtils implements TabCompleter {
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -37,7 +37,7 @@ public class PlayershopTabCompleter implements TabCompleter {
 
 	private List<String> handleChangeProfessionTabComplete(CommandSender sender, String[] args) {
 		if (args.length == 3) {
-			return getProfessions(args);
+			return getProfessions(args[2]);
 		} else if (args.length == 2) {
 			return getPlayerShopList(args[1], sender.getName());
 		} else {
@@ -69,18 +69,6 @@ public class PlayershopTabCompleter implements TabCompleter {
 		}
 	}
 
-	private List<String> getProfessions(String[] args) {
-		List<String> list = new ArrayList<>();
-		for (Profession profession : Profession.values()) {
-			if (args[2].equals("")) {
-				list.add(profession.name().toLowerCase());
-			} else if (profession.name().toLowerCase().contains(args[2])) {
-				list.add(profession.name().toLowerCase());
-			}
-		}
-		return list;
-	}
-
 	private List<String> getAllCommands(CommandSender sender) {
 		List<String> list = new ArrayList<>();
 		list.add("create");
@@ -99,24 +87,10 @@ public class PlayershopTabCompleter implements TabCompleter {
 
 	private List<String> getMatchingCommands(CommandSender sender, String[] args) {
 		List<String> list = new ArrayList<>();
-		addIfMatching(list, "create", args[0]);
-		addIfMatching(list, "delete", args[0]);
-		addIfMatching(list, "move", args[0]);
-		addIfMatching(list, "editShop", args[0]);
-		addIfMatching(list, "rename", args[0]);
-		addIfMatching(list, "resize", args[0]);
-		addIfMatching(list, "changeProfession", args[0]);
-		addIfMatching(list, "changeOwner", args[0]);
-		if (sender.hasPermission("ultimate_economy.adminshop")) {
-			addIfMatching(list, "deleteOther", args[0]);
+		for(String cmd: getAllCommands(sender)) {
+			addIfMatching(list, cmd, args[0]);
 		}
 		return list;
-	}
-
-	private void addIfMatching(List<String> list, String command, String arg) {
-		if (command.contains(arg)) {
-			list.add(command);
-		}
 	}
 
 	private List<String> getPlayerShopList(String arg, String playerName) {
