@@ -79,35 +79,29 @@ public class AdminshopTabCompleterTest {
 	public void zeroArgsTest() {
 		String[] args = { "" };
 		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(14, list.size());
+		assertEquals(9, list.size());
 		assertEquals("create", list.get(0));
 		assertEquals("delete", list.get(1));
 		assertEquals("move", list.get(2));
 		assertEquals("editShop", list.get(3));
-		assertEquals("addItem", list.get(4));
-		assertEquals("removeItem", list.get(5));
-		assertEquals("rename", list.get(6));
-		assertEquals("resize", list.get(7));
-		assertEquals("changeProfession", list.get(8));
-		assertEquals("editItem", list.get(9));
-		assertEquals("addEnchantedItem", list.get(10));
-		assertEquals("addPotion", list.get(11));
-		assertEquals("addSpawner", list.get(12));
-		assertEquals("removeSpawner", list.get(13));
+		assertEquals("rename", list.get(4));
+		assertEquals("resize", list.get(5));
+		assertEquals("changeProfession", list.get(6));
+		assertEquals("addSpawner", list.get(7));
+		assertEquals("removeSpawner", list.get(8));
 	}
 
 	@Test
 	public void zeroArgsTestWithMatching() {
 		String[] args = { "r" };
 		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(7, list.size());
+		assertEquals(6, list.size());
 		assertEquals("create", list.get(0));
-		assertEquals("removeItem", list.get(1));
-		assertEquals("rename", list.get(2));
-		assertEquals("resize", list.get(3));
-		assertEquals("changeProfession", list.get(4));
-		assertEquals("addSpawner", list.get(5));
-		assertEquals("removeSpawner", list.get(6));
+		assertEquals("rename", list.get(1));
+		assertEquals("resize", list.get(2));
+		assertEquals("changeProfession", list.get(3));
+		assertEquals("addSpawner", list.get(4));
+		assertEquals("removeSpawner", list.get(5));
 	}
 
 	@Test
@@ -183,30 +177,6 @@ public class AdminshopTabCompleterTest {
 	}
 
 	@Test
-	public void editItemTest() {
-		String[] args = { "editItem", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(2, list.size());
-		assertEquals("myshop1", list.get(0));
-		assertEquals("myshop2", list.get(1));
-	}
-
-	@Test
-	public void editItemTestWithMatching() {
-		String[] args = { "editItem", "1" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(1, list.size());
-		assertEquals("myshop1", list.get(0));
-	}
-
-	@Test
-	public void editItemTestWithMoreArgs() {
-		String[] args = { "editItem", "myshop1", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(0, list.size());
-	}
-
-	@Test
 	public void moveTest() {
 		String[] args = { "move", "" };
 		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
@@ -250,30 +220,6 @@ public class AdminshopTabCompleterTest {
 	@Test
 	public void renameTestWithMoreArgs() {
 		String[] args = { "rename", "myshop1", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(0, list.size());
-	}
-
-	@Test
-	public void removeItemTest() {
-		String[] args = { "removeItem", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(2, list.size());
-		assertEquals("myshop1", list.get(0));
-		assertEquals("myshop2", list.get(1));
-	}
-
-	@Test
-	public void removeItemTestWithMatching() {
-		String[] args = { "removeItem", "1" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(1, list.size());
-		assertEquals("myshop1", list.get(0));
-	}
-
-	@Test
-	public void removeItemTestWithMoreArgs() {
-		String[] args = { "removeSpawner", "myshop1", "" };
 		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
 		assertEquals(0, list.size());
 	}
@@ -343,47 +289,6 @@ public class AdminshopTabCompleterTest {
 	}
 
 	@Test
-	public void addItemTestTwoArgs() {
-		String[] args = { "addItem", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(2, list.size());
-		assertEquals("myshop1", list.get(0));
-		assertEquals("myshop2", list.get(1));
-	}
-
-	@Test
-	public void addItemTestWithTwoArgsMatching() {
-		String[] args = { "addItem", "1" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(1, list.size());
-		assertEquals("myshop1", list.get(0));
-	}
-
-	@Test
-	public void addItemTestThreeArgs() {
-		String[] args = { "addItem", "myshop1", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(1539, list.size());
-	}
-
-	@Test
-	public void addItemTestWithThreeArgsMatching() {
-		String[] args = { "addItem", "myshop1", "cobblestone_stai" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(3, list.size());
-		assertEquals("cobblestone_stairs", list.get(0));
-		assertEquals("mossy_cobblestone_stairs", list.get(1));
-		assertEquals("legacy_cobblestone_stairs", list.get(2));
-	}
-
-	@Test
-	public void addItemTestWithMoreArgs() {
-		String[] args = { "addItem", "myshop1", "cobblestone", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(0, list.size());
-	}
-
-	@Test
 	public void changeProfessionTestTwoArgs() {
 		String[] args = { "changeProfession", "" };
 		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
@@ -420,133 +325,5 @@ public class AdminshopTabCompleterTest {
 		String[] args = { "changeProfession", "myshop1", "fletcher", "" };
 		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
 		assertEquals(0, list.size());
-	}
-
-	@Test
-	public void addPotionTestTwoArgs() {
-		String[] args = { "addPotion", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(2, list.size());
-		assertEquals("myshop1", list.get(0));
-		assertEquals("myshop2", list.get(1));
-	}
-
-	@Test
-	public void addPotionTestWithTwoArgsMatching() {
-		String[] args = { "addPotion", "1" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(1, list.size());
-		assertEquals("myshop1", list.get(0));
-	}
-
-	@Test
-	public void addPotionTestThreeArgs() {
-		String[] args = { "addPotion", "myshop1", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(21, list.size());
-	}
-
-	@Test
-	public void addPotionTestWithThreeArgsMatching() {
-		String[] args = { "addPotion", "myshop1", "luc" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(1, list.size());
-		assertEquals("luck", list.get(0));
-	}
-
-	@Test
-	public void addPotionTestFourArgs() {
-		String[] args = { "addPotion", "myshop1", "luck", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(32, list.size());
-	}
-
-	@Test
-	public void addPotionTestWithFourArgsMatching() {
-		String[] args = { "addPotion", "myshop1", "luck", "hunge" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(1, list.size());
-		assertEquals("hunger", list.get(0));
-	}
-
-	@Test
-	public void addPotionTestFiveArgs() {
-		String[] args = { "addPotion", "myshop1", "luck", "hunger", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(3, list.size());
-		assertEquals("extended", list.get(0));
-		assertEquals("upgraded", list.get(1));
-		assertEquals("none", list.get(2));
-	}
-
-	@Test
-	public void addPotionTestWithFiveArgsMatching() {
-		String[] args = { "addPotion", "myshop1", "luck", "hunger", "non" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(1, list.size());
-		assertEquals("none", list.get(0));
-	}
-
-	@Test
-	public void addPotionTestWithMoreArgs() {
-		String[] args = { "addPotion", "myshop1", "luck", "hunger", "none", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(0, list.size());
-	}
-
-	//
-
-	@Test
-	public void addEnchantedItemTestTwoArgs() {
-		String[] args = { "addEnchantedItem", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(2, list.size());
-		assertEquals("myshop1", list.get(0));
-		assertEquals("myshop2", list.get(1));
-	}
-
-	@Test
-	public void addEnchantedItemTestWithTwoArgsMatching() {
-		String[] args = { "addEnchantedItem", "1" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(1, list.size());
-		assertEquals("myshop1", list.get(0));
-	}
-
-	@Test
-	public void addEnchantedItemTestThreeArgs() {
-		String[] args = { "addEnchantedItem", "myshop1", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(1539, list.size());
-	}
-
-	@Test
-	public void addEnchantedItemTestWithThreeArgsMatching() {
-		String[] args = { "addEnchantedItem", "myshop1", "acacia_butt" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(1, list.size());
-		assertEquals("acacia_button", list.get(0));
-	}
-	
-	@Test
-	public void addEnchantedItemTestWithUnevenMoreArgs() {
-		String[] args = { "addEnchantedItem", "myshop1", "acacia_button", "slot", "amount", "sell", "buy", "enchantement", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(0, list.size());
-	}
-
-	@Test
-	public void addEnchantedItemTestWithEvenMoreArgs() {
-		String[] args = { "addEnchantedItem", "myshop1", "acacia_button", "slot", "amount", "sell", "buy", "" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(38, list.size());
-	}
-	
-	@Test
-	public void addEnchantedItemTestWithEvenMoreArgsMatching() {
-		String[] args = { "addEnchantedItem", "myshop1", "acacia_button", "slot", "amount", "sell", "buy", "mendi" };
-		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
-		assertEquals(1, list.size());
-		assertEquals("mending", list.get(0));
 	}
 }

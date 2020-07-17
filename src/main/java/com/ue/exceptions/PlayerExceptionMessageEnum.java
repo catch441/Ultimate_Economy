@@ -18,7 +18,6 @@ public enum PlayerExceptionMessageEnum {
     YOU_ARE_ALREADY_CITIZEN ("you_are_already_citizen"),
     YOU_ARE_NO_CITIZEN ("you_are_no_citizen"),
     SHOPOWNER_NOT_ENOUGH_MONEY ("shopowner_not_enough_money"),
-    ENCHANTMENTLIST_INCOMPLETE ("enchantmentlist_incomplete"),
     PLAYER_DOES_NOT_EXIST ("player_does_not_exist"),
     PLAYER_ALREADY_EXIST ("player_already_exist"),
     HOME_DOES_NOT_EXIST ("home_does_not_exist"),
