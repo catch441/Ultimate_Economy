@@ -30,7 +30,8 @@ public class ShopEditorHandler {
 	 * @param reservedSlots
 	 */
 	public void setup(int reservedSlots) {
-		editor = Bukkit.createInventory(getShop().getShopVillager(), getShop().getSize(), getShop().getName()+ "-Editor");
+		editor = Bukkit.createInventory(getShop().getShopVillager(), getShop().getSize(),
+				getShop().getName() + "-Editor");
 		for (int i = 0; i < (getShop().getSize() - reservedSlots); i++) {
 			// +1 for player readable
 			getEditorInventory().setItem(i, CustomSkullService.getSkullWithName("SLOTEMPTY", "Slot " + (i + 1)));
@@ -46,7 +47,7 @@ public class ShopEditorHandler {
 		ItemMeta clickedItemMeta = event.getCurrentItem().getItemMeta();
 		int slot = Integer.valueOf(clickedItemMeta.getDisplayName().substring(5));
 		try {
-			getShop().openSlotEditor((Player) event.getWhoClicked(), slot);
+			getShop().openSlotEditor((Player) event.getWhoClicked(), slot- 1);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 		}
 	}
