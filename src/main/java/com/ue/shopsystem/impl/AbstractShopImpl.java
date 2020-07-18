@@ -251,7 +251,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	@Override
 	public void openSlotEditor(Player player, int slot) throws ShopSystemException, GeneralEconomyException {
-		getSlotEditorHandler().setupSlotEditorWithShopItemInformations(slot);
 		getSlotEditorHandler().setSelectedSlot(slot);
 		player.openInventory(getSlotEditorHandler().getSlotEditorInventory());
 	}
@@ -337,7 +336,11 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		return validationHandler;
 	}
 
-	protected ShopSlotEditorHandler getSlotEditorHandler() {
+	/**
+	 * Returns the slot editor handler.
+	 * @return slot editor handler
+	 */
+	public ShopSlotEditorHandler getSlotEditorHandler() {
 		return slotEditorHandler;
 	}
 
