@@ -1,6 +1,7 @@
 package com.ue.shopsystem;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -27,6 +29,7 @@ import com.ue.exceptions.PlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.impl.AbstractShopImpl;
+import com.ue.shopsystem.impl.ShopItem;
 import com.ue.shopsystem.impl.ShopSlotEditorHandler;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -409,6 +412,93 @@ public class ShopSlotEditorHandlerTest {
 	}
 	
 	@Test
+	public void handleSlotEditorTestMinusClick1() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 2, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(2).getType());
+		NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
+		assertEquals(PLUS, slotEditor.getItem(2).getItemMeta().getPersistentDataContainer().get(key,
+				PersistentDataType.STRING));
+		assertEquals("plus", slotEditor.getItem(2).getItemMeta().getDisplayName());
+		assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(11).getType());
+		assertEquals(PLUS, slotEditor.getItem(11).getItemMeta().getPersistentDataContainer().get(key,
+				PersistentDataType.STRING));
+		assertEquals("plus", slotEditor.getItem(11).getItemMeta().getDisplayName());
+		assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(20).getType());
+		assertEquals(PLUS, slotEditor.getItem(20).getItemMeta().getPersistentDataContainer().get(key,
+				PersistentDataType.STRING));
+		assertEquals("plus", slotEditor.getItem(20).getItemMeta().getDisplayName());
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestMinusClick2() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 11, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(11).getType());
+		NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
+		assertEquals(PLUS, slotEditor.getItem(11).getItemMeta().getPersistentDataContainer().get(key,
+				PersistentDataType.STRING));
+		assertEquals("plus", slotEditor.getItem(11).getItemMeta().getDisplayName());
+		assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(20).getType());
+		assertEquals(PLUS, slotEditor.getItem(20).getItemMeta().getPersistentDataContainer().get(key,
+				PersistentDataType.STRING));
+		assertEquals("plus", slotEditor.getItem(20).getItemMeta().getDisplayName());
+		assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(2).getType());
+		assertEquals(PLUS, slotEditor.getItem(2).getItemMeta().getPersistentDataContainer().get(key,
+				PersistentDataType.STRING));
+		assertEquals("plus", slotEditor.getItem(2).getItemMeta().getDisplayName());
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestMinusClick3() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 20, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(2).getType());
+		NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
+		assertEquals(PLUS, slotEditor.getItem(2).getItemMeta().getPersistentDataContainer().get(key,
+				PersistentDataType.STRING));
+		assertEquals("plus", slotEditor.getItem(2).getItemMeta().getDisplayName());
+		assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(2).getType());
+		assertEquals(PLUS, slotEditor.getItem(11).getItemMeta().getPersistentDataContainer().get(key,
+				PersistentDataType.STRING));
+		assertEquals("plus", slotEditor.getItem(11).getItemMeta().getDisplayName());
+		assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(2).getType());
+		assertEquals(PLUS, slotEditor.getItem(20).getItemMeta().getPersistentDataContainer().get(key,
+				PersistentDataType.STRING));
+		assertEquals("plus", slotEditor.getItem(20).getItemMeta().getDisplayName());
+		player.closeInventory();
+	}
+	
+	@Test
 	public void handleSlotEditorTestFactorOffClick1() {
 		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
@@ -465,9 +555,8 @@ public class ShopSlotEditorHandlerTest {
 			fail();
 		}
 		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
-		InventoryClickEvent eventBefore = new InventoryClickEvent(view, SlotType.CONTAINER, 12, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
-		handler.handleSlotEditor(eventBefore);
 		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 12, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
 		handler.handleSlotEditor(event);
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
 		assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(12).getType());
@@ -491,9 +580,8 @@ public class ShopSlotEditorHandlerTest {
 			fail();
 		}
 		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
-		InventoryClickEvent eventBefore = new InventoryClickEvent(view, SlotType.CONTAINER, 21, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
-		handler.handleSlotEditor(eventBefore);
 		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 21, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
 		handler.handleSlotEditor(event);
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
 		assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(21).getType());
@@ -537,7 +625,6 @@ public class ShopSlotEditorHandlerTest {
 		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 13, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(event);
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
-		
 		List<String> sellPrice = new ArrayList<String>();
 		sellPrice.add("§6Price: 1.0");
 		List<String> buyPrice = new ArrayList<String>();
@@ -571,7 +658,6 @@ public class ShopSlotEditorHandlerTest {
 		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 22, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(event);
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
-		
 		List<String> sellPrice = new ArrayList<String>();
 		sellPrice.add("§6Price: 0.0");
 		List<String> buyPrice = new ArrayList<String>();
@@ -589,12 +675,11 @@ public class ShopSlotEditorHandlerTest {
 			fail();
 		}
 		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
-		InventoryClickEvent eventBefore = new InventoryClickEvent(view, SlotType.CONTAINER, 4, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
-		handler.handleSlotEditor(eventBefore);
-		handler.handleSlotEditor(eventBefore);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 4, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
 		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 2, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(switchToMinus);
-		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 4, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(event);
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
 		assertEquals(Material.BARRIER, slotEditor.getItem(0).getType());
@@ -611,12 +696,11 @@ public class ShopSlotEditorHandlerTest {
 			fail();
 		}
 		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
-		InventoryClickEvent eventBefore = new InventoryClickEvent(view, SlotType.CONTAINER, 13, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
-		handler.handleSlotEditor(eventBefore);
-		handler.handleSlotEditor(eventBefore);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 13, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
 		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 11, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(switchToMinus);
-		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 13, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(event);	
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
 		List<String> sellPrice = new ArrayList<String>();
@@ -636,12 +720,11 @@ public class ShopSlotEditorHandlerTest {
 			fail();
 		}
 		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
-		InventoryClickEvent eventBefore = new InventoryClickEvent(view, SlotType.CONTAINER, 22, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
-		handler.handleSlotEditor(eventBefore);
-		handler.handleSlotEditor(eventBefore);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 22, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
 		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 20, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(switchToMinus);
-		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 22, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(event);		
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
 		List<String> sellPrice = new ArrayList<String>();
@@ -719,12 +802,11 @@ public class ShopSlotEditorHandlerTest {
 			fail();
 		}
 		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
-		InventoryClickEvent eventBefore = new InventoryClickEvent(view, SlotType.CONTAINER, 5, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
-		handler.handleSlotEditor(eventBefore);
-		handler.handleSlotEditor(eventBefore);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 5, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
 		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 2, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(switchToMinus);
-		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 5, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(event);
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
 		assertEquals(Material.BARRIER, slotEditor.getItem(0).getType());
@@ -741,12 +823,11 @@ public class ShopSlotEditorHandlerTest {
 			fail();
 		}
 		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
-		InventoryClickEvent eventBefore = new InventoryClickEvent(view, SlotType.CONTAINER, 14, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
-		handler.handleSlotEditor(eventBefore);
-		handler.handleSlotEditor(eventBefore);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 14, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
 		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 11, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(switchToMinus);
-		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 14, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(event);
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
 		List<String> sellPrice = new ArrayList<String>();
@@ -766,12 +847,11 @@ public class ShopSlotEditorHandlerTest {
 			fail();
 		}
 		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
-		InventoryClickEvent eventBefore = new InventoryClickEvent(view, SlotType.CONTAINER, 23, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
-		handler.handleSlotEditor(eventBefore);
-		handler.handleSlotEditor(eventBefore);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 23, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
 		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 20, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(switchToMinus);
-		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 23, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(event);
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
 		List<String> sellPrice = new ArrayList<String>();
@@ -848,12 +928,11 @@ public class ShopSlotEditorHandlerTest {
 			fail();
 		}
 		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
-		InventoryClickEvent eventBefore = new InventoryClickEvent(view, SlotType.CONTAINER, 6, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
-		handler.handleSlotEditor(eventBefore);
-		handler.handleSlotEditor(eventBefore);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 6, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
 		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 2, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(switchToMinus);
-		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 6, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(event);
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
 		assertEquals(Material.BARRIER, slotEditor.getItem(0).getType());
@@ -870,12 +949,11 @@ public class ShopSlotEditorHandlerTest {
 			fail();
 		}
 		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
-		InventoryClickEvent eventBefore = new InventoryClickEvent(view, SlotType.CONTAINER, 15, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
-		handler.handleSlotEditor(eventBefore);
-		handler.handleSlotEditor(eventBefore);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 15, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
 		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 11, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(switchToMinus);
-		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 15, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(event);
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
 		List<String> sellPrice = new ArrayList<String>();
@@ -895,12 +973,11 @@ public class ShopSlotEditorHandlerTest {
 			fail();
 		}
 		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
-		InventoryClickEvent eventBefore = new InventoryClickEvent(view, SlotType.CONTAINER, 24, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
-		handler.handleSlotEditor(eventBefore);
-		handler.handleSlotEditor(eventBefore);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 24, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
 		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 20, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(switchToMinus);
-		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 24, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleSlotEditor(event);
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
 		List<String> sellPrice = new ArrayList<String>();
@@ -928,6 +1005,610 @@ public class ShopSlotEditorHandlerTest {
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
 		assertEquals(Material.BARRIER, slotEditor.getItem(0).getType());
 		assertEquals(64, slotEditor.getItem(0).getAmount());
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestRemoveMoreAmount() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 6, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 2, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(switchToMinus);
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		assertEquals(Material.BARRIER, slotEditor.getItem(0).getType());
+		assertEquals(1, slotEditor.getItem(0).getAmount());
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestMinusMoreMoney1() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 15, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 11, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(switchToMinus);
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		List<String> sellPrice = new ArrayList<String>();
+		sellPrice.add("§6Price: 0.0");
+		List<String> buyPrice = new ArrayList<String>();
+		buyPrice.add("§6Price: 0.0");
+		checkBuySellInfoItems(slotEditor, sellPrice, buyPrice);
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestMinusMoreMoney2() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 24, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 20, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(switchToMinus);
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		List<String> sellPrice = new ArrayList<String>();
+		sellPrice.add("§6Price: 0.0");
+		List<String> buyPrice = new ArrayList<String>();
+		buyPrice.add("§6Price: 0.0");
+		checkBuySellInfoItems(slotEditor, sellPrice, buyPrice);
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestSelectItemClick() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		ItemStack stack = new ItemStack(Material.STONE);
+		stack.setAmount(20);
+		player.getInventory().setItem(0, stack);
+		InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 54, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		assertEquals(Material.STONE, slotEditor.getItem(0).getType());
+		assertEquals(1, slotEditor.getItem(0).getAmount());
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestSelectItemClickSpawner() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		ItemStack stack = new ItemStack(Material.SPAWNER);
+		player.getInventory().setItem(0, stack);
+		InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 54, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		assertEquals(Material.BARRIER, slotEditor.getItem(0).getType());
+		assertEquals(1, slotEditor.getItem(0).getAmount());
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestExitWithoutSave() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 7, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(event);
+			assertEquals(0,  AdminshopController.getAdminshopList().get(0).getItemList().size());
+			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			assertEquals("myshop-Editor", editor.getName());
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void handleSlotEditorTestSaveChangesNew() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			ItemStack stack = new ItemStack(Material.STONE);
+			stack.setAmount(20);
+			player.getInventory().setItem(0, stack);
+			InventoryClickEvent addItem = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 54, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(addItem);
+			InventoryClickEvent increaseAmount = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 6, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(increaseAmount);
+			InventoryClickEvent addBuyPrice = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 24, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(addBuyPrice);
+			InventoryClickEvent addSellPrice = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 14, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(addSellPrice);	
+			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 8, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(event);
+			assertEquals(1,  AdminshopController.getAdminshopList().get(0).getItemList().size());
+			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			assertEquals("myshop-Editor", editor.getName());
+			ShopItem shopItem = AdminshopController.getAdminshopList().get(0).getItemList().get(0);		
+			assertEquals(21, shopItem.getAmount());
+			assertEquals("20.0", String.valueOf(shopItem.getSellPrice()));
+			assertEquals("10.0", String.valueOf(shopItem.getBuyPrice()));
+			assertEquals(0, shopItem.getSlot());
+			stack.setAmount(1);
+			assertEquals(stack, shopItem.getItemStack());
+			assertEquals("ItemStack{STONE x 1}", shopItem.getItemString());
+			assertEquals("§6The item §astone§6 was added to the shop.", player.nextMessage());
+			assertNull(player.nextMessage());
+			player.closeInventory();
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void handleSlotEditorTestSaveChangesNewWithNoPrices() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			ItemStack stack = new ItemStack(Material.STONE);
+			stack.setAmount(20);
+			player.getInventory().setItem(0, stack);
+			InventoryClickEvent addItem = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 54, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(addItem);
+			InventoryClickEvent increaseAmount = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 6, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(increaseAmount);
+			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 8, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(event);
+			assertEquals(0,  AdminshopController.getAdminshopList().get(0).getItemList().size());
+			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			assertEquals("myshop-SlotEditor", editor.getName());
+			assertEquals("§cOne of the prices have to be above 0!", player.nextMessage());
+			assertNull(player.nextMessage());
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void handleSlotEditorTestSaveChangesEdit() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).addShopItem(0, 4.0, 19.0, new ItemStack(Material.STONE));
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			ItemStack stack = new ItemStack(Material.STONE);
+			stack.setAmount(20);
+			player.getInventory().setItem(0, stack);
+			InventoryClickEvent addItem = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 54, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(addItem);
+			InventoryClickEvent increaseAmount = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 6, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(increaseAmount);
+			InventoryClickEvent addBuyPrice = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 24, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(addBuyPrice);
+			InventoryClickEvent addSellPrice = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 14, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(addSellPrice);	
+			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 8, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(event);
+			assertEquals("§6Updated §aamount §asellPrice §abuyPrice §6for item §astone", player.nextMessage());
+			assertNull(player.nextMessage());
+			assertEquals(1,  AdminshopController.getAdminshopList().get(0).getItemList().size());
+			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			assertEquals("myshop-Editor", editor.getName());
+			ShopItem shopItem = AdminshopController.getAdminshopList().get(0).getItemList().get(0);		
+			assertEquals(21, shopItem.getAmount());
+			assertEquals("39.0", String.valueOf(shopItem.getSellPrice()));
+			assertEquals("14.0", String.valueOf(shopItem.getBuyPrice()));
+			assertEquals(0, shopItem.getSlot());
+			stack.setAmount(1);
+			assertEquals(stack, shopItem.getItemStack());
+			assertEquals("ItemStack{STONE x 1}", shopItem.getItemString());
+			player.closeInventory();
+		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void handleSlotEditorTestSaveChangesOtherItem() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).addShopItem(0, 4.0, 19.0, new ItemStack(Material.STONE));
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			ItemStack stack = new ItemStack(Material.ACACIA_BOAT);
+			stack.setAmount(1);
+			player.getInventory().setItem(0, stack);
+			InventoryClickEvent addItem = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 54, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(addItem);	
+			InventoryClickEvent increaseAmount = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 6, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(increaseAmount);
+			InventoryClickEvent addBuyPrice = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 24, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(addBuyPrice);
+			InventoryClickEvent addSellPrice = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 14, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(addSellPrice);	
+			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 8, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(event);
+			assertEquals("§6The item §astone§6 was removed from the shop.", player.nextMessage());
+			assertEquals("§6The item §aacacia_boat§6 was added to the shop.", player.nextMessage());
+			assertNull(player.nextMessage());
+			assertEquals(1,  AdminshopController.getAdminshopList().get(0).getItemList().size());
+			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			assertEquals("myshop-Editor", editor.getName());
+			ShopItem shopItem = AdminshopController.getAdminshopList().get(0).getItemList().get(0);		
+			assertEquals(21, shopItem.getAmount());
+			assertEquals("39.0", String.valueOf(shopItem.getSellPrice()));
+			assertEquals("14.0", String.valueOf(shopItem.getBuyPrice()));
+			assertEquals(0, shopItem.getSlot());
+			stack.setAmount(1);
+			assertEquals(stack, shopItem.getItemStack());
+			assertEquals("ItemStack{ACACIA_BOAT x 1}", shopItem.getItemString());
+			player.closeInventory();
+		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void handleSlotEditorTestSaveChangesOtherItemSpawner() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			ItemStack spawner = new ItemStack(Material.SPAWNER);
+			ItemMeta meta = spawner.getItemMeta();
+			meta.setDisplayName("COW");
+			spawner.setItemMeta(meta);
+			AdminshopController.getAdminshopList().get(0).addShopItem(0, 4.0, 19.0, spawner);
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			ItemStack stack = new ItemStack(Material.ACACIA_BOAT);
+			stack.setAmount(1);
+			player.getInventory().setItem(0, stack);
+			InventoryClickEvent addItem = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 54, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(addItem);	
+			InventoryClickEvent increaseAmount = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 6, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(increaseAmount);
+			InventoryClickEvent addBuyPrice = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 24, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(addBuyPrice);
+			InventoryClickEvent addSellPrice = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 14, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(addSellPrice);	
+			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 8, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(event);
+			assertEquals("§6The spawner §acow§6 was removed from shop.", player.nextMessage());
+			assertEquals("§6The item §aacacia_boat§6 was added to the shop.", player.nextMessage());
+			assertNull(player.nextMessage());
+			assertEquals(1,  AdminshopController.getAdminshopList().get(0).getItemList().size());
+			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			assertEquals("myshop-Editor", editor.getName());
+			ShopItem shopItem = AdminshopController.getAdminshopList().get(0).getItemList().get(0);		
+			assertEquals(21, shopItem.getAmount());
+			assertEquals("39.0", String.valueOf(shopItem.getSellPrice()));
+			assertEquals("14.0", String.valueOf(shopItem.getBuyPrice()));
+			assertEquals(0, shopItem.getSlot());
+			stack.setAmount(1);
+			assertEquals(stack, shopItem.getItemStack());
+			assertEquals("ItemStack{ACACIA_BOAT x 1}", shopItem.getItemString());
+			player.closeInventory();
+		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void handleSlotEditorTestRemoveItem() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopController.getAdminshopList().get(0).addShopItem(0, 4.0, 19.0, new ItemStack(Material.STONE));
+			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 26, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(event);
+			assertEquals(0,  AdminshopController.getAdminshopList().get(0).getItemList().size());
+			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			assertEquals("myshop-Editor", editor.getName());
+			assertEquals("§6The item §astone§6 was removed from the shop.", player.nextMessage());
+			assertNull(player.nextMessage());
+		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void handleSlotEditorTestFactorMinusTwentyClick1() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent turnFactorOn = new InventoryClickEvent(view, SlotType.CONTAINER, 12, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(turnFactorOn);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 15, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
+		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 11, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(switchToMinus);
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		List<String> sellPrice = new ArrayList<String>();
+		sellPrice.add("§6Price: 20000.0");
+		List<String> buyPrice = new ArrayList<String>();
+		buyPrice.add("§6Price: 0.0");
+		checkBuySellInfoItems(slotEditor, sellPrice, buyPrice);
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestFactorMinusTwentyClick2() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent turnFactorOn = new InventoryClickEvent(view, SlotType.CONTAINER, 21, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(turnFactorOn);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 24, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
+		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 20, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(switchToMinus);
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		List<String> sellPrice = new ArrayList<String>();
+		sellPrice.add("§6Price: 0.0");
+		List<String> buyPrice = new ArrayList<String>();
+		buyPrice.add("§6Price: 20000.0");
+		checkBuySellInfoItems(slotEditor, sellPrice, buyPrice);
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestFactorPlusTwentyClick1() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent turnFactorOn = new InventoryClickEvent(view, SlotType.CONTAINER, 12, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(turnFactorOn);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 15, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		List<String> sellPrice = new ArrayList<String>();
+		sellPrice.add("§6Price: 20000.0");
+		List<String> buyPrice = new ArrayList<String>();
+		buyPrice.add("§6Price: 0.0");
+		checkBuySellInfoItems(slotEditor, sellPrice, buyPrice);
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestFactorPlusTwentyClick2() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent turnFactorOn = new InventoryClickEvent(view, SlotType.CONTAINER, 21, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(turnFactorOn);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 24, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		List<String> sellPrice = new ArrayList<String>();
+		sellPrice.add("§6Price: 0.0");
+		List<String> buyPrice = new ArrayList<String>();
+		buyPrice.add("§6Price: 20000.0");
+		checkBuySellInfoItems(slotEditor, sellPrice, buyPrice);
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestFactorMinusTenClick1() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent turnFactorOn = new InventoryClickEvent(view, SlotType.CONTAINER, 12, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(turnFactorOn);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 14, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
+		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 11, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(switchToMinus);
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		List<String> sellPrice = new ArrayList<String>();
+		sellPrice.add("§6Price: 10000.0");
+		List<String> buyPrice = new ArrayList<String>();
+		buyPrice.add("§6Price: 0.0");
+		checkBuySellInfoItems(slotEditor, sellPrice, buyPrice);
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestFactorMinusTenClick2() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent turnFactorOn = new InventoryClickEvent(view, SlotType.CONTAINER, 21, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(turnFactorOn);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 23, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
+		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 20, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(switchToMinus);
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		List<String> sellPrice = new ArrayList<String>();
+		sellPrice.add("§6Price: 0.0");
+		List<String> buyPrice = new ArrayList<String>();
+		buyPrice.add("§6Price: 10000.0");
+		checkBuySellInfoItems(slotEditor, sellPrice, buyPrice);
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestFactorPlusTenClick1() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent turnFactorOn = new InventoryClickEvent(view, SlotType.CONTAINER, 12, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(turnFactorOn);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 14, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		List<String> sellPrice = new ArrayList<String>();
+		sellPrice.add("§6Price: 10000.0");
+		List<String> buyPrice = new ArrayList<String>();
+		buyPrice.add("§6Price: 0.0");
+		checkBuySellInfoItems(slotEditor, sellPrice, buyPrice);
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestFactorPlusTenClick2() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent turnFactorOn = new InventoryClickEvent(view, SlotType.CONTAINER, 21, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(turnFactorOn);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 23, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		List<String> sellPrice = new ArrayList<String>();
+		sellPrice.add("§6Price: 0.0");
+		List<String> buyPrice = new ArrayList<String>();
+		buyPrice.add("§6Price: 10000.0");
+		checkBuySellInfoItems(slotEditor, sellPrice, buyPrice);
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestFactorMinusOneClick1() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent turnFactorOn = new InventoryClickEvent(view, SlotType.CONTAINER, 12, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(turnFactorOn);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 13, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
+		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 11, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(switchToMinus);
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		List<String> sellPrice = new ArrayList<String>();
+		sellPrice.add("§6Price: 1000.0");
+		List<String> buyPrice = new ArrayList<String>();
+		buyPrice.add("§6Price: 0.0");
+		checkBuySellInfoItems(slotEditor, sellPrice, buyPrice);
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestFactorMinusOneClick2() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent turnFactorOn = new InventoryClickEvent(view, SlotType.CONTAINER, 21, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(turnFactorOn);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 22, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		handler.handleSlotEditor(event);
+		InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 20, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(switchToMinus);
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		List<String> sellPrice = new ArrayList<String>();
+		sellPrice.add("§6Price: 0.0");
+		List<String> buyPrice = new ArrayList<String>();
+		buyPrice.add("§6Price: 1000.0");
+		checkBuySellInfoItems(slotEditor, sellPrice, buyPrice);
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestFactorPlusOneClick1() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent turnFactorOn = new InventoryClickEvent(view, SlotType.CONTAINER, 12, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(turnFactorOn);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 13, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		List<String> sellPrice = new ArrayList<String>();
+		sellPrice.add("§6Price: 1000.0");
+		List<String> buyPrice = new ArrayList<String>();
+		buyPrice.add("§6Price: 0.0");
+		checkBuySellInfoItems(slotEditor, sellPrice, buyPrice);
+		player.closeInventory();
+	}
+	
+	@Test
+	public void handleSlotEditorTestFactorPlusOneClick2() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getSlotEditorInventory());
+		InventoryClickEvent turnFactorOn = new InventoryClickEvent(view, SlotType.CONTAINER, 21, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+		handler.handleSlotEditor(turnFactorOn);
+		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 22, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleSlotEditor(event);
+		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
+		List<String> sellPrice = new ArrayList<String>();
+		sellPrice.add("§6Price: 0.0");
+		List<String> buyPrice = new ArrayList<String>();
+		buyPrice.add("§6Price: 1000.0");
+		checkBuySellInfoItems(slotEditor, sellPrice, buyPrice);
 		player.closeInventory();
 	}
 }

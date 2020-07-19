@@ -177,27 +177,26 @@ public class ShopSlotEditorHandler {
 	 * @param event
 	 */
 	public void handleSlotEditor(InventoryClickEvent event) {
-		if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
+		if (event.getCurrentItem() != null) {
 			Player player = (Player) event.getWhoClicked();
 			try {
 				int slot = event.getSlot();
-				int factor = 1;
-				if (event.getInventory().getItem(12).getItemMeta().getDisplayName().equals("factor on")) {
-					factor = 1000;
-				}
 				String operator = getOperatorForHandleSlotEditor(event, slot);
 				double price = getPriceForHandleSlotEditor(event, slot);
 				ItemStack editorItemStack = slotEditor.getItem(0);
-				String command = event.getCurrentItem().getItemMeta().getDisplayName();
-				handleSlotEditorCommand(event, player, slot, factor, operator, price, editorItemStack, command);
+				String command = null;
+				if (event.getCurrentItem().getItemMeta() != null) {
+					command = event.getCurrentItem().getItemMeta().getDisplayName();
+				}
+				handleSlotEditorCommand(event, player, slot, operator, price, editorItemStack, command);
 			} catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
 				player.sendMessage(e.getMessage());
 			}
 		}
 	}
 
-	private void handleSlotEditorCommand(InventoryClickEvent event, Player player, int slot, int factor,
-			String operator, double price, ItemStack editorItemStack, String command)
+	private void handleSlotEditorCommand(InventoryClickEvent event, Player player, int slot, String operator,
+			double price, ItemStack editorItemStack, String command)
 			throws ShopSystemException, PlayerException, GeneralEconomyException {
 		switch (ChatColor.stripColor(command)) {
 		case "minus":
@@ -209,13 +208,13 @@ public class ShopSlotEditorHandler {
 			handleSwitchFactor(slot, command);
 			break;
 		case "one":
-			handlePlusMinusNumber(1,Arrays.asList(4, 13, 22), slot, factor, operator, price, editorItemStack);
+			handlePlusMinusNumber(1, Arrays.asList(4, 13, 22), slot, operator, price, editorItemStack);
 			break;
 		case "ten":
-			handlePlusMinusNumber(10,Arrays.asList(5, 14, 23), slot, factor, operator, price, editorItemStack);
+			handlePlusMinusNumber(10, Arrays.asList(5, 14, 23), slot, operator, price, editorItemStack);
 			break;
 		case "twenty":
-			handlePlusMinusNumber(20,Arrays.asList(6, 15, 24), slot, factor, operator, price, editorItemStack);
+			handlePlusMinusNumber(20, Arrays.asList(6, 15, 24), slot, operator, price, editorItemStack);
 			break;
 		case "save changes":
 			handleSaveChanges(player);
@@ -235,9 +234,11 @@ public class ShopSlotEditorHandler {
 	}
 
 	private void handleAddItemToSlotEditor(ItemStack clickedItem) {
-		ItemStack editorItemStack = new ItemStack(clickedItem);
-		editorItemStack.setAmount(1);
-		getSlotEditorInventory().setItem(0, editorItemStack);
+		if (clickedItem.getType() != Material.SPAWNER) {
+			ItemStack editorItemStack = new ItemStack(clickedItem);
+			editorItemStack.setAmount(1);
+			getSlotEditorInventory().setItem(0, editorItemStack);
+		}
 	}
 
 	private void handleSaveChanges(Player player) throws ShopSystemException, PlayerException, GeneralEconomyException {
@@ -253,11 +254,12 @@ public class ShopSlotEditorHandler {
 		try {
 			ShopItem shopItem = getShop().getShopItem(getSelectedSlot());
 			// slot is occupied, check if item changed
-			if (shopItem.getItemString().equals(stackInEditor.toString())) {
+			if (!shopItem.getItemString().equals(stackInEditor.toString())) {
 				// remove and add
 				handleRemoveItem(player);
 				getShop().addShopItem(getSelectedSlot(), sellPrice, buyPrice, itemStack);
-				sendAddMessage(player, itemStack);
+				player.sendMessage(
+						MessageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
 			} else {
 				// edit
 				player.sendMessage(getShop().editShopItem(getSelectedSlot(), String.valueOf(itemStack.getAmount()),
@@ -268,23 +270,20 @@ public class ShopSlotEditorHandler {
 			getShop().getValidationHandler().checkForItemDoesNotExist(stackInEditor.toString(),
 					getShop().getItemList());
 			getShop().addShopItem(getSelectedSlot(), sellPrice, buyPrice, itemStack);
-			sendAddMessage(player, itemStack);
-		}
-	}
-
-	private void sendAddMessage(Player player, ItemStack itemStack) {
-		if (itemStack.getType() != Material.SPAWNER) {
 			player.sendMessage(MessageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
-		} else {
-			player.sendMessage(MessageWrapper.getString("shop_removeSpawner",
-					itemStack.getItemMeta().getDisplayName().toLowerCase()));
 		}
 	}
 
 	private void handleRemoveItem(Player player) throws ShopSystemException, GeneralEconomyException {
-		getShop().removeShopItem(getSelectedSlot() - 1);
-		player.sendMessage(MessageWrapper.getString("shop_removeItem",
-				getSlotEditorInventory().getItem(0).getType().toString().toLowerCase()));
+		ItemStack item = getShop().getShopItem(getSelectedSlot()).getItemStack();
+		String deletedIem = item.getType().toString().toLowerCase();
+		getShop().removeShopItem(getSelectedSlot());
+		if (item.getType() == Material.SPAWNER) {
+			player.sendMessage(
+					MessageWrapper.getString("shop_removeSpawner", item.getItemMeta().getDisplayName().toLowerCase()));
+		} else {
+			player.sendMessage(MessageWrapper.getString("shop_removeItem", deletedIem));
+		}
 	}
 
 	private void handleSwitchFactor(int slot, String state) {
@@ -307,15 +306,23 @@ public class ShopSlotEditorHandler {
 		}
 	}
 
-	private void handlePlusMinusNumber(int amount, List<Integer> slots, int slot, int factor, String operator, double price,
+	private void handlePlusMinusNumber(int amount, List<Integer> slots, int slot, String operator, double price,
 			ItemStack editorItemStack) {
 		if (slots.get(0) == slot) {
 			handlePlusMinusAmount(amount, operator, editorItemStack);
 		} else if (slots.get(1) == slot) {
-			handlePlusMinusSellPrice(amount, factor, operator, price);
+			handlePlusMinusPrice(Arrays.asList(9, 11, 13, 14, 15), amount, getFactor(12), operator, price);
 		} else if (slots.get(2) == slot) {
-			handlePlusMinusBuyPrice(amount, factor, operator, price);
+			handlePlusMinusPrice(Arrays.asList(18, 20, 22, 23, 24), amount, getFactor(21), operator, price);
 		}
+	}
+
+	private int getFactor(int slot) {
+		int factor = 1;
+		if (getSlotEditorInventory().getItem(slot).getItemMeta().getDisplayName().equals("factor on")) {
+			factor = 1000;
+		}
+		return factor;
 	}
 
 	private void handlePlusMinusAmount(int value, String operator, ItemStack editorItemStack) {
@@ -334,19 +341,15 @@ public class ShopSlotEditorHandler {
 		}
 	}
 
-	private void handlePlusMinusSellPrice(int value, int factor, String operator, double price) {
-		if (price >= value && "minus".equals(operator)) {
-			updateEditorPrice(9, 11, 13, 14, 15, price - value * factor);
+	private void handlePlusMinusPrice(List<Integer> slots, int value, int factor, String operator, double price) {
+		if (price >= (value*factor) && "minus".equals(operator)) {
+			updateEditorPrice(slots.get(0), slots.get(1), slots.get(2), slots.get(3), slots.get(4),
+					price - value * factor);
 		} else if ("plus".equals(operator)) {
-			updateEditorPrice(9, 11, 13, 14, 15, price + value * factor);
-		}
-	}
-
-	private void handlePlusMinusBuyPrice(int value, int factor, String operator, double price) {
-		if (price >= value && "minus".equals(operator)) {
-			updateEditorPrice(18, 20, 22, 23, 24, price - value * factor);
-		} else if ("plus".equals(operator)) {
-			updateEditorPrice(18, 20, 22, 23, 24, price + value * factor);
+			updateEditorPrice(slots.get(0), slots.get(1), slots.get(2), slots.get(3), slots.get(4),
+					price + value * factor);
+		} else {
+			updateEditorPrice(slots.get(0), slots.get(1), slots.get(2), slots.get(3), slots.get(4), 0.0);
 		}
 	}
 
