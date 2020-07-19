@@ -219,11 +219,11 @@ public class ShopValidationHandler {
 	 * 
 	 * @param entireStock
 	 * @param stock
-	 * @throws GeneralEconomyException
+	 * @throws ShopSystemException 
 	 */
-	public void checkForValidStockDecrease(int entireStock, int stock) throws GeneralEconomyException {
+	public void checkForValidStockDecrease(int entireStock, int stock) throws ShopSystemException {
 		if ((entireStock - stock) < 0) {
-			throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, stock);
+			throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_UNAVAILABLE);
 		}
 	}
 

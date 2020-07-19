@@ -27,7 +27,7 @@ public class ShopEventHandler {
 	 * @param event
 	 */
 	public void handleInventoryClick(InventoryClickEvent event) {
-		if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
+		if (event.getCurrentItem() != null) {
 			event.setCancelled(true);
 			Entity entity = (Entity) event.getInventory().getHolder();
 			EconomyVillager economyVillager = (EconomyVillager) entity.getMetadata("ue-type").get(0).value();

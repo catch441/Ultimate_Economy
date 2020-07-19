@@ -374,8 +374,8 @@ public class ShopValidationHandlerTest {
 		try {
 			validationHandler.checkForValidStockDecrease(10, 20);
 			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals("§cThe parameter §420§c is invalid!", e.getMessage());
+		} catch (ShopSystemException e) {
+			assertEquals("§cThis item is unavailable!", e.getMessage());
 		}
 	}
 
@@ -383,7 +383,7 @@ public class ShopValidationHandlerTest {
 	public void checkForValidStockDecreaseTestValid() {
 		try {
 			validationHandler.checkForValidStockDecrease(10, 5);
-		} catch (GeneralEconomyException e) {
+		} catch (ShopSystemException e) {
 			fail();
 		}
 	}

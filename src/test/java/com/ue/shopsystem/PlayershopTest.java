@@ -173,8 +173,8 @@ public class PlayershopTest {
 			shop.buyShopItem(0, player, true);
 			fail();
 		} catch (ShopSystemException | TownSystemException | PlayerException | GeneralEconomyException e) {
-			assertTrue(e instanceof GeneralEconomyException);
-			assertEquals("§cThe parameter §41§c is invalid!", e.getMessage());
+			assertTrue(e instanceof ShopSystemException);
+			assertEquals("§cThis item is unavailable!", e.getMessage());
 		}
 	}
 
@@ -707,8 +707,8 @@ public class PlayershopTest {
 			shop.decreaseStock(0, 10);
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
-			assertTrue(e instanceof GeneralEconomyException);
-			assertEquals("§cThe parameter §410§c is invalid!", e.getMessage());
+			assertTrue(e instanceof ShopSystemException);
+			assertEquals("§cThis item is unavailable!", e.getMessage());
 		}
 	}
 
