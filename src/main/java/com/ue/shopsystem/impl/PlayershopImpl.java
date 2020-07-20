@@ -307,7 +307,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	}
 
 	private void setupStockpile() {
-		stockPile = Bukkit.createInventory(getShopVillager(), getSize());
+		stockPile = Bukkit.createInventory(getShopVillager(), getSize(), getName() + "-Stock");
 		ItemStack stockpileSwitchItem = new ItemStack(Material.CRAFTING_TABLE, 1);
 		ItemMeta meta = stockpileSwitchItem.getItemMeta();
 		List<String> infos = new ArrayList<>();

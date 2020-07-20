@@ -137,7 +137,7 @@ public class PlayershopTest {
 			// check stock inventory
 			ChestInventoryMock stock = (ChestInventoryMock) loaded.getStockpileInventory();
 			assertEquals(9, stock.getSize());
-			assertEquals("Inventory", stock.getName());
+			assertEquals("myshop-Stock", stock.getName());
 			assertEquals(Material.STONE, stock.getItem(0).getType());
 			assertEquals("§a10§6 Items", stock.getItem(0).getItemMeta().getLore().get(0));
 			assertNull(stock.getItem(1));

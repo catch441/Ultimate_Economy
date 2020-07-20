@@ -204,7 +204,7 @@ public class PlayershopControllerTest {
 			// check stock inventory
 			ChestInventoryMock stock = (ChestInventoryMock) response.getStockpileInventory();
 			assertEquals(9, stock.getSize());
-			assertEquals("Inventory", stock.getName());
+			assertEquals("myshop-Stock", stock.getName());
 			assertNull(stock.getItem(0));
 			assertNull(stock.getItem(1));
 			assertNull(stock.getItem(2));
