@@ -69,7 +69,7 @@ public class RentshopRentGuiHandler {
 	 * Returns the rent gui inventory.
 	 * @return gui inventory
 	 */
-	protected Inventory getRentGui() {
+	public Inventory getRentGui() {
 		return rentShopGUIInv;
 	}
 	
@@ -80,13 +80,9 @@ public class RentshopRentGuiHandler {
 	/**
 	 * Handles a click in the rentshop GUI.
 	 * @param event
-	 * @throws ShopSystemException
-	 * @throws GeneralEconomyException
-	 * @throws PlayerException
 	 */
-	public void handleRentShopGUIClick(InventoryClickEvent event)
-			throws ShopSystemException, GeneralEconomyException, PlayerException {
-		if (event.getCurrentItem().getItemMeta() != null) {
+	public void handleRentShopGUIClick(InventoryClickEvent event) {
+		if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
 			String durationString = event.getInventory().getItem(1).getItemMeta().getLore().get(0);
 			durationString = ChatColor.stripColor(durationString);
 			int duration = Integer.valueOf(
@@ -102,15 +98,13 @@ public class RentshopRentGuiHandler {
 				switchPlusMinusRentGUI("minus");
 				break;
 			case "one":
-				handlePlusMinusOneGuiClick(duration, operation);
+				handlePlusMinusValueGuiClick(1, duration, operation);
 				break;
 			case "seven":
-				handlePlusMinusSevenGuiClick(duration, operation);
+				handlePlusMinusValueGuiClick(7, duration, operation);
 				break;
 			case "Rent":
-				getShop().rentShop(EconomyPlayerController.getEconomyPlayerByName(event.getWhoClicked().getName()), duration);
-				event.getWhoClicked().sendMessage(MessageWrapper.getString("rent_rented"));
-				event.getWhoClicked().closeInventory();
+				handleRentClick(event, duration);
 				break;
 			default:
 				break;
@@ -118,28 +112,26 @@ public class RentshopRentGuiHandler {
 		}
 	}
 
-	private void handlePlusMinusSevenGuiClick(int duration, String operation) {
+	private void handleRentClick(InventoryClickEvent event, int duration) {
+		try {
+			getShop().rentShop(EconomyPlayerController.getEconomyPlayerByName(event.getWhoClicked().getName()), duration);
+			event.getWhoClicked().sendMessage(MessageWrapper.getString("rent_rented"));
+		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+			event.getWhoClicked().sendMessage(e.getMessage());
+		}
+		event.getWhoClicked().closeInventory();
+	}
+
+	private void handlePlusMinusValueGuiClick(int value,int duration, String operation) {
 		if ("plus".equals(operation)) {
 			if (duration < ConfigController.getMaxRentedDays()) {
-				duration += 7;
+				duration += value;
 				if (duration > ConfigController.getMaxRentedDays()) {
 					duration = ConfigController.getMaxRentedDays();
 				}
 			}
-		} else if (duration > 7) {
-			duration -= 7;
-		}
-		refreshDurationOnRentGUI(duration);
-		refreshRentalFeeOnRentGUI(duration);
-	}
-
-	private void handlePlusMinusOneGuiClick(int duration, String operation) {
-		if ("plus".equals(operation)) {
-			if (duration < ConfigController.getMaxRentedDays()) {
-				duration++;
-			}
-		} else if (duration > 1) {
-			duration--;
+		} else if (duration > value) {
+			duration -= value;
 		}
 		refreshDurationOnRentGUI(duration);
 		refreshRentalFeeOnRentGUI(duration);

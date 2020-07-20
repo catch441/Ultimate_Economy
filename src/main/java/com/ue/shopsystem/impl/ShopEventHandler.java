@@ -51,7 +51,7 @@ public class ShopEventHandler {
 				default:
 					break;
 				}
-			} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+			} catch (GeneralEconomyException e) {
 			}
 		}
 	}
