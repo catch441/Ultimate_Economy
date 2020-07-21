@@ -14,7 +14,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.Property;
+import com.mojang.authlib.properties.Property;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class CustomSkullService {
