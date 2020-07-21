@@ -161,7 +161,7 @@ public class JobSavefileHandler extends SaveFileUtils {
 		Map<String, Double> list = new HashMap<>();
 		if (getConfig().contains("JobItems")) {
 			for (String key : getConfig().getStringList("Itemlist")) {
-				double value = getConfig().getDouble("JobItems." + key);
+				double value = getConfig().getDouble("JobItems." + key + ".breakprice");
 				list.put(key, value);
 			}
 			getConfig().set("JobItems", null);
@@ -179,7 +179,7 @@ public class JobSavefileHandler extends SaveFileUtils {
 		Map<String, Double> list = new HashMap<>();
 		if (getConfig().contains("JobEntitys")) {
 			for (String key : getConfig().getStringList("Entitylist")) {
-				double value = getConfig().getDouble("JobEntitys." + key);
+				double value = getConfig().getDouble("JobEntitys." + key + ".killprice");
 				list.put(key, value);
 			}
 			getConfig().set("JobEntitys", null);

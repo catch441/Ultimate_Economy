@@ -76,7 +76,7 @@ public class ShopEventHandler {
 	private void handleBuySell(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
 			throws ShopSystemException, GeneralEconomyException, PlayerException {
 		Entity entity = (Entity) event.getInventory().getHolder();
-		EconomyVillager economyVillager = (EconomyVillager) entity.getMetadata("ue-type").get(0).value();
+		EconomyVillager economyVillager = EconomyVillager.getEnum(entity.getMetadata("ue-type").get(0).value().toString());
 		switch (event.getClick()) {
 		case MIDDLE:
 			handleSwitchStockpile(abstractShop, ecoPlayer, economyVillager);
@@ -142,7 +142,7 @@ public class ShopEventHandler {
 	public void handleOpenInventory(PlayerInteractEntityEvent event) {
 		event.setCancelled(true);
 		Entity entity = event.getRightClicked();
-		EconomyVillager economyVillager = (EconomyVillager) entity.getMetadata("ue-type").get(0).value();
+		EconomyVillager economyVillager = EconomyVillager.getEnum(entity.getMetadata("ue-type").get(0).value().toString());
 		String shopId = (String) entity.getMetadata("ue-id").get(0).value();
 		try {
 			switch (economyVillager) {

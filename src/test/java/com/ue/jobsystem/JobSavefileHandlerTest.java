@@ -170,7 +170,7 @@ public class JobSavefileHandlerTest {
 		List<String> list = new ArrayList<>();
 		list.add("dirt");
 		config.set("Itemlist", list);
-		config.set("JobItems.dirt", 2.0);
+		config.set("JobItems.dirt.breakprice", 2.0);
 		save(file,config);
 		savefileHandler = new JobSavefileHandler("kthjob", false);
 		Map<String,Double> result = savefileHandler.loadBlockList();
@@ -202,7 +202,7 @@ public class JobSavefileHandlerTest {
 		List<String> list = new ArrayList<>();
 		list.add("cow");
 		config.set("Entitylist", list);
-		config.set("JobEntitys.cow", 2.0);
+		config.set("JobEntitys.cow.killprice", 2.0);
 		save(file,config);
 		savefileHandler = new JobSavefileHandler("kthjob", false);
 		Map<String,Double> result = savefileHandler.loadEntityList();
