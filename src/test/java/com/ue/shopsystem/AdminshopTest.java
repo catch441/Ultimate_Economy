@@ -462,6 +462,7 @@ public class AdminshopTest {
 			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(2, false);
 			shop.buyShopItem(0, ecoPlayer, true);
+			stack.setAmount(10);
 			assertEquals(stack, player.getInventory().getItem(0));
 			assertEquals("§6§a10§6 items were bought for §a2.0§6 §a$§6.", player.nextMessage());
 			assertNull(player.nextMessage());

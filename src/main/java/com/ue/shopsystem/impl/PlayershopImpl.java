@@ -84,20 +84,24 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		getValidationHandler().checkForPlayerIsOnline(ecoPlayer);
 		getValidationHandler().checkForPlayerInventoryNotFull(ecoPlayer.getPlayer().getInventory());
 		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 2);
-		if (!isOwner(ecoPlayer)) {
+		if (isOwner(ecoPlayer)) {
+			ItemStack stack = shopItem.getItemStack().clone();
+			stack.setAmount(shopItem.getAmount());
+			ecoPlayer.getPlayer().getInventory().addItem(stack);
+			decreaseStock(slot, shopItem.getAmount());
+			if (sendMessage) {
+				sendBuySellOwnerMessage(shopItem.getAmount(), "got");
+			}
+		} else if (shopItem.getBuyPrice() != 0.0) {
 			// if player has not enough money, then the decrease method throws a
 			// playerexception
 			ecoPlayer.decreasePlayerAmount(shopItem.getBuyPrice(), true);
 			getOwner().increasePlayerAmount(shopItem.getBuyPrice(), false);
-		}
-		ItemStack stack = shopItem.getItemStack().clone();
-		stack.setAmount(shopItem.getAmount());
-		ecoPlayer.getPlayer().getInventory().addItem(stack);
-		decreaseStock(slot, shopItem.getAmount());
-		if (sendMessage) {
-			if (isOwner(ecoPlayer)) {
-				sendBuySellOwnerMessage(shopItem.getAmount(), "got");
-			} else {
+			ItemStack stack = shopItem.getItemStack().clone();
+			stack.setAmount(shopItem.getAmount());
+			ecoPlayer.getPlayer().getInventory().addItem(stack);
+			decreaseStock(slot, shopItem.getAmount());
+			if (sendMessage) {
 				sendBuySellPlayerMessage(shopItem.getAmount(), ecoPlayer, shopItem.getBuyPrice(), "buy");
 			}
 		}
@@ -261,11 +265,11 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
 	private void sendBuySellOwnerMessage(int amount, String gotAdded) {
 		if (amount > 1) {
-			getOwner().getPlayer().sendMessage(MessageWrapper.getString("shop_" + gotAdded + "_item_plural",
-					String.valueOf(amount)));
+			getOwner().getPlayer()
+					.sendMessage(MessageWrapper.getString("shop_" + gotAdded + "_item_plural", String.valueOf(amount)));
 		} else {
-			getOwner().getPlayer().sendMessage(MessageWrapper.getString("shop_" + gotAdded + "_item_singular",
-					String.valueOf(amount)));
+			getOwner().getPlayer().sendMessage(
+					MessageWrapper.getString("shop_" + gotAdded + "_item_singular", String.valueOf(amount)));
 		}
 	}
 

@@ -76,25 +76,28 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
 		getValidationHandler().checkForPlayerInventoryNotFull(ecoPlayer.getPlayer().getInventory());
 		ShopItem shopItem = getShopItem(slot);
-		// if player has not enough money, then the decrease method throws a
-		// playerexception
-		ecoPlayer.decreasePlayerAmount(shopItem.getBuyPrice(), true);
-		ItemStack stack = shopItem.getItemStack().clone();
-		if(stack.getType() == Material.SPAWNER) {
-			ItemMeta meta = stack.getItemMeta();
-			meta.setDisplayName(meta.getDisplayName() + "-" + ecoPlayer.getName());
-			stack.setItemMeta(meta);
-		}
-		ecoPlayer.getPlayer().getInventory().addItem(stack);
-		if (sendMessage) {
-			if (shopItem.getAmount() > 1) {
-				ecoPlayer.getPlayer()
-						.sendMessage(MessageWrapper.getString("shop_buy_plural", String.valueOf(shopItem.getAmount()),
-								shopItem.getBuyPrice(), ConfigController.getCurrencyText(shopItem.getBuyPrice())));
-			} else {
-				ecoPlayer.getPlayer()
-						.sendMessage(MessageWrapper.getString("shop_buy_singular", String.valueOf(shopItem.getAmount()),
-								shopItem.getBuyPrice(), ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+		if(shopItem.getBuyPrice() != 0.0) {
+			// if player has not enough money, then the decrease method throws a
+			// playerexception
+			ecoPlayer.decreasePlayerAmount(shopItem.getBuyPrice(), true);
+			ItemStack stack = shopItem.getItemStack().clone();
+			stack.setAmount(shopItem.getAmount());
+			if(stack.getType() == Material.SPAWNER) {
+				ItemMeta meta = stack.getItemMeta();
+				meta.setDisplayName(meta.getDisplayName() + "-" + ecoPlayer.getName());
+				stack.setItemMeta(meta);
+			}
+			ecoPlayer.getPlayer().getInventory().addItem(stack);
+			if (sendMessage) {
+				if (shopItem.getAmount() > 1) {
+					ecoPlayer.getPlayer()
+							.sendMessage(MessageWrapper.getString("shop_buy_plural", String.valueOf(shopItem.getAmount()),
+									shopItem.getBuyPrice(), ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+				} else {
+					ecoPlayer.getPlayer()
+							.sendMessage(MessageWrapper.getString("shop_buy_singular", String.valueOf(shopItem.getAmount()),
+									shopItem.getBuyPrice(), ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+				}
 			}
 		}
 	}

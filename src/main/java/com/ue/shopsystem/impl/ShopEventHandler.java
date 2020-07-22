@@ -106,7 +106,12 @@ public class ShopEventHandler {
 	private void handleSwitchStockpile(AbstractShop abstractShop, EconomyPlayer ecoPlayer,
 			EconomyVillager economyVillager) throws ShopSystemException {
 		if (economyVillager == EconomyVillager.PLAYERSHOP) {
-			((Playershop) abstractShop).openStockpile(ecoPlayer.getPlayer());
+			String inventoryName = ecoPlayer.getPlayer().getOpenInventory().getTitle();
+			if ((abstractShop.getName() + "-Stock").equals(inventoryName)) {
+				abstractShop.openShopInventory(ecoPlayer.getPlayer());
+			} else {
+				((Playershop) abstractShop).openStockpile(ecoPlayer.getPlayer());
+			}
 		}
 	}
 
@@ -120,26 +125,30 @@ public class ShopEventHandler {
 
 	private void handleSellSpecific(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
 			throws ShopSystemException, GeneralEconomyException, PlayerException {
-		ShopItem shopItem1 = abstractShop.getShopItem(event.getCurrentItem());
-		abstractShop.sellShopItem(shopItem1.getSlot(), shopItem1.getAmount(), ecoPlayer, true);
+		ShopItem shopItem = abstractShop.getShopItem(event.getCurrentItem());
+		if(ecoPlayer.getPlayer().getInventory().containsAtLeast(shopItem.getItemStack(), shopItem.getAmount())) {
+			abstractShop.sellShopItem(shopItem.getSlot(), shopItem.getAmount(), ecoPlayer, true);
+		}
 	}
 
 	private void handleSellAll(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
 			throws ShopSystemException, GeneralEconomyException, PlayerException {
 		ShopItem shopItem = abstractShop.getShopItem(event.getCurrentItem());
-		ItemStack original = shopItem.getItemStack().clone();
-		original.setAmount(1);
-		int sellAmount = 0;
-		for (ItemStack is : event.getWhoClicked().getInventory().getStorageContents()) {
-			if (is != null) {
-				ItemStack stack = new ItemStack(is);
-				stack.setAmount(1);
-				if (stack.equals(original)) {
-					sellAmount = sellAmount + is.getAmount();
+		if(ecoPlayer.getPlayer().getInventory().containsAtLeast(shopItem.getItemStack(), 1)) {
+			ItemStack original = shopItem.getItemStack().clone();
+			original.setAmount(1);
+			int sellAmount = 0;
+			for (ItemStack is : event.getWhoClicked().getInventory().getStorageContents()) {
+				if (is != null) {
+					ItemStack stack = new ItemStack(is);
+					stack.setAmount(1);
+					if (stack.equals(original)) {
+						sellAmount = sellAmount + is.getAmount();
+					}
 				}
 			}
+			abstractShop.sellShopItem(shopItem.getSlot(), sellAmount, ecoPlayer, true);
 		}
-		abstractShop.sellShopItem(shopItem.getSlot(), sellAmount, ecoPlayer, true);
 	}
 
 	/**

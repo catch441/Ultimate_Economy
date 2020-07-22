@@ -90,8 +90,7 @@ public enum EconomyPlayerCommandEnum {
 				TownworldController.handleTownWorldLocationCheck(player.getWorld().getName(),
 						player.getLocation().getChunk(), player.getName());
 			} else if (args.length == 0) {
-				Object[] homes = ecoPlayer.getHomeList().keySet().toArray();
-				player.sendMessage(MessageWrapper.getString("home_info", homes));
+				player.sendMessage(MessageWrapper.getString("home_info", ecoPlayer.getHomeList().keySet().toString()));
 			} else {
 				return false;
 			}

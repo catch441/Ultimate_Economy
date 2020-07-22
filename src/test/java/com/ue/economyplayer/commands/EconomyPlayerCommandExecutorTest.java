@@ -410,12 +410,14 @@ public class EconomyPlayerCommandExecutorTest {
 		try {
 			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 2, 3);
-			ecoPlayer.addHome("myhome", loc, false);
+			ecoPlayer.addHome("myhome1", loc, false);
+			ecoPlayer.addHome("myhome2", loc, false);
 			String[] args = {};
 			boolean result = executor.onCommand(player, null, "home", args);
-			assertEquals("§6Your homes: §amyhome§6", player.nextMessage());
+			assertEquals("§6Your homes: §a[myhome2, myhome1]§6", player.nextMessage());
 			assertTrue(result);
-			ecoPlayer.removeHome("myhome", false);
+			ecoPlayer.removeHome("myhome2", false);
+			ecoPlayer.removeHome("myhome1", false);
 		} catch (PlayerException e) {
 			fail();
 		}
