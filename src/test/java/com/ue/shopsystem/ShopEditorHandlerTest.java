@@ -106,6 +106,7 @@ public class ShopEditorHandlerTest {
 			ChestInventoryMock editor = (ChestInventoryMock) handler.getEditorInventory();
 			assertEquals(9, editor.getSize());
 			assertEquals("myshop-Editor", editor.getName());
+			assertEquals(AdminshopController.getAdminshopList().get(0).getShopVillager(), editor.getHolder());
 			checkInventory(editor);
 		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 			fail();
@@ -192,6 +193,20 @@ public class ShopEditorHandlerTest {
 		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 		handler.handleInventoryClick(event);
 		assertEquals("myshop-SlotEditor", ((ChestInventoryMock) player.getOpenInventory().getTopInventory()).getName());
+	}
+	
+	@Test
+	public void handleInventoryClickTestBottomInvClick() {
+		AbstractShopImpl shop = (AbstractShopImpl) AdminshopController.getAdminshopList().get(0);
+		ShopEditorHandler handler = new ShopEditorHandler(shop);
+		try {
+			shop.openEditor(player);
+		} catch (ShopSystemException e) {
+			fail();
+		}
+		InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 9, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+		handler.handleInventoryClick(event);
+		assertEquals("myshop-Editor", ((ChestInventoryMock) player.getOpenInventory().getTopInventory()).getName());
 	}
 	
 	@Test

@@ -130,12 +130,14 @@ public class PlayershopTest {
 			loaded.openEditor(owner.getPlayer());
 			ChestInventoryMock editor = (ChestInventoryMock) owner.getPlayer().getOpenInventory().getTopInventory();
 			owner.getPlayer().closeInventory();
+			assertEquals(loaded.getShopVillager(), editor.getHolder());
 			assertEquals(9, editor.getSize());
 			assertEquals("myshop-Editor", editor.getName());
 			assertNull(editor.getItem(7));
 			assertNull(editor.getItem(8));
 			// check stock inventory
 			ChestInventoryMock stock = (ChestInventoryMock) loaded.getStockpileInventory();
+			assertEquals(loaded.getShopVillager(), stock.getHolder());
 			assertEquals(9, stock.getSize());
 			assertEquals("myshop-Stock", stock.getName());
 			assertEquals(Material.STONE, stock.getItem(0).getType());

@@ -2,6 +2,7 @@ package com.ue.economyplayer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -87,10 +88,14 @@ public class EconomyPlayerEventHandlerTest {
 		PlayerJoinEvent event = new PlayerJoinEvent(player, "");
 		try {
 			EconomyPlayerController.getAllEconomyPlayers().get(0).setPlayer(null);
+			EconomyPlayerController.getAllEconomyPlayers().get(0).setScoreBoardDisabled(false);
 			eventHandler.handleJoin(event);
 			assertEquals("kthschnll", EconomyPlayerController.getAllEconomyPlayers().get(0).getName());
 			assertEquals(player, EconomyPlayerController.getAllEconomyPlayers().get(0).getPlayer());
 			assertFalse(player.hasPermission("ultimate_economy.wilderness"));
+			server.getScheduler().performOneTick();
+			assertEquals(1, player.getScoreboard().getObjectives().size());
+			assertNotNull("0", String.valueOf(player.getScoreboard().getObjective("bank")));
 		} catch (PlayerException e) {
 			fail();
 		}

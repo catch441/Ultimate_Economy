@@ -2,6 +2,7 @@ package com.ue.shopsystem.impl;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
@@ -76,22 +77,29 @@ public class ShopEventHandler {
 	private void handleBuySell(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
 			throws ShopSystemException, GeneralEconomyException, PlayerException {
 		Entity entity = (Entity) event.getInventory().getHolder();
-		EconomyVillager economyVillager = EconomyVillager.getEnum(entity.getMetadata("ue-type").get(0).value().toString());
-		switch (event.getClick()) {
-		case MIDDLE:
+		EconomyVillager economyVillager = EconomyVillager
+				.getEnum(entity.getMetadata("ue-type").get(0).value().toString());
+		int reservedSlots = 2;
+		if (economyVillager == EconomyVillager.ADMINSHOP) {
+			reservedSlots = 1;
+		}
+		if (event.getClick() == ClickType.MIDDLE) {
 			handleSwitchStockpile(abstractShop, ecoPlayer, economyVillager);
-			break;
-		case LEFT:
-			handleBuy(abstractShop, event, ecoPlayer);
-			break;
-		case RIGHT:
-			handleSellSpecific(abstractShop, event, ecoPlayer);
-			break;
-		case SHIFT_RIGHT:
-			handleSellAll(abstractShop, event, ecoPlayer);
-			break;
-		default:
-			break;
+		} else if (event.getRawSlot() < (abstractShop.getSize() - reservedSlots)
+				|| event.getRawSlot() >= abstractShop.getSize()) {
+			switch (event.getClick()) {
+			case LEFT:
+				handleBuy(abstractShop, event, ecoPlayer);
+				break;
+			case RIGHT:
+				handleSellSpecific(abstractShop, event, ecoPlayer);
+				break;
+			case SHIFT_RIGHT:
+				handleSellAll(abstractShop, event, ecoPlayer);
+				break;
+			default:
+				break;
+			}
 		}
 	}
 
@@ -142,7 +150,8 @@ public class ShopEventHandler {
 	public void handleOpenInventory(PlayerInteractEntityEvent event) {
 		event.setCancelled(true);
 		Entity entity = event.getRightClicked();
-		EconomyVillager economyVillager = EconomyVillager.getEnum(entity.getMetadata("ue-type").get(0).value().toString());
+		EconomyVillager economyVillager = EconomyVillager
+				.getEnum(entity.getMetadata("ue-type").get(0).value().toString());
 		String shopId = (String) entity.getMetadata("ue-id").get(0).value();
 		try {
 			switch (economyVillager) {

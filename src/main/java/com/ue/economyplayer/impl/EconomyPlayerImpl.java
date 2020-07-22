@@ -272,6 +272,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		this.player = player;
 		if(isOnline()) {
 			getBossBar().addPlayer(player);
+			updateScoreBoard();
 		}
 	}
 

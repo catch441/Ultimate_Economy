@@ -319,6 +319,57 @@ public class ShopEventHandlerTest {
 	}
 	
 	@Test
+	public void handleInventoryClickTestPlayershopSwitchStockpileItemLeftClick() {
+		try {
+			PlayershopController.createPlayerShop("myshop", new Location(world, 9, 9, 1), 9, EconomyPlayerController.getAllEconomyPlayers().get(0));
+			ShopEventHandler handler = new ShopEventHandler();
+			PlayershopController.getPlayerShops().get(0).openShopInventory(player);
+			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 7, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+			handler.handleInventoryClick(event);
+			assertEquals("myshop", player.getOpenInventory().getTitle());
+			assertTrue(event.isCancelled());
+			assertNull(player.nextMessage());
+			PlayershopController.deletePlayerShop(PlayershopController.getPlayerShops().get(0));
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void handleInventoryClickTestPlayershopSwitchStockpileItemRightClick() {
+		try {
+			PlayershopController.createPlayerShop("myshop", new Location(world, 9, 9, 1), 9, EconomyPlayerController.getAllEconomyPlayers().get(0));
+			ShopEventHandler handler = new ShopEventHandler();
+			PlayershopController.getPlayerShops().get(0).openShopInventory(player);
+			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 7, ClickType.RIGHT, InventoryAction.PICKUP_ONE);
+			handler.handleInventoryClick(event);
+			assertEquals("myshop", player.getOpenInventory().getTitle());
+			assertTrue(event.isCancelled());
+			assertNull(player.nextMessage());
+			PlayershopController.deletePlayerShop(PlayershopController.getPlayerShops().get(0));
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void handleInventoryClickTestPlayershopSwitchStockpileItemShiftRightClick() {
+		try {
+			PlayershopController.createPlayerShop("myshop", new Location(world, 9, 9, 1), 9, EconomyPlayerController.getAllEconomyPlayers().get(0));
+			ShopEventHandler handler = new ShopEventHandler();
+			PlayershopController.getPlayerShops().get(0).openShopInventory(player);
+			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 7, ClickType.SHIFT_RIGHT, InventoryAction.PICKUP_ONE);
+			handler.handleInventoryClick(event);
+			assertEquals("myshop", player.getOpenInventory().getTitle());
+			assertTrue(event.isCancelled());
+			assertNull(player.nextMessage());
+			PlayershopController.deletePlayerShop(PlayershopController.getPlayerShops().get(0));
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
+			fail();
+		}
+	}
+	
+	@Test
 	public void handleInventoryClickTestAdminshopSwitchStockpile() {
 		try {
 			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);

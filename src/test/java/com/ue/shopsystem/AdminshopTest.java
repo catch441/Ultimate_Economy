@@ -213,6 +213,7 @@ public class AdminshopTest {
 			assertEquals(location, shop.getShopVillager().getLocation());
 			// check inventory
 			ChestInventoryMock shopInv = (ChestInventoryMock) shop.getShopInventory();
+			assertEquals(shop.getShopVillager(), shopInv.getHolder());
 			assertEquals(9, shopInv.getSize());
 			assertEquals("myshop", shopInv.getName());
 			assertEquals(Material.STONE, shopInv.getItem(0).getType());
@@ -241,6 +242,7 @@ public class AdminshopTest {
 			shop.openEditor(player);
 			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			player.closeInventory();
+			assertEquals(shop.getShopVillager(), editor.getHolder());
 			assertEquals(9, editor.getSize());
 			assertEquals("myshop-Editor", editor.getName());
 			assertEquals(Material.PLAYER_HEAD, editor.getItem(0).getType());
@@ -282,6 +284,7 @@ public class AdminshopTest {
 			ChestInventoryMock slotEditor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			player.closeInventory();
 			assertEquals(27, slotEditor.getSize());
+			assertEquals(shop.getShopVillager(), slotEditor.getHolder());
 			assertEquals("myshop-SlotEditor", slotEditor.getName());
 			assertEquals(Material.RED_WOOL, slotEditor.getItem(7).getType());
 			assertEquals(Material.GREEN_WOOL, slotEditor.getItem(8).getType());

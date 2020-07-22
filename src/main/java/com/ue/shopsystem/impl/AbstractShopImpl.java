@@ -490,8 +490,9 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	private void setupShopVillager() {
 		getShopLocation().getChunk().load();
 		Collection<Entity> entitys = getShopLocation().getWorld().getNearbyEntities(getShopLocation(), 10, 10, 10);
+		// TODO find a better solution without "contains"
 		for (Entity entity : entitys) {
-			if (getName() != null && getName().equals(entity.getCustomName())) {
+			if (getName() != null && entity.getCustomName() != null && entity.getCustomName().contains(getName())) {
 				entity.remove();
 			}
 		}
@@ -531,10 +532,10 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		setShopId(shopId);
 		setName(getSavefileHandler().loadShopName());
 		setSize(getSavefileHandler().loadShopSize());
-		editorHandler = new ShopEditorHandler(this);
-		slotEditorHandler = new ShopSlotEditorHandler(this);
 		location = getSavefileHandler().loadShopLocation();
 		setupShopVillager();
+		editorHandler = new ShopEditorHandler(this);
+		slotEditorHandler = new ShopSlotEditorHandler(this);
 		getShopVillager().setProfession(getSavefileHandler().loadShopVillagerProfession());
 		setupShopInventory();
 		loadShopItems();

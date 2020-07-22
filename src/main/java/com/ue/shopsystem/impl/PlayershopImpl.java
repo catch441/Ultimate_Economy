@@ -77,10 +77,10 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	@Override
 	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
 			throws GeneralEconomyException, PlayerException, ShopSystemException {
+		getValidationHandler().checkForValidSlot(slot, getSize(), 2);
 		ShopItem shopItem = getShopItem(slot);
 		int entireStock = shopItem.getStock();
 		getValidationHandler().checkForValidStockDecrease(entireStock, shopItem.getAmount());
-		getValidationHandler().checkForValidSlot(slot, getSize(), 2);
 		getValidationHandler().checkForPlayerIsOnline(ecoPlayer);
 		getValidationHandler().checkForPlayerInventoryNotFull(ecoPlayer.getPlayer().getInventory());
 		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 2);

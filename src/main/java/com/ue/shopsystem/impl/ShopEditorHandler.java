@@ -44,11 +44,13 @@ public class ShopEditorHandler {
 	 * @param event
 	 */
 	public void handleInventoryClick(InventoryClickEvent event) {
-		ItemMeta clickedItemMeta = event.getCurrentItem().getItemMeta();
-		int slot = Integer.valueOf(clickedItemMeta.getDisplayName().substring(5));
-		try {
-			getShop().openSlotEditor((Player) event.getWhoClicked(), slot- 1);
-		} catch (ShopSystemException | GeneralEconomyException e) {
+		if(event.getRawSlot() < getShop().getSize()) {
+			ItemMeta clickedItemMeta = event.getCurrentItem().getItemMeta();
+			int slot = Integer.valueOf(clickedItemMeta.getDisplayName().substring(5));
+			try {
+				getShop().openSlotEditor((Player) event.getWhoClicked(), slot- 1);
+			} catch (ShopSystemException | GeneralEconomyException e) {
+			}
 		}
 	}
 
