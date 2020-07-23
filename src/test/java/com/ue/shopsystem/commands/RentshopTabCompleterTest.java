@@ -43,6 +43,7 @@ public class RentshopTabCompleterTest {
 		MockBukkit.load(UltimateEconomy.class);
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
+		EconomyPlayerController.getAllEconomyPlayers().clear();
 		player = server.addPlayer("kthschnll");
 		RentshopController.getRentShops().clear();
 		tabCompleter = new RentshopTabCompleter();
