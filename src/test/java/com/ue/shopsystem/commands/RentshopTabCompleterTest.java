@@ -44,6 +44,7 @@ public class RentshopTabCompleterTest {
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
 		player = server.addPlayer("kthschnll");
+		RentshopController.getRentShops().clear();
 		tabCompleter = new RentshopTabCompleter();
 		try {
 			Rentshop shop1 = RentshopController.createRentShop(new Location(world, 1, 2, 3), 9, 0);
