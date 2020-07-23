@@ -158,7 +158,7 @@ public class AdminshopTest {
 			assertEquals("7.5", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
 			assertEquals("§6§a30§6 items were sold for §a7.5§6 §a$§6.", player.nextMessage());
 			assertNull(player.nextMessage());
-			ecoPlayer.decreasePlayerAmount(5, false);
+			ecoPlayer.decreasePlayerAmount(7.5, false);
 			player.getInventory().clear();
 		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 			fail();
@@ -182,6 +182,25 @@ public class AdminshopTest {
 			assertEquals("§6§a1§6 item was sold for §a1.0§6 §a$§6.", player.nextMessage());
 			assertNull(player.nextMessage());
 			ecoPlayer.decreasePlayerAmount(1, false);
+			player.getInventory().clear();
+		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+			fail();
+		}
+	}
+	
+	@Test
+	public void sellShopItemTestOnlyBuyPrice() {
+		Location location = new Location(world, 1.5, 2.3, 6.9);
+		try {
+			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			AdminshopController.createAdminShop("myshop", location, 9);
+			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
+			ItemStack stack = new ItemStack(Material.STONE);
+			shop.addShopItem(0, 0, 2, stack);
+			shop.sellShopItem(0, 1, ecoPlayer, true);
+			assertNull(player.getInventory().getItem(0));
+			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
+			assertNull(player.nextMessage());
 			player.getInventory().clear();
 		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 			fail();

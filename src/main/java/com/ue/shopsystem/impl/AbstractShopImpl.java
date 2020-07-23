@@ -236,11 +236,13 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
 		getValidationHandler().checkForPlayerIsOnline(ecoPlayer);
 		ShopItem shopItem = getShopItem(slot);
-		double sellPrice = shopItem.getSellPrice() / shopItem.getAmount() * amount;
-		ecoPlayer.increasePlayerAmount(sellPrice, false);
-		removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack().clone(), amount);
-		if (sendMessage) {
-			sendBuySellPlayerMessage(amount, ecoPlayer, sellPrice, "sell");
+		if(shopItem.getSellPrice() != 0.0) {
+			double sellPrice = shopItem.getSellPrice() / shopItem.getAmount() * amount;
+			ecoPlayer.increasePlayerAmount(sellPrice, false);
+			removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack().clone(), amount);
+			if (sendMessage) {
+				sendBuySellPlayerMessage(amount, ecoPlayer, sellPrice, "sell");
+			}
 		}
 	}
 

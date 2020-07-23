@@ -118,19 +118,19 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		getValidationHandler().checkForPlayerIsOnline(ecoPlayer);
 		ShopItem shopItem = getShopItem(slot);
 		double sellPrice = shopItem.getSellPrice() / shopItem.getAmount() * amount;
-		if (!isOwner(ecoPlayer)) {
+		if (isOwner(ecoPlayer)) {
+			increaseStock(slot, amount);
+			removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack().clone(), amount);
+			if (sendMessage) {
+				sendBuySellOwnerMessage(amount, "added");
+			}
+		} else if (shopItem.getSellPrice() != 0.0) {
 			getValidationHandler().checkForShopOwnerHasEnoughMoney(getOwner(), sellPrice);
 			ecoPlayer.increasePlayerAmount(sellPrice, false);
 			getOwner().decreasePlayerAmount(sellPrice, true);
-		}
-		increaseStock(slot, amount);
-		removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack().clone(), amount);
-		if (sendMessage) {
-			if (isOwner(ecoPlayer)) {
-				sendBuySellOwnerMessage(amount, "added");
-			} else {
-				sendBuySellPlayerMessage(amount, ecoPlayer, sellPrice, "sell");
-			}
+			increaseStock(slot, amount);
+			removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack().clone(), amount);
+			sendBuySellPlayerMessage(amount, ecoPlayer, sellPrice, "sell");
 		}
 	}
 

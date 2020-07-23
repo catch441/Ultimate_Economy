@@ -548,6 +548,27 @@ public class PlayershopTest {
 			fail();
 		}
 	}
+	
+	@Test
+	public void sellShopItemTestOnyBuyPrice() {
+		Location location = new Location(world, 1.5, 2.3, 6.9);
+		try {
+			PlayershopController.createPlayerShop("myshop", location, 9,
+					EconomyPlayerController.getAllEconomyPlayers().get(0));
+			Playershop shop = PlayershopController.getPlayerShops().get(0);
+			shop.addShopItem(0, 0, 2, new ItemStack(Material.STONE));
+			EconomyPlayer ecoPlayerOwner = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer other = EconomyPlayerController.getAllEconomyPlayers().get(1);
+			shop.sellShopItem(0, 1, other, true);
+			assertNull(((PlayerMock) other.getPlayer()).nextMessage());
+			assertNull(owner.nextMessage());
+			assertEquals(0, shop.getShopItem(0).getStock());
+			assertEquals("0.0", String.valueOf(ecoPlayerOwner.getBankAccount().getAmount()));
+			assertEquals("0.0", String.valueOf(other.getBankAccount().getAmount()));
+		} catch (ShopSystemException | TownSystemException | PlayerException | GeneralEconomyException e) {
+			fail();
+		}
+	}
 
 	@Test
 	public void sellShopItemTestWithPlural() {
