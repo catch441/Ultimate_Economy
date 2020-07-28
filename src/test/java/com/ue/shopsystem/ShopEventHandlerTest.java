@@ -232,6 +232,28 @@ public class ShopEventHandlerTest {
 	}
 	
 	@Test
+	public void handleInventoryClickTestPlayershopLeftClickGetMinorAmountAsOwner() {
+		try {
+			PlayershopController.createPlayerShop("myshop", new Location(world, 9, 9, 1), 9, EconomyPlayerController.getAllEconomyPlayers().get(0));
+			ItemStack stack = new ItemStack(Material.STONE);
+			stack.setAmount(10);
+			PlayershopController.getPlayerShops().get(0).addShopItem(0, 1, 0, stack);
+			PlayershopController.getPlayerShops().get(0).increaseStock(0, 5);
+			ShopEventHandler handler = new ShopEventHandler();
+			PlayershopController.getPlayerShops().get(0).openShopInventory(player);
+			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
+			handler.handleInventoryClick(event);
+			assertTrue(event.isCancelled());
+			assertEquals("§6You got §a5§6 items from the shop.", player.nextMessage());
+			assertNull(player.nextMessage());
+			PlayershopController.deletePlayerShop(PlayershopController.getPlayerShops().get(0));
+			player.getInventory().clear();
+		} catch (ShopSystemException | GeneralEconomyException | PlayerException | TownSystemException e) {
+			fail();
+		}
+	}
+	
+	@Test
 	public void handleInventoryClickTestPlayershopLeftClickOnlySellAsOwner() {
 		try {
 			PlayershopController.createPlayerShop("myshop", new Location(world, 9, 9, 1), 9, EconomyPlayerController.getAllEconomyPlayers().get(0));
@@ -245,6 +267,7 @@ public class ShopEventHandlerTest {
 			assertEquals("§6You got §a1§6 item from the shop.", player.nextMessage());
 			assertNull(player.nextMessage());
 			PlayershopController.deletePlayerShop(PlayershopController.getPlayerShops().get(0));
+			player.getInventory().clear();
 		} catch (ShopSystemException | GeneralEconomyException | PlayerException | TownSystemException e) {
 			fail();
 		}

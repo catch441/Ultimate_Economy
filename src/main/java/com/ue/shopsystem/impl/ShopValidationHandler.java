@@ -222,7 +222,7 @@ public class ShopValidationHandler {
 	 * @throws ShopSystemException 
 	 */
 	public void checkForValidStockDecrease(int entireStock, int stock) throws ShopSystemException {
-		if ((entireStock - stock) < 0) {
+		if ((entireStock - stock) < 0 || entireStock == 0) {
 			throw ShopSystemException.getException(ShopExceptionMessageEnum.ITEM_UNAVAILABLE);
 		}
 	}

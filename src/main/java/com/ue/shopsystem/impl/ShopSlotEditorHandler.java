@@ -269,8 +269,10 @@ public class ShopSlotEditorHandler {
 			// item is new
 			getShop().getValidationHandler().checkForItemDoesNotExist(stackInEditor.toString(),
 					getShop().getItemList());
-			getShop().addShopItem(getSelectedSlot(), sellPrice, buyPrice, itemStack);
-			player.sendMessage(MessageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
+			if(itemStack.getType() != Material.BARRIER) {
+				getShop().addShopItem(getSelectedSlot(), sellPrice, buyPrice, itemStack);
+				player.sendMessage(MessageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
+			}
 		}
 	}
 

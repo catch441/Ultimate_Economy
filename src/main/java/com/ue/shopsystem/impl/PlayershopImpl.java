@@ -80,19 +80,13 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		getValidationHandler().checkForValidSlot(slot, getSize(), 2);
 		ShopItem shopItem = getShopItem(slot);
 		int entireStock = shopItem.getStock();
-		getValidationHandler().checkForValidStockDecrease(entireStock, shopItem.getAmount());
 		getValidationHandler().checkForPlayerIsOnline(ecoPlayer);
 		getValidationHandler().checkForPlayerInventoryNotFull(ecoPlayer.getPlayer().getInventory());
 		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 2);
 		if (isOwner(ecoPlayer)) {
-			ItemStack stack = shopItem.getItemStack().clone();
-			stack.setAmount(shopItem.getAmount());
-			ecoPlayer.getPlayer().getInventory().addItem(stack);
-			decreaseStock(slot, shopItem.getAmount());
-			if (sendMessage) {
-				sendBuySellOwnerMessage(shopItem.getAmount(), "got");
-			}
+			buyItemAsOwner(slot, ecoPlayer, sendMessage, shopItem);
 		} else if (shopItem.getBuyPrice() != 0.0) {
+			getValidationHandler().checkForValidStockDecrease(entireStock, shopItem.getAmount());
 			// if player has not enough money, then the decrease method throws a
 			// playerexception
 			ecoPlayer.decreasePlayerAmount(shopItem.getBuyPrice(), true);
@@ -104,6 +98,23 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 			if (sendMessage) {
 				sendBuySellPlayerMessage(shopItem.getAmount(), ecoPlayer, shopItem.getBuyPrice(), "buy");
 			}
+		}
+	}
+
+	private void buyItemAsOwner(int slot, EconomyPlayer ecoPlayer, boolean sendMessage, ShopItem shopItem)
+			throws GeneralEconomyException, ShopSystemException {
+		ItemStack stack = shopItem.getItemStack().clone();
+		int amount = shopItem.getAmount();
+		if(shopItem.getStock() < shopItem.getAmount()) {
+			amount = shopItem.getStock();
+		}
+		System.out.println("stock: " + shopItem.getStock() + " amount: " + amount);
+		getValidationHandler().checkForValidStockDecrease(shopItem.getStock(), amount);
+		stack.setAmount(amount);
+		ecoPlayer.getPlayer().getInventory().addItem(stack);		
+		decreaseStock(slot, amount);
+		if (sendMessage) {
+			sendBuySellOwnerMessage(amount, "got");
 		}
 	}
 

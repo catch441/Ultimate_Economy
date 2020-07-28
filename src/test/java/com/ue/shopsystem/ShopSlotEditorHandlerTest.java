@@ -1163,6 +1163,22 @@ public class ShopSlotEditorHandlerTest {
 	}
 	
 	@Test
+	public void handleSlotEditorTestSaveChangesNewNoSelectedItem() {
+		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		try {
+			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			InventoryClickEvent addSellPrice = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 14, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(addSellPrice);	
+			InventoryClickEvent save = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 8, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
+			handler.handleSlotEditor(save);
+			assertEquals(0, AdminshopController.getAdminshopList().get(0).getItemList().size());
+			assertNull(player.nextMessage());
+		} catch (ShopSystemException | GeneralEconomyException e) {
+			fail();
+		}
+	}
+	
+	@Test
 	public void handleSlotEditorTestSaveChangesNewWithNoPrices() {
 		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {

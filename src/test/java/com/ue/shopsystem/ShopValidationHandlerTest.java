@@ -370,9 +370,19 @@ public class ShopValidationHandlerTest {
 	}
 
 	@Test
-	public void checkForValidStockDecreaseTest() {
+	public void checkForValidStockDecreaseTest1() {
 		try {
 			validationHandler.checkForValidStockDecrease(10, 20);
+			fail();
+		} catch (ShopSystemException e) {
+			assertEquals("§cThis item is unavailable!", e.getMessage());
+		}
+	}
+	
+	@Test
+	public void checkForValidStockDecreaseTest2() {
+		try {
+			validationHandler.checkForValidStockDecrease(0, 0);
 			fail();
 		} catch (ShopSystemException e) {
 			assertEquals("§cThis item is unavailable!", e.getMessage());
