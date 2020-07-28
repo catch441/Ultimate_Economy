@@ -8,7 +8,9 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -30,6 +32,7 @@ public class BankSavefileHandlerTest {
 	@BeforeAll
 	public static void initPlugin() {
 		MockBukkit.mock();
+		Bukkit.getLogger().setLevel(Level.OFF);
 		MockBukkit.load(UltimateEconomy.class);
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "BankAccounts.yml");
 		file.delete();

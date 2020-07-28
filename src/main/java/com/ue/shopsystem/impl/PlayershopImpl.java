@@ -108,7 +108,6 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		if(shopItem.getStock() < shopItem.getAmount()) {
 			amount = shopItem.getStock();
 		}
-		System.out.println("stock: " + shopItem.getStock() + " amount: " + amount);
 		getValidationHandler().checkForValidStockDecrease(shopItem.getStock(), amount);
 		stack.setAmount(amount);
 		ecoPlayer.getPlayer().getInventory().addItem(stack);		

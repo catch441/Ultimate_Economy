@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.util.List;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -36,6 +38,7 @@ public class EconomyPlayerTabCompleterTest {
 	@BeforeAll
 	public static void initPlugin() {
 		server = MockBukkit.mock();
+		Bukkit.getLogger().setLevel(Level.OFF);
 		MockBukkit.load(UltimateEconomy.class);
 		tabCompleter = new EconomyPlayerTabCompleter();
 		player = server.addPlayer("kthschnll");

@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -32,6 +34,7 @@ public class JobSavefileHandlerTest {
 	@BeforeAll
 	public static void initPlugin() {
 		MockBukkit.mock();
+		Bukkit.getLogger().setLevel(Level.OFF);
 		MockBukkit.load(UltimateEconomy.class);
 		savefileHandler = new JobSavefileHandler("kthjob", true);
 	}

@@ -8,7 +8,9 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.List;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -47,6 +49,7 @@ public class JobcenterTest {
 	@BeforeAll
 	public static void initPlugin() {
 		server = MockBukkit.mock();
+		Bukkit.getLogger().setLevel(Level.OFF);
 		MockBukkit.load(UltimateEconomy.class);
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);

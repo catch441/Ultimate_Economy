@@ -2,6 +2,9 @@ package com.ue.shopsystem;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.logging.Level;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -18,6 +21,7 @@ public class ShopItemTest {
 	@BeforeAll
 	public static void initPlugin() {
 		MockBukkit.mock();
+		Bukkit.getLogger().setLevel(Level.OFF);
 	}
 
 	/**

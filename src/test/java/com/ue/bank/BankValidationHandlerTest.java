@@ -3,6 +3,9 @@ package com.ue.bank;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.util.logging.Level;
+
+import org.bukkit.Bukkit;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -24,6 +27,7 @@ public class BankValidationHandlerTest {
 	@BeforeAll
 	public static void initPlugin() {
 		MockBukkit.mock();
+		Bukkit.getLogger().setLevel(Level.OFF);
 		MockBukkit.load(UltimateEconomy.class);
 		validationHandler = new BankValidationHandler();
 	}

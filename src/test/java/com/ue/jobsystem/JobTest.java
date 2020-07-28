@@ -7,7 +7,9 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.Map;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -34,6 +36,7 @@ public class JobTest {
 	@BeforeAll
 	public static void initPlugin() {
 		server = MockBukkit.mock();
+		Bukkit.getLogger().setLevel(Level.OFF);
 		MockBukkit.load(UltimateEconomy.class);
 	}
 

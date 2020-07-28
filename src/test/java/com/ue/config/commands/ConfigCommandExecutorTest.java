@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
+import java.util.logging.Level;
+
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -30,6 +33,7 @@ public class ConfigCommandExecutorTest {
 	@BeforeAll
 	public static void initPlugin() {
 		server = MockBukkit.mock();
+		Bukkit.getLogger().setLevel(Level.OFF);
 		MockBukkit.load(UltimateEconomy.class);
 		player = server.addPlayer("catch441");
 		executor = new ConfigCommandExecutor();
