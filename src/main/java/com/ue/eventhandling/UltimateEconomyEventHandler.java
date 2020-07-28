@@ -36,6 +36,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
+import com.ue.common.utils.Updater;
+import com.ue.common.utils.Updater.UpdateResult;
 import com.ue.economyplayer.impl.EconomyPlayerEventHandler;
 import com.ue.exceptions.PlayerException;
 import com.ue.jobsystem.impl.JobSystemEventHandler;
@@ -44,8 +46,6 @@ import com.ue.shopsystem.impl.ShopEventHandler;
 import com.ue.shopsystem.impl.Spawner;
 import com.ue.townsystem.impl.TownsystemEventHandler;
 import com.ue.ultimate_economy.UltimateEconomy;
-import com.ue.updater.Updater;
-import com.ue.updater.Updater.UpdateResult;
 
 public class UltimateEconomyEventHandler implements Listener {
 

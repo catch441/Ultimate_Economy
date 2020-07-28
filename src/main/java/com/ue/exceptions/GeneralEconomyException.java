@@ -4,19 +4,21 @@ import com.ue.language.MessageWrapper;
 
 public class GeneralEconomyException extends Exception {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private GeneralEconomyException(String msg) {
-	super(msg);
-    }
+	private GeneralEconomyException(String msg) {
+		super(msg);
+	}
 
-    /**
-     * Returns a general economy exception with a formattet message for the minecraft chat.
-     * @param key
-     * @param params
-     * @return general economy exception
-     */
-    public static GeneralEconomyException getException(GeneralEconomyExceptionMessageEnum key, Object... params) {
-	return new GeneralEconomyException(MessageWrapper.getErrorString(key.getValue(), params));
-    }
+	/**
+	 * Returns a general economy exception with a formattet message for the
+	 * minecraft chat.
+	 * 
+	 * @param key
+	 * @param params
+	 * @return general economy exception
+	 */
+	public static GeneralEconomyException getException(GeneralEconomyExceptionMessageEnum key, Object... params) {
+		return new GeneralEconomyException(MessageWrapper.getErrorString(key.getValue(), params));
+	}
 }

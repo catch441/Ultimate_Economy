@@ -22,10 +22,10 @@
 			<url>file://${project.basedir}/src/main/resources/libs</url>
 		</repository>
 		<repository>
-            <id>mojang</id>
-            <name>Mojang's Repository</name>
-            <url>https://libraries.minecraft.net/</url>
-        </repository>
+			<id>mojang</id>
+			<name>Mojang's Repository</name>
+			<url>https://libraries.minecraft.net/</url>
+		</repository>
 	</repositories>
 
 	<properties>
@@ -87,12 +87,12 @@
 			<artifactId>junit-jupiter-engine</artifactId>
 			<version>5.5.2</version>
 		</dependency>
-		
+
 		<dependency>
-            <groupId>com.mojang</groupId>
-            <artifactId>authlib</artifactId>
-            <version>1.5.21</version>
-        </dependency>
+			<groupId>com.mojang</groupId>
+			<artifactId>authlib</artifactId>
+			<version>1.5.21</version>
+		</dependency>
 
 	</dependencies>
 	<build>
