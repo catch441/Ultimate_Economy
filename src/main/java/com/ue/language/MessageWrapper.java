@@ -35,6 +35,14 @@ public class MessageWrapper {
 		}
 		messages = ResourceBundle.getBundle("language.MessagesBundle", currentLocale, new UTF8Control());
 	}
+	
+	/**
+	 * Returns the message bundle with the actiual language.
+	 * @return messages as ResourceBundle
+	 */
+	public static ResourceBundle getMessages() {
+		return messages;
+	}
 
 	/**
 	 * Returns a error message with the chatcolor red.
@@ -44,7 +52,7 @@ public class MessageWrapper {
 	 */
 	public static String getErrorString(String key) {
 		try {
-			return ChatColor.RED + messages.getString(key);
+			return ChatColor.RED + getMessages().getString(key);
 		} catch (MissingResourceException e) {
 			return '!' + key + '!';
 		}
@@ -61,13 +69,13 @@ public class MessageWrapper {
 		try {
 			List<String> colored = new ArrayList<>();
 			for (Object object : params) {
-				if(object != null) {
+				if (object != null) {
 					colored.add("§4" + object.toString() + "§c");
 				} else {
 					colored.add("§4null§c");
 				}
 			}
-			String message = "§c" + messages.getString(key);
+			String message = "§c" + getMessages().getString(key);
 			String newMessage = MessageFormat.format(message, colored.toArray());
 			return ChatColor.translateAlternateColorCodes('§', newMessage);
 		} catch (MissingResourceException e) {
@@ -83,7 +91,7 @@ public class MessageWrapper {
 	 */
 	public static String getString(String key) {
 		try {
-			return ChatColor.GOLD + messages.getString(key);
+			return ChatColor.GOLD + getMessages().getString(key);
 		} catch (MissingResourceException e) {
 			return '!' + key + '!';
 		}
@@ -101,10 +109,13 @@ public class MessageWrapper {
 			List<String> colored = new ArrayList<>();
 
 			for (Object object : params) {
-				colored.add("§a" + object.toString() + "§6");
+				if (object != null) {
+					colored.add("§a" + object.toString() + "§6");
+				} else {
+					colored.add("§anull§6");
+				}				
 			}
-
-			String message = "§6" + messages.getString(key);
+			String message = "§6" + getMessages().getString(key);
 			String newMessage = MessageFormat.format(message, colored.toArray());
 			return ChatColor.translateAlternateColorCodes('§', newMessage);
 		} catch (MissingResourceException e) {
