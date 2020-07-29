@@ -14,9 +14,9 @@ public enum ConfigCommandEnum {
 		boolean perform(String label, String[] args, CommandSender sender) throws GeneralEconomyException {
 			// TODO refractor
 			if (args.length == 3) {
-				if (isLanguageSupported(args[1])) {
+				if (!isLanguageSupported(args[1])) {
 					sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter", args[1]));
-				} else if (isCountryMatching(args[1], args[2])) {
+				} else if (!isCountryMatching(args[1], args[2])) {
 					sender.sendMessage(MessageWrapper.getErrorString("invalid_parameter", args[2]));
 				} else {
 					UltimateEconomy.getInstance.getConfig().set("localeLanguage", args[1]);

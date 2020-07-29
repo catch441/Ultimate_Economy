@@ -3,6 +3,7 @@ package com.ue.config.commands;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.logging.Level;
 
@@ -58,246 +59,372 @@ public class ConfigCommandExecutorTest {
 	 */
 	@AfterEach
 	public void unload() {
-		
+
 	}
-	
+
 	@Test
 	public void zeroArgs() {
 		String[] args = {};
-		executor.onCommand(player, null, "ue-config", args);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertFalse(result);
 		assertNull(player.nextMessage());
+	}
+
+	@Test
+	public void invalidArg() {
+		String[] args = { "foo" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertFalse(result);
+		assertNull(player.nextMessage());
+	}
+
+	@Test
+	public void currencyCommandTestWithOneArg() {
+		String[] args = { "currency" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("/ue-config currency <singular> <plural>", player.nextMessage());
+		assertNull(player.nextMessage());
+	}
+
+	@Test
+	public void currencyCommandTestWithTwoArg() {
+		String[] args = { "currency", "kth" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("/ue-config currency <singular> <plural>", player.nextMessage());
+		assertNull(player.nextMessage());
+	}
+
+	@Test
+	public void currencyCommandTestWithThreeArg() {
+		String[] args = { "currency", "kth", "kths" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§6The configuration was changed to §akth kths§6.", player.nextMessage());
+		assertEquals("§6Please restart the server!", player.nextMessage());
+		assertNull(player.nextMessage());
+		assertEquals("kth", ConfigController.getCurrencySg());
+		assertEquals("kths", ConfigController.getCurrencyPl());
+	}
+
+	@Test
+	public void languageCommandTestWithOneArg() {
+		String[] args = { "language" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("/ue-config language <language> <country>",  player.nextMessage());
+		assertNull(player.nextMessage());
+	}
+
+	@Test
+	public void languageCommandTestWithTwoArg() {
+		String[] args = { "language", "DE" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("/ue-config language <language> <country>",  player.nextMessage());
+		assertNull(player.nextMessage());
+	}
+
+	@Test
+	public void languageCommandTestWithMoreArgs() {
+		String[] args = { "language", "de", "DE", "kth" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("/ue-config language <language> <country>",  player.nextMessage());
+		assertNull(player.nextMessage());
+	}
+
+	@Test
+	public void languageCommandTestWithTwoArgs() {
+		String[] args = { "language", "de", "DE" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§6Please restart the server!",  player.nextMessage());
+		assertNull(player.nextMessage());
+		assertEquals("de", UltimateEconomy.getInstance.getConfig().getString("localeLanguage"));
+		assertEquals("DE", UltimateEconomy.getInstance.getConfig().getString("localeCountry"));
 	}
 	
 	@Test
-	public void invalidArg() {
-		String[] args = {"foo"};
-		executor.onCommand(player, null, "ue-config", args);
+	public void languageCommandTestWithTwoArgsCZ() {
+		String[] args = { "language", "cs", "CZ" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§6Please restart the server!",  player.nextMessage());
+		assertNull(player.nextMessage());
+		assertEquals("cs", UltimateEconomy.getInstance.getConfig().getString("localeLanguage"));
+		assertEquals("CZ", UltimateEconomy.getInstance.getConfig().getString("localeCountry"));
+	}
+	
+	@Test
+	public void languageCommandTestWithTwoArgsUS() {
+		String[] args = { "language", "en", "US" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§6Please restart the server!",  player.nextMessage());
+		assertNull(player.nextMessage());
+		assertEquals("en", UltimateEconomy.getInstance.getConfig().getString("localeLanguage"));
+		assertEquals("US", UltimateEconomy.getInstance.getConfig().getString("localeCountry"));
+	}
+	
+	@Test
+	public void languageCommandTestWithTwoArgsCN() {
+		String[] args = { "language", "zh", "CN" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§6Please restart the server!",  player.nextMessage());
+		assertNull(player.nextMessage());
+		assertEquals("zh", UltimateEconomy.getInstance.getConfig().getString("localeLanguage"));
+		assertEquals("CN", UltimateEconomy.getInstance.getConfig().getString("localeCountry"));
+	}
+
+	@Test
+	public void languageCommandTestWithUnsupportedLanguage() {
+		String[] args = { "language", "kth", "DE" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§cThe parameter §4kth§c is invalid!",  player.nextMessage());
+		assertNull(player.nextMessage());
+	}
+
+	@Test
+	public void languageCommandTestWithUnsupportedCountry() {
+		String[] args = { "language", "de", "kth" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§cThe parameter §4kth§c is invalid!",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxRentedDaysCommandTestWithAll() {
 		String[] args = { "maxRentedDays", "8" };
-		executor.onCommand(player, null, "ue-config", args);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
 		assertEquals(8, ConfigController.getMaxRentedDays());
-		String message = player.nextMessage();
-		assertEquals("§6The configuration was changed to §a8§6.", message);
+		assertEquals("§6The configuration was changed to §a8§6.",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxRentedDaysCommandTestWithInvalidArgumentNumber() {
 		String[] args = { "maxRentedDays" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("/ue-config maxRentedDays <number>", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("/ue-config maxRentedDays <number>",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxRentedDaysCommandTestWithInvalidNumber() {
 		String[] args = { "maxRentedDays", "-1" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("§c§cThe parameter §4-1§c is invalid!", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§c§cThe parameter §4-1§c is invalid!",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxHomesCommandTestWithAll() {
 		String[] args = { "maxHomes", "8" };
-		executor.onCommand(player, null, "ue-config", args);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
 		assertEquals(8, ConfigController.getMaxHomes());
-		String message = player.nextMessage();
-		assertEquals("§6The configuration was changed to §a8§6.", message);
+		assertEquals("§6The configuration was changed to §a8§6.",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxHomesCommandTestWithInvalidArgumentNumber() {
 		String[] args = { "maxHomes" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("/ue-config maxHomes <number>", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("/ue-config maxHomes <number>",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxHomesCommandTestWithInvalidNumber() {
 		String[] args = { "maxHomes", "-1" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("§c§cThe parameter §4-1§c is invalid!", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§c§cThe parameter §4-1§c is invalid!",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxJobsCommandTestWithAll() {
 		String[] args = { "maxJobs", "8" };
-		executor.onCommand(player, null, "ue-config", args);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
 		assertEquals(8, ConfigController.getMaxJobs());
-		String message = player.nextMessage();
-		assertEquals("§6The configuration was changed to §a8§6.", message);
+		assertEquals("§6The configuration was changed to §a8§6.",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxJobsCommandTestWithInvalidArgumentNumber() {
 		String[] args = { "maxJobs" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("/ue-config maxJobs <number>", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("/ue-config maxJobs <number>",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxJobsCommandTestWithInvalidNumber() {
 		String[] args = { "maxJobs", "-1" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("§c§cThe parameter §4-1§c is invalid!", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§c§cThe parameter §4-1§c is invalid!",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxJoinedTownsCommandTestWithAll() {
 		String[] args = { "maxJoinedTowns", "8" };
-		executor.onCommand(player, null, "ue-config", args);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
 		assertEquals(8, ConfigController.getMaxJoinedTowns());
-		String message = player.nextMessage();
-		assertEquals("§6The configuration was changed to §a8§6.", message);
+		assertEquals("§6The configuration was changed to §a8§6.",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxJoinedTownsCommandTestWithInvalidArgumentNumber() {
 		String[] args = { "maxJoinedTowns" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("/ue-config maxJoinedTowns <number>", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("/ue-config maxJoinedTowns <number>",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxJoinedTownsCommandTestWithInvalidNumber() {
 		String[] args = { "maxJoinedTowns", "-1" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("§c§cThe parameter §4-1§c is invalid!", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§c§cThe parameter §4-1§c is invalid!",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxPlayershopsCommandTestWithAll() {
 		String[] args = { "maxPlayershops", "8" };
-		executor.onCommand(player, null, "ue-config", args);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
 		assertEquals(8, ConfigController.getMaxPlayershops());
-		String message = player.nextMessage();
-		assertEquals("§6The configuration was changed to §a8§6.", message);
+		assertEquals("§6The configuration was changed to §a8§6.",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxPlayershopsCommandTestWithInvalidArgumentNumber() {
 		String[] args = { "maxPlayershops" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("/ue-config maxPlayershops <number>", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("/ue-config maxPlayershops <number>",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void maxPlayershopsCommandTestWithInvalidNumber() {
 		String[] args = { "maxPlayershops", "-1" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("§c§cThe parameter §4-1§c is invalid!", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§c§cThe parameter §4-1§c is invalid!",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void homesCommandTestWithAll() {
 		String[] args = { "homes", "false" };
-		executor.onCommand(player, null, "ue-config", args);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
 		assertFalse(ConfigController.isHomeSystem());
-		String message = player.nextMessage();
-		assertEquals("§6The configuration was changed to §afalse§6.", message);
-		String message2 = player.nextMessage();
-		assertEquals("§6Please restart the server!", message2);
+		assertEquals("§6The configuration was changed to §afalse§6.",  player.nextMessage());
+		assertEquals("§6Please restart the server!",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void homesCommandTestWithInvalidArgumentNumber() {
 		String[] args = { "homes" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("/ue-config homes <true/false>", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("/ue-config homes <true/false>",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void homesCommandTestWithInvalidNumber() {
 		String[] args = { "homes", "abc" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("§cThe parameter §4abc§c is invalid!", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§cThe parameter §4abc§c is invalid!",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void extendedInteractionCommandTestWithAll() {
 		String[] args = { "extendedInteraction", "false" };
-		executor.onCommand(player, null, "ue-config", args);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
 		assertFalse(ConfigController.isExtendedInteraction());
-		String message = player.nextMessage();
-		assertEquals("§6The configuration was changed to §afalse§6.", message);
+		assertEquals("§6The configuration was changed to §afalse§6.",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void extendedInteractionCommandTestWithInvalidArgumentNumber() {
 		String[] args = { "extendedInteraction" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("/ue-config extendedInteraction <true/false>", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("/ue-config extendedInteraction <true/false>",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void extendedInteractionCommandTestWithInvalidNumber() {
 		String[] args = { "extendedInteraction", "abc" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("§cThe parameter §4abc§c is invalid!", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§cThe parameter §4abc§c is invalid!",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void wildernessInteractionCommandTestWithAll() {
 		String[] args = { "wildernessInteraction", "false" };
-		executor.onCommand(player, null, "ue-config", args);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
 		assertFalse(ConfigController.isWildernessInteraction());
-		String message = player.nextMessage();
-		assertEquals("§6The configuration was changed to §afalse§6.", message);
+		assertEquals("§6The configuration was changed to §afalse§6.",  player.nextMessage());
+		assertNull(player.nextMessage());
+		String[] args1 = { "wildernessInteraction", "true" };
+		boolean result1 = executor.onCommand(player, null, "ue-config", args1);
+		assertTrue(result1);
+		assertTrue(ConfigController.isWildernessInteraction());
+		assertEquals("§6The configuration was changed to §atrue§6.",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void wildernessInteractionCommandTestWithInvalidArgumentNumber() {
 		String[] args = { "wildernessInteraction" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("/ue-config wildernessInteraction <true/false>", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("/ue-config wildernessInteraction <true/false>",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 
 	@Test
 	public void wildernessInteractionCommandTestWithInvalidNumber() {
 		String[] args = { "wildernessInteraction", "abc" };
-		executor.onCommand(player, null, "ue-config", args);
-		String message = player.nextMessage();
-		assertEquals("§cThe parameter §4abc§c is invalid!", message);
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		assertEquals("§cThe parameter §4abc§c is invalid!",  player.nextMessage());
 		assertNull(player.nextMessage());
 	}
 }
