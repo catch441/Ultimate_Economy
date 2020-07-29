@@ -33,8 +33,11 @@ public class ShopEditorHandler {
 		editor = Bukkit.createInventory(getShop().getShopVillager(), getShop().getSize(),
 				getShop().getName() + "-Editor");
 		for (int i = 0; i < (getShop().getSize() - reservedSlots); i++) {
-			// +1 for player readable
-			getEditorInventory().setItem(i, CustomSkullService.getSkullWithName("SLOTEMPTY", "Slot " + (i + 1)));
+			if(getShop().getShopInventory().getItem(i) != null) {
+				setOccupied(true, i);
+			} else {
+				setOccupied(false, i);
+			}
 		}
 	}
 

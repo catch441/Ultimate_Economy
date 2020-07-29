@@ -287,7 +287,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	@Override
-	public Inventory getShopInventory() throws ShopSystemException {
+	public Inventory getShopInventory() {
 		return shopInventory;
 	}
 
@@ -407,11 +407,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		meta.setLore(loreList);
 		itemStack.setItemMeta(meta);
 		itemStack.setAmount(amount);
-		try {
-			getShopInventory().setItem(slot, itemStack);
-		} catch (ShopSystemException e) {
-			// only rentshop
-		}
+		getShopInventory().setItem(slot, itemStack);
 	}
 
 	private List<String> createItemLoreList(ItemMeta meta, int amount, double sellPrice, double buyPrice) {
@@ -535,12 +531,12 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		setName(getSavefileHandler().loadShopName());
 		setSize(getSavefileHandler().loadShopSize());
 		location = getSavefileHandler().loadShopLocation();
-		setupShopVillager();
-		editorHandler = new ShopEditorHandler(this);
-		slotEditorHandler = new ShopSlotEditorHandler(this);
+		setupShopVillager();	
 		getShopVillager().setProfession(getSavefileHandler().loadShopVillagerProfession());
 		setupShopInventory();
 		loadShopItems();
+		editorHandler = new ShopEditorHandler(this);
+		slotEditorHandler = new ShopSlotEditorHandler(this);
 	}
 
 	private void loadShopItems() {
@@ -552,7 +548,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	protected void loadShopItem(String itemString) {
 		ShopItem shopItem = getSavefileHandler().loadItem(itemString);
 		getShopItemMap().put(shopItem.getSlot(), shopItem);
-		getEditorHandler().setOccupied(true, shopItem.getSlot());
 		addShopItemToInv(shopItem.getItemStack(), shopItem.getAmount(), shopItem.getSlot(), shopItem.getSellPrice(),
 				shopItem.getBuyPrice());
 	}

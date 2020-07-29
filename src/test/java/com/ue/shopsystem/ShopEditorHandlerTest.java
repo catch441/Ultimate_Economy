@@ -112,6 +112,11 @@ public class ShopEditorHandlerTest {
 			assertEquals("myshop-Editor", editor.getName());
 			assertEquals(AdminshopController.getAdminshopList().get(0).getShopVillager(), editor.getHolder());
 			checkInventory(editor);
+			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
+			assertEquals(SLOTFILLED,
+					editor.getItem(0).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+			assertEquals(SLOTFILLED,
+					editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
 			fail();
 		}	
@@ -150,6 +155,11 @@ public class ShopEditorHandlerTest {
 		assertEquals(9, editor.getSize());
 		assertEquals("kth-Editor", editor.getName());
 		checkInventory(editor);
+		NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
+		assertEquals(SLOTEMPTY,
+				editor.getItem(0).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+		assertEquals(SLOTEMPTY,
+				editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 	}
 	
 	private void checkInventory(ChestInventoryMock editor) {
@@ -171,10 +181,6 @@ public class ShopEditorHandlerTest {
 		assertEquals("Slot 7", editor.getItem(6).getItemMeta().getDisplayName());
 		assertEquals("Slot 8", editor.getItem(7).getItemMeta().getDisplayName());
 		NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-		assertEquals(SLOTEMPTY,
-				editor.getItem(0).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-		assertEquals(SLOTEMPTY,
-				editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 		assertEquals(SLOTEMPTY,
 				editor.getItem(2).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 		assertEquals(SLOTEMPTY,
