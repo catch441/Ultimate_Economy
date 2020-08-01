@@ -9,6 +9,9 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -23,8 +26,9 @@ import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 
-import com.bstats.metrics.Metrics;
 import com.ue.bank.api.BankController;
+import com.ue.common.utils.DaggerServiceComponent;
+import com.ue.common.utils.ServiceComponent;
 import com.ue.config.api.ConfigController;
 import com.ue.config.commands.ConfigCommandExecutor;
 import com.ue.config.commands.ConfigTabCompleter;
@@ -66,16 +70,22 @@ import com.ue.vault.VaultHook;
  * @author Lukas Heubach (catch441)
  */
 public class UltimateEconomy extends JavaPlugin {
-
+	
 	public static UltimateEconomy getInstance;
 	public EconomyUltimateEconomy economyImplementer;
+	@Inject
+	Metrics metrics;
 	private VaultHook vaultHook;
+	private ServiceComponent serviceComponent;
 
 	/**
-	 * Constructor for MockBukkit.
+	 * Default constructor.
 	 */
 	public UltimateEconomy() {
-		super();
+		super();	
+		getInstance = this;
+		serviceComponent = DaggerServiceComponent.builder().build();
+		serviceComponent.inject(this);
 	}
 
 	/**
@@ -88,12 +98,14 @@ public class UltimateEconomy extends JavaPlugin {
 	 */
 	public UltimateEconomy(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
 		super(loader, description, dataFolder, file);
+		getInstance = this;
+		serviceComponent = DaggerServiceComponent.builder().build();
+		serviceComponent.inject(this);
 	}
 
 	@Override
 	public void onEnable() {
 		loadPlugin();
-		setupBstatsMetrics();
 		setupVault();
 	}
 
@@ -109,14 +121,6 @@ public class UltimateEconomy extends JavaPlugin {
 		AdminshopController.despawnAllVillagers();
 		PlayershopController.despawnAllVillagers();
 		RentshopController.despawnAllVillagers();
-	}
-
-	private void setupBstatsMetrics() {
-		try {
-			@SuppressWarnings("unused")
-			Metrics metrics = new Metrics(this);
-		} catch (Exception e) {
-		}
 	}
 
 	private void disableVault() {
@@ -248,7 +252,6 @@ public class UltimateEconomy extends JavaPlugin {
 	}
 
 	private void loadPlugin() {
-		getInstance = this;
 		if (!getDataFolder().exists()) {
 			getDataFolder().mkdirs();
 		}
