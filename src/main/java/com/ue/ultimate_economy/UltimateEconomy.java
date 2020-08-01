@@ -99,8 +99,6 @@ public class UltimateEconomy extends JavaPlugin {
 	public UltimateEconomy(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
 		super(loader, description, dataFolder, file);
 		getInstance = this;
-		serviceComponent = DaggerServiceComponent.builder().build();
-		serviceComponent.inject(this);
 	}
 
 	@Override

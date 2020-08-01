@@ -40,7 +40,7 @@ import be.seeseemelk.mockbukkit.entity.PlayerMock;
 import be.seeseemelk.mockbukkit.inventory.ChestInventoryMock;
 
 public class ShopEventHandlerTest {
-
+	
 	private static ServerMock server;
 	private static WorldMock world;
 	private static PlayerMock player;

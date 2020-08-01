@@ -7,7 +7,7 @@ import com.ue.ultimate_economy.UltimateEconomy;
 import dagger.Component;
 
 @Singleton
-@Component(modules = {ControllerModule.class})
+@Component(modules = {ProviderModule.class})
 public interface ServiceComponent {
 
 	/**
