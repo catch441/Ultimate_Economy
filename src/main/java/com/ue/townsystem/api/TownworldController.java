@@ -8,12 +8,12 @@ import org.bukkit.Chunk;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BossBar;
 
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.townsystem.impl.TownworldImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class TownworldController {
@@ -90,7 +90,7 @@ public class TownworldController {
 	 */
 	public static void handleTownWorldLocationCheck(String worldname, Chunk chunk, String playername) {
 		try {
-			BossBar bossbar = EconomyPlayerController.getEconomyPlayerByName(playername).getBossBar();
+			BossBar bossbar = EconomyPlayerManagerImpl.getEconomyPlayerByName(playername).getBossBar();
 			try {
 				Townworld townworld = getTownWorldByName(worldname);
 				try {
@@ -108,7 +108,7 @@ public class TownworldController {
 				// disable bossbar in other worlds
 				bossbar.setVisible(false);
 			}
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			// should never happen
 		}
 	}
@@ -136,11 +136,11 @@ public class TownworldController {
 	 * 
 	 * @param world
 	 * @throws TownSystemException
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 * @throws GeneralEconomyException
 	 */
 	public static void deleteTownWorld(String world)
-			throws TownSystemException, PlayerException, GeneralEconomyException {
+			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		if (Bukkit.getWorld(world) == null) {
 			throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, world);
 		} else {
@@ -167,7 +167,7 @@ public class TownworldController {
 				}
 				townworldImpl.setTownList(towns);
 				townWorldList.add(townworldImpl);
-			} catch (TownSystemException | PlayerException e) {
+			} catch (TownSystemException | EconomyPlayerException e) {
 				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the townworld " + townWorldName);
 				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}

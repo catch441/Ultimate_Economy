@@ -22,13 +22,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.impl.AbstractShopImpl;
 import com.ue.shopsystem.impl.ShopEditorHandler;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -59,7 +59,7 @@ public class ShopEditorHandlerTest {
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
 		server.setPlayers(0);
-		EconomyPlayerController.getAllEconomyPlayers().clear();
+		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 		player = server.addPlayer("kthschnll");
 	}
 
@@ -68,9 +68,9 @@ public class ShopEditorHandlerTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -117,7 +117,7 @@ public class ShopEditorHandlerTest {
 					editor.getItem(0).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 			assertEquals(SLOTFILLED,
 					editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}	
 	}
@@ -224,7 +224,7 @@ public class ShopEditorHandlerTest {
 		AbstractShopImpl shop = (AbstractShopImpl) AdminshopController.getAdminshopList().get(0);
 		try {
 			shop.addShopItem(0, 1, 1, new ItemStack(Material.STONE));
-		} catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
+		} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 		ShopEditorHandler handler = new ShopEditorHandler(shop);

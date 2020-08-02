@@ -10,7 +10,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.EntityType;
 
 import com.ue.jobsystem.api.JobController;
-import com.ue.jobsystem.api.JobcenterController;
+import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
 
 public class JobTabCompleter implements TabCompleter {
 
@@ -122,12 +122,12 @@ public class JobTabCompleter implements TabCompleter {
 	}
 
 	private List<String> getJobcenterNames(String arg) {
-		List<String> all = JobcenterController.getJobcenterNameList();
+		List<String> all = JobcenterManagerImpl.getJobcenterNameList();
 		if ("".equals(arg)) {
 			return all;
 		} else {
 			List<String> list = new ArrayList<>();
-			for (String jobname : JobcenterController.getJobcenterNameList()) {
+			for (String jobname : JobcenterManagerImpl.getJobcenterNameList()) {
 				addIfMatching(list, jobname, arg);
 			}
 			return list;

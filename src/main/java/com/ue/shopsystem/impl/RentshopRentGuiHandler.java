@@ -3,6 +3,8 @@ package com.ue.shopsystem.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -11,16 +13,18 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.ue.config.api.ConfigController;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.config.logic.api.ConfigManager;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.Rentshop;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class RentshopRentGuiHandler {
 	
+	@Inject
+	ConfigManager configManager;
 	private Rentshop shop;
 	private Inventory rentShopGUIInv;
 	
@@ -114,9 +118,9 @@ public class RentshopRentGuiHandler {
 
 	private void handleRentClick(InventoryClickEvent event, int duration) {
 		try {
-			getShop().rentShop(EconomyPlayerController.getEconomyPlayerByName(event.getWhoClicked().getName()), duration);
+			getShop().rentShop(EconomyPlayerManagerImpl.getEconomyPlayerByName(event.getWhoClicked().getName()), duration);
 			event.getWhoClicked().sendMessage(MessageWrapper.getString("rent_rented"));
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			event.getWhoClicked().sendMessage(e.getMessage());
 		}
 		event.getWhoClicked().closeInventory();
@@ -124,10 +128,10 @@ public class RentshopRentGuiHandler {
 
 	private void handlePlusMinusValueGuiClick(int value,int duration, String operation) {
 		if ("plus".equals(operation)) {
-			if (duration < ConfigController.getMaxRentedDays()) {
+			if (duration < configManager.getMaxRentedDays()) {
 				duration += value;
-				if (duration > ConfigController.getMaxRentedDays()) {
-					duration = ConfigController.getMaxRentedDays();
+				if (duration > configManager.getMaxRentedDays()) {
+					duration = configManager.getMaxRentedDays();
 				}
 			}
 		} else if (duration > value) {

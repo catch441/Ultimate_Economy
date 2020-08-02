@@ -8,12 +8,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.impl.RentshopImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
+import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class RentshopController {
@@ -174,7 +174,7 @@ public class RentshopController {
 			if (file.exists()) {
 				try {
 					getRentShops().add(new RentshopImpl(shopId));
-				} catch (TownSystemException | PlayerException | GeneralEconomyException | ShopSystemException e) {
+				} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException | ShopSystemException e) {
 					Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
 					Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 				}

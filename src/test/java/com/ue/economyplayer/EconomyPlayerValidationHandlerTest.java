@@ -14,14 +14,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.economyplayer.impl.EconomyPlayerValidationHandler;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
+import com.ue.economyplayer.logic.impl.EconomyPlayerValidationHandlerImpl;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -30,7 +30,7 @@ import be.seeseemelk.mockbukkit.WorldMock;
 
 public class EconomyPlayerValidationHandlerTest {
 
-	private static EconomyPlayerValidationHandler validationHandler;
+	private static EconomyPlayerValidationHandlerImpl validationHandler;
 	private static ServerMock server;
 	private static WorldMock world;
 
@@ -45,7 +45,7 @@ public class EconomyPlayerValidationHandlerTest {
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
 		server.addPlayer("catch441");
-		validationHandler = new EconomyPlayerValidationHandler(EconomyPlayerController.getAllEconomyPlayers().get(0));
+		validationHandler = new EconomyPlayerValidationHandlerImpl(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 	}
 
 	/**
@@ -53,9 +53,9 @@ public class EconomyPlayerValidationHandlerTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -75,8 +75,8 @@ public class EconomyPlayerValidationHandlerTest {
 		try {
 			validationHandler.checkForEnoughMoney(10, true);
 			fail();
-		} catch (PlayerException | GeneralEconomyException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou have not enough money!", e.getMessage());
 		}
 	}
@@ -86,8 +86,8 @@ public class EconomyPlayerValidationHandlerTest {
 		try {
 			validationHandler.checkForEnoughMoney(10, false);
 			fail();
-		} catch (PlayerException | GeneralEconomyException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cThe player has not enough money!", e.getMessage());
 		}
 	}
@@ -95,11 +95,11 @@ public class EconomyPlayerValidationHandlerTest {
 	@Test
 	public void checkForEnoughMoneyTestSuccess() {
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).increasePlayerAmount(1.0, false);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(1.0, false);
 			validationHandler.checkForEnoughMoney(1.0, false);
 			validationHandler.checkForEnoughMoney(0.5, false);
-			EconomyPlayerController.getAllEconomyPlayers().get(0).decreasePlayerAmount(1.0, false);
-		} catch (PlayerException | GeneralEconomyException e) {
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).decreasePlayerAmount(1.0, false);
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 	}
@@ -109,7 +109,7 @@ public class EconomyPlayerValidationHandlerTest {
 		try {
 			validationHandler.checkForExistingHome("myhome1");
 			fail();
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			assertEquals("§cThis home does not exist!", e.getMessage());
 		}
 	}
@@ -117,11 +117,11 @@ public class EconomyPlayerValidationHandlerTest {
 	@Test
 	public void checkForExistingHomeTestSuccess() {
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).addHome("myhome2", new Location(world, 1, 2, 3),
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).addHome("myhome2", new Location(world, 1, 2, 3),
 					false);
 			validationHandler.checkForExistingHome("myhome2");
-			EconomyPlayerController.getAllEconomyPlayers().get(0).removeHome("myhome2", false);
-		} catch (PlayerException e) {
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).removeHome("myhome2", false);
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -130,7 +130,7 @@ public class EconomyPlayerValidationHandlerTest {
 	public void checkForNotReachedMaxHomesTestSuccess() {
 		try {
 			validationHandler.checkForNotReachedMaxHomes();
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -138,23 +138,23 @@ public class EconomyPlayerValidationHandlerTest {
 	@Test
 	public void checkForNotReachedMaxHomesTestFail() {
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).addHome("myhome0", new Location(world, 1, 2, 3),
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).addHome("myhome0", new Location(world, 1, 2, 3),
 					false);
-			EconomyPlayerController.getAllEconomyPlayers().get(0).addHome("myhome2", new Location(world, 1, 2, 3),
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).addHome("myhome2", new Location(world, 1, 2, 3),
 					false);
-			EconomyPlayerController.getAllEconomyPlayers().get(0).addHome("myhome3", new Location(world, 1, 2, 3),
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).addHome("myhome3", new Location(world, 1, 2, 3),
 					false);
-			EconomyPlayerController.getAllEconomyPlayers().get(0).addHome("myhome4", new Location(world, 1, 2, 3),
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).addHome("myhome4", new Location(world, 1, 2, 3),
 					false);
 			validationHandler.checkForNotReachedMaxHomes();
 			fail();
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			assertEquals("§cYou have already reached the maximum!", e.getMessage());
 			try {
-				EconomyPlayerController.getAllEconomyPlayers().get(0).removeHome("myhome0", false);
-				EconomyPlayerController.getAllEconomyPlayers().get(0).removeHome("myhome2", false);
-				EconomyPlayerController.getAllEconomyPlayers().get(0).removeHome("myhome3", false);
-			} catch (PlayerException e1) {
+				EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).removeHome("myhome0", false);
+				EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).removeHome("myhome2", false);
+				EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).removeHome("myhome3", false);
+			} catch (EconomyPlayerException e1) {
 				fail();
 			}
 		}
@@ -164,7 +164,7 @@ public class EconomyPlayerValidationHandlerTest {
 	public void checkForNotExistingHomeTestSuccess() {
 		try {
 			validationHandler.checkForNotExistingHome("myhome1");
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -173,15 +173,15 @@ public class EconomyPlayerValidationHandlerTest {
 	public void checkForNotExistingHomeTestFail() {
 
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).addHome("myhome1", new Location(world, 1, 2, 3),
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).addHome("myhome1", new Location(world, 1, 2, 3),
 					false);
 			validationHandler.checkForNotExistingHome("myhome1");
 			fail();
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			assertEquals("§cThis home already exists!", e.getMessage());
 			try {
-				EconomyPlayerController.getAllEconomyPlayers().get(0).removeHome("myhome1", false);
-			} catch (PlayerException e1) {
+				EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).removeHome("myhome1", false);
+			} catch (EconomyPlayerException e1) {
 				fail();
 			}
 		}
@@ -194,7 +194,7 @@ public class EconomyPlayerValidationHandlerTest {
 			Job job = JobController.getJobList().get(0);
 			validationHandler.checkForJobNotJoined(job);
 			JobController.deleteJob(job);
-		} catch (PlayerException | GeneralEconomyException e) {
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 	}
@@ -205,11 +205,11 @@ public class EconomyPlayerValidationHandlerTest {
 		try {
 			JobController.createJob("myjob1");
 			job = JobController.getJobList().get(0);
-			EconomyPlayerController.getAllEconomyPlayers().get(0).joinJob(job, false);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).joinJob(job, false);
 			validationHandler.checkForJobNotJoined(job);
 			fail();
-		} catch (PlayerException | GeneralEconomyException | JobSystemException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException | GeneralEconomyException | JobSystemException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou already joined this job!", e.getMessage());
 			JobController.deleteJob(job);
 		}
@@ -220,10 +220,10 @@ public class EconomyPlayerValidationHandlerTest {
 		try {
 			JobController.createJob("myjob1");
 			Job job = JobController.getJobList().get(0);
-			EconomyPlayerController.getAllEconomyPlayers().get(0).joinJob(job, false);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).joinJob(job, false);
 			validationHandler.checkForJobJoined(job);
 			JobController.deleteJob(job);
-		} catch (PlayerException | GeneralEconomyException | JobSystemException e) {
+		} catch (EconomyPlayerException | GeneralEconomyException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -236,8 +236,8 @@ public class EconomyPlayerValidationHandlerTest {
 			job = JobController.getJobList().get(0);
 			validationHandler.checkForJobJoined(job);
 			fail();
-		} catch (PlayerException | GeneralEconomyException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou didnt join this job yet!", e.getMessage());
 			JobController.deleteJob(job);
 		}
@@ -247,7 +247,7 @@ public class EconomyPlayerValidationHandlerTest {
 	public void checkForNotReachedMaxJoinedJobsTestSuccess() {
 		try {
 			validationHandler.checkForNotReachedMaxJoinedJobs();
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -257,13 +257,13 @@ public class EconomyPlayerValidationHandlerTest {
 		try {
 			JobController.createJob("myjob1");
 			JobController.createJob("myjob2");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(JobController.getJobList().get(0), false);
 			ecoPlayer.joinJob(JobController.getJobList().get(1), false);
 			validationHandler.checkForNotReachedMaxJoinedJobs();
 			fail();
-		} catch (PlayerException | GeneralEconomyException | JobSystemException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException | GeneralEconomyException | JobSystemException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou have already reached the maximum!", e.getMessage());
 			JobController.deleteJob(JobController.getJobList().get(0));
 			JobController.deleteJob(JobController.getJobList().get(0));
@@ -274,7 +274,7 @@ public class EconomyPlayerValidationHandlerTest {
 	public void checkForTownNotJoinedTestSuccess() {
 		try {
 			validationHandler.checkForTownNotJoined("mytown");
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -282,14 +282,14 @@ public class EconomyPlayerValidationHandlerTest {
 	@Test
 	public void checkForTownNotJoinedTestFail() {
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).addJoinedTown("mytown");
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).addJoinedTown("mytown");
 			validationHandler.checkForTownNotJoined("mytown");
 			fail();
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			assertEquals("§cYou already joined this town!", e.getMessage());
 			try {
-				EconomyPlayerController.getAllEconomyPlayers().get(0).removeJoinedTown("mytown");
-			} catch (PlayerException e1) {
+				EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).removeJoinedTown("mytown");
+			} catch (EconomyPlayerException e1) {
 				fail();
 			};
 		}
@@ -298,10 +298,10 @@ public class EconomyPlayerValidationHandlerTest {
 	@Test
 	public void checkForJoinedTownTestSuccess() {
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).addJoinedTown("mytown");
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).addJoinedTown("mytown");
 			validationHandler.checkForJoinedTown("mytown");
-			EconomyPlayerController.getAllEconomyPlayers().get(0).removeJoinedTown("mytown");
-		} catch (PlayerException e) {
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).removeJoinedTown("mytown");
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -311,7 +311,7 @@ public class EconomyPlayerValidationHandlerTest {
 		try {
 			validationHandler.checkForJoinedTown("mytown");
 			fail();
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			assertEquals("§cYou didnt join this town yet!", e.getMessage());
 		}
 	}
@@ -320,7 +320,7 @@ public class EconomyPlayerValidationHandlerTest {
 	public void checkForNotReachedMaxJoinedTownsTestSuccess() {
 		try {
 			validationHandler.checkForNotReachedMaxJoinedTowns();
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -328,14 +328,14 @@ public class EconomyPlayerValidationHandlerTest {
 	@Test
 	public void checkForNotReachedMaxJoinedTownsTestFail() {
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).addJoinedTown("mytown");
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).addJoinedTown("mytown");
 			validationHandler.checkForNotReachedMaxJoinedTowns();
 			fail();
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			assertEquals("§cYou have already reached the maximum!", e.getMessage());
 			try {
-				EconomyPlayerController.getAllEconomyPlayers().get(0).removeJoinedTown("mytown");
-			} catch (PlayerException e1) {
+				EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).removeJoinedTown("mytown");
+			} catch (EconomyPlayerException e1) {
 				fail();
 			};
 		}

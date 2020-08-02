@@ -6,10 +6,10 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface Town {
 
@@ -65,10 +65,10 @@ public interface Town {
      * @param player
      *            the player has to be a citizen of the town
      * @throws TownSystemException
-     * @throws PlayerException
+     * @throws EconomyPlayerException
      */
     public void addDeputy(EconomyPlayer player)
-	    throws TownSystemException, PlayerException;
+	    throws TownSystemException, EconomyPlayerException;
 
     /**
      * Removes a deputy from the town.
@@ -76,10 +76,10 @@ public interface Town {
      * @param player
      *            the player has to be a deputy of the town
      * @throws TownSystemException
-     * @throws PlayerException
+     * @throws EconomyPlayerException
      */
     public void removeDeputy(EconomyPlayer player)
-	    throws TownSystemException, PlayerException;
+	    throws TownSystemException, EconomyPlayerException;
 
     /**
      * Opens the inventory of the TownManager.
@@ -171,10 +171,10 @@ public interface Town {
      * @param sendMessage
      *            when true a message is send to the receiver and this player
      * @throws TownSystemException
-     * @throws PlayerException
+     * @throws EconomyPlayerException
      */
     public void expandTown(Chunk chunk, EconomyPlayer player, boolean sendMessage)
-	    throws TownSystemException, PlayerException;
+	    throws TownSystemException, EconomyPlayerException;
 
     /**
      * Renames this town.
@@ -185,21 +185,21 @@ public interface Town {
      * @param sendMessage
      *            when true a message is send to the receiver and this player
      * @throws TownSystemException
-     * @throws PlayerException
+     * @throws EconomyPlayerException
      * @throws GeneralEconomyException 
      */
     public void renameTown(String newName, EconomyPlayer player, boolean sendMessage)
-	    throws TownSystemException, PlayerException, GeneralEconomyException;
+	    throws TownSystemException, EconomyPlayerException, GeneralEconomyException;
 
     /**
      * Joins a player to a town.
      * 
      * @param player
      *            the player who wants to join the town
-     * @throws PlayerException
+     * @throws EconomyPlayerException
      * @throws TownSystemException
      */
-    public void joinTown(EconomyPlayer player) throws PlayerException, TownSystemException;
+    public void joinTown(EconomyPlayer player) throws EconomyPlayerException, TownSystemException;
 
     /**
      * Leaves a player from a town.
@@ -207,9 +207,9 @@ public interface Town {
      * @param player
      *            have to be a citizen
      * @throws TownSystemException
-     * @throws PlayerException
+     * @throws EconomyPlayerException
      */
-    public void leaveTown(EconomyPlayer player) throws TownSystemException, PlayerException;
+    public void leaveTown(EconomyPlayer player) throws TownSystemException, EconomyPlayerException;
 
     /**
      * Despawns all town villagers.
@@ -226,9 +226,9 @@ public interface Town {
      * @param chunkX
      * @param chunkZ
      * @throws TownSystemException
-     * @throws PlayerException
+     * @throws EconomyPlayerException
      */
-    public void buyPlot(EconomyPlayer player, int chunkX, int chunkZ) throws TownSystemException, PlayerException;
+    public void buyPlot(EconomyPlayer player, int chunkX, int chunkZ) throws TownSystemException, EconomyPlayerException;
 
     /**
      * Returns a Plot by chunk coords.
@@ -271,10 +271,10 @@ public interface Town {
      * @param sendMessage
      *            when true a message is send to the receiver and this player
      * @throws TownSystemException
-     * @throws PlayerException
+     * @throws EconomyPlayerException
      */
     public void changeTownSpawn(Location townSpawn, EconomyPlayer ecoPlayer, boolean sendMessage)
-	    throws TownSystemException, PlayerException;
+	    throws TownSystemException, EconomyPlayerException;
 
     /**
      * Get the town spawn location.
@@ -290,8 +290,8 @@ public interface Town {
      * @param player
      *            the player who wants to move the townmanager
      * @throws TownSystemException
-     * @throws PlayerException
+     * @throws EconomyPlayerException
      */
     public void moveTownManagerVillager(Location location, EconomyPlayer player)
-	    throws TownSystemException, PlayerException;
+	    throws TownSystemException, EconomyPlayerException;
 }

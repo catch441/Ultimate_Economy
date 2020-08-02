@@ -8,8 +8,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.townsystem.api.TownController;
 
 public class TownTabCompleter implements TabCompleter {
@@ -65,9 +65,9 @@ public class TownTabCompleter implements TabCompleter {
 	if (args.length == 2) {
 	    try {
 		if (args[1].equals("")) {
-		    list.addAll(EconomyPlayerController.getEconomyPlayerByName(sender.getName()).getJoinedTownList());
+		    list.addAll(EconomyPlayerManagerImpl.getEconomyPlayerByName(sender.getName()).getJoinedTownList());
 		} else if (args.length == 2) {
-		    List<String> list2 = EconomyPlayerController.getEconomyPlayerByName(sender.getName())
+		    List<String> list2 = EconomyPlayerManagerImpl.getEconomyPlayerByName(sender.getName())
 			    .getJoinedTownList();
 		    for (String string : list2) {
 			if (string.contains(args[1])) {
@@ -75,7 +75,7 @@ public class TownTabCompleter implements TabCompleter {
 			}
 		    }
 		}
-	    } catch (PlayerException e) {
+	    } catch (EconomyPlayerException e) {
 		Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
 	    }
 	}

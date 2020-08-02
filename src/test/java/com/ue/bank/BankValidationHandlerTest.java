@@ -11,15 +11,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.bank.impl.BankValidationHandler;
-import com.ue.exceptions.GeneralEconomyException;
+import com.ue.bank.logic.impl.BankValidationHandlerImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
 
 public class BankValidationHandlerTest {
 	
-	private static BankValidationHandler validationHandler;
+	private static BankValidationHandlerImpl validationHandler;
 
 	/**
 	 * Init shop for tests.
@@ -29,7 +29,7 @@ public class BankValidationHandlerTest {
 		MockBukkit.mock();
 		Bukkit.getLogger().setLevel(Level.OFF);
 		MockBukkit.load(UltimateEconomy.class);
-		validationHandler = new BankValidationHandler();
+		validationHandler = new BankValidationHandlerImpl();
 	}
 
 	/**

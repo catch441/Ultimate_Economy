@@ -18,11 +18,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.commands.adminshop.AdminshopCommandExecutor;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -49,7 +49,7 @@ public class AdminshopCommandExecutorTest {
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
 		server.setPlayers(0);
-		EconomyPlayerController.getAllEconomyPlayers().clear();
+		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 		player = server.addPlayer("kthschnll");
 		executor = new AdminshopCommandExecutor();
 	}
@@ -59,9 +59,9 @@ public class AdminshopCommandExecutorTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);

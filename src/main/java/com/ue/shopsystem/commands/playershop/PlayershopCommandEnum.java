@@ -3,24 +3,24 @@ package com.ue.shopsystem.commands.playershop;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.PlayershopController;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public enum PlayershopCommandEnum {
 
 	CREATE {
 		@Override
 		boolean perform(String label, String[] args, Player player) throws NumberFormatException, ShopSystemException,
-				TownSystemException, PlayerException, GeneralEconomyException {
+				TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 3) {
 				PlayershopController.createPlayerShop(args[1], player.getLocation(), Integer.valueOf(args[2]),
-						EconomyPlayerController.getEconomyPlayerByName(player.getName()));
+						EconomyPlayerManagerImpl.getEconomyPlayerByName(player.getName()));
 				player.sendMessage(MessageWrapper.getString("shop_create", args[1]));
 			} else {
 				player.sendMessage("/" + label + " create <shop> <size> <- size have to be a multible of 9");
@@ -72,7 +72,7 @@ public enum PlayershopCommandEnum {
 	RESIZE {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws NumberFormatException, ShopSystemException, GeneralEconomyException, PlayerException {
+				throws NumberFormatException, ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 			if (args.length == 3) {
 				PlayershopController.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
 						.changeShopSize(Integer.valueOf(args[2]));
@@ -86,7 +86,7 @@ public enum PlayershopCommandEnum {
 	MOVE {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws TownSystemException, PlayerException, GeneralEconomyException {
+				throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 2) {
 				PlayershopController.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
 						.moveShop(player.getLocation());
@@ -99,9 +99,9 @@ public enum PlayershopCommandEnum {
 	CHANGEOWNER {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws PlayerException, ShopSystemException, GeneralEconomyException {
+				throws EconomyPlayerException, ShopSystemException, GeneralEconomyException {
 			if (args.length == 3) {
-				EconomyPlayer newOwner = EconomyPlayerController.getEconomyPlayerByName(args[2]);
+				EconomyPlayer newOwner = EconomyPlayerManagerImpl.getEconomyPlayerByName(args[2]);
 				PlayershopController.getPlayerShopByUniqueName(args[1] + "_" + player.getName()).changeOwner(newOwner);
 				player.sendMessage(MessageWrapper.getString("shop_changeOwner1", args[2]));
 				if (newOwner.isOnline()) {
@@ -147,7 +147,7 @@ public enum PlayershopCommandEnum {
 	};
 
 	abstract boolean perform(String label, String[] args, Player player)
-			throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException;
+			throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException;
 
 	/**
 	 * Returns a enum. Returns PlayershopCommandEnum.UNKNOWN, if no enum is found.

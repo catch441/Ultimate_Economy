@@ -36,16 +36,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.Jobcenter;
-import com.ue.jobsystem.api.JobcenterController;
 import com.ue.jobsystem.impl.JobSystemEventHandler;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -84,9 +84,9 @@ public class JobSystemEventHandlerTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -102,10 +102,10 @@ public class JobSystemEventHandlerTest {
 		for (int i = 0; i < size; i++) {
 			JobController.deleteJob(JobController.getJobList().get(0));
 		}
-		int size1 = JobcenterController.getJobcenterList().size();
+		int size1 = JobcenterManagerImpl.getJobcenterList().size();
 		for (int i = 0; i < size1; i++) {
 			try {
-				JobcenterController.deleteJobcenter(JobcenterController.getJobcenterList().get(0));
+				JobcenterManagerImpl.deleteJobcenter(JobcenterManagerImpl.getJobcenterList().get(0));
 			} catch (JobSystemException e) {
 				fail();
 			}
@@ -156,7 +156,7 @@ public class JobSystemEventHandlerTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addMob("cow", 1.0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(job, false);
 			player.setGameMode(GameMode.SURVIVAL);
 			LivingEntityMock entity = (LivingEntityMock) world.spawnEntity(new Location(world, 1, 2, 3),
@@ -167,7 +167,7 @@ public class JobSystemEventHandlerTest {
 			eventHandler.handleEntityDeath(event);
 			assertEquals("1.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
 			ecoPlayer.decreasePlayerAmount(1.0, true);
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -178,7 +178,7 @@ public class JobSystemEventHandlerTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addMob("cow", 1.0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(job, false);
 			player.setGameMode(GameMode.CREATIVE);
 			LivingEntityMock entity = (LivingEntityMock) world.spawnEntity(new Location(world, 1, 2, 3),
@@ -188,7 +188,7 @@ public class JobSystemEventHandlerTest {
 			EntityDeathEvent event = new EntityDeathEvent(entity, new ArrayList<>());
 			eventHandler.handleEntityDeath(event);
 			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -198,7 +198,7 @@ public class JobSystemEventHandlerTest {
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(job, false);
 			player.setGameMode(GameMode.SURVIVAL);
 			LivingEntityMock entity = (LivingEntityMock) world.spawnEntity(new Location(world, 1, 2, 3),
@@ -208,7 +208,7 @@ public class JobSystemEventHandlerTest {
 			EntityDeathEvent event = new EntityDeathEvent(entity, new ArrayList<>());
 			eventHandler.handleEntityDeath(event);
 			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -219,7 +219,7 @@ public class JobSystemEventHandlerTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addBlock("Stone", 1.0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(job, false);
 			player.setGameMode(GameMode.SURVIVAL);
 			Block block = new BlockMock(Material.STONE);
@@ -227,7 +227,7 @@ public class JobSystemEventHandlerTest {
 			eventHandler.handleBreakBlock(event);
 			assertEquals("1.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
 			ecoPlayer.decreasePlayerAmount(1.0, true);
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -238,14 +238,14 @@ public class JobSystemEventHandlerTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addBlock("Stone", 1.0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(job, false);
 			player.setGameMode(GameMode.CREATIVE);
 			Block block = new BlockMock(Material.STONE);
 			BlockBreakEvent event = new BlockBreakEvent(block, player);
 			eventHandler.handleBreakBlock(event);
 			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -256,7 +256,7 @@ public class JobSystemEventHandlerTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addBlock("Stone", 1.0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(job, false);
 			player.setGameMode(GameMode.SURVIVAL);
 			Block block = new BlockMock(Material.STONE);
@@ -264,7 +264,7 @@ public class JobSystemEventHandlerTest {
 			BlockBreakEvent event = new BlockBreakEvent(block, player);
 			eventHandler.handleBreakBlock(event);
 			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -274,14 +274,14 @@ public class JobSystemEventHandlerTest {
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(job, false);
 			player.setGameMode(GameMode.SURVIVAL);
 			Block block = new BlockMock(Material.STONE);
 			BlockBreakEvent event = new BlockBreakEvent(block, player);
 			eventHandler.handleBreakBlock(event);
 			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -292,7 +292,7 @@ public class JobSystemEventHandlerTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addBlock("Potatoes", 1.0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(job, false);
 			player.setGameMode(GameMode.SURVIVAL);
 			Block block = new BlockMock(Material.POTATOES);
@@ -303,7 +303,7 @@ public class JobSystemEventHandlerTest {
 			eventHandler.handleBreakBlock(event);
 			assertEquals("1.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
 			ecoPlayer.decreasePlayerAmount(1.0, true);
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -314,7 +314,7 @@ public class JobSystemEventHandlerTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addBlock("Potatoes", 1.0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(job, false);
 			player.setGameMode(GameMode.SURVIVAL);
 			Block block = new BlockMock(Material.POTATOES);
@@ -324,7 +324,7 @@ public class JobSystemEventHandlerTest {
 			BlockBreakEvent event = new BlockBreakEvent(block, player);
 			eventHandler.handleBreakBlock(event);
 			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -335,7 +335,7 @@ public class JobSystemEventHandlerTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addFisherLootType("fish", 1.0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(job, false);
 			ItemMock item = new ItemMock(server, UUID.randomUUID());
 			ItemStack stack = new ItemStack(Material.PUFFERFISH);
@@ -344,7 +344,7 @@ public class JobSystemEventHandlerTest {
 			eventHandler.handleFishing(event);
 			assertEquals("1.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
 			ecoPlayer.decreasePlayerAmount(1.0, true);
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -355,7 +355,7 @@ public class JobSystemEventHandlerTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addFisherLootType("treasure", 1.0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(job, false);
 			ItemMock item = new ItemMock(server, UUID.randomUUID());
 			ItemStack stack = new ItemStack(Material.ENCHANTED_BOOK);
@@ -364,7 +364,7 @@ public class JobSystemEventHandlerTest {
 			eventHandler.handleFishing(event);
 			assertEquals("1.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
 			ecoPlayer.decreasePlayerAmount(1.0, true);
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -375,7 +375,7 @@ public class JobSystemEventHandlerTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			job.addFisherLootType("junk", 1.0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(job, false);
 			ItemMock item = new ItemMock(server, UUID.randomUUID());
 			ItemStack stack = new ItemStack(Material.STICK);
@@ -384,7 +384,7 @@ public class JobSystemEventHandlerTest {
 			eventHandler.handleFishing(event);
 			assertEquals("1.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
 			ecoPlayer.decreasePlayerAmount(1.0, true);
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -394,7 +394,7 @@ public class JobSystemEventHandlerTest {
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(job, false);
 			ItemMock item = new ItemMock(server, UUID.randomUUID());
 			ItemStack stack = new ItemStack(Material.STICK);
@@ -402,7 +402,7 @@ public class JobSystemEventHandlerTest {
 			PlayerFishEvent event = new PlayerFishEvent(player, item, null, PlayerFishEvent.State.CAUGHT_FISH);
 			eventHandler.handleFishing(event);
 			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -412,19 +412,19 @@ public class JobSystemEventHandlerTest {
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.joinJob(job, false);
 			PlayerFishEvent event = new PlayerFishEvent(player, null, null, PlayerFishEvent.State.CAUGHT_FISH);
 			eventHandler.handleFishing(event);
 			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
 
 	@Test
 	public void handleFishingTestNoJobs() {
-		EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+		EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 		PlayerFishEvent event = new PlayerFishEvent(player, null, null, PlayerFishEvent.State.CAUGHT_FISH);
 		eventHandler.handleFishing(event);
 		assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
@@ -432,7 +432,7 @@ public class JobSystemEventHandlerTest {
 
 	@Test
 	public void handleFishingTestFailedAttempt() {
-		EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+		EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 		PlayerFishEvent event = new PlayerFishEvent(player, null, null, PlayerFishEvent.State.FAILED_ATTEMPT);
 		eventHandler.handleFishing(event);
 		assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
@@ -443,7 +443,7 @@ public class JobSystemEventHandlerTest {
 		try {
 			player.closeInventory();
 			Location loc = new Location(world, 1, 2, 30);
-			JobcenterController.createJobcenter("myJobcenter", loc, 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter", loc, 9);
 			Entity villager = new ArrayList<>(world.getNearbyEntities(loc, 0, 0, 0)).get(0);
 			assertNull(player.getOpenInventory().getTopInventory());
 			PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, villager);
@@ -458,12 +458,12 @@ public class JobSystemEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestLeftClick() {
 		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 2, 16);
-			JobcenterController.createJobcenter("myJobcenter", loc, 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter", loc, 9);
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			Entity villager = new ArrayList<>(world.getNearbyEntities(loc, 0, 0, 0)).get(0);
 			PlayerInteractEntityEvent eventBefore = new PlayerInteractEntityEvent(player, villager);
 			eventHandler.handleOpenInventory(eventBefore);
@@ -473,7 +473,7 @@ public class JobSystemEventHandlerTest {
 			assertFalse(ecoPlayer.hasJob(job));
 			eventHandler.handleInventoryClick(event);
 			assertTrue(ecoPlayer.hasJob(job));
-		} catch (JobSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (JobSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -481,13 +481,13 @@ public class JobSystemEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestRightClick() {
 		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 2, 16);
-			JobcenterController.createJobcenter("myJobcenter", loc, 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter", loc, 9);
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			ecoPlayer.joinJob(job, false);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			Entity villager = new ArrayList<>(world.getNearbyEntities(loc, 0, 0, 0)).get(0);
 			PlayerInteractEntityEvent eventBefore = new PlayerInteractEntityEvent(player, villager);
 			eventHandler.handleOpenInventory(eventBefore);
@@ -497,7 +497,7 @@ public class JobSystemEventHandlerTest {
 			assertTrue(ecoPlayer.hasJob(job));
 			eventHandler.handleInventoryClick(event);
 			assertFalse(ecoPlayer.hasJob(job));
-		} catch (JobSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (JobSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -506,10 +506,10 @@ public class JobSystemEventHandlerTest {
 	public void handleInventoryClickTestWithErrorMessage() {
 		try {
 			Location loc = new Location(world, 1, 2, 16);
-			JobcenterController.createJobcenter("myJobcenter", loc, 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter", loc, 9);
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			Entity villager = new ArrayList<>(world.getNearbyEntities(loc, 0, 0, 0)).get(0);
 			PlayerInteractEntityEvent eventBefore = new PlayerInteractEntityEvent(player, villager);
 			eventHandler.handleOpenInventory(eventBefore);
@@ -518,7 +518,7 @@ public class JobSystemEventHandlerTest {
 					ClickType.RIGHT, InventoryAction.PICKUP_ALL);
 			eventHandler.handleInventoryClick(event);
 			assertEquals("§c§cYou didnt join this job yet!", player.nextMessage());
-		} catch (JobSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (JobSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -527,7 +527,7 @@ public class JobSystemEventHandlerTest {
 	public void handleInventoryClickTestInfo() {
 		try {
 			Location loc = new Location(world, 1, 2, 16);
-			JobcenterController.createJobcenter("myJobcenter", loc, 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter", loc, 9);
 			JobController.createJob("myjob");
 			Entity villager = new ArrayList<>(world.getNearbyEntities(loc, 0, 0, 0)).get(0);
 			PlayerInteractEntityEvent eventBefore = new PlayerInteractEntityEvent(player, villager);

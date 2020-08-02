@@ -7,12 +7,12 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.impl.AdminshopImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
+import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class AdminshopController {

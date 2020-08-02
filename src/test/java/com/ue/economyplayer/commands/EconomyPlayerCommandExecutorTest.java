@@ -17,13 +17,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerCommandExecutorImpl;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -51,9 +52,9 @@ public class EconomyPlayerCommandExecutorTest {
 		server.addWorld(world);
 		player = server.addPlayer("catch441");
 		kth = server.addPlayer("kthschnll");
-		executor = new EconomyPlayerCommandExecutor();
+		executor = new EconomyPlayerCommandExecutorImpl();
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).increasePlayerAmount(21.125, false);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(21.125, false);
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -64,9 +65,9 @@ public class EconomyPlayerCommandExecutorTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -107,22 +108,22 @@ public class EconomyPlayerCommandExecutorTest {
 
 	@Test
 	public void bankCommandTestOn() {
-		EconomyPlayerController.getAllEconomyPlayers().get(0).setScoreBoardDisabled(true);
+		EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).setScoreBoardDisabled(true);
 		String[] args = { "on" };
 		boolean result = executor.onCommand(player, null, "bank", args);
 		assertNull(player.nextMessage());
 		assertTrue(result);
-		assertFalse(EconomyPlayerController.getAllEconomyPlayers().get(0).isScoreBoardDisabled());
+		assertFalse(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).isScoreBoardDisabled());
 	}
 
 	@Test
 	public void bankCommandTestOff() {
-		EconomyPlayerController.getAllEconomyPlayers().get(0).setScoreBoardDisabled(false);
+		EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).setScoreBoardDisabled(false);
 		String[] args = { "off" };
 		boolean result = executor.onCommand(player, null, "bank", args);
 		assertNull(player.nextMessage());
 		assertTrue(result);
-		assertTrue(EconomyPlayerController.getAllEconomyPlayers().get(0).isScoreBoardDisabled());
+		assertTrue(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).isScoreBoardDisabled());
 	}
 
 	@Test
@@ -183,13 +184,13 @@ public class EconomyPlayerCommandExecutorTest {
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
-			EconomyPlayerController.getAllEconomyPlayers().get(0).joinJob(job, false);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).joinJob(job, false);
 			String[] args = {};
 			boolean result = executor.onCommand(player, null, "myjobs", args);
 			assertEquals("§6Joined jobs: §a[myjob]§6 ", player.nextMessage());
 			assertTrue(result);
 			JobController.deleteJob(job);
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -221,7 +222,7 @@ public class EconomyPlayerCommandExecutorTest {
 	@Test
 	public void setHomeCommandTestInvalidArg() {
 		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 2, 3);
 			ecoPlayer.addHome("myhome", loc, false);
 			String[] args = { "myhome" };
@@ -229,7 +230,7 @@ public class EconomyPlayerCommandExecutorTest {
 			assertEquals("§cThis home already exists!", player.nextMessage());
 			assertTrue(result);
 			ecoPlayer.removeHome("myhome", false);
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 
@@ -237,7 +238,7 @@ public class EconomyPlayerCommandExecutorTest {
 
 	@Test
 	public void setHomeCommandTestOneArg() {
-		EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+		EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 		String[] args = { "myhome" };
 		Location loc = new Location(world, 1, 2, 3);
 		player.setLocation(loc);
@@ -248,7 +249,7 @@ public class EconomyPlayerCommandExecutorTest {
 		try {
 			assertEquals(loc, ecoPlayer.getHome("myhome"));
 			ecoPlayer.removeHome("myhome", false);
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -272,7 +273,7 @@ public class EconomyPlayerCommandExecutorTest {
 	@Test
 	public void delHomeCommandTestOneArg() {
 		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 2, 3);
 			ecoPlayer.addHome("myhome", loc, false);
 			String[] args = { "myhome" };
@@ -280,7 +281,7 @@ public class EconomyPlayerCommandExecutorTest {
 			assertEquals("§6Your home §amyhome§6 was deleted.", player.nextMessage());
 			assertTrue(result);
 			assertEquals(0, ecoPlayer.getHomeList().size());
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -341,12 +342,12 @@ public class EconomyPlayerCommandExecutorTest {
 			assertEquals("§6You gave §akthschnll§6 §a10.0§6 §a$§6.", player.nextMessage());
 			assertEquals("§6You got §a10.0§6 §a$§6 from §acatch441§6.", kth.nextMessage());
 			assertEquals("11.125", String
-					.valueOf(EconomyPlayerController.getEconomyPlayerByName("catch441").getBankAccount().getAmount()));
+					.valueOf(EconomyPlayerManagerImpl.getEconomyPlayerByName("catch441").getBankAccount().getAmount()));
 			assertEquals("10.0", String
-					.valueOf(EconomyPlayerController.getEconomyPlayerByName("kthschnll").getBankAccount().getAmount()));
+					.valueOf(EconomyPlayerManagerImpl.getEconomyPlayerByName("kthschnll").getBankAccount().getAmount()));
 			assertTrue(result);
-			EconomyPlayerController.getEconomyPlayerByName("catch441").increasePlayerAmount(10, false);
-		} catch (PlayerException | GeneralEconomyException e) {
+			EconomyPlayerManagerImpl.getEconomyPlayerByName("catch441").increasePlayerAmount(10, false);
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 	}
@@ -374,8 +375,8 @@ public class EconomyPlayerCommandExecutorTest {
 		assertEquals("§6You got §a10.0§6 §a$§6", player.nextMessage());
 		assertTrue(result);
 		try {
-			EconomyPlayerController.getEconomyPlayerByName("catch441").decreasePlayerAmount(10, false);
-		} catch (GeneralEconomyException | PlayerException e) {
+			EconomyPlayerManagerImpl.getEconomyPlayerByName("catch441").decreasePlayerAmount(10, false);
+		} catch (GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -387,8 +388,8 @@ public class EconomyPlayerCommandExecutorTest {
 		assertNull(player.nextMessage());
 		assertTrue(result);
 		try {
-			EconomyPlayerController.getEconomyPlayerByName("catch441").increasePlayerAmount(10, false);
-		} catch (GeneralEconomyException | PlayerException e) {
+			EconomyPlayerManagerImpl.getEconomyPlayerByName("catch441").increasePlayerAmount(10, false);
+		} catch (GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -412,7 +413,7 @@ public class EconomyPlayerCommandExecutorTest {
 	@Test
 	public void homeCommandTestZeroArgs() {
 		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 2, 3);
 			ecoPlayer.addHome("myhome1", loc, false);
 			ecoPlayer.addHome("myhome2", loc, false);
@@ -422,7 +423,7 @@ public class EconomyPlayerCommandExecutorTest {
 			assertTrue(result);
 			ecoPlayer.removeHome("myhome2", false);
 			ecoPlayer.removeHome("myhome1", false);
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -439,7 +440,7 @@ public class EconomyPlayerCommandExecutorTest {
 	public void homeCommandTestTwoArgs() {
 		try {
 			player.setLocation(new Location(world, 1, 2, 3));
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 4, 5, 6);
 			ecoPlayer.addHome("myhome", loc, false);
 			String[] args = { "myhome" };
@@ -450,7 +451,7 @@ public class EconomyPlayerCommandExecutorTest {
 			assertEquals("5.0", String.valueOf(player.getLocation().getY()));
 			assertEquals("6.0", String.valueOf(player.getLocation().getZ()));
 			ecoPlayer.removeHome("myhome", false);
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}

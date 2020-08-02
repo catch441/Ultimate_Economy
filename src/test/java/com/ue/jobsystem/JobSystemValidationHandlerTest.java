@@ -18,13 +18,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
-import com.ue.jobsystem.impl.JobSystemValidationHandler;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.jobsystem.logic.impl.JobsystemValidationHandlerImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -32,7 +32,7 @@ import be.seeseemelk.mockbukkit.ServerMock;
 
 public class JobSystemValidationHandlerTest {
 	
-	private static JobSystemValidationHandler validationHandler;
+	private static JobsystemValidationHandlerImpl validationHandler;
 	private static ServerMock server;
 
 	/**
@@ -44,7 +44,7 @@ public class JobSystemValidationHandlerTest {
 		Bukkit.getLogger().setLevel(Level.OFF);
 		MockBukkit.load(UltimateEconomy.class);
 		server.addPlayer("catch441");
-		validationHandler = new JobSystemValidationHandler();
+		validationHandler = new JobsystemValidationHandlerImpl();
 	}
 
 	/**
@@ -52,9 +52,9 @@ public class JobSystemValidationHandlerTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -370,7 +370,7 @@ public class JobSystemValidationHandlerTest {
 			inv.setItem(0, new ItemStack(Material.STONE));
 			validationHandler.checkForFreeSlot(inv,0);
 			assertTrue(false);
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			assertEquals("§cThis slot is occupied!", e.getMessage());
 		}
 	}
@@ -380,7 +380,7 @@ public class JobSystemValidationHandlerTest {
 		try {
 			Inventory inv = Bukkit.createInventory(null, 9);
 			validationHandler.checkForFreeSlot(inv,0);
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			assertTrue(false);
 		}
 	}

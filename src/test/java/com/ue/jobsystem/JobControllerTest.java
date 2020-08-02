@@ -16,15 +16,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.Jobcenter;
-import com.ue.jobsystem.api.JobcenterController;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -54,9 +54,9 @@ public class JobControllerTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -72,10 +72,10 @@ public class JobControllerTest {
 		for (int i = 0; i < size; i++) {
 			JobController.deleteJob(JobController.getJobList().get(0));
 		}
-		int size2 = JobcenterController.getJobcenterList().size();
+		int size2 = JobcenterManagerImpl.getJobcenterList().size();
 		for (int i = 0; i < size2; i++) {
 			try {
-				JobcenterController.deleteJobcenter(JobcenterController.getJobcenterList().get(0));
+				JobcenterManagerImpl.deleteJobcenter(JobcenterManagerImpl.getJobcenterList().get(0));
 			} catch (JobSystemException e) {
 				assertTrue(false);
 			}
@@ -165,12 +165,12 @@ public class JobControllerTest {
 	public void removeJobFromAllPlayers() {
 		try {
 			JobController.createJob("myjob");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Job job = JobController.getJobList().get(0);
 			ecoPlayer.joinJob(job, false);
 			JobController.removeJobFromAllPlayers(job);
 			assertEquals(0, ecoPlayer.getJobList().size());
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			assertTrue(false);
 		}
 	}
@@ -178,12 +178,12 @@ public class JobControllerTest {
 	@Test
 	public void deleteJobTest() {
 		try {
-			JobcenterController.createJobcenter("jobcenter", new Location(world, 1, 1, 1), 9);
-			JobcenterController.createJobcenter("other", new Location(world, 10, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("jobcenter", new Location(world, 1, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("other", new Location(world, 10, 1, 1), 9);
 			JobController.createJob("myjob");
-			Jobcenter jobcenter = JobcenterController.getJobcenterList().get(0);
+			Jobcenter jobcenter = JobcenterManagerImpl.getJobcenterList().get(0);
 			Job job = JobController.getJobList().get(0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			jobcenter.addJob(job, "STONE", 0);
 			ecoPlayer.joinJob(job, false);
 			JobController.deleteJob(job);
@@ -197,7 +197,7 @@ public class JobControllerTest {
 			if (file.exists()) {
 				assertTrue(false);
 			}
-		} catch (JobSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (JobSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			assertTrue(false);
 		}
 	}

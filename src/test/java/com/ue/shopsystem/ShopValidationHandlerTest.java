@@ -20,10 +20,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.api.PlayershopController;
@@ -31,6 +30,7 @@ import com.ue.shopsystem.impl.ShopItem;
 import com.ue.shopsystem.impl.ShopValidationHandler;
 import com.ue.townsystem.api.TownController;
 import com.ue.townsystem.api.TownworldController;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -63,9 +63,9 @@ public class ShopValidationHandlerTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -84,7 +84,7 @@ public class ShopValidationHandlerTest {
 		if (TownworldController.getTownWorldList().size() != 0) {
 			try {
 				TownworldController.deleteTownWorld(world.getName());
-			} catch (TownSystemException | PlayerException | GeneralEconomyException e) {
+			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException e) {
 				fail();
 			}
 		}
@@ -184,7 +184,7 @@ public class ShopValidationHandlerTest {
 			inv.setItem(0, new ItemStack(Material.STONE));
 			validationHandler.checkForSlotIsEmpty(0, inv, 0);
 			fail();
-		} catch (GeneralEconomyException | PlayerException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException e) {
 			assertEquals("§cThis slot is occupied!", e.getMessage());
 		}
 	}
@@ -194,7 +194,7 @@ public class ShopValidationHandlerTest {
 		try {
 			Inventory inv = Bukkit.createInventory(null, 9);
 			validationHandler.checkForSlotIsEmpty(0, inv, 0);
-		} catch (GeneralEconomyException | PlayerException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -502,13 +502,13 @@ public class ShopValidationHandlerTest {
 	@Test
 	public void checkForChangeOwnerIsPossibleTest() {
 		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			PlayershopController.createPlayerShop("myshop", new Location(world, 1, 1, 1), 9, ecoPlayer);
 			validationHandler.checkForChangeOwnerIsPossible(ecoPlayer, "myshop");
 			fail();
 		} catch (ShopSystemException e) {
 			assertEquals("§cThe player has already a shop with the same name!", e.getMessage());
-		} catch (PlayerException | TownSystemException | GeneralEconomyException e) {
+		} catch (EconomyPlayerException | TownSystemException | GeneralEconomyException e) {
 			fail();
 		}
 	}
@@ -516,10 +516,10 @@ public class ShopValidationHandlerTest {
 	@Test
 	public void checkForChangeOwnerIsPossibleTestValid() {
 		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			PlayershopController.createPlayerShop("myshop1", new Location(world, 1, 1, 1), 9, ecoPlayer);
 			validationHandler.checkForChangeOwnerIsPossible(ecoPlayer, "myshop");
-		} catch (ShopSystemException | PlayerException | TownSystemException | GeneralEconomyException e) {
+		} catch (ShopSystemException | EconomyPlayerException | TownSystemException | GeneralEconomyException e) {
 			fail();
 		}
 	}
@@ -527,13 +527,13 @@ public class ShopValidationHandlerTest {
 	@Test
 	public void checkForShopNameIsFreeTest1() {
 		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			PlayershopController.createPlayerShop("myshop", new Location(world, 1, 1, 1), 9, ecoPlayer);
 			ShopValidationHandler.checkForShopNameIsFree("myshop",ecoPlayer);
 			fail();
 		} catch (GeneralEconomyException e) {
 			assertEquals("§c§4myshop_catch441§c already exists!", e.getMessage());
-		} catch (PlayerException | TownSystemException | ShopSystemException e) {
+		} catch (EconomyPlayerException | TownSystemException | ShopSystemException e) {
 			fail();
 		}
 	}
@@ -541,7 +541,7 @@ public class ShopValidationHandlerTest {
 	@Test
 	public void checkForShopNameIsFreeTestValid() {
 		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ShopValidationHandler.checkForShopNameIsFree("myshop",ecoPlayer);	
 		} catch (GeneralEconomyException e) {
 			fail();
@@ -553,10 +553,10 @@ public class ShopValidationHandlerTest {
 		try {
 			Location loc = new Location(world, 1, 1, 1);
 			TownworldController.createTownWorld(world.getName());
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			validationHandler.checkForPlayerHasPermissionAtLocation(loc, ecoPlayer);
 			fail();
-		} catch (PlayerException | TownSystemException e) {
+		} catch (EconomyPlayerException | TownSystemException e) {
 			assertEquals("§cYou dont have the permission to do that!", e.getMessage());
 		}
 	}
@@ -566,13 +566,13 @@ public class ShopValidationHandlerTest {
 		try {
 			Location loc = new Location(world, 1, 1, 1);
 			TownworldController.createTownWorld(world.getName());
-			EconomyPlayerController.createEconomyPlayer("katharina");
-			EconomyPlayer ecoPlayer1 = EconomyPlayerController.getAllEconomyPlayers().get(0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(1);
+			EconomyPlayerManagerImpl.createEconomyPlayer("katharina");
+			EconomyPlayer ecoPlayer1 = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(1);
 			TownController.createTown(TownworldController.getTownWorldList().get(0), "kthschnll", loc, ecoPlayer);
 			validationHandler.checkForPlayerHasPermissionAtLocation(loc, ecoPlayer1);
 			fail();
-		} catch (PlayerException | TownSystemException e) {
+		} catch (EconomyPlayerException | TownSystemException e) {
 			assertEquals("§cYou dont have the permission to do that!", e.getMessage());
 		} catch (GeneralEconomyException e) {
 			fail();
@@ -584,10 +584,10 @@ public class ShopValidationHandlerTest {
 		try {
 			Location loc = new Location(world, 1, 1, 1);
 			TownworldController.createTownWorld(world.getName());
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			TownController.createTown(TownworldController.getTownWorldList().get(0), "kthschnll", loc, ecoPlayer);
 			validationHandler.checkForPlayerHasPermissionAtLocation(loc, ecoPlayer);
-		} catch (GeneralEconomyException | PlayerException | TownSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | TownSystemException e) {
 			fail();
 		}
 	}
@@ -613,22 +613,22 @@ public class ShopValidationHandlerTest {
 	
 	@Test
 	public void checkForPlayerIsOnlineTestValid() {
-		EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+		EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 		try {
 			validationHandler.checkForPlayerIsOnline(ecoPlayer);
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
 	
 	@Test
 	public void checkForPlayerIsOnlineTest() {
-		EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+		EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 		ecoPlayer.setPlayer(null);
 		try {
 			validationHandler.checkForPlayerIsOnline(ecoPlayer);
 			fail();
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			assertEquals("§cThe player is not online!", e.getMessage());
 			ecoPlayer.setPlayer(player);
 		}
@@ -636,19 +636,19 @@ public class ShopValidationHandlerTest {
 	
 	@Test
 	public void checkForShopOwnerHasEnoughMoneyTestValid() {
-		EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+		EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 		try {
 			ecoPlayer.increasePlayerAmount(1, false);
 			validationHandler.checkForShopOwnerHasEnoughMoney(ecoPlayer, 1);
 			ecoPlayer.decreasePlayerAmount(1, false);
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
 	
 	@Test
 	public void checkForShopOwnerHasEnoughMoneyTest() {
-		EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+		EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 		try {
 			validationHandler.checkForShopOwnerHasEnoughMoney(ecoPlayer, 1);
 			fail();
@@ -662,7 +662,7 @@ public class ShopValidationHandlerTest {
 	public void checkForPlayerInventoryNotFullTestValid() {
 		try {
 			validationHandler.checkForPlayerInventoryNotFull(player.getInventory());
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -713,7 +713,7 @@ public class ShopValidationHandlerTest {
 			player.getInventory().setItem(40, new ItemStack(Material.STONE));
 			validationHandler.checkForPlayerInventoryNotFull(player.getInventory());
 			fail();
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			assertEquals("§cThere is no free slot in your inventory!", e.getMessage());
 			player.getInventory().clear();
 		}

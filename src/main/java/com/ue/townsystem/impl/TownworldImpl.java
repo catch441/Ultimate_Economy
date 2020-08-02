@@ -10,14 +10,14 @@ import org.bukkit.Chunk;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.townsystem.api.Town;
 import com.ue.townsystem.api.TownController;
 import com.ue.townsystem.api.Townworld;
+import com.ue.ultimate_economy.GeneralEconomyException;
+import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class TownworldImpl implements Townworld {
@@ -59,7 +59,7 @@ public class TownworldImpl implements Townworld {
 	}
 
 	@Override
-	public void delete() throws TownSystemException, PlayerException, GeneralEconomyException {
+	public void delete() throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		file.delete();
 		despawnAllTownVillagers();
 		List<Town> listCopy = new ArrayList<>(getTownList());

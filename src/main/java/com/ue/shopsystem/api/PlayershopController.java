@@ -7,12 +7,10 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
-import com.ue.config.api.ConfigController;
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
-import com.ue.exceptions.PlayerException;
-import com.ue.exceptions.PlayerExceptionMessageEnum;
+import com.ue.config.logic.impl.ConfigManagerImpl;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.impl.PlayershopImpl;
@@ -20,6 +18,8 @@ import com.ue.shopsystem.impl.ShopValidationHandler;
 import com.ue.townsystem.api.Town;
 import com.ue.townsystem.api.Townworld;
 import com.ue.townsystem.api.TownworldController;
+import com.ue.ultimate_economy.GeneralEconomyException;
+import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class PlayershopController {
@@ -121,11 +121,11 @@ public class PlayershopController {
 	 * @param ecoPlayer
 	 * @throws ShopSystemException
 	 * @throws TownSystemException
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 * @throws GeneralEconomyException
 	 */
 	public static void createPlayerShop(String name, Location spawnLocation, int size, EconomyPlayer ecoPlayer)
-			throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
+			throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		ShopValidationHandler.checkForValidShopName(name);
 		checkForMaxPlayershopsForPlayer(ecoPlayer);
 		checkForTownworldPlotPermission(spawnLocation, ecoPlayer);
@@ -180,7 +180,7 @@ public class PlayershopController {
 			if (file.exists()) {
 				try {
 					getPlayerShops().add(new PlayershopImpl(null, shopId));
-				} catch (TownSystemException | PlayerException | GeneralEconomyException | ShopSystemException e) {
+				} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException | ShopSystemException e) {
 					Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
 					Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 				}
@@ -198,7 +198,7 @@ public class PlayershopController {
 				String shopId = generateFreePlayerShopId();
 				try {
 					getPlayerShops().add(new PlayershopImpl(shopName, shopId));
-				} catch (TownSystemException | PlayerException | GeneralEconomyException | ShopSystemException e) {
+				} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException | ShopSystemException e) {
 					Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopName);
 					Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 				}
@@ -218,30 +218,30 @@ public class PlayershopController {
 	 */
 
 	private static void checkForTownworldPlotPermission(Location spawnLocation, EconomyPlayer ecoPlayer)
-			throws PlayerException, TownSystemException {
+			throws EconomyPlayerException, TownSystemException {
 		if (TownworldController.isTownWorld(spawnLocation.getWorld().getName())) {
 			Townworld townworld = TownworldController.getTownWorldByName(spawnLocation.getWorld().getName());
 			if (townworld.isChunkFree(spawnLocation.getChunk())) {
-				throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
+				throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
 			} else {
 				Town town = townworld.getTownByChunk(spawnLocation.getChunk());
 				if (!town.hasBuildPermissions(ecoPlayer,
 						town.getPlotByChunk(spawnLocation.getChunk().getX() + "/" + spawnLocation.getChunk().getZ()))) {
-					throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
+					throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
 				}
 			}
 		}
 	}
 
-	private static void checkForMaxPlayershopsForPlayer(EconomyPlayer ecoPlayer) throws PlayerException {
+	private static void checkForMaxPlayershopsForPlayer(EconomyPlayer ecoPlayer) throws EconomyPlayerException {
 		int actualNumber = 0;
 		for (Playershop shop : PlayershopController.getPlayerShops()) {
 			if (shop.isOwner(ecoPlayer)) {
 				actualNumber++;
 			}
 		}
-		if (actualNumber >= ConfigController.getMaxPlayershops()) {
-			throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
+		if (actualNumber >= ConfigManagerImpl.getMaxPlayershops()) {
+			throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.MAX_REACHED);
 		}
 	}
 }

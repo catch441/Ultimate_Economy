@@ -6,8 +6,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.ShopSystemException;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class ShopEditorHandler {
 

@@ -1,7 +1,8 @@
 package com.ue.vault;
 
+import javax.inject.Inject;
+
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.plugin.ServicePriority;
 
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -12,25 +13,28 @@ public class VaultHook {
 
     private UltimateEconomy plugin = UltimateEconomy.getInstance;
 
-    private Economy provider;
+    private final Economy vaultEconomy;
+    
+    /**
+     * Vault Hook constructor.
+     * @param vaultEconomy
+     */
+    @Inject
+    public VaultHook(Economy vaultEconomy) {
+    	this.vaultEconomy = vaultEconomy;
+    }
 
     /**
      * Hooks UE into vault.
      */
     public void hook() {
-	provider = plugin.economyImplementer;
-	Bukkit.getServicesManager().register(Economy.class, this.provider, this.plugin, ServicePriority.Normal);
-	Bukkit.getConsoleSender()
-		.sendMessage(ChatColor.GREEN + "VaultAPI hooked into " + ChatColor.AQUA + plugin.getName());
+	Bukkit.getServicesManager().register(Economy.class, vaultEconomy, plugin, ServicePriority.Normal);
     }
 
     /**
      * Unhooks UE from vault.
      */
     public void unhook() {
-	Bukkit.getServicesManager().unregister(Economy.class, this.provider);
-	Bukkit.getConsoleSender()
-		.sendMessage(ChatColor.YELLOW + "VaultAPI unhooked from " + ChatColor.AQUA + plugin.getName());
-
+	Bukkit.getServicesManager().unregister(Economy.class, vaultEconomy);
     }
 }

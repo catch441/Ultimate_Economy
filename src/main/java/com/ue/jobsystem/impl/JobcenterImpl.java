@@ -21,16 +21,18 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.eventhandling.EconomyVillager;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.Jobcenter;
-import com.ue.jobsystem.api.JobcenterController;
+import com.ue.jobsystem.dataaccese.impl.JobcenterDaoImpl;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
+import com.ue.jobsystem.logic.impl.JobsystemValidationHandlerImpl;
+import com.ue.ultimate_economy.EconomyVillager;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobcenterImpl implements Jobcenter {
@@ -41,8 +43,8 @@ public class JobcenterImpl implements Jobcenter {
 	private int size;
 	private List<Job> jobs = new ArrayList<>();
 	private Inventory inventory;
-	private JobSystemValidationHandler validationHandler;
-	private JobcenterSavefileHandler savefileHandler;
+	private JobsystemValidationHandlerImpl validationHandler;
+	private JobcenterDaoImpl savefileHandler;
 
 	/**
 	 * Constructor for creating a new jobcenter.
@@ -53,8 +55,8 @@ public class JobcenterImpl implements Jobcenter {
 	 * @throws JobSystemException
 	 */
 	public JobcenterImpl(String name, Location spawnLocation, int size) throws JobSystemException {
-		validationHandler = new JobSystemValidationHandler();
-		savefileHandler = new JobcenterSavefileHandler(name, true);
+		validationHandler = new JobsystemValidationHandlerImpl();
+		savefileHandler = new JobcenterDaoImpl(name, true);
 		setupNewJobcenter(name, spawnLocation, size);
 	}
 
@@ -64,8 +66,8 @@ public class JobcenterImpl implements Jobcenter {
 	 * @param name
 	 */
 	public JobcenterImpl(String name) {
-		validationHandler = new JobSystemValidationHandler();
-		savefileHandler = new JobcenterSavefileHandler(name, false);
+		validationHandler = new JobsystemValidationHandlerImpl();
+		savefileHandler = new JobcenterDaoImpl(name, false);
 		loadExistingJobcenter(name);
 	}
 
@@ -76,7 +78,7 @@ public class JobcenterImpl implements Jobcenter {
 
 	@Override
 	public void addJob(Job job, String itemMaterial, int slot)
-			throws PlayerException, GeneralEconomyException, JobSystemException {
+			throws EconomyPlayerException, GeneralEconomyException, JobSystemException {
 		getValidationHandler().checkForValidSlot(slot, getSize());
 		getValidationHandler().checkForFreeSlot(getInventory(), slot);
 		getValidationHandler().checkForJobDoesNotExistInJobcenter(getJobList(), job);
@@ -101,11 +103,11 @@ public class JobcenterImpl implements Jobcenter {
 		getSavefileHandler().saveJob(job, null, 0);
 		getSavefileHandler().saveJobNameList(getJobNameList());
 		if (!isJAvailableInOtherJobcenter(job)) {
-			for (EconomyPlayer ecoPlayer : EconomyPlayerController.getAllEconomyPlayers()) {
+			for (EconomyPlayer ecoPlayer : EconomyPlayerManagerImpl.getAllEconomyPlayers()) {
 				if (ecoPlayer.hasJob(job)) {
 					try {
 						ecoPlayer.leaveJob(job, false);
-					} catch (PlayerException e) {
+					} catch (EconomyPlayerException e) {
 						Bukkit.getLogger().warning("[Ultimate_Economy] Failed to leave the job " + job.getName());
 						Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 					}
@@ -167,11 +169,11 @@ public class JobcenterImpl implements Jobcenter {
 	 * 
 	 */
 
-	private JobcenterSavefileHandler getSavefileHandler() {
+	private JobcenterDaoImpl getSavefileHandler() {
 		return savefileHandler;
 	}
 
-	private JobSystemValidationHandler getValidationHandler() {
+	private JobsystemValidationHandlerImpl getValidationHandler() {
 		return validationHandler;
 	}
 
@@ -204,7 +206,7 @@ public class JobcenterImpl implements Jobcenter {
 	}
 
 	private boolean isJAvailableInOtherJobcenter(Job job) throws JobSystemException {
-		for (Jobcenter jobcenter : JobcenterController.getJobcenterList()) {
+		for (Jobcenter jobcenter : JobcenterManagerImpl.getJobcenterList()) {
 			if (jobcenter.hasJob(job)) {
 				return true;
 			}

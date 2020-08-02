@@ -16,11 +16,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.bank.api.BankAccount;
-import com.ue.bank.api.BankController;
-import com.ue.bank.impl.BankAccountImpl;
-import com.ue.bank.impl.BankSavefileHandler;
-import com.ue.exceptions.GeneralEconomyException;
+import com.ue.bank.dataaccess.impl.BankDaoImpl;
+import com.ue.bank.logic.api.BankAccount;
+import com.ue.bank.logic.impl.BankAccountImpl;
+import com.ue.bank.logic.impl.BankManagerImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -35,7 +35,7 @@ public class BankAccountTest {
 		MockBukkit.mock();
 		Bukkit.getLogger().setLevel(Level.OFF);
 		MockBukkit.load(UltimateEconomy.class);
-		BankSavefileHandler.setupSavefile();
+		BankDaoImpl.setupSavefile();
 	}
 
 	/**
@@ -52,9 +52,9 @@ public class BankAccountTest {
 	 */
 	@AfterEach
 	public void unload() {
-		int size = BankController.getBankAccounts().size();
+		int size = BankManagerImpl.getBankAccounts().size();
 		for (int i = 0; i < size; i++) {
-			BankController.deleteBankAccount(BankController.getBankAccounts().get(0));
+			BankManagerImpl.deleteBankAccount(BankManagerImpl.getBankAccounts().get(0));
 		}
 	}
 
@@ -91,7 +91,7 @@ public class BankAccountTest {
 	@Test
 	public void decreaseAmountTest() {
 		try {
-			BankAccount account = BankController.createBankAccount(10.0);
+			BankAccount account = BankManagerImpl.createBankAccount(10.0);
 			account.decreaseAmount(5.5);
 			assertEquals("4.5", String.valueOf(account.getAmount()));
 			// check savefile
@@ -106,7 +106,7 @@ public class BankAccountTest {
 	@Test
 	public void decreaseAmountTestWithNegativeAmount() {
 		try {
-			BankAccount account = BankController.createBankAccount(10.0);
+			BankAccount account = BankManagerImpl.createBankAccount(10.0);
 			account.decreaseAmount(-5.5);
 			fail();
 		} catch (GeneralEconomyException e) {
@@ -117,7 +117,7 @@ public class BankAccountTest {
 	@Test
 	public void decreaseAmountTestWithInvalidAmount() {
 		try {
-			BankAccount account = BankController.createBankAccount(10.0);
+			BankAccount account = BankManagerImpl.createBankAccount(10.0);
 			account.decreaseAmount(20);
 			fail();
 		} catch (GeneralEconomyException e) {
@@ -128,7 +128,7 @@ public class BankAccountTest {
 	@Test
 	public void increaseAmountAmountTest() {
 		try {
-			BankAccount account = BankController.createBankAccount(10.0);
+			BankAccount account = BankManagerImpl.createBankAccount(10.0);
 			account.increaseAmount(5.5);
 			assertEquals("15.5", String.valueOf(account.getAmount()));
 			// check savefile
@@ -143,7 +143,7 @@ public class BankAccountTest {
 	@Test
 	public void increaseAmountTestWithNegativeAmount() {
 		try {
-			BankAccount account = BankController.createBankAccount(10.0);
+			BankAccount account = BankManagerImpl.createBankAccount(10.0);
 			account.increaseAmount(-5.5);
 			fail();
 		} catch (GeneralEconomyException e) {
@@ -154,7 +154,7 @@ public class BankAccountTest {
 	@Test
 	public void hasAmountTest() {
 		try {
-			BankAccount account = BankController.createBankAccount(10.0);
+			BankAccount account = BankManagerImpl.createBankAccount(10.0);
 			assertTrue(account.hasAmount(5.0));
 			assertFalse(account.hasAmount(20.0));
 		} catch (GeneralEconomyException e) {
@@ -165,7 +165,7 @@ public class BankAccountTest {
 	@Test
 	public void hasAmountTestWithNegativeAmount() {
 		try {
-			BankAccount account = BankController.createBankAccount(10.0);
+			BankAccount account = BankManagerImpl.createBankAccount(10.0);
 			account.hasAmount(-5.0);
 			fail();
 		} catch (GeneralEconomyException e) {
@@ -175,15 +175,15 @@ public class BankAccountTest {
 	
 	@Test
 	public void getAmountTest() {
-		BankAccount account = BankController.createBankAccount(10.0);
+		BankAccount account = BankManagerImpl.createBankAccount(10.0);
 		assertEquals("10.0", String.valueOf(account.getAmount()));
 	}
 	
 	@Test
 	public void getIbanTest() {
 		try {
-			BankController.createExternalBankAccount(10.0,"myiban");
-			BankAccount account = BankController.getBankAccounts().get(0);
+			BankManagerImpl.createExternalBankAccount(10.0,"myiban");
+			BankAccount account = BankManagerImpl.getBankAccounts().get(0);
 			assertEquals("10.0", String.valueOf(account.getAmount()));
 		} catch (GeneralEconomyException e) {
 			fail();

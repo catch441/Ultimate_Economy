@@ -20,16 +20,16 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.ue.bank.api.BankAccount;
-import com.ue.bank.api.BankController;
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.economyplayer.impl.EconomyPlayerSavefileHandler;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
+import com.ue.bank.logic.api.BankAccount;
+import com.ue.bank.logic.impl.BankManagerImpl;
+import com.ue.economyplayer.dataaccess.impl.EconomyPlayerDaoImpl;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -38,7 +38,7 @@ import be.seeseemelk.mockbukkit.WorldMock;
 
 public class EconomyPlayerSavefileHandlerTest {
 	
-	private EconomyPlayerSavefileHandler savefileHandler;
+	private EconomyPlayerDaoImpl savefileHandler;
 	private static EconomyPlayer ecoPlayer;
 	private static WorldMock world;
 	private static ServerMock server;
@@ -54,7 +54,7 @@ public class EconomyPlayerSavefileHandlerTest {
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
 		server.addPlayer("kthschnll");
-		ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+		ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class EconomyPlayerSavefileHandlerTest {
 	public static void deleteSavefiles() {
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
-		EconomyPlayerController.deleteEconomyPlayer(ecoPlayer);
+		EconomyPlayerManagerImpl.deleteEconomyPlayer(ecoPlayer);
 		int size = JobController.getJobList().size();
 		for(int i = 0; i<size; i++) {
 			JobController.deleteJob(JobController.getJobList().get(0));
@@ -79,22 +79,22 @@ public class EconomyPlayerSavefileHandlerTest {
 	public void setupPlayer() {
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 		file.delete();
-		savefileHandler = new EconomyPlayerSavefileHandler(ecoPlayer);
+		savefileHandler = new EconomyPlayerDaoImpl(ecoPlayer);
 	}
 	
 	@Test
 	public void setupSavefileTest() {
 		File result = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 		assertFalse(result.exists());
-		EconomyPlayerSavefileHandler.setupSavefile();
+		EconomyPlayerDaoImpl.setupSavefile();
 		assertTrue(result.exists());
 	}
 	
 	@Test
 	public void setupSavefileLoadTest() {
-		EconomyPlayerSavefileHandler.setupSavefile();
-		EconomyPlayerSavefileHandler.savePlayerList(new ArrayList<>());
-		EconomyPlayerSavefileHandler.setupSavefile();
+		EconomyPlayerDaoImpl.setupSavefile();
+		EconomyPlayerDaoImpl.savePlayerList(new ArrayList<>());
+		EconomyPlayerDaoImpl.setupSavefile();
 		File result = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
 		assertTrue(result.exists());
@@ -103,10 +103,10 @@ public class EconomyPlayerSavefileHandlerTest {
 	
 	@Test
 	public void savePlayerListTest() {
-		EconomyPlayerSavefileHandler.setupSavefile();
+		EconomyPlayerDaoImpl.setupSavefile();
 		List<String> list = new ArrayList<>();
 		list.add("myKthschnll");
-		EconomyPlayerSavefileHandler.savePlayerList(list);
+		EconomyPlayerDaoImpl.savePlayerList(list);
 		File result = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
 		assertEquals(1, config.getStringList("Player").size());
@@ -115,11 +115,11 @@ public class EconomyPlayerSavefileHandlerTest {
 	
 	@Test
 	public void loadPlayerListTest() {
-		EconomyPlayerSavefileHandler.setupSavefile();
+		EconomyPlayerDaoImpl.setupSavefile();
 		List<String> list = new ArrayList<>();
 		list.add("myKthschnll");
-		EconomyPlayerSavefileHandler.savePlayerList(list);
-		List<String> result = EconomyPlayerSavefileHandler.loadPlayerList();
+		EconomyPlayerDaoImpl.savePlayerList(list);
+		List<String> result = EconomyPlayerDaoImpl.loadPlayerList();
 		assertEquals(1, result.size());
 		assertEquals("myKthschnll", result.get(0));
 	}
@@ -127,24 +127,24 @@ public class EconomyPlayerSavefileHandlerTest {
 	@Test
 	public void deleteEconomyPlayer() {
 		try {
-			EconomyPlayerSavefileHandler.setupSavefile();
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer2 = EconomyPlayerController.getEconomyPlayerByName("catch441");
+			EconomyPlayerDaoImpl.setupSavefile();
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer2 = EconomyPlayerManagerImpl.getEconomyPlayerByName("catch441");
 			File result = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 			YamlConfiguration configBefore = YamlConfiguration.loadConfiguration(result);
 			assertTrue(configBefore.isSet("catch441"));
-			EconomyPlayerSavefileHandler.deleteEconomyPlayer(ecoPlayer2);
+			EconomyPlayerDaoImpl.deleteEconomyPlayer(ecoPlayer2);
 			YamlConfiguration configAfter = YamlConfiguration.loadConfiguration(result);
 			assertFalse(configAfter.isSet("catch441"));
-			EconomyPlayerController.deleteEconomyPlayer(ecoPlayer2);
-		} catch (PlayerException e) {
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(ecoPlayer2);
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
 	
 	@Test
 	public void saveHomeTest() {
-		EconomyPlayerSavefileHandler.setupSavefile();
+		EconomyPlayerDaoImpl.setupSavefile();
 		Location loc = new Location(world,1,2,3);
 		savefileHandler.saveHome("myNewHome", loc);
 		File result = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
@@ -161,10 +161,10 @@ public class EconomyPlayerSavefileHandlerTest {
 	
 	@Test
 	public void loadHomeTest() {
-		EconomyPlayerSavefileHandler.setupSavefile();
+		EconomyPlayerDaoImpl.setupSavefile();
 		Location loc = new Location(world,1,2,3);
 		savefileHandler.saveHome("myNewHome", loc);
-		EconomyPlayerSavefileHandler.setupSavefile();
+		EconomyPlayerDaoImpl.setupSavefile();
 		Location result = savefileHandler.loadHome("myNewHome");
 		assertEquals("World",result.getWorld().getName());
 		assertEquals("1.0",String.valueOf(result.getX()));
@@ -175,14 +175,14 @@ public class EconomyPlayerSavefileHandlerTest {
 	@Test
 	public void loadHomeListTest() {
 		try {
-			EconomyPlayerSavefileHandler.setupSavefile();
+			EconomyPlayerDaoImpl.setupSavefile();
 			Location loc = new Location(world,1,2,3);
 			ecoPlayer.addHome("myHome", loc, false);
-			EconomyPlayerSavefileHandler.setupSavefile();
+			EconomyPlayerDaoImpl.setupSavefile();
 			List<String> list = savefileHandler.loadHomeList();
 			assertEquals(1,list.size());
 			assertEquals("myHome",list.get(0));
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -190,13 +190,13 @@ public class EconomyPlayerSavefileHandlerTest {
 	@Test
 	public void loadJoinedTownsTest() {
 		try {
-			EconomyPlayerSavefileHandler.setupSavefile();
+			EconomyPlayerDaoImpl.setupSavefile();
 			ecoPlayer.addJoinedTown("mytown");
-			EconomyPlayerSavefileHandler.setupSavefile();
+			EconomyPlayerDaoImpl.setupSavefile();
 			List<String> list = savefileHandler.loadJoinedTowns();
 			assertEquals(1,list.size());
 			assertEquals("mytown",list.get(0));
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -204,15 +204,15 @@ public class EconomyPlayerSavefileHandlerTest {
 	@Test
 	public void loadJobsListTest() {	
 		try {
-			EconomyPlayerSavefileHandler.setupSavefile();
+			EconomyPlayerDaoImpl.setupSavefile();
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			ecoPlayer.joinJob(job, false);
-			EconomyPlayerSavefileHandler.setupSavefile();
+			EconomyPlayerDaoImpl.setupSavefile();
 			List<String> list = savefileHandler.loadJobsList();
 			assertEquals(1,list.size());
 			assertEquals("myjob",list.get(0));
-		} catch (GeneralEconomyException | PlayerException | JobSystemException e) {
+		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -220,12 +220,12 @@ public class EconomyPlayerSavefileHandlerTest {
 	@Test
 	public void loadBankIbanTest() {
 		try {
-			EconomyPlayerSavefileHandler.setupSavefile();
+			EconomyPlayerDaoImpl.setupSavefile();
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 			YamlConfiguration configBefore = YamlConfiguration.loadConfiguration(file);
 			configBefore.set("kthschnll.Iban", "myIban");
 			configBefore.save(file);
-			EconomyPlayerSavefileHandler.setupSavefile();
+			EconomyPlayerDaoImpl.setupSavefile();
 			assertEquals("myIban", savefileHandler.loadBankIban());
 		} catch (IOException e) {
 			fail();
@@ -235,15 +235,15 @@ public class EconomyPlayerSavefileHandlerTest {
 	@Test
 	public void loadBankIbanOldTest() {
 		try {
-			EconomyPlayerSavefileHandler.setupSavefile();
+			EconomyPlayerDaoImpl.setupSavefile();
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 			YamlConfiguration configBefore = YamlConfiguration.loadConfiguration(file);
 			configBefore.set("kthschnll.account amount", 20.5);
 			configBefore.save(file);
-			EconomyPlayerSavefileHandler.setupSavefile();
+			EconomyPlayerDaoImpl.setupSavefile();
 			String iban = savefileHandler.loadBankIban();
 			YamlConfiguration configAfter = YamlConfiguration.loadConfiguration(file);
-			BankAccount account = BankController.getBankAccountByIban(iban);
+			BankAccount account = BankManagerImpl.getBankAccountByIban(iban);
 			assertFalse(configAfter.isSet("kthschnll.account amount"));
 			assertEquals("20.5",String.valueOf(account.getAmount()));
 		} catch (GeneralEconomyException | IOException e) {
@@ -254,12 +254,12 @@ public class EconomyPlayerSavefileHandlerTest {
 	@Test
 	public void loadScoreboardDisabledTest() {
 		try {
-			EconomyPlayerSavefileHandler.setupSavefile();
+			EconomyPlayerDaoImpl.setupSavefile();
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 			YamlConfiguration configBefore = YamlConfiguration.loadConfiguration(file);
 			configBefore.set("kthschnll.scoreboardDisabled", false);
 			configBefore.save(file);
-			EconomyPlayerSavefileHandler.setupSavefile();
+			EconomyPlayerDaoImpl.setupSavefile();
 			assertFalse(savefileHandler.loadScoreboardDisabled());
 		} catch (IOException e) {
 			fail();
@@ -269,12 +269,12 @@ public class EconomyPlayerSavefileHandlerTest {
 	@Test
 	public void loadScoreboardDisabledOldTest() {
 		try {
-			EconomyPlayerSavefileHandler.setupSavefile();
+			EconomyPlayerDaoImpl.setupSavefile();
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 			YamlConfiguration configBefore = YamlConfiguration.loadConfiguration(file);
 			configBefore.set("kthschnll.bank", false);
 			configBefore.save(file);
-			EconomyPlayerSavefileHandler.setupSavefile();
+			EconomyPlayerDaoImpl.setupSavefile();
 			assertFalse(savefileHandler.loadScoreboardDisabled());
 			YamlConfiguration configAfter = YamlConfiguration.loadConfiguration(file);
 			assertFalse(configAfter.isSet("kthschnll.bank"));

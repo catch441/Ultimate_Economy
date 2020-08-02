@@ -23,11 +23,11 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.config.api.ConfigController;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
+import com.ue.config.logic.impl.ConfigManagerImpl;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.shopsystem.api.RentshopController;
 import com.ue.shopsystem.impl.RentshopRentGuiHandler;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -62,7 +62,7 @@ public class RentshopRentGuiHandlerTest {
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
 		server.setPlayers(0);
-		EconomyPlayerController.getAllEconomyPlayers().clear();
+		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 		player = server.addPlayer("kthschnll");
 	}
 
@@ -71,9 +71,9 @@ public class RentshopRentGuiHandlerTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -247,7 +247,7 @@ public class RentshopRentGuiHandlerTest {
 	@Test
 	public void handleRentShopGuiClickTestPlusOneClickMore() {
 		try {
-			ConfigController.setMaxRentedDays(3);
+			ConfigManagerImpl.setMaxRentedDays(3);
 			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
 			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
@@ -266,7 +266,7 @@ public class RentshopRentGuiHandlerTest {
 			list.add("§6RentalFee: §a13.5");
 			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
 			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
-			ConfigController.setMaxRentedDays(14);
+			ConfigManagerImpl.setMaxRentedDays(14);
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -352,7 +352,7 @@ public class RentshopRentGuiHandlerTest {
 	@Test
 	public void handleRentShopGuiClickTestPlusSevenClickMore() {
 		try {
-			ConfigController.setMaxRentedDays(14);
+			ConfigManagerImpl.setMaxRentedDays(14);
 			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
 			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
@@ -396,7 +396,7 @@ public class RentshopRentGuiHandlerTest {
 	@Test
 	public void handleRentShopGuiClickTestRentClick() {
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).increasePlayerAmount(4.5, false);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(4.5, false);
 			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
 			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
@@ -405,7 +405,7 @@ public class RentshopRentGuiHandlerTest {
 			assertEquals("§6You rented this shop.", player.nextMessage());
 			assertNull(player.nextMessage());
 			assertNull(player.getOpenInventory().getTopInventory());
-			assertTrue(RentshopController.getRentShops().get(0).isOwner(EconomyPlayerController.getAllEconomyPlayers().get(0)));
+			assertTrue(RentshopController.getRentShops().get(0).isOwner(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0)));
 			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
 		} catch (GeneralEconomyException e) {
 			fail();

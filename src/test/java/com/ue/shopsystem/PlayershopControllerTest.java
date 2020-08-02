@@ -27,17 +27,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.config.api.ConfigController;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.eventhandling.EconomyVillager;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.config.logic.impl.ConfigManagerImpl;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.api.Playershop;
 import com.ue.shopsystem.api.PlayershopController;
 import com.ue.townsystem.api.TownController;
 import com.ue.townsystem.api.TownworldController;
+import com.ue.ultimate_economy.EconomyVillager;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -67,9 +67,9 @@ public class PlayershopControllerTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -92,9 +92,9 @@ public class PlayershopControllerTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			PlayershopController.createPlayerShop("myshop", location, 5,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | EconomyPlayerException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §45§c is invalid!", e.getMessage());
 		}
@@ -104,13 +104,13 @@ public class PlayershopControllerTest {
 	public void createNewAdminshopTestWithExistingName() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			ConfigController.setMaxPlayershops(2);
+			ConfigManagerImpl.setMaxPlayershops(2);
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | EconomyPlayerException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§c§4myshop_catch441§c already exists!", e.getMessage());
 		}
@@ -121,9 +121,9 @@ public class PlayershopControllerTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			PlayershopController.createPlayerShop("myshop_", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | EconomyPlayerException e) {
 			assertTrue(e instanceof ShopSystemException);
 			assertEquals("§cThis shopname is invalid! Use a name without _!", e.getMessage());
 		}
@@ -133,17 +133,17 @@ public class PlayershopControllerTest {
 	public void createNewAdminshopTestWithMaxShopsReached() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			ConfigController.setMaxPlayershops(1);
+			ConfigManagerImpl.setMaxPlayershops(1);
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			PlayershopController.createPlayerShop("myshop1", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | EconomyPlayerException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou have already reached the maximum!", e.getMessage());
 			try {
-				ConfigController.setMaxPlayershops(2);
+				ConfigManagerImpl.setMaxPlayershops(2);
 			} catch (GeneralEconomyException e1) {
 				fail();
 			}
@@ -156,14 +156,14 @@ public class PlayershopControllerTest {
 		try {
 			TownworldController.createTownWorld(world.getName());
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | EconomyPlayerException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou dont have the permission to do that!", e.getMessage());
 			try {
 				TownworldController.deleteTownWorld(world.getName());
-			} catch (TownSystemException | PlayerException | GeneralEconomyException e1) {
+			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException e1) {
 				fail();
 			}
 		}
@@ -174,12 +174,12 @@ public class PlayershopControllerTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			Playershop response = PlayershopController.getPlayerShops().get(0);
 			assertEquals(world, response.getWorld());
 			assertEquals("P0", response.getShopId());
 			assertEquals("myshop", response.getName());
-			assertEquals(EconomyPlayerController.getAllEconomyPlayers().get(0), response.getOwner());
+			assertEquals(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), response.getOwner());
 			assertEquals(EconomyVillager.PLAYERSHOP, response.getShopVillager().getMetadata("ue-type").get(0).value());
 			// check shop inventory
 			ChestInventoryMock shopInv = (ChestInventoryMock) response.getShopInventory();
@@ -231,7 +231,7 @@ public class PlayershopControllerTest {
 			assertEquals("catch441", config.getString("Owner"));
 			assertEquals(1, UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopIds").size());
 			assertEquals("P0", UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopIds").get(0));
-		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -242,9 +242,9 @@ public class PlayershopControllerTest {
 		try {
 
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 
-		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -255,16 +255,16 @@ public class PlayershopControllerTest {
 		try {
 			TownworldController.createTownWorld(world.getName());
 			TownController.createTown(TownworldController.getTownWorldList().get(0), "mytown", location,
-					EconomyPlayerController.getAllEconomyPlayers().get(1));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(1));
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			fail();
-		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | EconomyPlayerException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou dont have the permission to do that!", e.getMessage());
 			try {
 				TownworldController.deleteTownWorld(world.getName());
-			} catch (TownSystemException | PlayerException | GeneralEconomyException e1) {
+			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException e1) {
 				fail();
 			}
 		}
@@ -276,11 +276,11 @@ public class PlayershopControllerTest {
 		try {
 			String id1 = PlayershopController.generateFreePlayerShopId();
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			String id2 = PlayershopController.generateFreePlayerShopId();
 			assertEquals("P0", id1);
 			assertEquals("P1", id2);
-		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -290,11 +290,11 @@ public class PlayershopControllerTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			List<String> list = PlayershopController.getPlayerShopUniqueNameList();
 			assertEquals(1, list.size());
 			assertEquals("myshop_catch441", list.get(0));
-		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | EconomyPlayerException e) {
 			System.out.println(e.getMessage());
 			fail();
 		}
@@ -305,15 +305,15 @@ public class PlayershopControllerTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			PlayershopController.createPlayerShop("myshop2", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			Playershop shop = PlayershopController.getPlayerShopByUniqueName("myshop_catch441");
 			assertNotNull(shop);
 			assertEquals("P1", shop.getShopId());
 			assertEquals("myshop", shop.getName());
 			assertEquals("catch441", shop.getOwner().getName());
-		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -334,13 +334,13 @@ public class PlayershopControllerTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			PlayershopController.createPlayerShop("myshop2", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			Playershop shop = PlayershopController.getPlayerShopById("P1");
 			assertNotNull(shop);
 			assertEquals("P1", shop.getShopId());
-		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -361,11 +361,11 @@ public class PlayershopControllerTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			List<String> list = PlayershopController.getPlayershopIdList();
 			assertEquals(1, list.size());
 			assertEquals("P0", list.get(0));
-		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -375,7 +375,7 @@ public class PlayershopControllerTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			Collection<Entity> entities1 = world
 					.getNearbyEntities(PlayershopController.getPlayerShops().get(0).getShopLocation(), 0, 0, 0);
 			PlayershopController.despawnAllVillagers();
@@ -383,7 +383,7 @@ public class PlayershopControllerTest {
 					.getNearbyEntities(PlayershopController.getPlayerShops().get(0).getShopLocation(), 0, 0, 0);
 			assertEquals(1, entities1.size());
 			assertEquals(0, entities2.size());
-		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -393,13 +393,13 @@ public class PlayershopControllerTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			PlayershopController.deletePlayerShop(PlayershopController.getPlayerShops().get(0));
 			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "P0.yml");
 			assertFalse(saveFile.exists());
 			assertEquals(0, UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopIds").size());
 			assertEquals(0, PlayershopController.getPlayerShops().size());
-		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -409,7 +409,7 @@ public class PlayershopControllerTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			PlayershopController.getPlayerShops().get(0).despawnVillager();
 			assertEquals(1, PlayershopController.getPlayerShops().size());
 			PlayershopController.getPlayerShops().clear();
@@ -423,7 +423,7 @@ public class PlayershopControllerTest {
 			assertEquals(EconomyVillager.PLAYERSHOP, shop.getShopVillager().getMetadata("ue-type").get(0).value());
 			assertEquals(0, shop.getItemList().size());
 			assertEquals(location, shop.getShopLocation());
-		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -433,7 +433,7 @@ public class PlayershopControllerTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			Playershop shop = PlayershopController.getPlayerShops().get(0);
 			shop.addShopItem(0, 10, 10, new ItemStack(Material.STONE));
 			shop.increaseStock(0, 25);
@@ -451,7 +451,7 @@ public class PlayershopControllerTest {
 			assertEquals(location, response.getShopLocation());
 			assertEquals(ChatColor.GREEN + "25" + ChatColor.GOLD + " Items",
 					response.getStockpileInventory().getItem(0).getItemMeta().getLore().get(0));
-		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -461,7 +461,7 @@ public class PlayershopControllerTest {
 		Location location = new Location(world, 10.5, 2.3, 6.9);
 		try {
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "P0.yml");
 			file.delete();
 			PlayershopController.getPlayerShops().clear();
@@ -469,7 +469,7 @@ public class PlayershopControllerTest {
 			assertEquals(0, PlayershopController.getPlayerShops().size());
 			UltimateEconomy.getInstance.getConfig().set("PlayerShopIds", new ArrayList<>());
 			UltimateEconomy.getInstance.saveConfig();
-		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -483,7 +483,7 @@ public class PlayershopControllerTest {
 			UltimateEconomy.getInstance.getConfig().set("PlayerShopNames", list);
 			UltimateEconomy.getInstance.saveConfig();
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "P0.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			File oldFile = new File(UltimateEconomy.getInstance.getDataFolder(), "myshop_catch441.yml");
@@ -497,7 +497,7 @@ public class PlayershopControllerTest {
 			assertEquals(1, UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopIds").size());
 			assertEquals("P0", UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopIds").get(0));
 			assertTrue(file.exists());
-		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException
+		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | EconomyPlayerException
 				| IOException e) {
 			fail();
 		}
@@ -512,11 +512,11 @@ public class PlayershopControllerTest {
 			UltimateEconomy.getInstance.getConfig().set("PlayerShopNames", list);
 			UltimateEconomy.getInstance.saveConfig();
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			PlayershopController.getPlayerShops().clear();
 			PlayershopController.loadAllPlayerShops();
 			assertEquals(0, PlayershopController.getPlayerShops().size());
-		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -530,7 +530,7 @@ public class PlayershopControllerTest {
 			UltimateEconomy.getInstance.getConfig().set("PlayerShopNames", list);
 			UltimateEconomy.getInstance.saveConfig();
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "P0.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			File oldFile = new File(UltimateEconomy.getInstance.getDataFolder(), "myshop_catch441.yml");
@@ -538,11 +538,11 @@ public class PlayershopControllerTest {
 			config.save(oldFile);
 			file.delete();
 			PlayershopController.getPlayerShops().clear();
-			EconomyPlayerController.getAllEconomyPlayers().clear();
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 			PlayershopController.loadAllPlayerShops();
 			assertEquals(0, PlayershopController.getPlayerShops().size());
-			EconomyPlayerController.loadAllEconomyPlayers();
-		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException
+			EconomyPlayerManagerImpl.loadAllEconomyPlayers();
+		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | EconomyPlayerException
 				| IOException e) {
 			fail();
 		}
@@ -553,13 +553,13 @@ public class PlayershopControllerTest {
 		Location location = new Location(world, 1.5, 29.3, 6.9);
 		try {
 			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerController.getAllEconomyPlayers().get(0));
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			PlayershopController.getPlayerShops().clear();
-			EconomyPlayerController.getAllEconomyPlayers().clear();
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 			PlayershopController.loadAllPlayerShops();
 			assertEquals(0, PlayershopController.getPlayerShops().size());
-			EconomyPlayerController.loadAllEconomyPlayers();
-		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | PlayerException e) {
+			EconomyPlayerManagerImpl.loadAllEconomyPlayers();
+		} catch (GeneralEconomyException | ShopSystemException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}

@@ -31,14 +31,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.eventhandling.EconomyVillager;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.api.Adminshop;
 import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.impl.ShopItem;
+import com.ue.ultimate_economy.EconomyVillager;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -78,9 +78,9 @@ public class AdminshopControllerTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -100,9 +100,9 @@ public class AdminshopControllerTest {
 				fail();
 			}
 		}
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 	}
 
@@ -461,7 +461,7 @@ public class AdminshopControllerTest {
 			assertEquals(1, config.getInt("ShopItems." + itemStringSpawner + ".Slot"));
 			assertEquals(1, config.getInt("ShopItems." + itemStringSpawner + ".Amount"));
 			assertEquals(itemStringSpawner, config.getString("ShopItems." + itemStringSpawner + ".Name").toString());
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}

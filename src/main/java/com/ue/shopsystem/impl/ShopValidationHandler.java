@@ -7,11 +7,9 @@ import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
-import com.ue.exceptions.PlayerException;
-import com.ue.exceptions.PlayerExceptionMessageEnum;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
@@ -19,6 +17,8 @@ import com.ue.shopsystem.api.PlayershopController;
 import com.ue.townsystem.api.Town;
 import com.ue.townsystem.api.Townworld;
 import com.ue.townsystem.api.TownworldController;
+import com.ue.ultimate_economy.GeneralEconomyException;
+import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
 public class ShopValidationHandler {
 
@@ -72,12 +72,12 @@ public class ShopValidationHandler {
 	 * @param inventory
 	 * @param reservedSlots
 	 * @throws GeneralEconomyException
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 */
 	public void checkForSlotIsEmpty(int slot, Inventory inventory, int reservedSlots)
-			throws GeneralEconomyException, PlayerException {
+			throws GeneralEconomyException, EconomyPlayerException {
 		if (!isSlotEmpty(slot, inventory, reservedSlots)) {
-			throw PlayerException.getException(PlayerExceptionMessageEnum.INVENTORY_SLOT_OCCUPIED);
+			throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.INVENTORY_SLOT_OCCUPIED);
 		}
 	}
 
@@ -271,19 +271,19 @@ public class ShopValidationHandler {
 	 * 
 	 * @param location
 	 * @param owner
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 * @throws TownSystemException
 	 */
 	public void checkForPlayerHasPermissionAtLocation(Location location, EconomyPlayer owner)
-			throws PlayerException, TownSystemException {
+			throws EconomyPlayerException, TownSystemException {
 		Townworld townworld = TownworldController.getTownWorldByName(location.getWorld().getName());
 		if (townworld.isChunkFree(location.getChunk())) {
-			throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
+			throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
 		} else {
 			Town town = townworld.getTownByChunk(location.getChunk());
 			if (!town.hasBuildPermissions(owner,
 					town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
-				throw PlayerException.getException(PlayerExceptionMessageEnum.NO_PERMISSION);
+				throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
 			}
 		}
 	}
@@ -316,11 +316,11 @@ public class ShopValidationHandler {
 	 * Check if player is online.
 	 * 
 	 * @param ecoPlayer
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 */
-	public void checkForPlayerIsOnline(EconomyPlayer ecoPlayer) throws PlayerException {
+	public void checkForPlayerIsOnline(EconomyPlayer ecoPlayer) throws EconomyPlayerException {
 		if (!ecoPlayer.isOnline()) {
-			throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ONLINE);
+			throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.NOT_ONLINE);
 		}
 	}
 
@@ -328,11 +328,11 @@ public class ShopValidationHandler {
 	 * Check if the player inventory is not full.
 	 * 
 	 * @param inventory
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 */
-	public void checkForPlayerInventoryNotFull(Inventory inventory) throws PlayerException {
+	public void checkForPlayerInventoryNotFull(Inventory inventory) throws EconomyPlayerException {
 		if (inventory.firstEmpty() == -1) {
-			throw PlayerException.getException(PlayerExceptionMessageEnum.INVENTORY_FULL);
+			throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.INVENTORY_FULL);
 		}
 	}
 

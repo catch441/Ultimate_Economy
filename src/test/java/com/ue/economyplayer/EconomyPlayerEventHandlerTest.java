@@ -16,10 +16,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.config.api.ConfigController;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.economyplayer.impl.EconomyPlayerEventHandler;
-import com.ue.exceptions.PlayerException;
+import com.ue.config.logic.impl.ConfigManagerImpl;
+import com.ue.economyplayer.logic.impl.EconomyPlayerEventHandlerImpl;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -32,7 +32,7 @@ public class EconomyPlayerEventHandlerTest {
 	private static ServerMock server;
 	private static WorldMock world;
 	private static PlayerMock player;
-	private static EconomyPlayerEventHandler eventHandler;
+	private static EconomyPlayerEventHandlerImpl eventHandler;
 
 	/**
 	 * Init shop for tests.
@@ -45,7 +45,7 @@ public class EconomyPlayerEventHandlerTest {
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
 		player = server.addPlayer("kthschnll");
-		eventHandler = new EconomyPlayerEventHandler();
+		eventHandler = new EconomyPlayerEventHandlerImpl();
 	}
 
 	/**
@@ -53,9 +53,9 @@ public class EconomyPlayerEventHandlerTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -72,35 +72,35 @@ public class EconomyPlayerEventHandlerTest {
 
 	@Test
 	public void handleJoinTestNew() {
-		EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+		EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		PlayerJoinEvent event = new PlayerJoinEvent(player, "");
 		try {
-			assertTrue(EconomyPlayerController.getAllEconomyPlayers().isEmpty());
+			assertTrue(EconomyPlayerManagerImpl.getAllEconomyPlayers().isEmpty());
 			eventHandler.handleJoin(event);
-			assertEquals("kthschnll", EconomyPlayerController.getAllEconomyPlayers().get(0).getName());
-			assertEquals(player, EconomyPlayerController.getAllEconomyPlayers().get(0).getPlayer());
+			assertEquals("kthschnll", EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).getName());
+			assertEquals(player, EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).getPlayer());
 			assertFalse(player.hasPermission("ultimate_economy.wilderness"));
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
 
 	@Test
 	public void handleJoinTestLoad() {
-		EconomyPlayerController.getAllEconomyPlayers().clear();
-		EconomyPlayerController.loadAllEconomyPlayers();
+		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
+		EconomyPlayerManagerImpl.loadAllEconomyPlayers();
 		PlayerJoinEvent event = new PlayerJoinEvent(player, "");
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).setPlayer(null);
-			EconomyPlayerController.getAllEconomyPlayers().get(0).setScoreBoardDisabled(false);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).setPlayer(null);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).setScoreBoardDisabled(false);
 			eventHandler.handleJoin(event);
-			assertEquals("kthschnll", EconomyPlayerController.getAllEconomyPlayers().get(0).getName());
-			assertEquals(player, EconomyPlayerController.getAllEconomyPlayers().get(0).getPlayer());
+			assertEquals("kthschnll", EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).getName());
+			assertEquals(player, EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).getPlayer());
 			assertFalse(player.hasPermission("ultimate_economy.wilderness"));
 			server.getScheduler().performOneTick();
 			assertEquals(1, player.getScoreboard().getObjectives().size());
 			assertNotNull("0", String.valueOf(player.getScoreboard().getObjective("bank")));
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -108,15 +108,15 @@ public class EconomyPlayerEventHandlerTest {
 	@Test
 	public void handleJoinTestWithWildernessInteraction() {
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().clear();
-			ConfigController.setWildernessInteraction(true);
-			EconomyPlayerController.loadAllEconomyPlayers();
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
+			ConfigManagerImpl.setWildernessInteraction(true);
+			EconomyPlayerManagerImpl.loadAllEconomyPlayers();
 			PlayerJoinEvent event = new PlayerJoinEvent(player, "");
 			assertFalse(player.hasPermission("ultimate_economy.wilderness"));
 			eventHandler.handleJoin(event);
 			assertTrue(player.hasPermission("ultimate_economy.wilderness"));
-			ConfigController.setWildernessInteraction(false);
-		} catch (PlayerException e) {
+			ConfigManagerImpl.setWildernessInteraction(false);
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}

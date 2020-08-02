@@ -5,11 +5,11 @@ import java.util.Calendar;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.ue.exceptions.GeneralEconomyException;
+import com.ue.common.utils.MessageWrapper;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.Rentshop;
 import com.ue.shopsystem.api.RentshopController;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class RentDailyTask extends BukkitRunnable {
 

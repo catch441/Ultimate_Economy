@@ -15,9 +15,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.ue.common.utils.SaveFileUtils;
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownExceptionMessageEnum;
@@ -369,10 +369,10 @@ public class ShopSavefileHandler extends SaveFileUtils {
 	private void convertToNewOwnerSaving(String name) {
 		if (name != null) {
 			try {
-				EconomyPlayer ecoPlayer = EconomyPlayerController
+				EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl
 						.getEconomyPlayerByName(name.substring(name.indexOf("_") + 1));
 				saveOwner(ecoPlayer);
-			} catch (PlayerException e) {
+			} catch (EconomyPlayerException e) {
 				Bukkit.getLogger().warning("[Ultimate_Economy] Error on save config to file");
 				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}

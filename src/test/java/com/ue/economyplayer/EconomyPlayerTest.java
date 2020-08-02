@@ -24,15 +24,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.bank.api.BankController;
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.economyplayer.impl.EconomyPlayerImpl;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
+import com.ue.bank.logic.impl.BankManagerImpl;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerImpl;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -53,9 +53,9 @@ public class EconomyPlayerTest {
 		MockBukkit.load(UltimateEconomy.class);
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
-		EconomyPlayerController.getAllEconomyPlayers().clear();
+		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 		player = server.addPlayer("catch441");
-		EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+		EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 	}
 
 	/**
@@ -73,17 +73,17 @@ public class EconomyPlayerTest {
 	 */
 	@AfterEach
 	public void unload() {
-		int size = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		int size2 = JobController.getJobList().size();
 		for (int i = 0; i < size2; i++) {
 			JobController.deleteJob(JobController.getJobList().get(0));
 		}
-		int size3 = BankController.getBankAccounts().size();
+		int size3 = BankManagerImpl.getBankAccounts().size();
 		for (int i = 0; i < size3; i++) {
-			BankController.deleteBankAccount(BankController.getBankAccounts().get(0));
+			BankManagerImpl.deleteBankAccount(BankManagerImpl.getBankAccounts().get(0));
 		}
 	}
 	
@@ -92,11 +92,11 @@ public class EconomyPlayerTest {
 		try {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
-			EconomyPlayerController.createEconomyPlayer("kthschnll");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("kthschnll");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.addHome("myhome", new Location(world, 1, 2, 3), false);
 			ecoPlayer.joinJob(job, false);
-			EconomyPlayerController.getAllEconomyPlayers().clear();
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 			EconomyPlayer result = new EconomyPlayerImpl("kthschnll", false);
 			assertEquals("kthschnll", result.getName());
 			assertTrue(result.isScoreBoardDisabled());
@@ -108,7 +108,7 @@ public class EconomyPlayerTest {
 			assertEquals(1, result.getHomeList().size());
 			assertEquals(1, result.getJobList().size());
 			assertEquals(job, result.getJobList().get(0));
-		} catch (PlayerException | GeneralEconomyException | JobSystemException e) {
+		} catch (EconomyPlayerException | GeneralEconomyException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -116,7 +116,7 @@ public class EconomyPlayerTest {
 	@Test
 	public void constructorLoadTestWithInvalidBankAndJob() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("kthschnll");
+			EconomyPlayerManagerImpl.createEconomyPlayer("kthschnll");
 			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			List<String> list = new ArrayList<>();
@@ -124,12 +124,12 @@ public class EconomyPlayerTest {
 			config.set("kthschnll.Jobs", list);
 			config.set("kthschnll.Iban", "myiban123");
 			config.save(saveFile);
-			EconomyPlayerController.getAllEconomyPlayers().clear();
-			BankController.deleteBankAccount(BankController.getBankAccounts().get(0));
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
+			BankManagerImpl.deleteBankAccount(BankManagerImpl.getBankAccounts().get(0));
 			EconomyPlayer result = new EconomyPlayerImpl("kthschnll", false);
 			assertEquals(0, result.getJobList().size());
 			assertNull(result.getBankAccount());
-		} catch (PlayerException | IOException e) {
+		} catch (EconomyPlayerException | IOException e) {
 			fail();
 		}
 	}
@@ -137,12 +137,12 @@ public class EconomyPlayerTest {
 	@Test
 	public void isOnlineTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("Wulfgar");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("Wulfgar");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			assertFalse(ecoPlayer.isOnline());
 			ecoPlayer.setPlayer(player);
 			assertTrue(ecoPlayer.isOnline());
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -150,12 +150,12 @@ public class EconomyPlayerTest {
 	@Test
 	public void isScoreBoardDisabledTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			assertTrue(ecoPlayer.isScoreBoardDisabled());
 			ecoPlayer.setScoreBoardDisabled(false);
 			assertFalse(ecoPlayer.isScoreBoardDisabled());
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -163,9 +163,9 @@ public class EconomyPlayerTest {
 	@Test
 	public void getNameTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			assertEquals("catch441", EconomyPlayerController.getAllEconomyPlayers().get(0).getName());
-		} catch (PlayerException e) {
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			assertEquals("catch441", EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).getName());
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -173,8 +173,8 @@ public class EconomyPlayerTest {
 	@Test
 	public void addHomeTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 2, 3);
 			ecoPlayer.addHome("myhome", loc, true);
 			assertEquals("§6You created the home §amyhome§6.", player.nextMessage());
@@ -191,7 +191,7 @@ public class EconomyPlayerTest {
 			assertEquals("1.0", config.getString("catch441.Home.myhome.X"));
 			assertEquals("2.0", config.getString("catch441.Home.myhome.Y"));
 			assertEquals("3.0", config.getString("catch441.Home.myhome.Z"));
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -199,14 +199,14 @@ public class EconomyPlayerTest {
 	@Test
 	public void addHomeTestWithAlredyExists() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 2, 3);
 			ecoPlayer.addHome("myhome", loc, false);
 			ecoPlayer.addHome("myhome", loc, false);
 			fail();
-		} catch (PlayerException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cThis home already exists!", e.getMessage());
 		}
 	}
@@ -214,16 +214,16 @@ public class EconomyPlayerTest {
 	@Test
 	public void addHomeTestWithReachedMaxHomes() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 2, 3);
 			ecoPlayer.addHome("myhome", loc, false);
 			ecoPlayer.addHome("myhome1", loc, false);
 			ecoPlayer.addHome("myhome2", loc, false);
 			ecoPlayer.addHome("myhome3", loc, false);
 			fail();
-		} catch (PlayerException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou have already reached the maximum!", e.getMessage());
 		}
 	}
@@ -231,12 +231,12 @@ public class EconomyPlayerTest {
 	@Test
 	public void getHomeTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 2, 3);
 			ecoPlayer.addHome("myhome", loc, false);
 			assertEquals(loc, ecoPlayer.getHome("myhome"));
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -244,11 +244,11 @@ public class EconomyPlayerTest {
 	@Test
 	public void getHomeTestWithNoHomes() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayerController.getAllEconomyPlayers().get(0).getHome("myhome");
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).getHome("myhome");
 			fail();
-		} catch (PlayerException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cThis home does not exist!", e.getMessage());
 		}
 	}
@@ -256,8 +256,8 @@ public class EconomyPlayerTest {
 	@Test
 	public void removeHomeTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 2, 3);
 			ecoPlayer.addHome("myhome", loc, false);
 			ecoPlayer.removeHome("myhome", true);
@@ -270,7 +270,7 @@ public class EconomyPlayerTest {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertEquals(0, config.getStringList("catch441.Home.Homelist").size());
 			assertFalse(config.isSet("catch441.Home.myhome.Name"));
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -278,11 +278,11 @@ public class EconomyPlayerTest {
 	@Test
 	public void removeHomeTestWithNoHomes() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayerController.getAllEconomyPlayers().get(0).removeHome("myhome", true);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).removeHome("myhome", true);
 			fail();
-		} catch (PlayerException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cThis home does not exist!", e.getMessage());
 		}
 	}
@@ -290,15 +290,15 @@ public class EconomyPlayerTest {
 	@Test
 	public void reachedMaxHomesTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 2, 3);
 			ecoPlayer.addHome("myhome", loc, false);
 			ecoPlayer.addHome("myhome1", loc, false);
 			assertFalse(ecoPlayer.reachedMaxHomes());
 			ecoPlayer.addHome("myhome2", loc, false);
 			assertTrue(ecoPlayer.reachedMaxHomes());
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -306,15 +306,15 @@ public class EconomyPlayerTest {
 	@Test
 	public void reachedMaxJoinedJobsTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			JobController.createJob("job1");
 			JobController.createJob("job2");
 			ecoPlayer.joinJob(JobController.getJobList().get(0), false);
 			assertFalse(ecoPlayer.reachedMaxJoinedJobs());
 			ecoPlayer.joinJob(JobController.getJobList().get(1), false);
 			assertTrue(ecoPlayer.reachedMaxJoinedJobs());
-		} catch (PlayerException | GeneralEconomyException | JobSystemException e) {
+		} catch (EconomyPlayerException | GeneralEconomyException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -322,15 +322,15 @@ public class EconomyPlayerTest {
 	@Test
 	public void getHomeListTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 2, 3);
 			ecoPlayer.addHome("myhome", loc, false);
 			Map<String, Location> list = ecoPlayer.getHomeList();
 			assertEquals(1, list.size());
 			assertTrue(list.containsKey("myhome"));
 			assertTrue(list.containsValue(loc));
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 
@@ -339,11 +339,11 @@ public class EconomyPlayerTest {
 	@Test
 	public void getBankAccountTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			String iban = ecoPlayer.getBankAccount().getIban();
-			assertEquals(BankController.getBankAccountByIban(iban), ecoPlayer.getBankAccount());
-		} catch (PlayerException | GeneralEconomyException e) {
+			assertEquals(BankManagerImpl.getBankAccountByIban(iban), ecoPlayer.getBankAccount());
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 
@@ -352,12 +352,12 @@ public class EconomyPlayerTest {
 	@Test
 	public void hasEnoughtMoneyTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(10, false);
 			assertTrue(ecoPlayer.hasEnoughtMoney(10));
 			assertFalse(ecoPlayer.hasEnoughtMoney(20));
-		} catch (PlayerException | GeneralEconomyException e) {
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 	}
@@ -365,8 +365,8 @@ public class EconomyPlayerTest {
 	@Test
 	public void joinJobTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			ecoPlayer.joinJob(job, true);
@@ -378,7 +378,7 @@ public class EconomyPlayerTest {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertEquals(1, config.getStringList("catch441.Jobs").size());
 			assertEquals("myjob", config.getStringList("catch441.Jobs").get(0));
-		} catch (PlayerException | GeneralEconomyException | JobSystemException e) {
+		} catch (EconomyPlayerException | GeneralEconomyException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -386,15 +386,15 @@ public class EconomyPlayerTest {
 	@Test
 	public void joinJobTestWithAlreadyJoined() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			ecoPlayer.joinJob(job, false);
 			ecoPlayer.joinJob(job, false);
 			fail();
-		} catch (PlayerException | JobSystemException | GeneralEconomyException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException | JobSystemException | GeneralEconomyException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou already joined this job!", e.getMessage());
 		}
 	}
@@ -402,8 +402,8 @@ public class EconomyPlayerTest {
 	@Test
 	public void joinJobTestWithMaxReached() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			JobController.createJob("myjob1");
 			JobController.createJob("myjob2");
 			JobController.createJob("myjob3");
@@ -413,8 +413,8 @@ public class EconomyPlayerTest {
 			ecoPlayer.joinJob(JobController.getJobList().get(2), false);
 			ecoPlayer.joinJob(JobController.getJobList().get(3), false);
 			fail();
-		} catch (PlayerException | JobSystemException | GeneralEconomyException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException | JobSystemException | GeneralEconomyException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou have already reached the maximum!", e.getMessage());
 		}
 	}
@@ -422,14 +422,14 @@ public class EconomyPlayerTest {
 	@Test
 	public void hasJobTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			JobController.createJob("myjob");
 			JobController.createJob("myjob2");
 			ecoPlayer.joinJob(JobController.getJobList().get(0), false);
 			assertTrue(ecoPlayer.hasJob(JobController.getJobList().get(0)));
 			assertFalse(ecoPlayer.hasJob(JobController.getJobList().get(1)));
-		} catch (PlayerException | GeneralEconomyException | JobSystemException e) {
+		} catch (EconomyPlayerException | GeneralEconomyException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -437,8 +437,8 @@ public class EconomyPlayerTest {
 	@Test
 	public void leaveJobTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			ecoPlayer.joinJob(job, false);
@@ -449,7 +449,7 @@ public class EconomyPlayerTest {
 			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertEquals(0, config.getStringList("catch441.Jobs").size());
-		} catch (PlayerException | GeneralEconomyException | JobSystemException e) {
+		} catch (EconomyPlayerException | GeneralEconomyException | JobSystemException e) {
 			fail();
 		}
 	}
@@ -457,14 +457,14 @@ public class EconomyPlayerTest {
 	@Test
 	public void leaveJobTestWithJobNotJoined() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			ecoPlayer.leaveJob(job, false);
 			fail();
-		} catch (PlayerException | GeneralEconomyException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou didnt join this job yet!", e.getMessage());
 		}
 	}
@@ -472,14 +472,14 @@ public class EconomyPlayerTest {
 	@Test
 	public void getJobListTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			JobController.createJob("myjob");
 			ecoPlayer.joinJob(JobController.getJobList().get(0), false);
 			List<Job> list = ecoPlayer.getJobList();
 			assertEquals(1, list.size());
 			assertEquals(JobController.getJobList().get(0), list.get(0));
-		} catch (PlayerException | GeneralEconomyException | JobSystemException e) {
+		} catch (EconomyPlayerException | GeneralEconomyException | JobSystemException e) {
 			fail();
 		}
 
@@ -488,8 +488,8 @@ public class EconomyPlayerTest {
 	@Test
 	public void increasePlayerAmountTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.setScoreBoardDisabled(false);
 			ecoPlayer.increasePlayerAmount(10, true);
 			assertEquals("§6You got §a10.0§6 §a$§6", player.nextMessage());
@@ -499,7 +499,7 @@ public class EconomyPlayerTest {
 			assertEquals(1, player.getScoreboard().getObjectives().size());
 			assertEquals("10", String
 					.valueOf(player.getScoreboard().getObjective("bank").getScore(ChatColor.GOLD + "$").getScore()));
-		} catch (PlayerException | GeneralEconomyException e) {
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 	}
@@ -507,11 +507,11 @@ public class EconomyPlayerTest {
 	@Test
 	public void increasePlayerAmountTestWithInvalidAmount() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(-10, false);
 			fail();
-		} catch (PlayerException | GeneralEconomyException e) {
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4-10.0§c is invalid!", e.getMessage());
 		}
@@ -520,8 +520,8 @@ public class EconomyPlayerTest {
 	@Test
 	public void decreasePlayerAmountTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.setScoreBoardDisabled(false);
 			ecoPlayer.increasePlayerAmount(10, false);
 			ecoPlayer.decreasePlayerAmount(5, false);
@@ -531,7 +531,7 @@ public class EconomyPlayerTest {
 			assertEquals("5", String
 					.valueOf(player.getScoreboard().getObjective("bank").getScore(ChatColor.GOLD + "$").getScore()));
 			ecoPlayer.decreasePlayerAmount(5, false);
-		} catch (PlayerException | GeneralEconomyException e) {
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 	}
@@ -539,12 +539,12 @@ public class EconomyPlayerTest {
 	@Test
 	public void decreasePlayerAmountTestWithNotEnoughMoneyPersonal() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.decreasePlayerAmount(10, true);
 			fail();
-		} catch (PlayerException | GeneralEconomyException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou have not enough money!", e.getMessage());
 		}
 	}
@@ -552,12 +552,12 @@ public class EconomyPlayerTest {
 	@Test
 	public void decreasePlayerAmountTestWithNotEnoughMoney() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.decreasePlayerAmount(10, false);
 			fail();
-		} catch (PlayerException | GeneralEconomyException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cThe player has not enough money!", e.getMessage());
 		}
 	}
@@ -565,10 +565,10 @@ public class EconomyPlayerTest {
 	@Test
 	public void getPlayerTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			assertEquals(player, ecoPlayer.getPlayer());
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -576,13 +576,13 @@ public class EconomyPlayerTest {
 	@Test
 	public void addWildernessPermissionTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.denyWildernessPermission();
 			assertFalse(ecoPlayer.getPlayer().hasPermission("ultimate_economy.wilderness"));
 			ecoPlayer.addWildernessPermission();
 			assertTrue(ecoPlayer.getPlayer().hasPermission("ultimate_economy.wilderness"));
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -590,13 +590,13 @@ public class EconomyPlayerTest {
 	@Test
 	public void denyWildernessPermissionTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.addWildernessPermission();
 			assertTrue(ecoPlayer.getPlayer().hasPermission("ultimate_economy.wilderness"));
 			ecoPlayer.denyWildernessPermission();
 			assertFalse(ecoPlayer.getPlayer().hasPermission("ultimate_economy.wilderness"));
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -604,10 +604,10 @@ public class EconomyPlayerTest {
 	@Test
 	public void payToOtherPlayerTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
 			PlayerMock recieverPlayer = server.addPlayer("kthschnll");
-			EconomyPlayer reciever = EconomyPlayerController.getAllEconomyPlayers().get(1);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer reciever = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(1);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.setScoreBoardDisabled(false);
 			reciever.setScoreBoardDisabled(false);
 			ecoPlayer.increasePlayerAmount(10, false);
@@ -624,7 +624,7 @@ public class EconomyPlayerTest {
 			assertEquals(1, player.getScoreboard().getObjectives().size());
 			assertEquals("0", String
 					.valueOf(player.getScoreboard().getObjective("bank").getScore(ChatColor.GOLD + "$").getScore()));
-		} catch (PlayerException | GeneralEconomyException e) {
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 	}
@@ -632,8 +632,8 @@ public class EconomyPlayerTest {
 	@Test
 	public void addJoinedTownTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.addJoinedTown("mytown");
 			assertEquals(1, ecoPlayer.getJoinedTownList().size());
 			assertEquals("mytown", ecoPlayer.getJoinedTownList().get(0));
@@ -642,7 +642,7 @@ public class EconomyPlayerTest {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertEquals(1, config.getStringList("catch441.joinedTowns").size());
 			assertEquals("mytown", config.getStringList("catch441.joinedTowns").get(0));
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -650,13 +650,13 @@ public class EconomyPlayerTest {
 	@Test
 	public void addJoinedTownTestWithAlreadyJoined() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.addJoinedTown("mytown");
 			ecoPlayer.addJoinedTown("mytown");
 			fail();
-		} catch (PlayerException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou already joined this town!", e.getMessage());
 		}
 	}
@@ -664,13 +664,13 @@ public class EconomyPlayerTest {
 	@Test
 	public void addJoinedTownTestWithMaxTownsReached() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.addJoinedTown("mytown");
 			ecoPlayer.addJoinedTown("mytown1");
 			fail();
-		} catch (PlayerException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou have already reached the maximum!", e.getMessage());
 		}
 	}
@@ -678,12 +678,12 @@ public class EconomyPlayerTest {
 	@Test
 	public void getJoinedTownListTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.addJoinedTown("mytown");
 			assertEquals(1, ecoPlayer.getJoinedTownList().size());
 			assertEquals("mytown", ecoPlayer.getJoinedTownList().get(0));
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -691,12 +691,12 @@ public class EconomyPlayerTest {
 	@Test
 	public void reachedMaxJoinedTownsTest() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			assertFalse(ecoPlayer.reachedMaxJoinedTowns());
 			ecoPlayer.addJoinedTown("mytown");
 			assertTrue(ecoPlayer.reachedMaxJoinedTowns());
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -704,8 +704,8 @@ public class EconomyPlayerTest {
 	@Test
 	public void removeJoinedTown() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.addJoinedTown("mytown");
 			ecoPlayer.removeJoinedTown("mytown");
 			assertEquals(0, ecoPlayer.getJoinedTownList().size());
@@ -713,7 +713,7 @@ public class EconomyPlayerTest {
 			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertEquals(0, config.getStringList("catch441.joinedTowns").size());
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -721,12 +721,12 @@ public class EconomyPlayerTest {
 	@Test
 	public void removeJoinedTownWithTownNotJoined() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.removeJoinedTown("mytown");
 			fail();
-		} catch (PlayerException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (EconomyPlayerException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou didnt join this town yet!", e.getMessage());
 		}
 	}
@@ -734,8 +734,8 @@ public class EconomyPlayerTest {
 	@Test
 	public void setScoreBoardDisabled() {
 		try {
-			EconomyPlayerController.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			assertTrue(ecoPlayer.isScoreBoardDisabled());
 			ecoPlayer.setScoreBoardDisabled(false);
 			assertFalse(ecoPlayer.isScoreBoardDisabled());
@@ -754,7 +754,7 @@ public class EconomyPlayerTest {
 			File saveFile1 = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
 			YamlConfiguration config1 = YamlConfiguration.loadConfiguration(saveFile1);
 			assertTrue(config1.getBoolean("catch441.scoreboardDisabled"));
-		} catch (PlayerException e) {
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}

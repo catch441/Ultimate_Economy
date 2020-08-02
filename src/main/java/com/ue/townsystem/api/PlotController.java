@@ -8,9 +8,9 @@ import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.townsystem.impl.PlotImpl;
@@ -26,13 +26,13 @@ public class PlotController {
      * @param coords
      * @return Plot
      * @throws TownSystemException
-     * @throws PlayerException
+     * @throws EconomyPlayerException
      *             if EconomyPlayers are not loaded before.
      */
-    public static Plot loadPlot(TownImpl townImpl, String coords) throws TownSystemException, PlayerException {
+    public static Plot loadPlot(TownImpl townImpl, String coords) throws TownSystemException, EconomyPlayerException {
 	FileConfiguration config = YamlConfiguration.loadConfiguration(townImpl.getTownworld().getSaveFile());
 	if (config.getStringList("Towns." + townImpl.getTownName() + ".chunks").contains(coords)) {
-	    EconomyPlayer economyPlayer = EconomyPlayerController.getEconomyPlayerByName(
+	    EconomyPlayer economyPlayer = EconomyPlayerManagerImpl.getEconomyPlayerByName(
 		    config.getString("Towns." + townImpl.getTownName() + ".Plots." + coords + ".owner"));
 	    PlotImpl plotImpl = new PlotImpl(townImpl, economyPlayer, coords);
 	    plotImpl.setIsForSale(
@@ -40,7 +40,7 @@ public class PlotController {
 	    List<EconomyPlayer> residents = new ArrayList<>();
 	    for (String name : config
 		    .getStringList("Towns." + townImpl.getTownName() + ".Plots." + coords + ".coOwners")) {
-		residents.add(EconomyPlayerController.getEconomyPlayerByName(name));
+		residents.add(EconomyPlayerManagerImpl.getEconomyPlayerByName(name));
 	    }
 	    plotImpl.setResidents(residents);
 	    plotImpl.setSalePrice(

@@ -5,11 +5,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.language.MessageWrapper;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class AdminshopCommandExecutor implements CommandExecutor {
 
@@ -22,7 +22,7 @@ public class AdminshopCommandExecutor implements CommandExecutor {
 					return AdminshopCommandEnum.getEnum(args[0]).perform(label, args, player);
 				}
 				return false;
-			} catch (TownSystemException | ShopSystemException | PlayerException | GeneralEconomyException e) {
+			} catch (TownSystemException | ShopSystemException | EconomyPlayerException | GeneralEconomyException e) {
 				player.sendMessage(e.getMessage());
 			} catch (NumberFormatException e) {
 				player.sendMessage(MessageWrapper.getErrorString("invalid_parameter", "number"));

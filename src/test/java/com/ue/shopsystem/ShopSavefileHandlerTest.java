@@ -24,8 +24,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.impl.ShopItem;
@@ -61,7 +61,7 @@ public class ShopSavefileHandlerTest {
 	@AfterAll
 	public static void deleteSavefiles() {
 		UltimateEconomy.getInstance.getDataFolder().delete();
-		EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+		EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		MockBukkit.unload();
 		savefileHandler.deleteFile();
 	}
@@ -234,7 +234,7 @@ public class ShopSavefileHandlerTest {
 
 	@Test
 	public void saveOwnerTest() {
-		EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+		EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 		savefileHandler.saveOwner(ecoPlayer);
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "A0.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -243,7 +243,7 @@ public class ShopSavefileHandlerTest {
 
 	@Test
 	public void saveOwnerTestWithDelete() {
-		EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+		EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 		savefileHandler.saveOwner(ecoPlayer);
 		savefileHandler.saveOwner(null);
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "A0.yml");
@@ -400,7 +400,7 @@ public class ShopSavefileHandlerTest {
 
 	@Test
 	public void loadOwnerTest() {
-		EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+		EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 		savefileHandler.saveOwner(ecoPlayer);
 		assertEquals("kthschnll", savefileHandler.loadOwner(null));
 	}

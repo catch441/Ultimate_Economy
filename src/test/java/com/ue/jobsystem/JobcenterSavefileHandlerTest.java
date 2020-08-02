@@ -20,10 +20,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.exceptions.GeneralEconomyException;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
-import com.ue.jobsystem.impl.JobcenterSavefileHandler;
+import com.ue.jobsystem.dataaccese.impl.JobcenterDaoImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -32,7 +32,7 @@ import be.seeseemelk.mockbukkit.WorldMock;
 
 public class JobcenterSavefileHandlerTest {
 
-	private static JobcenterSavefileHandler savefileHandler;
+	private static JobcenterDaoImpl savefileHandler;
 	private static WorldMock world;
 	private static ServerMock server;
 
@@ -46,7 +46,7 @@ public class JobcenterSavefileHandlerTest {
 		MockBukkit.load(UltimateEconomy.class);
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
-		savefileHandler = new JobcenterSavefileHandler("kthcenter", true);
+		savefileHandler = new JobcenterDaoImpl("kthcenter", true);
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class JobcenterSavefileHandlerTest {
 	public void unload() {
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 		file.delete();
-		savefileHandler = new JobcenterSavefileHandler("kthcenter", true);
+		savefileHandler = new JobcenterDaoImpl("kthcenter", true);
 		int size = JobController.getJobList().size();
 		for (int i = 0; i < size; i++) {
 			JobController.deleteJob(JobController.getJobList().get(0));
@@ -75,7 +75,7 @@ public class JobcenterSavefileHandlerTest {
 
 	@Test
 	public void constructorNewTest() {
-		JobcenterSavefileHandler savefileHandler1 = new JobcenterSavefileHandler("kthcenter", true);
+		JobcenterDaoImpl savefileHandler1 = new JobcenterDaoImpl("kthcenter", true);
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 		assertTrue(file.exists());
 		savefileHandler1.deleteSavefile();
@@ -86,7 +86,7 @@ public class JobcenterSavefileHandlerTest {
 		try {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 			file.createNewFile();
-			JobcenterSavefileHandler savefileHandler1 = new JobcenterSavefileHandler("kthcenter", false);
+			JobcenterDaoImpl savefileHandler1 = new JobcenterDaoImpl("kthcenter", false);
 			File result = new File(UltimateEconomy.getInstance.getDataFolder(), "kthcenter-JobCenter.yml");
 			assertTrue(result.exists());
 			savefileHandler1.deleteSavefile();
@@ -167,7 +167,7 @@ public class JobcenterSavefileHandlerTest {
 	@Test
 	public void loadJobcenterSizeTest() {
 		savefileHandler.saveJobcenterSize(9);
-		savefileHandler = new JobcenterSavefileHandler("kthcenter", false);
+		savefileHandler = new JobcenterDaoImpl("kthcenter", false);
 		assertEquals(9, savefileHandler.loadJobcenterSize());
 	}
 
@@ -175,7 +175,7 @@ public class JobcenterSavefileHandlerTest {
 	public void loadJobcenterLocationTest() {
 		Location loc = new Location(world, 1, 2, 3);
 		savefileHandler.saveJobcenterLocation(loc);
-		savefileHandler = new JobcenterSavefileHandler("kthcenter", false);
+		savefileHandler = new JobcenterDaoImpl("kthcenter", false);
 		Location result = savefileHandler.loadJobcenterLocation();
 		assertEquals(world, result.getWorld());
 		assertEquals("1.0", String.valueOf(result.getX()));
@@ -192,7 +192,7 @@ public class JobcenterSavefileHandlerTest {
 		config.set("ShopLocation.y",2);
 		config.set("ShopLocation.z",3);
 		save(file,config);
-		savefileHandler = new JobcenterSavefileHandler("kthcenter", false);
+		savefileHandler = new JobcenterDaoImpl("kthcenter", false);
 		Location result = savefileHandler.loadJobcenterLocation();
 		assertEquals(world, result.getWorld());
 		assertEquals("1.0", String.valueOf(result.getX()));
@@ -206,7 +206,7 @@ public class JobcenterSavefileHandlerTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			savefileHandler.saveJob(job, "stone", 3);
-			savefileHandler = new JobcenterSavefileHandler("kthcenter", false);
+			savefileHandler = new JobcenterDaoImpl("kthcenter", false);
 			assertEquals(3, savefileHandler.loadJobSlot(job));
 		} catch (GeneralEconomyException e) {
 			fail();
@@ -222,7 +222,7 @@ public class JobcenterSavefileHandlerTest {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			config.set("Jobs.myjob.ItemSlot", 9);
 			save(file,config);
-			savefileHandler = new JobcenterSavefileHandler("kthcenter", false);
+			savefileHandler = new JobcenterDaoImpl("kthcenter", false);
 			assertEquals(8, savefileHandler.loadJobSlot(job));
 		} catch (GeneralEconomyException e) {
 			fail();
@@ -234,7 +234,7 @@ public class JobcenterSavefileHandlerTest {
 		List<String> list = new ArrayList<>();
 		list.add("myjob");
 		savefileHandler.saveJobNameList(list);
-		savefileHandler = new JobcenterSavefileHandler("kthcenter", false);
+		savefileHandler = new JobcenterDaoImpl("kthcenter", false);
 		assertEquals(1,savefileHandler.loadJobNameList().size());
 		assertEquals("myjob",savefileHandler.loadJobNameList().get(0));
 	}
@@ -245,7 +245,7 @@ public class JobcenterSavefileHandlerTest {
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			savefileHandler.saveJob(job, "STONE", 3);
-			savefileHandler = new JobcenterSavefileHandler("kthcenter", false);
+			savefileHandler = new JobcenterDaoImpl("kthcenter", false);
 			assertEquals(Material.STONE, savefileHandler.loadJobItemMaterial(job));
 		} catch (GeneralEconomyException e) {
 			fail();

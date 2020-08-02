@@ -1,24 +1,38 @@
 package com.ue.exceptions;
 
-import com.ue.language.MessageWrapper;
+import com.ue.common.utils.MessageWrapper;
 
 public class TownSystemException extends Exception {
 
 	private static final long serialVersionUID = 1L;
-
-	TownSystemException(String msg) {
-		super(msg);
-	}
+	private final MessageWrapper messageWrapper;
+	
+	private TownExceptionMessageEnum key;
+	private Object[] params;
 
 	/**
-	 * Returns a town system exception with a error message.
-	 * 
+	 * Default constructor.
 	 * @param key
 	 * @param params
-	 * @return town system exception
+	 * @param messageWrapper
 	 */
-	public static TownSystemException getException(TownExceptionMessageEnum key, Object... params) {
-		return new TownSystemException(MessageWrapper.getErrorString(key.getValue(), params));
+	public TownSystemException(MessageWrapper messageWrapper, TownExceptionMessageEnum key, Object... params) {
+		super();
+		this.key = key;
+		this.params = params;
+		this.messageWrapper = messageWrapper;
 	}
-
+	
+	@Override
+	public String getMessage() {
+		return messageWrapper.getErrorString(key.getValue(), params);
+	}
+	
+	/**
+	 * Returns the params.
+	 * @return object array
+	 */
+	public Object[] getParams() {
+		return params;
+	}
 }

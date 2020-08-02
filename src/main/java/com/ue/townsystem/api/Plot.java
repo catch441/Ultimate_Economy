@@ -5,8 +5,8 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.TownSystemException;
 
 public interface Plot {
@@ -21,18 +21,18 @@ public interface Plot {
      * @param sendMessage
      *            when true a message is send to the receiver and this player
      * @throws TownSystemException
-     * @throws PlayerException
+     * @throws EconomyPlayerException
      */
     public void setForSale(double salePrice, Location playerLocation, EconomyPlayer player, boolean sendMessage)
-	    throws TownSystemException, PlayerException;
+	    throws TownSystemException, EconomyPlayerException;
     
     /**
      * Moves a sale villager to a new location.
      * 
      * @param newLocation
-     * @throws PlayerException
+     * @throws EconomyPlayerException
      */
-    public void moveSaleVillager(Location newLocation) throws PlayerException;
+    public void moveSaleVillager(Location newLocation) throws EconomyPlayerException;
 
     /**
      * Returns the salePrice for this slot.

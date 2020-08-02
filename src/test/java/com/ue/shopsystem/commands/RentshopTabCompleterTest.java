@@ -15,13 +15,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.api.Rentshop;
 import com.ue.shopsystem.api.RentshopController;
 import com.ue.shopsystem.commands.rentshop.RentshopTabCompleter;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -46,7 +46,7 @@ public class RentshopTabCompleterTest {
 		MockBukkit.load(UltimateEconomy.class);
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
-		EconomyPlayerController.getAllEconomyPlayers().clear();
+		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 		player = server.addPlayer("kthschnll");
 		RentshopController.getRentShops().clear();
 		tabCompleter = new RentshopTabCompleter();
@@ -54,9 +54,9 @@ public class RentshopTabCompleterTest {
 			Rentshop shop1 = RentshopController.createRentShop(new Location(world, 1, 2, 3), 9, 0);
 			Rentshop shop2 = RentshopController.createRentShop(new Location(world, 1, 2, 3), 9, 0);
 			RentshopController.createRentShop(new Location(world, 1, 2, 3), 9, 0);
-			shop1.rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0), 1);
-			shop2.rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0), 1);
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+			shop1.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
+			shop2.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -66,9 +66,9 @@ public class RentshopTabCompleterTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);

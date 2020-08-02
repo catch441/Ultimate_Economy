@@ -15,14 +15,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.api.PlayershopController;
 import com.ue.shopsystem.commands.playershop.PlayershopTabCompleter;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -50,11 +50,11 @@ public class PlayershopTabCompleterTest {
 		player = server.addPlayer("kthschnll1");
 		tabCompleter = new PlayershopTabCompleter();
 		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 2, 3);
 			PlayershopController.createPlayerShop("myshop1", loc, 9, ecoPlayer);
 			PlayershopController.createPlayerShop("myshop2", loc, 9, ecoPlayer);
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException | TownSystemException e) {
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException | TownSystemException e) {
 			fail();
 		}
 	}

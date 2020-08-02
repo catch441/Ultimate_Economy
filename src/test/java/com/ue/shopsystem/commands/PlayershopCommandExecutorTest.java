@@ -18,14 +18,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.api.Playershop;
 import com.ue.shopsystem.api.PlayershopController;
 import com.ue.shopsystem.commands.playershop.PlayershopCommandExecutor;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -52,7 +52,7 @@ public class PlayershopCommandExecutorTest {
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
 		server.setPlayers(0);
-		EconomyPlayerController.getAllEconomyPlayers().clear();
+		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 		player = server.addPlayer("1catch441");
 		other = server.addPlayer("1kthschnll");
 		executor = new PlayershopCommandExecutor();
@@ -64,9 +64,9 @@ public class PlayershopCommandExecutorTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -331,8 +331,8 @@ public class PlayershopCommandExecutorTest {
 		assertTrue(result);
 		Playershop shop = PlayershopController.getPlayerShops().get(0);
 		try {
-			assertEquals(EconomyPlayerController.getEconomyPlayerByName("1kthschnll"), shop.getOwner());
-		} catch (PlayerException e) {
+			assertEquals(EconomyPlayerManagerImpl.getEconomyPlayerByName("1kthschnll"), shop.getOwner());
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 		assertEquals("§6You got the shop §amyshop§6 from §a1catch441§6.", other.nextMessage());
@@ -344,20 +344,20 @@ public class PlayershopCommandExecutorTest {
 	@Test
 	public void changeOwnerCommandTestWithOtherNotOnline() {
 		createPlayershop(0);
-		EconomyPlayerController.getAllEconomyPlayers().get(1).setPlayer(null);
+		EconomyPlayerManagerImpl.getAllEconomyPlayers().get(1).setPlayer(null);
 		String[] args = { "changeOwner", "myshop", "1kthschnll" };
 		boolean result = executor.onCommand(player, null, "playershop", args);
 		assertTrue(result);
 		Playershop shop = PlayershopController.getPlayerShops().get(0);
 		try {
-			assertEquals(EconomyPlayerController.getEconomyPlayerByName("1kthschnll"), shop.getOwner());
-		} catch (PlayerException e) {
+			assertEquals(EconomyPlayerManagerImpl.getEconomyPlayerByName("1kthschnll"), shop.getOwner());
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 		assertNull(other.nextMessage());
 		assertEquals("§6The new owner of your shop is §a1kthschnll§6.", player.nextMessage());
 		assertNull(player.nextMessage());
-		EconomyPlayerController.getAllEconomyPlayers().get(0).setPlayer(other);
+		EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).setPlayer(other);
 	}
 	
 	@Test
@@ -411,8 +411,8 @@ public class PlayershopCommandExecutorTest {
 	private void createPlayershop(int player) {
 		Location loc = new Location(world, 1, 2, 30);
 		try {
-			PlayershopController.createPlayerShop("myshop", loc, 9, EconomyPlayerController.getAllEconomyPlayers().get(player));
-		} catch (ShopSystemException | TownSystemException | PlayerException | GeneralEconomyException e) {
+			PlayershopController.createPlayerShop("myshop", loc, 9, EconomyPlayerManagerImpl.getAllEconomyPlayers().get(player));
+		} catch (ShopSystemException | TownSystemException | EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 	}

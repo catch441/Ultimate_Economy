@@ -22,14 +22,14 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
-import com.ue.jobsystem.api.JobcenterController;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobSystemEventHandler {
@@ -63,11 +63,11 @@ public class JobSystemEventHandler {
 		LivingEntity entity = event.getEntity();
 		if (entity.getKiller() instanceof Player) {
 			try {
-				EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(entity.getKiller().getName());
+				EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getEconomyPlayerByName(entity.getKiller().getName());
 				if (entity.getKiller().getGameMode() == GameMode.SURVIVAL) {
 					payForKillJob(entity, ecoPlayer);
 				}
-			} catch (PlayerException e) {
+			} catch (EconomyPlayerException e) {
 			}
 		}
 	}
@@ -91,10 +91,10 @@ public class JobSystemEventHandler {
 	public void handleBreakBlock(BlockBreakEvent event) {
 		if (event.getPlayer().getGameMode() == GameMode.SURVIVAL) {
 			try {
-				EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(event.getPlayer().getName());
+				EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getEconomyPlayerByName(event.getPlayer().getName());
 				List<MetadataValue> list = event.getBlock().getMetadata("placedBy");
 				payForBreakJob(ecoPlayer, event.getBlock(), list);
-			} catch (PlayerException e) {
+			} catch (EconomyPlayerException e) {
 			}
 		}
 	}
@@ -131,7 +131,7 @@ public class JobSystemEventHandler {
 	public void handleFishing(PlayerFishEvent event) {
 		if (event.getState().equals(PlayerFishEvent.State.CAUGHT_FISH)) {
 			try {
-				EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(event.getPlayer().getName());
+				EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getEconomyPlayerByName(event.getPlayer().getName());
 				List<Job> jobList = ecoPlayer.getJobList();
 				if (!jobList.isEmpty()) {
 					Item caught = (Item) event.getCaught();
@@ -140,7 +140,7 @@ public class JobSystemEventHandler {
 						payForFisherJob(ecoPlayer, jobList, lootType);
 					}
 				}
-			} catch (ClassCastException | PlayerException e) {
+			} catch (ClassCastException | EconomyPlayerException e) {
 			}
 		}
 	}
@@ -176,7 +176,7 @@ public class JobSystemEventHandler {
 		if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
 			event.setCancelled(true);
 			try {
-				EconomyPlayer ecoPlayer = EconomyPlayerController
+				EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl
 						.getEconomyPlayerByName(event.getWhoClicked().getName());
 				String displayname = event.getCurrentItem().getItemMeta().getDisplayName();
 				if (displayname != null) {
@@ -189,7 +189,7 @@ public class JobSystemEventHandler {
 					}
 				}
 			} catch (JobSystemException | GeneralEconomyException e) {
-			} catch (PlayerException e) {
+			} catch (EconomyPlayerException e) {
 				event.getWhoClicked().sendMessage(ChatColor.RED + e.getMessage());
 			}
 		}
@@ -203,7 +203,7 @@ public class JobSystemEventHandler {
 	public void handleOpenInventory(PlayerInteractEntityEvent event) {
 		try {
 			event.setCancelled(true);
-			JobcenterController.getJobcenterByName(event.getRightClicked().getCustomName()).openInv(event.getPlayer());
+			JobcenterManagerImpl.getJobcenterByName(event.getRightClicked().getCustomName()).openInv(event.getPlayer());
 		} catch (GeneralEconomyException e) {
 		}
 	}

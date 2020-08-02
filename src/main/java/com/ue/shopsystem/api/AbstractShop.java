@@ -10,13 +10,13 @@ import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.impl.ShopItem;
 import com.ue.shopsystem.impl.ShopSavefileHandler;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public abstract interface AbstractShop {
 
@@ -98,11 +98,11 @@ public abstract interface AbstractShop {
 	 * @param buyPrice
 	 * @param itemStack
 	 * @throws ShopSystemException
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 * @throws GeneralEconomyException
 	 */
 	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack)
-			throws ShopSystemException, PlayerException, GeneralEconomyException;
+			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException;
 
 	/**
 	 * This method removes a item from this shop.
@@ -122,11 +122,11 @@ public abstract interface AbstractShop {
 	 * @param buyPrice
 	 * @return String
 	 * @throws ShopSystemException
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 * @throws GeneralEconomyException
 	 */
 	public String editShopItem(int slot, String amount, String sellPrice, String buyPrice)
-			throws ShopSystemException, PlayerException, GeneralEconomyException;
+			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException;
 
 	/**
 	 * Buy the shop item from a specific slot for the given economy player. The
@@ -136,11 +136,11 @@ public abstract interface AbstractShop {
 	 * @param ecoPlayer
 	 * @param sendMessage
 	 * @throws GeneralEconomyException
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 * @throws ShopSystemException
 	 */
 	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
-			throws GeneralEconomyException, PlayerException, ShopSystemException;
+			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException;
 
 	/**
 	 * Sells a shopitem to this shop. Make sure, that the player has the amount of
@@ -152,10 +152,10 @@ public abstract interface AbstractShop {
 	 * @param sendMessage
 	 * @throws GeneralEconomyException
 	 * @throws ShopSystemException
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 */
 	public void sellShopItem(int slot, int amount, EconomyPlayer ecoPlayer, boolean sendMessage)
-			throws GeneralEconomyException, ShopSystemException, PlayerException;
+			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException;
 
 	/**
 	 * Change the profession of a shopvillager.
@@ -183,18 +183,18 @@ public abstract interface AbstractShop {
 	 * @param newSize
 	 * @throws ShopSystemException
 	 * @throws GeneralEconomyException
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 */
-	public void changeShopSize(int newSize) throws ShopSystemException, GeneralEconomyException, PlayerException;
+	public void changeShopSize(int newSize) throws ShopSystemException, GeneralEconomyException, EconomyPlayerException;
 
 	/**
 	 * This method moves a shop to a new location.
 	 * 
 	 * @param location
 	 * @throws TownSystemException
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 */
-	public void moveShop(Location location) throws TownSystemException, PlayerException;
+	public void moveShop(Location location) throws TownSystemException, EconomyPlayerException;
 
 	/**
 	 * Despawns the shop villager.

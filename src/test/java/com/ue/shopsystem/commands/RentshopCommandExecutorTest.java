@@ -18,13 +18,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.api.Rentshop;
 import com.ue.shopsystem.api.RentshopController;
 import com.ue.shopsystem.commands.rentshop.RentshopCommandExecutor;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -51,7 +51,7 @@ public class RentshopCommandExecutorTest {
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
 		server.setPlayers(0);
-		EconomyPlayerController.getAllEconomyPlayers().clear();
+		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 		player = server.addPlayer("kthschnll");
 		other = server.addPlayer("catch441");
 		executor = new RentshopCommandExecutor();
@@ -62,9 +62,9 @@ public class RentshopCommandExecutorTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -295,9 +295,9 @@ public class RentshopCommandExecutorTest {
 		String[] args = { "changeProfession", "Shop#R0", "Farmer" };
 		Rentshop shop = RentshopController.getRentShops().get(0);
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
-			shop.rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0), 1);
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
+			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 		boolean result = executor.onCommand(player, null, "rentshop", args);
@@ -338,9 +338,9 @@ public class RentshopCommandExecutorTest {
 		String[] args = { "rename", "Shop#R0", "NewName" };
 		Rentshop shop = RentshopController.getRentShops().get(0);
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
-			shop.rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0), 1);
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
+			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 		boolean result = executor.onCommand(player, null, "rentshop", args);
@@ -358,9 +358,9 @@ public class RentshopCommandExecutorTest {
 		String[] args = { "rename", "Shop#R0", "NewName" };
 		Rentshop shop = RentshopController.getRentShops().get(0);
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
-			shop.rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0), 1);
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
+			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 		boolean result = executor.onCommand(other, null, "rentshop", args);
@@ -401,9 +401,9 @@ public class RentshopCommandExecutorTest {
 		String[] args = { "editShop", "Shop#R0" };
 		Rentshop shop = RentshopController.getRentShops().get(0);
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
-			shop.rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0), 1);
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
+			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 		boolean result = executor.onCommand(player, null, "rentshop", args);
@@ -421,9 +421,9 @@ public class RentshopCommandExecutorTest {
 		String[] args = { "editShop", "Shop#R0" };
 		Rentshop shop = RentshopController.getRentShops().get(0);
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
-			shop.rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0), 1);
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
+			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 		boolean result = executor.onCommand(other, null, "rentshop", args);

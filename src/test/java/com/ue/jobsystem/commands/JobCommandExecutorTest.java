@@ -15,12 +15,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.Jobcenter;
-import com.ue.jobsystem.api.JobcenterController;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -54,9 +54,9 @@ public class JobCommandExecutorTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -72,10 +72,10 @@ public class JobCommandExecutorTest {
 		for (int i = 0; i < size; i++) {
 			JobController.deleteJob(JobController.getJobList().get(0));
 		}
-		int size2 = JobcenterController.getJobcenterList().size();
+		int size2 = JobcenterManagerImpl.getJobcenterList().size();
 		for (int i = 0; i < size2; i++) {
 			try {
-				JobcenterController.deleteJobcenter(JobcenterController.getJobcenterList().get(0));
+				JobcenterManagerImpl.deleteJobcenter(JobcenterManagerImpl.getJobcenterList().get(0));
 			} catch (JobSystemException e) {
 				assertTrue(false);
 			}
@@ -100,7 +100,7 @@ public class JobCommandExecutorTest {
 	public void createCommandTest() {
 		String[] args = { "create", "center", "9" };
 		executor.onCommand(player, null, "jobcenter", args);
-		Jobcenter center = JobcenterController.getJobcenterList().get(0);
+		Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 		assertEquals("center", center.getName());
 		String message = player.nextMessage();
 		assertEquals("§6The jobcenter §acenter§6 was created.", message);
@@ -130,7 +130,7 @@ public class JobCommandExecutorTest {
 		createJobcenter();
 		String[] args = { "delete", "center" };
 		executor.onCommand(player, null, "jobcenter", args);
-		assertEquals(0, JobcenterController.getJobcenterList().size());
+		assertEquals(0, JobcenterManagerImpl.getJobcenterList().size());
 		String message = player.nextMessage();
 		assertEquals("§6The jobcenter §acenter§6 was deleted.", message);
 		assertNull(player.nextMessage());
@@ -161,7 +161,7 @@ public class JobCommandExecutorTest {
 		createJobcenter();
 		String[] args = { "move", "center" };
 		executor.onCommand(player, null, "jobcenter", args);
-		assertEquals(loc, JobcenterController.getJobcenterList().get(0).getJobcenterLocation());
+		assertEquals(loc, JobcenterManagerImpl.getJobcenterList().get(0).getJobcenterLocation());
 		assertNull(player.nextMessage());
 	}
 
@@ -190,7 +190,7 @@ public class JobCommandExecutorTest {
 		String[] args = { "addJob", "center", "myjob", "stone", "1" };
 		executor.onCommand(player, null, "jobcenter", args);
 		try {
-			assertEquals("myjob", JobcenterController.getJobcenterByName("center").getJobList().get(0).getName());
+			assertEquals("myjob", JobcenterManagerImpl.getJobcenterByName("center").getJobList().get(0).getName());
 		} catch (GeneralEconomyException e) {
 			assertTrue(false);
 		}
@@ -246,7 +246,7 @@ public class JobCommandExecutorTest {
 		String[] args = { "removeJob", "center", "myjob" };
 		executor.onCommand(player, null, "jobcenter", args);
 		try {
-			assertEquals(0, JobcenterController.getJobcenterByName("center").getJobList().size());
+			assertEquals(0, JobcenterManagerImpl.getJobcenterByName("center").getJobList().size());
 		} catch (GeneralEconomyException e) {
 			assertTrue(false);
 		}

@@ -17,9 +17,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.bank.api.BankController;
-import com.ue.bank.impl.BankSavefileHandler;
-import com.ue.exceptions.GeneralEconomyException;
+import com.ue.bank.dataaccess.impl.BankDaoImpl;
+import com.ue.bank.logic.impl.BankManagerImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -45,9 +45,9 @@ public class BankSavefileHandlerTest {
 	public static void deleteSavefiles() {
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		MockBukkit.unload();
-		int size = BankController.getBankAccounts().size();
+		int size = BankManagerImpl.getBankAccounts().size();
 		for (int i = 0; i < size; i++) {
-			BankController.deleteBankAccount(BankController.getBankAccounts().get(0));
+			BankManagerImpl.deleteBankAccount(BankManagerImpl.getBankAccounts().get(0));
 		}
 	}
 
@@ -62,7 +62,7 @@ public class BankSavefileHandlerTest {
 	
 	@Test
 	public void setupSavefileTest() {
-		BankSavefileHandler.setupSavefile();
+		BankDaoImpl.setupSavefile();
 		File result = new File(UltimateEconomy.getInstance.getDataFolder(), "BankAccounts.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
 		assertTrue(result.exists());
@@ -71,8 +71,8 @@ public class BankSavefileHandlerTest {
 	
 	@Test
 	public void setupSavefileLoadTest() {
-		BankSavefileHandler.setupSavefile();
-		BankSavefileHandler.setupSavefile();
+		BankDaoImpl.setupSavefile();
+		BankDaoImpl.setupSavefile();
 		File result = new File(UltimateEconomy.getInstance.getDataFolder(), "BankAccounts.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
 		assertTrue(result.exists());
@@ -81,10 +81,10 @@ public class BankSavefileHandlerTest {
 	
 	@Test
 	public void saveIbanListTest() {
-		BankSavefileHandler.setupSavefile();
+		BankDaoImpl.setupSavefile();
 		List<String> list = new ArrayList<>();
 		list.add("myiban");
-		BankSavefileHandler.saveIbanList(list);
+		BankDaoImpl.saveIbanList(list);
 		File result = new File(UltimateEconomy.getInstance.getDataFolder(), "BankAccounts.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
 		assertEquals(1, config.getStringList("Ibans").size());
@@ -93,24 +93,24 @@ public class BankSavefileHandlerTest {
 	
 	@Test
 	public void loadIbanListTest() {
-		BankSavefileHandler.setupSavefile();
+		BankDaoImpl.setupSavefile();
 		List<String> list = new ArrayList<>();
 		list.add("myiban");
-		BankSavefileHandler.saveIbanList(list);
-		BankSavefileHandler.setupSavefile();
-		assertEquals(1, BankSavefileHandler.loadIbanList().size());
-		assertEquals("myiban", BankSavefileHandler.loadIbanList().get(0));
+		BankDaoImpl.saveIbanList(list);
+		BankDaoImpl.setupSavefile();
+		assertEquals(1, BankDaoImpl.loadIbanList().size());
+		assertEquals("myiban", BankDaoImpl.loadIbanList().get(0));
 	}
 	
 	@Test
 	public void deleteAccountTest() {
 		try {
-			BankSavefileHandler.setupSavefile();
-			BankController.createExternalBankAccount(10.0, "myiban");
+			BankDaoImpl.setupSavefile();
+			BankManagerImpl.createExternalBankAccount(10.0, "myiban");
 			File result = new File(UltimateEconomy.getInstance.getDataFolder(), "BankAccounts.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
 			assertTrue(config.contains("myiban.amount"));
-			BankSavefileHandler.deleteAccount("myiban");
+			BankDaoImpl.deleteAccount("myiban");
 			config = YamlConfiguration.loadConfiguration(result);
 			assertFalse(config.contains("myiban.amount"));
 		} catch (GeneralEconomyException e) {
@@ -120,8 +120,8 @@ public class BankSavefileHandlerTest {
 	
 	@Test
 	public void saveAmountTest() {
-		BankSavefileHandler.setupSavefile();
-		BankSavefileHandler handler = new BankSavefileHandler("myiban");
+		BankDaoImpl.setupSavefile();
+		BankDaoImpl handler = new BankDaoImpl("myiban");
 		handler.saveAmount(12.34);
 		File result = new File(UltimateEconomy.getInstance.getDataFolder(), "BankAccounts.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
@@ -130,10 +130,10 @@ public class BankSavefileHandlerTest {
 	
 	@Test
 	public void loadAmountTest() {
-		BankSavefileHandler.setupSavefile();
-		BankSavefileHandler handler = new BankSavefileHandler("myiban");
+		BankDaoImpl.setupSavefile();
+		BankDaoImpl handler = new BankDaoImpl("myiban");
 		handler.saveAmount(12.34);
-		BankSavefileHandler.setupSavefile();
+		BankDaoImpl.setupSavefile();
 		assertEquals("12.34",String.valueOf(handler.loadAmount()));
 	}
 }

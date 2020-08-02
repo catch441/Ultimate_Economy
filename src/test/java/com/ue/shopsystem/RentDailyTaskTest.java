@@ -17,13 +17,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.api.RentshopController;
 import com.ue.shopsystem.impl.RentDailyTask;
 import com.ue.shopsystem.impl.RentshopImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -52,9 +52,9 @@ public class RentDailyTaskTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -77,10 +77,10 @@ public class RentDailyTaskTest {
 		try {
 			RentshopController.createRentShop(new Location(world, 5, 1, 7), 9, 5);
 			RentshopImpl shop = (RentshopImpl) RentshopController.createRentShop(new Location(world, 50, 1, 7), 9, 10);
-			EconomyPlayerController.getAllEconomyPlayers().get(0).increasePlayerAmount(10, false);
-			shop.rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0), 1);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(10, false);
+			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
 			shop.setRentUntil(Calendar.getInstance().getTimeInMillis() + 1000L);
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 		new RentDailyTask().run();
@@ -94,13 +94,13 @@ public class RentDailyTaskTest {
 		try {
 			RentshopController.createRentShop(new Location(world, 5, 1, 7), 9, 5);
 			RentshopImpl shop = (RentshopImpl) RentshopController.createRentShop(new Location(world, 50, 1, 7), 9, 10);
-			EconomyPlayerController.getAllEconomyPlayers().get(0).increasePlayerAmount(10, false);
-			shop.rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0), 1);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(10, false);
+			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
 			shop.setRentUntil(10L);
 			new RentDailyTask().run();
 			assertTrue(shop.isRentable());
 			assertNull(player.nextMessage());
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -110,12 +110,12 @@ public class RentDailyTaskTest {
 		try {
 			RentshopController.createRentShop(new Location(world, 5, 1, 7), 9, 5);
 			RentshopImpl shop = (RentshopImpl) RentshopController.createRentShop(new Location(world, 50, 1, 7), 9, 10);
-			EconomyPlayerController.getAllEconomyPlayers().get(0).increasePlayerAmount(10, false);
-			shop.rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0), 1);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(10, false);
+			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
 			new RentDailyTask().run();
 			assertFalse(shop.isRentable());
 			assertNull(player.nextMessage());
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -125,13 +125,13 @@ public class RentDailyTaskTest {
 		try {
 			RentshopController.createRentShop(new Location(world, 5, 1, 7), 9, 5);
 			RentshopImpl shop = (RentshopImpl) RentshopController.createRentShop(new Location(world, 50, 1, 7), 9, 10);
-			EconomyPlayerController.getAllEconomyPlayers().get(0).increasePlayerAmount(10, false);
-			shop.rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0), 1);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(10, false);
+			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
 			shop.setRentUntil(Calendar.getInstance().getTimeInMillis() + 1000L);
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
-		EconomyPlayerController.getAllEconomyPlayers().get(0).setPlayer(null);
+		EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).setPlayer(null);
 		new RentDailyTask().run();
 		assertNull(player.nextMessage());
 	}

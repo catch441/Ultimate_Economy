@@ -5,11 +5,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.language.MessageWrapper;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class RentshopCommandExecutor implements CommandExecutor {
 
@@ -28,7 +28,7 @@ public class RentshopCommandExecutor implements CommandExecutor {
 				}
 			} catch (NumberFormatException e) {
 				player.sendMessage(MessageWrapper.getErrorString("invalid_parameter", "number"));
-			} catch (ShopSystemException | PlayerException | GeneralEconomyException | TownSystemException e) {
+			} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException | TownSystemException e) {
 				player.sendMessage(e.getMessage());
 			}
 		}

@@ -4,9 +4,11 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
 import com.ue.jobsystem.api.Job;
+import com.ue.jobsystem.dataaccese.impl.JobDaoImpl;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.jobsystem.logic.impl.JobsystemValidationHandlerImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobImpl implements Job {
@@ -15,8 +17,8 @@ public class JobImpl implements Job {
 	private Map<String, Double> blockList = new HashMap<>();
 	private Map<String, Double> fisherList = new HashMap<>();
 	private String name;
-	private JobSystemValidationHandler validationHandler;
-	private JobSavefileHandler savefileHandler;
+	private JobsystemValidationHandlerImpl validationHandler;
+	private JobDaoImpl savefileHandler;
 
 	/**
 	 * Constructor to create a new or load a existing job.
@@ -24,7 +26,7 @@ public class JobImpl implements Job {
 	 * @param name
 	 */
 	public JobImpl(String name) {
-		validationHandler = new JobSystemValidationHandler();
+		validationHandler = new JobsystemValidationHandlerImpl();
 		if (!new File(UltimateEconomy.getInstance.getDataFolder(), name + "-Job.yml").exists()) {
 			setupNewJob(name);
 		} else {
@@ -140,11 +142,11 @@ public class JobImpl implements Job {
 	 * 
 	 */
 
-	private JobSystemValidationHandler getValidationHandler() {
+	private JobsystemValidationHandlerImpl getValidationHandler() {
 		return validationHandler;
 	}
 
-	private JobSavefileHandler getSavefileHandler() {
+	private JobDaoImpl getSavefileHandler() {
 		return savefileHandler;
 	}
 
@@ -154,7 +156,7 @@ public class JobImpl implements Job {
 	 */
 
 	private void setupNewJob(String name) {
-		savefileHandler = new JobSavefileHandler(name, true);
+		savefileHandler = new JobDaoImpl(name, true);
 		setupJobName(name);
 	}
 
@@ -169,7 +171,7 @@ public class JobImpl implements Job {
 	 */
 
 	private void loadExistingJob(String name) {
-		savefileHandler = new JobSavefileHandler(name, false);
+		savefileHandler = new JobDaoImpl(name, false);
 		fisherList = getSavefileHandler().loadFisherList();
 		entityList = getSavefileHandler().loadEntityList();
 		blockList = getSavefileHandler().loadBlockList();

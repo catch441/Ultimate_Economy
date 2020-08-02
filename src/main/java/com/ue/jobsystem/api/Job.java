@@ -2,8 +2,8 @@ package com.ue.jobsystem.api;
 
 import java.util.Map;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface Job {
 

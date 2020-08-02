@@ -3,23 +3,23 @@ package com.ue.jobsystem.commands;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.Jobcenter;
-import com.ue.jobsystem.api.JobcenterController;
-import com.ue.language.MessageWrapper;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public enum JobCommandEnum {
 
 	CREATE {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws JobSystemException, PlayerException, GeneralEconomyException {
+				throws JobSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 3) {
-				JobcenterController.createJobcenter(args[1], player.getLocation(), Integer.parseInt(args[2]));
+				JobcenterManagerImpl.createJobcenter(args[1], player.getLocation(), Integer.parseInt(args[2]));
 				player.sendMessage(MessageWrapper.getString("jobcenter_create", args[1]));
 			} else {
 				player.sendMessage("/jobcenter create <jobcenter> <size> <- size have to be a multible of 9");
@@ -30,9 +30,9 @@ public enum JobCommandEnum {
 	DELETE {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws JobSystemException, PlayerException, GeneralEconomyException {
+				throws JobSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 2) {
-				JobcenterController.deleteJobcenter(JobcenterController.getJobcenterByName(args[1]));
+				JobcenterManagerImpl.deleteJobcenter(JobcenterManagerImpl.getJobcenterByName(args[1]));
 				player.sendMessage(MessageWrapper.getString("jobcenter_delete", args[1]));
 			} else {
 				player.sendMessage("/jobcenter delete <jobcenter>");
@@ -43,9 +43,9 @@ public enum JobCommandEnum {
 	MOVE {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws JobSystemException, PlayerException, GeneralEconomyException {
+				throws JobSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 2) {
-				Jobcenter jobcenter = JobcenterController.getJobcenterByName(args[1]);
+				Jobcenter jobcenter = JobcenterManagerImpl.getJobcenterByName(args[1]);
 				jobcenter.moveJobcenter(player.getLocation());
 			} else {
 				player.sendMessage("/jobcenter move <jobcenter>");
@@ -56,9 +56,9 @@ public enum JobCommandEnum {
 	ADDJOB {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws JobSystemException, PlayerException, GeneralEconomyException {
+				throws JobSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 5) {
-				Jobcenter jobcenter = JobcenterController.getJobcenterByName(args[1]);
+				Jobcenter jobcenter = JobcenterManagerImpl.getJobcenterByName(args[1]);
 				Job job = JobController.getJobByName(args[2]);
 				jobcenter.addJob(job, args[3], Integer.valueOf(args[4]) - 1);
 				// TODO aus messages holen
@@ -73,9 +73,9 @@ public enum JobCommandEnum {
 	REMOVEJOB {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws JobSystemException, PlayerException, GeneralEconomyException {
+				throws JobSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 3) {
-				Jobcenter jobcenter = JobcenterController.getJobcenterByName(args[1]);
+				Jobcenter jobcenter = JobcenterManagerImpl.getJobcenterByName(args[1]);
 				Job job = JobController.getJobByName(args[2]);
 				jobcenter.removeJob(job);
 				player.sendMessage(MessageWrapper.getString("jobcenter_removeJob", args[2]));
@@ -88,7 +88,7 @@ public enum JobCommandEnum {
 	JOB_CREATE {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws JobSystemException, PlayerException, GeneralEconomyException {
+				throws JobSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 3) {
 				JobController.createJob(args[2]);
 				player.sendMessage(MessageWrapper.getString("jobcenter_createJob", args[2]));
@@ -101,7 +101,7 @@ public enum JobCommandEnum {
 	JOB_DELETE {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws JobSystemException, PlayerException, GeneralEconomyException {
+				throws JobSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 3) {
 				JobController.deleteJob(JobController.getJobByName(args[2]));
 				player.sendMessage(MessageWrapper.getString("jobcenter_delJob", args[2]));
@@ -114,7 +114,7 @@ public enum JobCommandEnum {
 	JOB_ADDFISHER {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws JobSystemException, PlayerException, GeneralEconomyException {
+				throws JobSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 5) {
 				Job job = JobController.getJobByName(args[2]);
 				job.addFisherLootType(args[3], Double.valueOf(args[4]));
@@ -128,7 +128,7 @@ public enum JobCommandEnum {
 	JOB_REMOVEFISHER {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws JobSystemException, PlayerException, GeneralEconomyException {
+				throws JobSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 4) {
 				Job job = JobController.getJobByName(args[2]);
 				job.delFisherLootType(args[3]);
@@ -142,7 +142,7 @@ public enum JobCommandEnum {
 	JOB_ADDITEM {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws JobSystemException, PlayerException, GeneralEconomyException {
+				throws JobSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 5) {
 				Job job = JobController.getJobByName(args[2]);
 				job.addBlock(args[3], Double.valueOf(args[4]));
@@ -156,7 +156,7 @@ public enum JobCommandEnum {
 	JOB_REMOVEITEM {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws JobSystemException, PlayerException, GeneralEconomyException {
+				throws JobSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 4) {
 				Job job = JobController.getJobByName(args[2]);
 				job.deleteBlock(args[3]);
@@ -170,7 +170,7 @@ public enum JobCommandEnum {
 	JOB_ADDMOB {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws JobSystemException, PlayerException, GeneralEconomyException {
+				throws JobSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 5) {
 				Job job = JobController.getJobByName(args[2]);
 				job.addMob(args[3], Double.valueOf(args[4]));
@@ -184,7 +184,7 @@ public enum JobCommandEnum {
 	JOB_REMOVEMOB {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws JobSystemException, PlayerException, GeneralEconomyException {
+				throws JobSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 4) {
 				Job job = JobController.getJobByName(args[2]);
 				job.deleteMob(args[3]);
@@ -198,7 +198,7 @@ public enum JobCommandEnum {
 	JOB {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws JobSystemException, PlayerException, GeneralEconomyException {
+				throws JobSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 1) {
 				player.sendMessage("/jobcenter job [create/delete/addItem/removeItem/"
 						+ "addMob/removeMob/addFisher/removeFisher]");
@@ -216,7 +216,7 @@ public enum JobCommandEnum {
 	};
 
 	abstract boolean perform(String label, String[] args, Player player)
-			throws JobSystemException, PlayerException, GeneralEconomyException;
+			throws JobSystemException, EconomyPlayerException, GeneralEconomyException;
 
 	/**
 	 * Returns a enum. Return null, if no enum is found.

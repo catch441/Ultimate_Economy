@@ -14,10 +14,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.exceptions.GeneralEconomyException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.commands.adminshop.AdminshopTabCompleter;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;

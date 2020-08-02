@@ -32,17 +32,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.eventhandling.EconomyVillager;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.api.AbstractShop;
 import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.impl.AdminshopImpl;
 import com.ue.shopsystem.impl.ShopItem;
+import com.ue.ultimate_economy.EconomyVillager;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -83,9 +83,9 @@ public class AdminshopTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -115,7 +115,7 @@ public class AdminshopTest {
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.sellShopItem(-20, 20, null, true);
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4-19§c is invalid!", e.getMessage());
 		}
@@ -128,14 +128,14 @@ public class AdminshopTest {
 			AdminshopController.createAdminShop("myshop", location, 9);
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(0, 1, 2, new ItemStack(Material.STONE));
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.setPlayer(null);
 			shop.sellShopItem(0, 1, ecoPlayer, true);
 			fail();
-		} catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cThe player is not online!", e.getMessage());
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.setPlayer(player);
 		}
 	}
@@ -144,7 +144,7 @@ public class AdminshopTest {
 	public void sellShopItemTestPlural() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			AdminshopController.createAdminShop("myshop", location, 9);
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			ItemStack stack = new ItemStack(Material.STONE);
@@ -163,7 +163,7 @@ public class AdminshopTest {
 			assertNull(player.nextMessage());
 			ecoPlayer.decreasePlayerAmount(7.5, false);
 			player.getInventory().clear();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -172,7 +172,7 @@ public class AdminshopTest {
 	public void sellShopItemTestSingular() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			AdminshopController.createAdminShop("myshop", location, 9);
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			ItemStack stack = new ItemStack(Material.STONE);
@@ -186,7 +186,7 @@ public class AdminshopTest {
 			assertNull(player.nextMessage());
 			ecoPlayer.decreasePlayerAmount(1, false);
 			player.getInventory().clear();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -195,7 +195,7 @@ public class AdminshopTest {
 	public void sellShopItemTestOnlyBuyPrice() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			AdminshopController.createAdminShop("myshop", location, 9);
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			ItemStack stack = new ItemStack(Material.STONE);
@@ -205,7 +205,7 @@ public class AdminshopTest {
 			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
 			assertNull(player.nextMessage());
 			player.getInventory().clear();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -322,7 +322,7 @@ public class AdminshopTest {
 					PersistentDataType.STRING));
 			assertEquals(K_OFF, slotEditor.getItem(21).getItemMeta().getPersistentDataContainer().get(key,
 					PersistentDataType.STRING));
-		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -335,7 +335,7 @@ public class AdminshopTest {
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.buyShopItem(9, null, false);
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §410§c is invalid!", e.getMessage());
 		}
@@ -347,10 +347,10 @@ public class AdminshopTest {
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
-			EconomyPlayer player = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer player = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			shop.buyShopItem(6, player, false);
 			fail();
-		} catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
+		} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException e) {
 			assertTrue(e instanceof ShopSystemException);
 			assertEquals("§cThis slot is empty!", e.getMessage());
 		}
@@ -363,14 +363,14 @@ public class AdminshopTest {
 			AdminshopController.createAdminShop("myshop", location, 9);
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(0, 1, 2, new ItemStack(Material.STONE));
-			EconomyPlayer player = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer player = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			player.setPlayer(null);
 			shop.buyShopItem(0, player, false);
 			fail();
-		} catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cThe player is not online!", e.getMessage());
-			EconomyPlayerController.getAllEconomyPlayers().get(0).setPlayer(player);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).setPlayer(player);
 		}
 	}
 	
@@ -422,11 +422,11 @@ public class AdminshopTest {
 			player.getInventory().setItem(38, new ItemStack(Material.STONE));
 			player.getInventory().setItem(39, new ItemStack(Material.STONE));
 			player.getInventory().setItem(40, new ItemStack(Material.STONE));
-			shop.buyShopItem(0, EconomyPlayerController.getAllEconomyPlayers().get(0), false);
+			shop.buyShopItem(0, EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), false);
 			fail();
-		} catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
+		} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException e) {
 			assertEquals("§cThere is no free slot in your inventory!", e.getMessage());
-			assertTrue(e instanceof PlayerException);
+			assertTrue(e instanceof EconomyPlayerException);
 			player.getInventory().clear();
 		}
 	}
@@ -439,14 +439,14 @@ public class AdminshopTest {
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			ItemStack stack = new ItemStack(Material.STONE);
 			shop.addShopItem(0, 1, 1, stack);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(1, false);
 			shop.buyShopItem(0, ecoPlayer, false);
 			assertEquals(stack, player.getInventory().getItem(0));
 			assertNull(player.nextMessage());
 			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
 			player.getInventory().clear();
-		} catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
+		} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 	}
@@ -459,7 +459,7 @@ public class AdminshopTest {
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			ItemStack stack = new ItemStack(Material.STONE);
 			shop.addShopItem(0, 1, 1, stack);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(1, false);
 			shop.buyShopItem(0, ecoPlayer, true);
 			assertEquals(stack, player.getInventory().getItem(0));
@@ -467,7 +467,7 @@ public class AdminshopTest {
 			assertNull(player.nextMessage());
 			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
 			player.getInventory().clear();
-		} catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
+		} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 	}
@@ -481,7 +481,7 @@ public class AdminshopTest {
 			ItemStack stack = new ItemStack(Material.STONE);
 			stack.setAmount(10);
 			shop.addShopItem(0, 1, 2, stack);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(2, false);
 			shop.buyShopItem(0, ecoPlayer, true);
 			stack.setAmount(10);
@@ -490,7 +490,7 @@ public class AdminshopTest {
 			assertNull(player.nextMessage());
 			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
 			player.getInventory().clear();
-		} catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
+		} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 	}
@@ -501,7 +501,7 @@ public class AdminshopTest {
 		try {
 			AdminshopController.createAdminShop("myshop", location, 9);
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(2, false);
 			ItemStack stack = new ItemStack(Material.SPAWNER);
 			ItemMeta meta = stack.getItemMeta();
@@ -516,7 +516,7 @@ public class AdminshopTest {
 			assertNull(player.nextMessage());
 			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
 			player.getInventory().clear();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -563,7 +563,7 @@ public class AdminshopTest {
 			assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
 			assertEquals(16, config.getInt("ShopItems." + itemString + ".Amount"));
 			assertEquals(item, config.getItemStack("ShopItems." + itemString + ".Name"));
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -618,7 +618,7 @@ public class AdminshopTest {
 			assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
 			assertEquals(16, config.getInt("ShopItems." + itemString + ".Amount"));
 			assertEquals(item.toString(), config.getItemStack("ShopItems." + itemString + ".Name").toString());
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -664,7 +664,7 @@ public class AdminshopTest {
 			assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
 			assertEquals(16, config.getInt("ShopItems." + itemString + ".Amount"));
 			assertEquals(item, config.getItemStack("ShopItems." + itemString + ".Name"));
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -710,7 +710,7 @@ public class AdminshopTest {
 			assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
 			assertEquals(16, config.getInt("ShopItems." + itemString + ".Amount"));
 			assertEquals(item, config.getItemStack("ShopItems." + itemString + ".Name"));
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -761,7 +761,7 @@ public class AdminshopTest {
 			assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
 			assertEquals(16, config.getInt("ShopItems." + itemString + ".Amount"));
 			assertEquals(item.toString(), config.getItemStack("ShopItems." + itemString + ".Name").toString());
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -815,7 +815,7 @@ public class AdminshopTest {
 			assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
 			assertEquals(16, config.getInt("ShopItems." + itemString + ".Amount"));
 			assertEquals(item.toString(), config.getItemStack("ShopItems." + itemString + ".Name").toString());
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -829,7 +829,7 @@ public class AdminshopTest {
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, -10, 20, item);
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4-10.0§c is invalid!", e.getMessage());
 		}
@@ -844,7 +844,7 @@ public class AdminshopTest {
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(1, 0, 0, item);
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			assertTrue(e instanceof ShopSystemException);
 			assertEquals("§cOne of the prices have to be above 0!", e.getMessage());
 		}
@@ -859,7 +859,7 @@ public class AdminshopTest {
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.addShopItem(10, 10, 20, item);
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §411§c is invalid!", e.getMessage());
 		}
@@ -875,8 +875,8 @@ public class AdminshopTest {
 			shop.addShopItem(1, 10, 20, new ItemStack(Material.COBBLESTONE, 16));
 			shop.addShopItem(1, 10, 20, item);
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
-			assertTrue(e instanceof PlayerException);
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
+			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cThis slot is occupied!", e.getMessage());
 		}
 	}
@@ -891,7 +891,7 @@ public class AdminshopTest {
 			shop.addShopItem(1, 10, 20, item);
 			shop.addShopItem(2, 10, 20, item);
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			assertTrue(e instanceof ShopSystemException);
 			assertEquals("§cThis item already exists in this shop!", e.getMessage());
 		}
@@ -941,7 +941,7 @@ public class AdminshopTest {
 			assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
 			assertEquals(8, config.getInt("ShopItems." + itemString + ".Amount"));
 			assertEquals(item, config.getItemStack("ShopItems." + itemString + ".Name"));
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -990,7 +990,7 @@ public class AdminshopTest {
 			assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
 			assertEquals(8, config.getInt("ShopItems." + itemString + ".Amount"));
 			assertEquals(item, config.getItemStack("ShopItems." + itemString + ".Name"));
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -1039,7 +1039,7 @@ public class AdminshopTest {
 			assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
 			assertEquals(16, config.getInt("ShopItems." + itemString + ".Amount"));
 			assertEquals(item, config.getItemStack("ShopItems." + itemString + ".Name"));
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -1088,7 +1088,7 @@ public class AdminshopTest {
 			assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
 			assertEquals(16, config.getInt("ShopItems." + itemString + ".Amount"));
 			assertEquals(item, config.getItemStack("ShopItems." + itemString + ".Name"));
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -1101,7 +1101,7 @@ public class AdminshopTest {
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.editShopItem(1, "8", "10", "25.0");
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			assertTrue(e instanceof ShopSystemException);
 			assertEquals("§cThis slot is empty!", e.getMessage());
 		}
@@ -1117,7 +1117,7 @@ public class AdminshopTest {
 			shop.addShopItem(1, 10, 20, item);
 			shop.editShopItem(1, "8", "-10", "25.0");
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4-10§c is invalid!", e.getMessage());
 		}
@@ -1133,7 +1133,7 @@ public class AdminshopTest {
 			shop.addShopItem(1, 10, 20, item);
 			shop.editShopItem(1, "8", "0", "0");
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			assertTrue(e instanceof ShopSystemException);
 			assertEquals("§cOne of the prices have to be above 0!", e.getMessage());
 		}
@@ -1149,7 +1149,7 @@ public class AdminshopTest {
 			shop.addShopItem(1, 10, 20, item);
 			shop.editShopItem(1, "100", "10.0", "25.0");
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4100§c is invalid!", e.getMessage());
 		}
@@ -1165,7 +1165,7 @@ public class AdminshopTest {
 			shop.addShopItem(1, 10, 20, item);
 			shop.editShopItem(1, "8", "10.0", "-25.0");
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §4-25.0§c is invalid!", e.getMessage());
 		}
@@ -1215,7 +1215,7 @@ public class AdminshopTest {
 			assertEquals(1, config.getInt("ShopItems." + itemString + ".Slot"));
 			assertEquals(1, config.getInt("ShopItems." + itemString + ".Amount"));
 			assertEquals(itemString, config.getString("ShopItems." + itemString + ".Name").toString());
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -1246,7 +1246,7 @@ public class AdminshopTest {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertEquals(0, config.getStringList("ShopItemList").size());
 			assertFalse(config.isSet("ShopItens." + item.toString()));
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -1312,7 +1312,7 @@ public class AdminshopTest {
 			assertEquals("1.0", String.valueOf(config.getDouble("ShopLocation.y")));
 			assertEquals("6.3", String.valueOf(config.getDouble("ShopLocation.z")));
 			assertEquals("World", config.getString("ShopLocation.World"));
-		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -1484,7 +1484,7 @@ public class AdminshopTest {
 			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "A0.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertEquals(18, config.getInt("ShopSize"));
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -1542,7 +1542,7 @@ public class AdminshopTest {
 					editor.getItem(6).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
 			assertEquals(SLOTEMPTY,
 					editor.getItem(7).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -1555,7 +1555,7 @@ public class AdminshopTest {
 			AbstractShop shop = AdminshopController.getAdminshopList().get(0);
 			shop.changeShopSize(5);
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			assertTrue(e instanceof GeneralEconomyException);
 			assertEquals("§cThe parameter §45§c is invalid!", e.getMessage());
 		}
@@ -1570,7 +1570,7 @@ public class AdminshopTest {
 			shop.addShopItem(15, 0, 1, new ItemStack(Material.STONE));
 			shop.changeShopSize(9);
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			assertTrue(e instanceof ShopSystemException);
 			assertEquals("§cChanging the shop size has failed due to occupied slots!", e.getMessage());
 		}
@@ -1619,7 +1619,7 @@ public class AdminshopTest {
 			assertEquals("1.0", String.valueOf(item.getBuyPrice()));
 			assertEquals(0, item.getStock());
 			assertEquals(Material.STONE, item.getItemStack().getType());
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -1662,7 +1662,7 @@ public class AdminshopTest {
 			assertEquals(0, result.getStock());
 			stack.setAmount(1);
 			assertEquals(stack, result.getItemStack());
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -1722,7 +1722,7 @@ public class AdminshopTest {
 			assertEquals(Material.COAL, inv.getItem(0).getType());
 			assertEquals(3, inv.getItem(0).getAmount());
 			assertNull(inv.getItem(0).getItemMeta().getLore());
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}

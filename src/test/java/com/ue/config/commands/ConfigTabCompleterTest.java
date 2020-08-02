@@ -11,13 +11,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.ue.config.logic.impl.ConfigTabCompleterImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
 
 public class ConfigTabCompleterTest {
 
-	private static ConfigTabCompleter tabCompleter;
+	private static ConfigTabCompleterImpl tabCompleter;
 
 	/**
 	 * Init shop for tests.
@@ -27,7 +28,7 @@ public class ConfigTabCompleterTest {
 		MockBukkit.mock();
 		Bukkit.getLogger().setLevel(Level.OFF);
 		MockBukkit.load(UltimateEconomy.class);
-		tabCompleter = new ConfigTabCompleter();
+		tabCompleter = new ConfigTabCompleterImpl();
 	}
 
 	/**

@@ -13,10 +13,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.language.MessageWrapper;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class ShopSlotEditorHandler {
 
@@ -189,7 +189,7 @@ public class ShopSlotEditorHandler {
 					command = event.getCurrentItem().getItemMeta().getDisplayName();
 				}
 				handleSlotEditorCommand(event, player, slot, operator, price, editorItemStack, command);
-			} catch (ShopSystemException | PlayerException | GeneralEconomyException e) {
+			} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException e) {
 				player.sendMessage(e.getMessage());
 			}
 		}
@@ -197,7 +197,7 @@ public class ShopSlotEditorHandler {
 
 	private void handleSlotEditorCommand(InventoryClickEvent event, Player player, int slot, String operator,
 			double price, ItemStack editorItemStack, String command)
-			throws ShopSystemException, PlayerException, GeneralEconomyException {
+			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
 		switch (ChatColor.stripColor(command)) {
 		case "minus":
 		case "plus":
@@ -241,7 +241,7 @@ public class ShopSlotEditorHandler {
 		}
 	}
 
-	private void handleSaveChanges(Player player) throws ShopSystemException, PlayerException, GeneralEconomyException {
+	private void handleSaveChanges(Player player) throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
 		double buyPrice = Double
 				.valueOf(getSlotEditorInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
 		double sellPrice = Double

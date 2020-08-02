@@ -19,14 +19,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.jobsystem.impl.JobSavefileHandler;
+import com.ue.jobsystem.dataaccese.impl.JobDaoImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
 
 public class JobSavefileHandlerTest {
 	
-	private static JobSavefileHandler savefileHandler;
+	private static JobDaoImpl savefileHandler;
 
 	/**
 	 * Init shop for tests.
@@ -36,7 +36,7 @@ public class JobSavefileHandlerTest {
 		MockBukkit.mock();
 		Bukkit.getLogger().setLevel(Level.OFF);
 		MockBukkit.load(UltimateEconomy.class);
-		savefileHandler = new JobSavefileHandler("kthjob", true);
+		savefileHandler = new JobDaoImpl("kthjob", true);
 	}
 
 	/**
@@ -56,12 +56,12 @@ public class JobSavefileHandlerTest {
 	public void unload() {
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(),"kthjob-Job.yml");
 		file.delete();
-		savefileHandler = new JobSavefileHandler("kthjob", true);
+		savefileHandler = new JobDaoImpl("kthjob", true);
 	}
 	
 	@Test
 	public void constructorNewTest() {
-		JobSavefileHandler savefileHandler1 = new JobSavefileHandler("myjob",true);
+		JobDaoImpl savefileHandler1 = new JobDaoImpl("myjob",true);
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(),"myjob-Job.yml");
 		assertTrue(file.exists());
 		savefileHandler1.deleteSavefile();
@@ -72,7 +72,7 @@ public class JobSavefileHandlerTest {
 		try {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(),"myjob-Job.yml");
 			file.createNewFile();
-			JobSavefileHandler savefileHandler1 = new JobSavefileHandler("myjob",false);
+			JobDaoImpl savefileHandler1 = new JobDaoImpl("myjob",false);
 			File result = new File(UltimateEconomy.getInstance.getDataFolder(),"myjob-Job.yml");
 			assertTrue(result.exists());
 			savefileHandler1.deleteSavefile();
@@ -133,7 +133,7 @@ public class JobSavefileHandlerTest {
 		Map<String,Double> list = new HashMap<>();
 		list.put("dirt", 2.0);
 		savefileHandler.saveBlockList(list);
-		savefileHandler = new JobSavefileHandler("kthjob", false);
+		savefileHandler = new JobDaoImpl("kthjob", false);
 		Map<String,Double> result = savefileHandler.loadBlockList(); 
 		assertTrue(result.containsKey("dirt"));
 		assertTrue(result.containsValue(2.0));
@@ -146,7 +146,7 @@ public class JobSavefileHandlerTest {
 		Map<String,Double> list = new HashMap<>();
 		list.put("fish1", 2.0);
 		savefileHandler.saveFisherList(list);
-		savefileHandler = new JobSavefileHandler("kthjob", false);
+		savefileHandler = new JobDaoImpl("kthjob", false);
 		Map<String,Double> result = savefileHandler.loadFisherList(); 
 		assertTrue(result.containsKey("fish1"));
 		assertTrue(result.containsValue(2.0));
@@ -159,7 +159,7 @@ public class JobSavefileHandlerTest {
 		Map<String,Double> list = new HashMap<>();
 		list.put("cow", 2.0);
 		savefileHandler.saveEntityList(list);
-		savefileHandler = new JobSavefileHandler("kthjob", false);
+		savefileHandler = new JobDaoImpl("kthjob", false);
 		Map<String,Double> result = savefileHandler.loadEntityList(); 
 		assertTrue(result.containsKey("cow"));
 		assertTrue(result.containsValue(2.0));
@@ -175,7 +175,7 @@ public class JobSavefileHandlerTest {
 		config.set("Itemlist", list);
 		config.set("JobItems.dirt.breakprice", 2.0);
 		save(file,config);
-		savefileHandler = new JobSavefileHandler("kthjob", false);
+		savefileHandler = new JobDaoImpl("kthjob", false);
 		Map<String,Double> result = savefileHandler.loadBlockList();
 		assertTrue(result.containsKey("dirt"));
 		assertTrue(result.containsValue(2.0));
@@ -191,7 +191,7 @@ public class JobSavefileHandlerTest {
 		config.set("Fisherlist", list);
 		config.set("Fisher.fish", 2.0);
 		save(file,config);
-		savefileHandler = new JobSavefileHandler("kthjob", false);
+		savefileHandler = new JobDaoImpl("kthjob", false);
 		Map<String,Double> result = savefileHandler.loadFisherList();
 		assertTrue(result.containsKey("fish"));
 		assertTrue(result.containsValue(2.0));
@@ -207,7 +207,7 @@ public class JobSavefileHandlerTest {
 		config.set("Entitylist", list);
 		config.set("JobEntitys.cow.killprice", 2.0);
 		save(file,config);
-		savefileHandler = new JobSavefileHandler("kthjob", false);
+		savefileHandler = new JobDaoImpl("kthjob", false);
 		Map<String,Double> result = savefileHandler.loadEntityList();
 		assertTrue(result.containsKey("cow"));
 		assertTrue(result.containsValue(2.0));

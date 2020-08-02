@@ -2,10 +2,10 @@ package com.ue.shopsystem.api;
 
 import org.bukkit.entity.Player;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface Rentshop extends Playershop {
 
@@ -47,10 +47,10 @@ public interface Rentshop extends Playershop {
      * @param duration
      * @throws ShopSystemException
      * @throws GeneralEconomyException
-     * @throws PlayerException
+     * @throws EconomyPlayerException
      */
     public void rentShop(EconomyPlayer player, int duration)
-	    throws ShopSystemException, GeneralEconomyException, PlayerException;
+	    throws ShopSystemException, GeneralEconomyException, EconomyPlayerException;
 
     /**
      * Opens the rentshop GUI, if the shop is not rented.

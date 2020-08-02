@@ -3,13 +3,13 @@ package com.ue.shopsystem.commands.rentshop;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.Rentshop;
 import com.ue.shopsystem.api.RentshopController;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public enum RentshopCommandEnum {
 
@@ -47,7 +47,7 @@ public enum RentshopCommandEnum {
 	MOVE {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws PlayerException, GeneralEconomyException, TownSystemException {
+				throws EconomyPlayerException, GeneralEconomyException, TownSystemException {
 			if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 				if (args.length == 2) {
 					RentshopController.getRentShopByUniqueName(args[1], null).moveShop(player.getLocation());
@@ -61,7 +61,7 @@ public enum RentshopCommandEnum {
 	RESIZE {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws NumberFormatException, ShopSystemException, GeneralEconomyException, PlayerException {
+				throws NumberFormatException, ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 			if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 				if (args.length == 3) {
 					RentshopController.getRentShopByUniqueName(args[1], null).changeShopSize(Integer.valueOf(args[2]));
@@ -123,7 +123,7 @@ public enum RentshopCommandEnum {
 	};
 
 	abstract boolean perform(String label, String[] args, Player player)
-			throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException;
+			throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException;
 
 	/**
 	 * Returns a enum. Returns RentshopCommandEnum.UNKNOWN , if no enum is found.

@@ -5,9 +5,9 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface Jobcenter {
 
@@ -18,11 +18,11 @@ public interface Jobcenter {
      * @param itemMaterial
      * @param slot
      * @throws JobSystemException
-     * @throws PlayerException
+     * @throws EconomyPlayerException
      * @throws GeneralEconomyException
      */
     public void addJob(Job job, String itemMaterial, int slot)
-	    throws JobSystemException, PlayerException, GeneralEconomyException;
+	    throws JobSystemException, EconomyPlayerException, GeneralEconomyException;
 
     /**
      * This method removes a job from this jobcenter.

@@ -16,8 +16,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
+import com.ue.economyplayer.logic.impl.EconomyPlayerTabCompleterImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -27,7 +28,7 @@ import be.seeseemelk.mockbukkit.entity.PlayerMock;
 
 public class EconomyPlayerTabCompleterTest {
 
-	private static EconomyPlayerTabCompleter tabCompleter;
+	private static EconomyPlayerTabCompleterImpl tabCompleter;
 	private static PlayerMock player;
 	private static ServerMock server;
 	private static WorldMock world;
@@ -40,13 +41,13 @@ public class EconomyPlayerTabCompleterTest {
 		server = MockBukkit.mock();
 		Bukkit.getLogger().setLevel(Level.OFF);
 		MockBukkit.load(UltimateEconomy.class);
-		tabCompleter = new EconomyPlayerTabCompleter();
+		tabCompleter = new EconomyPlayerTabCompleterImpl();
 		player = server.addPlayer("kthschnll");
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		try {
-			EconomyPlayerController.getAllEconomyPlayers().get(0).addHome("myhome1", new Location(world,1,2,3), false);
-			EconomyPlayerController.getAllEconomyPlayers().get(0).addHome("myhome2", new Location(world,1,2,3), false);
-		} catch (PlayerException e) {
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).addHome("myhome1", new Location(world,1,2,3), false);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).addHome("myhome2", new Location(world,1,2,3), false);
+		} catch (EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -58,7 +59,7 @@ public class EconomyPlayerTabCompleterTest {
 	public static void deleteSavefiles() {
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
-		EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+		EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		MockBukkit.unload();
 	}
 

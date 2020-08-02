@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -17,8 +18,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -26,27 +29,21 @@ import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 
-import com.ue.bank.api.BankController;
+import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.DaggerServiceComponent;
+import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServiceComponent;
-import com.ue.config.api.ConfigController;
-import com.ue.config.commands.ConfigCommandExecutor;
-import com.ue.config.commands.ConfigTabCompleter;
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.economyplayer.commands.EconomyPlayerCommandExecutor;
-import com.ue.economyplayer.commands.EconomyPlayerTabCompleter;
-import com.ue.eventhandling.UltimateEconomyEventHandler;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
+import com.ue.config.logic.api.ConfigManager;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerManager;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.jobsystem.api.Job;
-import com.ue.jobsystem.api.JobController;
-import com.ue.jobsystem.api.JobcenterController;
 import com.ue.jobsystem.commands.JobCommandExecutor;
 import com.ue.jobsystem.commands.JobTabCompleter;
-import com.ue.language.MessageWrapper;
+import com.ue.jobsystem.logic.api.JobManager;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
 import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.api.PlayershopController;
 import com.ue.shopsystem.api.RentshopController;
@@ -63,26 +60,48 @@ import com.ue.townsystem.commands.TownCommandExecutor;
 import com.ue.townsystem.commands.TownTabCompleter;
 import com.ue.townsystem.commands.TownworldCommandExecutor;
 import com.ue.townsystem.commands.TownworldTabCompleter;
-import com.ue.vault.EconomyUltimateEconomy;
 import com.ue.vault.VaultHook;
 
 /**
  * @author Lukas Heubach (catch441)
  */
 public class UltimateEconomy extends JavaPlugin {
-	
+
 	public static UltimateEconomy getInstance;
-	public EconomyUltimateEconomy economyImplementer;
+	@Inject
+	ConfigManager configManager;
+	@Inject
+	BankManager bankManager;
+	@Inject
+	EconomyPlayerManager ecoPlayerManager;
+	@Inject
+	JobManager jobManager;
+	@Inject
+	VaultHook vaultHook;
 	@Inject
 	Metrics metrics;
-	private VaultHook vaultHook;
+	@Inject
+	MessageWrapper messageWrapper;
+	@Inject
+	@Named("ConfigCommandExecutor")
+	CommandExecutor configCommandExecutor;
+	@Inject
+	@Named("EconomyPlayerCommandExecutor")
+	CommandExecutor ecoPlayerCommandExecutor;
+	@Inject
+	@Named("EconomyPlayerTabCompleter")
+	TabCompleter ecoPlayerTabCompleter;
+	@Inject
+	@Named("ConfigTabCompleter")
+	TabCompleter configTabCompleter;
+
 	private ServiceComponent serviceComponent;
 
 	/**
 	 * Default constructor.
 	 */
 	public UltimateEconomy() {
-		super();	
+		super();
 		getInstance = this;
 		serviceComponent = DaggerServiceComponent.builder().build();
 		serviceComponent.inject(this);
@@ -114,7 +133,7 @@ public class UltimateEconomy extends JavaPlugin {
 	}
 
 	private void disablePlugin() {
-		JobcenterController.despawnAllVillagers();
+		JobcenterManagerImpl.despawnAllVillagers();
 		TownworldController.despawnAllVillagers();
 		AdminshopController.despawnAllVillagers();
 		PlayershopController.despawnAllVillagers();
@@ -158,32 +177,32 @@ public class UltimateEconomy extends JavaPlugin {
 
 	private void setupVault() {
 		if (Bukkit.getServer().getPluginManager().getPlugin("Vault") != null) {
-			economyImplementer = new EconomyUltimateEconomy();
-			vaultHook = new VaultHook();
 			vaultHook.hook();
 		}
 	}
 
 	private void loadCommands() {
-		EconomyPlayerCommandExecutor economyPlayerCommandExecutor = setupCommandExecutors();
-		EconomyPlayerTabCompleter economyPlayerTabCompleter = setupTabCompleters();
-		if (ConfigController.isHomeSystem()) {
+		setupCommandExecutors();
+		setupTabCompleters();
+		if (configManager.isHomeSystem()) {
 			try {
 				Field commandMapField = SimplePluginManager.class.getDeclaredField("commandMap");
 				commandMapField.setAccessible(true);
 				CommandMap map = (CommandMap) commandMapField.get(Bukkit.getServer().getPluginManager());
-				setupHomeCommand(economyPlayerCommandExecutor, economyPlayerTabCompleter, map);
-				setupSetHomeCommand(economyPlayerCommandExecutor, map);
-				setupDeleteHomeCommand(economyPlayerCommandExecutor, economyPlayerTabCompleter, map);
+				setupHomeCommand(map);
+				setupSetHomeCommand(map);
+				setupDeleteHomeCommand(map);
 			} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-		// TODO einkommentieren		
-				//Bukkit.getLogger().warning("[Ultimate_Economy] Error on enable homes feature.");
-				//Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+				// TODO einkommentieren
+				// Bukkit.getLogger().warning("[Ultimate_Economy] Error on enable homes
+				// feature.");
+				// Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " +
+				// e.getMessage());
 			}
 		}
 	}
 
-	private void setupSetHomeCommand(EconomyPlayerCommandExecutor economyPlayerCommandExecutor, CommandMap map) {
+	private void setupSetHomeCommand(CommandMap map) {
 		UltimateEconomyCommand setHome = new UltimateEconomyCommand("sethome", this);
 		setHome.setDescription("Sets a homepoint.");
 		setHome.setPermission("ultimate_economy.home");
@@ -191,11 +210,10 @@ public class UltimateEconomy extends JavaPlugin {
 		setHome.setPermissionMessage("You don't have the permission.");
 		setHome.setUsage("/<command> [home]");
 		map.register("ultimate_economy", setHome);
-		setHome.setExecutor(economyPlayerCommandExecutor);
+		setHome.setExecutor(ecoPlayerCommandExecutor);
 	}
 
-	private void setupDeleteHomeCommand(EconomyPlayerCommandExecutor economyPlayerCommandExecutor,
-			EconomyPlayerTabCompleter economyPlayerTabCompleter, CommandMap map) {
+	private void setupDeleteHomeCommand(CommandMap map) {
 		UltimateEconomyCommand delHome = new UltimateEconomyCommand("delhome", this);
 		delHome.setDescription("Remove a homepoint.");
 		delHome.setPermission("ultimate_economy.home");
@@ -203,50 +221,45 @@ public class UltimateEconomy extends JavaPlugin {
 		delHome.setPermissionMessage("You don't have the permission.");
 		delHome.setUsage("/<command> [home]");
 		map.register("ultimate_economy", delHome);
-		delHome.setExecutor(economyPlayerCommandExecutor);
-		delHome.setTabCompleter(economyPlayerTabCompleter);
+		delHome.setExecutor(ecoPlayerCommandExecutor);
+		delHome.setTabCompleter(ecoPlayerTabCompleter);
 	}
 
-	private void setupHomeCommand(EconomyPlayerCommandExecutor economyPlayerCommandExecutor, EconomyPlayerTabCompleter economyPlayerTabCompleter,
-			CommandMap map) {
+	private void setupHomeCommand(CommandMap map) {
 		UltimateEconomyCommand home = new UltimateEconomyCommand("home", this);
 		home.setDescription("Teleports you to a homepoint.");
 		home.setPermission("ultimate_economy.home");
 		home.setLabel("home");
 		home.setPermissionMessage("You don't have the permission.");
 		map.register("ultimate_economy", home);
-		home.setExecutor(economyPlayerCommandExecutor);
-		home.setTabCompleter(economyPlayerTabCompleter);
+		home.setExecutor(ecoPlayerCommandExecutor);
+		home.setTabCompleter(ecoPlayerTabCompleter);
 	}
 
-	private EconomyPlayerTabCompleter setupTabCompleters() {
+	private void setupTabCompleters() {
 		getCommand("jobcenter").setTabCompleter(new JobTabCompleter());
 		getCommand("town").setTabCompleter(new TownTabCompleter());
 		getCommand("townworld").setTabCompleter(new TownworldTabCompleter());
 		getCommand("adminshop").setTabCompleter(new AdminshopTabCompleter());
 		getCommand("playershop").setTabCompleter(new PlayershopTabCompleter());
 		getCommand("rentshop").setTabCompleter(new RentshopTabCompleter());
-		getCommand("ue-config").setTabCompleter(new ConfigTabCompleter());
-		EconomyPlayerTabCompleter economyPlayerTabCompleter = new EconomyPlayerTabCompleter();
-		getCommand("bank").setTabCompleter(economyPlayerTabCompleter);
-		return economyPlayerTabCompleter;
+		getCommand("ue-config").setTabCompleter(configTabCompleter);
+		getCommand("bank").setTabCompleter(ecoPlayerTabCompleter);
 	}
 
-	private EconomyPlayerCommandExecutor setupCommandExecutors() {
+	private void setupCommandExecutors() {
 		getCommand("jobcenter").setExecutor(new JobCommandExecutor());
 		getCommand("town").setExecutor(new TownCommandExecutor());
 		getCommand("townworld").setExecutor(new TownworldCommandExecutor(this));
 		getCommand("adminshop").setExecutor(new AdminshopCommandExecutor());
 		getCommand("playershop").setExecutor(new PlayershopCommandExecutor());
 		getCommand("rentshop").setExecutor(new RentshopCommandExecutor());
-		EconomyPlayerCommandExecutor economyPlayerCommandExecutor = new EconomyPlayerCommandExecutor();
-		getCommand("pay").setExecutor(economyPlayerCommandExecutor);
-		getCommand("givemoney").setExecutor(economyPlayerCommandExecutor);
-		getCommand("money").setExecutor(economyPlayerCommandExecutor);
-		getCommand("myjobs").setExecutor(economyPlayerCommandExecutor);
-		getCommand("bank").setExecutor(economyPlayerCommandExecutor);
-		getCommand("ue-config").setExecutor(new ConfigCommandExecutor());
-		return economyPlayerCommandExecutor;
+		getCommand("pay").setExecutor(ecoPlayerCommandExecutor);
+		getCommand("givemoney").setExecutor(ecoPlayerCommandExecutor);
+		getCommand("money").setExecutor(ecoPlayerCommandExecutor);
+		getCommand("myjobs").setExecutor(ecoPlayerCommandExecutor);
+		getCommand("bank").setExecutor(ecoPlayerCommandExecutor);
+		getCommand("ue-config").setExecutor(configCommandExecutor);
 	}
 
 	private void loadPlugin() {
@@ -254,12 +267,11 @@ public class UltimateEconomy extends JavaPlugin {
 			getDataFolder().mkdirs();
 		}
 		setupPlugin();
-		MessageWrapper.loadLanguage();
-		BankController.loadBankAccounts();
-		JobController.loadAllJobs();
-		JobcenterController.loadAllJobcenters();
-		EconomyPlayerController.loadAllEconomyPlayers();
-		TownworldController.loadAllTownWorlds();
+		messageWrapper.loadLanguage(configManager.getLocale());
+		bankManager.loadBankAccounts();
+		jobManager.loadAllJobs();
+		JobcenterManagerImpl.loadAllJobcenters();
+		ecoPlayerManager.loadAllEconomyPlayers();
 		AdminshopController.loadAllAdminShops();
 		PlayershopController.loadAllPlayerShops();
 		RentshopController.loadAllRentShops();
@@ -269,7 +281,7 @@ public class UltimateEconomy extends JavaPlugin {
 	}
 
 	private void setupPlugin() {
-		ConfigController.setupConfig();
+		configManager.setupConfig();
 		CustomSkullService.setup();
 		// setup and start RentDailyTask
 		new RentDailyTask().runTaskTimerAsynchronously(this, 1, 1000);
@@ -297,7 +309,7 @@ public class UltimateEconomy extends JavaPlugin {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 			try {
-				EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(player.getName());
+				EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(player.getName());
 				switch (label) {
 				case "shop":
 					return handleShopCommand(args, player, ecoPlayer);
@@ -310,7 +322,7 @@ public class UltimateEconomy extends JavaPlugin {
 				default:
 					break;
 				}
-			} catch (PlayerException | JobSystemException | GeneralEconomyException | ShopSystemException e) {
+			} catch (EconomyPlayerException | JobSystemException | GeneralEconomyException | ShopSystemException e) {
 				player.sendMessage(e.getMessage());
 			}
 		}
@@ -320,19 +332,19 @@ public class UltimateEconomy extends JavaPlugin {
 	private boolean handleJobInfoCommand(String[] args, Player player)
 			throws JobSystemException, GeneralEconomyException {
 		if (args.length == 1) {
-			Job job = JobController.getJobByName(args[0]);
-			player.sendMessage(MessageWrapper.getString("jobinfo_info", job.getName()));
+			Job job = jobManager.getJobByName(args[0]);
+			player.sendMessage(messageWrapper.getString("jobinfo_info", job.getName()));
 			for (String string : job.getBlockList().keySet()) {
 				player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN
-						+ job.getBlockPrice(string) + ConfigController.getCurrencyText(job.getBlockPrice(string)));
+						+ job.getBlockPrice(string) + configManager.getCurrencyText(job.getBlockPrice(string)));
 			}
 			for (String string : job.getFisherList().keySet()) {
-				player.sendMessage(MessageWrapper.getString("jobinfo_fishingprice", string.toLowerCase(),
-						job.getFisherPrice(string), ConfigController.getCurrencyText(job.getFisherPrice(string))));
+				player.sendMessage(messageWrapper.getString("jobinfo_fishingprice", string.toLowerCase(),
+						job.getFisherPrice(string), configManager.getCurrencyText(job.getFisherPrice(string))));
 			}
 			for (String string : job.getEntityList().keySet()) {
-				player.sendMessage(MessageWrapper.getString("jobinfo_killprice", string.toLowerCase(),
-						job.getKillPrice(string), ConfigController.getCurrencyText(job.getKillPrice(string))));
+				player.sendMessage(messageWrapper.getString("jobinfo_killprice", string.toLowerCase(),
+						job.getKillPrice(string), configManager.getCurrencyText(job.getKillPrice(string))));
 			}
 		} else {
 			return false;
@@ -341,24 +353,24 @@ public class UltimateEconomy extends JavaPlugin {
 	}
 
 	private boolean handleJobListCommand(Player player) {
-		List<String> jobNames = JobController.getJobNameList();
-		player.sendMessage(MessageWrapper.getString("joblist_info", jobNames.toString()));
+		List<String> jobNames = jobManager.getJobNameList();
+		player.sendMessage(messageWrapper.getString("joblist_info", jobNames.toString()));
 		return true;
 	}
 
 	private boolean handleShopListCommand(Player player) {
 		List<String> shopNames = AdminshopController.getAdminshopNameList();
-		player.sendMessage(MessageWrapper.getString("shoplist_info", shopNames.toString()));
+		player.sendMessage(messageWrapper.getString("shoplist_info", shopNames.toString()));
 		return true;
 	}
 
 	private boolean handleShopCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws JobSystemException, GeneralEconomyException, ShopSystemException {
 		if (args.length == 1) {
-			if (ecoPlayer.hasJob(JobController.getJobByName(args[0]))) {
+			if (ecoPlayer.hasJob(jobManager.getJobByName(args[0]))) {
 				AdminshopController.getAdminShopByName(args[0]).openShopInventory(player);
 			} else {
-				player.sendMessage(MessageWrapper.getErrorString("job_not_joined"));
+				player.sendMessage(messageWrapper.getErrorString("job_not_joined"));
 			}
 		} else {
 			return false;
@@ -372,7 +384,7 @@ public class UltimateEconomy extends JavaPlugin {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private List<String> getJobList(String arg) {
-		List<String> temp = JobController.getJobNameList();
+		List<String> temp = jobManager.getJobNameList();
 		List<String> list = new ArrayList<>();
 		if ("".equals(arg)) {
 			list = temp;

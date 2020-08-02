@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -24,19 +26,21 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.ue.config.api.ConfigController;
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.config.logic.api.ConfigManager;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopExceptionMessageEnum;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.AbstractShop;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public abstract class AbstractShopImpl implements AbstractShop {
 
+	@Inject
+	ConfigManager configManager;
 	private Villager villager;
 	private Location location;
 	private Inventory shopInventory;
@@ -151,7 +155,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	@Override
-	public void changeShopSize(int newSize) throws ShopSystemException, GeneralEconomyException, PlayerException {
+	public void changeShopSize(int newSize) throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 		getValidationHandler();
 		ShopValidationHandler.checkForValidSize(newSize);
 		getValidationHandler().checkForResizePossible(getShopInventory(), getSize(), newSize, 1);
@@ -164,7 +168,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	@Override
 	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack)
-			throws ShopSystemException, PlayerException, GeneralEconomyException {
+			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
 		getValidationHandler().checkForSlotIsEmpty(slot, getShopInventory(), 1);
 		getValidationHandler().checkForValidPrice(String.valueOf(sellPrice));
 		getValidationHandler().checkForValidPrice(String.valueOf(buyPrice));
@@ -181,7 +185,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	@Override
 	public String editShopItem(int slot, String newAmount, String newSellPrice, String newBuyPrice)
-			throws ShopSystemException, PlayerException, GeneralEconomyException {
+			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
 		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
 		getValidationHandler().checkForValidAmount(newAmount);
 		getValidationHandler().checkForValidPrice(newSellPrice);
@@ -227,11 +231,11 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	@Override
 	public abstract void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
-			throws GeneralEconomyException, PlayerException, ShopSystemException;
+			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException;
 
 	@Override
 	public void sellShopItem(int slot, int amount, EconomyPlayer ecoPlayer, boolean sendMessage)
-			throws GeneralEconomyException, ShopSystemException, PlayerException {
+			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
 		getValidationHandler().checkForValidSlot(slot, getSize(), 1);
 		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
 		getValidationHandler().checkForPlayerIsOnline(ecoPlayer);
@@ -275,7 +279,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	@Override
-	public void moveShop(Location location) throws TownSystemException, PlayerException {
+	public void moveShop(Location location) throws TownSystemException, EconomyPlayerException {
 		this.location = location;
 		getSavefileHandler().saveShopLocation(location);
 		getShopVillager().teleport(location);
@@ -304,10 +308,10 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	protected void sendBuySellPlayerMessage(int amount, EconomyPlayer ecoPlayer, double price, String sellBuy) {
 		if (amount > 1) {
 			ecoPlayer.getPlayer().sendMessage(MessageWrapper.getString("shop_" + sellBuy + "_plural",
-					String.valueOf(amount), price, ConfigController.getCurrencyText(price)));
+					String.valueOf(amount), price, configManager.getCurrencyText(price)));
 		} else {
 			ecoPlayer.getPlayer().sendMessage(MessageWrapper.getString("shop_" + sellBuy + "_singular",
-					String.valueOf(amount), price, ConfigController.getCurrencyText(price)));
+					String.valueOf(amount), price, configManager.getCurrencyText(price)));
 		}
 	}
 
@@ -374,7 +378,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		this.size = size;
 	}
 
-	protected void reloadShopItems() throws GeneralEconomyException, ShopSystemException, PlayerException {
+	protected void reloadShopItems() throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
 		for (String item : getUniqueItemStringList()) {
 			loadShopItem(item);
 		}
@@ -425,15 +429,15 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		}
 		if (sellPrice == 0.0) {
 			list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + " "
-					+ ConfigController.getCurrencyText(buyPrice));
+					+ configManager.getCurrencyText(buyPrice));
 		} else if (buyPrice == 0.0) {
 			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + " "
-					+ ConfigController.getCurrencyText(sellPrice));
+					+ configManager.getCurrencyText(sellPrice));
 		} else {
 			list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + " "
-					+ ConfigController.getCurrencyText(buyPrice));
+					+ configManager.getCurrencyText(buyPrice));
 			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + " "
-					+ ConfigController.getCurrencyText(sellPrice));
+					+ configManager.getCurrencyText(sellPrice));
 		}
 		return list;
 	}

@@ -7,19 +7,19 @@ import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.AdminshopController;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public enum AdminshopCommandEnum {
 
 	CREATE {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
+				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 3) {
 				AdminshopController.createAdminShop(args[1], player.getLocation(), Integer.valueOf(args[2]));
 				player.sendMessage(MessageWrapper.getString("shop_create", args[1]));
@@ -32,7 +32,7 @@ public enum AdminshopCommandEnum {
 	DELETE {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
+				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 2) {
 				AdminshopController.deleteAdminShop(AdminshopController.getAdminShopByName(args[1]));
 				player.sendMessage(MessageWrapper.getString("shop_delete", args[1]));
@@ -45,7 +45,7 @@ public enum AdminshopCommandEnum {
 	RENAME {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
+				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 3) {
 				AdminshopController.getAdminShopByName(args[1]).changeShopName(args[2]);
 				player.sendMessage(MessageWrapper.getString("shop_rename", args[1], args[2]));
@@ -58,7 +58,7 @@ public enum AdminshopCommandEnum {
 	RESIZE {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
+				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 3) {
 				AdminshopController.getAdminShopByName(args[1]).changeShopSize(Integer.valueOf(args[2]));
 				player.sendMessage(MessageWrapper.getString("shop_resize", args[2]));
@@ -71,7 +71,7 @@ public enum AdminshopCommandEnum {
 	MOVE {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
+				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 2) {
 				AdminshopController.getAdminShopByName(args[1]).moveShop(player.getLocation());
 			} else {
@@ -83,7 +83,7 @@ public enum AdminshopCommandEnum {
 	EDITSHOP {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
+				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 2) {
 				AdminshopController.getAdminShopByName(args[1]).openEditor(player);
 			} else {
@@ -95,7 +95,7 @@ public enum AdminshopCommandEnum {
 	CHANGEPROFESSION {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
+				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 3) {
 				try {
 					AdminshopController.getAdminShopByName(args[1])
@@ -113,7 +113,7 @@ public enum AdminshopCommandEnum {
 	ADDSPAWNER {
 		@Override
 		boolean perform(String label, String[] args, Player player)
-				throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException {
+				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 5) {
 				try {
 					EntityType.valueOf(args[2].toUpperCase());
@@ -141,7 +141,7 @@ public enum AdminshopCommandEnum {
 	};
 
 	abstract boolean perform(String label, String[] args, Player player)
-			throws ShopSystemException, TownSystemException, PlayerException, GeneralEconomyException;
+			throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException;
 
 	/**
 	 * Returns a enum. Return AdminshopCommandEnum.UNKNOWN, if no enum is found.

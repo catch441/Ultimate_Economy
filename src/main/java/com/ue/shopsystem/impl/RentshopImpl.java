@@ -8,13 +8,13 @@ import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.eventhandling.EconomyVillager;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.api.Rentshop;
+import com.ue.ultimate_economy.EconomyVillager;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class RentshopImpl extends PlayershopImpl implements Rentshop {
@@ -44,12 +44,12 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * 
 	 * @param shopId
 	 * @throws TownSystemException
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 * @throws ShopSystemException
 	 * @throws GeneralEconomyException
 	 */
 	public RentshopImpl(String shopId)
-			throws TownSystemException, PlayerException, GeneralEconomyException, ShopSystemException {
+			throws TownSystemException, EconomyPlayerException, GeneralEconomyException, ShopSystemException {
 		super(null, shopId);
 		loadExistingRentshop();
 	}
@@ -64,7 +64,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 */
 	@Override
 	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack)
-			throws ShopSystemException, PlayerException, GeneralEconomyException {
+			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
 		getValidationHandler().checkForIsRented(isRentable());
 		super.addShopItem(slot, sellPrice, buyPrice, itemStack);
 	}
@@ -74,7 +74,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 */
 	@Override
 	public String editShopItem(int slot, String newAmount, String newSellPrice, String newBuyPrice)
-			throws ShopSystemException, PlayerException, GeneralEconomyException {
+			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
 		getValidationHandler().checkForIsRented(isRentable());
 		return super.editShopItem(slot, newAmount, newSellPrice, newBuyPrice);
 	}
@@ -184,7 +184,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 */
 	@Override
 	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
-			throws GeneralEconomyException, PlayerException, ShopSystemException {
+			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
 		getValidationHandler().checkForIsRented(isRentable());
 		super.buyShopItem(slot, ecoPlayer, sendMessage);
 	}
@@ -194,7 +194,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 */
 	@Override
 	public void sellShopItem(int slot, int amount, EconomyPlayer ecoPlayer, boolean sendMessage)
-			throws GeneralEconomyException, ShopSystemException, PlayerException {
+			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
 		getValidationHandler().checkForIsRented(isRentable());
 		super.sellShopItem(slot, amount, ecoPlayer, sendMessage);
 	}
@@ -232,7 +232,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
 	@Override
 	public void rentShop(EconomyPlayer player, int duration)
-			throws ShopSystemException, GeneralEconomyException, PlayerException {
+			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 		getValidationHandler().checkForIsRentable(isRentable());
 		// throws a playerexception, if the player has not enough money.
 		player.decreasePlayerAmount(duration * getRentalFee(), true);
@@ -255,7 +255,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * Overriden, because of is not rented check.
 	 */
 	@Override
-	public void changeShopSize(int newSize) throws ShopSystemException, PlayerException, GeneralEconomyException {
+	public void changeShopSize(int newSize) throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
 		getValidationHandler().checkForIsRentable(isRentable());
 		super.changeShopSize(newSize);
 	}
@@ -266,7 +266,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void changeOwner(EconomyPlayer newOwner) throws PlayerException, ShopSystemException {
+	public void changeOwner(EconomyPlayer newOwner) throws EconomyPlayerException, ShopSystemException {
 		getValidationHandler().checkForIsRentable(isRentable());
 		super.changeOwner(newOwner);
 	}

@@ -6,17 +6,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
-import com.ue.config.api.ConfigController;
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.eventhandling.EconomyVillager;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
-import com.ue.exceptions.PlayerException;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.language.MessageWrapper;
 import com.ue.shopsystem.api.Adminshop;
 import com.ue.shopsystem.api.AdminshopController;
+import com.ue.ultimate_economy.EconomyVillager;
+import com.ue.ultimate_economy.GeneralEconomyException;
+import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
@@ -70,7 +69,7 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 */
 	@Override
 	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
-			throws GeneralEconomyException, PlayerException, ShopSystemException {
+			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
 		getValidationHandler().checkForValidSlot(slot, getSize(), 1);
 		getValidationHandler().checkForPlayerIsOnline(ecoPlayer);
 		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
@@ -92,11 +91,11 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 				if (shopItem.getAmount() > 1) {
 					ecoPlayer.getPlayer()
 							.sendMessage(MessageWrapper.getString("shop_buy_plural", String.valueOf(shopItem.getAmount()),
-									shopItem.getBuyPrice(), ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+									shopItem.getBuyPrice(), configManager.getCurrencyText(shopItem.getBuyPrice())));
 				} else {
 					ecoPlayer.getPlayer()
 							.sendMessage(MessageWrapper.getString("shop_buy_singular", String.valueOf(shopItem.getAmount()),
-									shopItem.getBuyPrice(), ConfigController.getCurrencyText(shopItem.getBuyPrice())));
+									shopItem.getBuyPrice(), configManager.getCurrencyText(shopItem.getBuyPrice())));
 				}
 			}
 		}

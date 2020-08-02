@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.bukkit.Chunk;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface Townworld {
     
@@ -135,8 +135,8 @@ public interface Townworld {
      * Delets all save files and towns.
      * <p>
      * @throws GeneralEconomyException 
-     * @throws PlayerException 
+     * @throws EconomyPlayerException 
      * @throws TownSystemException 
      */
-    public void delete() throws TownSystemException, PlayerException, GeneralEconomyException;
+    public void delete() throws TownSystemException, EconomyPlayerException, GeneralEconomyException;
 }

@@ -5,10 +5,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
-import com.ue.language.MessageWrapper;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class JobCommandExecutor implements CommandExecutor {
 
@@ -24,7 +24,7 @@ public class JobCommandExecutor implements CommandExecutor {
 					}
 				}
 				return false;
-			} catch (JobSystemException | PlayerException | GeneralEconomyException e) {
+			} catch (JobSystemException | EconomyPlayerException | GeneralEconomyException e) {
 				player.sendMessage(e.getMessage());
 			} catch (NumberFormatException e) {
 				player.sendMessage(MessageWrapper.getErrorString("invalid_parameter", "number"));

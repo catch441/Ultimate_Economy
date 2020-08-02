@@ -14,10 +14,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
 import com.ue.jobsystem.api.JobController;
-import com.ue.jobsystem.api.JobcenterController;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -63,10 +63,10 @@ public class JobTabCompleterTest {
 		for (int i = 0; i < size; i++) {
 			JobController.deleteJob(JobController.getJobList().get(0));
 		}
-		int size2 = JobcenterController.getJobcenterList().size();
+		int size2 = JobcenterManagerImpl.getJobcenterList().size();
 		for (int i = 0; i < size2; i++) {
 			try {
-				JobcenterController.deleteJobcenter(JobcenterController.getJobcenterList().get(0));
+				JobcenterManagerImpl.deleteJobcenter(JobcenterManagerImpl.getJobcenterList().get(0));
 			} catch (JobSystemException e) {
 				assertTrue(false);
 			}
@@ -160,8 +160,8 @@ public class JobTabCompleterTest {
 	@Test
 	public void removeJobArgTestWithTwoArgs() {
 		try {
-			JobcenterController.createJobcenter("myJobcenter1", new Location(world, 1, 1, 1), 9);
-			JobcenterController.createJobcenter("myJobcenter2", new Location(world, 1, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter1", new Location(world, 1, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter2", new Location(world, 1, 1, 1), 9);
 			String[] args = { "removeJob", "" };
 			List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 			assertEquals(2, result.size());
@@ -175,8 +175,8 @@ public class JobTabCompleterTest {
 	@Test
 	public void removeJobArgTestWithTwoArgsMatching() {
 		try {
-			JobcenterController.createJobcenter("myJobcenter1", new Location(world, 1, 1, 1), 9);
-			JobcenterController.createJobcenter("myJobcenter2", new Location(world, 1, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter1", new Location(world, 1, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter2", new Location(world, 1, 1, 1), 9);
 			String[] args = { "removeJob", "1" };
 			List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 			assertEquals(1, result.size());
@@ -226,7 +226,7 @@ public class JobTabCompleterTest {
 	@Test
 	public void addJobArgTest() {
 		try {
-			JobcenterController.createJobcenter("myJobcenter", new Location(world, 1, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter", new Location(world, 1, 1, 1), 9);
 			String[] args = { "addJob", "" };
 			List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 			assertEquals(1, result.size());
@@ -239,8 +239,8 @@ public class JobTabCompleterTest {
 	@Test
 	public void addJobArgTestWithMatching() {
 		try {
-			JobcenterController.createJobcenter("myJobcenter1", new Location(world, 1, 1, 1), 9);
-			JobcenterController.createJobcenter("myJobcenter2", new Location(world, 1, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter1", new Location(world, 1, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter2", new Location(world, 1, 1, 1), 9);
 			String[] args = { "addJob", "1" };
 			List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 			assertEquals(1, result.size());
@@ -298,7 +298,7 @@ public class JobTabCompleterTest {
 	@Test
 	public void moveArgTest() {
 		try {
-			JobcenterController.createJobcenter("myJobcenter", new Location(world, 1, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter", new Location(world, 1, 1, 1), 9);
 			String[] args = { "move", "" };
 			List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 			assertEquals(1, result.size());
@@ -311,8 +311,8 @@ public class JobTabCompleterTest {
 	@Test
 	public void moveArgTestWithMatching() {
 		try {
-			JobcenterController.createJobcenter("myJobcenter1", new Location(world, 1, 1, 1), 9);
-			JobcenterController.createJobcenter("myJobcenter2", new Location(world, 1, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter1", new Location(world, 1, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter2", new Location(world, 1, 1, 1), 9);
 			String[] args = { "move", "1" };
 			List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 			assertEquals(1, result.size());
@@ -325,7 +325,7 @@ public class JobTabCompleterTest {
 	@Test
 	public void deleteArgTest() {
 		try {
-			JobcenterController.createJobcenter("myJobcenter", new Location(world, 1, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter", new Location(world, 1, 1, 1), 9);
 			String[] args = { "delete", "" };
 			List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 			assertEquals(1, result.size());
@@ -338,8 +338,8 @@ public class JobTabCompleterTest {
 	@Test
 	public void deleteArgTestWithMatching() {
 		try {
-			JobcenterController.createJobcenter("myJobcenter1", new Location(world, 1, 1, 1), 9);
-			JobcenterController.createJobcenter("myJobcenter2", new Location(world, 1, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter1", new Location(world, 1, 1, 1), 9);
+			JobcenterManagerImpl.createJobcenter("myJobcenter2", new Location(world, 1, 1, 1), 9);
 			String[] args = { "delete", "1" };
 			List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 			assertEquals(1, result.size());

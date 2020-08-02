@@ -19,16 +19,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.JobSystemException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.api.Jobcenter;
-import com.ue.jobsystem.api.JobcenterController;
 import com.ue.jobsystem.impl.JobcenterImpl;
+import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -61,9 +61,9 @@ public class JobcenterTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -79,10 +79,10 @@ public class JobcenterTest {
 		for (int i = 0; i < size; i++) {
 			JobController.deleteJob(JobController.getJobList().get(0));
 		}
-		int size2 = JobcenterController.getJobcenterList().size();
+		int size2 = JobcenterManagerImpl.getJobcenterList().size();
 		for (int i = 0; i < size2; i++) {
 			try {
-				JobcenterController.deleteJobcenter(JobcenterController.getJobcenterList().get(0));
+				JobcenterManagerImpl.deleteJobcenter(JobcenterManagerImpl.getJobcenterList().get(0));
 			} catch (JobSystemException e) {
 				fail();
 			}
@@ -93,10 +93,10 @@ public class JobcenterTest {
 	public void doubleVillagerTest() {
 		try {
 			Location loc = new Location(world, 5, 5, 5);
-			JobcenterController.createJobcenter("center", loc, 9);
-			JobcenterController.getJobcenterList().clear();
+			JobcenterManagerImpl.createJobcenter("center", loc, 9);
+			JobcenterManagerImpl.getJobcenterList().clear();
 			assertEquals(1, world.getNearbyEntities(loc, 0, 0, 0).size());
-			JobcenterController.createJobcenter("center", loc, 9);
+			JobcenterManagerImpl.createJobcenter("center", loc, 9);
 			assertEquals(1, world.getNearbyEntities(loc, 0, 0, 0).size());
 		} catch (JobSystemException | GeneralEconomyException e) {
 			fail();
@@ -107,12 +107,12 @@ public class JobcenterTest {
 	public void constructorLoadTest() {
 		try {
 			Location loc = new Location(world, 1, 1, 1);
-			JobcenterController.createJobcenter("center", loc, 9);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			JobcenterManagerImpl.createJobcenter("center", loc, 9);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			center.addJob(job, "stone", 0);
-			JobcenterController.getJobcenterList().clear();
+			JobcenterManagerImpl.getJobcenterList().clear();
 			Jobcenter result = new JobcenterImpl("center");
 			assertEquals("center",result.getName());
 			assertEquals(loc, result.getJobcenterLocation());
@@ -126,7 +126,7 @@ public class JobcenterTest {
 			List<String> lore = inv.getItem(8).getItemMeta().getLore();
 			assertEquals("§6Leftclick: §aJoin",lore.get(0));
 			assertEquals("§6Rightclick: §cLeave",lore.get(1));
-		} catch (JobSystemException | PlayerException | GeneralEconomyException e) {
+		} catch (JobSystemException | EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 	}
@@ -135,16 +135,16 @@ public class JobcenterTest {
 	public void constructorLoadTestWithJobError() {
 		try {
 			Location loc = new Location(world, 1, 1, 1);
-			JobcenterController.createJobcenter("center", loc, 9);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			JobcenterManagerImpl.createJobcenter("center", loc, 9);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			center.addJob(job, "stone", 0);
-			JobcenterController.getJobcenterList().clear();
+			JobcenterManagerImpl.getJobcenterList().clear();
 			JobController.getJobList().clear();
 			Jobcenter result = new JobcenterImpl("center");
 			assertEquals(0, result.getJobList().size());
-		} catch (JobSystemException | PlayerException | GeneralEconomyException e) {
+		} catch (JobSystemException | EconomyPlayerException | GeneralEconomyException e) {
 			fail();
 		}
 	}
@@ -152,8 +152,8 @@ public class JobcenterTest {
 	@Test
 	public void getNameTest() {
 		try {
-			JobcenterController.createJobcenter("center", new Location(world, 1, 1, 1), 9);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			JobcenterManagerImpl.createJobcenter("center", new Location(world, 1, 1, 1), 9);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			assertEquals("center", center.getName());
 		} catch (JobSystemException | GeneralEconomyException e) {
 			fail();
@@ -163,8 +163,8 @@ public class JobcenterTest {
 	@Test
 	public void hasJobTest() {
 		try {
-			JobcenterController.createJobcenter("center", new Location(world, 1, 1, 1), 9);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			JobcenterManagerImpl.createJobcenter("center", new Location(world, 1, 1, 1), 9);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			JobController.createJob("myjob");
 			JobController.createJob("myjob1");
 			Job job = JobController.getJobList().get(0);
@@ -172,7 +172,7 @@ public class JobcenterTest {
 			center.addJob(job, "stone", 0);
 			assertTrue(center.hasJob(job));
 			assertFalse(center.hasJob(job1));
-		} catch (JobSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (JobSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -180,14 +180,14 @@ public class JobcenterTest {
 	@Test
 	public void getJobListTest() {
 		try {
-			JobcenterController.createJobcenter("center", new Location(world, 1, 1, 1), 9);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			JobcenterManagerImpl.createJobcenter("center", new Location(world, 1, 1, 1), 9);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			center.addJob(job, "stone", 0);
 			assertEquals(1, center.getJobList().size());
 			assertEquals(job, center.getJobList().get(0));
-		} catch (JobSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (JobSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -196,8 +196,8 @@ public class JobcenterTest {
 	public void despawnVillagerTest() {
 		try {
 			Location loc = new Location(world, 12, 12, 12);
-			JobcenterController.createJobcenter("center", loc, 9);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			JobcenterManagerImpl.createJobcenter("center", loc, 9);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			assertEquals(1, world.getNearbyEntities(loc, 0, 0, 0).size());
 			center.despawnVillager();
 			assertEquals(0, world.getNearbyEntities(loc, 0, 0, 0).size());
@@ -210,8 +210,8 @@ public class JobcenterTest {
 	public void moveJobcenterTest() {
 		try {
 			Location loc = new Location(world, 3, 3, 3);
-			JobcenterController.createJobcenter("center", loc, 9);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			JobcenterManagerImpl.createJobcenter("center", loc, 9);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			Location newLoc = new Location(world, 2, 2, 2);
 			center.moveJobcenter(newLoc);
 			assertEquals(newLoc, center.getJobcenterLocation());
@@ -226,8 +226,8 @@ public class JobcenterTest {
 	public void openInvTest() {
 		try {
 			Location loc = new Location(world, 1, 1, 1);
-			JobcenterController.createJobcenter("center", loc, 9);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			JobcenterManagerImpl.createJobcenter("center", loc, 9);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			center.openInv(player);
 			ChestInventoryMock inv = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			assertEquals("center", inv.getName());
@@ -240,8 +240,8 @@ public class JobcenterTest {
 	public void deleteJobcenterTest() {
 		try {
 			Location loc = new Location(world, 4, 4, 4);
-			JobcenterController.createJobcenter("center", loc, 9);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			JobcenterManagerImpl.createJobcenter("center", loc, 9);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			center.deleteJobcenter();
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "center-JobCenter.yml");
 			assertFalse(file.exists());
@@ -254,10 +254,10 @@ public class JobcenterTest {
 	@Test
 	public void removeJobTest() {
 		try {
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			Location loc = new Location(world, 1, 1, 1);
-			JobcenterController.createJobcenter("center", loc, 9);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			JobcenterManagerImpl.createJobcenter("center", loc, 9);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			ecoPlayer.joinJob(job, false);
@@ -274,7 +274,7 @@ public class JobcenterTest {
 			assertEquals(0, config.getStringList("Jobnames").size());
 			assertFalse(config.contains("Jobs.myjob"));
 			assertFalse(ecoPlayer.hasJob(job));
-		} catch (JobSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (JobSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -283,10 +283,10 @@ public class JobcenterTest {
 	public void removeJobTestWithPlayerLeaveJobError() {
 		try {
 			Location loc = new Location(world, 1, 1, 1);
-			JobcenterController.createJobcenter("center", loc, 9);
+			JobcenterManagerImpl.createJobcenter("center", loc, 9);
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			center.removeJob(job);
 			fail();
 		} catch (JobSystemException | GeneralEconomyException e) {
@@ -299,10 +299,10 @@ public class JobcenterTest {
 	public void removeJobTestWithJobInOtherJocenter() {
 		Location loc = new Location(world, 1, 1, 1);
 		try {
-			JobcenterController.createJobcenter("center", loc, 9);
-			JobcenterController.createJobcenter("center2", loc.add(10, 10, 10), 9);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
-			Jobcenter center2 = JobcenterController.getJobcenterList().get(1);
+			JobcenterManagerImpl.createJobcenter("center", loc, 9);
+			JobcenterManagerImpl.createJobcenter("center2", loc.add(10, 10, 10), 9);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
+			Jobcenter center2 = JobcenterManagerImpl.getJobcenterList().get(1);
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
 			center.addJob(job, "stone", 0);
@@ -310,7 +310,7 @@ public class JobcenterTest {
 			center.removeJob(job);
 			assertEquals(0, center.getJobList().size());
 			assertEquals(job, center2.getJobList().get(0));
-		} catch (JobSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (JobSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -319,10 +319,10 @@ public class JobcenterTest {
 	public void addJobTest() {
 		try {
 			Location loc = new Location(world, 1, 1, 1);
-			JobcenterController.createJobcenter("center", loc, 9);
+			JobcenterManagerImpl.createJobcenter("center", loc, 9);
 			JobController.createJob("myjob");
 			Job job = JobController.getJobList().get(0);
-			Jobcenter center = JobcenterController.getJobcenterList().get(0);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
 			center.addJob(job, "stone", 0);
 			assertEquals(1, center.getJobList().size());
 			assertEquals(job, center.getJobList().get(0));
@@ -338,7 +338,7 @@ public class JobcenterTest {
 			assertEquals("myjob", config.getStringList("Jobnames").get(0));
 			assertEquals("STONE", config.getString("Jobs.myjob.ItemMaterial"));
 			assertEquals("0", config.getString("Jobs.myjob.Slot"));
-		} catch (JobSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (JobSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}

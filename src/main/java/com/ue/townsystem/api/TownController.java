@@ -11,14 +11,14 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.GeneralEconomyExceptionMessageEnum;
-import com.ue.exceptions.PlayerException;
-import com.ue.exceptions.PlayerExceptionMessageEnum;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.townsystem.impl.TownImpl;
+import com.ue.ultimate_economy.GeneralEconomyException;
+import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
 public class TownController {
 
@@ -33,11 +33,11 @@ public class TownController {
 	 * @param location
 	 * @param player    the player who wants to be the mayor of the town
 	 * @throws TownSystemException
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 * @throws GeneralEconomyException
 	 */
 	public static void createTown(Townworld townworld, String townName, Location location, EconomyPlayer player)
-			throws TownSystemException, PlayerException, GeneralEconomyException {
+			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		checkForTownDoesNotExist(townName);
 		checkForChunkIsFree(townworld, location);
 		checkForPlayerHasEnoughMoney(townworld, player);
@@ -55,16 +55,16 @@ public class TownController {
 		}
 	}
 
-	private static void checkForMaxJoinedTownsNotReached(EconomyPlayer player) throws PlayerException {
+	private static void checkForMaxJoinedTownsNotReached(EconomyPlayer player) throws EconomyPlayerException {
 		if (player.reachedMaxJoinedTowns()) {
-			throw PlayerException.getException(PlayerExceptionMessageEnum.MAX_REACHED);
+			throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.MAX_REACHED);
 		}
 	}
 
 	private static void checkForPlayerHasEnoughMoney(Townworld townworld, EconomyPlayer player)
-			throws PlayerException, GeneralEconomyException {
+			throws EconomyPlayerException, GeneralEconomyException {
 		if (!player.hasEnoughtMoney(townworld.getFoundationPrice())) {
-			throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
+			throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
 		}
 	}
 
@@ -86,11 +86,11 @@ public class TownController {
 	 * @param town
 	 * @param player
 	 * @throws TownSystemException
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 * @throws GeneralEconomyException
 	 */
 	public static void dissolveTown(Town town, EconomyPlayer player)
-			throws TownSystemException, PlayerException, GeneralEconomyException {
+			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		if (town.isMayor(player)) {
 			List<EconomyPlayer> tList = new ArrayList<>();
 			tList.addAll(town.getCitizens());
@@ -109,7 +109,7 @@ public class TownController {
 						p.getName());
 			}
 		} else {
-			throw PlayerException.getException(PlayerExceptionMessageEnum.TOWN_NOT_TOWN_OWNER);
+			throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.TOWN_NOT_TOWN_OWNER);
 		}
 	}
 
@@ -121,9 +121,9 @@ public class TownController {
 	 * @param townName
 	 * @return Town
 	 * @throws TownSystemException
-	 * @throws PlayerException
+	 * @throws EconomyPlayerException
 	 */
-	public static Town loadTown(Townworld townworld, String townName) throws TownSystemException, PlayerException {
+	public static Town loadTown(Townworld townworld, String townName) throws TownSystemException, EconomyPlayerException {
 		TownImpl townImpl = new TownImpl(townworld, townName);
 		townNameList.add(townName);
 		return townImpl;

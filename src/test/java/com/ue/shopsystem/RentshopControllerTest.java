@@ -27,15 +27,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.eventhandling.EconomyVillager;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.api.Rentshop;
 import com.ue.shopsystem.api.RentshopController;
 import com.ue.shopsystem.impl.ShopItem;
+import com.ue.ultimate_economy.EconomyVillager;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -70,9 +70,9 @@ public class RentshopControllerTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -148,13 +148,13 @@ public class RentshopControllerTest {
 		try {
 			RentshopController.createRentShop(location, 9, 10);
 			RentshopController.createRentShop(location, 9, 0);
-			RentshopController.getRentShops().get(1).rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0),
+			RentshopController.getRentShops().get(1).rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0),
 					10);
 			List<String> list = RentshopController.getRentShopUniqueNameList();
 			assertEquals(2, list.size());
 			assertEquals("RentShop#R0", list.get(0));
 			assertEquals("Shop#R1_catch441", list.get(1));
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -166,9 +166,9 @@ public class RentshopControllerTest {
 			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
 			Rentshop shop2 = RentshopController.createRentShop(location, 9, 0);
 			Rentshop shop3 = RentshopController.createRentShop(location, 9, 0);
-			shop2.rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0),
+			shop2.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0),
 					10);
-			shop3.rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0),
+			shop3.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0),
 					10);
 			Rentshop response = RentshopController.getRentShopByUniqueName("RentShop#R0",null);
 			Rentshop response2 = RentshopController.getRentShopByUniqueName("Shop#R2", player);
@@ -178,7 +178,7 @@ public class RentshopControllerTest {
 			assertEquals(shop3, response2);
 			assertEquals("R2", response2.getShopId());
 			assertEquals("Shop#R2", response2.getName());
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -200,12 +200,12 @@ public class RentshopControllerTest {
 		try {
 			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
 			Rentshop shop2 = RentshopController.createRentShop(location, 9, 0);
-			RentshopController.getRentShops().get(1).rentShop(EconomyPlayerController.getAllEconomyPlayers().get(0),
+			RentshopController.getRentShops().get(1).rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0),
 					10);
 			List<Rentshop> shops = RentshopController.getRentShops();
 			assertEquals(shop, shops.get(0));
 			assertEquals(shop2, shops.get(1));
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -359,7 +359,7 @@ public class RentshopControllerTest {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
 			Rentshop shop = RentshopController.createRentShop(location, 9, 5);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
 			shop.addShopItem(0, 1, 1, new ItemStack(Material.STONE));
@@ -390,7 +390,7 @@ public class RentshopControllerTest {
 			assertEquals(shopItemLoaded.getItemStack().getType(), shopItem.getItemStack().getType());
 			// inventory
 			assertEquals(loaded.getShopInventory().getItem(0).getType(), shop.getShopInventory().getItem(0).getType());
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -417,18 +417,18 @@ public class RentshopControllerTest {
 		Location location = new Location(world, 10.5, 2.3, 6.9);
 		try {
 			Rentshop shop = RentshopController.createRentShop(location, 9, 5);
-			EconomyPlayer ecoPlayer = EconomyPlayerController.getAllEconomyPlayers().get(0);
+			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
 			RentshopController.despawnAllVillagers();
 			RentshopController.getRentShops().clear();
-			EconomyPlayerController.getAllEconomyPlayers().clear();
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 			assertEquals(0, RentshopController.getRentShops().size());
 			RentshopController.loadAllRentShops();
 			assertEquals(0, RentshopController.getRentShops().size());
-			EconomyPlayerController.getAllEconomyPlayers().add(ecoPlayer);
+			EconomyPlayerManagerImpl.getAllEconomyPlayers().add(ecoPlayer);
 			RentshopController.getRentShops().add(shop);
-		} catch (GeneralEconomyException | ShopSystemException | PlayerException e) {
+		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
 	}

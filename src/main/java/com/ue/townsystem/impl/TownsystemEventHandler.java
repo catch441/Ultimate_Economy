@@ -1,5 +1,7 @@
 package com.ue.townsystem.impl;
 
+import javax.inject.Inject;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -12,20 +14,35 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-import com.ue.config.api.ConfigController;
-import com.ue.economyplayer.api.EconomyPlayer;
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
-import com.ue.exceptions.PlayerExceptionMessageEnum;
+import com.ue.common.utils.DaggerServiceComponent;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServiceComponent;
+import com.ue.config.logic.api.ConfigManager;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.TownSystemException;
-import com.ue.language.MessageWrapper;
 import com.ue.townsystem.api.Plot;
 import com.ue.townsystem.api.Town;
 import com.ue.townsystem.api.Townworld;
 import com.ue.townsystem.api.TownworldController;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class TownsystemEventHandler {
+
+	@Inject
+	ConfigManager configManager;
+
+	private ServiceComponent serviceComponent;
+
+	/**
+	 * Default constructor.
+	 */
+	public TownsystemEventHandler() {
+		serviceComponent = DaggerServiceComponent.builder().build();
+		serviceComponent.inject(this);
+	}
 
 	/**
 	 * Handles the player teleport event for the townsystem.
@@ -103,15 +120,17 @@ public class TownsystemEventHandler {
 		if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
 			event.setCancelled(true);
 			try {
-				Townworld townWorld = TownworldController.getTownWorldByName(event.getWhoClicked().getWorld().getName());
+				Townworld townWorld = TownworldController
+						.getTownWorldByName(event.getWhoClicked().getWorld().getName());
 				Chunk chunk = ((Villager) event.getClickedInventory().getHolder()).getLocation().getChunk();
-				EconomyPlayer ecoPlayer = EconomyPlayerController.getEconomyPlayerByName(event.getWhoClicked().getName());
+				EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl
+						.getEconomyPlayerByName(event.getWhoClicked().getName());
 				Town town = townWorld.getTownByChunk(chunk);
 				Plot plot = town.getPlotByChunk(chunk.getX() + "/" + chunk.getZ());
 				switch (event.getCurrentItem().getItemMeta().getDisplayName()) {
 				case "Buy":
 					if (!ecoPlayer.hasEnoughtMoney(plot.getSalePrice())) {
-						throw PlayerException.getException(PlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
+						throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
 					} else {
 						EconomyPlayer receiver = plot.getOwner();
 						ecoPlayer.payToOtherPlayer(receiver, plot.getSalePrice(), false);
@@ -127,7 +146,8 @@ public class TownsystemEventHandler {
 					break;
 				case "Join":
 					town.joinTown(ecoPlayer);
-					event.getWhoClicked().sendMessage(ChatColor.GOLD + "You joined the town " + town.getTownName() + ".");
+					event.getWhoClicked()
+							.sendMessage(ChatColor.GOLD + "You joined the town " + town.getTownName() + ".");
 					break;
 				case "Leave":
 					town.leaveTown(ecoPlayer);
@@ -138,12 +158,12 @@ public class TownsystemEventHandler {
 				}
 				event.getWhoClicked().closeInventory();
 			} catch (TownSystemException | GeneralEconomyException e) {
-			} catch (PlayerException e) {
+			} catch (EconomyPlayerException e) {
 				event.getWhoClicked().sendMessage(ChatColor.RED + e.getMessage());
 			}
 		}
 	}
-	
+
 	/**
 	 * Handles the player interact event for the townsystem.
 	 * 
@@ -154,7 +174,7 @@ public class TownsystemEventHandler {
 			Location location = event.getClickedBlock().getLocation();
 			try {
 				Townworld townworld = TownworldController.getTownWorldByName(location.getWorld().getName());
-				EconomyPlayer economyPlayer = EconomyPlayerController
+				EconomyPlayer economyPlayer = EconomyPlayerManagerImpl
 						.getEconomyPlayerByName(event.getPlayer().getName());
 				if (townworld.isChunkFree(location.getChunk())) {
 					if (!event.getPlayer().hasPermission("ultimate_economy.wilderness")) {
@@ -168,24 +188,24 @@ public class TownsystemEventHandler {
 						event.getPlayer().sendMessage(MessageWrapper.getErrorString("no_permission_on_plot"));
 					}
 				}
-			} catch (TownSystemException | PlayerException e) {
+			} catch (TownSystemException | EconomyPlayerException e) {
 			}
 		}
 	}
-	
+
 	private boolean hasNoBuildPermission(PlayerInteractEvent event, Location location, EconomyPlayer economyPlayer,
 			Town town) throws TownSystemException {
 		if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")
 				&& !town.hasBuildPermissions(economyPlayer,
 						town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))
 				|| (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) && isDoorOrGate(event)
-						&& ConfigController.isExtendedInteraction())) {
+						&& configManager.isExtendedInteraction())) {
 			return true;
 		} else {
 			return false;
 		}
 	}
-	
+
 	private boolean isDoorOrGate(PlayerInteractEvent event) {
 		if (event.getClickedBlock().getType().toString().contains("DOOR")
 				|| event.getClickedBlock().getType().toString().contains("GATE")) {

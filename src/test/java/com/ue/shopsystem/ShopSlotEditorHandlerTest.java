@@ -25,14 +25,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.ue.economyplayer.api.EconomyPlayerController;
-import com.ue.exceptions.GeneralEconomyException;
-import com.ue.exceptions.PlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.impl.AbstractShopImpl;
 import com.ue.shopsystem.impl.ShopItem;
 import com.ue.shopsystem.impl.ShopSlotEditorHandler;
+import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -77,7 +77,7 @@ public class ShopSlotEditorHandlerTest {
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
 		server.setPlayers(0);
-		EconomyPlayerController.getAllEconomyPlayers().clear();
+		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 		player = server.addPlayer("kthschnll");
 	}
 
@@ -86,9 +86,9 @@ public class ShopSlotEditorHandlerTest {
 	 */
 	@AfterAll
 	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerController.getAllEconomyPlayers().size();
+		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
 		for (int i = 0; i < size2; i++) {
-			EconomyPlayerController.deleteEconomyPlayer(EconomyPlayerController.getAllEconomyPlayers().get(0));
+			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
@@ -244,7 +244,7 @@ public class ShopSlotEditorHandlerTest {
 		ItemStack clone = stack.clone();
 		try {
 			AdminshopController.getAdminshopList().get(0).addShopItem(0, 2, 3, stack);
-		} catch (ShopSystemException | PlayerException | GeneralEconomyException e1) {
+		} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException e1) {
 			fail();
 		}
 		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
@@ -1238,7 +1238,7 @@ public class ShopSlotEditorHandlerTest {
 			assertEquals(stack, shopItem.getItemStack());
 			assertEquals("ItemStack{STONE x 1}", shopItem.getItemString());
 			player.closeInventory();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -1277,7 +1277,7 @@ public class ShopSlotEditorHandlerTest {
 			assertEquals(stack, shopItem.getItemStack());
 			assertEquals("ItemStack{ACACIA_BOAT x 1}", shopItem.getItemString());
 			player.closeInventory();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -1320,7 +1320,7 @@ public class ShopSlotEditorHandlerTest {
 			assertEquals(stack, shopItem.getItemStack());
 			assertEquals("ItemStack{ACACIA_BOAT x 1}", shopItem.getItemString());
 			player.closeInventory();
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
@@ -1338,7 +1338,7 @@ public class ShopSlotEditorHandlerTest {
 			assertEquals("myshop-Editor", editor.getName());
 			assertEquals("§6The item §astone§6 was removed from the shop.", player.nextMessage());
 			assertNull(player.nextMessage());
-		} catch (ShopSystemException | GeneralEconomyException | PlayerException e) {
+		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
 	}
