@@ -17,7 +17,8 @@ import org.junit.jupiter.api.Test;
 
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.jobsystem.api.JobController;
-import com.ue.jobsystem.api.Jobcenter;
+import com.ue.jobsystem.logic.api.Jobcenter;
+import com.ue.jobsystem.logic.impl.JobCommandExecutorImpl;
 import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
@@ -46,7 +47,7 @@ public class JobCommandExecutorTest {
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
 		player = server.addPlayer("catch441");
-		executor = new JobCommandExecutor();
+		executor = new JobCommandExecutorImpl();
 	}
 
 	/**

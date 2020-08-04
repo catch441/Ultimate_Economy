@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Test;
 
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
-import com.ue.jobsystem.api.Job;
-import com.ue.jobsystem.api.JobController;
+import com.ue.jobsystem.logic.api.Job;
+import com.ue.jobsystem.logic.api.JobController;
 import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.jobsystem.logic.impl.JobsystemValidationHandlerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;

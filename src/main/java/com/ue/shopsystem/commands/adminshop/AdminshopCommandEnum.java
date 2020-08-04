@@ -11,7 +11,7 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.shopsystem.api.AdminshopController;
+import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public enum AdminshopCommandEnum {
@@ -21,7 +21,7 @@ public enum AdminshopCommandEnum {
 		boolean perform(String label, String[] args, Player player)
 				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 3) {
-				AdminshopController.createAdminShop(args[1], player.getLocation(), Integer.valueOf(args[2]));
+				AdminshopManagerImpl.createAdminShop(args[1], player.getLocation(), Integer.valueOf(args[2]));
 				player.sendMessage(MessageWrapper.getString("shop_create", args[1]));
 			} else {
 				player.sendMessage("/" + label + " create <shopname> <size> <- size have to be a multible of 9");
@@ -34,7 +34,7 @@ public enum AdminshopCommandEnum {
 		boolean perform(String label, String[] args, Player player)
 				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 2) {
-				AdminshopController.deleteAdminShop(AdminshopController.getAdminShopByName(args[1]));
+				AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminShopByName(args[1]));
 				player.sendMessage(MessageWrapper.getString("shop_delete", args[1]));
 			} else {
 				player.sendMessage("/" + label + " delete <shopname>");
@@ -47,7 +47,7 @@ public enum AdminshopCommandEnum {
 		boolean perform(String label, String[] args, Player player)
 				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 3) {
-				AdminshopController.getAdminShopByName(args[1]).changeShopName(args[2]);
+				AdminshopManagerImpl.getAdminShopByName(args[1]).changeShopName(args[2]);
 				player.sendMessage(MessageWrapper.getString("shop_rename", args[1], args[2]));
 			} else {
 				player.sendMessage("/" + label + " rename <oldName> <newName>");
@@ -60,7 +60,7 @@ public enum AdminshopCommandEnum {
 		boolean perform(String label, String[] args, Player player)
 				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 3) {
-				AdminshopController.getAdminShopByName(args[1]).changeShopSize(Integer.valueOf(args[2]));
+				AdminshopManagerImpl.getAdminShopByName(args[1]).changeShopSize(Integer.valueOf(args[2]));
 				player.sendMessage(MessageWrapper.getString("shop_resize", args[2]));
 			} else {
 				player.sendMessage("/" + label + " resize <shopname> <new size>");
@@ -73,7 +73,7 @@ public enum AdminshopCommandEnum {
 		boolean perform(String label, String[] args, Player player)
 				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 2) {
-				AdminshopController.getAdminShopByName(args[1]).moveShop(player.getLocation());
+				AdminshopManagerImpl.getAdminShopByName(args[1]).moveShop(player.getLocation());
 			} else {
 				player.sendMessage("/" + label + " move <shopname>");
 			}
@@ -85,7 +85,7 @@ public enum AdminshopCommandEnum {
 		boolean perform(String label, String[] args, Player player)
 				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 2) {
-				AdminshopController.getAdminShopByName(args[1]).openEditor(player);
+				AdminshopManagerImpl.getAdminShopByName(args[1]).openEditor(player);
 			} else {
 				player.sendMessage("/" + label + " editShop <shopname>");
 			}
@@ -98,7 +98,7 @@ public enum AdminshopCommandEnum {
 				throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 			if (args.length == 3) {
 				try {
-					AdminshopController.getAdminShopByName(args[1])
+					AdminshopManagerImpl.getAdminShopByName(args[1])
 							.changeProfession(Profession.valueOf(args[2].toUpperCase()));
 					player.sendMessage(MessageWrapper.getString("profession_changed"));
 				} catch (IllegalArgumentException e) {
@@ -121,7 +121,7 @@ public enum AdminshopCommandEnum {
 					ItemMeta meta = itemStack.getItemMeta();
 					meta.setDisplayName(args[2].toUpperCase());
 					itemStack.setItemMeta(meta);
-					AdminshopController.getAdminShopByName(args[1]).addShopItem(Integer.valueOf(args[3]) - 1, 0.0,
+					AdminshopManagerImpl.getAdminShopByName(args[1]).addShopItem(Integer.valueOf(args[3]) - 1, 0.0,
 							Double.valueOf(args[4]), itemStack);
 					player.sendMessage(MessageWrapper.getString("shop_addSpawner", args[2]));
 				} catch (IllegalArgumentException e) {

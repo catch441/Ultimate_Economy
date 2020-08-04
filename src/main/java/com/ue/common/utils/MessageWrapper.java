@@ -10,8 +10,6 @@ import java.util.ResourceBundle;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
-import com.ue.language.UTF8Control;
-
 public class MessageWrapper {
 
 	private ResourceBundle messages;

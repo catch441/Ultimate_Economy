@@ -28,8 +28,8 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.shopsystem.impl.ShopItem;
-import com.ue.shopsystem.impl.ShopSavefileHandler;
+import com.ue.shopsystem.logic.impl.ShopDaoImpl;
+import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
@@ -38,7 +38,7 @@ import be.seeseemelk.mockbukkit.WorldMock;
 
 public class ShopSavefileHandlerTest {
 
-	private static ShopSavefileHandler savefileHandler;
+	private static ShopDaoImpl savefileHandler;
 	private static WorldMock world;
 
 	/**
@@ -52,7 +52,7 @@ public class ShopSavefileHandlerTest {
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
 		server.addPlayer("kthschnll");
-		savefileHandler = new ShopSavefileHandler("A0");
+		savefileHandler = new ShopDaoImpl("A0");
 	}
 
 	/**
@@ -73,12 +73,12 @@ public class ShopSavefileHandlerTest {
 	public void unload() {
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "A0.yml");
 		file.delete();
-		savefileHandler = new ShopSavefileHandler("A0");
+		savefileHandler = new ShopDaoImpl("A0");
 	}
 
 	@Test
 	public void constructorNewTest() {
-		ShopSavefileHandler savefileHandler1 = new ShopSavefileHandler("A1");
+		ShopDaoImpl savefileHandler1 = new ShopDaoImpl("A1");
 		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "A1.yml");
 		assertTrue(file.exists());
 		savefileHandler1.deleteFile();
@@ -89,7 +89,7 @@ public class ShopSavefileHandlerTest {
 		try {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "A1.yml");
 			file.createNewFile();
-			ShopSavefileHandler savefileHandler1 = new ShopSavefileHandler("A1");
+			ShopDaoImpl savefileHandler1 = new ShopDaoImpl("A1");
 			File result = new File(UltimateEconomy.getInstance.getDataFolder(), "A1.yml");
 			assertTrue(result.exists());
 			savefileHandler1.deleteFile();

@@ -25,11 +25,11 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.api.PlayershopController;
-import com.ue.shopsystem.api.Rentshop;
-import com.ue.shopsystem.api.RentshopController;
-import com.ue.shopsystem.impl.ShopEventHandler;
+import com.ue.shopsystem.logic.api.Rentshop;
+import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
+import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
+import com.ue.shopsystem.logic.impl.ShopEventHandlerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -78,7 +78,7 @@ public class ShopEventHandlerTest {
 	public void handleOpenInventoryTestPlayershop() {
 		try {
 			PlayershopController.createPlayerShop("myshop", new Location(world, 9, 9, 1), 9, EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-			ShopEventHandler handler = new ShopEventHandler();
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, PlayershopController.getPlayerShops().get(0).getShopVillager());
 			handler.handleOpenInventory(event);
 			assertTrue(event.isCancelled());
@@ -94,15 +94,15 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleOpenInventoryTestAdminshop() {
 		try {
-			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
-			ShopEventHandler handler = new ShopEventHandler();
-			PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, AdminshopController.getAdminshopList().get(0).getShopVillager());
+			AdminshopManagerImpl.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
+			PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, AdminshopManagerImpl.getAdminshopList().get(0).getShopVillager());
 			handler.handleOpenInventory(event);
 			assertTrue(event.isCancelled());
 			ChestInventoryMock inv = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			assertEquals("myshop1", inv.getName());
-			assertEquals(AdminshopController.getAdminshopList().get(0).getShopVillager(), inv.getHolder());
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			assertEquals(AdminshopManagerImpl.getAdminshopList().get(0).getShopVillager(), inv.getHolder());
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -111,15 +111,15 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleOpenInventoryTestRentshopNotRented() {
 		try {
-			RentshopController.createRentShop(new Location(world, 9, 9, 1), 9, 10);
-			ShopEventHandler handler = new ShopEventHandler();
-			PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, RentshopController.getRentShops().get(0).getShopVillager());
+			RentshopManagerImpl.createRentShop(new Location(world, 9, 9, 1), 9, 10);
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
+			PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, RentshopManagerImpl.getRentShops().get(0).getShopVillager());
 			handler.handleOpenInventory(event);
 			assertTrue(event.isCancelled());
 			ChestInventoryMock inv = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			assertEquals("RentShop#R0", inv.getName());
-			assertEquals(RentshopController.getRentShops().get(0).getShopVillager(), inv.getHolder());
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			assertEquals(RentshopManagerImpl.getRentShops().get(0).getShopVillager(), inv.getHolder());
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -128,17 +128,17 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleOpenInventoryTestRentshopRented() {
 		try {
-			Rentshop shop = RentshopController.createRentShop(new Location(world, 9, 9, 1), 9, 7);
+			Rentshop shop = RentshopManagerImpl.createRentShop(new Location(world, 9, 9, 1), 9, 7);
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(7, false);
 			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
-			ShopEventHandler handler = new ShopEventHandler();
-			PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, RentshopController.getRentShops().get(0).getShopVillager());
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
+			PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, RentshopManagerImpl.getRentShops().get(0).getShopVillager());
 			handler.handleOpenInventory(event);
 			assertTrue(event.isCancelled());
 			ChestInventoryMock inv = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			assertEquals("Shop#R0", inv.getName());
-			assertEquals(RentshopController.getRentShops().get(0).getShopVillager(), inv.getHolder());
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			assertEquals(RentshopManagerImpl.getRentShops().get(0).getShopVillager(), inv.getHolder());
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}
@@ -147,16 +147,16 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestAdminshopLeftClickError() {
 		try {
-			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
-			ShopEventHandler handler = new ShopEventHandler();
-			AdminshopController.getAdminshopList().get(0).openShopInventory(player);
+			AdminshopManagerImpl.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
+			AdminshopManagerImpl.getAdminshopList().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertTrue(event.isCancelled());
 			assertEquals("§cYou have not enough money!", player.nextMessage());
 			assertNull(player.nextMessage());
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
@@ -165,17 +165,17 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestAdminshopLeftClick() {
 		try {
-			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
-			ShopEventHandler handler = new ShopEventHandler();
+			AdminshopManagerImpl.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(1, false);
-			AdminshopController.getAdminshopList().get(0).openShopInventory(player);
+			AdminshopManagerImpl.getAdminshopList().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertTrue(event.isCancelled());
 			assertEquals("§6§a1§6 item was bought for §a1.0§6 §a$§6.", player.nextMessage());
 			assertNull(player.nextMessage());
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
@@ -184,16 +184,16 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestAdminshopLeftClickOnlySell() {
 		try {
-			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 1, 0, new ItemStack(Material.STONE));
-			ShopEventHandler handler = new ShopEventHandler();
+			AdminshopManagerImpl.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 1, 0, new ItemStack(Material.STONE));
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			//EconomyPlayerController.getAllEconomyPlayers().get(0).increasePlayerAmount(1, false);
-			AdminshopController.getAdminshopList().get(0).openShopInventory(player);
+			AdminshopManagerImpl.getAdminshopList().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertTrue(event.isCancelled());
 			assertNull(player.nextMessage());
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
@@ -202,16 +202,16 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestAdminshopLeftClickInOwnInventory() {
 		try {
-			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
-			ShopEventHandler handler = new ShopEventHandler();
-			AdminshopController.getAdminshopList().get(0).openShopInventory(player);
+			AdminshopManagerImpl.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
+			AdminshopManagerImpl.getAdminshopList().get(0).openShopInventory(player);
 			player.getInventory().setItem(0, new ItemStack(Material.STONE));
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 36, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertTrue(event.isCancelled());
 			assertNull(player.nextMessage());
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
@@ -222,7 +222,7 @@ public class ShopEventHandlerTest {
 		try {
 			PlayershopController.createPlayerShop("myshop", new Location(world, 9, 9, 1), 9, EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			PlayershopController.getPlayerShops().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
-			ShopEventHandler handler = new ShopEventHandler();
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			PlayershopController.getPlayerShops().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
@@ -243,7 +243,7 @@ public class ShopEventHandlerTest {
 			stack.setAmount(10);
 			PlayershopController.getPlayerShops().get(0).addShopItem(0, 1, 0, stack);
 			PlayershopController.getPlayerShops().get(0).increaseStock(0, 5);
-			ShopEventHandler handler = new ShopEventHandler();
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			PlayershopController.getPlayerShops().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
@@ -263,7 +263,7 @@ public class ShopEventHandlerTest {
 			PlayershopController.createPlayerShop("myshop", new Location(world, 9, 9, 1), 9, EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			PlayershopController.getPlayerShops().get(0).addShopItem(0, 1, 0, new ItemStack(Material.STONE));
 			PlayershopController.getPlayerShops().get(0).increaseStock(0, 10);
-			ShopEventHandler handler = new ShopEventHandler();
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			PlayershopController.getPlayerShops().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
@@ -280,18 +280,18 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestRentshopLeftClick() {
 		try {
-			Rentshop shop = RentshopController.createRentShop(new Location(world, 9, 9, 1), 9, 7);
+			Rentshop shop = RentshopManagerImpl.createRentShop(new Location(world, 9, 9, 1), 9, 7);
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(7, false);
 			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
 			shop.addShopItem(0, 1, 1, new ItemStack(Material.STONE));
-			ShopEventHandler handler = new ShopEventHandler();
-			RentshopController.getRentShops().get(0).openShopInventory(player);
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
+			RentshopManagerImpl.getRentShops().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertTrue(event.isCancelled());
 			assertEquals("§cThis item is unavailable!", player.nextMessage());
 			assertNull(player.nextMessage());
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
@@ -300,16 +300,16 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handlerInventoryClickTestRentshopNotRented() {
 		try {
-			RentshopController.createRentShop(new Location(world, 9, 9, 1), 9, 7);
-			ShopEventHandler handler = new ShopEventHandler();
+			RentshopManagerImpl.createRentShop(new Location(world, 9, 9, 1), 9, 7);
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(7, false);
-			RentshopController.getRentShops().get(0).openRentGUI(player);
+			RentshopManagerImpl.getRentShops().get(0).openRentGUI(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertTrue(event.isCancelled());
 			assertEquals("§6You rented this shop.", player.nextMessage());
 			assertNull(player.nextMessage());
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -318,14 +318,14 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestNullItemClick() {
 		try {
-			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
-			ShopEventHandler handler = new ShopEventHandler();
-			AdminshopController.getAdminshopList().get(0).openShopInventory(player);
+			AdminshopManagerImpl.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
+			AdminshopManagerImpl.getAdminshopList().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertFalse(event.isCancelled());
 			assertNull(player.nextMessage());
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -334,15 +334,15 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestAdminshopEditor() {
 		try {
-			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
-			ShopEventHandler handler = new ShopEventHandler();
-			AdminshopController.getAdminshopList().get(0).openEditor(player);
+			AdminshopManagerImpl.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
+			AdminshopManagerImpl.getAdminshopList().get(0).openEditor(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertEquals("myshop1-SlotEditor", player.getOpenInventory().getTitle());
 			assertTrue(event.isCancelled());
 			assertNull(player.nextMessage());
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -351,15 +351,15 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestAdminshopSlotEditor() {
 		try {
-			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
-			ShopEventHandler handler = new ShopEventHandler();
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 7, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertEquals("myshop1-Editor", player.getOpenInventory().getTitle());
 			assertTrue(event.isCancelled());
 			assertNull(player.nextMessage());
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -369,7 +369,7 @@ public class ShopEventHandlerTest {
 	public void handleInventoryClickTestPlayershopSwitchStockpile() {
 		try {
 			PlayershopController.createPlayerShop("myshop", new Location(world, 9, 9, 1), 9, EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-			ShopEventHandler handler = new ShopEventHandler();
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			PlayershopController.getPlayerShops().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 7, ClickType.MIDDLE, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
@@ -386,7 +386,7 @@ public class ShopEventHandlerTest {
 	public void handleInventoryClickTestPlayershopSwitchStockpileBack() {
 		try {
 			PlayershopController.createPlayerShop("myshop", new Location(world, 9, 9, 1), 9, EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-			ShopEventHandler handler = new ShopEventHandler();
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			PlayershopController.getPlayerShops().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 7, ClickType.MIDDLE, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
@@ -404,7 +404,7 @@ public class ShopEventHandlerTest {
 	public void handleInventoryClickTestPlayershopSwitchStockpileItemLeftClick() {
 		try {
 			PlayershopController.createPlayerShop("myshop", new Location(world, 9, 9, 1), 9, EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-			ShopEventHandler handler = new ShopEventHandler();
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			PlayershopController.getPlayerShops().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 7, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
@@ -421,7 +421,7 @@ public class ShopEventHandlerTest {
 	public void handleInventoryClickTestPlayershopSwitchStockpileItemRightClick() {
 		try {
 			PlayershopController.createPlayerShop("myshop", new Location(world, 9, 9, 1), 9, EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-			ShopEventHandler handler = new ShopEventHandler();
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			PlayershopController.getPlayerShops().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 7, ClickType.RIGHT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
@@ -438,7 +438,7 @@ public class ShopEventHandlerTest {
 	public void handleInventoryClickTestPlayershopSwitchStockpileItemShiftRightClick() {
 		try {
 			PlayershopController.createPlayerShop("myshop", new Location(world, 9, 9, 1), 9, EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-			ShopEventHandler handler = new ShopEventHandler();
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			PlayershopController.getPlayerShops().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 7, ClickType.SHIFT_RIGHT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
@@ -454,16 +454,16 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestAdminshopSwitchStockpile() {
 		try {
-			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
-			ShopEventHandler handler = new ShopEventHandler();
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
-			AdminshopController.getAdminshopList().get(0).openShopInventory(player);
+			AdminshopManagerImpl.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
+			AdminshopManagerImpl.getAdminshopList().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.MIDDLE, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertEquals("myshop1", player.getOpenInventory().getTitle());
 			assertTrue(event.isCancelled());
 			assertNull(player.nextMessage());
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
@@ -472,13 +472,13 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestAdminshopSellSpecific() {
 		try {
-			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
-			ShopEventHandler handler = new ShopEventHandler();
+			AdminshopManagerImpl.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			ItemStack stack = new ItemStack(Material.STONE);
 			stack.setAmount(2);
 			player.getInventory().setItem(0,stack);
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
-			AdminshopController.getAdminshopList().get(0).openShopInventory(player);
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
+			AdminshopManagerImpl.getAdminshopList().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.RIGHT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertEquals("§6§a1§6 item was sold for §a1.0§6 §a$§6.", player.nextMessage());
@@ -487,7 +487,7 @@ public class ShopEventHandlerTest {
 			assertEquals(1,player.getInventory().getItem(0).getAmount());
 			player.getInventory().clear();
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).decreasePlayerAmount(1, false);
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
@@ -496,15 +496,15 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestAdminshopSellSpecificWithoutItem() {
 		try {
-			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
-			ShopEventHandler handler = new ShopEventHandler();
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
-			AdminshopController.getAdminshopList().get(0).openShopInventory(player);
+			AdminshopManagerImpl.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
+			AdminshopManagerImpl.getAdminshopList().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.RIGHT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertTrue(event.isCancelled());
 			assertNull(player.nextMessage());
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
@@ -513,15 +513,15 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestAdminshopSellAll() {
 		try {
-			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
-			ShopEventHandler handler = new ShopEventHandler();
+			AdminshopManagerImpl.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			ItemStack stack = new ItemStack(Material.STONE);
 			stack.setAmount(2);
 			player.getInventory().setItem(0,stack);
 			player.getInventory().setItem(1,new ItemStack(Material.ACACIA_DOOR));
 			player.getInventory().setItem(2,stack);
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
-			AdminshopController.getAdminshopList().get(0).openShopInventory(player);
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
+			AdminshopManagerImpl.getAdminshopList().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 0, ClickType.SHIFT_RIGHT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertEquals("§6§a4§6 items were sold for §a4.0§6 §a$§6.", player.nextMessage());
@@ -531,7 +531,7 @@ public class ShopEventHandlerTest {
 			assertNull(player.getInventory().getItem(2));
 			player.getInventory().clear();
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).decreasePlayerAmount(4, false);
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
@@ -540,13 +540,13 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestAdminshopSellSpecificOwnInvClick() {
 		try {
-			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
-			ShopEventHandler handler = new ShopEventHandler();
+			AdminshopManagerImpl.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			ItemStack stack = new ItemStack(Material.STONE);
 			stack.setAmount(2);
 			player.getInventory().setItem(0,stack);
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
-			AdminshopController.getAdminshopList().get(0).openShopInventory(player);
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
+			AdminshopManagerImpl.getAdminshopList().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 36, ClickType.RIGHT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertEquals("§6§a1§6 item was sold for §a1.0§6 §a$§6.", player.nextMessage());
@@ -555,7 +555,7 @@ public class ShopEventHandlerTest {
 			assertEquals(1,player.getInventory().getItem(0).getAmount());
 			player.getInventory().clear();
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).decreasePlayerAmount(1, false);
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}
@@ -564,15 +564,15 @@ public class ShopEventHandlerTest {
 	@Test
 	public void handleInventoryClickTestAdminshopSellAllOwnInvClick() {
 		try {
-			AdminshopController.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
-			ShopEventHandler handler = new ShopEventHandler();
+			AdminshopManagerImpl.createAdminShop("myshop1", new Location(world, 9, 9, 1), 9);
+			ShopEventHandlerImpl handler = new ShopEventHandlerImpl();
 			ItemStack stack = new ItemStack(Material.STONE);
 			stack.setAmount(2);
 			player.getInventory().setItem(0,stack);
 			player.getInventory().setItem(1,new ItemStack(Material.ACACIA_DOOR));
 			player.getInventory().setItem(2,stack);
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
-			AdminshopController.getAdminshopList().get(0).openShopInventory(player);
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STONE));
+			AdminshopManagerImpl.getAdminshopList().get(0).openShopInventory(player);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 36, ClickType.SHIFT_RIGHT, InventoryAction.PICKUP_ONE);
 			handler.handleInventoryClick(event);
 			assertEquals("§6§a4§6 items were sold for §a4.0§6 §a$§6.", player.nextMessage());
@@ -582,7 +582,7 @@ public class ShopEventHandlerTest {
 			assertNull(player.getInventory().getItem(2));
 			player.getInventory().clear();
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).decreasePlayerAmount(4, false);
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			fail();
 		}

@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Test;
 
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.commands.adminshop.AdminshopCommandExecutor;
+import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -73,10 +73,10 @@ public class AdminshopCommandExecutorTest {
 	 */
 	@AfterEach
 	public void unload() {
-		int size = AdminshopController.getAdminshopList().size();
+		int size = AdminshopManagerImpl.getAdminshopList().size();
 		for (int i = 0; i < size; i++) {
 			try {
-				AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+				AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 			} catch (ShopSystemException e) {
 				fail();
 			}
@@ -122,9 +122,9 @@ public class AdminshopCommandExecutorTest {
 		String[] args = { "create", "myshop", "9" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
 		assertTrue(result);
-		assertEquals(1, AdminshopController.getAdminshopList().size());
-		assertEquals("myshop", AdminshopController.getAdminshopList().get(0).getName());
-		assertEquals(9, AdminshopController.getAdminshopList().get(0).getSize());
+		assertEquals(1, AdminshopManagerImpl.getAdminshopList().size());
+		assertEquals("myshop", AdminshopManagerImpl.getAdminshopList().get(0).getName());
+		assertEquals(9, AdminshopManagerImpl.getAdminshopList().get(0).getSize());
 		assertEquals("§6The shop §amyshop§6 was created.", player.nextMessage());
 		assertNull(player.nextMessage());
 	}
@@ -153,7 +153,7 @@ public class AdminshopCommandExecutorTest {
 		String[] args = { "delete", "myshop" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
 		assertTrue(result);
-		assertEquals(0, AdminshopController.getAdminshopList().size());
+		assertEquals(0, AdminshopManagerImpl.getAdminshopList().size());
 		assertEquals("§6The shop §amyshop§6 was deleted.", player.nextMessage());
 		assertNull(player.nextMessage());
 	}
@@ -173,7 +173,7 @@ public class AdminshopCommandExecutorTest {
 		String[] args = { "rename", "myshop", "kth" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
 		assertTrue(result);
-		assertEquals("kth", AdminshopController.getAdminshopList().get(0).getName());
+		assertEquals("kth", AdminshopManagerImpl.getAdminshopList().get(0).getName());
 		assertEquals("§6You changed the shop name from §amyshop§6 to §akth§6.", player.nextMessage());
 		assertNull(player.nextMessage());
 	}
@@ -203,7 +203,7 @@ public class AdminshopCommandExecutorTest {
 		String[] args = { "resize", "myshop", "18" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
 		assertTrue(result);
-		assertEquals(18, AdminshopController.getAdminshopList().get(0).getSize());
+		assertEquals(18, AdminshopManagerImpl.getAdminshopList().get(0).getSize());
 		assertEquals("§6You changed the shop size to §a18§6.", player.nextMessage());
 		assertNull(player.nextMessage());
 	}
@@ -225,7 +225,7 @@ public class AdminshopCommandExecutorTest {
 		String[] args = { "move", "myshop" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
 		assertTrue(result);
-		assertEquals(loc, AdminshopController.getAdminshopList().get(0).getShopLocation());
+		assertEquals(loc, AdminshopManagerImpl.getAdminshopList().get(0).getShopLocation());
 		assertNull(player.nextMessage());
 	}
 	
@@ -273,7 +273,7 @@ public class AdminshopCommandExecutorTest {
 		String[] args = { "changeProfession", "myshop", "Farmer" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
 		assertTrue(result);
-		assertEquals(Profession.FARMER, AdminshopController.getAdminshopList().get(0).getShopVillager().getProfession());
+		assertEquals(Profession.FARMER, AdminshopManagerImpl.getAdminshopList().get(0).getShopVillager().getProfession());
 		assertEquals("§6The profession of the shop villager has been successfully changed!", player.nextMessage());
 		assertNull(player.nextMessage());
 	}
@@ -304,8 +304,8 @@ public class AdminshopCommandExecutorTest {
 		boolean result = executor.onCommand(player, null, "adminshop", args);
 		assertTrue(result);
 		try {
-			assertEquals("SPAWNER_COW", AdminshopController.getAdminshopList().get(0).getShopItem(0).getItemString());
-			assertEquals("1.0", String.valueOf(AdminshopController.getAdminshopList().get(0).getShopItem(0).getBuyPrice()));
+			assertEquals("SPAWNER_COW", AdminshopManagerImpl.getAdminshopList().get(0).getShopItem(0).getItemString());
+			assertEquals("1.0", String.valueOf(AdminshopManagerImpl.getAdminshopList().get(0).getShopItem(0).getBuyPrice()));
 		} catch (GeneralEconomyException | ShopSystemException e) {
 			fail();
 		}
@@ -315,7 +315,7 @@ public class AdminshopCommandExecutorTest {
 	
 	private void createAdminshop() {
 		try {
-			AdminshopController.createAdminShop("myshop", new Location(world, 8, 9, 1), 9);
+			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 8, 9, 1), 9);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}

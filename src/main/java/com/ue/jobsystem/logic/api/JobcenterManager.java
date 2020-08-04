@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.bukkit.Location;
 
-import com.ue.jobsystem.api.Jobcenter;
 import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 

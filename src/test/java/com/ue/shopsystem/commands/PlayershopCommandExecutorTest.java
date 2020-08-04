@@ -22,9 +22,9 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.shopsystem.api.Playershop;
-import com.ue.shopsystem.api.PlayershopController;
-import com.ue.shopsystem.commands.playershop.PlayershopCommandExecutor;
+import com.ue.shopsystem.logic.api.Playershop;
+import com.ue.shopsystem.logic.api.PlayershopController;
+import com.ue.shopsystem.logic.impl.PlayershopCommandExecutorImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -55,7 +55,7 @@ public class PlayershopCommandExecutorTest {
 		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 		player = server.addPlayer("1catch441");
 		other = server.addPlayer("1kthschnll");
-		executor = new PlayershopCommandExecutor();
+		executor = new PlayershopCommandExecutorImpl();
 		PlayershopController.getPlayerShops().clear();
 	}
 

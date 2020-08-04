@@ -20,9 +20,9 @@ import org.junit.jupiter.api.Test;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.shopsystem.api.RentshopController;
-import com.ue.shopsystem.impl.RentDailyTask;
-import com.ue.shopsystem.impl.RentshopImpl;
+import com.ue.shopsystem.logic.impl.RentDailyTask;
+import com.ue.shopsystem.logic.impl.RentshopImpl;
+import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -66,17 +66,17 @@ public class RentDailyTaskTest {
 	 */
 	@AfterEach
 	public void unload() {
-		int size = RentshopController.getRentShops().size();
+		int size = RentshopManagerImpl.getRentShops().size();
 		for (int i = 0; i < size; i++) {
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		}
 	}
 
 	@Test
 	public void runTaskTestWithReminder() {
 		try {
-			RentshopController.createRentShop(new Location(world, 5, 1, 7), 9, 5);
-			RentshopImpl shop = (RentshopImpl) RentshopController.createRentShop(new Location(world, 50, 1, 7), 9, 10);
+			RentshopManagerImpl.createRentShop(new Location(world, 5, 1, 7), 9, 5);
+			RentshopImpl shop = (RentshopImpl) RentshopManagerImpl.createRentShop(new Location(world, 50, 1, 7), 9, 10);
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(10, false);
 			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
 			shop.setRentUntil(Calendar.getInstance().getTimeInMillis() + 1000L);
@@ -92,8 +92,8 @@ public class RentDailyTaskTest {
 	@Test
 	public void runTaskTestWithReset() {
 		try {
-			RentshopController.createRentShop(new Location(world, 5, 1, 7), 9, 5);
-			RentshopImpl shop = (RentshopImpl) RentshopController.createRentShop(new Location(world, 50, 1, 7), 9, 10);
+			RentshopManagerImpl.createRentShop(new Location(world, 5, 1, 7), 9, 5);
+			RentshopImpl shop = (RentshopImpl) RentshopManagerImpl.createRentShop(new Location(world, 50, 1, 7), 9, 10);
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(10, false);
 			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
 			shop.setRentUntil(10L);
@@ -108,8 +108,8 @@ public class RentDailyTaskTest {
 	@Test
 	public void runTaskTestWithNoAction() {
 		try {
-			RentshopController.createRentShop(new Location(world, 5, 1, 7), 9, 5);
-			RentshopImpl shop = (RentshopImpl) RentshopController.createRentShop(new Location(world, 50, 1, 7), 9, 10);
+			RentshopManagerImpl.createRentShop(new Location(world, 5, 1, 7), 9, 5);
+			RentshopImpl shop = (RentshopImpl) RentshopManagerImpl.createRentShop(new Location(world, 50, 1, 7), 9, 10);
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(10, false);
 			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
 			new RentDailyTask().run();
@@ -123,8 +123,8 @@ public class RentDailyTaskTest {
 	@Test
 	public void runTaskTestWithReminderOffline() {
 		try {
-			RentshopController.createRentShop(new Location(world, 5, 1, 7), 9, 5);
-			RentshopImpl shop = (RentshopImpl) RentshopController.createRentShop(new Location(world, 50, 1, 7), 9, 10);
+			RentshopManagerImpl.createRentShop(new Location(world, 5, 1, 7), 9, 5);
+			RentshopImpl shop = (RentshopImpl) RentshopManagerImpl.createRentShop(new Location(world, 50, 1, 7), 9, 10);
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(10, false);
 			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
 			shop.setRentUntil(Calendar.getInstance().getTimeInMillis() + 1000L);

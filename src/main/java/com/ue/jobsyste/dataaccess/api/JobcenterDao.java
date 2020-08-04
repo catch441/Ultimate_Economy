@@ -5,7 +5,7 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
-import com.ue.jobsystem.api.Job;
+import com.ue.jobsystem.logic.api.Job;
 
 public interface JobcenterDao {
 

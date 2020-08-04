@@ -25,9 +25,9 @@ import org.junit.jupiter.api.Test;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.shopsystem.api.AdminshopController;
-import com.ue.shopsystem.impl.AbstractShopImpl;
 import com.ue.shopsystem.impl.ShopEditorHandler;
+import com.ue.shopsystem.logic.impl.AbstractShopImpl;
+import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -80,7 +80,7 @@ public class ShopEditorHandlerTest {
 	@BeforeEach
 	public void load() {
 		try {
-			AdminshopController.createAdminShop("myshop", new Location(world,5,3,7), 9);
+			AdminshopManagerImpl.createAdminShop("myshop", new Location(world,5,3,7), 9);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -91,10 +91,10 @@ public class ShopEditorHandlerTest {
 	 */
 	@AfterEach
 	public void unload() {
-		int size = AdminshopController.getAdminshopList().size();
+		int size = AdminshopManagerImpl.getAdminshopList().size();
 		for (int i = 0; i < size; i++) {
 			try {
-				AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+				AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 			} catch (ShopSystemException e) {
 				fail();
 			}
@@ -104,13 +104,13 @@ public class ShopEditorHandlerTest {
 	@Test
 	public void constructorTest() {
 		try {
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STICK));
-			AdminshopController.getAdminshopList().get(0).addShopItem(1, 1, 1, new ItemStack(Material.STONE));
-			ShopEditorHandler handler = new ShopEditorHandler((AbstractShopImpl) AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 1, 1, new ItemStack(Material.STICK));
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(1, 1, 1, new ItemStack(Material.STONE));
+			ShopEditorHandler handler = new ShopEditorHandler((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0));
 			ChestInventoryMock editor = (ChestInventoryMock) handler.getEditorInventory();
 			assertEquals(9, editor.getSize());
 			assertEquals("myshop-Editor", editor.getName());
-			assertEquals(AdminshopController.getAdminshopList().get(0).getShopVillager(), editor.getHolder());
+			assertEquals(AdminshopManagerImpl.getAdminshopList().get(0).getShopVillager(), editor.getHolder());
 			checkInventory(editor);
 			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
 			assertEquals(SLOTFILLED,
@@ -124,7 +124,7 @@ public class ShopEditorHandlerTest {
 	
 	@Test
 	public void setOccupiedTestTrue() {
-		ShopEditorHandler handler = new ShopEditorHandler((AbstractShopImpl) AdminshopController.getAdminshopList().get(0));
+		ShopEditorHandler handler = new ShopEditorHandler((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0));
 		handler.setOccupied(true, 0);
 		ChestInventoryMock editor = (ChestInventoryMock) handler.getEditorInventory();
 		NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
@@ -136,7 +136,7 @@ public class ShopEditorHandlerTest {
 	
 	@Test
 	public void setOccupiedTestFalse() {
-		ShopEditorHandler handler = new ShopEditorHandler((AbstractShopImpl) AdminshopController.getAdminshopList().get(0));
+		ShopEditorHandler handler = new ShopEditorHandler((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0));
 		handler.setOccupied(true, 0);
 		handler.setOccupied(false, 0);
 		ChestInventoryMock editor = (ChestInventoryMock) handler.getEditorInventory();
@@ -149,7 +149,7 @@ public class ShopEditorHandlerTest {
 	
 	@Test
 	public void changeInventoryNameTest() {
-		ShopEditorHandler handler = new ShopEditorHandler((AbstractShopImpl) AdminshopController.getAdminshopList().get(0));
+		ShopEditorHandler handler = new ShopEditorHandler((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0));
 		handler.changeInventoryName("kth");
 		ChestInventoryMock editor = (ChestInventoryMock) handler.getEditorInventory();
 		assertEquals(9, editor.getSize());
@@ -197,7 +197,7 @@ public class ShopEditorHandlerTest {
 	
 	@Test
 	public void handleInventoryClickTestFree() {
-		AbstractShopImpl shop = (AbstractShopImpl) AdminshopController.getAdminshopList().get(0);
+		AbstractShopImpl shop = (AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0);
 		ShopEditorHandler handler = new ShopEditorHandler(shop);
 		PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getEditorInventory());
 		InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
@@ -207,7 +207,7 @@ public class ShopEditorHandlerTest {
 	
 	@Test
 	public void handleInventoryClickTestBottomInvClick() {
-		AbstractShopImpl shop = (AbstractShopImpl) AdminshopController.getAdminshopList().get(0);
+		AbstractShopImpl shop = (AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0);
 		ShopEditorHandler handler = new ShopEditorHandler(shop);
 		try {
 			shop.openEditor(player);
@@ -221,7 +221,7 @@ public class ShopEditorHandlerTest {
 	
 	@Test
 	public void handleInventoryClickTestWithFilled() {
-		AbstractShopImpl shop = (AbstractShopImpl) AdminshopController.getAdminshopList().get(0);
+		AbstractShopImpl shop = (AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0);
 		try {
 			shop.addShopItem(0, 1, 1, new ItemStack(Material.STONE));
 		} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException e) {

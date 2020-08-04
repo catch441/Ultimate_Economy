@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Test;
 
 import com.ue.config.logic.impl.ConfigManagerImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
-import com.ue.shopsystem.api.RentshopController;
-import com.ue.shopsystem.impl.RentshopRentGuiHandler;
+import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
+import com.ue.shopsystem.logic.impl.RentshopRentGuiHandlerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -83,8 +83,8 @@ public class RentshopRentGuiHandlerTest {
 	@Test
 	public void constructorTest() {
 		try {
-			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
+			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
 			ChestInventoryMock gui = (ChestInventoryMock) handler.getRentGui();
 			assertEquals(9, gui.getSize());
 			assertEquals("RentShop#R0", gui.getName());
@@ -118,7 +118,7 @@ public class RentshopRentGuiHandlerTest {
 			assertEquals("§6Duration: §a1§6 Day", gui.getItem(5).getItemMeta().getLore().get(0));
 			assertEquals(SEVEN,
 					gui.getItem(5).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -127,8 +127,8 @@ public class RentshopRentGuiHandlerTest {
 	@Test
 	public void handleRentShopGuiClickTestPlusClick() {
 		try {
-			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
+			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
 			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 3, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleRentShopGUIClick(event);
@@ -139,7 +139,7 @@ public class RentshopRentGuiHandlerTest {
 			assertEquals("minus", gui.getItem(3).getItemMeta().getDisplayName());
 			assertEquals(MINUS,
 					gui.getItem(3).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));	
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -148,8 +148,8 @@ public class RentshopRentGuiHandlerTest {
 	@Test
 	public void handleRentShopGuiClickTestMinusClick() {
 		try {
-			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
+			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
 			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 3, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleRentShopGUIClick(event);
@@ -161,7 +161,7 @@ public class RentshopRentGuiHandlerTest {
 			assertEquals("plus", gui.getItem(3).getItemMeta().getDisplayName());
 			assertEquals(PLUS,
 					gui.getItem(3).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));	
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -170,8 +170,8 @@ public class RentshopRentGuiHandlerTest {
 	@Test
 	public void handleRentShopGuiClickTestPlusOneClick() {
 		try {
-			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
+			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
 			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 4, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleRentShopGUIClick(event);
@@ -184,7 +184,7 @@ public class RentshopRentGuiHandlerTest {
 			list.clear();
 			list.add("§6RentalFee: §a9.0");
 			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -193,8 +193,8 @@ public class RentshopRentGuiHandlerTest {
 	@Test
 	public void handleRentShopGuiClickTestMinusOneClick() {
 		try {
-			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
+			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
 			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 4, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleRentShopGUIClick(event);
@@ -210,7 +210,7 @@ public class RentshopRentGuiHandlerTest {
 			list.clear();
 			list.add("§6RentalFee: §a4.5");
 			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -219,8 +219,8 @@ public class RentshopRentGuiHandlerTest {
 	@Test
 	public void handleRentShopGuiClickTestMinusOneClickMore() {
 		try {
-			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
+			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
 			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 4, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleRentShopGUIClick(event);
@@ -238,7 +238,7 @@ public class RentshopRentGuiHandlerTest {
 			list.clear();
 			list.add("§6RentalFee: §a4.5");
 			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -248,8 +248,8 @@ public class RentshopRentGuiHandlerTest {
 	public void handleRentShopGuiClickTestPlusOneClickMore() {
 		try {
 			ConfigManagerImpl.setMaxRentedDays(3);
-			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
+			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
 			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 4, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleRentShopGUIClick(event);
@@ -265,7 +265,7 @@ public class RentshopRentGuiHandlerTest {
 			list.clear();
 			list.add("§6RentalFee: §a13.5");
 			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 			ConfigManagerImpl.setMaxRentedDays(14);
 		} catch (GeneralEconomyException e) {
 			fail();
@@ -275,8 +275,8 @@ public class RentshopRentGuiHandlerTest {
 	@Test
 	public void handleRentShopGuiClickTestPlusSevenClick() {
 		try {
-			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
+			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
 			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 5, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleRentShopGUIClick(event);
@@ -289,7 +289,7 @@ public class RentshopRentGuiHandlerTest {
 			list.clear();
 			list.add("§6RentalFee: §a36.0");
 			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -298,8 +298,8 @@ public class RentshopRentGuiHandlerTest {
 	@Test
 	public void handleRentShopGuiClickTestMinusSevenClick() {
 		try {
-			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
+			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
 			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 5, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleRentShopGUIClick(event);
@@ -315,7 +315,7 @@ public class RentshopRentGuiHandlerTest {
 			list.clear();
 			list.add("§6RentalFee: §a4.5");
 			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -324,8 +324,8 @@ public class RentshopRentGuiHandlerTest {
 	@Test
 	public void handleRentShopGuiClickTestMinusSevenClickMore() {
 		try {
-			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
+			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
 			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 5, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleRentShopGUIClick(event);
@@ -343,7 +343,7 @@ public class RentshopRentGuiHandlerTest {
 			list.clear();
 			list.add("§6RentalFee: §a4.5");
 			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -353,8 +353,8 @@ public class RentshopRentGuiHandlerTest {
 	public void handleRentShopGuiClickTestPlusSevenClickMore() {
 		try {
 			ConfigManagerImpl.setMaxRentedDays(14);
-			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
+			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
 			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 5, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleRentShopGUIClick(event);
@@ -370,7 +370,7 @@ public class RentshopRentGuiHandlerTest {
 			list.clear();
 			list.add("§6RentalFee: §a63.0");
 			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -379,15 +379,15 @@ public class RentshopRentGuiHandlerTest {
 	@Test
 	public void handleRentShopGuiClickTestRentClickError() {
 		try {
-			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
+			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
 			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleRentShopGUIClick(event);
 			assertEquals("§cYou have not enough money!", player.nextMessage());
 			assertNull(player.nextMessage());
 			assertNull(player.getOpenInventory().getTopInventory());
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -397,16 +397,16 @@ public class RentshopRentGuiHandlerTest {
 	public void handleRentShopGuiClickTestRentClick() {
 		try {
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(4.5, false);
-			RentshopController.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandler handler = new RentshopRentGuiHandler(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
+			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
 			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
 			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
 			handler.handleRentShopGUIClick(event);
 			assertEquals("§6You rented this shop.", player.nextMessage());
 			assertNull(player.nextMessage());
 			assertNull(player.getOpenInventory().getTopInventory());
-			assertTrue(RentshopController.getRentShops().get(0).isOwner(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0)));
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			assertTrue(RentshopManagerImpl.getRentShops().get(0).isOwner(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0)));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		} catch (GeneralEconomyException e) {
 			fail();
 		}

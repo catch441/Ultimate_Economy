@@ -20,9 +20,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.ue.jobsystem.api.Job;
-import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.dataaccese.impl.JobcenterDaoImpl;
+import com.ue.jobsystem.logic.api.Job;
+import com.ue.jobsystem.logic.api.JobController;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 

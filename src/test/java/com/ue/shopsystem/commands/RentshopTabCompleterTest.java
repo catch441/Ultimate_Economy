@@ -18,9 +18,9 @@ import org.junit.jupiter.api.Test;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.shopsystem.api.Rentshop;
-import com.ue.shopsystem.api.RentshopController;
 import com.ue.shopsystem.commands.rentshop.RentshopTabCompleter;
+import com.ue.shopsystem.logic.api.Rentshop;
+import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -48,12 +48,12 @@ public class RentshopTabCompleterTest {
 		server.addWorld(world);
 		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 		player = server.addPlayer("kthschnll");
-		RentshopController.getRentShops().clear();
+		RentshopManagerImpl.getRentShops().clear();
 		tabCompleter = new RentshopTabCompleter();
 		try {
-			Rentshop shop1 = RentshopController.createRentShop(new Location(world, 1, 2, 3), 9, 0);
-			Rentshop shop2 = RentshopController.createRentShop(new Location(world, 1, 2, 3), 9, 0);
-			RentshopController.createRentShop(new Location(world, 1, 2, 3), 9, 0);
+			Rentshop shop1 = RentshopManagerImpl.createRentShop(new Location(world, 1, 2, 3), 9, 0);
+			Rentshop shop2 = RentshopManagerImpl.createRentShop(new Location(world, 1, 2, 3), 9, 0);
+			RentshopManagerImpl.createRentShop(new Location(world, 1, 2, 3), 9, 0);
 			shop1.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
 			shop2.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
 		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
@@ -72,9 +72,9 @@ public class RentshopTabCompleterTest {
 		}
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
-		int size = RentshopController.getRentShops().size();
+		int size = RentshopManagerImpl.getRentShops().size();
 		for (int i = 0; i < size; i++) {
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		}
 		MockBukkit.unload();
 	}

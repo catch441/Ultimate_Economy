@@ -9,7 +9,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.EntityType;
 
 import com.ue.common.utils.TabCompleterUtils;
-import com.ue.shopsystem.api.AdminshopController;
+import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
 
 public class AdminshopTabCompleter extends TabCompleterUtils implements TabCompleter {
 
@@ -84,7 +84,7 @@ public class AdminshopTabCompleter extends TabCompleterUtils implements TabCompl
 	}
 
 	private List<String> getAdminshopList(String arg) {
-		List<String> temp = AdminshopController.getAdminshopNameList();
+		List<String> temp = AdminshopManagerImpl.getAdminshopNameList();
 		List<String> list = new ArrayList<>();
 		if ("".equals(arg)) {
 			list = temp;

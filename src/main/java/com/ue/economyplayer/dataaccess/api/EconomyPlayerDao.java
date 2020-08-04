@@ -7,7 +7,7 @@ import org.bukkit.Location;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
-import com.ue.jobsystem.api.Job;
+import com.ue.jobsystem.logic.api.Job;
 
 public interface EconomyPlayerDao {
 

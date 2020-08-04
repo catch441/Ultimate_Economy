@@ -6,7 +6,6 @@ import java.util.Map;
 import org.bukkit.inventory.Inventory;
 
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 

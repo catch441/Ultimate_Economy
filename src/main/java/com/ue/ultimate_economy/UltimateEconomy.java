@@ -38,23 +38,19 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.jobsystem.api.Job;
-import com.ue.jobsystem.commands.JobCommandExecutor;
-import com.ue.jobsystem.commands.JobTabCompleter;
+import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
+import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.impl.JobSystemException;
-import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
-import com.ue.shopsystem.api.AdminshopController;
-import com.ue.shopsystem.api.PlayershopController;
-import com.ue.shopsystem.api.RentshopController;
 import com.ue.shopsystem.commands.adminshop.AdminshopCommandExecutor;
 import com.ue.shopsystem.commands.adminshop.AdminshopTabCompleter;
-import com.ue.shopsystem.commands.playershop.PlayershopCommandExecutor;
-import com.ue.shopsystem.commands.playershop.PlayershopTabCompleter;
 import com.ue.shopsystem.commands.rentshop.RentshopCommandExecutor;
 import com.ue.shopsystem.commands.rentshop.RentshopTabCompleter;
-import com.ue.shopsystem.impl.CustomSkullService;
-import com.ue.shopsystem.impl.RentDailyTask;
+import com.ue.shopsystem.logic.api.CustomSkullService;
+import com.ue.shopsystem.logic.api.PlayershopManager;
+import com.ue.shopsystem.logic.api.RentshopManager;
+import com.ue.shopsystem.logic.impl.AdminshopManager;
+import com.ue.shopsystem.logic.impl.RentDailyTask;
 import com.ue.townsystem.api.TownworldController;
 import com.ue.townsystem.commands.TownCommandExecutor;
 import com.ue.townsystem.commands.TownTabCompleter;
@@ -77,11 +73,21 @@ public class UltimateEconomy extends JavaPlugin {
 	@Inject
 	JobManager jobManager;
 	@Inject
+	JobcenterManager jobcenterManager;
+	@Inject
+	AdminshopManager adminshopManager;
+	@Inject
+	PlayershopManager playershopManager;
+	@Inject
+	RentshopManager rentshopManager;
+	@Inject
 	VaultHook vaultHook;
 	@Inject
 	Metrics metrics;
 	@Inject
 	MessageWrapper messageWrapper;
+	@Inject
+	CustomSkullService skullService;
 	@Inject
 	@Named("ConfigCommandExecutor")
 	CommandExecutor configCommandExecutor;
@@ -89,11 +95,23 @@ public class UltimateEconomy extends JavaPlugin {
 	@Named("EconomyPlayerCommandExecutor")
 	CommandExecutor ecoPlayerCommandExecutor;
 	@Inject
+	@Named("JobCommandExecutor")
+	CommandExecutor jobCommandExecutor;
+	@Inject
+	@Named("PlayershopCommandExecutor")
+	CommandExecutor playershopCommandExecutor;
+	@Inject
 	@Named("EconomyPlayerTabCompleter")
 	TabCompleter ecoPlayerTabCompleter;
 	@Inject
 	@Named("ConfigTabCompleter")
 	TabCompleter configTabCompleter;
+	@Inject
+	@Named("JobTabCompleter")
+	TabCompleter jobTabCompleter;
+	@Inject
+	@Named("PlayershopTabCompleter")
+	TabCompleter playershopTabCompleter;
 
 	private ServiceComponent serviceComponent;
 
@@ -133,11 +151,11 @@ public class UltimateEconomy extends JavaPlugin {
 	}
 
 	private void disablePlugin() {
-		JobcenterManagerImpl.despawnAllVillagers();
+		jobcenterManager.despawnAllVillagers();
 		TownworldController.despawnAllVillagers();
-		AdminshopController.despawnAllVillagers();
-		PlayershopController.despawnAllVillagers();
-		RentshopController.despawnAllVillagers();
+		adminshopManager.despawnAllVillagers();
+		playershopManager.despawnAllVillagers();
+		rentshopManager.despawnAllVillagers();
 	}
 
 	private void disableVault() {
@@ -237,22 +255,22 @@ public class UltimateEconomy extends JavaPlugin {
 	}
 
 	private void setupTabCompleters() {
-		getCommand("jobcenter").setTabCompleter(new JobTabCompleter());
+		getCommand("jobcenter").setTabCompleter(jobTabCompleter);
 		getCommand("town").setTabCompleter(new TownTabCompleter());
 		getCommand("townworld").setTabCompleter(new TownworldTabCompleter());
 		getCommand("adminshop").setTabCompleter(new AdminshopTabCompleter());
-		getCommand("playershop").setTabCompleter(new PlayershopTabCompleter());
+		getCommand("playershop").setTabCompleter(playershopTabCompleter);
 		getCommand("rentshop").setTabCompleter(new RentshopTabCompleter());
 		getCommand("ue-config").setTabCompleter(configTabCompleter);
 		getCommand("bank").setTabCompleter(ecoPlayerTabCompleter);
 	}
 
 	private void setupCommandExecutors() {
-		getCommand("jobcenter").setExecutor(new JobCommandExecutor());
+		getCommand("jobcenter").setExecutor(jobCommandExecutor);
 		getCommand("town").setExecutor(new TownCommandExecutor());
 		getCommand("townworld").setExecutor(new TownworldCommandExecutor(this));
 		getCommand("adminshop").setExecutor(new AdminshopCommandExecutor());
-		getCommand("playershop").setExecutor(new PlayershopCommandExecutor());
+		getCommand("playershop").setExecutor(playershopCommandExecutor);
 		getCommand("rentshop").setExecutor(new RentshopCommandExecutor());
 		getCommand("pay").setExecutor(ecoPlayerCommandExecutor);
 		getCommand("givemoney").setExecutor(ecoPlayerCommandExecutor);
@@ -270,11 +288,11 @@ public class UltimateEconomy extends JavaPlugin {
 		messageWrapper.loadLanguage(configManager.getLocale());
 		bankManager.loadBankAccounts();
 		jobManager.loadAllJobs();
-		JobcenterManagerImpl.loadAllJobcenters();
+		jobcenterManager.loadAllJobcenters();
 		ecoPlayerManager.loadAllEconomyPlayers();
-		AdminshopController.loadAllAdminShops();
-		PlayershopController.loadAllPlayerShops();
-		RentshopController.loadAllRentShops();
+		adminshopManager.loadAllAdminShops();
+		playershopManager.loadAllPlayerShops();
+		rentshopManager.loadAllRentShops();
 
 		loadCommands();
 		loadSpawners();
@@ -282,9 +300,9 @@ public class UltimateEconomy extends JavaPlugin {
 
 	private void setupPlugin() {
 		configManager.setupConfig();
-		CustomSkullService.setup();
+		skullService.setup();
 		// setup and start RentDailyTask
-		new RentDailyTask().runTaskTimerAsynchronously(this, 1, 1000);
+		new RentDailyTask(rentshopManager, messageWrapper).runTaskTimerAsynchronously(this, 1, 1000);
 	}
 
 	@Override
@@ -359,7 +377,7 @@ public class UltimateEconomy extends JavaPlugin {
 	}
 
 	private boolean handleShopListCommand(Player player) {
-		List<String> shopNames = AdminshopController.getAdminshopNameList();
+		List<String> shopNames = adminshopManager.getAdminshopNameList();
 		player.sendMessage(messageWrapper.getString("shoplist_info", shopNames.toString()));
 		return true;
 	}
@@ -368,7 +386,7 @@ public class UltimateEconomy extends JavaPlugin {
 			throws JobSystemException, GeneralEconomyException, ShopSystemException {
 		if (args.length == 1) {
 			if (ecoPlayer.hasJob(jobManager.getJobByName(args[0]))) {
-				AdminshopController.getAdminShopByName(args[0]).openShopInventory(player);
+				adminshopManager.getAdminShopByName(args[0]).openShopInventory(player);
 			} else {
 				player.sendMessage(messageWrapper.getErrorString("job_not_joined"));
 			}

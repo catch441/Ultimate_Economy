@@ -7,8 +7,8 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.shopsystem.api.Rentshop;
-import com.ue.shopsystem.api.RentshopController;
+import com.ue.shopsystem.logic.api.Rentshop;
+import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public enum RentshopCommandEnum {
@@ -19,7 +19,7 @@ public enum RentshopCommandEnum {
 				throws NumberFormatException, GeneralEconomyException {
 			if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 				if (args.length == 3) {
-					Rentshop shop = RentshopController.createRentShop(player.getLocation(), Integer.valueOf(args[1]),
+					Rentshop shop = RentshopManagerImpl.createRentShop(player.getLocation(), Integer.valueOf(args[1]),
 							Double.valueOf(args[2]));
 					player.sendMessage(MessageWrapper.getString("shop_create", shop.getName()));
 
@@ -35,7 +35,7 @@ public enum RentshopCommandEnum {
 		boolean perform(String label, String[] args, Player player) throws GeneralEconomyException {
 			if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 				if (args.length == 2) {
-					RentshopController.deleteRentShop(RentshopController.getRentShopByUniqueName(args[1], null));
+					RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShopByUniqueName(args[1], null));
 					player.sendMessage(MessageWrapper.getString("shop_delete", args[1]));
 				} else {
 					player.sendMessage("/" + label + " delete <shopname>");
@@ -50,7 +50,7 @@ public enum RentshopCommandEnum {
 				throws EconomyPlayerException, GeneralEconomyException, TownSystemException {
 			if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 				if (args.length == 2) {
-					RentshopController.getRentShopByUniqueName(args[1], null).moveShop(player.getLocation());
+					RentshopManagerImpl.getRentShopByUniqueName(args[1], null).moveShop(player.getLocation());
 				} else {
 					player.sendMessage("/" + label + " move <shopname>");
 				}
@@ -64,7 +64,7 @@ public enum RentshopCommandEnum {
 				throws NumberFormatException, ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 			if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 				if (args.length == 3) {
-					RentshopController.getRentShopByUniqueName(args[1], null).changeShopSize(Integer.valueOf(args[2]));
+					RentshopManagerImpl.getRentShopByUniqueName(args[1], null).changeShopSize(Integer.valueOf(args[2]));
 					player.sendMessage(MessageWrapper.getString("shop_resize", args[2]));
 				} else {
 					player.sendMessage("/" + label + " resize <shopname> <new size>");
@@ -78,7 +78,7 @@ public enum RentshopCommandEnum {
 		boolean perform(String label, String[] args, Player player) throws GeneralEconomyException {
 			if (args.length == 3) {
 				try {
-					RentshopController.getRentShopByUniqueName(args[1], player)
+					RentshopManagerImpl.getRentShopByUniqueName(args[1], player)
 							.changeProfession(Profession.valueOf(args[2].toUpperCase()));
 					player.sendMessage(MessageWrapper.getString("profession_changed"));
 				} catch (IllegalArgumentException e) {
@@ -95,7 +95,7 @@ public enum RentshopCommandEnum {
 		boolean perform(String label, String[] args, Player player)
 				throws ShopSystemException, GeneralEconomyException {
 			if (args.length == 3) {
-				RentshopController.getRentShopByUniqueName(args[1], player).changeShopName(args[2]);
+				RentshopManagerImpl.getRentShopByUniqueName(args[1], player).changeShopName(args[2]);
 				player.sendMessage(MessageWrapper.getString("shop_rename", args[1], args[2]));
 			} else {
 				player.sendMessage("/" + label + " rename <oldName> <newName>");
@@ -108,7 +108,7 @@ public enum RentshopCommandEnum {
 		boolean perform(String label, String[] args, Player player)
 				throws ShopSystemException, GeneralEconomyException {
 			if (args.length == 2) {
-				RentshopController.getRentShopByUniqueName(args[1], player).openEditor(player);
+				RentshopManagerImpl.getRentShopByUniqueName(args[1], player).openEditor(player);
 			} else {
 				player.sendMessage("/" + label + " editShop <shopname>");
 			}

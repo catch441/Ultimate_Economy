@@ -10,10 +10,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import com.ue.common.utils.MessageWrapper;
-import com.ue.jobsystem.api.Job;
-import com.ue.jobsystem.api.Jobcenter;
-import com.ue.jobsystem.impl.JobcenterImpl;
-import com.ue.jobsystem.logic.api.JobManager;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerManager;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.jobsystem.logic.api.Job;
+import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 import com.ue.ultimate_economy.GeneralEconomyException;
@@ -24,21 +25,21 @@ public class JobcenterManagerImpl implements JobcenterManager {
 
 	private List<Jobcenter> jobCenterList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
-	private final JobManager jobManager;
+	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobsystemValidationHandler validationHandler;
 
 	/**
 	 * Inject constructor.
 	 * 
 	 * @param validationHandler
-	 * @param jobManager
+	 * @param ecoPlayerManager
 	 * @param messageWrapper
 	 */
 	@Inject
-	public JobcenterManagerImpl(JobsystemValidationHandler validationHandler, JobManager jobManager,
+	public JobcenterManagerImpl(JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
-		this.jobManager = jobManager;
+		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
 	}
 
@@ -72,10 +73,23 @@ public class JobcenterManagerImpl implements JobcenterManager {
 		getJobcenterList().remove(jobcenter);
 		for (Job job : jobcenter.getJobList()) {
 			if (!otherJobcenterHasJob(job)) {
-				jobManager.removeJobFromAllPlayers(job);
+				removeJobFromAllPlayers(job);
 			}
 		}
 		saveJobcenterNameList();
+	}
+
+	private void removeJobFromAllPlayers(Job job) {
+		for (EconomyPlayer ecoPlayer : ecoPlayerManager.getAllEconomyPlayers()) {
+			if (ecoPlayer.hasJob(job)) {
+				try {
+					ecoPlayer.leaveJob(job, false);
+				} catch (EconomyPlayerException e) {
+					Bukkit.getLogger().warning("[Ultimate_Economy] Failed leave the job " + job.getName());
+					Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+				}
+			}
+		}
 	}
 
 	private boolean otherJobcenterHasJob(Job job) throws JobSystemException {

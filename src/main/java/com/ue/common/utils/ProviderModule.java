@@ -33,10 +33,28 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerTabCompleterImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerValidationHandlerImpl;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.JobcenterManager;
+import com.ue.jobsystem.logic.api.JobsystemEventHandler;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import com.ue.jobsystem.logic.impl.JobCommandExecutorImpl;
 import com.ue.jobsystem.logic.impl.JobManagerImpl;
+import com.ue.jobsystem.logic.impl.JobTabCompleterImpl;
 import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
+import com.ue.jobsystem.logic.impl.JobsystemEventHandlerImpl;
 import com.ue.jobsystem.logic.impl.JobsystemValidationHandlerImpl;
+import com.ue.shopsystem.logic.api.CustomSkullService;
+import com.ue.shopsystem.logic.api.PlayershopManager;
+import com.ue.shopsystem.logic.api.RentshopManager;
+import com.ue.shopsystem.logic.api.ShopEventHandler;
+import com.ue.shopsystem.logic.api.ShopValidationHandler;
+import com.ue.shopsystem.logic.impl.AdminshopManager;
+import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
+import com.ue.shopsystem.logic.impl.CustomSkullServiceImpl;
+import com.ue.shopsystem.logic.impl.PlayershopCommandExecutorImpl;
+import com.ue.shopsystem.logic.impl.PlayershopManagerImpl;
+import com.ue.shopsystem.logic.impl.PlayershopTabCompleterImpl;
+import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
+import com.ue.shopsystem.logic.impl.ShopEventHandlerImpl;
+import com.ue.shopsystem.logic.impl.ShopValidationHandlerImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
 import com.ue.vault.UltimateEconomyVault;
 import com.ue.vault.VaultHook;
@@ -104,9 +122,27 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	JobcenterManager provideJobcenterManager(JobsystemValidationHandler validationHandler, JobManager jobManager,
-			MessageWrapper messageWrapper) {
-		return new JobcenterManagerImpl(validationHandler, jobManager, messageWrapper);
+	JobcenterManager provideJobcenterManager(JobsystemValidationHandler validationHandler,
+			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
+		return new JobcenterManagerImpl(validationHandler, ecoPlayerManager, messageWrapper);
+	}
+
+	@Singleton
+	@Provides
+	AdminshopManager provideAdminshopManager(ShopValidationHandler validationHandler, MessageWrapper messageWrapper) {
+		return new AdminshopManagerImpl(validationHandler, messageWrapper);
+	}
+
+	@Singleton
+	@Provides
+	PlayershopManager providePlayershopManager(ShopValidationHandler validationHandler, MessageWrapper messageWrapper) {
+		return new PlayershopManagerImpl(validationHandler, messageWrapper);
+	}
+
+	@Singleton
+	@Provides
+	RentshopManager provideRentshopManager(ShopValidationHandler validationHandler, MessageWrapper messageWrapper) {
+		return new RentshopManagerImpl(validationHandler, messageWrapper);
 	}
 
 	@Singleton
@@ -126,6 +162,22 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
+	@Named("JobCommandExecutor")
+	CommandExecutor provideJobCommandExecutor(JobcenterManager jobcenterManager, JobManager jobManager,
+			MessageWrapper messageWrapper) {
+		return new JobCommandExecutorImpl(jobcenterManager, jobManager, messageWrapper);
+	}
+
+	@Singleton
+	@Provides
+	@Named("PlayershopCommandExecutor")
+	CommandExecutor providePlayershopCommandExecutor(EconomyPlayerManager ecoPlayerManager,
+			PlayershopManager playershopManager, MessageWrapper messageWrapper) {
+		return new PlayershopCommandExecutorImpl(ecoPlayerManager, playershopManager, messageWrapper);
+	}
+
+	@Singleton
+	@Provides
 	@Named("EconomyPlayerTabCompleter")
 	TabCompleter provideEcoPlayerTabCompleter(EconomyPlayerManager ecoPlayerManager) {
 		return new EconomyPlayerTabCompleterImpl(ecoPlayerManager);
@@ -136,6 +188,20 @@ public class ProviderModule {
 	@Named("ConfigTabCompleter")
 	TabCompleter provideConfigTabCompleter() {
 		return new ConfigTabCompleterImpl();
+	}
+
+	@Singleton
+	@Provides
+	@Named("JobTabCompleter")
+	TabCompleter provideJobTabCompleter(JobManager jobManager, JobcenterManager jobcenterManager) {
+		return new JobTabCompleterImpl(jobManager, jobcenterManager);
+	}
+
+	@Singleton
+	@Provides
+	@Named("PlayershopTabCompleter")
+	TabCompleter providePlayershopTabCompleter(PlayershopManager playershopManager) {
+		return new PlayershopTabCompleterImpl(playershopManager);
 	}
 
 	@Singleton
@@ -170,6 +236,18 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
+	JobsystemValidationHandler provideJobsystemValidationHandler(MessageWrapper messageWrapper) {
+		return new JobsystemValidationHandlerImpl(messageWrapper);
+	}
+
+	@Singleton
+	@Provides
+	ShopValidationHandler provideShopValidationHandler(ConfigManager configManager, MessageWrapper messageWrapper) {
+		return new ShopValidationHandlerImpl(configManager, messageWrapper);
+	}
+
+	@Singleton
+	@Provides
 	EconomyPlayerEventHandler provideEcoPlayerEventHandler(EconomyPlayerManager ecoPlayerManager,
 			ConfigManager configManager) {
 		return new EconomyPlayerEventHandlerImpl(ecoPlayerManager, configManager);
@@ -177,7 +255,21 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	JobsystemValidationHandler provideJobsystemValidationHandler(MessageWrapper messageWrapper) {
-		return new JobsystemValidationHandlerImpl(messageWrapper);
+	JobsystemEventHandler provideJobsystemEventHandler(JobcenterManager jobcenterManager, JobManager jobManager,
+			EconomyPlayerManager ecoPlayerManager) {
+		return new JobsystemEventHandlerImpl(jobcenterManager, jobManager, ecoPlayerManager);
+	}
+
+	@Singleton
+	@Provides
+	ShopEventHandler provideShopEventHandler(RentshopManager rentshopManager, AdminshopManager adminshopManager,
+			PlayershopManager playershopManager, EconomyPlayerManager ecoPlayerManager) {
+		return new ShopEventHandlerImpl(rentshopManager, adminshopManager, playershopManager, ecoPlayerManager);
+	}
+
+	@Singleton
+	@Provides
+	CustomSkullService provideCustomSkullService() {
+		return new CustomSkullServiceImpl();
 	}
 }

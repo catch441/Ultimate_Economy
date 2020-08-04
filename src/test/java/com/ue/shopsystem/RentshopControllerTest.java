@@ -31,9 +31,9 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.shopsystem.api.Rentshop;
-import com.ue.shopsystem.api.RentshopController;
-import com.ue.shopsystem.impl.ShopItem;
+import com.ue.shopsystem.logic.api.Rentshop;
+import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
+import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -84,9 +84,9 @@ public class RentshopControllerTest {
 	 */
 	@AfterEach
 	public void unload() {
-		int size = RentshopController.getRentShops().size();
+		int size = RentshopManagerImpl.getRentShops().size();
 		for (int i = 0; i < size; i++) {
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		}
 	}
 
@@ -94,9 +94,9 @@ public class RentshopControllerTest {
 	public void generateFreeRentShopIdTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			String id1 = RentshopController.generateFreeRentShopId();
-			RentshopController.createRentShop(location, 9, 10);
-			String id2 = RentshopController.generateFreeRentShopId();
+			String id1 = RentshopManagerImpl.generateFreeRentShopId();
+			RentshopManagerImpl.createRentShop(location, 9, 10);
+			String id2 = RentshopManagerImpl.generateFreeRentShopId();
 			assertEquals("R0", id1);
 			assertEquals("R1", id2);
 		} catch (GeneralEconomyException e) {
@@ -108,8 +108,8 @@ public class RentshopControllerTest {
 	public void getRentShopIdListTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			RentshopController.createRentShop(location, 9, 10);
-			List<String> list = RentshopController.getRentShopIdList();
+			RentshopManagerImpl.createRentShop(location, 9, 10);
+			List<String> list = RentshopManagerImpl.getRentShopIdList();
 			assertEquals(1, list.size());
 			assertEquals("R0", list.get(0));
 		} catch (GeneralEconomyException e) {
@@ -121,9 +121,9 @@ public class RentshopControllerTest {
 	public void getRentShopByIdTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			RentshopController.createRentShop(location, 9, 10);
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
-			Rentshop response = RentshopController.getRentShopById("R1");
+			RentshopManagerImpl.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
+			Rentshop response = RentshopManagerImpl.getRentShopById("R1");
 			assertEquals(shop, response);
 			assertEquals("R1", response.getShopId());
 		} catch (GeneralEconomyException e) {
@@ -134,7 +134,7 @@ public class RentshopControllerTest {
 	@Test
 	public void getRentShopByIdTestWithNoShop() {
 		try {
-			RentshopController.getRentShopById("R0");
+			RentshopManagerImpl.getRentShopById("R0");
 			fail();
 		} catch (GeneralEconomyException e) {
 			assertTrue(e instanceof GeneralEconomyException);
@@ -146,11 +146,11 @@ public class RentshopControllerTest {
 	public void getRentShopUniqueNameListTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			RentshopController.createRentShop(location, 9, 10);
-			RentshopController.createRentShop(location, 9, 0);
-			RentshopController.getRentShops().get(1).rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0),
+			RentshopManagerImpl.createRentShop(location, 9, 10);
+			RentshopManagerImpl.createRentShop(location, 9, 0);
+			RentshopManagerImpl.getRentShops().get(1).rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0),
 					10);
-			List<String> list = RentshopController.getRentShopUniqueNameList();
+			List<String> list = RentshopManagerImpl.getRentShopUniqueNameList();
 			assertEquals(2, list.size());
 			assertEquals("RentShop#R0", list.get(0));
 			assertEquals("Shop#R1_catch441", list.get(1));
@@ -163,15 +163,15 @@ public class RentshopControllerTest {
 	public void getRentShopByUniqueNameTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
-			Rentshop shop2 = RentshopController.createRentShop(location, 9, 0);
-			Rentshop shop3 = RentshopController.createRentShop(location, 9, 0);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
+			Rentshop shop2 = RentshopManagerImpl.createRentShop(location, 9, 0);
+			Rentshop shop3 = RentshopManagerImpl.createRentShop(location, 9, 0);
 			shop2.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0),
 					10);
 			shop3.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0),
 					10);
-			Rentshop response = RentshopController.getRentShopByUniqueName("RentShop#R0",null);
-			Rentshop response2 = RentshopController.getRentShopByUniqueName("Shop#R2", player);
+			Rentshop response = RentshopManagerImpl.getRentShopByUniqueName("RentShop#R0",null);
+			Rentshop response2 = RentshopManagerImpl.getRentShopByUniqueName("Shop#R2", player);
 			assertEquals(shop, response);
 			assertEquals("R0", response.getShopId());
 			assertEquals("RentShop#R0", response.getName());
@@ -186,7 +186,7 @@ public class RentshopControllerTest {
 	@Test
 	public void getRentShopByUniqueNameTestWithoutShop() {
 		try {
-			RentshopController.getRentShopByUniqueName("RentShop#R0",null);
+			RentshopManagerImpl.getRentShopByUniqueName("RentShop#R0",null);
 			fail();
 		} catch (GeneralEconomyException e) {
 			assertTrue(e instanceof GeneralEconomyException);
@@ -198,11 +198,11 @@ public class RentshopControllerTest {
 	public void getRentShopsTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
-			Rentshop shop2 = RentshopController.createRentShop(location, 9, 0);
-			RentshopController.getRentShops().get(1).rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0),
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
+			Rentshop shop2 = RentshopManagerImpl.createRentShop(location, 9, 0);
+			RentshopManagerImpl.getRentShops().get(1).rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0),
 					10);
-			List<Rentshop> shops = RentshopController.getRentShops();
+			List<Rentshop> shops = RentshopManagerImpl.getRentShops();
 			assertEquals(shop, shops.get(0));
 			assertEquals(shop2, shops.get(1));
 		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
@@ -214,9 +214,9 @@ public class RentshopControllerTest {
 	public void despawnAllVillagersTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			Collection<Entity> entities1 = world.getNearbyEntities(shop.getShopLocation(), 0, 0, 0);
-			RentshopController.despawnAllVillagers();
+			RentshopManagerImpl.despawnAllVillagers();
 			Collection<Entity> entities2 = world.getNearbyEntities(shop.getShopLocation(), 0, 0, 0);
 			assertEquals(1, entities1.size());
 			assertEquals(0, entities2.size());
@@ -229,14 +229,14 @@ public class RentshopControllerTest {
 	public void deleteRentshopTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			RentshopController.createRentShop(location, 9, 10);
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.createRentShop(location, 9, 10);
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "R0.yml");
 			assertFalse(saveFile.exists());
 			assertEquals(0, UltimateEconomy.getInstance.getConfig().getStringList("RentShopIds").size());
-			assertEquals(0, RentshopController.getRentShops().size());
-			assertEquals(0, RentshopController.getRentShopIdList().size());
-			assertEquals(0, RentshopController.getRentShopUniqueNameList().size());
+			assertEquals(0, RentshopManagerImpl.getRentShops().size());
+			assertEquals(0, RentshopManagerImpl.getRentShopIdList().size());
+			assertEquals(0, RentshopManagerImpl.getRentShopUniqueNameList().size());
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -246,7 +246,7 @@ public class RentshopControllerTest {
 	public void createRentshopTestWithInvalidSize() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			RentshopController.createRentShop(location, -13, 10);
+			RentshopManagerImpl.createRentShop(location, -13, 10);
 			fail();
 		} catch (GeneralEconomyException e) {
 			assertTrue(e instanceof GeneralEconomyException);
@@ -258,7 +258,7 @@ public class RentshopControllerTest {
 	public void createRentshopTestWithInvalidRentalFee() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			RentshopController.createRentShop(location, 9, -5);
+			RentshopManagerImpl.createRentShop(location, 9, -5);
 			fail();
 		} catch (GeneralEconomyException e) {
 			assertTrue(e instanceof GeneralEconomyException);
@@ -270,7 +270,7 @@ public class RentshopControllerTest {
 	public void createRentshopTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 5);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 5);
 			assertEquals(world, shop.getWorld());
 			assertEquals("R0", shop.getShopId());
 			assertEquals("RentShop#R0", shop.getName());
@@ -332,14 +332,14 @@ public class RentshopControllerTest {
 	public void loadAllRentshopsTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 5);
-			assertEquals(1, RentshopController.getRentShops().size());
-			RentshopController.despawnAllVillagers();
-			RentshopController.getRentShops().clear();
-			assertEquals(0, RentshopController.getRentShops().size());
-			RentshopController.loadAllRentShops();
-			assertEquals(1, RentshopController.getRentShops().size());
-			Rentshop loaded = RentshopController.getRentShops().get(0);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 5);
+			assertEquals(1, RentshopManagerImpl.getRentShops().size());
+			RentshopManagerImpl.despawnAllVillagers();
+			RentshopManagerImpl.getRentShops().clear();
+			assertEquals(0, RentshopManagerImpl.getRentShops().size());
+			RentshopManagerImpl.loadAllRentShops();
+			assertEquals(1, RentshopManagerImpl.getRentShops().size());
+			Rentshop loaded = RentshopManagerImpl.getRentShops().get(0);
 			assertEquals(loaded.getWorld(), shop.getWorld());
 			assertEquals(loaded.getShopId(), shop.getShopId());
 			assertEquals(loaded.getName(), shop.getName());
@@ -358,18 +358,18 @@ public class RentshopControllerTest {
 	public void loadAllRentshopsTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 5);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 5);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
 			shop.addShopItem(0, 1, 1, new ItemStack(Material.STONE));
-			assertEquals(1, RentshopController.getRentShops().size());
-			RentshopController.despawnAllVillagers();
-			RentshopController.getRentShops().clear();
-			assertEquals(0, RentshopController.getRentShops().size());
-			RentshopController.loadAllRentShops();
-			Rentshop loaded = RentshopController.getRentShops().get(0);
-			assertEquals(1, RentshopController.getRentShops().size());
+			assertEquals(1, RentshopManagerImpl.getRentShops().size());
+			RentshopManagerImpl.despawnAllVillagers();
+			RentshopManagerImpl.getRentShops().clear();
+			assertEquals(0, RentshopManagerImpl.getRentShops().size());
+			RentshopManagerImpl.loadAllRentShops();
+			Rentshop loaded = RentshopManagerImpl.getRentShops().get(0);
+			assertEquals(1, RentshopManagerImpl.getRentShops().size());
 			assertEquals(loaded.getWorld(), shop.getWorld());
 			assertEquals(loaded.getShopId(), shop.getShopId());
 			assertEquals(loaded.getName(), shop.getName());
@@ -399,14 +399,14 @@ public class RentshopControllerTest {
 	public void loadAllRentshopsTestWithNoFile() {
 		Location location = new Location(world, 10.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 5);
-			RentshopController.despawnAllVillagers();
-			RentshopController.getRentShops().clear();
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 5);
+			RentshopManagerImpl.despawnAllVillagers();
+			RentshopManagerImpl.getRentShops().clear();
 			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),shop.getShopId() + ".yml");
 			saveFile.delete();
-			assertEquals(0, RentshopController.getRentShops().size());
-			RentshopController.loadAllRentShops();
-			assertEquals(0, RentshopController.getRentShops().size());
+			assertEquals(0, RentshopManagerImpl.getRentShops().size());
+			RentshopManagerImpl.loadAllRentShops();
+			assertEquals(0, RentshopManagerImpl.getRentShops().size());
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -416,18 +416,18 @@ public class RentshopControllerTest {
 	public void loadAllRentshopsTestWithInvalidPlayer() {
 		Location location = new Location(world, 10.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 5);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 5);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
-			RentshopController.despawnAllVillagers();
-			RentshopController.getRentShops().clear();
+			RentshopManagerImpl.despawnAllVillagers();
+			RentshopManagerImpl.getRentShops().clear();
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
-			assertEquals(0, RentshopController.getRentShops().size());
-			RentshopController.loadAllRentShops();
-			assertEquals(0, RentshopController.getRentShops().size());
+			assertEquals(0, RentshopManagerImpl.getRentShops().size());
+			RentshopManagerImpl.loadAllRentShops();
+			assertEquals(0, RentshopManagerImpl.getRentShops().size());
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().add(ecoPlayer);
-			RentshopController.getRentShops().add(shop);
+			RentshopManagerImpl.getRentShops().add(shop);
 		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
 			fail();
 		}

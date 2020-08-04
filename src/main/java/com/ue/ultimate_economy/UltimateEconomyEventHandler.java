@@ -41,28 +41,29 @@ import org.bukkit.metadata.MetadataValue;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.Updater;
 import com.ue.common.utils.Updater.UpdateResult;
-import com.ue.economyplayer.logic.impl.EconomyPlayerEventHandlerImpl;
+import com.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.jobsystem.impl.JobSystemEventHandler;
-import com.ue.shopsystem.impl.ShopEventHandler;
-import com.ue.shopsystem.impl.Spawner;
+import com.ue.jobsystem.logic.api.JobsystemEventHandler;
+import com.ue.shopsystem.logic.api.ShopEventHandler;
+import com.ue.shopsystem.logic.impl.Spawner;
 import com.ue.townsystem.impl.TownsystemEventHandler;
 
 public class UltimateEconomyEventHandler implements Listener {
 
 	@Inject
-	EconomyPlayerEventHandlerImpl ecoPlayerEventHandler;
+	EconomyPlayerEventHandler ecoPlayerEventHandler;
 	@Inject
 	MessageWrapper messageWrapper;
+	@Inject
+	JobsystemEventHandler jobsystemEventHandler;
+	@Inject
+	ShopEventHandler shopEventHandler;
 	private UltimateEconomy plugin;
 	private UpdateResult updateResult;
 	private List<String> spawnerlist;
 	private File spawner;
-	private JobSystemEventHandler jobSystemEventHandler;
 	private TownsystemEventHandler townSystemEventHandler;
 	
-	private ShopEventHandler shopEventHandler;
-
 	/**
 	 * Constructor of ultimate economy event handler.
 	 * 
@@ -76,9 +77,7 @@ public class UltimateEconomyEventHandler implements Listener {
 		updateResult = Updater.checkForUpdate(plugin.getDescription().getVersion());
 		this.spawnerlist = spawnerlist;
 		this.spawner = spawner;
-		jobSystemEventHandler = new JobSystemEventHandler();
 		townSystemEventHandler = new TownsystemEventHandler();
-		shopEventHandler = new ShopEventHandler();
 	}
 
 	/**
@@ -118,7 +117,7 @@ public class UltimateEconomyEventHandler implements Listener {
 		EconomyVillager economyVillager = EconomyVillager.getEnum(entity.getMetadata("ue-type").get(0).value().toString());
 		switch (economyVillager) {
 		case JOBCENTER:
-			jobSystemEventHandler.handleOpenInventory(event);
+			jobsystemEventHandler.handleOpenInventory(event);
 			break;
 		case ADMINSHOP:				
 		case PLAYERSHOP:
@@ -158,7 +157,7 @@ public class UltimateEconomyEventHandler implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onEntityDeath(EntityDeathEvent event) {
-		jobSystemEventHandler.handleEntityDeath(event);
+		jobsystemEventHandler.handleEntityDeath(event);
 	}
 
 	/**
@@ -188,7 +187,7 @@ public class UltimateEconomyEventHandler implements Listener {
 			EconomyVillager economyVillager = (EconomyVillager) entity.getMetadata("ue-type").get(0).value();
 			switch (economyVillager) {
 			case JOBCENTER:
-				jobSystemEventHandler.handleInventoryClick(event);
+				jobsystemEventHandler.handleInventoryClick(event);
 				break;
 			case ADMINSHOP:
 			case PLAYERSHOP:
@@ -220,7 +219,7 @@ public class UltimateEconomyEventHandler implements Listener {
 				handleSetSpawner(event);
 			} 
 		}
-		jobSystemEventHandler.handleSetBlock(event);
+		jobsystemEventHandler.handleSetBlock(event);
 	}
 
 	private void handleSetSpawner(BlockPlaceEvent event) {
@@ -268,7 +267,7 @@ public class UltimateEconomyEventHandler implements Listener {
 			if (event.getBlock().getBlockData().getMaterial() == Material.SPAWNER) {
 				handleBreakSpawner(event);
 			} else {
-				jobSystemEventHandler.handleBreakBlock(event);
+				jobsystemEventHandler.handleBreakBlock(event);
 			}
 		}
 	}
@@ -362,7 +361,7 @@ public class UltimateEconomyEventHandler implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onFishingEvent(PlayerFishEvent event) {
-		jobSystemEventHandler.handleFishing(event);
+		jobsystemEventHandler.handleFishing(event);
 	}
 
 	/**

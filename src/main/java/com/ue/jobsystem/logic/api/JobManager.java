@@ -2,7 +2,6 @@ package com.ue.jobsystem.logic.api;
 
 import java.util.List;
 
-import com.ue.jobsystem.api.Job;
 import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
@@ -53,13 +52,10 @@ public interface JobManager {
 	 * 
 	 */
 	public void loadAllJobs();
-	
+
 	/**
-	 * Remove a job from all economy players.
-	 * 
+	 * Removes a job from all joined players.
 	 * @param job
 	 */
 	public void removeJobFromAllPlayers(Job job);
-	
-	
 }

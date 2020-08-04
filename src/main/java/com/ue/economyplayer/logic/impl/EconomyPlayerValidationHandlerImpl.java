@@ -10,7 +10,7 @@ import org.bukkit.Location;
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
-import com.ue.jobsystem.api.Job;
+import com.ue.jobsystem.logic.api.Job;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class EconomyPlayerValidationHandlerImpl implements EconomyPlayerValidationHandler {

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import com.ue.jobsystem.api.JobController;
 import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.jobsystem.logic.impl.JobTabCompleterImpl;
 import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -28,7 +29,7 @@ public class JobTabCompleterTest {
 
 	private static ServerMock server;
 	private static WorldMock world;
-	private static JobTabCompleter tabCompleter;
+	private static JobTabCompleterImpl tabCompleter;
 
 	/**
 	 * Init shop for tests.
@@ -40,7 +41,7 @@ public class JobTabCompleterTest {
 		MockBukkit.load(UltimateEconomy.class);
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
-		tabCompleter = new JobTabCompleter();
+		tabCompleter = new JobTabCompleterImpl();
 		;
 	}
 

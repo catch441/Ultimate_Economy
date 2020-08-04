@@ -29,9 +29,9 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.shopsystem.api.Rentshop;
-import com.ue.shopsystem.api.RentshopController;
-import com.ue.shopsystem.impl.RentshopImpl;
+import com.ue.shopsystem.logic.api.Rentshop;
+import com.ue.shopsystem.logic.impl.RentshopImpl;
+import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -83,9 +83,9 @@ public class RentshopTest {
 	 */
 	@AfterEach
 	public void unload() {
-		int size = RentshopController.getRentShops().size();
+		int size = RentshopManagerImpl.getRentShops().size();
 		for (int i = 0; i < size; i++) {
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		}
 	}
 	
@@ -93,7 +93,7 @@ public class RentshopTest {
 	public void constructorLoadTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			RentshopController.createRentShop(location, 9, 10);
+			RentshopManagerImpl.createRentShop(location, 9, 10);
 			Rentshop shop = new RentshopImpl("R0");
 			assertEquals("10.0", String.valueOf(shop.getRentalFee()));
 			assertTrue(shop.isRentable());
@@ -144,7 +144,7 @@ public class RentshopTest {
 	public void constructorLoadTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop setup = RentshopController.createRentShop(location, 9, 10);
+			Rentshop setup = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
 			setup.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 10);
 			Rentshop shop = new RentshopImpl("R0");
@@ -162,7 +162,7 @@ public class RentshopTest {
 	public void moveShopTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			Location newLocation = new Location(world, 10, 3, 20);
 			shop.moveShop(newLocation);
 			assertEquals(newLocation, shop.getShopLocation());
@@ -175,7 +175,7 @@ public class RentshopTest {
 	public void isRentableTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			assertTrue(shop.isRentable());
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
 			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 10);
@@ -189,7 +189,7 @@ public class RentshopTest {
 	public void changeShopNameTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.changeShopName("newname");
 			assertEquals("newname", shop.getName());
 			assertEquals("newname#R0", shop.getShopVillager().getCustomName());
@@ -206,7 +206,7 @@ public class RentshopTest {
 	public void changeShopNameTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
 			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 10);
 			shop.changeShopName("newname");
@@ -225,7 +225,7 @@ public class RentshopTest {
 	public void rentShopTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -248,7 +248,7 @@ public class RentshopTest {
 	public void rentShopTestWithNotEnoughMoney() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 10);
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
@@ -261,7 +261,7 @@ public class RentshopTest {
 	public void rentShopTestWithAlreadyRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -277,7 +277,7 @@ public class RentshopTest {
 	public void resetShopTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -305,7 +305,7 @@ public class RentshopTest {
 	public void changeRentalFee() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.changeRentalFee(25);
 			assertEquals("25.0", String.valueOf(shop.getRentalFee()));
 			// check savefile
@@ -321,7 +321,7 @@ public class RentshopTest {
 	public void changeRentalFeeWithNegativValue() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.changeRentalFee(-25);
 			fail();
 		} catch (GeneralEconomyException e) {
@@ -334,7 +334,7 @@ public class RentshopTest {
 	public void changeShopSizeTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.changeShopSize(18);
 			assertEquals(18, shop.getSize());
 		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
@@ -346,7 +346,7 @@ public class RentshopTest {
 	public void changeShopSizeTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -362,7 +362,7 @@ public class RentshopTest {
 	public void getRentalFeeTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			assertEquals("10.0", String.valueOf(shop.getRentalFee()));
 		} catch (GeneralEconomyException e) {
 			fail();
@@ -373,7 +373,7 @@ public class RentshopTest {
 	public void openRentGUITest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.openRentGUI(player);
 			assertNotNull(player.getOpenInventory());
 			assertEquals("RentShop#R0", ((ChestInventoryMock) player.getOpenInventory().getTopInventory()).getName());
@@ -386,7 +386,7 @@ public class RentshopTest {
 	public void openRentGUITestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -402,7 +402,7 @@ public class RentshopTest {
 	public void changeOwnerTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			shop.changeOwner(ecoPlayer);
 			assertEquals(ecoPlayer, shop.getOwner());
@@ -415,7 +415,7 @@ public class RentshopTest {
 	public void changeOwnerTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -431,7 +431,7 @@ public class RentshopTest {
 	public void addShopItemTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.addShopItem(0, 0, 0, null);
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
@@ -444,7 +444,7 @@ public class RentshopTest {
 	public void addShopTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -458,7 +458,7 @@ public class RentshopTest {
 	public void editShopItemTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.editShopItem(0, "none", "none", "1");
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
@@ -471,7 +471,7 @@ public class RentshopTest {
 	public void editShopTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -486,7 +486,7 @@ public class RentshopTest {
 	public void getShopItemTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.getShopItem(new ItemStack(Material.STONE));
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException e) {
@@ -499,7 +499,7 @@ public class RentshopTest {
 	public void getShopItemTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -514,7 +514,7 @@ public class RentshopTest {
 	public void isAvailableTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.isAvailable(0);
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException e) {
@@ -527,7 +527,7 @@ public class RentshopTest {
 	public void isAvailableTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -542,7 +542,7 @@ public class RentshopTest {
 	public void openShopInventoryTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.openShopInventory(player);
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException e) {
@@ -555,7 +555,7 @@ public class RentshopTest {
 	public void openShopInventoryTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -569,7 +569,7 @@ public class RentshopTest {
 	public void decreaseStockTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.decreaseStock(0,0);
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException e) {
@@ -582,7 +582,7 @@ public class RentshopTest {
 	public void decreaseStockTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -598,7 +598,7 @@ public class RentshopTest {
 	public void increaseStockTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.increaseStock(0,10);
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException e) {
@@ -611,7 +611,7 @@ public class RentshopTest {
 	public void increaseStockTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -626,7 +626,7 @@ public class RentshopTest {
 	public void removeShopItemTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.removeShopItem(0);
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException e) {
@@ -639,7 +639,7 @@ public class RentshopTest {
 	public void removeShopItemTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -654,7 +654,7 @@ public class RentshopTest {
 	public void openStockpileTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.openStockpile(player);
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException e) {
@@ -667,7 +667,7 @@ public class RentshopTest {
 	public void openStockpileTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -681,7 +681,7 @@ public class RentshopTest {
 	public void openSlotEditorTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.openSlotEditor(player,0);
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException e) {
@@ -694,7 +694,7 @@ public class RentshopTest {
 	public void openSlotEditorTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -708,7 +708,7 @@ public class RentshopTest {
 	public void openEditorTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.openEditor(player);
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException e) {
@@ -721,7 +721,7 @@ public class RentshopTest {
 	public void openEditorTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -735,7 +735,7 @@ public class RentshopTest {
 	public void buyShopItemWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.buyShopItem(0,EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0),false);
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
@@ -748,7 +748,7 @@ public class RentshopTest {
 	public void buyShopItemTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);
@@ -764,7 +764,7 @@ public class RentshopTest {
 	public void sellShopItemWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			shop.sellShopItem(0,1,EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0),false);
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
@@ -777,7 +777,7 @@ public class RentshopTest {
 	public void sellShopItemTestWithRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			Rentshop shop = RentshopController.createRentShop(location, 9, 10);
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			ecoPlayer.increasePlayerAmount(100, false);
 			shop.rentShop(ecoPlayer, 10);

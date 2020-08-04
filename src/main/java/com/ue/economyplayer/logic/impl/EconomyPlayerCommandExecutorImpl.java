@@ -19,7 +19,7 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
-import com.ue.jobsystem.api.Job;
+import com.ue.jobsystem.logic.api.Job;
 import com.ue.townsystem.api.TownworldController;
 import com.ue.ultimate_economy.GeneralEconomyException;
 

@@ -39,12 +39,12 @@ import org.junit.jupiter.api.Test;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
-import com.ue.jobsystem.api.Job;
-import com.ue.jobsystem.api.JobController;
-import com.ue.jobsystem.api.Jobcenter;
-import com.ue.jobsystem.impl.JobSystemEventHandler;
+import com.ue.jobsystem.logic.api.Job;
+import com.ue.jobsystem.logic.api.JobController;
+import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
+import com.ue.jobsystem.logic.impl.JobsystemEventHandlerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -63,7 +63,7 @@ public class JobSystemEventHandlerTest {
 	private static ServerMock server;
 	private static WorldMock world;
 	private static PlayerMock player;
-	private static JobSystemEventHandler eventHandler;
+	private static JobsystemEventHandlerImpl eventHandler;
 
 	/**
 	 * Init shop for tests.
@@ -76,7 +76,7 @@ public class JobSystemEventHandlerTest {
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
 		player = server.addPlayer("kthschnll");
-		eventHandler = new JobSystemEventHandler();
+		eventHandler = new JobsystemEventHandlerImpl();
 	}
 
 	/**

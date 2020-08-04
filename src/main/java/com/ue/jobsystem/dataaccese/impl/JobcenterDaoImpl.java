@@ -11,7 +11,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
-import com.ue.jobsystem.api.Job;
+import com.ue.jobsystem.logic.api.Job;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {

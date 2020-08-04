@@ -34,9 +34,9 @@ import org.junit.jupiter.api.Test;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.shopsystem.api.Adminshop;
-import com.ue.shopsystem.api.AdminshopController;
-import com.ue.shopsystem.impl.ShopItem;
+import com.ue.shopsystem.logic.api.Adminshop;
+import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
+import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -92,10 +92,10 @@ public class AdminshopControllerTest {
 	 */
 	@AfterEach
 	public void unloadAdminshops() {
-		int size = AdminshopController.getAdminshopList().size();
+		int size = AdminshopManagerImpl.getAdminshopList().size();
 		for (int i = 0; i < size; i++) {
 			try {
-				AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+				AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 			} catch (ShopSystemException e) {
 				fail();
 			}
@@ -110,7 +110,7 @@ public class AdminshopControllerTest {
 	public void createNewAdminshopTestWithInvalidSize() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			AdminshopController.createAdminShop("myshop", location, 5);
+			AdminshopManagerImpl.createAdminShop("myshop", location, 5);
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			assertTrue(e instanceof GeneralEconomyException);
@@ -122,8 +122,8 @@ public class AdminshopControllerTest {
 	public void createNewAdminshopTestWithExistingName() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			AdminshopController.createAdminShop("myshop", location, 9);
-			AdminshopController.createAdminShop("myshop", location, 9);
+			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
+			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			assertTrue(e instanceof GeneralEconomyException);
@@ -135,7 +135,7 @@ public class AdminshopControllerTest {
 	public void createNewAdminshopTestWithInvalidName() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			AdminshopController.createAdminShop("my_shop", location, 9);
+			AdminshopManagerImpl.createAdminShop("my_shop", location, 9);
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			assertTrue(e instanceof ShopSystemException);
@@ -147,8 +147,8 @@ public class AdminshopControllerTest {
 	public void createNewAdminshopTestSuccess() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			AdminshopController.createAdminShop("myshop", location, 9);
-			List<Adminshop> list = AdminshopController.getAdminshopList();
+			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
+			List<Adminshop> list = AdminshopManagerImpl.getAdminshopList();
 			assertEquals(1, list.size());
 			Adminshop shop = list.get(0);
 			assertEquals(world, shop.getWorld());
@@ -256,12 +256,12 @@ public class AdminshopControllerTest {
 	@Test
 	public void deleteAdminshopTest() {
 		try {
-			AdminshopController.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
-			AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
+			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "A0.yml");
 			assertFalse(saveFile.exists());
 			assertEquals(0, UltimateEconomy.getInstance.getConfig().getStringList("AdminShopIds").size());
-			assertEquals(0, AdminshopController.getAdminshopList().size());
+			assertEquals(0, AdminshopManagerImpl.getAdminshopList().size());
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -270,8 +270,8 @@ public class AdminshopControllerTest {
 	@Test
 	public void getAdminShopByNameFailTest() {
 		try {
-			AdminshopController.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
-			AdminshopController.getAdminShopByName("myshop2");
+			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
+			AdminshopManagerImpl.getAdminShopByName("myshop2");
 			fail();
 		} catch (GeneralEconomyException | ShopSystemException e) {
 			assertTrue(e instanceof GeneralEconomyException);
@@ -282,9 +282,9 @@ public class AdminshopControllerTest {
 	@Test
 	public void getAdminShopByNameTest() {
 		try {
-			AdminshopController.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
-			AdminshopController.createAdminShop("myshop2", new Location(world, 1.5, 2.3, 6.9), 9);
-			Adminshop shop = AdminshopController.getAdminShopByName("myshop");
+			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
+			AdminshopManagerImpl.createAdminShop("myshop2", new Location(world, 1.5, 2.3, 6.9), 9);
+			Adminshop shop = AdminshopManagerImpl.getAdminShopByName("myshop");
 			assertNotNull(shop);
 			assertEquals("myshop", shop.getName());
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -295,8 +295,8 @@ public class AdminshopControllerTest {
 	@Test
 	public void getAdminshopByIdTest() {
 		try {
-			AdminshopController.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
-			Adminshop shop = AdminshopController.getAdminShopById("A0");
+			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
+			Adminshop shop = AdminshopManagerImpl.getAdminShopById("A0");
 			assertNotNull(shop);
 			assertEquals("A0", shop.getShopId());
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -307,8 +307,8 @@ public class AdminshopControllerTest {
 	@Test
 	public void getAdminshopByIdFailTest() {
 		try {
-			AdminshopController.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
-			AdminshopController.getAdminShopById("A1");
+			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
+			AdminshopManagerImpl.getAdminShopById("A1");
 			fail();
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			assertTrue(e instanceof GeneralEconomyException);
@@ -319,9 +319,9 @@ public class AdminshopControllerTest {
 	@Test
 	public void generateFreeAdminShopIdTest() {
 		try {
-			String id1 = AdminshopController.generateFreeAdminShopId();
-			AdminshopController.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
-			String id2 = AdminshopController.generateFreeAdminShopId();
+			String id1 = AdminshopManagerImpl.generateFreeAdminShopId();
+			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
+			String id2 = AdminshopManagerImpl.generateFreeAdminShopId();
 			assertEquals("A0", id1);
 			assertEquals("A1", id2);
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -333,14 +333,14 @@ public class AdminshopControllerTest {
 	public void loadAllAdminShopsTest() {
 		try {
 			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopController.createAdminShop("myshop", location, 9);
-			assertEquals(1, AdminshopController.getAdminshopList().size());
-			AdminshopController.getAdminshopList().get(0).despawnVillager();
-			AdminshopController.getAdminshopList().clear();
-			assertEquals(0, AdminshopController.getAdminshopList().size());
-			AdminshopController.loadAllAdminShops();
-			assertEquals(1, AdminshopController.getAdminshopList().size());
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
+			assertEquals(1, AdminshopManagerImpl.getAdminshopList().size());
+			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
+			AdminshopManagerImpl.getAdminshopList().clear();
+			assertEquals(0, AdminshopManagerImpl.getAdminshopList().size());
+			AdminshopManagerImpl.loadAllAdminShops();
+			assertEquals(1, AdminshopManagerImpl.getAdminshopList().size());
+			Adminshop shop = AdminshopManagerImpl.getAdminshopList().get(0);
 			assertEquals(world, shop.getWorld());
 			assertEquals("A0", shop.getShopId());
 			assertEquals("myshop", shop.getName());
@@ -356,15 +356,15 @@ public class AdminshopControllerTest {
 	public void loadAllAdminShopsTestWithProfession() {
 		try {
 			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopController.createAdminShop("myshop", location, 9);
-			AdminshopController.getAdminshopList().get(0).changeProfession(Profession.ARMORER);
-			assertEquals(1, AdminshopController.getAdminshopList().size());
-			AdminshopController.getAdminshopList().get(0).despawnVillager();
-			AdminshopController.getAdminshopList().clear();
-			assertEquals(0, AdminshopController.getAdminshopList().size());
-			AdminshopController.loadAllAdminShops();
-			assertEquals(1, AdminshopController.getAdminshopList().size());
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
+			AdminshopManagerImpl.getAdminshopList().get(0).changeProfession(Profession.ARMORER);
+			assertEquals(1, AdminshopManagerImpl.getAdminshopList().size());
+			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
+			AdminshopManagerImpl.getAdminshopList().clear();
+			assertEquals(0, AdminshopManagerImpl.getAdminshopList().size());
+			AdminshopManagerImpl.loadAllAdminShops();
+			assertEquals(1, AdminshopManagerImpl.getAdminshopList().size());
+			Adminshop shop = AdminshopManagerImpl.getAdminshopList().get(0);
 			assertEquals(world, shop.getWorld());
 			assertEquals("A0", shop.getShopId());
 			assertEquals("myshop", shop.getName());
@@ -390,14 +390,14 @@ public class AdminshopControllerTest {
 		enchantedTool.setItemMeta(enchantedToolMeta);
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			AdminshopController.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopController.getAdminshopList().get(0);
+			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
+			Adminshop shop = AdminshopManagerImpl.getAdminshopList().get(0);
 			shop.addShopItem(0, 5, 10, enchantedTool);
 			shop.addShopItem(1, 0, 20, spawner);
-			AdminshopController.getAdminshopList().get(0).despawnVillager();
-			AdminshopController.getAdminshopList().clear();
-			AdminshopController.loadAllAdminShops();
-			Adminshop response = AdminshopController.getAdminshopList().get(0);
+			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
+			AdminshopManagerImpl.getAdminshopList().clear();
+			AdminshopManagerImpl.loadAllAdminShops();
+			Adminshop response = AdminshopManagerImpl.getAdminshopList().get(0);
 			enchantedTool.setAmount(1);
 			String itemString = enchantedTool.toString();
 			String itemStringSpawner = "SPAWNER_COW";
@@ -469,12 +469,12 @@ public class AdminshopControllerTest {
 	@Test
 	public void despawnAllVillagersTest() {
 		try {
-			AdminshopController.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
+			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
 			Collection<Entity> entities1 = world
-					.getNearbyEntities(AdminshopController.getAdminshopList().get(0).getShopLocation(), 0, 0, 0);
-			AdminshopController.despawnAllVillagers();
+					.getNearbyEntities(AdminshopManagerImpl.getAdminshopList().get(0).getShopLocation(), 0, 0, 0);
+			AdminshopManagerImpl.despawnAllVillagers();
 			Collection<Entity> entities2 = world
-					.getNearbyEntities(AdminshopController.getAdminshopList().get(0).getShopLocation(), 0, 0, 0);
+					.getNearbyEntities(AdminshopManagerImpl.getAdminshopList().get(0).getShopLocation(), 0, 0, 0);
 			assertEquals(1, entities1.size());
 			assertEquals(0, entities2.size());
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -486,13 +486,13 @@ public class AdminshopControllerTest {
 	public void loadAllAdminShopsTestWithRenaming() {
 		try {
 			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopController.createAdminShop("myshop", location, 9);
-			AdminshopController.getAdminshopList().get(0).despawnVillager();
-			AdminshopController.getAdminshopList().clear();
+			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
+			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
+			AdminshopManagerImpl.getAdminshopList().clear();
 			UltimateEconomy.getInstance.getConfig().set("AdminshopIds",
 					UltimateEconomy.getInstance.getConfig().get("AdminShopIds"));
 			UltimateEconomy.getInstance.saveConfig();
-			AdminshopController.loadAllAdminShops();
+			AdminshopManagerImpl.loadAllAdminShops();
 			assertTrue(UltimateEconomy.getInstance.getConfig().isSet("AdminShopIds"));
 			assertFalse(UltimateEconomy.getInstance.getConfig().isSet("AdminshopIds"));
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -504,13 +504,13 @@ public class AdminshopControllerTest {
 	public void loadAllAdminShopsTestWithDeletedSavefile() {
 		try {
 			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopController.createAdminShop("myshop", location, 9);
-			AdminshopController.getAdminshopList().get(0).despawnVillager();
-			AdminshopController.getAdminshopList().clear();
+			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
+			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
+			AdminshopManagerImpl.getAdminshopList().clear();
 			File savefile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 			savefile.delete();
-			AdminshopController.loadAllAdminShops();
-			assertEquals(0,AdminshopController.getAdminshopList().size());
+			AdminshopManagerImpl.loadAllAdminShops();
+			assertEquals(0,AdminshopManagerImpl.getAdminshopList().size());
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -520,15 +520,15 @@ public class AdminshopControllerTest {
 	public void loadAllAdminShopsTestWithInvalidSavedWorld() {
 		try {
 			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopController.createAdminShop("myshop", location, 9);
-			AdminshopController.getAdminshopList().get(0).despawnVillager();
-			AdminshopController.getAdminshopList().clear();
+			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
+			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
+			AdminshopManagerImpl.getAdminshopList().clear();
 			File savefile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(savefile);
 			config.set("ShopLocation.World", "something");
 			config.save(savefile);
-			AdminshopController.loadAllAdminShops();
-			assertEquals(0,AdminshopController.getAdminshopList().size());
+			AdminshopManagerImpl.loadAllAdminShops();
+			assertEquals(0,AdminshopManagerImpl.getAdminshopList().size());
 		} catch (IOException | ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -538,9 +538,9 @@ public class AdminshopControllerTest {
 	public void loadAllAdminshopsOldTest() {
 		try {
 			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopController.createAdminShop("myshop", location, 9);
-			AdminshopController.getAdminshopList().get(0).despawnVillager();
-			AdminshopController.getAdminshopList().clear();
+			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
+			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
+			AdminshopManagerImpl.getAdminshopList().clear();
 			// create old state
 			List<String> list = new ArrayList<String>();
 			list.add("myshop");
@@ -554,7 +554,7 @@ public class AdminshopControllerTest {
 			newFile.createNewFile();
 			config.save(newFile);
 			// load
-			AdminshopController.loadAllAdminShops();
+			AdminshopManagerImpl.loadAllAdminShops();
 			assertTrue(UltimateEconomy.getInstance.getConfig().isSet("AdminShopIds"));
 			assertFalse(UltimateEconomy.getInstance.getConfig().isSet("ShopNames"));
 			assertTrue(new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml").exists());
@@ -568,9 +568,9 @@ public class AdminshopControllerTest {
 	public void loadAllAdminshopsOldTestWithInvalidSavedWorld() {
 		try {
 			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopController.createAdminShop("myshop", location, 9);
-			AdminshopController.getAdminshopList().get(0).despawnVillager();
-			AdminshopController.getAdminshopList().clear();
+			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
+			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
+			AdminshopManagerImpl.getAdminshopList().clear();
 			// create old state
 			List<String> list = new ArrayList<String>();
 			list.add("myshop");
@@ -585,8 +585,8 @@ public class AdminshopControllerTest {
 			newFile.createNewFile();
 			config.save(newFile);
 			// load
-			AdminshopController.loadAllAdminShops();
-			assertEquals(0,AdminshopController.getAdminshopList().size());
+			AdminshopManagerImpl.loadAllAdminShops();
+			assertEquals(0,AdminshopManagerImpl.getAdminshopList().size());
 		} catch (ShopSystemException | GeneralEconomyException | IOException e) {
 			fail();
 		}
@@ -596,9 +596,9 @@ public class AdminshopControllerTest {
 	public void loadAllAdminShopsOldTestWithDeletedSavefile() {
 		try {
 			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopController.createAdminShop("myshop", location, 9);
-			AdminshopController.getAdminshopList().get(0).despawnVillager();
-			AdminshopController.getAdminshopList().clear();
+			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
+			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
+			AdminshopManagerImpl.getAdminshopList().clear();
 			// create old state
 			List<String> list = new ArrayList<String>();
 			list.add("myshop");
@@ -608,8 +608,8 @@ public class AdminshopControllerTest {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
 			file.delete();
 			// load
-			AdminshopController.loadAllAdminShops();
-			assertEquals(0,AdminshopController.getAdminshopList().size());
+			AdminshopManagerImpl.loadAllAdminShops();
+			assertEquals(0,AdminshopManagerImpl.getAdminshopList().size());
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}

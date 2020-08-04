@@ -15,8 +15,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.ue.exceptions.ShopSystemException;
-import com.ue.shopsystem.api.AdminshopController;
 import com.ue.shopsystem.commands.adminshop.AdminshopTabCompleter;
+import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -46,8 +46,8 @@ public class AdminshopTabCompleterTest {
 		tabCompleter = new AdminshopTabCompleter();
 		Location loc = new Location(world, 1, 2, 3);
 		try {
-			AdminshopController.createAdminShop("myshop1", loc, 9);
-			AdminshopController.createAdminShop("myshop2", loc, 9);
+			AdminshopManagerImpl.createAdminShop("myshop1", loc, 9);
+			AdminshopManagerImpl.createAdminShop("myshop2", loc, 9);
 		} catch (ShopSystemException | GeneralEconomyException e1) {
 			fail();
 		}
@@ -60,10 +60,10 @@ public class AdminshopTabCompleterTest {
 	public static void deleteSavefiles() {
 		UltimateEconomy.getInstance.getDataFolder().delete();
 		server.setPlayers(0);
-		int size = AdminshopController.getAdminshopList().size();
+		int size = AdminshopManagerImpl.getAdminshopList().size();
 		for (int i = 0; i < size; i++) {
 			try {
-				AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+				AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 			} catch (ShopSystemException e) {
 				fail();
 			}

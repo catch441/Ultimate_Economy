@@ -21,9 +21,9 @@ import org.junit.jupiter.api.Test;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.shopsystem.api.Rentshop;
-import com.ue.shopsystem.api.RentshopController;
 import com.ue.shopsystem.commands.rentshop.RentshopCommandExecutor;
+import com.ue.shopsystem.logic.api.Rentshop;
+import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -76,9 +76,9 @@ public class RentshopCommandExecutorTest {
 	 */
 	@AfterEach
 	public void unload() {
-		int size = RentshopController.getRentShops().size();
+		int size = RentshopManagerImpl.getRentShops().size();
 		for (int i = 0; i < size; i++) {
-			RentshopController.deleteRentShop(RentshopController.getRentShops().get(0));
+			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
 		}
 	}
 	
@@ -135,10 +135,10 @@ public class RentshopCommandExecutorTest {
 		String[] args = { "create", "18", "4" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
-		Rentshop shop = RentshopController.getRentShops().get(0);
+		Rentshop shop = RentshopManagerImpl.getRentShops().get(0);
 		assertEquals(18, shop.getSize());
 		assertEquals("4.0", String.valueOf(shop.getRentalFee()));
-		assertEquals(1, RentshopController.getRentShops().size());
+		assertEquals(1, RentshopManagerImpl.getRentShops().size());
 		assertEquals("§6The shop §aRentShop#R0§6 was created.", player.nextMessage());
 		assertNull(player.nextMessage());
 	}
@@ -169,7 +169,7 @@ public class RentshopCommandExecutorTest {
 		String[] args = { "delete", "RentShop#R0" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
-		assertEquals(0, RentshopController.getRentShops().size());
+		assertEquals(0, RentshopManagerImpl.getRentShops().size());
 		assertEquals("§6The shop §aRentShop#R0§6 was deleted.", player.nextMessage());
 		assertNull(player.nextMessage());
 	}
@@ -202,7 +202,7 @@ public class RentshopCommandExecutorTest {
 		String[] args = { "move", "RentShop#R0" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
-		Rentshop shop = RentshopController.getRentShops().get(0);
+		Rentshop shop = RentshopManagerImpl.getRentShops().get(0);
 		assertEquals(loc, shop.getShopLocation());
 		assertNull(player.nextMessage());
 	}
@@ -262,7 +262,7 @@ public class RentshopCommandExecutorTest {
 		String[] args = { "resize", "RentShop#R0", "9" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
-		Rentshop shop = RentshopController.getRentShops().get(0);
+		Rentshop shop = RentshopManagerImpl.getRentShops().get(0);
 		assertEquals(9, shop.getSize());
 		assertEquals("§6You changed the shop size to §a9§6.", player.nextMessage());
 		assertNull(player.nextMessage());
@@ -293,7 +293,7 @@ public class RentshopCommandExecutorTest {
 		Location loc = new Location(world, 10,11,12);
 		player.setLocation(loc);
 		String[] args = { "changeProfession", "Shop#R0", "Farmer" };
-		Rentshop shop = RentshopController.getRentShops().get(0);
+		Rentshop shop = RentshopManagerImpl.getRentShops().get(0);
 		try {
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
 			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
@@ -313,7 +313,7 @@ public class RentshopCommandExecutorTest {
 		Location loc = new Location(world, 10,11,12);
 		player.setLocation(loc);
 		String[] args = { "changeProfession", "RentShop#R0", "Farmer" };
-		Rentshop shop = RentshopController.getRentShops().get(0);
+		Rentshop shop = RentshopManagerImpl.getRentShops().get(0);
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
 		assertEquals("§6The profession of the shop villager has been successfully changed!", player.nextMessage());
@@ -336,7 +336,7 @@ public class RentshopCommandExecutorTest {
 		Location loc = new Location(world, 10,11,12);
 		player.setLocation(loc);
 		String[] args = { "rename", "Shop#R0", "NewName" };
-		Rentshop shop = RentshopController.getRentShops().get(0);
+		Rentshop shop = RentshopManagerImpl.getRentShops().get(0);
 		try {
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
 			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
@@ -356,7 +356,7 @@ public class RentshopCommandExecutorTest {
 		Location loc = new Location(world, 10,11,12);
 		player.setLocation(loc);
 		String[] args = { "rename", "Shop#R0", "NewName" };
-		Rentshop shop = RentshopController.getRentShops().get(0);
+		Rentshop shop = RentshopManagerImpl.getRentShops().get(0);
 		try {
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
 			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
@@ -376,7 +376,7 @@ public class RentshopCommandExecutorTest {
 		Location loc = new Location(world, 10,11,12);
 		player.setLocation(loc);
 		String[] args = { "rename", "RentShop#R0", "NewName" };
-		Rentshop shop = RentshopController.getRentShops().get(0);
+		Rentshop shop = RentshopManagerImpl.getRentShops().get(0);
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
 		assertEquals("§6You changed the shop name from §aRentShop#R0§6 to §aNewName§6.", player.nextMessage());
@@ -399,7 +399,7 @@ public class RentshopCommandExecutorTest {
 		Location loc = new Location(world, 10,11,12);
 		player.setLocation(loc);
 		String[] args = { "editShop", "Shop#R0" };
-		Rentshop shop = RentshopController.getRentShops().get(0);
+		Rentshop shop = RentshopManagerImpl.getRentShops().get(0);
 		try {
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
 			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
@@ -419,7 +419,7 @@ public class RentshopCommandExecutorTest {
 		Location loc = new Location(world, 10,11,12);
 		player.setLocation(loc);
 		String[] args = { "editShop", "Shop#R0" };
-		Rentshop shop = RentshopController.getRentShops().get(0);
+		Rentshop shop = RentshopManagerImpl.getRentShops().get(0);
 		try {
 			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
 			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 1);
@@ -448,7 +448,7 @@ public class RentshopCommandExecutorTest {
 	
 	private void createRentshop() {
 		try {
-			RentshopController.createRentShop(new Location(world, 6, 5, 2), 18, 4);
+			RentshopManagerImpl.createRentShop(new Location(world, 6, 5, 2), 18, 4);
 		} catch (GeneralEconomyException e) {
 			fail();
 		}

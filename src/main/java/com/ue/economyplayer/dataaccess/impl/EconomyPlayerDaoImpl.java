@@ -17,7 +17,7 @@ import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
-import com.ue.jobsystem.api.Job;
+import com.ue.jobsystem.logic.api.Job;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayerDao {

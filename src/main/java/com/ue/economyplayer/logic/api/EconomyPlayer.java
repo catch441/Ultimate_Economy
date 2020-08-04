@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.jobsystem.api.Job;
+import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 

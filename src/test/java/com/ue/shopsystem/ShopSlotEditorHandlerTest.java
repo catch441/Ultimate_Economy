@@ -28,10 +28,10 @@ import org.junit.jupiter.api.Test;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.shopsystem.api.AdminshopController;
-import com.ue.shopsystem.impl.AbstractShopImpl;
-import com.ue.shopsystem.impl.ShopItem;
-import com.ue.shopsystem.impl.ShopSlotEditorHandler;
+import com.ue.shopsystem.logic.impl.AbstractShopImpl;
+import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
+import com.ue.shopsystem.logic.impl.ShopSlotEditorHandlerImpl;
+import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -98,7 +98,7 @@ public class ShopSlotEditorHandlerTest {
 	@BeforeEach
 	public void load() {
 		try {
-			AdminshopController.createAdminShop("myshop", new Location(world,5,3,7), 9);
+			AdminshopManagerImpl.createAdminShop("myshop", new Location(world,5,3,7), 9);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -109,10 +109,10 @@ public class ShopSlotEditorHandlerTest {
 	 */
 	@AfterEach
 	public void unload() {
-		int size = AdminshopController.getAdminshopList().size();
+		int size = AdminshopManagerImpl.getAdminshopList().size();
 		for (int i = 0; i < size; i++) {
 			try {
-				AdminshopController.deleteAdminShop(AdminshopController.getAdminshopList().get(0));
+				AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
 			} catch (ShopSystemException e) {
 				fail();
 			}
@@ -121,7 +121,7 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void constructorTest() {
-		ShopSlotEditorHandler handler = new ShopSlotEditorHandler((AbstractShopImpl) AdminshopController.getAdminshopList().get(0));
+		ShopSlotEditorHandlerImpl handler = new ShopSlotEditorHandlerImpl((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0));
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
 		assertEquals("myshop-SlotEditor", slotEditor.getName());
 		checkSlotEditorInventory(slotEditor);
@@ -148,7 +148,7 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void changeInventoryNameTest() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		handler.changeInventoryName("kth");
 		ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
 		assertEquals("kth-SlotEditor", slotEditor.getName());
@@ -157,7 +157,7 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void setSelectedSlotTestEmpty() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
 			handler.setSelectedSlot(1);
 			ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
@@ -243,11 +243,11 @@ public class ShopSlotEditorHandlerTest {
 		stack.setAmount(20);
 		ItemStack clone = stack.clone();
 		try {
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 2, 3, stack);
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 2, 3, stack);
 		} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException e1) {
 			fail();
 		}
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
 			handler.setSelectedSlot(0);
 			ChestInventoryMock slotEditor = (ChestInventoryMock) handler.getSlotEditorInventory();
@@ -318,9 +318,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestSelectedItemClick() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 			player.closeInventory();
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
@@ -332,9 +332,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestPlusClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -360,9 +360,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestPlusClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -388,9 +388,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestPlusClick3() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -416,9 +416,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestMinusClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -445,9 +445,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestMinusClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -474,9 +474,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestMinusClick3() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -503,9 +503,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorOffClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -527,9 +527,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorOffClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -551,9 +551,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorOnClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -576,9 +576,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorOnClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -601,9 +601,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestPlusOneClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -618,9 +618,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestPlusOneClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -651,9 +651,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestPlusOneClick3() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -671,9 +671,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestMinusOneClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -692,9 +692,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestMinusOneClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -716,9 +716,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestMinusOneClick3() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -740,9 +740,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestPlusTenClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -757,9 +757,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestPlusTenClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -777,9 +777,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestPlusTenClick3() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -798,9 +798,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestMinusTenClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -819,9 +819,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestMinusTenClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -843,9 +843,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestMinusTenClick3() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -867,9 +867,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestPlusTwentyClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -884,9 +884,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestPlusTwentyClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -904,9 +904,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestPlusTwentyClick3() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -924,9 +924,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestMinusTwentyClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -945,9 +945,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestMinusTwentyClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -969,9 +969,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestMinusTwentyClick3() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -993,9 +993,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestAddMoreAmount() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1013,9 +1013,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestRemoveMoreAmount() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1034,9 +1034,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestMinusMoreMoney1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1056,9 +1056,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestMinusMoreMoney2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1078,9 +1078,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestSelectItemClick() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1097,9 +1097,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestSelectItemClickSpawner() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1115,12 +1115,12 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestExitWithoutSave() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 7, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 			handler.handleSlotEditor(event);
-			assertEquals(0,  AdminshopController.getAdminshopList().get(0).getItemList().size());
+			assertEquals(0,  AdminshopManagerImpl.getAdminshopList().get(0).getItemList().size());
 			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			assertEquals("myshop-Editor", editor.getName());
 		} catch (ShopSystemException | GeneralEconomyException e) {
@@ -1130,9 +1130,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestSaveChangesNew() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 			ItemStack stack = new ItemStack(Material.STONE);
 			stack.setAmount(20);
 			player.getInventory().setItem(0, stack);
@@ -1146,10 +1146,10 @@ public class ShopSlotEditorHandlerTest {
 			handler.handleSlotEditor(addSellPrice);	
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 8, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 			handler.handleSlotEditor(event);
-			assertEquals(1,  AdminshopController.getAdminshopList().get(0).getItemList().size());
+			assertEquals(1,  AdminshopManagerImpl.getAdminshopList().get(0).getItemList().size());
 			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			assertEquals("myshop-Editor", editor.getName());
-			ShopItem shopItem = AdminshopController.getAdminshopList().get(0).getItemList().get(0);		
+			ShopItem shopItem = AdminshopManagerImpl.getAdminshopList().get(0).getItemList().get(0);		
 			assertEquals(21, shopItem.getAmount());
 			assertEquals("20.0", String.valueOf(shopItem.getSellPrice()));
 			assertEquals("10.0", String.valueOf(shopItem.getBuyPrice()));
@@ -1167,14 +1167,14 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestSaveChangesNewNoSelectedItem() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 			InventoryClickEvent addSellPrice = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 14, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 			handler.handleSlotEditor(addSellPrice);	
 			InventoryClickEvent save = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 8, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 			handler.handleSlotEditor(save);
-			assertEquals(0, AdminshopController.getAdminshopList().get(0).getItemList().size());
+			assertEquals(0, AdminshopManagerImpl.getAdminshopList().get(0).getItemList().size());
 			assertNull(player.nextMessage());
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
@@ -1183,9 +1183,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestSaveChangesNewWithNoPrices() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 			ItemStack stack = new ItemStack(Material.STONE);
 			stack.setAmount(20);
 			player.getInventory().setItem(0, stack);
@@ -1195,7 +1195,7 @@ public class ShopSlotEditorHandlerTest {
 			handler.handleSlotEditor(increaseAmount);
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 8, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 			handler.handleSlotEditor(event);
-			assertEquals(0,  AdminshopController.getAdminshopList().get(0).getItemList().size());
+			assertEquals(0,  AdminshopManagerImpl.getAdminshopList().get(0).getItemList().size());
 			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			assertEquals("myshop-SlotEditor", editor.getName());
 			assertEquals("§cOne of the prices have to be above 0!", player.nextMessage());
@@ -1207,10 +1207,10 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestSaveChangesEdit() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 4.0, 19.0, new ItemStack(Material.STONE));
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 4.0, 19.0, new ItemStack(Material.STONE));
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 			ItemStack stack = new ItemStack(Material.STONE);
 			stack.setAmount(20);
 			player.getInventory().setItem(0, stack);
@@ -1226,10 +1226,10 @@ public class ShopSlotEditorHandlerTest {
 			handler.handleSlotEditor(event);
 			assertEquals("§6Updated §aamount §asellPrice §abuyPrice §6for item §astone", player.nextMessage());
 			assertNull(player.nextMessage());
-			assertEquals(1,  AdminshopController.getAdminshopList().get(0).getItemList().size());
+			assertEquals(1,  AdminshopManagerImpl.getAdminshopList().get(0).getItemList().size());
 			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			assertEquals("myshop-Editor", editor.getName());
-			ShopItem shopItem = AdminshopController.getAdminshopList().get(0).getItemList().get(0);		
+			ShopItem shopItem = AdminshopManagerImpl.getAdminshopList().get(0).getItemList().get(0);		
 			assertEquals(21, shopItem.getAmount());
 			assertEquals("39.0", String.valueOf(shopItem.getSellPrice()));
 			assertEquals("14.0", String.valueOf(shopItem.getBuyPrice()));
@@ -1245,10 +1245,10 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestSaveChangesOtherItem() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 4.0, 19.0, new ItemStack(Material.STONE));
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 4.0, 19.0, new ItemStack(Material.STONE));
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 			ItemStack stack = new ItemStack(Material.ACACIA_BOAT);
 			stack.setAmount(1);
 			player.getInventory().setItem(0, stack);
@@ -1265,10 +1265,10 @@ public class ShopSlotEditorHandlerTest {
 			assertEquals("§6The item §astone§6 was removed from the shop.", player.nextMessage());
 			assertEquals("§6The item §aacacia_boat§6 was added to the shop.", player.nextMessage());
 			assertNull(player.nextMessage());
-			assertEquals(1,  AdminshopController.getAdminshopList().get(0).getItemList().size());
+			assertEquals(1,  AdminshopManagerImpl.getAdminshopList().get(0).getItemList().size());
 			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			assertEquals("myshop-Editor", editor.getName());
-			ShopItem shopItem = AdminshopController.getAdminshopList().get(0).getItemList().get(0);		
+			ShopItem shopItem = AdminshopManagerImpl.getAdminshopList().get(0).getItemList().get(0);		
 			assertEquals(21, shopItem.getAmount());
 			assertEquals("39.0", String.valueOf(shopItem.getSellPrice()));
 			assertEquals("14.0", String.valueOf(shopItem.getBuyPrice()));
@@ -1284,14 +1284,14 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestSaveChangesOtherItemSpawner() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
 			ItemStack spawner = new ItemStack(Material.SPAWNER);
 			ItemMeta meta = spawner.getItemMeta();
 			meta.setDisplayName("COW");
 			spawner.setItemMeta(meta);
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 4.0, 19.0, spawner);
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 4.0, 19.0, spawner);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 			ItemStack stack = new ItemStack(Material.ACACIA_BOAT);
 			stack.setAmount(1);
 			player.getInventory().setItem(0, stack);
@@ -1308,10 +1308,10 @@ public class ShopSlotEditorHandlerTest {
 			assertEquals("§6The spawner §acow§6 was removed from shop.", player.nextMessage());
 			assertEquals("§6The item §aacacia_boat§6 was added to the shop.", player.nextMessage());
 			assertNull(player.nextMessage());
-			assertEquals(1,  AdminshopController.getAdminshopList().get(0).getItemList().size());
+			assertEquals(1,  AdminshopManagerImpl.getAdminshopList().get(0).getItemList().size());
 			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			assertEquals("myshop-Editor", editor.getName());
-			ShopItem shopItem = AdminshopController.getAdminshopList().get(0).getItemList().get(0);		
+			ShopItem shopItem = AdminshopManagerImpl.getAdminshopList().get(0).getItemList().get(0);		
 			assertEquals(21, shopItem.getAmount());
 			assertEquals("39.0", String.valueOf(shopItem.getSellPrice()));
 			assertEquals("14.0", String.valueOf(shopItem.getBuyPrice()));
@@ -1327,13 +1327,13 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestRemoveItem() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
-			AdminshopController.getAdminshopList().get(0).addShopItem(0, 4.0, 19.0, new ItemStack(Material.STONE));
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).addShopItem(0, 4.0, 19.0, new ItemStack(Material.STONE));
 			InventoryClickEvent event = new InventoryClickEvent(player.getOpenInventory(), SlotType.CONTAINER, 26, ClickType.LEFT, InventoryAction.PICKUP_ONE);		
 			handler.handleSlotEditor(event);
-			assertEquals(0,  AdminshopController.getAdminshopList().get(0).getItemList().size());
+			assertEquals(0,  AdminshopManagerImpl.getAdminshopList().get(0).getItemList().size());
 			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
 			assertEquals("myshop-Editor", editor.getName());
 			assertEquals("§6The item §astone§6 was removed from the shop.", player.nextMessage());
@@ -1345,9 +1345,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorMinusTwentyClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1371,9 +1371,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorMinusTwentyClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1397,9 +1397,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorPlusTwentyClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1419,9 +1419,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorPlusTwentyClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1441,9 +1441,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorMinusTenClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1467,9 +1467,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorMinusTenClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1493,9 +1493,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorPlusTenClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1515,9 +1515,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorPlusTenClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1537,9 +1537,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorMinusOneClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1563,9 +1563,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorMinusOneClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1589,9 +1589,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorPlusOneClick1() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
@@ -1611,9 +1611,9 @@ public class ShopSlotEditorHandlerTest {
 	
 	@Test
 	public void handleSlotEditorTestFactorPlusOneClick2() {
-		ShopSlotEditorHandler handler = ((AbstractShopImpl) AdminshopController.getAdminshopList().get(0)).getSlotEditorHandler();
+		ShopSlotEditorHandlerImpl handler = ((AbstractShopImpl) AdminshopManagerImpl.getAdminshopList().get(0)).getSlotEditorHandler();
 		try {
-			AdminshopController.getAdminshopList().get(0).openSlotEditor(player, 0);
+			AdminshopManagerImpl.getAdminshopList().get(0).openSlotEditor(player, 0);
 		} catch (ShopSystemException | GeneralEconomyException e) {
 			fail();
 		}
