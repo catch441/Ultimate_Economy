@@ -18,9 +18,9 @@ import org.junit.jupiter.api.Test;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.shopsystem.commands.rentshop.RentshopTabCompleter;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
+import com.ue.shopsystem.logic.impl.RentshopTabCompleterImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -34,7 +34,7 @@ public class RentshopTabCompleterTest {
 	private static ServerMock server;
 	private static WorldMock world;
 	private static PlayerMock player;
-	private static RentshopTabCompleter tabCompleter;
+	private static RentshopTabCompleterImpl tabCompleter;
 
 	/**
 	 * Init shop for tests.
@@ -49,7 +49,7 @@ public class RentshopTabCompleterTest {
 		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 		player = server.addPlayer("kthschnll");
 		RentshopManagerImpl.getRentShops().clear();
-		tabCompleter = new RentshopTabCompleter();
+		tabCompleter = new RentshopTabCompleterImpl();
 		try {
 			Rentshop shop1 = RentshopManagerImpl.createRentShop(new Location(world, 1, 2, 3), 9, 0);
 			Rentshop shop2 = RentshopManagerImpl.createRentShop(new Location(world, 1, 2, 3), 9, 0);

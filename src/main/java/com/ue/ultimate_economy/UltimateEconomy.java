@@ -42,14 +42,10 @@ import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.impl.JobSystemException;
-import com.ue.shopsystem.commands.adminshop.AdminshopCommandExecutor;
-import com.ue.shopsystem.commands.adminshop.AdminshopTabCompleter;
-import com.ue.shopsystem.commands.rentshop.RentshopCommandExecutor;
-import com.ue.shopsystem.commands.rentshop.RentshopTabCompleter;
+import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.RentshopManager;
-import com.ue.shopsystem.logic.impl.AdminshopManager;
 import com.ue.shopsystem.logic.impl.RentDailyTask;
 import com.ue.townsystem.api.TownworldController;
 import com.ue.townsystem.commands.TownCommandExecutor;
@@ -101,6 +97,12 @@ public class UltimateEconomy extends JavaPlugin {
 	@Named("PlayershopCommandExecutor")
 	CommandExecutor playershopCommandExecutor;
 	@Inject
+	@Named("AdminshopCommandExecutor")
+	CommandExecutor adminshopCommandExecutor;
+	@Inject
+	@Named("RentshopCommandExecutor")
+	CommandExecutor rentshopCommandExecutor;
+	@Inject
 	@Named("EconomyPlayerTabCompleter")
 	TabCompleter ecoPlayerTabCompleter;
 	@Inject
@@ -112,6 +114,12 @@ public class UltimateEconomy extends JavaPlugin {
 	@Inject
 	@Named("PlayershopTabCompleter")
 	TabCompleter playershopTabCompleter;
+	@Inject
+	@Named("AdminshopTabCompleter")
+	TabCompleter adminshopTabCompleter;
+	@Inject
+	@Named("RentshopTabCompleter")
+	TabCompleter rentshopTabCompleter;
 
 	private ServiceComponent serviceComponent;
 
@@ -258,9 +266,9 @@ public class UltimateEconomy extends JavaPlugin {
 		getCommand("jobcenter").setTabCompleter(jobTabCompleter);
 		getCommand("town").setTabCompleter(new TownTabCompleter());
 		getCommand("townworld").setTabCompleter(new TownworldTabCompleter());
-		getCommand("adminshop").setTabCompleter(new AdminshopTabCompleter());
+		getCommand("adminshop").setTabCompleter(adminshopTabCompleter);
 		getCommand("playershop").setTabCompleter(playershopTabCompleter);
-		getCommand("rentshop").setTabCompleter(new RentshopTabCompleter());
+		getCommand("rentshop").setTabCompleter(rentshopTabCompleter);
 		getCommand("ue-config").setTabCompleter(configTabCompleter);
 		getCommand("bank").setTabCompleter(ecoPlayerTabCompleter);
 	}
@@ -269,9 +277,9 @@ public class UltimateEconomy extends JavaPlugin {
 		getCommand("jobcenter").setExecutor(jobCommandExecutor);
 		getCommand("town").setExecutor(new TownCommandExecutor());
 		getCommand("townworld").setExecutor(new TownworldCommandExecutor(this));
-		getCommand("adminshop").setExecutor(new AdminshopCommandExecutor());
+		getCommand("adminshop").setExecutor(adminshopCommandExecutor);
 		getCommand("playershop").setExecutor(playershopCommandExecutor);
-		getCommand("rentshop").setExecutor(new RentshopCommandExecutor());
+		getCommand("rentshop").setExecutor(rentshopCommandExecutor);
 		getCommand("pay").setExecutor(ecoPlayerCommandExecutor);
 		getCommand("givemoney").setExecutor(ecoPlayerCommandExecutor);
 		getCommand("money").setExecutor(ecoPlayerCommandExecutor);

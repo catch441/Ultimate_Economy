@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.shopsystem.commands.adminshop.AdminshopCommandExecutor;
+import com.ue.shopsystem.logic.impl.AdminshopCommandExecutorImpl;
 import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -51,7 +51,7 @@ public class AdminshopCommandExecutorTest {
 		server.setPlayers(0);
 		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 		player = server.addPlayer("kthschnll");
-		executor = new AdminshopCommandExecutor();
+		executor = new AdminshopCommandExecutorImpl();
 	}
 
 	/**

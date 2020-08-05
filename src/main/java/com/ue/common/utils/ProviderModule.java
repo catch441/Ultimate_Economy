@@ -41,18 +41,22 @@ import com.ue.jobsystem.logic.impl.JobTabCompleterImpl;
 import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
 import com.ue.jobsystem.logic.impl.JobsystemEventHandlerImpl;
 import com.ue.jobsystem.logic.impl.JobsystemValidationHandlerImpl;
+import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.shopsystem.logic.api.ShopEventHandler;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
-import com.ue.shopsystem.logic.impl.AdminshopManager;
+import com.ue.shopsystem.logic.impl.AdminshopCommandExecutorImpl;
 import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
+import com.ue.shopsystem.logic.impl.AdminshopTabCompleterImpl;
 import com.ue.shopsystem.logic.impl.CustomSkullServiceImpl;
 import com.ue.shopsystem.logic.impl.PlayershopCommandExecutorImpl;
 import com.ue.shopsystem.logic.impl.PlayershopManagerImpl;
 import com.ue.shopsystem.logic.impl.PlayershopTabCompleterImpl;
+import com.ue.shopsystem.logic.impl.RentshopCommandExecutorImpl;
 import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
+import com.ue.shopsystem.logic.impl.RentshopTabCompleterImpl;
 import com.ue.shopsystem.logic.impl.ShopEventHandlerImpl;
 import com.ue.shopsystem.logic.impl.ShopValidationHandlerImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -178,6 +182,20 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
+	@Named("AdminshopCommandExecutor")
+	CommandExecutor provideAdminshopCommandExecutor(AdminshopManager adminshopManager, MessageWrapper messageWrapper) {
+		return new AdminshopCommandExecutorImpl(adminshopManager, messageWrapper);
+	}
+	
+	@Singleton
+	@Provides
+	@Named("RentshopCommandExecutor")
+	CommandExecutor provideRentshopCommandExecutor(RentshopManager rentshopManager, MessageWrapper messageWrapper) {
+		return new RentshopCommandExecutorImpl(rentshopManager, messageWrapper);
+	}
+
+	@Singleton
+	@Provides
 	@Named("EconomyPlayerTabCompleter")
 	TabCompleter provideEcoPlayerTabCompleter(EconomyPlayerManager ecoPlayerManager) {
 		return new EconomyPlayerTabCompleterImpl(ecoPlayerManager);
@@ -202,6 +220,20 @@ public class ProviderModule {
 	@Named("PlayershopTabCompleter")
 	TabCompleter providePlayershopTabCompleter(PlayershopManager playershopManager) {
 		return new PlayershopTabCompleterImpl(playershopManager);
+	}
+	
+	@Singleton
+	@Provides
+	@Named("AdminshopTabCompleter")
+	TabCompleter provideAdminshopTabCompleter(AdminshopManager adminshopManager) {
+		return new AdminshopTabCompleterImpl(adminshopManager);
+	}
+	
+	@Singleton
+	@Provides
+	@Named("RentshopTabCompleter")
+	TabCompleter provideRentshopTabCompleter(RentshopManager rentshopManager) {
+		return new RentshopTabCompleterImpl(rentshopManager);
 	}
 
 	@Singleton

@@ -15,8 +15,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.ue.exceptions.ShopSystemException;
-import com.ue.shopsystem.commands.adminshop.AdminshopTabCompleter;
 import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
+import com.ue.shopsystem.logic.impl.AdminshopTabCompleterImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -30,7 +30,7 @@ public class AdminshopTabCompleterTest {
 	private static ServerMock server;
 	private static WorldMock world;
 	private static PlayerMock player;
-	private static AdminshopTabCompleter tabCompleter;
+	private static AdminshopTabCompleterImpl tabCompleter;
 
 	/**
 	 * Init shop for tests.
@@ -43,7 +43,7 @@ public class AdminshopTabCompleterTest {
 		world = new WorldMock(Material.GRASS_BLOCK, 1);
 		server.addWorld(world);
 		player = server.addPlayer("kthschnll1");
-		tabCompleter = new AdminshopTabCompleter();
+		tabCompleter = new AdminshopTabCompleterImpl();
 		Location loc = new Location(world, 1, 2, 3);
 		try {
 			AdminshopManagerImpl.createAdminShop("myshop1", loc, 9);

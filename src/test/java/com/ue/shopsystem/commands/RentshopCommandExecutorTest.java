@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.shopsystem.commands.rentshop.RentshopCommandExecutor;
 import com.ue.shopsystem.logic.api.Rentshop;
+import com.ue.shopsystem.logic.impl.RentshopCommandExecutorImpl;
 import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -54,7 +54,7 @@ public class RentshopCommandExecutorTest {
 		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
 		player = server.addPlayer("kthschnll");
 		other = server.addPlayer("catch441");
-		executor = new RentshopCommandExecutor();
+		executor = new RentshopCommandExecutorImpl();
 	}
 
 	/**
