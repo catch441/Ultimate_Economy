@@ -59,6 +59,8 @@ import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
 import com.ue.shopsystem.logic.impl.RentshopTabCompleterImpl;
 import com.ue.shopsystem.logic.impl.ShopEventHandlerImpl;
 import com.ue.shopsystem.logic.impl.ShopValidationHandlerImpl;
+import com.ue.townsystem.logic.api.TownsystemValidationHandler;
+import com.ue.townsystem.logic.impl.TownsystemValidationHandlerImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
 import com.ue.vault.UltimateEconomyVault;
 import com.ue.vault.VaultHook;
@@ -186,7 +188,7 @@ public class ProviderModule {
 	CommandExecutor provideAdminshopCommandExecutor(AdminshopManager adminshopManager, MessageWrapper messageWrapper) {
 		return new AdminshopCommandExecutorImpl(adminshopManager, messageWrapper);
 	}
-	
+
 	@Singleton
 	@Provides
 	@Named("RentshopCommandExecutor")
@@ -221,14 +223,14 @@ public class ProviderModule {
 	TabCompleter providePlayershopTabCompleter(PlayershopManager playershopManager) {
 		return new PlayershopTabCompleterImpl(playershopManager);
 	}
-	
+
 	@Singleton
 	@Provides
 	@Named("AdminshopTabCompleter")
 	TabCompleter provideAdminshopTabCompleter(AdminshopManager adminshopManager) {
 		return new AdminshopTabCompleterImpl(adminshopManager);
 	}
-	
+
 	@Singleton
 	@Provides
 	@Named("RentshopTabCompleter")
@@ -297,6 +299,12 @@ public class ProviderModule {
 	ShopEventHandler provideShopEventHandler(RentshopManager rentshopManager, AdminshopManager adminshopManager,
 			PlayershopManager playershopManager, EconomyPlayerManager ecoPlayerManager) {
 		return new ShopEventHandlerImpl(rentshopManager, adminshopManager, playershopManager, ecoPlayerManager);
+	}
+
+	@Singleton
+	@Provides
+	TownsystemValidationHandler provideTownsystemValidationHandler(MessageWrapper messageWrapper) {
+		return new TownsystemValidationHandlerImpl(messageWrapper);
 	}
 
 	@Singleton

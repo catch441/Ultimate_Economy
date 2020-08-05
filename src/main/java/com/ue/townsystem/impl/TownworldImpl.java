@@ -27,6 +27,7 @@ public class TownworldImpl implements Townworld {
 	private File file;
 	private List<String> townNames;
 	private List<Town> towns;
+	private final TownworldDao townworldDao;
 
 	/**
 	 * Represents a townworld.
@@ -190,11 +191,6 @@ public class TownworldImpl implements Townworld {
 			}
 		}
 		throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_NOT_CLAIMED);
-	}
-
-	@Override
-	public File getSaveFile() {
-		return file;
 	}
 
 	private void save(FileConfiguration config) {

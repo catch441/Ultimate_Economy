@@ -1,4 +1,4 @@
-package com.ue.townsystem.api;
+package com.ue.townsystem.logic.api;
 
 import java.util.List;
 
@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.townsystem.api.Town;
 
 public interface Plot {
 
@@ -118,9 +119,9 @@ public interface Plot {
      * Removes a plot from sale. Removes also the saleVillager.
      * 
      * @param player
-     * @throws TownSystemException
+     * @throws EconomyPlayerException 
      */
-    public void removeFromSale(EconomyPlayer player) throws TownSystemException;
+    public void removeFromSale(EconomyPlayer player) throws EconomyPlayerException;
 
     /**
      * Opens the inventory of the saleManager.
@@ -128,4 +129,10 @@ public interface Plot {
      * @param player
      */
     public void openSaleVillagerInv(Player player);
+    
+    /**
+     * Returns the town of the plot.
+     * @return town
+     */
+    public Town getTown();
 }

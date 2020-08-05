@@ -8,8 +8,8 @@ import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.api.Rentshop;
-import com.ue.townsystem.impl.PlotImpl;
 import com.ue.townsystem.impl.TownsystemEventHandler;
+import com.ue.townsystem.logic.api.Plot;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import dagger.Component;
@@ -73,15 +73,11 @@ public interface ServiceComponent {
 	 * @param rentshop
 	 */
 	void inject(Rentshop rentshop);
-
-	/*
-	 * Temporal
-	 */
-
+	
 	/**
-	 * s.
+	 * Injects a plot.
 	 * 
 	 * @param plot
 	 */
-	void inject(PlotImpl plot);
+	void inject(Plot plot);
 }

@@ -11,7 +11,7 @@ public enum TownExceptionMessageEnum {
 	TOWNWORLD_ALREADY_EXIST("townworld_already_exist"), WORLD_DOES_NOT_EXIST("world_does_not_exist"),
 	PLAYER_IS_ALREADY_DEPUTY("player_is_already_deputy"), PLAYER_IS_NO_DEPUTY("player_is_no_deputy"),
 	PLAYER_IS_ALREADY_RESIDENT("player_is_already_resident"), TOWN_HAS_NOT_ENOUGH_MONEY("town_has_not_enough_money"),
-	PLAYER_IS_NO_RESIDENT("player_is_no_resident"), PLAYER_IS_NOT_OWNER("player_is_not_owner"),
+	PLAYER_IS_NO_RESIDENT("player_is_no_resident"),
 	PLAYER_IS_ALREADY_OWNER("player_is_already_owner");
 
 	private String value;

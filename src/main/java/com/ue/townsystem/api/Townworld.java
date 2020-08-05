@@ -1,12 +1,12 @@
 package com.ue.townsystem.api;
 
-import java.io.File;
 import java.util.List;
 
 import org.bukkit.Chunk;
 
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.TownSystemException;
+import com.ue.townsystem.dataaccess.api.TownworldDao;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface Townworld {
@@ -78,13 +78,6 @@ public interface Townworld {
     public void setTownNameList(List<String> names);
 
     /**
-     * Returns the savefile of this townworld.
-     * 
-     * @return File
-     */
-    public File getSaveFile();
-
-    /**
      * Set the FoundationPrice for a town in this townworld. Set 'saving' true if
      * the value should be saved in the file.
      * 
@@ -139,4 +132,10 @@ public interface Townworld {
      * @throws TownSystemException 
      */
     public void delete() throws TownSystemException, EconomyPlayerException, GeneralEconomyException;
+
+    /**
+     * Returns the dao oth the townworld.
+     * @return townworld dao
+     */
+    public TownworldDao getDao();
 }

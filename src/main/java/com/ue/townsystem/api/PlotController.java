@@ -13,8 +13,9 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.impl.PlotImpl;
 import com.ue.townsystem.impl.TownImpl;
+import com.ue.townsystem.logic.api.Plot;
+import com.ue.townsystem.logic.impl.PlotImpl;
 
 public class PlotController {
 
