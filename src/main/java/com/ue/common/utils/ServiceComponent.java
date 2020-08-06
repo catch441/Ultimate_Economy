@@ -6,6 +6,7 @@ import com.ue.bank.logic.api.BankAccount;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.Jobcenter;
+import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.townsystem.impl.TownsystemEventHandler;
@@ -66,18 +67,25 @@ public interface ServiceComponent {
 	 * @param adminshop
 	 */
 	void inject(Adminshop adminshop);
-	
+
 	/**
 	 * Injects a rentshop.
 	 * 
 	 * @param rentshop
 	 */
 	void inject(Rentshop rentshop);
-	
+
 	/**
 	 * Injects a plot.
 	 * 
 	 * @param plot
 	 */
 	void inject(Plot plot);
+
+	/**
+	 * Injects a shop data access object.
+	 * 
+	 * @param shopDao
+	 */
+	void inject(ShopDao shopDao);
 }

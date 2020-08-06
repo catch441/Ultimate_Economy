@@ -21,9 +21,9 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
-import com.ue.townsystem.api.Town;
-import com.ue.townsystem.api.Townworld;
 import com.ue.townsystem.api.TownworldController;
+import com.ue.townsystem.logic.api.Town;
+import com.ue.townsystem.logic.api.Townworld;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 

@@ -13,12 +13,14 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.townsystem.impl.TownworldImpl;
+import com.ue.townsystem.logic.api.Town;
+import com.ue.townsystem.logic.api.Townworld;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class TownworldController {
 
-	private static List<Townworld> townWorldList = new ArrayList<>();
+	private List<Townworld> townWorldList = new ArrayList<>();
 
 	/**
 	 * This method returns a townworld by it's name.
@@ -27,7 +29,7 @@ public class TownworldController {
 	 * @return Townworld
 	 * @throws TownSystemException
 	 */
-	public static Townworld getTownWorldByName(String name) throws TownSystemException {
+	public Townworld getTownWorldByName(String name) throws TownSystemException {
 		for (Townworld townworld : townWorldList) {
 			if (townworld.getWorldName().equals(name)) {
 				return townworld;
@@ -41,14 +43,14 @@ public class TownworldController {
 	 * 
 	 * @return List of TownWorlds
 	 */
-	public static List<Townworld> getTownWorldList() {
+	public List<Townworld> getTownWorldList() {
 		return townWorldList;
 	}
 
 	/**
 	 * This method despawns all town villager in this townworld.
 	 */
-	public static void despawnAllVillagers() {
+	public void despawnAllVillagers() {
 		for (Townworld townworld : townWorldList) {
 			townworld.despawnAllTownVillagers();
 		}
@@ -59,7 +61,7 @@ public class TownworldController {
 	 * 
 	 * @return list of strings
 	 */
-	public static List<String> getTownWorldNameList() {
+	public List<String> getTownWorldNameList() {
 		List<String> nameList = new ArrayList<>();
 		for (Townworld townworld : townWorldList) {
 			nameList.add(townworld.getWorldName());
@@ -73,7 +75,7 @@ public class TownworldController {
 	 * @param worldName
 	 * @return boolean
 	 */
-	public static boolean isTownWorld(String worldName) {
+	public boolean isTownWorld(String worldName) {
 		if (getTownWorldNameList().contains(worldName)) {
 			return true;
 		} else {
@@ -88,7 +90,7 @@ public class TownworldController {
 	 * @param chunk
 	 * @param playername
 	 */
-	public static void handleTownWorldLocationCheck(String worldname, Chunk chunk, String playername) {
+	public void handleTownWorldLocationCheck(String worldname, Chunk chunk, String playername) {
 		try {
 			BossBar bossbar = EconomyPlayerManagerImpl.getEconomyPlayerByName(playername).getBossBar();
 			try {
@@ -119,7 +121,7 @@ public class TownworldController {
 	 * @param world
 	 * @throws TownSystemException
 	 */
-	public static void createTownWorld(String world) throws TownSystemException {
+	public void createTownWorld(String world) throws TownSystemException {
 		if (Bukkit.getWorld(world) == null) {
 			throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, world);
 		} else if (isTownWorld(world)) {
@@ -139,7 +141,7 @@ public class TownworldController {
 	 * @throws EconomyPlayerException
 	 * @throws GeneralEconomyException
 	 */
-	public static void deleteTownWorld(String world)
+	public void deleteTownWorld(String world)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		if (Bukkit.getWorld(world) == null) {
 			throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, world);
@@ -157,7 +159,7 @@ public class TownworldController {
 	 * plots in the townworld as well. EconomyPlayers have to be loaded first.
 	 * 
 	 */
-	public static void loadAllTownWorlds() {
+	public void loadAllTownWorlds() {
 		for (String townWorldName : UltimateEconomy.getInstance.getConfig().getStringList("TownWorlds")) {
 			try {
 				TownworldImpl townworldImpl = new TownworldImpl(townWorldName);

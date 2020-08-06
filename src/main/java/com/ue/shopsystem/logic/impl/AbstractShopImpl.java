@@ -77,7 +77,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 * @param size
 	 */
 	public AbstractShopImpl(String name, String shopId, Location spawnLocation, int size) {
-		shopDao = new ShopDaoImpl(validationHandler, messageWrapper, ecoPlayerManager, shopId);
+		shopDao = new ShopDaoImpl(shopId);
 		setupNewShop(name, shopId, spawnLocation, size);
 		slotEditorHandler = new ShopSlotEditorHandlerImpl(messageWrapper, validationHandler, skullService, this);
 		editorHandler = new ShopEditorHandlerImpl(skullService, this);
@@ -93,7 +93,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 * @throws TownSystemException
 	 */
 	public AbstractShopImpl(String name, String shopId) throws TownSystemException {
-		shopDao = new ShopDaoImpl(validationHandler, messageWrapper, ecoPlayerManager, shopId);
+		shopDao = new ShopDaoImpl(shopId);
 		if (name != null) {
 			loadExistingShopOld(name, shopId);
 		} else {

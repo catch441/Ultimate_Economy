@@ -3,8 +3,11 @@ package com.ue.townsystem.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bukkit.Chunk;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -13,9 +16,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.api.Town;
 import com.ue.townsystem.api.TownController;
-import com.ue.townsystem.api.Townworld;
+import com.ue.townsystem.dataaccess.api.TownsystemDao;
+import com.ue.townsystem.dataaccess.impl.TownsystemDaoImpl;
+import com.ue.townsystem.logic.api.Town;
+import com.ue.townsystem.logic.api.Townworld;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -24,10 +29,8 @@ public class TownworldImpl implements Townworld {
 
 	private double foundationPrice, expandPrice;
 	private final String worldName;
-	private File file;
-	private List<String> townNames;
-	private List<Town> towns;
-	private final TownworldDao townworldDao;
+	private Map<String, Town> towns = new HashMap<>();;
+	private final TownsystemDao townsystemDao;
 
 	/**
 	 * Represents a townworld.
@@ -35,16 +38,11 @@ public class TownworldImpl implements Townworld {
 	 * @param world
 	 */
 	public TownworldImpl(String world) {
+		townsystemDao = new TownsystemDaoImpl(world);
+		
 		worldName = world;
-		towns = new ArrayList<>();
-		file = new File(UltimateEconomy.getInstance.getDataFolder(), world + "_TownWorld" + ".yml");
-		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 		if (!file.exists()) {
-			try {
-				file.createNewFile();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+
 			foundationPrice = 0;
 			expandPrice = 0;
 			config.set("World", world);
@@ -77,8 +75,7 @@ public class TownworldImpl implements Townworld {
 			throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
 					town.getTownName());
 		} else {
-			towns.add(town);
-			townNames.add(town.getTownName());
+			towns.put(town.getTownName(), town);
 		}
 	}
 
@@ -88,40 +85,25 @@ public class TownworldImpl implements Townworld {
 			throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,
 					town.getTownName());
 		} else {
-			towns.remove(town);
-			townNames.remove(town.getTownName());
+			towns.remove(town.getTownName());
 		}
 	}
 
 	@Override
 	public void despawnAllTownVillagers() {
-		for (Town town : towns) {
-			town.despawnAllVillagers();
+		for (Entry<String, Town> town : towns.entrySet()) {
+			town.getValue().despawnAllVillagers();
 		}
 	}
 
 	@Override
 	public List<String> getTownNameList() {
-		return townNames;
-	}
-
-	public void setTownNameList(List<String> names) {
-		townNames = names;
+		return new ArrayList<>(towns.keySet());
 	}
 
 	@Override
 	public double getFoundationPrice() {
 		return foundationPrice;
-	}
-
-	/**
-	 * Set the town list. Not necessary if you load the townworld with the
-	 * TownworldController.
-	 * 
-	 * @param towns
-	 */
-	public void setTownList(List<Town> towns) {
-		this.towns = towns;
 	}
 
 	@Override
@@ -191,13 +173,5 @@ public class TownworldImpl implements Townworld {
 			}
 		}
 		throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_NOT_CLAIMED);
-	}
-
-	private void save(FileConfiguration config) {
-		try {
-			config.save(file);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 }

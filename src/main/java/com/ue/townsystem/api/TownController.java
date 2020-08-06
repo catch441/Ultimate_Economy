@@ -17,12 +17,14 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.townsystem.impl.TownImpl;
+import com.ue.townsystem.logic.api.Town;
+import com.ue.townsystem.logic.api.Townworld;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
 public class TownController {
 
-	private static List<String> townNameList = new ArrayList<>();
+	private List<String> townNameList = new ArrayList<>();
 
 	/**
 	 * Creates a new town if player has enough money. Player money decreases if
@@ -36,7 +38,7 @@ public class TownController {
 	 * @throws EconomyPlayerException
 	 * @throws GeneralEconomyException
 	 */
-	public static void createTown(Townworld townworld, String townName, Location location, EconomyPlayer player)
+	public void createTown(Townworld townworld, String townName, Location location, EconomyPlayer player)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		checkForTownDoesNotExist(townName);
 		checkForChunkIsFree(townworld, location);
@@ -55,26 +57,26 @@ public class TownController {
 		}
 	}
 
-	private static void checkForMaxJoinedTownsNotReached(EconomyPlayer player) throws EconomyPlayerException {
+	private void checkForMaxJoinedTownsNotReached(EconomyPlayer player) throws EconomyPlayerException {
 		if (player.reachedMaxJoinedTowns()) {
 			throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.MAX_REACHED);
 		}
 	}
 
-	private static void checkForPlayerHasEnoughMoney(Townworld townworld, EconomyPlayer player)
+	private void checkForPlayerHasEnoughMoney(Townworld townworld, EconomyPlayer player)
 			throws EconomyPlayerException, GeneralEconomyException {
 		if (!player.hasEnoughtMoney(townworld.getFoundationPrice())) {
 			throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
 		}
 	}
 
-	private static void checkForChunkIsFree(Townworld townworld, Location location) throws TownSystemException {
+	private void checkForChunkIsFree(Townworld townworld, Location location) throws TownSystemException {
 		if (!townworld.isChunkFree(location.getChunk())) {
 			throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED);
 		}
 	}
 
-	private static void checkForTownDoesNotExist(String townName) throws GeneralEconomyException {
+	private void checkForTownDoesNotExist(String townName) throws GeneralEconomyException {
 		if (townNameList.contains(townName)) {
 			throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, townName);
 		}
@@ -89,7 +91,7 @@ public class TownController {
 	 * @throws EconomyPlayerException
 	 * @throws GeneralEconomyException
 	 */
-	public static void dissolveTown(Town town, EconomyPlayer player)
+	public void dissolveTown(Town town, EconomyPlayer player)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		if (town.isMayor(player)) {
 			List<EconomyPlayer> tList = new ArrayList<>();
@@ -114,7 +116,7 @@ public class TownController {
 	}
 
 	/**
-	 * Static method for loading a existing town by name. EconomyPlayers have to be
+	 * Static method for loading a existing town by name. EconomyPlayers and bank accounts have to be
 	 * loaded first.
 	 * 
 	 * @param townworld
@@ -123,7 +125,7 @@ public class TownController {
 	 * @throws TownSystemException
 	 * @throws EconomyPlayerException
 	 */
-	public static Town loadTown(Townworld townworld, String townName) throws TownSystemException, EconomyPlayerException {
+	public Town loadTown(Townworld townworld, String townName) throws TownSystemException, EconomyPlayerException {
 		TownImpl townImpl = new TownImpl(townworld, townName);
 		townNameList.add(townName);
 		return townImpl;
@@ -134,7 +136,7 @@ public class TownController {
 	 * 
 	 * @return List of Strings
 	 */
-	public static List<String> getTownNameList() {
+	public List<String> getTownNameList() {
 		return townNameList;
 	}
 
@@ -145,7 +147,7 @@ public class TownController {
 	 * @param townworld
 	 * @param townNames
 	 */
-	public static void setAndSaveTownNameList(Townworld townworld, List<String> townNames) {
+	public void setAndSaveTownNameList(Townworld townworld, List<String> townNames) {
 		FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
 		townNameList = townNames;
 		config.set("TownNames", townNameList);
@@ -159,7 +161,7 @@ public class TownController {
 	 * @return town
 	 * @throws GeneralEconomyException
 	 */
-	public static Town getTown(String name) throws GeneralEconomyException {
+	public Town getTown(String name) throws GeneralEconomyException {
 		for (Townworld world : TownworldController.getTownWorldList()) {
 			for (Town town : world.getTownList()) {
 				if (town.getTownName().equals(name)) {
@@ -168,18 +170,5 @@ public class TownController {
 			}
 		}
 		throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
-	}
-
-	/**
-	 * Saves a config in a file.
-	 * 
-	 * @param config
-	 */
-	private static void save(File file, FileConfiguration config) {
-		try {
-			config.save(file);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 }

@@ -1,6 +1,7 @@
 package com.ue.townsystem.logic.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -15,9 +16,9 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.townsystem.api.TownController;
-import com.ue.townsystem.api.Townworld;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
+import com.ue.townsystem.logic.api.Townworld;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
@@ -101,8 +102,8 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 	}
 
 	@Override
-	public void checkForLocationIsInTown(List<String> chunkList, Location townSpawn) throws TownSystemException {
-		if (!chunkList.contains(townSpawn.getChunk().getX() + "/" + townSpawn.getChunk().getZ())) {
+	public void checkForLocationIsInTown(Map<String, Plot> chunkList, Location townSpawn) throws TownSystemException {
+		if (!chunkList.containsKey(townSpawn.getChunk().getX() + "/" + townSpawn.getChunk().getZ())) {
 			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.LOCATION_NOT_IN_TOWN);
 		}
 	}
@@ -130,51 +131,64 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 	}
 
 	@Override
-	public void checkForPlotIsForSale(Plot plot) throws TownSystemException {
-		if (!plot.isForSale()) {
+	public void checkForPlotIsForSale(boolean isForSale) throws TownSystemException {
+		if (!isForSale) {
 			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.PLOT_IS_NOT_FOR_SALE);
 		}
 	}
 
 	@Override
-	public void checkForPlayerIsCitizenPersonalError(List<EconomyPlayer> citizens, EconomyPlayer citizen) throws EconomyPlayerException {
+	public void checkForPlayerIsCitizenPersonalError(List<EconomyPlayer> citizens, EconomyPlayer citizen)
+			throws EconomyPlayerException {
 		if (!citizens.contains(citizen)) {
 			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_ARE_NO_CITIZEN);
 		}
 	}
 
 	@Override
-	public void checkForPlayerIsMayor(EconomyPlayer mayor, EconomyPlayer player) throws TownSystemException, EconomyPlayerException {
+	public void checkForPlayerIsMayor(EconomyPlayer mayor, EconomyPlayer player)
+			throws TownSystemException, EconomyPlayerException {
 		if (!mayor.equals(player)) {
 			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
 		}
 	}
 
 	@Override
-	public void checkForPlayerIsNotMayor(EconomyPlayer mayor, EconomyPlayer player) throws EconomyPlayerException, TownSystemException {
+	public void checkForPlayerIsNotMayor(EconomyPlayer mayor, EconomyPlayer player)
+			throws EconomyPlayerException, TownSystemException {
 		if (mayor.equals(player)) {
 			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_ARE_THE_OWNER);
 		}
 	}
 
 	@Override
-	public void checkForTownDowsNotExist(String newName) throws GeneralEconomyException {
+	public void checkForTownDoesNotExist(String newName) throws GeneralEconomyException {
 		if (TownController.getTownNameList().contains(newName)) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, newName);
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
+					newName);
 		}
 	}
 
 	@Override
-	public void checkForChunkIsNotClaimedByThisTown(List<String> chunkList, Plot plot) throws TownSystemException {
-		if (chunkList.contains(plot.getChunkCoords())) {
+	public void checkForChunkIsNotClaimedByThisTown(Map<String, Plot> chunkList, String chunkCoords)
+			throws TownSystemException {
+		if (chunkList.containsKey(chunkCoords)) {
 			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED);
 		}
 	}
 
 	@Override
-	public void checkForChunkIsClaimedByThisTown(List<String> chunkList, Plot plot) throws TownSystemException {
-		if (!chunkList.contains(plot.getChunkCoords())) {
+	public void checkForChunkIsClaimedByThisTown(Map<String, Plot> chunkList, String chunkCoords)
+			throws TownSystemException {
+		if (!chunkList.containsKey(chunkCoords)) {
 			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.CHUNK_NOT_CLAIMED_BY_TOWN);
+		}
+	}
+	
+	@Override
+	public void checkForPositiveAmount(double amount) throws GeneralEconomyException {
+		if (amount < 0) {
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, amount);
 		}
 	}
 
@@ -186,14 +200,16 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 	}
 
 	@Override
-	public void checkForPlayerIsNotCitizenPersonal(List<EconomyPlayer> citizens, EconomyPlayer newCitizen) throws EconomyPlayerException {
+	public void checkForPlayerIsNotCitizenPersonal(List<EconomyPlayer> citizens, EconomyPlayer newCitizen)
+			throws EconomyPlayerException {
 		if (citizens.contains(newCitizen)) {
 			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_ARE_ALREADY_CITIZEN);
 		}
 	}
 
 	@Override
-	public void checkForPlayerIsNotDeputy(List<EconomyPlayer> deputies, EconomyPlayer player) throws TownSystemException {
+	public void checkForPlayerIsNotDeputy(List<EconomyPlayer> deputies, EconomyPlayer player)
+			throws TownSystemException {
 		if (deputies.contains(player)) {
 			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.PLAYER_IS_ALREADY_DEPUTY);
 		}

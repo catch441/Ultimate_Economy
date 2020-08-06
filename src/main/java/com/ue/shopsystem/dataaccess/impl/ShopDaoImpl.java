@@ -5,35 +5,38 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.ShopSystemException;
-import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
+import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 
 	private File file;
 	private YamlConfiguration config;
-	private final EconomyPlayerManager ecoPlayerManager;
-	private final MessageWrapper messageWrapper;
-	private final ShopValidationHandler validationHandler;
+	@Inject
+	EconomyPlayerManager ecoPlayerManager;
+	@Inject
+	ShopValidationHandler validationHandler;
+	@Inject
+	TownsystemValidationHandler townsystemValidationHandler;
 
 	/**
 	 * Constructor for a new shop savefile handler.
@@ -43,11 +46,7 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	 * @param ecoPlayerManager
 	 * @param shopId
 	 */
-	public ShopDaoImpl(ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
-			EconomyPlayerManager ecoPlayerManager, String shopId) {
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.messageWrapper = messageWrapper;
-		this.validationHandler = validationHandler;
+	public ShopDaoImpl(String shopId) {
 		file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
 		if (!getSavefile().exists()) {
 			try {
@@ -195,10 +194,10 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 
 	@Override
 	public Location loadShopLocation() throws TownSystemException {
-		World world = Bukkit.getWorld(getConfig().getString("ShopLocation.World"));
-		checkForWorldExists(world);
-		return new Location(world, getConfig().getDouble("ShopLocation.x"), getConfig().getDouble("ShopLocation.y"),
-				getConfig().getDouble("ShopLocation.z"));
+		String world = getConfig().getString("ShopLocation.World");
+		townsystemValidationHandler.checkForWorldExists(world);
+		return new Location(Bukkit.getWorld(world), getConfig().getDouble("ShopLocation.x"),
+				getConfig().getDouble("ShopLocation.y"), getConfig().getDouble("ShopLocation.z"));
 	}
 
 	@Override
@@ -263,13 +262,6 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	@Override
 	public void deleteFile() {
 		getSavefile().delete();
-	}
-
-	// TODO extract into townworld validation handler
-	private void checkForWorldExists(World world) throws TownSystemException {
-		if (world == null) {
-			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, "<unknown>");
-		}
 	}
 
 	/*

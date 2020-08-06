@@ -26,9 +26,9 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.api.Town;
 import com.ue.townsystem.dataaccess.api.TownsystemDao;
 import com.ue.townsystem.logic.api.Plot;
+import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -50,24 +50,32 @@ public class PlotImpl implements Plot {
 	private final TownsystemDao townsystemDao;
 
 	/**
-	 * Represents a plot in a town.
+	 * Creating a new plot constructor.
 	 * 
 	 * @param townsystemDao
 	 * @param town
 	 * @param owner
-	 * @param chunkCoords    (format "X/Z")
-	 * @param isNew
+	 * @param chunkCoords   (format "X/Z")
 	 */
-	public PlotImpl(TownsystemDao townsystemDao, Town town, EconomyPlayer owner,
-			String chunkCoords, boolean isNew) {
+	public PlotImpl(TownsystemDao townsystemDao, Town town, EconomyPlayer owner, String chunkCoords) {
 		this.chunkCoords = chunkCoords;
 		this.town = town;
 		this.townsystemDao = townsystemDao;
-		if (isNew) {
-			setupNewPlot(owner);
-		} else {
-			loadExistingPlot();
-		}
+		setupNewPlot(owner);
+	}
+
+	/**
+	 * Loading an existing plot constructor.
+	 * 
+	 * @param townsystemDao
+	 * @param town
+	 * @param chunkCoords   (format "X/Z")
+	 */
+	public PlotImpl(TownsystemDao townsystemDao, Town town, String chunkCoords) {
+		this.chunkCoords = chunkCoords;
+		this.town = town;
+		this.townsystemDao = townsystemDao;
+		loadExistingPlot();
 	}
 
 	private void loadExistingPlot() {
