@@ -10,7 +10,7 @@ import org.bukkit.command.TabCompleter;
 
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
-import com.ue.townsystem.api.TownController;
+import com.ue.townsystem.api.TownManagerImpl;
 
 public class TownTabCompleter implements TabCompleter {
 
@@ -47,9 +47,9 @@ public class TownTabCompleter implements TabCompleter {
 	List<String> list = new ArrayList<>();
 	if (args.length == 2) {
 	    if (args[1].equals("")) {
-		list.addAll(TownController.getTownNameList());
+		list.addAll(TownManagerImpl.getTownNameList());
 	    } else if (args.length == 2) {
-		List<String> list2 = TownController.getTownNameList();
+		List<String> list2 = TownManagerImpl.getTownNameList();
 		for (String string : list2) {
 		    if (string.contains(args[1])) {
 			list.add(string);

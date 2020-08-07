@@ -16,7 +16,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.api.TownController;
+import com.ue.townsystem.api.TownManagerImpl;
 import com.ue.townsystem.dataaccess.api.TownsystemDao;
 import com.ue.townsystem.dataaccess.impl.TownsystemDaoImpl;
 import com.ue.townsystem.logic.api.Town;
@@ -65,7 +65,7 @@ public class TownworldImpl implements Townworld {
 		Iterator<Town> iter = listCopy.iterator();
 		while(iter.hasNext()) {
 			Town town = iter.next();
-			TownController.dissolveTown(town, town.getMayor());
+			TownManagerImpl.dissolveTown(town, town.getMayor());
 		}
 	}
 

@@ -33,8 +33,8 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.api.TownController;
-import com.ue.townsystem.api.TownworldController;
+import com.ue.townsystem.api.TownManagerImpl;
+import com.ue.townsystem.api.TownworldManagerImpl;
 import com.ue.townsystem.dataaccess.api.TownsystemDao;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.Town;
@@ -148,7 +148,7 @@ public class TownImpl implements Town {
 		}
 		villager.setCustomName(getTownName() + " TownManager");
 
-		List<String> townNameList = TownController.getTownNameList();
+		List<String> townNameList = TownManagerImpl.getTownNameList();
 		townNameList.remove(oldName);
 
 		townworld.setTownNameList(townNames);
@@ -177,7 +177,7 @@ public class TownImpl implements Town {
 
 	private void performLocationCheckForAllPlayers() {
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			TownworldController.handleTownWorldLocationCheck(p.getWorld().getName(), p.getLocation().getChunk(),
+			TownworldManagerImpl.performTownWorldLocationCheck(p.getWorld().getName(), p.getLocation().getChunk(),
 					p.getName());
 		}
 	}

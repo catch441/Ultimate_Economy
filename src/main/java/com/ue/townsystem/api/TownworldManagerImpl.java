@@ -1,178 +1,145 @@
 package com.ue.townsystem.api;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.inject.Inject;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BossBar;
 
+import com.ue.common.utils.MessageWrapper;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
 import com.ue.townsystem.impl.TownworldImpl;
 import com.ue.townsystem.logic.api.Town;
+import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
+import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-public class TownworldController {
+public class TownworldManagerImpl implements TownworldManager {
 
-	private List<Townworld> townWorldList = new ArrayList<>();
+	private Map<String, Townworld> townWorldList = new HashMap<>();
+	private final MessageWrapper messageWrapper;
+	private final TownsystemValidationHandler townsystemValidationHandler;
 
-	/**
-	 * This method returns a townworld by it's name.
-	 * 
-	 * @param name
-	 * @return Townworld
-	 * @throws TownSystemException
-	 */
+	@Inject
+	public TownworldManagerImpl(MessageWrapper messageWrapper,
+			TownsystemValidationHandler townsystemValidationHandler) {
+		this.messageWrapper = messageWrapper;
+		this.townsystemValidationHandler = townsystemValidationHandler;
+	}
+
+	@Override
 	public Townworld getTownWorldByName(String name) throws TownSystemException {
-		for (Townworld townworld : townWorldList) {
-			if (townworld.getWorldName().equals(name)) {
-				return townworld;
+		for (Entry<String, Townworld> townworld : townWorldList.entrySet()) {
+			if (townworld.getKey().equals(name)) {
+				return townworld.getValue();
 			}
 		}
-		throw TownSystemException.getException(TownExceptionMessageEnum.TOWNWORLD_DOES_NOT_EXIST);
+		throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.TOWNWORLD_DOES_NOT_EXIST);
 	}
 
-	/**
-	 * This method returns a list of all townworlds.
-	 * 
-	 * @return List of TownWorlds
-	 */
+	@Override
 	public List<Townworld> getTownWorldList() {
-		return townWorldList;
+		return new ArrayList<Townworld>(townWorldList.values());
 	}
 
-	/**
-	 * This method despawns all town villager in this townworld.
-	 */
+	@Override
 	public void despawnAllVillagers() {
-		for (Townworld townworld : townWorldList) {
+		for (Townworld townworld : townWorldList.values()) {
 			townworld.despawnAllTownVillagers();
 		}
 	}
 
-	/**
-	 * Returns a list of all townworld names.
-	 * 
-	 * @return list of strings
-	 */
+	@Override
 	public List<String> getTownWorldNameList() {
-		List<String> nameList = new ArrayList<>();
-		for (Townworld townworld : townWorldList) {
-			nameList.add(townworld.getWorldName());
-		}
-		return nameList;
+		return new ArrayList<>(townWorldList.keySet());
 	}
 
-	/**
-	 * This method returns true, if the world is an townworld.
-	 * 
-	 * @param worldName
-	 * @return boolean
-	 */
+	@Override
 	public boolean isTownWorld(String worldName) {
-		if (getTownWorldNameList().contains(worldName)) {
+		if (townWorldList.containsKey(worldName)) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	/**
-	 * Handles the townworld location check.
-	 * 
-	 * @param worldname
-	 * @param chunk
-	 * @param playername
-	 */
-	public void handleTownWorldLocationCheck(String worldname, Chunk chunk, String playername) {
+	@Override
+	public void performTownWorldLocationCheck(String worldname, Chunk chunk, EconomyPlayer ecoPlayer) {
+		BossBar bossbar = ecoPlayer.getBossBar();
 		try {
-			BossBar bossbar = EconomyPlayerManagerImpl.getEconomyPlayerByName(playername).getBossBar();
+			Townworld townworld = getTownWorldByName(worldname);
 			try {
-				Townworld townworld = getTownWorldByName(worldname);
-				try {
-					Town town = townworld.getTownByChunk(chunk);
-					bossbar.setTitle(town.getTownName());
-					bossbar.setColor(BarColor.RED);
-					bossbar.setVisible(true);
-				} catch (TownSystemException e) {
-					// if chunk is in the wilderness
-					bossbar.setTitle("Wilderness");
-					bossbar.setColor(BarColor.GREEN);
-					bossbar.setVisible(true);
-				}
+				Town town = townworld.getTownByChunk(chunk);
+				bossbar.setTitle(town.getTownName());
+				bossbar.setColor(BarColor.RED);
+				bossbar.setVisible(true);
 			} catch (TownSystemException e) {
-				// disable bossbar in other worlds
-				bossbar.setVisible(false);
+				// if chunk is in the wilderness
+				bossbar.setTitle("Wilderness");
+				bossbar.setColor(BarColor.GREEN);
+				bossbar.setVisible(true);
 			}
-		} catch (EconomyPlayerException e) {
-			// should never happen
+		} catch (TownSystemException e) {
+			// disable bossbar in other worlds
+			bossbar.setVisible(false);
 		}
 	}
 
-	/**
-	 * This method should be used to create/enble a new townworld.
-	 * 
-	 * @param world
-	 * @throws TownSystemException
-	 */
+	@Override
 	public void createTownWorld(String world) throws TownSystemException {
-		if (Bukkit.getWorld(world) == null) {
-			throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, world);
-		} else if (isTownWorld(world)) {
-			throw TownSystemException.getException(TownExceptionMessageEnum.TOWNWORLD_ALREADY_EXIST);
-		} else {
-			townWorldList.add(new TownworldImpl(world));
-			UltimateEconomy.getInstance.getConfig().set("TownWorlds", TownworldController.getTownWorldNameList());
-			UltimateEconomy.getInstance.saveConfig();
-		}
+		townsystemValidationHandler.checkForWorldExists(world);
+		townsystemValidationHandler.checkForTownworldDoesNotExist(townWorldList, world);
+		townWorldList.put(world, new TownworldImpl(world));
+		saveTownworldNameList();
 	}
 
-	/**
-	 * This method should be used to delete/disable a townworld.
-	 * 
-	 * @param world
-	 * @throws TownSystemException
-	 * @throws EconomyPlayerException
-	 * @throws GeneralEconomyException
-	 */
+	@Override
 	public void deleteTownWorld(String world)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
-		if (Bukkit.getWorld(world) == null) {
-			throw TownSystemException.getException(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, world);
-		} else {
-			Townworld townworld = getTownWorldByName(world);
-			townWorldList.remove(townworld);
-			townworld.delete();
-			UltimateEconomy.getInstance.getConfig().set("TownWorlds", TownworldController.getTownWorldNameList());
-			UltimateEconomy.getInstance.saveConfig();
-		}
+		townsystemValidationHandler.checkForWorldExists(world);
+		townsystemValidationHandler.checkForTownworldExists(townWorldList, world);
+		getTownWorldByName(world).delete();
+		;
+		townWorldList.remove(world);
+		saveTownworldNameList();
 	}
 
-	/**
-	 * This method loads all townworlds from the save file. Loads all towns and
-	 * plots in the townworld as well. EconomyPlayers have to be loaded first.
-	 * 
-	 */
+	@Override
 	public void loadAllTownWorlds() {
 		for (String townWorldName : UltimateEconomy.getInstance.getConfig().getStringList("TownWorlds")) {
 			try {
-				TownworldImpl townworldImpl = new TownworldImpl(townWorldName);
+				Townworld townworld = new TownworldImpl(townWorldName);
 				List<Town> towns = new ArrayList<>();
-				for (String townName : townworldImpl.getTownNameList()) {
-					towns.add(TownController.loadTown(townworldImpl, townName));
+				for (String townName : townworld.getTownNameList()) {
+					towns.add(TownManagerImpl.loadTown(townworldImpl, townName));
 				}
-				townworldImpl.setTownList(towns);
-				townWorldList.add(townworldImpl);
+				townworld.setTownList(towns);
+				townWorldList.put(townWorldName, townworld);
 			} catch (TownSystemException | EconomyPlayerException e) {
 				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the townworld " + townWorldName);
 				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
+	}
+
+	/*
+	 * TODO extract into config dao
+	 */
+	private void saveTownworldNameList() {
+		UltimateEconomy.getInstance.getConfig().set("TownWorlds", getTownWorldNameList());
+		UltimateEconomy.getInstance.saveConfig();
 	}
 }

@@ -5,26 +5,49 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
+import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
+import com.ue.townsystem.dataaccess.api.TownsystemDao;
 import com.ue.townsystem.impl.TownImpl;
 import com.ue.townsystem.logic.api.Town;
+import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
-public class TownController {
+public class TownManagerImpl {
 
+	@Inject 
+	MessageWrapper messageWrapper;
 	private List<String> townNameList = new ArrayList<>();
+	private final TownsystemValidationHandler townsystemValidationHandler;
+	private final EconomyPlayerValidationHandler ecoPlayerValidationHandler;
+
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param townsystemValidationHandler
+	 * @param ecoPlayerValidationHandler
+	 */
+	@Inject
+	public TownManagerImpl(TownsystemValidationHandler townsystemValidationHandler,
+			EconomyPlayerValidationHandler ecoPlayerValidationHandler) {
+		this.townsystemValidationHandler = townsystemValidationHandler;
+		this.ecoPlayerValidationHandler = ecoPlayerValidationHandler;
+	}
 
 	/**
 	 * Creates a new town if player has enough money. Player money decreases if
@@ -40,10 +63,10 @@ public class TownController {
 	 */
 	public void createTown(Townworld townworld, String townName, Location location, EconomyPlayer player)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
-		checkForTownDoesNotExist(townName);
+		townsystemValidationHandler.checkForTownDoesNotExist(getTownNameList(), townName);
 		checkForChunkIsFree(townworld, location);
-		checkForPlayerHasEnoughMoney(townworld, player);
-		checkForMaxJoinedTownsNotReached(player);
+		ecoPlayerValidationHandler.checkForNotReachedMaxJoinedTowns(player.reachedMaxJoinedTowns());
+		ecoPlayerValidationHandler.checkForEnoughMoney(player.getBankAccount(), townworld.getFoundationPrice(), true);
 		TownImpl townImpl = new TownImpl(townworld, player, townName, location);
 		townworld.addTown(townImpl);
 		FileConfiguration config = YamlConfiguration.loadConfiguration(townworld.getSaveFile());
@@ -52,33 +75,14 @@ public class TownController {
 		save(townworld.getSaveFile(), config);
 		player.decreasePlayerAmount(townworld.getFoundationPrice(), true);
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			TownworldController.handleTownWorldLocationCheck(p.getWorld().getName(), p.getLocation().getChunk(),
+			TownworldManagerImpl.performTownWorldLocationCheck(p.getWorld().getName(), p.getLocation().getChunk(),
 					p.getName());
-		}
-	}
-
-	private void checkForMaxJoinedTownsNotReached(EconomyPlayer player) throws EconomyPlayerException {
-		if (player.reachedMaxJoinedTowns()) {
-			throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.MAX_REACHED);
-		}
-	}
-
-	private void checkForPlayerHasEnoughMoney(Townworld townworld, EconomyPlayer player)
-			throws EconomyPlayerException, GeneralEconomyException {
-		if (!player.hasEnoughtMoney(townworld.getFoundationPrice())) {
-			throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
 		}
 	}
 
 	private void checkForChunkIsFree(Townworld townworld, Location location) throws TownSystemException {
 		if (!townworld.isChunkFree(location.getChunk())) {
 			throw TownSystemException.getException(TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED);
-		}
-	}
-
-	private void checkForTownDoesNotExist(String townName) throws GeneralEconomyException {
-		if (townNameList.contains(townName)) {
-			throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, townName);
 		}
 	}
 
@@ -107,7 +111,7 @@ public class TownController {
 			config.set("TownNames", townNameList);
 			save(town.getTownworld().getSaveFile(), config);
 			for (Player p : Bukkit.getOnlinePlayers()) {
-				TownworldController.handleTownWorldLocationCheck(p.getWorld().getName(), p.getLocation().getChunk(),
+				TownworldManagerImpl.performTownWorldLocationCheck(p.getWorld().getName(), p.getLocation().getChunk(),
 						p.getName());
 			}
 		} else {
@@ -116,17 +120,20 @@ public class TownController {
 	}
 
 	/**
-	 * Static method for loading a existing town by name. EconomyPlayers and bank accounts have to be
-	 * loaded first.
+	 * Method for loading a existing town by name. EconomyPlayers and bank accounts
+	 * have to be loaded first.
 	 * 
+	 * @param townsystemDao
 	 * @param townworld
 	 * @param townName
 	 * @return Town
 	 * @throws TownSystemException
 	 * @throws EconomyPlayerException
+	 * @throws GeneralEconomyException 
 	 */
-	public Town loadTown(Townworld townworld, String townName) throws TownSystemException, EconomyPlayerException {
-		TownImpl townImpl = new TownImpl(townworld, townName);
+	public Town loadTown(TownsystemDao townsystemDao, Townworld townworld, String townName)
+			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
+		TownImpl townImpl = new TownImpl(townsystemDao, townworld, townName);
 		townNameList.add(townName);
 		return townImpl;
 	}
@@ -142,7 +149,7 @@ public class TownController {
 
 	/**
 	 * Sets and saves the townName list. Do not use this if you create and load
-	 * towns woth the TownController.
+	 * towns with the TownController.
 	 * 
 	 * @param townworld
 	 * @param townNames
@@ -162,13 +169,13 @@ public class TownController {
 	 * @throws GeneralEconomyException
 	 */
 	public Town getTown(String name) throws GeneralEconomyException {
-		for (Townworld world : TownworldController.getTownWorldList()) {
+		for (Townworld world : TownworldManagerImpl.getTownWorldList()) {
 			for (Town town : world.getTownList()) {
 				if (town.getTownName().equals(name)) {
 					return town;
 				}
 			}
 		}
-		throw GeneralEconomyException.getException(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
+		throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
 	}
 }

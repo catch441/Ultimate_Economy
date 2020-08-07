@@ -28,8 +28,8 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.api.PlayershopController;
 import com.ue.shopsystem.impl.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
-import com.ue.townsystem.api.TownController;
-import com.ue.townsystem.api.TownworldController;
+import com.ue.townsystem.api.TownManagerImpl;
+import com.ue.townsystem.api.TownworldManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -81,9 +81,9 @@ public class ShopValidationHandlerTest {
 		for (int i = 0; i < size; i++) {
 			PlayershopController.deletePlayerShop(PlayershopController.getPlayerShops().get(0));
 		}
-		if (TownworldController.getTownWorldList().size() != 0) {
+		if (TownworldManagerImpl.getTownWorldList().size() != 0) {
 			try {
-				TownworldController.deleteTownWorld(world.getName());
+				TownworldManagerImpl.deleteTownWorld(world.getName());
 			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException e) {
 				fail();
 			}
@@ -552,7 +552,7 @@ public class ShopValidationHandlerTest {
 	public void checkForPlayerHasPermissionAtLocationTest1() {
 		try {
 			Location loc = new Location(world, 1, 1, 1);
-			TownworldController.createTownWorld(world.getName());
+			TownworldManagerImpl.createTownWorld(world.getName());
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			validationHandler.checkForPlayerHasPermissionAtLocation(loc, ecoPlayer);
 			fail();
@@ -565,11 +565,11 @@ public class ShopValidationHandlerTest {
 	public void checkForPlayerHasPermissionAtLocationTest2() {
 		try {
 			Location loc = new Location(world, 1, 1, 1);
-			TownworldController.createTownWorld(world.getName());
+			TownworldManagerImpl.createTownWorld(world.getName());
 			EconomyPlayerManagerImpl.createEconomyPlayer("katharina");
 			EconomyPlayer ecoPlayer1 = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(1);
-			TownController.createTown(TownworldController.getTownWorldList().get(0), "kthschnll", loc, ecoPlayer);
+			TownManagerImpl.createTown(TownworldManagerImpl.getTownWorldList().get(0), "kthschnll", loc, ecoPlayer);
 			validationHandler.checkForPlayerHasPermissionAtLocation(loc, ecoPlayer1);
 			fail();
 		} catch (EconomyPlayerException | TownSystemException e) {
@@ -583,9 +583,9 @@ public class ShopValidationHandlerTest {
 	public void checkForPlayerHasPermissionAtLocationTestValid() {
 		try {
 			Location loc = new Location(world, 1, 1, 1);
-			TownworldController.createTownWorld(world.getName());
+			TownworldManagerImpl.createTownWorld(world.getName());
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			TownController.createTown(TownworldController.getTownWorldList().get(0), "kthschnll", loc, ecoPlayer);
+			TownManagerImpl.createTown(TownworldManagerImpl.getTownWorldList().get(0), "kthschnll", loc, ecoPlayer);
 			validationHandler.checkForPlayerHasPermissionAtLocation(loc, ecoPlayer);
 		} catch (GeneralEconomyException | EconomyPlayerException | TownSystemException e) {
 			fail();

@@ -155,10 +155,11 @@ public interface TownsystemValidationHandler {
 	/**
 	 * Check for town does not exist.
 	 * 
+	 * @param townNames
 	 * @param newName
 	 * @throws GeneralEconomyException
 	 */
-	public void checkForTownDoesNotExist(String newName) throws GeneralEconomyException;
+	public void checkForTownDoesNotExist(List<String> townNames, String newName) throws GeneralEconomyException;
 
 	/**
 	 * Check for chunk is not claimed by the town.
@@ -177,7 +178,8 @@ public interface TownsystemValidationHandler {
 	 * @param chunkCoords
 	 * @throws TownSystemException
 	 */
-	public void checkForChunkIsClaimedByThisTown(Map<String, Plot> chunkList, String chunkCoords) throws TownSystemException;
+	public void checkForChunkIsClaimedByThisTown(Map<String, Plot> chunkList, String chunkCoords)
+			throws TownSystemException;
 
 	/**
 	 * Check for player did not reached max joined towns.
@@ -236,8 +238,27 @@ public interface TownsystemValidationHandler {
 
 	/**
 	 * Check for positive amount.
+	 * 
 	 * @param amount
 	 * @throws GeneralEconomyException
 	 */
 	public void checkForPositiveAmount(double amount) throws GeneralEconomyException;
+
+	/**
+	 * Check for townworld does not exist.
+	 * 
+	 * @param townworlds
+	 * @param world
+	 * @throws TownSystemException
+	 */
+	public void checkForTownworldDoesNotExist(Map<String, Townworld> townworlds, String world) throws TownSystemException;
+
+	/**
+	 * Check for townworld does exist.
+	 * 
+	 * @param townworlds
+	 * @param world
+	 * @throws TownSystemException
+	 */
+	public void checkForTownworldExists(Map<String, Townworld> townworlds, String world) throws TownSystemException;
 }

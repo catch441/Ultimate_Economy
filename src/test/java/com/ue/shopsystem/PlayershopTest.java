@@ -32,8 +32,8 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.PlayershopController;
 import com.ue.shopsystem.logic.impl.PlayershopImpl;
-import com.ue.townsystem.api.TownController;
-import com.ue.townsystem.api.TownworldController;
+import com.ue.townsystem.api.TownManagerImpl;
+import com.ue.townsystem.api.TownworldManagerImpl;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -86,9 +86,9 @@ public class PlayershopTest {
 		for (int i = 0; i < size; i++) {
 			PlayershopController.deletePlayerShop(PlayershopController.getPlayerShops().get(0));
 		}
-		if (TownworldController.getTownWorldList().size() != 0) {
+		if (TownworldManagerImpl.getTownWorldList().size() != 0) {
 			try {
-				TownworldController.deleteTownWorld(world.getName());
+				TownworldManagerImpl.deleteTownWorld(world.getName());
 			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException e) {
 				fail();
 			}
@@ -1000,7 +1000,7 @@ public class PlayershopTest {
 		try {
 			PlayershopController.createPlayerShop("myshop", location, 18,
 					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-			TownworldController.createTownWorld(world.getName());
+			TownworldManagerImpl.createTownWorld(world.getName());
 			Playershop shop = PlayershopController.getPlayerShops().get(0);
 			shop.moveShop(new Location(world, 10, 10, 10));
 			fail();
@@ -1016,8 +1016,8 @@ public class PlayershopTest {
 		try {
 			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
 			PlayershopController.createPlayerShop("myshop", location, 18, ecoPlayer);
-			TownworldController.createTownWorld(world.getName());
-			TownController.createTown(TownworldController.getTownWorldList().get(0), "newtown", location, ecoPlayer);
+			TownworldManagerImpl.createTownWorld(world.getName());
+			TownManagerImpl.createTown(TownworldManagerImpl.getTownWorldList().get(0), "newtown", location, ecoPlayer);
 			Playershop shop = PlayershopController.getPlayerShops().get(0);
 			Location newLoc = new Location(world, 10, 10, 10);
 			shop.moveShop(newLoc);

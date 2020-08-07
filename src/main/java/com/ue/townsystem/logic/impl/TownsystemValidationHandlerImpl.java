@@ -15,7 +15,6 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.api.TownController;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
@@ -162,8 +161,8 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 	}
 
 	@Override
-	public void checkForTownDoesNotExist(String newName) throws GeneralEconomyException {
-		if (TownController.getTownNameList().contains(newName)) {
+	public void checkForTownDoesNotExist(List<String> townNames, String newName) throws GeneralEconomyException {
+		if (townNames.contains(newName)) {
 			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
 					newName);
 		}
@@ -184,11 +183,12 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.CHUNK_NOT_CLAIMED_BY_TOWN);
 		}
 	}
-	
+
 	@Override
 	public void checkForPositiveAmount(double amount) throws GeneralEconomyException {
 		if (amount < 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, amount);
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
+					amount);
 		}
 	}
 
@@ -219,6 +219,21 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 	public void checkForChunkIsConnectedToTown(boolean isChunkConnectedToTown) throws TownSystemException {
 		if (!isChunkConnectedToTown) {
 			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.CHUNK_IS_NOT_CONNECTED_WITH_TOWN);
+		}
+	}
+
+	@Override
+	public void checkForTownworldDoesNotExist(Map<String, Townworld> townworlds, String world)
+			throws TownSystemException {
+		if (townworlds.containsKey(world)) {
+			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.TOWNWORLD_ALREADY_EXIST);
+		}
+	}
+
+	@Override
+	public void checkForTownworldExists(Map<String, Townworld> townworlds, String world) throws TownSystemException {
+		if (!townworlds.containsKey(world)) {
+			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.TOWNWORLD_DOES_NOT_EXIST);
 		}
 	}
 }

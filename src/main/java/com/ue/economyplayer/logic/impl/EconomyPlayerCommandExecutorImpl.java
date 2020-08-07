@@ -20,7 +20,7 @@ import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.jobsystem.logic.api.Job;
-import com.ue.townsystem.api.TownworldController;
+import com.ue.townsystem.api.TownworldManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
@@ -141,7 +141,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 1) {
 			Location location = ecoPlayer.getHome(args[0]);
 			player.teleport(location);
-			TownworldController.handleTownWorldLocationCheck(player.getWorld().getName(),
+			TownworldManagerImpl.performTownWorldLocationCheck(player.getWorld().getName(),
 					player.getLocation().getChunk(), player.getName());
 		} else if (args.length == 0) {
 			player.sendMessage(messageWrapper.getString("home_info", ecoPlayer.getHomeList().keySet().toString()));

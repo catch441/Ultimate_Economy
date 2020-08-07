@@ -14,8 +14,8 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.api.TownController;
-import com.ue.townsystem.api.TownworldController;
+import com.ue.townsystem.api.TownManagerImpl;
+import com.ue.townsystem.api.TownworldManagerImpl;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.Townworld;
@@ -81,8 +81,8 @@ public class TownCommandExecutor implements CommandExecutor {
 	private boolean performCreateCommand(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		if (args.length == 2) {
-			Townworld townworld = TownworldController.getTownWorldByName(player.getWorld().getName());
-			TownController.createTown(townworld, args[1], player.getLocation(), ecoPlayer);
+			Townworld townworld = TownworldManagerImpl.getTownWorldByName(player.getWorld().getName());
+			TownManagerImpl.createTown(townworld, args[1], player.getLocation(), ecoPlayer);
 			player.sendMessage(MessageWrapper.getString("town_create", args[1]));
 		} else {
 			player.sendMessage("/" + label + " create <town>");
@@ -93,8 +93,8 @@ public class TownCommandExecutor implements CommandExecutor {
 	private boolean performDeleteCommand(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws GeneralEconomyException, TownSystemException, EconomyPlayerException {
 		if (args.length == 2) {
-			Town town = TownController.getTown(args[1]);
-			TownController.dissolveTown(town, ecoPlayer);
+			Town town = TownManagerImpl.getTown(args[1]);
+			TownManagerImpl.dissolveTown(town, ecoPlayer);
 			player.sendMessage(MessageWrapper.getString("town_delete", args[1]));
 		} else {
 			player.sendMessage("/" + label + " delete <town>");
@@ -105,7 +105,7 @@ public class TownCommandExecutor implements CommandExecutor {
 	private boolean performExpandCommand(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws GeneralEconomyException, TownSystemException, EconomyPlayerException {
 		if (args.length == 2) {
-			Town town = TownController.getTown(args[1]);
+			Town town = TownManagerImpl.getTown(args[1]);
 			town.expandTown(player.getLocation().getChunk(), ecoPlayer, true);
 		} else {
 			player.sendMessage("/" + label + " expand <town>");
@@ -116,7 +116,7 @@ public class TownCommandExecutor implements CommandExecutor {
 	private boolean performRenameCommand(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws GeneralEconomyException, TownSystemException, EconomyPlayerException {
 		if (args.length == 3) {
-			Town town = TownController.getTown(args[1]);
+			Town town = TownManagerImpl.getTown(args[1]);
 			town.renameTown(args[2], ecoPlayer, true);
 		} else {
 			player.sendMessage("/" + label + " rename <old name> <new name>");
@@ -127,7 +127,7 @@ public class TownCommandExecutor implements CommandExecutor {
 	private boolean performSetTownSpawnCommand(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws GeneralEconomyException, TownSystemException, EconomyPlayerException {
 		if (args.length == 2) {
-			Town town = TownController.getTown(args[1]);
+			Town town = TownManagerImpl.getTown(args[1]);
 			town.changeTownSpawn(player.getLocation(), ecoPlayer, true);
 		} else {
 			player.sendMessage("/" + label + " setTownSpawn <town>");
@@ -138,7 +138,7 @@ public class TownCommandExecutor implements CommandExecutor {
 	private boolean performAddDeputyCommand(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws GeneralEconomyException, EconomyPlayerException, TownSystemException {
 		if (args.length == 3) {
-			Town town = TownController.getTown(args[1]);
+			Town town = TownManagerImpl.getTown(args[1]);
 			if (!town.isMayor(ecoPlayer)) {
 				throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.TOWN_NOT_TOWN_OWNER);
 			} else {
@@ -154,7 +154,7 @@ public class TownCommandExecutor implements CommandExecutor {
 	private boolean performRemoveDeputyCommand(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws GeneralEconomyException, EconomyPlayerException, TownSystemException {
 		if (args.length == 3) {
-			Town town = TownController.getTown(args[1]);
+			Town town = TownManagerImpl.getTown(args[1]);
 			if (!town.isMayor(ecoPlayer)) {
 				throw EconomyPlayerException.getException(EconomyPlayerExceptionMessageEnum.TOWN_NOT_TOWN_OWNER);
 			} else {
@@ -171,7 +171,7 @@ public class TownCommandExecutor implements CommandExecutor {
 	private boolean performMoveTownmanagerCommand(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws TownSystemException, EconomyPlayerException {
 		if (args.length == 1) {
-			Townworld townworld = TownworldController.getTownWorldByName(player.getWorld().getName());
+			Townworld townworld = TownworldManagerImpl.getTownWorldByName(player.getWorld().getName());
 			townworld.getTownByChunk(player.getLocation().getChunk()).moveTownManagerVillager(player.getLocation(),
 					ecoPlayer);
 		} else {
@@ -183,7 +183,7 @@ public class TownCommandExecutor implements CommandExecutor {
 	private boolean performTpCommand(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws GeneralEconomyException {
 		if (args.length == 2) {
-			Town town = TownController.getTown(args[1]);
+			Town town = TownManagerImpl.getTown(args[1]);
 			player.teleport(town.getTownSpawn());
 		} else {
 			player.sendMessage("/" + label + " tp <town>");
@@ -194,7 +194,7 @@ public class TownCommandExecutor implements CommandExecutor {
 	private boolean performPayCommand(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws GeneralEconomyException, EconomyPlayerException {
 		if (args.length == 3) {
-			Town town = TownController.getTown(args[1]);
+			Town town = TownManagerImpl.getTown(args[1]);
 			double amount = Double.valueOf(args[2]);
 			ecoPlayer.decreasePlayerAmount(amount, true);
 			town.increaseTownBankAmount(amount);
@@ -209,7 +209,7 @@ public class TownCommandExecutor implements CommandExecutor {
 	private boolean performWithdrawCommand(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws EconomyPlayerException, GeneralEconomyException, TownSystemException {
 		if (args.length == 3) {
-			Town town = TownController.getTown(args[1]);
+			Town town = TownManagerImpl.getTown(args[1]);
 			if (town.hasDeputyPermissions(ecoPlayer)) {
 				double amount = Double.valueOf(args[2]);
 				town.decreaseTownBankAmount(amount);
@@ -226,7 +226,7 @@ public class TownCommandExecutor implements CommandExecutor {
 	private boolean performBankCommand(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws GeneralEconomyException {
 		if (args.length == 2) {
-			Town town = TownController.getTown(args[1]);
+			Town town = TownManagerImpl.getTown(args[1]);
 			if (town.hasDeputyPermissions(ecoPlayer)) {
 				player.sendMessage(MessageWrapper.getString("town_bank", town.getTownBankAmount(),
 						configManager.getCurrencyText(town.getTownBankAmount())));
@@ -254,7 +254,7 @@ public class TownCommandExecutor implements CommandExecutor {
 	private boolean performPlotSetForSaleCommand(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
 			throws TownSystemException, NumberFormatException, EconomyPlayerException {
 		if (args.length == 3) {
-			Townworld townworld = TownworldController.getTownWorldByName(player.getWorld().getName());
+			Townworld townworld = TownworldManagerImpl.getTownWorldByName(player.getWorld().getName());
 			Town town = townworld.getTownByChunk(player.getLocation().getChunk());
 			Plot plot = town.getPlotByChunk(
 					player.getLocation().getChunk().getX() + "/" + player.getLocation().getChunk().getZ());

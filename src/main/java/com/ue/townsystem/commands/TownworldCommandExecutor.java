@@ -10,7 +10,7 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.api.TownworldController;
+import com.ue.townsystem.api.TownworldManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -59,7 +59,7 @@ public class TownworldCommandExecutor implements CommandExecutor {
 	private boolean handleSetExpandPriceCommand(CommandSender sender, String label, String[] args)
 			throws TownSystemException {
 		if (args.length == 3) {
-			TownworldController.getTownWorldByName(args[1]).setExpandPrice(Double.valueOf(args[2]), true);
+			TownworldManagerImpl.getTownWorldByName(args[1]).setExpandPrice(Double.valueOf(args[2]), true);
 			sender.sendMessage(MessageWrapper.getString("townworld_setExpandPrice", args[2],
 					configManager.getCurrencyText(Double.valueOf(args[2]))));
 		} else {
@@ -71,7 +71,7 @@ public class TownworldCommandExecutor implements CommandExecutor {
 	private boolean handleSetFoundationPriceCommand(CommandSender sender, String label, String[] args)
 			throws TownSystemException {
 		if (args.length == 3) {
-			TownworldController.getTownWorldByName(args[1]).setFoundationPrice(Double.valueOf(args[2]), true);
+			TownworldManagerImpl.getTownWorldByName(args[1]).setFoundationPrice(Double.valueOf(args[2]), true);
 			sender.sendMessage(MessageWrapper.getString("townworld_setFoundationPrice", args[2],
 					configManager.getCurrencyText(Double.valueOf(args[2]))));
 		} else {
@@ -83,7 +83,7 @@ public class TownworldCommandExecutor implements CommandExecutor {
 	private boolean handleDisableCommand(CommandSender sender, String label, String[] args)
 			throws EconomyPlayerException, GeneralEconomyException, TownSystemException {
 		if (args.length == 2) {
-			TownworldController.deleteTownWorld(args[1]);
+			TownworldManagerImpl.deleteTownWorld(args[1]);
 			sender.sendMessage(MessageWrapper.getString("townworld_disable", args[1]));
 		} else {
 			sender.sendMessage("/" + label + " disable <world>");
@@ -93,7 +93,7 @@ public class TownworldCommandExecutor implements CommandExecutor {
 
 	private boolean handleEnableCommand(CommandSender sender, String label, String[] args) throws TownSystemException {
 		if (args.length == 2) {
-			TownworldController.createTownWorld(args[1]);
+			TownworldManagerImpl.createTownWorld(args[1]);
 			sender.sendMessage(MessageWrapper.getString("townworld_enable", args[1]));
 		} else {
 			sender.sendMessage("/" + label + " enable <world>");

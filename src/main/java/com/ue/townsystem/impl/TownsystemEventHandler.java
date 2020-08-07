@@ -23,7 +23,7 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.api.TownworldController;
+import com.ue.townsystem.api.TownworldManagerImpl;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.Townworld;
@@ -50,7 +50,7 @@ public class TownsystemEventHandler {
 	 * @param event
 	 */
 	public void handlePlayerTeleport(PlayerTeleportEvent event) {
-		TownworldController.handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
+		TownworldManagerImpl.performTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
 				event.getTo().getChunk(), event.getPlayer().getName());
 	}
 
@@ -60,7 +60,7 @@ public class TownsystemEventHandler {
 	 * @param event
 	 */
 	public void handlePlayerJoin(PlayerJoinEvent event) {
-		TownworldController.handleTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
+		TownworldManagerImpl.performTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
 				event.getPlayer().getLocation().getChunk(), event.getPlayer().getName());
 	}
 
@@ -73,7 +73,7 @@ public class TownsystemEventHandler {
 		// check, if player positions changed the chunk
 		if (event.getFrom().getChunk().getX() != event.getTo().getChunk().getX()
 				|| event.getFrom().getChunk().getZ() != event.getTo().getChunk().getZ()) {
-			TownworldController.handleTownWorldLocationCheck(event.getTo().getWorld().getName(),
+			TownworldManagerImpl.performTownWorldLocationCheck(event.getTo().getWorld().getName(),
 					event.getTo().getChunk(), event.getPlayer().getName());
 		}
 	}
@@ -86,7 +86,7 @@ public class TownsystemEventHandler {
 	public void handleOpenTownmanagerInventory(PlayerInteractEntityEvent event) {
 		event.setCancelled(true);
 		try {
-			Townworld townworld2 = TownworldController.getTownWorldByName(event.getRightClicked().getWorld().getName());
+			Townworld townworld2 = TownworldManagerImpl.getTownWorldByName(event.getRightClicked().getWorld().getName());
 			Town town2 = townworld2.getTownByChunk(event.getRightClicked().getLocation().getChunk());
 			town2.openTownManagerVillagerInv(event.getPlayer());
 		} catch (TownSystemException e) {
@@ -101,7 +101,7 @@ public class TownsystemEventHandler {
 	public void handleOpenPlotSaleInventory(PlayerInteractEntityEvent event) {
 		event.setCancelled(true);
 		try {
-			Townworld townworld = TownworldController.getTownWorldByName(event.getRightClicked().getWorld().getName());
+			Townworld townworld = TownworldManagerImpl.getTownWorldByName(event.getRightClicked().getWorld().getName());
 			Town town = townworld.getTownByChunk(event.getRightClicked().getLocation().getChunk());
 			Plot plot = town.getPlotByChunk(event.getRightClicked().getLocation().getChunk().getX() + "/"
 					+ event.getRightClicked().getLocation().getChunk().getZ());
@@ -120,7 +120,7 @@ public class TownsystemEventHandler {
 		if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
 			event.setCancelled(true);
 			try {
-				Townworld townWorld = TownworldController
+				Townworld townWorld = TownworldManagerImpl
 						.getTownWorldByName(event.getWhoClicked().getWorld().getName());
 				Chunk chunk = ((Villager) event.getClickedInventory().getHolder()).getLocation().getChunk();
 				EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl
@@ -173,7 +173,7 @@ public class TownsystemEventHandler {
 		if (event.getClickedBlock() != null) {
 			Location location = event.getClickedBlock().getLocation();
 			try {
-				Townworld townworld = TownworldController.getTownWorldByName(location.getWorld().getName());
+				Townworld townworld = TownworldManagerImpl.getTownWorldByName(location.getWorld().getName());
 				EconomyPlayer economyPlayer = EconomyPlayerManagerImpl
 						.getEconomyPlayerByName(event.getPlayer().getName());
 				if (townworld.isChunkFree(location.getChunk())) {

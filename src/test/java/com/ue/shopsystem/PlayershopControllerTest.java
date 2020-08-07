@@ -34,8 +34,8 @@ import com.ue.exceptions.ShopSystemException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.PlayershopController;
-import com.ue.townsystem.api.TownController;
-import com.ue.townsystem.api.TownworldController;
+import com.ue.townsystem.api.TownManagerImpl;
+import com.ue.townsystem.api.TownworldManagerImpl;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -154,7 +154,7 @@ public class PlayershopControllerTest {
 	public void createNewPlayershopTestWithNoPlotPermission() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
 		try {
-			TownworldController.createTownWorld(world.getName());
+			TownworldManagerImpl.createTownWorld(world.getName());
 			PlayershopController.createPlayerShop("myshop", location, 9,
 					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
 			fail();
@@ -162,7 +162,7 @@ public class PlayershopControllerTest {
 			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou dont have the permission to do that!", e.getMessage());
 			try {
-				TownworldController.deleteTownWorld(world.getName());
+				TownworldManagerImpl.deleteTownWorld(world.getName());
 			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException e1) {
 				fail();
 			}
@@ -253,8 +253,8 @@ public class PlayershopControllerTest {
 	public void createNewPlayershopTestWithNoPlotPermissions2() {
 		Location location = new Location(world, 1.5, 29.3, 6.9);
 		try {
-			TownworldController.createTownWorld(world.getName());
-			TownController.createTown(TownworldController.getTownWorldList().get(0), "mytown", location,
+			TownworldManagerImpl.createTownWorld(world.getName());
+			TownManagerImpl.createTown(TownworldManagerImpl.getTownWorldList().get(0), "mytown", location,
 					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(1));
 			PlayershopController.createPlayerShop("myshop", location, 9,
 					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
@@ -263,7 +263,7 @@ public class PlayershopControllerTest {
 			assertTrue(e instanceof EconomyPlayerException);
 			assertEquals("§cYou dont have the permission to do that!", e.getMessage());
 			try {
-				TownworldController.deleteTownWorld(world.getName());
+				TownworldManagerImpl.deleteTownWorld(world.getName());
 			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException e1) {
 				fail();
 			}

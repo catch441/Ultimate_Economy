@@ -18,7 +18,7 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
-import com.ue.townsystem.api.TownworldController;
+import com.ue.townsystem.api.TownworldManagerImpl;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.Townworld;
 import com.ue.ultimate_economy.GeneralEconomyException;
@@ -189,8 +189,8 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	 */
 	private void checkForTownworldPlotPermission(Location spawnLocation, EconomyPlayer ecoPlayer)
 			throws EconomyPlayerException, TownSystemException {
-		if (TownworldController.isTownWorld(spawnLocation.getWorld().getName())) {
-			Townworld townworld = TownworldController.getTownWorldByName(spawnLocation.getWorld().getName());
+		if (TownworldManagerImpl.isTownWorld(spawnLocation.getWorld().getName())) {
+			Townworld townworld = TownworldManagerImpl.getTownWorldByName(spawnLocation.getWorld().getName());
 			if (townworld.isChunkFree(spawnLocation.getChunk())) {
 				throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
 			} else {

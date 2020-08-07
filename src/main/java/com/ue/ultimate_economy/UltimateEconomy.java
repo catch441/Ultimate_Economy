@@ -47,7 +47,7 @@ import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.shopsystem.logic.impl.RentDailyTask;
-import com.ue.townsystem.api.TownworldController;
+import com.ue.townsystem.api.TownworldManagerImpl;
 import com.ue.townsystem.commands.TownCommandExecutor;
 import com.ue.townsystem.commands.TownTabCompleter;
 import com.ue.townsystem.commands.TownworldCommandExecutor;
@@ -160,7 +160,7 @@ public class UltimateEconomy extends JavaPlugin {
 
 	private void disablePlugin() {
 		jobcenterManager.despawnAllVillagers();
-		TownworldController.despawnAllVillagers();
+		TownworldManagerImpl.despawnAllVillagers();
 		adminshopManager.despawnAllVillagers();
 		playershopManager.despawnAllVillagers();
 		rentshopManager.despawnAllVillagers();
