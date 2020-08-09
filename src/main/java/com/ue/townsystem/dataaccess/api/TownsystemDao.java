@@ -178,7 +178,7 @@ public interface TownsystemDao {
 	 * Loads the chunk coords of all plots of a town.
 	 * 
 	 * @param townName
-	 * @return
+	 * @return chunk coord list
 	 */
 	public List<String> loadTownPlotCoords(String townName);
 
@@ -186,7 +186,7 @@ public interface TownsystemDao {
 	 * Loads the mayor of a town.
 	 * 
 	 * @param townName
-	 * @return
+	 * @return mayor
 	 * @throws EconomyPlayerException
 	 */
 	public EconomyPlayer loadMayor(String townName) throws EconomyPlayerException;
@@ -195,7 +195,7 @@ public interface TownsystemDao {
 	 * Loads all deputies of a town.
 	 * 
 	 * @param townName
-	 * @return
+	 * @return deputies
 	 * @throws EconomyPlayerException
 	 */
 	public List<EconomyPlayer> loadDeputies(String townName) throws EconomyPlayerException;
@@ -204,7 +204,7 @@ public interface TownsystemDao {
 	 * Loads the tax of a town.
 	 * 
 	 * @param townName
-	 * @return
+	 * @return tax
 	 */
 	public double loadTax(String townName);
 
@@ -212,7 +212,7 @@ public interface TownsystemDao {
 	 * Loads the townspawn.
 	 * 
 	 * @param townName
-	 * @return
+	 * @return townspawn
 	 * @throws TownSystemException
 	 * @throws NumberFormatException
 	 */
@@ -222,7 +222,7 @@ public interface TownsystemDao {
 	 * Loads the citizens of a town.
 	 * 
 	 * @param townName
-	 * @return
+	 * @return citizens
 	 * @throws EconomyPlayerException
 	 */
 	public List<EconomyPlayer> loadCitizens(String townName) throws EconomyPlayerException;
@@ -231,7 +231,7 @@ public interface TownsystemDao {
 	 * Loads the townmanager location.
 	 * 
 	 * @param townName
-	 * @return
+	 * @return townmanager location
 	 * @throws TownSystemException
 	 */
 	public Location loadTownManagerLocation(String townName) throws TownSystemException;
@@ -247,7 +247,47 @@ public interface TownsystemDao {
 	 * Loads the town bank iban.
 	 * 
 	 * @param townName
-	 * @return
+	 * @return bank iban
 	 */
 	public String loadTownBankIban(String townName);
+
+	/**
+	 * Saves the foundation price.
+	 * 
+	 * @param foundationPrice
+	 */
+	public void saveFoundationPrice(double foundationPrice);
+
+	/**
+	 * Saves the expand price.
+	 * 
+	 * @param expandPrice
+	 */
+	public void saveExpandPrice(double expandPrice);
+
+	/**
+	 * Saves the world name.
+	 * 
+	 * @param world
+	 */
+	public void saveWorldName(String world);
+
+	/**
+	 * Loads the foundation price.
+	 * 
+	 * @return foundation price
+	 */
+	public double loadFoundationPrice();
+
+	/**
+	 * Loads the expand price.
+	 * 
+	 * @return extand price
+	 */
+	public double loadExpandPrice();
+
+	/**
+	 * Deletes the savefile.
+	 */
+	public void deleteSavefile();
 }

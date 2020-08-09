@@ -10,7 +10,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ue.bank.dataaccess.api.BankDao;
 import com.ue.common.utils.SaveFileUtils;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 public class BankDaoImpl extends SaveFileUtils implements BankDao {
 
@@ -18,8 +17,8 @@ public class BankDaoImpl extends SaveFileUtils implements BankDao {
 	private YamlConfiguration config;
 	
 	@Override
-	public void setupSavefile() {
-		file = new File(UltimateEconomy.getInstance.getDataFolder(), "BankAccounts.yml");
+	public void setupSavefile(String dataFolder) {
+		file = new File(dataFolder, "BankAccounts.yml");
 		if(!file.exists()) {
 			try {
 				getSavefile().createNewFile();

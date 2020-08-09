@@ -15,41 +15,29 @@ import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
 public class BankManagerImpl implements BankManager {
 
-	private List<BankAccount> accounts = new ArrayList<>();
-	private final MessageWrapper messageWrapper;
-	private final BankDao bankDao;
-	private final BankValidationHandler validationHandler;
-
-	/**
-	 * Default constructor.
-	 * 
-	 * @param validationHandler
-	 * @param bankDao
-	 * @param messageWrapper
-	 */
 	@Inject
-	public BankManagerImpl(BankValidationHandler validationHandler, BankDao bankDao, MessageWrapper messageWrapper) {
-		this.messageWrapper = messageWrapper;
-		this.bankDao = bankDao;
-		this.validationHandler = validationHandler;
-	}
+	MessageWrapper messageWrapper;
+	@Inject
+	BankDao bankDao;
+	@Inject
+	BankValidationHandler validationHandler;
+	private List<BankAccount> accounts = new ArrayList<>();
 
 	@Override
 	public BankAccount createBankAccount(double startAmount) {
-		BankAccount account = new BankAccountImpl(validationHandler, bankDao, startAmount);
+		BankAccount account = new BankAccountImpl(bankDao, validationHandler, startAmount);
 		getBankAccounts().add(account);
 		bankDao.saveIbanList(getIbanList());
 		return account;
 	}
 
 	@Override
-	public void createExternalBankAccount(double startAmount, String externalIban) throws GeneralEconomyException {
-		if (getIbanList().contains(externalIban)) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
-					externalIban);
-		}
-		getBankAccounts().add(new BankAccountImpl(validationHandler, bankDao, startAmount, externalIban));
+	public BankAccount createExternalBankAccount(double startAmount, String externalIban) throws GeneralEconomyException {
+		validationHandler.checkForIbanIsFree(getIbanList(), externalIban);
+		BankAccount account = new BankAccountImpl(bankDao, validationHandler, startAmount, externalIban);
+		getBankAccounts().add(account);
 		bankDao.saveIbanList(getIbanList());
+		return account;
 	}
 
 	@Override
@@ -60,10 +48,10 @@ public class BankManagerImpl implements BankManager {
 	}
 
 	@Override
-	public void loadBankAccounts() {
-		bankDao.setupSavefile();
+	public void loadBankAccounts(String dataFolder) {
+		bankDao.setupSavefile(dataFolder);
 		for (String iban : bankDao.loadIbanList()) {
-			getBankAccounts().add(new BankAccountImpl(validationHandler, bankDao, iban));
+			getBankAccounts().add(new BankAccountImpl(bankDao, validationHandler, iban));
 		}
 	}
 

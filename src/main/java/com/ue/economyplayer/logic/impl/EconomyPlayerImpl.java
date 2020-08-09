@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -34,18 +32,12 @@ import com.ue.ultimate_economy.UltimateEconomy;
 
 public class EconomyPlayerImpl implements EconomyPlayer {
 
-	@Inject
-	ConfigManager configManager;
-	@Inject
-	BankManager bankManager;
-	@Inject
-	JobManager jobManager;
-	@Inject
-	MessageWrapper messageWrapper;
-	@Inject
-	EconomyPlayerDao ecoPlayerDao;
-	@Inject
-	EconomyPlayerValidationHandler validationHandler;
+	private final ConfigManager configManager;
+	private final BankManager bankManager;
+	private final JobManager jobManager;
+	private final MessageWrapper messageWrapper;
+	private final EconomyPlayerDao ecoPlayerDao;
+	private final EconomyPlayerValidationHandler validationHandler;
 	private Map<String, Location> homes = new HashMap<>();
 	private BankAccount bankAccount;
 	private Player player;
@@ -58,11 +50,26 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	/**
 	 * Constructor for creating a new economyPlayer/loading an existing player.
 	 * 
+	 * @param validationHandler
+	 * @param ecoPlayerDao
+	 * @param messageWrapper
+	 * @param configManager
+	 * @param bankManager
+	 * @param jobManager
+	 * @param player
 	 * @param name
 	 * @param isNew
 	 */
-	public EconomyPlayerImpl(String name, boolean isNew) {
-		this.player = Bukkit.getPlayer(name);
+	public EconomyPlayerImpl(EconomyPlayerValidationHandler validationHandler, EconomyPlayerDao ecoPlayerDao,
+			MessageWrapper messageWrapper, ConfigManager configManager, BankManager bankManager, JobManager jobManager,
+			Player player, String name, boolean isNew) {
+		this.configManager = configManager;
+		this.bankManager = bankManager;
+		this.jobManager = jobManager;
+		this.messageWrapper = messageWrapper;
+		this.ecoPlayerDao = ecoPlayerDao;
+		this.validationHandler = validationHandler;
+		this.player = player;
 		if (isNew) {
 			setupNewPlayer(name);
 		} else {
@@ -194,7 +201,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		if (isOnline() && sendMessage) {
 			getPlayer().sendMessage(messageWrapper.getString("sethome", homeName));
 		}
-		
+
 	}
 
 	@Override
@@ -254,7 +261,8 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	@Override
-	public void decreasePlayerAmount(double amount, boolean personal) throws GeneralEconomyException, EconomyPlayerException {
+	public void decreasePlayerAmount(double amount, boolean personal)
+			throws GeneralEconomyException, EconomyPlayerException {
 		validationHandler.checkForEnoughMoney(getBankAccount(), amount, personal);
 		getBankAccount().decreaseAmount(amount);
 		if (isOnline()) {
@@ -281,7 +289,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	public void setPlayer(Player player) {
 		getBossBar().removeAll();
 		this.player = player;
-		if(isOnline()) {
+		if (isOnline()) {
 			getBossBar().addPlayer(player);
 			updateScoreBoard();
 		}
@@ -318,7 +326,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	private void updateScoreBoard() {
 		int score = 0;
-		if(getBankAccount() != null) {
+		if (getBankAccount() != null) {
 			score = (int) getBankAccount().getAmount();
 		}
 		if (isOnline()) {

@@ -18,9 +18,9 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
-import com.ue.townsystem.api.TownworldManagerImpl;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.Townworld;
+import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -31,17 +31,21 @@ public class PlayershopManagerImpl implements PlayershopManager {
 
 	private final MessageWrapper messageWrapper;
 	private final ShopValidationHandler validationHandler;
+	private final TownworldManager townworldManager;
 
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param townworldManager
 	 * @param validationHandler
 	 * @param messageWrapper
 	 */
 	@Inject
-	public PlayershopManagerImpl(ShopValidationHandler validationHandler, MessageWrapper messageWrapper) {
+	public PlayershopManagerImpl(TownworldManager townworldManager, ShopValidationHandler validationHandler,
+			MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
+		this.townworldManager = townworldManager;
 	}
 
 	@Override
@@ -189,8 +193,8 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	 */
 	private void checkForTownworldPlotPermission(Location spawnLocation, EconomyPlayer ecoPlayer)
 			throws EconomyPlayerException, TownSystemException {
-		if (TownworldManagerImpl.isTownWorld(spawnLocation.getWorld().getName())) {
-			Townworld townworld = TownworldManagerImpl.getTownWorldByName(spawnLocation.getWorld().getName());
+		if (townworldManager.isTownWorld(spawnLocation.getWorld().getName())) {
+			Townworld townworld = townworldManager.getTownWorldByName(spawnLocation.getWorld().getName());
 			if (townworld.isChunkFree(spawnLocation.getChunk())) {
 				throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
 			} else {

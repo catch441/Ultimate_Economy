@@ -46,7 +46,7 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.jobsystem.logic.api.JobsystemEventHandler;
 import com.ue.shopsystem.logic.api.ShopEventHandler;
 import com.ue.shopsystem.logic.impl.Spawner;
-import com.ue.townsystem.impl.TownsystemEventHandler;
+import com.ue.townsystem.logic.impl.TownsystemEventHandlerImpl;
 
 public class UltimateEconomyEventHandler implements Listener {
 
@@ -62,7 +62,7 @@ public class UltimateEconomyEventHandler implements Listener {
 	private UpdateResult updateResult;
 	private List<String> spawnerlist;
 	private File spawner;
-	private TownsystemEventHandler townSystemEventHandler;
+	private TownsystemEventHandlerImpl townSystemEventHandler;
 	
 	/**
 	 * Constructor of ultimate economy event handler.
@@ -77,7 +77,7 @@ public class UltimateEconomyEventHandler implements Listener {
 		updateResult = Updater.checkForUpdate(plugin.getDescription().getVersion());
 		this.spawnerlist = spawnerlist;
 		this.spawner = spawner;
-		townSystemEventHandler = new TownsystemEventHandler();
+		townSystemEventHandler = new TownsystemEventHandlerImpl();
 	}
 
 	/**

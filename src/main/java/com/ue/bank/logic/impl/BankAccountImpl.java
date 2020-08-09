@@ -9,22 +9,22 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class BankAccountImpl implements BankAccount {
 
-	private double amount;
-	private final String iban;
 	private final BankDao bankDao;
 	private final BankValidationHandler validationHandler;
+	private double amount;
+	private final String iban;
 
 	/**
 	 * Constructor for creating a new bank account.
 	 * 
-	 * @param validationHandler
 	 * @param bankDao
+	 * @param validationHandler
 	 * @param startAmount
 	 */
-	public BankAccountImpl(BankValidationHandler validationHandler, BankDao bankDao, double startAmount) {
+	public BankAccountImpl(BankDao bankDao, BankValidationHandler validationHandler, double startAmount) {
 		this.bankDao = bankDao;
-		iban = UUID.randomUUID().toString();
 		this.validationHandler = validationHandler;
+		iban = UUID.randomUUID().toString();
 		setAmount(startAmount);
 		bankDao.saveAmount(iban, getAmount());
 	}
@@ -32,16 +32,16 @@ public class BankAccountImpl implements BankAccount {
 	/**
 	 * Constructor for creating a account with a external iban.
 	 * 
-	 * @param validationHandler
 	 * @param bankDao
+	 * @param validationHandler
 	 * @param startAmount
 	 * @param externalIban
 	 */
-	public BankAccountImpl(BankValidationHandler validationHandler, BankDao bankDao, double startAmount,
+	public BankAccountImpl(BankDao bankDao, BankValidationHandler validationHandler, double startAmount,
 			String externalIban) {
 		this.bankDao = bankDao;
-		iban = externalIban;
 		this.validationHandler = validationHandler;
+		iban = externalIban;
 		setAmount(startAmount);
 		bankDao.saveAmount(iban, getAmount());
 	}
@@ -49,14 +49,14 @@ public class BankAccountImpl implements BankAccount {
 	/**
 	 * Constructor for loading an existing bank account.
 	 * 
-	 * @param validationHandler
 	 * @param bankDao
+	 * @param validationHandler
 	 * @param iban
 	 */
-	public BankAccountImpl(BankValidationHandler validationHandler, BankDao bankDao, String iban) {
+	public BankAccountImpl(BankDao bankDao, BankValidationHandler validationHandler, String iban) {
 		this.bankDao = bankDao;
-		this.iban = iban;
 		this.validationHandler = validationHandler;
+		this.iban = iban;
 		setAmount(bankDao.loadAmount(iban));
 	}
 

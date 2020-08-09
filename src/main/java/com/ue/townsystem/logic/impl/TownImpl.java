@@ -1,4 +1,4 @@
-package com.ue.townsystem.impl;
+package com.ue.townsystem.logic.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +13,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -30,17 +29,13 @@ import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
-import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.api.TownManagerImpl;
-import com.ue.townsystem.api.TownworldManagerImpl;
 import com.ue.townsystem.dataaccess.api.TownsystemDao;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
-import com.ue.townsystem.logic.impl.PlotImpl;
+import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -53,6 +48,8 @@ public class TownImpl implements Town {
 	TownsystemValidationHandler validationHandler;
 	@Inject
 	BankManager bankManager;
+	@Inject
+	TownworldManager townworldManager;
 	private final TownsystemDao townsystemDao;
 	private String townName;
 	private EconomyPlayer mayor;
@@ -138,7 +135,8 @@ public class TownImpl implements Town {
 	@Override
 	public void renameTown(String newName, EconomyPlayer player, boolean sendMessage)
 			throws EconomyPlayerException, GeneralEconomyException, TownSystemException {
-		validationHandler.checkForTownDoesNotExist(newName);
+		List<String> townNameList = townworldManager.getTownNameList();
+		validationHandler.checkForTownDoesNotExist(townNameList, newName);
 		validationHandler.checkForPlayerIsMayor(getMayor(), player);
 		String oldName = getTownName();
 		townName = newName;
@@ -147,17 +145,12 @@ public class TownImpl implements Town {
 			citizen.addJoinedTown(newName);
 		}
 		villager.setCustomName(getTownName() + " TownManager");
-
-		List<String> townNameList = TownManagerImpl.getTownNameList();
 		townNameList.remove(oldName);
-
-		townworld.setTownNameList(townNames);
-
+		((TownworldManagerImpl) townworldManager).setTownNameList(townNameList);
 		if (player.isOnline() && sendMessage) {
-			performLocationCheckForAllPlayers();
+			townworldManager.performTownworldLocationCheckAllPlayers();
 			player.getPlayer().sendMessage(messageWrapper.getString("town_rename", oldName, newName));
 		}
-
 	}
 
 	@Override
@@ -169,16 +162,9 @@ public class TownImpl implements Town {
 		decreaseTownBankAmount(getTownworld().getExpandPrice());
 		Plot plot = new PlotImpl(townsystemDao, this, player, chunk.getX() + "/" + chunk.getZ());
 		getPlots().put(plot.getChunkCoords(), plot);
-		performLocationCheckForAllPlayers();
+		townworldManager.performTownworldLocationCheckAllPlayers();
 		if (player.isOnline() && sendMessage) {
 			player.getPlayer().sendMessage(messageWrapper.getString("town_expand"));
-		}
-	}
-
-	private void performLocationCheckForAllPlayers() {
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			TownworldManagerImpl.performTownWorldLocationCheck(p.getWorld().getName(), p.getLocation().getChunk(),
-					p.getName());
 		}
 	}
 

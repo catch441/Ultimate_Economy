@@ -3,124 +3,129 @@ package com.ue.townsystem.logic.api;
 import java.util.List;
 
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 
+import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.exceptions.TownSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface Townworld {
-    
-    /**
-     * Returns the townlist.
-     * 
-     * @return List
-     */
-    public List<Town> getTownList();
 
-    /**
-     * Adds a town to the townworld. You don't have to add a town, after you created
-     * one with the TownController.
-     * 
-     * @param town
-     * @throws GeneralEconomyException 
-     */
-    public void addTown(Town town) throws GeneralEconomyException;
+	/**
+	 * Returns the townlist.
+	 * 
+	 * @return List
+	 */
+	public List<Town> getTownList();
 
-    /**
-     * Removes a town from the townworld. You don't have to remove a town, after you
-     * dissolved one with the TownController.
-     * 
-     * @param town
-     * @throws GeneralEconomyException 
-     */
-    public void removeTown(Town town) throws GeneralEconomyException;
+	/**
+	 * Founds a new town in this townworld, if player has enough money. Player money
+	 * decreases if player has enough money.
+	 * 
+	 * @param townName
+	 * @param location
+	 * @param player
+	 * @throws GeneralEconomyException
+	 * @throws EconomyPlayerException
+	 * @throws TownSystemException
+	 */
+	public void foundTown(String townName, Location location, EconomyPlayer player)
+			throws GeneralEconomyException, EconomyPlayerException, TownSystemException;
 
-    /**
-     * Returns town by chunk.
-     * <p>
-     * 
-     * @param chunk
-     * @return Town
-     * @throws TownSystemException
-     */
-    public Town getTownByChunk(Chunk chunk) throws TownSystemException;
+	/**
+	 * Dissolves a entire town. The Chunks are not resettet.
+	 * 
+	 * @param ecoPlayer
+	 * @param town
+	 * @throws GeneralEconomyException
+	 * @throws EconomyPlayerException
+	 * @throws TownSystemException
+	 */
+	public void dissolveTown(EconomyPlayer ecoPlayer, Town town)
+			throws GeneralEconomyException, TownSystemException, EconomyPlayerException;
 
-    /**
-     * Returns the Town World name.
-     * 
-     * @return String
-     */
-    public String getWorldName();
+	/**
+	 * Returns town by chunk.
+	 * 
+	 * @param chunk
+	 * @return Town
+	 * @throws TownSystemException
+	 */
+	public Town getTownByChunk(Chunk chunk) throws TownSystemException;
 
-    /**
-     * Returns a town by townname.
-     * 
-     * @param townName
-     * @return Town
-     * @throws GeneralEconomyException 
-     */
-    public Town getTownByName(String townName) throws GeneralEconomyException;
+	/**
+	 * Returns the Town World name.
+	 * 
+	 * @return String
+	 */
+	public String getWorldName();
 
-    /**
-     * Returns a list of all townnames in this townworld.
-     * 
-     * @return List
-     */
-    public List<String> getTownNameList();
+	/**
+	 * Returns a town by townname.
+	 * 
+	 * @param townName
+	 * @return Town
+	 * @throws GeneralEconomyException
+	 */
+	public Town getTownByName(String townName) throws GeneralEconomyException;
 
-    /**
-     * Set the FoundationPrice for a town in this townworld. Set 'saving' true if
-     * the value should be saved in the file.
-     * 
-     * @param foundationPrice
-     * @param saving
-     *            saves the value into the savefile.
-     */
-    public void setFoundationPrice(double foundationPrice, boolean saving);
+	/**
+	 * Returns a list of all townnames in this townworld.
+	 * 
+	 * @return List
+	 */
+	public List<String> getTownNameList();
 
-    /**
-     * Returns the founding price of this townworld.
-     * 
-     * @return double
-     */
-    public double getFoundationPrice();
+	/**
+	 * Set the FoundationPrice for a town in this townworld.
+	 * 
+	 * @param foundationPrice
+	 */
+	public void setFoundationPrice(double foundationPrice);
 
-    /**
-     * Set the ExpandPrice for a town in this townworld. Set 'saving' true if the
-     * value should be saved in the file.
-     * 
-     * @param expandPrice
-     * @param saving
-     */
-    public void setExpandPrice(double expandPrice, boolean saving);
+	/**
+	 * Returns the founding price of this townworld.
+	 * 
+	 * @return double
+	 */
+	public double getFoundationPrice();
 
-    /**
-     * Returns the expand price for a town in this townworld.
-     * 
-     * @return double
-     */
-    public double getExpandPrice();
+	/**
+	 * Set the ExpandPrice for a town in this townworld.
+	 * 
+	 * @param expandPrice
+	 */
+	public void setExpandPrice(double expandPrice);
 
-    /**
-     * Despawns all town villagers in this townworld.
-     * 
-     */
-    public void despawnAllTownVillagers();
+	/**
+	 * Returns the expand price for a town in this townworld.
+	 * 
+	 * @return double
+	 */
+	public double getExpandPrice();
 
-    /**
-     * Returns true if the chunk is not claimed by any town.
-     * 
-     * @param chunk
-     * @return boolean
-     */
-    public boolean isChunkFree(Chunk chunk);
+	/**
+	 * Despawns all town villagers in this townworld.
+	 * 
+	 */
+	public void despawnAllTownVillagers();
 
-    /**
-     * Delets all save files and towns.
-     * <p>
-     * @throws GeneralEconomyException 
-     * @throws EconomyPlayerException 
-     * @throws TownSystemException 
-     */
-    public void delete() throws TownSystemException, EconomyPlayerException, GeneralEconomyException;
+	/**
+	 * Returns true if the chunk is not claimed by any town.
+	 * 
+	 * @param chunk
+	 * @return boolean
+	 */
+	public boolean isChunkFree(Chunk chunk);
+
+	/**
+	 * Delets all save files and towns.
+	 * <p>
+	 * 
+	 * @throws GeneralEconomyException
+	 * @throws EconomyPlayerException
+	 * @throws TownSystemException
+	 */
+	public void delete() throws TownSystemException, EconomyPlayerException, GeneralEconomyException;
 }

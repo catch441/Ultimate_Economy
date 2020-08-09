@@ -1,52 +1,20 @@
-package com.ue.config.commands;
+package com.ue.config.logic.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
-import java.util.logging.Level;
-
-import org.bukkit.Bukkit;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.config.logic.impl.ConfigTabCompleterImpl;
-import com.ue.ultimate_economy.UltimateEconomy;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
-
-public class ConfigTabCompleterTest {
-
-	private static ConfigTabCompleterImpl tabCompleter;
-
-	/**
-	 * Init shop for tests.
-	 */
-	@BeforeAll
-	public static void initPlugin() {
-		MockBukkit.mock();
-		Bukkit.getLogger().setLevel(Level.OFF);
-		MockBukkit.load(UltimateEconomy.class);
-		tabCompleter = new ConfigTabCompleterImpl();
-	}
-
-	/**
-	 * Unload mock bukkit.
-	 */
-	@AfterAll
-	public static void deleteSavefiles() {
-		UltimateEconomy.getInstance.getDataFolder().delete();
-		MockBukkit.unload();
-	}
-
-	/**
-	 * Unload all.
-	 */
-	@AfterEach
-	public void unload() {
-
-	}
+@ExtendWith(MockitoExtension.class)
+public class ConfigTabCompleterImplTest {
+	
+	@InjectMocks
+	ConfigTabCompleterImpl tabCompleter;
 
 	@Test
 	public void zeroArgsTest() {

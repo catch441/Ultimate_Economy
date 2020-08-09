@@ -4,11 +4,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,13 +24,9 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.config.logic.impl.ConfigManagerImpl;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
-import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
+import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
-
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigManagerImplTest {
@@ -38,6 +37,8 @@ public class ConfigManagerImplTest {
 	MessageWrapper messageWrapper;
 	@Mock
 	ConfigDao dao;
+	@Mock
+	EconomyPlayerManager ecoPlayerManager;
 
 	@Test
 	public void setupConfigInitTest() {
@@ -135,41 +136,41 @@ public class ConfigManagerImplTest {
 
 	@Test
 	public void setWildernessInteractionTest() {
-		ServerMock server = MockBukkit.mock();
-		server.addPlayer("catch441");
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("kthschnll");
-			manager.setupConfig();
-			assertFalse(manager.isWildernessInteraction());
-			manager.setWildernessInteraction(true);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getEconomyPlayerByName("kthschnll");
-			assertTrue(ecoPlayer.getPlayer().hasPermission("ultimate_economy.wilderness"));
-			assertTrue(manager.isWildernessInteraction());
-			verify(dao).saveWildernessInteraction(true);
-
-			EconomyPlayerManagerImpl.deleteEconomyPlayer(ecoPlayer);
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
-		MockBukkit.unload();
+		List<EconomyPlayer> list = new ArrayList<>();
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		list.add(ecoPlayer);
+		when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(list);
+		assertFalse(manager.isWildernessInteraction());
+		manager.setWildernessInteraction(true);
+		assertTrue(manager.isWildernessInteraction());
+		verify(dao).saveWildernessInteraction(true);
+		verify(ecoPlayer).addWildernessPermission();
+	}
+	
+	@Test
+	public void setWildernessInteractionTestWithFalse() {
+		List<EconomyPlayer> list = new ArrayList<>();
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		list.add(ecoPlayer);
+		when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(list);
+		assertFalse(manager.isWildernessInteraction());
+		manager.setWildernessInteraction(false);
+		assertFalse(manager.isWildernessInteraction());
+		verify(dao).saveWildernessInteraction(false);
+		verify(ecoPlayer).denyWildernessPermission();
 	}
 
 	@Test
 	public void setMaxRentedDaysTest() {
-		try {
-			manager.setupConfig();
-			assertEquals(14, manager.getMaxRentedDays());
-			manager.setMaxRentedDays(7);
-			assertEquals(7, manager.getMaxRentedDays());
-			verify(dao).saveMaxRentedDays(7);
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		manager.setupConfig();
+		assertEquals(14, manager.getMaxRentedDays());
+		assertDoesNotThrow(() -> manager.setMaxRentedDays(7));
+		assertEquals(7, manager.getMaxRentedDays());
+		verify(dao).saveMaxRentedDays(7);
 	}
 
 	@Test
 	public void setMaxRentedDaysExceptionTest() {
-		messageWrapper.loadLanguage(new Locale("en", "US"));
 		try {
 			manager.setMaxRentedDays(-7);
 			fail();
@@ -182,20 +183,15 @@ public class ConfigManagerImplTest {
 
 	@Test
 	public void setMaxPlayershopsTest() {
-		try {
-			manager.setupConfig();
-			assertEquals(3, manager.getMaxPlayershops());
-			manager.setMaxPlayershops(1);
-			assertEquals(1, manager.getMaxPlayershops());
-			verify(dao).saveMaxPlayershops(1);
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		manager.setupConfig();
+		assertEquals(3, manager.getMaxPlayershops());
+		assertDoesNotThrow(() -> manager.setMaxPlayershops(1));
+		assertEquals(1, manager.getMaxPlayershops());
+		verify(dao).saveMaxPlayershops(1);
 	}
 
 	@Test
 	public void setMaxPlayershopsExceptionTest() {
-		messageWrapper.loadLanguage(new Locale("en", "US"));
 		try {
 			manager.setMaxPlayershops(-1);
 			fail();
@@ -208,20 +204,15 @@ public class ConfigManagerImplTest {
 
 	@Test
 	public void setMaxHomesTest() {
-		try {
-			manager.setupConfig();
-			assertEquals(3, manager.getMaxHomes());
-			manager.setMaxHomes(1);
-			assertEquals(1, manager.getMaxHomes());
-			verify(dao).saveMaxHomes(1);
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		manager.setupConfig();
+		assertEquals(3, manager.getMaxHomes());
+		assertDoesNotThrow(() -> manager.setMaxHomes(1));
+		assertEquals(1, manager.getMaxHomes());
+		verify(dao).saveMaxHomes(1);
 	}
 
 	@Test
 	public void setMaxHomesExceptionTest() {
-		messageWrapper.loadLanguage(new Locale("en", "US"));
 		try {
 			manager.setMaxHomes(-1);
 			fail();
@@ -234,20 +225,15 @@ public class ConfigManagerImplTest {
 
 	@Test
 	public void setMaxJobsTest() {
-		try {
-			manager.setupConfig();
-			assertEquals(2, manager.getMaxJobs());
-			manager.setMaxJobs(1);
-			assertEquals(1, manager.getMaxJobs());
-			verify(dao).saveMaxJobs(1);
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		manager.setupConfig();
+		assertEquals(2, manager.getMaxJobs());
+		assertDoesNotThrow(() -> manager.setMaxJobs(1));
+		assertEquals(1, manager.getMaxJobs());
+		verify(dao).saveMaxJobs(1);
 	}
 
 	@Test
 	public void setMaxJobsExceptionTest() {
-		messageWrapper.loadLanguage(new Locale("en", "US"));
 		try {
 			manager.setMaxJobs(-1);
 			fail();
@@ -260,20 +246,15 @@ public class ConfigManagerImplTest {
 
 	@Test
 	public void setMaxJoinedTownesTest() {
-		try {
-			manager.setupConfig();
-			assertEquals(1, manager.getMaxJoinedTowns());
-			manager.setMaxJoinedTowns(3);
-			assertEquals(3, manager.getMaxJoinedTowns());
-			verify(dao).saveMaxJoinedTowns(3);
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		manager.setupConfig();
+		assertEquals(1, manager.getMaxJoinedTowns());
+		assertDoesNotThrow(() -> manager.setMaxJoinedTowns(3));
+		assertEquals(3, manager.getMaxJoinedTowns());
+		verify(dao).saveMaxJoinedTowns(3);
 	}
 
 	@Test
 	public void setMaxJoinedTownesExceptionTest() {
-		messageWrapper.loadLanguage(new Locale("en", "US"));
 		try {
 			manager.setMaxJoinedTowns(-3);
 			fail();
@@ -327,20 +308,45 @@ public class ConfigManagerImplTest {
 
 	@Test
 	public void setLocaleTest() {
+		assertDoesNotThrow(() -> manager.setLocale("de", "DE"));
+		assertEquals("DE", manager.getLocale().getCountry());
+		assertEquals("de", manager.getLocale().getLanguage());
+		verify(dao).saveLanguage("de");
+		verify(dao).saveCountry("DE");
+	}
+	
+	@Test
+	public void setLocaleCsCzTest() {
+		assertDoesNotThrow(() -> manager.setLocale("cs", "CZ"));
+		assertEquals("CZ", manager.getLocale().getCountry());
+		assertEquals("cs", manager.getLocale().getLanguage());
+		verify(dao).saveLanguage("cs");
+		verify(dao).saveCountry("CZ");
+	}
+	
+	@Test
+	public void setLocaleZhCnTest() {
+		assertDoesNotThrow(() -> manager.setLocale("zh", "CN"));
+		assertEquals("CN", manager.getLocale().getCountry());
+		assertEquals("zh", manager.getLocale().getLanguage());
+		verify(dao).saveLanguage("zh");
+		verify(dao).saveCountry("CN");
+	}
+	
+	@Test
+	public void setLocaleUnsupportedLanguage() {
 		try {
-			manager.setLocale("de", "DE");
-			assertEquals("DE", manager.getLocale().getCountry());
-			assertEquals("de", manager.getLocale().getLanguage());
-			verify(dao).saveLanguage("de");
-			verify(dao).saveCountry("DE");
-		} catch (GeneralEconomyException e) {
+			manager.setLocale("kth", "KTH");
 			fail();
+		} catch (GeneralEconomyException e) {
+			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
+			assertEquals(1, e.getParams().length);
+			assertEquals("kth", e.getParams()[0]);
 		}
 	}
 
 	@Test
 	public void setLocaleCountryNotMatching() {
-		messageWrapper.loadLanguage(new Locale("en", "US"));
 		try {
 			manager.setLocale("de", "KTH");
 			fail();

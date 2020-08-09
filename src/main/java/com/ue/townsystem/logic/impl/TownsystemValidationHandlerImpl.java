@@ -236,4 +236,18 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.TOWNWORLD_DOES_NOT_EXIST);
 		}
 	}
+
+	@Override
+	public void checkForChunkIsFree(Townworld townworld, Location location) throws TownSystemException {
+		if (!townworld.isChunkFree(location.getChunk())) {
+			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED);
+		}
+	}
+
+	@Override
+	public void checkForTownworldHasTown(List<String> townNames, String town) throws GeneralEconomyException {
+		if (!townNames.contains(town)) {
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, town);
+		}
+	}
 }

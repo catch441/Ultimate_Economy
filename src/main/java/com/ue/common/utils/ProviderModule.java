@@ -60,7 +60,13 @@ import com.ue.shopsystem.logic.impl.RentshopTabCompleterImpl;
 import com.ue.shopsystem.logic.impl.ShopEventHandlerImpl;
 import com.ue.shopsystem.logic.impl.ShopValidationHandlerImpl;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
+import com.ue.townsystem.logic.api.TownworldManager;
+import com.ue.townsystem.logic.impl.TownCommandExecutorImpl;
+import com.ue.townsystem.logic.impl.TownTabCompleterImpl;
 import com.ue.townsystem.logic.impl.TownsystemValidationHandlerImpl;
+import com.ue.townsystem.logic.impl.TownworldCommandExecutorImpl;
+import com.ue.townsystem.logic.impl.TownworldManagerImpl;
+import com.ue.townsystem.logic.impl.TownworldTabCompleterImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
 import com.ue.vault.UltimateEconomyVault;
 import com.ue.vault.VaultHook;
@@ -106,17 +112,14 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	BankManager providesBankManager(BankValidationHandler bankValidationHandler, BankDao bankDao,
-			MessageWrapper messageWrapper) {
-		return new BankManagerImpl(bankValidationHandler, bankDao, messageWrapper);
+	BankManager providesBankManager() {
+		return new BankManagerImpl();
 	}
 
 	@Singleton
 	@Provides
-	EconomyPlayerManager provideEcoPlayerManager(BankManager bankManager,
-			EconomyPlayerValidationHandler validationHandler, MessageWrapper messageWrapper,
-			EconomyPlayerDao ecoPlayerDao) {
-		return new EconomyPlayerManagerImpl(bankManager, validationHandler, messageWrapper, ecoPlayerDao);
+	EconomyPlayerManager provideEcoPlayerManager() {
+		return new EconomyPlayerManagerImpl();
 	}
 
 	@Singleton
@@ -141,8 +144,9 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	PlayershopManager providePlayershopManager(ShopValidationHandler validationHandler, MessageWrapper messageWrapper) {
-		return new PlayershopManagerImpl(validationHandler, messageWrapper);
+	PlayershopManager providePlayershopManager(TownworldManager townworldManager,
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper) {
+		return new PlayershopManagerImpl(townworldManager, validationHandler, messageWrapper);
 	}
 
 	@Singleton
@@ -153,17 +157,23 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
+	TownworldManager provideTownworldManager() {
+		return new TownworldManagerImpl();
+	}
+
+	@Singleton
+	@Provides
 	@Named("ConfigCommandExecutor")
-	CommandExecutor provideConfigCommandExecutor(ConfigManager configManager, MessageWrapper messageWrapper) {
-		return new ConfigCommandExecutorImpl(configManager, messageWrapper);
+	CommandExecutor provideConfigCommandExecutor() {
+		return new ConfigCommandExecutorImpl();
 	}
 
 	@Singleton
 	@Provides
 	@Named("EconomyPlayerCommandExecutor")
-	CommandExecutor provideEconomyPlayerCommandExecutor(EconomyPlayerManager ecoPlayerManager,
-			ConfigManager configManager, MessageWrapper messageWrapper) {
-		return new EconomyPlayerCommandExecutorImpl(ecoPlayerManager, configManager, messageWrapper);
+	CommandExecutor provideEconomyPlayerCommandExecutor(TownworldManager townworldManager,
+			EconomyPlayerManager ecoPlayerManager, ConfigManager configManager, MessageWrapper messageWrapper) {
+		return new EconomyPlayerCommandExecutorImpl(ecoPlayerManager, configManager, messageWrapper, townworldManager);
 	}
 
 	@Singleton
@@ -194,6 +204,20 @@ public class ProviderModule {
 	@Named("RentshopCommandExecutor")
 	CommandExecutor provideRentshopCommandExecutor(RentshopManager rentshopManager, MessageWrapper messageWrapper) {
 		return new RentshopCommandExecutorImpl(rentshopManager, messageWrapper);
+	}
+	
+	@Singleton
+	@Provides
+	@Named("TownCommandExecutor")
+	CommandExecutor provideTownCommandExecutor() {
+		return new TownCommandExecutorImpl();
+	}
+	
+	@Singleton
+	@Provides
+	@Named("TownworldCommandExecutor")
+	CommandExecutor provideTownworldCommandExecutor() {
+		return new TownworldCommandExecutorImpl();
 	}
 
 	@Singleton
@@ -237,6 +261,20 @@ public class ProviderModule {
 	TabCompleter provideRentshopTabCompleter(RentshopManager rentshopManager) {
 		return new RentshopTabCompleterImpl(rentshopManager);
 	}
+	
+	@Singleton
+	@Provides
+	@Named("TownTabCompleter")
+	TabCompleter provideTownTabCompleter() {
+		return new TownTabCompleterImpl();
+	}
+	
+	@Singleton
+	@Provides
+	@Named("TownworldTabCompleter")
+	TabCompleter provideTownworldTabCompleter() {
+		return new TownworldTabCompleterImpl();
+	}
 
 	@Singleton
 	@Provides
@@ -259,7 +297,7 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	BankValidationHandler provideBankValidationHandler(MessageWrapper messageWrapper) {
-		return new BankValidationHandlerImpl(messageWrapper);
+		return new BankValidationHandlerImpl();
 	}
 
 	@Singleton
@@ -276,8 +314,9 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	ShopValidationHandler provideShopValidationHandler(ConfigManager configManager, MessageWrapper messageWrapper) {
-		return new ShopValidationHandlerImpl(configManager, messageWrapper);
+	ShopValidationHandler provideShopValidationHandler(TownworldManager townworldManager, ConfigManager configManager,
+			MessageWrapper messageWrapper) {
+		return new ShopValidationHandlerImpl(townworldManager, configManager, messageWrapper);
 	}
 
 	@Singleton

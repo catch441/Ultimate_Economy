@@ -13,20 +13,10 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class ConfigCommandExecutorImpl implements CommandExecutor {
 
-	private final ConfigManager configManager;
-	private final MessageWrapper messageWrapper;
-
-	/**
-	 * Config Command Executor constructor.
-	 * 
-	 * @param configManager
-	 * @param messageWrapper
-	 */
 	@Inject
-	public ConfigCommandExecutorImpl(ConfigManager configManager, MessageWrapper messageWrapper) {
-		this.configManager = configManager;
-		this.messageWrapper = messageWrapper;
-	}
+	ConfigManager configManager;
+	@Inject
+	MessageWrapper messageWrapper;
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

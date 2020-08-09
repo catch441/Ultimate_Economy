@@ -251,7 +251,8 @@ public interface TownsystemValidationHandler {
 	 * @param world
 	 * @throws TownSystemException
 	 */
-	public void checkForTownworldDoesNotExist(Map<String, Townworld> townworlds, String world) throws TownSystemException;
+	public void checkForTownworldDoesNotExist(Map<String, Townworld> townworlds, String world)
+			throws TownSystemException;
 
 	/**
 	 * Check for townworld does exist.
@@ -261,4 +262,22 @@ public interface TownsystemValidationHandler {
 	 * @throws TownSystemException
 	 */
 	public void checkForTownworldExists(Map<String, Townworld> townworlds, String world) throws TownSystemException;
+
+	/**
+	 * Check for chunk is free.
+	 * 
+	 * @param townworld
+	 * @param location
+	 * @throws TownSystemException
+	 */
+	public void checkForChunkIsFree(Townworld townworld, Location location) throws TownSystemException;
+
+	/**
+	 * Check for townworld has town.
+	 * 
+	 * @param townNames
+	 * @param town
+	 * @throws GeneralEconomyException
+	 */
+	public void checkForTownworldHasTown(List<String> townNames, String town) throws GeneralEconomyException;
 }

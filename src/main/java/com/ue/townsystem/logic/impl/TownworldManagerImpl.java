@@ -1,4 +1,4 @@
-package com.ue.townsystem.api;
+package com.ue.townsystem.logic.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,32 +12,42 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BossBar;
+import org.bukkit.entity.Player;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.exceptions.TownExceptionMessageEnum;
 import com.ue.exceptions.TownSystemException;
-import com.ue.townsystem.impl.TownworldImpl;
+import com.ue.townsystem.dataaccess.api.TownsystemDao;
+import com.ue.townsystem.dataaccess.impl.TownsystemDaoImpl;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
 import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
+import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class TownworldManagerImpl implements TownworldManager {
 
-	private Map<String, Townworld> townWorldList = new HashMap<>();
-	private final MessageWrapper messageWrapper;
-	private final TownsystemValidationHandler townsystemValidationHandler;
-
 	@Inject
-	public TownworldManagerImpl(MessageWrapper messageWrapper,
-			TownsystemValidationHandler townsystemValidationHandler) {
-		this.messageWrapper = messageWrapper;
-		this.townsystemValidationHandler = townsystemValidationHandler;
+	EconomyPlayerManager ecoPlayerManager;
+	@Inject
+	MessageWrapper messageWrapper;
+	@Inject
+	TownsystemValidationHandler townsystemValidationHandler;
+	private Map<String, Townworld> townWorldList = new HashMap<>();
+	private List<String> townNameList = new ArrayList<>();
+
+	protected void setTownNameList(List<String> townNameList) {
+		this.townNameList = townNameList;
+	}
+
+	@Override
+	public List<String> getTownNameList() {
+		return townNameList;
 	}
 
 	@Override
@@ -48,6 +58,18 @@ public class TownworldManagerImpl implements TownworldManager {
 			}
 		}
 		throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.TOWNWORLD_DOES_NOT_EXIST);
+	}
+
+	@Override
+	public Town getTownByName(String name) throws GeneralEconomyException {
+		for (Townworld world : getTownWorldList()) {
+			for (Town town : world.getTownList()) {
+				if (town.getTownName().equals(name)) {
+					return town;
+				}
+			}
+		}
+		throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
 	}
 
 	@Override
@@ -97,12 +119,23 @@ public class TownworldManagerImpl implements TownworldManager {
 			bossbar.setVisible(false);
 		}
 	}
+	
+	@Override
+	public void performTownworldLocationCheckAllPlayers() throws EconomyPlayerException {
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(p.getName());
+			performTownWorldLocationCheck(p.getWorld().getName(), p.getLocation().getChunk(),
+					ecoPlayer);
+		}
+	}
 
 	@Override
-	public void createTownWorld(String world) throws TownSystemException {
+	public void createTownWorld(String world)
+			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		townsystemValidationHandler.checkForWorldExists(world);
 		townsystemValidationHandler.checkForTownworldDoesNotExist(townWorldList, world);
-		townWorldList.put(world, new TownworldImpl(world));
+		TownsystemDao townsystemDao = new TownsystemDaoImpl(world);
+		townWorldList.put(world, new TownworldImpl(townsystemDao, world, true));
 		saveTownworldNameList();
 	}
 
@@ -112,7 +145,6 @@ public class TownworldManagerImpl implements TownworldManager {
 		townsystemValidationHandler.checkForWorldExists(world);
 		townsystemValidationHandler.checkForTownworldExists(townWorldList, world);
 		getTownWorldByName(world).delete();
-		;
 		townWorldList.remove(world);
 		saveTownworldNameList();
 	}
@@ -121,14 +153,11 @@ public class TownworldManagerImpl implements TownworldManager {
 	public void loadAllTownWorlds() {
 		for (String townWorldName : UltimateEconomy.getInstance.getConfig().getStringList("TownWorlds")) {
 			try {
-				Townworld townworld = new TownworldImpl(townWorldName);
-				List<Town> towns = new ArrayList<>();
-				for (String townName : townworld.getTownNameList()) {
-					towns.add(TownManagerImpl.loadTown(townworldImpl, townName));
-				}
-				townworld.setTownList(towns);
+				TownsystemDao townsystemDao = new TownsystemDaoImpl(townWorldName);
+				Townworld townworld = new TownworldImpl(townsystemDao, townWorldName, false);
+				townNameList.addAll(townworld.getTownNameList());
 				townWorldList.put(townWorldName, townworld);
-			} catch (TownSystemException | EconomyPlayerException e) {
+			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException e) {
 				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the townworld " + townWorldName);
 				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}

@@ -215,4 +215,11 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 		fileConfig.set("localeLanguage", language);
 		save(fileConfig, file);
 	}
+	
+	@Deprecated
+	@Override
+	public void removeDeprecated() {
+		fileConfig.set("TownNames", null);
+		save(fileConfig, file);
+	}
 }

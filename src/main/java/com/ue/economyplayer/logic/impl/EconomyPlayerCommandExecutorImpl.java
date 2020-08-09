@@ -20,7 +20,7 @@ import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.jobsystem.logic.api.Job;
-import com.ue.townsystem.api.TownworldManagerImpl;
+import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
@@ -28,6 +28,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	private final ConfigManager configManager;
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerManager ecoPlayerManager;
+	private final TownworldManager townworldManager;
 
 	/**
 	 * EcoPlayer command executor constructor.
@@ -35,13 +36,15 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	 * @param ecoPlayerManager
 	 * @param configManager
 	 * @param messageWrapper
+	 * @param townworldManager
 	 */
 	@Inject
 	public EconomyPlayerCommandExecutorImpl(EconomyPlayerManager ecoPlayerManager, ConfigManager configManager,
-			MessageWrapper messageWrapper) {
+			MessageWrapper messageWrapper, TownworldManager townworldManager) {
 		this.configManager = configManager;
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerManager = ecoPlayerManager;
+		this.townworldManager = townworldManager;
 	}
 
 	@Override
@@ -100,7 +103,8 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performMoneyCommand(String[] args, Player player, EconomyPlayer ecoPlayer) throws EconomyPlayerException {
+	private boolean performMoneyCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
+			throws EconomyPlayerException {
 		DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.ROOT);
 		otherSymbols.setDecimalSeparator('.');
 		otherSymbols.setGroupingSeparator(',');
@@ -137,12 +141,13 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performHomeCommand(String[] args, Player player, EconomyPlayer ecoPlayer) throws EconomyPlayerException {
+	private boolean performHomeCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
+			throws EconomyPlayerException {
 		if (args.length == 1) {
 			Location location = ecoPlayer.getHome(args[0]);
 			player.teleport(location);
-			TownworldManagerImpl.performTownWorldLocationCheck(player.getWorld().getName(),
-					player.getLocation().getChunk(), player.getName());
+			townworldManager.performTownWorldLocationCheck(player.getWorld().getName(),
+					player.getLocation().getChunk(), ecoPlayer);
 		} else if (args.length == 0) {
 			player.sendMessage(messageWrapper.getString("home_info", ecoPlayer.getHomeList().keySet().toString()));
 		} else {

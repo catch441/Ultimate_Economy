@@ -22,7 +22,7 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.to.ShopItem;
-import com.ue.townsystem.api.TownworldManagerImpl;
+import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -31,6 +31,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
 	@Inject
 	PlayershopManager playershopManager;
+	@Inject
+	TownworldManager townworldManager;
 	private EconomyPlayer owner;
 	private Inventory stockPile;
 
@@ -166,7 +168,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 */
 	@Override
 	public void moveShop(Location location) throws TownSystemException, EconomyPlayerException {
-		if (TownworldManagerImpl.isTownWorld(location.getWorld().getName())) {
+		if (townworldManager.isTownWorld(location.getWorld().getName())) {
 			getValidationHandler().checkForPlayerHasPermissionAtLocation(location, getOwner());
 		}
 		super.moveShop(location);

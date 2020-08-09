@@ -1,4 +1,4 @@
-package com.ue.townsystem.commands;
+package com.ue.townsystem.logic.impl;
 
 public enum TownCommandEnum {
 

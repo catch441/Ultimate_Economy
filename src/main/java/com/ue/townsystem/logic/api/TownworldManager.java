@@ -21,6 +21,15 @@ public interface TownworldManager {
 	public Townworld getTownWorldByName(String name) throws TownSystemException;
 
 	/**
+	 * Returns a town by townname.
+	 * 
+	 * @param townName
+	 * @return Town
+	 * @throws GeneralEconomyException
+	 */
+	public Town getTownByName(String townName) throws GeneralEconomyException;
+
+	/**
 	 * This method returns a list of all townworlds.
 	 * 
 	 * @return List of TownWorlds
@@ -52,8 +61,11 @@ public interface TownworldManager {
 	 * 
 	 * @param world
 	 * @throws TownSystemException
+	 * @throws GeneralEconomyException
+	 * @throws EconomyPlayerException
 	 */
-	public void createTownWorld(String world) throws TownSystemException;
+	public void createTownWorld(String world)
+			throws TownSystemException, EconomyPlayerException, GeneralEconomyException;
 
 	/**
 	 * This method should be used to delete/disable a townworld.
@@ -65,14 +77,14 @@ public interface TownworldManager {
 	 */
 	public void deleteTownWorld(String world)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException;
-	
+
 	/**
 	 * This method loads all townworlds from the save file. Loads all towns and
 	 * plots in the townworld as well. EconomyPlayers have to be loaded first.
 	 * 
 	 */
 	public void loadAllTownWorlds();
-	
+
 	/**
 	 * Handles the townworld location check.
 	 * 
@@ -81,4 +93,18 @@ public interface TownworldManager {
 	 * @param ecoPlayer
 	 */
 	public void performTownWorldLocationCheck(String worldname, Chunk chunk, EconomyPlayer ecoPlayer);
+
+	/**
+	 * Returns the town name list.
+	 * 
+	 * @return town names
+	 */
+	public List<String> getTownNameList();
+
+	/**
+	 * Performs the townworld location check for all online players.
+	 * 
+	 * @throws EconomyPlayerException
+	 */
+	public void performTownworldLocationCheckAllPlayers() throws EconomyPlayerException;
 }

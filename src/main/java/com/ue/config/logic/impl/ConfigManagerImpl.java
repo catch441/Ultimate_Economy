@@ -45,6 +45,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		this.ecoPlayerManager = ecoPlayerManager;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void setupConfig() {
 		try {
@@ -59,6 +60,7 @@ public class ConfigManagerImpl implements ConfigManager {
 			setupCurrencyPl();
 			setupCurrencySg();
 			setupLocale();
+			configDao.removeDeprecated();
 		} catch (GeneralEconomyException e) {
 		}
 	}

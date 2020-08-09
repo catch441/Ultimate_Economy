@@ -21,9 +21,9 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
-import com.ue.townsystem.api.TownworldManagerImpl;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.Townworld;
+import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
@@ -31,17 +31,21 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 
 	private final MessageWrapper messageWrapper;
 	private final ConfigManager configManager;
+	private final TownworldManager townworldManager;
 
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param townworldManager
 	 * @param configManager
 	 * @param messageWrapper
 	 */
 	@Inject
-	public ShopValidationHandlerImpl(ConfigManager configManager, MessageWrapper messageWrapper) {
+	public ShopValidationHandlerImpl(TownworldManager townworldManager, ConfigManager configManager,
+			MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
 		this.configManager = configManager;
+		this.townworldManager = townworldManager;
 	}
 
 	@Override
@@ -88,21 +92,24 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 	@Override
 	public void checkForValidAmount(String amount) throws GeneralEconomyException {
 		if (!"none".equals(amount) && (Integer.valueOf(amount) <= 0 || Integer.valueOf(amount) > 64)) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, amount);
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
+					amount);
 		}
 	}
 
 	@Override
 	public void checkForValidPrice(String price) throws GeneralEconomyException {
 		if (!"none".equals(price) && Double.valueOf(price) < 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, price);
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
+					price);
 		}
 	}
 
 	@Override
 	public void checkForValidSize(int size) throws GeneralEconomyException {
 		if (size % 9 != 0 || size > 54) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
+					size);
 		}
 	}
 
@@ -110,7 +117,8 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 	public void checkForValidSlot(int slot, int size, int reservedSlots) throws GeneralEconomyException {
 		if (slot > (size - 1 - reservedSlots) || slot < 0) {
 			// +1 for player readable style
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, slot + 1);
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
+					slot + 1);
 		}
 	}
 
@@ -148,7 +156,8 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 	@Override
 	public void checkForPositiveValue(double value) throws GeneralEconomyException {
 		if (value < 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, value);
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
+					value);
 		}
 	}
 
@@ -160,7 +169,8 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 	}
 
 	@Override
-	public void checkForChangeOwnerIsPossible(List<String> uniqueShopNameList, EconomyPlayer newOwner, String shopName) throws ShopSystemException {
+	public void checkForChangeOwnerIsPossible(List<String> uniqueShopNameList, EconomyPlayer newOwner, String shopName)
+			throws ShopSystemException {
 		if (uniqueShopNameList.contains(shopName + "_" + newOwner.getName())) {
 			throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.SHOP_CHANGEOWNER_ERROR);
 		}
@@ -174,9 +184,10 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 	}
 
 	@Override
-	public void checkForShopNameIsFree(List<String> shopNames, String name, EconomyPlayer owner) throws GeneralEconomyException {
+	public void checkForShopNameIsFree(List<String> shopNames, String name, EconomyPlayer owner)
+			throws GeneralEconomyException {
 		String suffix = "";
-		if(owner != null) {
+		if (owner != null) {
 			suffix = "_" + owner.getName();
 		}
 		if (shopNames.contains(name + suffix)) {
@@ -188,7 +199,7 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 	@Override
 	public void checkForPlayerHasPermissionAtLocation(Location location, EconomyPlayer owner)
 			throws EconomyPlayerException, TownSystemException {
-		Townworld townworld = TownworldManagerImpl.getTownWorldByName(location.getWorld().getName());
+		Townworld townworld = townworldManager.getTownWorldByName(location.getWorld().getName());
 		if (townworld.isChunkFree(location.getChunk())) {
 			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
 		} else {
@@ -242,9 +253,10 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 			throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.ERROR_ON_RENAMING);
 		}
 	}
-	
+
 	@Override
-	public void checkForMaxPlayershopsForPlayer(List<Playershop> shopList, EconomyPlayer ecoPlayer) throws EconomyPlayerException {
+	public void checkForMaxPlayershopsForPlayer(List<Playershop> shopList, EconomyPlayer ecoPlayer)
+			throws EconomyPlayerException {
 		int actualNumber = 0;
 		for (Playershop shop : shopList) {
 			if (shop.isOwner(ecoPlayer)) {

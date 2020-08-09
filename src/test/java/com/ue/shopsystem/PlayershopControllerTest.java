@@ -35,7 +35,7 @@ import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.PlayershopController;
 import com.ue.townsystem.api.TownManagerImpl;
-import com.ue.townsystem.api.TownworldManagerImpl;
+import com.ue.townsystem.logic.impl.TownworldManagerImpl;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;

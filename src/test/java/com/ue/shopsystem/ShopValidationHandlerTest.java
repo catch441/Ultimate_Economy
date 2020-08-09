@@ -29,7 +29,7 @@ import com.ue.shopsystem.api.PlayershopController;
 import com.ue.shopsystem.impl.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.api.TownManagerImpl;
-import com.ue.townsystem.api.TownworldManagerImpl;
+import com.ue.townsystem.logic.impl.TownworldManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
