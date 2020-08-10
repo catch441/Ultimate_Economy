@@ -1,29 +1,47 @@
-package com.ue.economyplayer.commands;
+package com.ue.economyplayer.dataaccess.impl;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.logging.Level;
+
+import javax.inject.Inject;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.entity.Player;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.ue.common.utils.MessageWrapper;
+import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerCommandExecutorImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.jobsystem.logic.api.Job;
-import com.ue.jobsystem.logic.api.JobController;
 import com.ue.jobsystem.logic.impl.JobSystemException;
+import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -32,61 +50,39 @@ import be.seeseemelk.mockbukkit.ServerMock;
 import be.seeseemelk.mockbukkit.WorldMock;
 import be.seeseemelk.mockbukkit.entity.PlayerMock;
 
-public class EconomyPlayerCommandExecutorTest {
+@ExtendWith(MockitoExtension.class)
+public class EconomyPlayerCommandExecutorImplTest {
 
-	private static ServerMock server;
-	private static WorldMock world;
-	private static PlayerMock player;
-	private static PlayerMock kth;
-	private static CommandExecutor executor;
-
-	/**
-	 * Init shop for tests.
-	 */
-	@BeforeAll
-	public static void initPlugin() {
-		server = MockBukkit.mock();
-		Bukkit.getLogger().setLevel(Level.OFF);
-		MockBukkit.load(UltimateEconomy.class);
-		world = new WorldMock(Material.GRASS_BLOCK, 1);
-		server.addWorld(world);
-		player = server.addPlayer("catch441");
-		kth = server.addPlayer("kthschnll");
-		executor = new EconomyPlayerCommandExecutorImpl();
-		try {
-			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(21.125, false);
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
-	}
+	@InjectMocks
+	EconomyPlayerCommandExecutorImpl executor;
+	@Mock
+	ConfigManager configManager;
+	@Mock
+	MessageWrapper messageWrapper;
+	@Mock
+	EconomyPlayerManager ecoPlayerManager;
+	@Mock
+	TownworldManager townworldManager;
+	@Mock
+	Player player;
+	@Mock
+	EconomyPlayer ecoPlayer;
 
 	/**
-	 * Unload mock bukkit.
+	 * Setup.
 	 */
-	@AfterAll
-	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
-		for (int i = 0; i < size2; i++) {
-			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-		}
-		UltimateEconomy.getInstance.getDataFolder().delete();
-		server.setPlayers(0);
-		MockBukkit.unload();
+	@BeforeEach
+	public void setup() {
+		when(player.getName()).thenReturn("kthschnll");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
 	}
 
-	/**
-	 * Unload all.
-	 */
-	@AfterEach
-	public void unload() {
-
-	}
-	
 	@Test
 	public void invalidCommandTest() {
 		String[] args = {};
 		boolean result = executor.onCommand(player, null, "kth", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertFalse(result);
 	}
 
@@ -94,7 +90,8 @@ public class EconomyPlayerCommandExecutorTest {
 	public void bankCommandTestZeroArgs() {
 		String[] args = {};
 		boolean result = executor.onCommand(player, null, "bank", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertFalse(result);
 	}
 
@@ -102,28 +99,29 @@ public class EconomyPlayerCommandExecutorTest {
 	public void bankCommandTestInvalidArg() {
 		String[] args = { "kth" };
 		boolean result = executor.onCommand(player, null, "bank", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertFalse(result);
 	}
 
 	@Test
 	public void bankCommandTestOn() {
-		EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).setScoreBoardDisabled(true);
 		String[] args = { "on" };
 		boolean result = executor.onCommand(player, null, "bank", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertTrue(result);
-		assertFalse(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).isScoreBoardDisabled());
+		verify(ecoPlayer).setScoreBoardDisabled(false);
 	}
 
 	@Test
 	public void bankCommandTestOff() {
-		EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).setScoreBoardDisabled(false);
 		String[] args = { "off" };
 		boolean result = executor.onCommand(player, null, "bank", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertTrue(result);
-		assertTrue(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).isScoreBoardDisabled());
+		verify(ecoPlayer).setScoreBoardDisabled(true);
 	}
 
 	@Test
@@ -136,25 +134,27 @@ public class EconomyPlayerCommandExecutorTest {
 
 	@Test
 	public void moneyCommandTestMoreArgs() {
-		player.addAttachment(UltimateEconomy.getInstance).setPermission("ultimate_economy.adminpay", false);
+		when(player.hasPermission("Ultimate_Economy.adminpay")).thenReturn(false);
 		String[] args = { "kth", "kth" };
 		boolean result = executor.onCommand(player, null, "money", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertFalse(result);
 	}
 
 	@Test
 	public void moneyCommandTestAdminMoreArgs() {
-		player.addAttachment(UltimateEconomy.getInstance).setPermission("ultimate_economy.adminpay", true);
+		when(player.hasPermission("Ultimate_Economy.adminpay")).thenReturn(true);
 		String[] args = { "kth", "kth" };
 		boolean result = executor.onCommand(player, null, "money", args);
-		assertEquals("/money or /money <player>", player.nextMessage());
+		verify(player).sendMessage("/money or /money <player>");
+		verifyNoMoreInteractions(player);
 		assertTrue(result);
 	}
 
 	@Test
 	public void moneyCommandTestAdminOneArg() {
-		player.addAttachment(UltimateEconomy.getInstance).setPermission("ultimate_economy.adminpay", true);
+		when(player.hasPermission("Ultimate_Economy.adminpay")).thenReturn(true);
 		String[] args = { "catch441" };
 		boolean result = executor.onCommand(player, null, "money", args);
 		assertEquals("§6Money: §a21.12§6 §a$§6", player.nextMessage());
@@ -163,7 +163,7 @@ public class EconomyPlayerCommandExecutorTest {
 
 	@Test
 	public void moneyCommandTestAdminInvalidPlayer() {
-		player.addAttachment(UltimateEconomy.getInstance).setPermission("ultimate_economy.adminpay", true);
+		when(player.hasPermission("Ultimate_Economy.adminpay")).thenReturn(true);
 		String[] args = { "kthschnll441" };
 		boolean result = executor.onCommand(player, null, "money", args);
 		assertEquals("§cThis player does not exist!", player.nextMessage());
@@ -172,34 +172,35 @@ public class EconomyPlayerCommandExecutorTest {
 
 	@Test
 	public void moneyCommandTestPlayerOneArg() {
-		player.addAttachment(UltimateEconomy.getInstance).setPermission("ultimate_economy.adminpay", false);
+		when(player.hasPermission("Ultimate_Economy.adminpay")).thenReturn(false);
 		String[] args = { "catch441" };
 		boolean result = executor.onCommand(player, null, "money", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertFalse(result);
 	}
 
 	@Test
 	public void myJobsCommandTestZeroArgs() {
-		try {
-			JobController.createJob("myjob");
-			Job job = JobController.getJobList().get(0);
-			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).joinJob(job, false);
-			String[] args = {};
-			boolean result = executor.onCommand(player, null, "myjobs", args);
-			assertEquals("§6Joined jobs: §a[myjob]§6 ", player.nextMessage());
-			assertTrue(result);
-			JobController.deleteJob(job);
-		} catch (GeneralEconomyException | EconomyPlayerException | JobSystemException e) {
-			fail();
-		}
+		Job job = mock(Job.class);
+		when(job.getName()).thenReturn("myjob");
+		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job));
+		when(messageWrapper.getString("myjobs_info", "[myjob]")).thenReturn("§6Joined jobs: §a[myjob]§6");
+
+		String[] args = {};
+		boolean result = executor.onCommand(player, null, "myjobs", args);
+		verify(messageWrapper).getString("myjobs_info", "[myjob]");
+		verify(player).sendMessage("§6Joined jobs: §a[myjob]§6");
+		verifyNoMoreInteractions(player);
+		assertTrue(result);
 	}
 
 	@Test
 	public void myJobsCommandTestMoreArgs() {
 		String[] args = { "kth" };
 		boolean result = executor.onCommand(player, null, "myjobs", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertFalse(result);
 	}
 
@@ -207,7 +208,8 @@ public class EconomyPlayerCommandExecutorTest {
 	public void setHomeCommandTestZeroArgs() {
 		String[] args = {};
 		boolean result = executor.onCommand(player, null, "sethome", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertFalse(result);
 	}
 
@@ -215,7 +217,8 @@ public class EconomyPlayerCommandExecutorTest {
 	public void setHomeCommandTestMoreArgs() {
 		String[] args = { "kth", "kth" };
 		boolean result = executor.onCommand(player, null, "sethome", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertFalse(result);
 	}
 
@@ -258,7 +261,8 @@ public class EconomyPlayerCommandExecutorTest {
 	public void delHomeCommandTestZeroArgs() {
 		String[] args = {};
 		boolean result = executor.onCommand(player, null, "delhome", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertFalse(result);
 	}
 
@@ -266,7 +270,8 @@ public class EconomyPlayerCommandExecutorTest {
 	public void delHomeCommandTestMoreArgs() {
 		String[] args = { "kth", "kth" };
 		boolean result = executor.onCommand(player, null, "delhome", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertFalse(result);
 	}
 
@@ -298,7 +303,8 @@ public class EconomyPlayerCommandExecutorTest {
 	public void payCommandTestZeroArgs() {
 		String[] args = {};
 		boolean result = executor.onCommand(player, null, "pay", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertFalse(result);
 	}
 
@@ -306,7 +312,8 @@ public class EconomyPlayerCommandExecutorTest {
 	public void payCommandTestOneArgs() {
 		String[] args = { "kthschnll" };
 		boolean result = executor.onCommand(player, null, "pay", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertFalse(result);
 	}
 
@@ -314,7 +321,8 @@ public class EconomyPlayerCommandExecutorTest {
 	public void payCommandTestMoreArgs() {
 		String[] args = { "kthschnll", "10", "kth" };
 		boolean result = executor.onCommand(player, null, "pay", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertFalse(result);
 	}
 
@@ -343,8 +351,8 @@ public class EconomyPlayerCommandExecutorTest {
 			assertEquals("§6You got §a10.0§6 §a$§6 from §acatch441§6.", kth.nextMessage());
 			assertEquals("11.125", String
 					.valueOf(EconomyPlayerManagerImpl.getEconomyPlayerByName("catch441").getBankAccount().getAmount()));
-			assertEquals("10.0", String
-					.valueOf(EconomyPlayerManagerImpl.getEconomyPlayerByName("kthschnll").getBankAccount().getAmount()));
+			assertEquals("10.0", String.valueOf(
+					EconomyPlayerManagerImpl.getEconomyPlayerByName("kthschnll").getBankAccount().getAmount()));
 			assertTrue(result);
 			EconomyPlayerManagerImpl.getEconomyPlayerByName("catch441").increasePlayerAmount(10, false);
 		} catch (EconomyPlayerException | GeneralEconomyException e) {
@@ -356,7 +364,7 @@ public class EconomyPlayerCommandExecutorTest {
 	public void givemoneyCommandTestZeroArgs() {
 		String[] args = {};
 		boolean result = executor.onCommand(player, null, "givemoney", args);
-		assertNull(player.nextMessage());
+		verifyNoInteractions(player);
 		assertFalse(result);
 	}
 
@@ -364,7 +372,7 @@ public class EconomyPlayerCommandExecutorTest {
 	public void givemoneyCommandTestMoreArgs() {
 		String[] args = { "kth", "kth", "kth" };
 		boolean result = executor.onCommand(player, null, "givemoney", args);
-		assertNull(player.nextMessage());
+		verifyNoInteractions(player);
 		assertFalse(result);
 	}
 
@@ -432,7 +440,8 @@ public class EconomyPlayerCommandExecutorTest {
 	public void homeCommandTestMoreArgs() {
 		String[] args = { "kth", "kth" };
 		boolean result = executor.onCommand(player, null, "home", args);
-		assertNull(player.nextMessage());
+		verify(player).getName();
+		verifyNoMoreInteractions(player);
 		assertFalse(result);
 	}
 

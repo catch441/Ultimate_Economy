@@ -196,7 +196,6 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		validationHandler.checkForNotReachedMaxHomes(reachedMaxHomes());
 		validationHandler.checkForNotExistingHome(getHomeList(), homeName);
 		getHomeList().put(homeName, location);
-		ecoPlayerDao.saveHomeList(getName(), getHomeList());
 		ecoPlayerDao.saveHome(getName(), homeName, location);
 		if (isOnline() && sendMessage) {
 			getPlayer().sendMessage(messageWrapper.getString("sethome", homeName));
@@ -208,7 +207,6 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	public void removeHome(String homeName, boolean sendMessage) throws EconomyPlayerException {
 		validationHandler.checkForExistingHome(getHomeList(), homeName);
 		getHomeList().remove(homeName);
-		ecoPlayerDao.saveHomeList(getName(), getHomeList());
 		ecoPlayerDao.saveHome(getName(), homeName, null);
 		if (isOnline() && sendMessage) {
 			getPlayer().sendMessage(messageWrapper.getString("delhome", homeName));
@@ -355,7 +353,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		setName(name);
 		setScoreBoardDisabled(true);
 		bankAccount = bankManager.createBankAccount(0.0);
-		ecoPlayerDao.saveBankIban(getName(), getBankAccount());
+		ecoPlayerDao.saveBankIban(getName(), getBankAccount().getIban());
 	}
 
 	/*
@@ -368,7 +366,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		scoreBoardDisabled = ecoPlayerDao.loadScoreboardDisabled(getName());
 		loadJoinedJobs();
 		joinedTowns = ecoPlayerDao.loadJoinedTowns(getName());
-		loadHomes();
+		homes = ecoPlayerDao.loadHomeList(getName());
 		loadBankAccount();
 		updateScoreBoard();
 	}
@@ -380,13 +378,6 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		} catch (GeneralEconomyException e) {
 			Bukkit.getLogger().warning(
 					"[Ultimate_Economy] Failed to load the bank account " + iban + " for the player " + getName());
-		}
-	}
-
-	private void loadHomes() {
-		for (String homeName : ecoPlayerDao.loadHomeList(getName())) {
-			Location homeLocation = ecoPlayerDao.loadHome(getName(), homeName);
-			getHomeList().put(homeName, homeLocation);
 		}
 	}
 

@@ -3,6 +3,7 @@ package com.ue.economyplayer.dataaccess.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,30 +15,23 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
+import com.ue.common.utils.BukkitService;
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
-import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.jobsystem.logic.api.Job;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayerDao {
 
+	@Inject
+	BankManager bankManager;
+	@Inject
+	BukkitService bukkitService;
 	private File file;
 	private YamlConfiguration config;
-	private final BankManager bankManager;
-	
-	/**
-	 * Inject constructor.
-	 * @param bankManager
-	 */
-	@Inject
-	public EconomyPlayerDaoImpl(BankManager bankManager) {
-		this.bankManager = bankManager;
-	}
 
 	@Override
-	public void setupSavefile() {
-		file = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
+	public void setupSavefile(String datafolder) {
+		file = new File(datafolder, "PlayerFile.yml");
 		if (!file.exists()) {
 			try {
 				getSavefile().createNewFile();
@@ -61,8 +55,8 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	}
 
 	@Override
-	public void deleteEconomyPlayer(EconomyPlayer ecoPlayer) {
-		getConfig().set(ecoPlayer.getName(), null);
+	public void deleteEconomyPlayer(String playerName) {
+		getConfig().set(playerName, null);
 		save(getConfig(), getSavefile());
 	}
 
@@ -72,12 +66,6 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 
 	private YamlConfiguration getConfig() {
 		return config;
-	}
-
-	@Override
-	public void saveHomeList(String playerName, Map<String, Location> homeList) {
-		getConfig().set(playerName + ".Home.Homelist", new ArrayList<String>(homeList.keySet()));
-		save(getConfig(), getSavefile());
 	}
 
 	@Override
@@ -95,8 +83,8 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	}
 
 	@Override
-	public void saveBankIban(String playerName, BankAccount account) {
-		getConfig().set(playerName + ".Iban", account.getIban());
+	public void saveBankIban(String playerName, String iban) {
+		getConfig().set(playerName + ".Iban", iban);
 		save(getConfig(), getSavefile());
 	}
 
@@ -138,18 +126,22 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 		return getConfig().getBoolean(playerName + ".scoreboardDisabled");
 	}
 
-	@Override
-	public Location loadHome(String playerName, String homeName) {
+	private Location loadHome(String playerName, String homeName) {
 		return new Location(
-				Bukkit.getWorld(getConfig().getString(playerName + ".Home." + homeName + ".World")),
+				bukkitService.getWorld(getConfig().getString(playerName + ".Home." + homeName + ".World")),
 				getConfig().getDouble(playerName + ".Home." + homeName + ".X"),
 				getConfig().getDouble(playerName + ".Home." + homeName + ".Y"),
 				getConfig().getDouble(playerName + ".Home." + homeName + ".Z"));
 	}
 
 	@Override
-	public List<String> loadHomeList(String playerName) {
-		return getConfig().getStringList(playerName + ".Home.Homelist");
+	public Map<String, Location> loadHomeList(String playerName) {
+		removeDeprecatedHomelist(playerName);
+		Map<String, Location> homes = new HashMap<>();
+		for(String home: getConfig().getConfigurationSection(playerName + ".Home").getKeys(false)) {
+			homes.put(home, loadHome(playerName, home));
+		}
+		return homes;
 	}
 
 	@Override
@@ -170,6 +162,18 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 			BankAccount bankAccount = bankManager.createBankAccount(amount);
 			getConfig().set(playerName + ".account amount", null);
 			getConfig().set(playerName + ".Iban", bankAccount.getIban());
+			save(getConfig(), getSavefile());
+		}
+	}
+	
+	/**
+	 * @since 1.2.6
+	 * @deprecated can be removed later
+	 */
+	@Deprecated
+	private void removeDeprecatedHomelist(String playerName) {
+		if (getConfig().contains(playerName + ".Home.Homelist")) {
+			getConfig().set(playerName + ".Home.Homelist", null);
 			save(getConfig(), getSavefile());
 		}
 	}

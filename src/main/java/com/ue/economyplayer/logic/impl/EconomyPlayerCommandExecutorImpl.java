@@ -25,27 +25,14 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 
-	private final ConfigManager configManager;
-	private final MessageWrapper messageWrapper;
-	private final EconomyPlayerManager ecoPlayerManager;
-	private final TownworldManager townworldManager;
-
-	/**
-	 * EcoPlayer command executor constructor.
-	 * 
-	 * @param ecoPlayerManager
-	 * @param configManager
-	 * @param messageWrapper
-	 * @param townworldManager
-	 */
 	@Inject
-	public EconomyPlayerCommandExecutorImpl(EconomyPlayerManager ecoPlayerManager, ConfigManager configManager,
-			MessageWrapper messageWrapper, TownworldManager townworldManager) {
-		this.configManager = configManager;
-		this.messageWrapper = messageWrapper;
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.townworldManager = townworldManager;
-	}
+	ConfigManager configManager;
+	@Inject
+	MessageWrapper messageWrapper;
+	@Inject
+	EconomyPlayerManager ecoPlayerManager;
+	@Inject
+	TownworldManager townworldManager;
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

@@ -171,9 +171,8 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	@Named("EconomyPlayerCommandExecutor")
-	CommandExecutor provideEconomyPlayerCommandExecutor(TownworldManager townworldManager,
-			EconomyPlayerManager ecoPlayerManager, ConfigManager configManager, MessageWrapper messageWrapper) {
-		return new EconomyPlayerCommandExecutorImpl(ecoPlayerManager, configManager, messageWrapper, townworldManager);
+	CommandExecutor provideEconomyPlayerCommandExecutor() {
+		return new EconomyPlayerCommandExecutorImpl();
 	}
 
 	@Singleton
@@ -223,8 +222,8 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	@Named("EconomyPlayerTabCompleter")
-	TabCompleter provideEcoPlayerTabCompleter(EconomyPlayerManager ecoPlayerManager) {
-		return new EconomyPlayerTabCompleterImpl(ecoPlayerManager);
+	TabCompleter provideEcoPlayerTabCompleter() {
+		return new EconomyPlayerTabCompleterImpl();
 	}
 
 	@Singleton
@@ -290,8 +289,8 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	EconomyPlayerDao provideEcoPlayerDao(BankManager bankManager) {
-		return new EconomyPlayerDaoImpl(bankManager);
+	EconomyPlayerDao provideEcoPlayerDao() {
+		return new EconomyPlayerDaoImpl();
 	}
 
 	@Singleton

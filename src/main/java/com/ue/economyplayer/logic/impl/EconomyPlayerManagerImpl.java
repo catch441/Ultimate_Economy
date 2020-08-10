@@ -15,6 +15,7 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.jobsystem.logic.api.JobManager;
+import com.ue.ultimate_economy.UltimateEconomy;
 
 public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 
@@ -68,13 +69,13 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	public void deleteEconomyPlayer(EconomyPlayer player) {
 		getAllEconomyPlayers().remove(player);
 		ecoPlayerDao.savePlayerList(getEconomyPlayerNameList());
-		ecoPlayerDao.deleteEconomyPlayer(player);
+		ecoPlayerDao.deleteEconomyPlayer(player.getName());
 		bankManager.deleteBankAccount(player.getBankAccount());
 	}
 
 	@Override
 	public void loadAllEconomyPlayers() {
-		ecoPlayerDao.setupSavefile();
+		ecoPlayerDao.setupSavefile(UltimateEconomy.getInstance.getDataFolder().getPath());
 		List<String> playerList = ecoPlayerDao.loadPlayerList();
 		for (String player : playerList) {
 			getAllEconomyPlayers().add(new EconomyPlayerImpl(validationHandler, ecoPlayerDao, messageWrapper,
