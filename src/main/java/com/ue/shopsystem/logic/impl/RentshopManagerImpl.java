@@ -12,11 +12,10 @@ import org.bukkit.entity.Player;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.exceptions.ShopSystemException;
-import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
+import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 import com.ue.ultimate_economy.UltimateEconomy;

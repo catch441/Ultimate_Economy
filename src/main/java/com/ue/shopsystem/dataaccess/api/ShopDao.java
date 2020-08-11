@@ -7,9 +7,9 @@ import org.bukkit.Location;
 import org.bukkit.entity.Villager.Profession;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
-import com.ue.exceptions.ShopSystemException;
-import com.ue.exceptions.TownSystemException;
+import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.shopsystem.logic.to.ShopItem;
+import com.ue.townsystem.logic.impl.TownSystemException;
 
 public interface ShopDao {
 

@@ -15,7 +15,6 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopRentGuiHandler;

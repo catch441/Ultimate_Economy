@@ -33,9 +33,9 @@ import org.junit.jupiter.api.Test;
 
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
-import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
+import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;

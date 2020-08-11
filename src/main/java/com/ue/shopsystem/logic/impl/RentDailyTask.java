@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.ue.common.utils.MessageWrapper;
-import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.ultimate_economy.GeneralEconomyException;

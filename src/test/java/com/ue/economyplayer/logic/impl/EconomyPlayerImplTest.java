@@ -1,15 +1,20 @@
-package com.ue.economyplayer;
+package com.ue.economyplayer.logic.impl;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -18,19 +23,31 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.ue.bank.logic.api.BankAccount;
+import com.ue.bank.logic.api.BankManager;
 import com.ue.bank.logic.impl.BankManagerImpl;
+import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.config.logic.api.ConfigManager;
+import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.jobsystem.logic.api.Job;
-import com.ue.jobsystem.logic.api.JobController;
+import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -40,53 +57,44 @@ import be.seeseemelk.mockbukkit.ServerMock;
 import be.seeseemelk.mockbukkit.WorldMock;
 import be.seeseemelk.mockbukkit.entity.PlayerMock;
 
-public class EconomyPlayerTest {
+@ExtendWith(MockitoExtension.class)
+public class EconomyPlayerImplTest {
 
-	private static ServerMock server;
-	private static WorldMock world;
-	private static PlayerMock player;
+	@Mock
+	BukkitService bukkitService;
+	@Mock
+	ConfigManager configManager;
+	@Mock
+	BankManager bankManager;
+	@Mock
+	JobManager jobManager;
+	@Mock
+	MessageWrapper messageWrapper;
+	@Mock
+	EconomyPlayerDao ecoPlayerDao;
+	@Mock
+	EconomyPlayerValidationHandler validationHandler;
 
-	@BeforeAll
-	public static void initPlugin() {
-		server = MockBukkit.mock();
-		Bukkit.getLogger().setLevel(Level.OFF);
-		MockBukkit.load(UltimateEconomy.class);
-		world = new WorldMock(Material.GRASS_BLOCK, 1);
-		server.addWorld(world);
-		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
-		player = server.addPlayer("catch441");
-		EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-	}
-
-	/**
-	 * Unload mock bukkit.
+	/*
+	 * try { EconomyPlayerManagerImpl.createEconomyPlayer("catch441"); EconomyPlayer
+	 * ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
+	 * assertEquals(1, EconomyPlayerManagerImpl.getAllEconomyPlayers().size());
+	 * assertEquals("catch441", ecoPlayer.getName()); assertEquals(player,
+	 * ecoPlayer.getPlayer()); assertTrue(ecoPlayer.getJobList().isEmpty());
+	 * assertTrue(ecoPlayer.getHomeList().isEmpty());
+	 * assertTrue(ecoPlayer.getJoinedTownList().isEmpty());
+	 * assertEquals(BankManagerImpl.getBankAccounts().get(0),
+	 * ecoPlayer.getBankAccount()); // check savefile File saveFile = new
+	 * File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
+	 * YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
+	 * assertEquals(1, config.getStringList("Player").size());
+	 * assertEquals("catch441", config.getStringList("Player").get(0));
+	 * assertEquals(BankManagerImpl.getBankAccounts().get(0).getIban(),
+	 * config.getString("catch441.Iban"));
+	 * assertTrue(config.getBoolean("catch441.scoreboardDisabled")); } catch
+	 * (EconomyPlayerException e) { assertTrue(false); }
 	 */
-	@AfterAll
-	public static void deleteSavefiles() {
-		UltimateEconomy.getInstance.getDataFolder().delete();
-		server.setPlayers(0);
-		MockBukkit.unload();
-	}
 
-	/**
-	 * Unload all.
-	 */
-	@AfterEach
-	public void unload() {
-		int size = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
-		for (int i = 0; i < size; i++) {
-			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-		}
-		int size2 = JobController.getJobList().size();
-		for (int i = 0; i < size2; i++) {
-			JobController.deleteJob(JobController.getJobList().get(0));
-		}
-		int size3 = BankManagerImpl.getBankAccounts().size();
-		for (int i = 0; i < size3; i++) {
-			BankManagerImpl.deleteBankAccount(BankManagerImpl.getBankAccounts().get(0));
-		}
-	}
-	
 	@Test
 	public void constructorLoadTest() {
 		try {
@@ -102,9 +110,9 @@ public class EconomyPlayerTest {
 			assertTrue(result.isScoreBoardDisabled());
 			assertEquals(ecoPlayer.getBankAccount(), result.getBankAccount());
 			assertTrue(result.getHomeList().containsKey("myhome"));
-			assertEquals("1.0",String.valueOf(result.getHomeList().get("myhome").getX()));
-			assertEquals("2.0",String.valueOf(result.getHomeList().get("myhome").getY()));
-			assertEquals("3.0",String.valueOf(result.getHomeList().get("myhome").getZ()));
+			assertEquals("1.0", String.valueOf(result.getHomeList().get("myhome").getX()));
+			assertEquals("2.0", String.valueOf(result.getHomeList().get("myhome").getY()));
+			assertEquals("3.0", String.valueOf(result.getHomeList().get("myhome").getZ()));
 			assertEquals(1, result.getHomeList().size());
 			assertEquals(1, result.getJobList().size());
 			assertEquals(job, result.getJobList().get(0));
@@ -112,12 +120,12 @@ public class EconomyPlayerTest {
 			fail();
 		}
 	}
-	
+
 	@Test
 	public void constructorLoadTestWithInvalidBankAndJob() {
 		try {
 			EconomyPlayerManagerImpl.createEconomyPlayer("kthschnll");
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
+			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			List<String> list = new ArrayList<>();
 			list.add("myjob");
@@ -136,64 +144,75 @@ public class EconomyPlayerTest {
 
 	@Test
 	public void isOnlineTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("Wulfgar");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			assertFalse(ecoPlayer.isOnline());
-			ecoPlayer.setPlayer(player);
-			assertTrue(ecoPlayer.isOnline());
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
+		BossBar bossBar = mock(BossBar.class);
+		BankAccount account = mock(BankAccount.class);
+		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		when(bankManager.createBankAccount(0.0)).thenReturn(account);
+
+		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
+				configManager, bankManager, jobManager, null, "kthschnll", true);
+		assertFalse(ecoPlayer.isOnline());
+		ecoPlayer.setPlayer(mock(Player.class));
+		assertTrue(ecoPlayer.isOnline());
 	}
 
 	@Test
 	public void isScoreBoardDisabledTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			assertTrue(ecoPlayer.isScoreBoardDisabled());
-			ecoPlayer.setScoreBoardDisabled(false);
-			assertFalse(ecoPlayer.isScoreBoardDisabled());
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
+		BossBar bossBar = mock(BossBar.class);
+		BankAccount account = mock(BankAccount.class);
+		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		when(bankManager.createBankAccount(0.0)).thenReturn(account);
+
+		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
+				configManager, bankManager, jobManager, null, "kthschnll", true);
+		assertTrue(ecoPlayer.isScoreBoardDisabled());
+		ecoPlayer.setScoreBoardDisabled(false);
+		assertFalse(ecoPlayer.isScoreBoardDisabled());
 	}
 
 	@Test
 	public void getNameTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			assertEquals("catch441", EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).getName());
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
+		BossBar bossBar = mock(BossBar.class);
+		BankAccount account = mock(BankAccount.class);
+		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		when(bankManager.createBankAccount(0.0)).thenReturn(account);
+
+		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
+				configManager, bankManager, jobManager, null, "kthschnll", true);
+		assertEquals("kthschnll", ecoPlayer.getName());
 	}
 
 	@Test
 	public void addHomeTest() {
+		BossBar bossBar = mock(BossBar.class);
+		BankAccount account = mock(BankAccount.class);
+		//Location location = mock(Location.class);
+		Player player = mock(Player.class);
+		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		when(configManager.getMaxHomes()).thenReturn(3);
+		when(bankManager.createBankAccount(0.0)).thenReturn(account);
+		when(messageWrapper.getString("sethome", "myHome")).thenReturn("My message.");
+
+		EconomyPlayerImpl ecoPlayer = new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
+				configManager, bankManager, jobManager, player, "kthschnll", true);
 		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			Location loc = new Location(world, 1, 2, 3);
-			ecoPlayer.addHome("myhome", loc, true);
-			assertEquals("§6You created the home §amyhome§6.", player.nextMessage());
-			assertTrue(ecoPlayer.getHomeList().containsKey("myhome"));
-			assertTrue(ecoPlayer.getHomeList().containsValue(loc));
-			assertEquals(1, ecoPlayer.getHomeList().size());
-			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-			assertEquals(1, config.getStringList("catch441.Home.Homelist").size());
-			assertEquals("myhome", config.getStringList("catch441.Home.Homelist").get(0));
-			assertEquals("myhome", config.getString("catch441.Home.myhome.Name"));
-			assertEquals("World", config.getString("catch441.Home.myhome.World"));
-			assertEquals("1.0", config.getString("catch441.Home.myhome.X"));
-			assertEquals("2.0", config.getString("catch441.Home.myhome.Y"));
-			assertEquals("3.0", config.getString("catch441.Home.myhome.Z"));
+			ecoPlayer.addHome("myHome", null, true);
+		} catch (EconomyPlayerException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Map<String, Location> empty = new HashMap<String, Location>();
+		try {
+			verify(validationHandler).checkForNotExistingHome(empty, "myHome");
 		} catch (EconomyPlayerException e) {
 			fail();
 		}
+		assertTrue(ecoPlayer.getHomeList().containsKey("myHome"));
+		//assertTrue(ecoPlayer.getHomeList().containsValue(location));
+		assertEquals(1, ecoPlayer.getHomeList().size());
+		//assertDoesNotThrow(() -> verify(validationHandler).checkForNotReachedMaxHomes(false));
+		//verify(ecoPlayerDao).saveHome("kthschnll", "myHome", location);
+		verify(player).sendMessage("My message.");
 	}
 
 	@Test
@@ -266,7 +285,7 @@ public class EconomyPlayerTest {
 			assertFalse(ecoPlayer.getHomeList().containsValue(loc));
 			assertEquals(0, ecoPlayer.getHomeList().size());
 			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
+			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertEquals(0, config.getStringList("catch441.Home.Homelist").size());
 			assertFalse(config.isSet("catch441.Home.myhome.Name"));
@@ -374,7 +393,7 @@ public class EconomyPlayerTest {
 			assertEquals(1, ecoPlayer.getJobList().size());
 			assertEquals(job, ecoPlayer.getJobList().get(0));
 			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
+			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertEquals(1, config.getStringList("catch441.Jobs").size());
 			assertEquals("myjob", config.getStringList("catch441.Jobs").get(0));
@@ -446,7 +465,7 @@ public class EconomyPlayerTest {
 			assertEquals("§6You have left the job §amyjob§6.", player.nextMessage());
 			assertEquals(0, ecoPlayer.getJobList().size());
 			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
+			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertEquals(0, config.getStringList("catch441.Jobs").size());
 		} catch (EconomyPlayerException | GeneralEconomyException | JobSystemException e) {
@@ -638,7 +657,7 @@ public class EconomyPlayerTest {
 			assertEquals(1, ecoPlayer.getJoinedTownList().size());
 			assertEquals("mytown", ecoPlayer.getJoinedTownList().get(0));
 			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
+			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertEquals(1, config.getStringList("catch441.joinedTowns").size());
 			assertEquals("mytown", config.getStringList("catch441.joinedTowns").get(0));
@@ -710,7 +729,7 @@ public class EconomyPlayerTest {
 			ecoPlayer.removeJoinedTown("mytown");
 			assertEquals(0, ecoPlayer.getJoinedTownList().size());
 			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
+			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertEquals(0, config.getStringList("catch441.joinedTowns").size());
 		} catch (EconomyPlayerException e) {
@@ -743,7 +762,7 @@ public class EconomyPlayerTest {
 			assertEquals(1, player.getScoreboard().getObjectives().size());
 			assertNotNull("0", String.valueOf(player.getScoreboard().getObjective("bank")));
 			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
+			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
 			assertFalse(config.getBoolean("catch441.bank"));
 			ecoPlayer.setScoreBoardDisabled(true);
@@ -751,7 +770,7 @@ public class EconomyPlayerTest {
 			assertTrue(ecoPlayer.isScoreBoardDisabled());
 			assertEquals(0, player.getScoreboard().getObjectives().size());
 			// check savefile
-			File saveFile1 = new File(UltimateEconomy.getInstance.getDataFolder(),"PlayerFile.yml");
+			File saveFile1 = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
 			YamlConfiguration config1 = YamlConfiguration.loadConfiguration(saveFile1);
 			assertTrue(config1.getBoolean("catch441.scoreboardDisabled"));
 		} catch (EconomyPlayerException e) {

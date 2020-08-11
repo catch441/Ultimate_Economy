@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.bukkit.Location;
 
-import com.ue.exceptions.ShopSystemException;
+import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface AdminshopManager {

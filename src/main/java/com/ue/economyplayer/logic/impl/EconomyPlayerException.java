@@ -35,4 +35,12 @@ public class EconomyPlayerException extends Exception {
 	public Object[] getParams() {
 		return params;
 	}
+	
+	/**
+	 * Returns the message key.
+	 * @return key
+	 */
+	public EconomyPlayerExceptionMessageEnum getKey() {
+		return key;
+	}
 }

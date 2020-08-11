@@ -18,9 +18,9 @@ import com.ue.common.utils.SaveFileUtils;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.exceptions.TownSystemException;
 import com.ue.townsystem.dataaccess.api.TownsystemDao;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
+import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class TownsystemDaoImpl extends SaveFileUtils implements TownsystemDao {

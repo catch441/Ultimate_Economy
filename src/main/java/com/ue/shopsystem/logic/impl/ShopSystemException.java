@@ -1,4 +1,4 @@
-package com.ue.exceptions;
+package com.ue.shopsystem.logic.impl;
 
 import com.ue.common.utils.MessageWrapper;
 

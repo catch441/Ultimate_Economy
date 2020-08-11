@@ -6,7 +6,7 @@ import org.bukkit.Location;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.exceptions.TownSystemException;
+import com.ue.townsystem.logic.impl.TownSystemException;
 
 public interface TownsystemDao {
 

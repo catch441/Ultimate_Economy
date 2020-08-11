@@ -17,8 +17,6 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.exceptions.TownExceptionMessageEnum;
-import com.ue.exceptions.TownSystemException;
 import com.ue.townsystem.dataaccess.api.TownsystemDao;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;

@@ -20,11 +20,11 @@ import org.junit.jupiter.api.Test;
 
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
-import com.ue.exceptions.ShopSystemException;
-import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.PlayershopController;
 import com.ue.shopsystem.logic.impl.PlayershopCommandExecutorImpl;
+import com.ue.shopsystem.logic.impl.ShopSystemException;
+import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 

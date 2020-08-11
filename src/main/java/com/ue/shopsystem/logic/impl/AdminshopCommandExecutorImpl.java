@@ -14,9 +14,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.exceptions.ShopSystemException;
-import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.logic.api.AdminshopManager;
+import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class AdminshopCommandExecutorImpl implements CommandExecutor {

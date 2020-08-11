@@ -31,9 +31,6 @@ import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.exceptions.ShopExceptionMessageEnum;
-import com.ue.exceptions.ShopSystemException;
-import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.dataaccess.impl.ShopDaoImpl;
 import com.ue.shopsystem.logic.api.AbstractShop;
@@ -42,6 +39,7 @@ import com.ue.shopsystem.logic.api.ShopEditorHandler;
 import com.ue.shopsystem.logic.api.ShopSlotEditorHandler;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
+import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 

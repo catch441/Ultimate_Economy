@@ -1,4 +1,4 @@
-package com.ue.economyplayer.dataaccess.impl;
+package com.ue.economyplayer.logic.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
-import com.ue.economyplayer.logic.impl.EconomyPlayerTabCompleterImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class EconomyPlayerTabCompleterImplTest {

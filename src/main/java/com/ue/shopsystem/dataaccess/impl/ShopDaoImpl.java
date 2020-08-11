@@ -19,12 +19,12 @@ import com.ue.common.utils.SaveFileUtils;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.exceptions.ShopSystemException;
-import com.ue.exceptions.TownSystemException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
+import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
+import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 public class ShopDaoImpl extends SaveFileUtils implements ShopDao {

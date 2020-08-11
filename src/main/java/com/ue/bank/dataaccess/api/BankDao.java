@@ -8,9 +8,8 @@ public interface BankDao {
 	 * Creates a new savefile if no one exists and loads an existing file if the
 	 * savefile already exists.
 	 * 
-	 * @param dataFolder
 	 */
-	public void setupSavefile(String dataFolder);
+	public void setupSavefile();
 
 	/**
 	 * Saves the list of ibans.

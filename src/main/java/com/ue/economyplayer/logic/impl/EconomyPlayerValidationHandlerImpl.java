@@ -15,17 +15,8 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class EconomyPlayerValidationHandlerImpl implements EconomyPlayerValidationHandler {
 
-	private final MessageWrapper messageWrapper;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param messageWrapper
-	 */
 	@Inject
-	public EconomyPlayerValidationHandlerImpl(MessageWrapper messageWrapper) {
-		this.messageWrapper = messageWrapper;
-	}
+	MessageWrapper messageWrapper;
 
 	@Override
 	public void checkForEnoughMoney(BankAccount account, double amount, boolean personal)

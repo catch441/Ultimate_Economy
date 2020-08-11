@@ -5,9 +5,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.bukkit.Bukkit;
-
 import com.ue.bank.logic.api.BankManager;
+import com.ue.common.utils.BukkitService;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
@@ -15,7 +14,6 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.jobsystem.logic.api.JobManager;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 
@@ -31,6 +29,8 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	ConfigManager configManager;
 	@Inject
 	JobManager jobManager;
+	@Inject
+	BukkitService bukkitService;
 	private List<EconomyPlayer> economyPlayers = new ArrayList<>();
 
 	@Override
@@ -60,26 +60,25 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	@Override
 	public void createEconomyPlayer(String playerName) throws EconomyPlayerException {
 		validationHandler.checkForPlayerDoesNotExist(getEconomyPlayerNameList(), playerName);
-		getAllEconomyPlayers().add(new EconomyPlayerImpl(validationHandler, ecoPlayerDao, messageWrapper, configManager,
-				bankManager, jobManager, Bukkit.getPlayer(playerName), playerName, true));
-		ecoPlayerDao.savePlayerList(getEconomyPlayerNameList());
+		getAllEconomyPlayers().add(new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
+				configManager, bankManager, jobManager, bukkitService.getPlayer(playerName), playerName, true));
 	}
 
 	@Override
 	public void deleteEconomyPlayer(EconomyPlayer player) {
 		getAllEconomyPlayers().remove(player);
-		ecoPlayerDao.savePlayerList(getEconomyPlayerNameList());
 		ecoPlayerDao.deleteEconomyPlayer(player.getName());
 		bankManager.deleteBankAccount(player.getBankAccount());
 	}
 
 	@Override
 	public void loadAllEconomyPlayers() {
-		ecoPlayerDao.setupSavefile(UltimateEconomy.getInstance.getDataFolder().getPath());
+		ecoPlayerDao.setupSavefile();
 		List<String> playerList = ecoPlayerDao.loadPlayerList();
 		for (String player : playerList) {
-			getAllEconomyPlayers().add(new EconomyPlayerImpl(validationHandler, ecoPlayerDao, messageWrapper,
-					configManager, bankManager, jobManager, Bukkit.getPlayer(player), player, false));
+			getAllEconomyPlayers()
+					.add(new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
+							configManager, bankManager, jobManager, bukkitService.getPlayer(player), player, false));
 		}
 	}
 }

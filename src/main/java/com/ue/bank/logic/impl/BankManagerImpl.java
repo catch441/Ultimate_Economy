@@ -48,8 +48,8 @@ public class BankManagerImpl implements BankManager {
 	}
 
 	@Override
-	public void loadBankAccounts(String dataFolder) {
-		bankDao.setupSavefile(dataFolder);
+	public void loadBankAccounts() {
+		bankDao.setupSavefile();
 		for (String iban : bankDao.loadIbanList()) {
 			getBankAccounts().add(new BankAccountImpl(bankDao, validationHandler, iban));
 		}

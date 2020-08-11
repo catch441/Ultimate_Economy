@@ -5,20 +5,25 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ue.bank.dataaccess.api.BankDao;
+import com.ue.common.utils.BukkitService;
 import com.ue.common.utils.SaveFileUtils;
 
 public class BankDaoImpl extends SaveFileUtils implements BankDao {
 
+	@Inject
+	BukkitService bukkitService;
 	private File file;
 	private YamlConfiguration config;
 	
 	@Override
-	public void setupSavefile(String dataFolder) {
-		file = new File(dataFolder, "BankAccounts.yml");
+	public void setupSavefile() {
+		file = new File(bukkitService.getDataFolderPath(), "BankAccounts.yml");
 		if(!file.exists()) {
 			try {
 				getSavefile().createNewFile();

@@ -5,7 +5,7 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import com.ue.exceptions.TownSystemException;
+import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface RentshopManager {

@@ -37,7 +37,6 @@ import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.exceptions.ShopSystemException;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.JobcenterManager;
@@ -47,6 +46,7 @@ import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.shopsystem.logic.impl.RentDailyTask;
+import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.vault.VaultHook;
 
@@ -304,7 +304,7 @@ public class UltimateEconomy extends JavaPlugin {
 		}
 		setupPlugin();
 		messageWrapper.loadLanguage(configManager.getLocale());
-		bankManager.loadBankAccounts(getDataFolder().getPath());
+		bankManager.loadBankAccounts();
 		jobManager.loadAllJobs();
 		jobcenterManager.loadAllJobcenters();
 		ecoPlayerManager.loadAllEconomyPlayers();

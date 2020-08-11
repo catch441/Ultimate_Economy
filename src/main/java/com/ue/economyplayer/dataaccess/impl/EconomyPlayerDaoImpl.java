@@ -30,8 +30,8 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	private YamlConfiguration config;
 
 	@Override
-	public void setupSavefile(String datafolder) {
-		file = new File(datafolder, "PlayerFile.yml");
+	public void setupSavefile() {
+		file = new File(bukkitService.getDataFolderPath(), "PlayerFile.yml");
 		if (!file.exists()) {
 			try {
 				getSavefile().createNewFile();
@@ -44,14 +44,9 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	}
 
 	@Override
-	public void savePlayerList(List<String> playerList) {
-		getConfig().set("Player", playerList);
-		save(getConfig(), getSavefile());
-	}
-
-	@Override
 	public List<String> loadPlayerList() {
-		return getConfig().getStringList("Player");
+		removeDeprecatedPlayerList();
+		return new ArrayList<>(getConfig().getConfigurationSection("").getKeys(false));
 	}
 
 	@Override
@@ -127,8 +122,7 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	}
 
 	private Location loadHome(String playerName, String homeName) {
-		return new Location(
-				bukkitService.getWorld(getConfig().getString(playerName + ".Home." + homeName + ".World")),
+		return new Location(bukkitService.getWorld(getConfig().getString(playerName + ".Home." + homeName + ".World")),
 				getConfig().getDouble(playerName + ".Home." + homeName + ".X"),
 				getConfig().getDouble(playerName + ".Home." + homeName + ".Y"),
 				getConfig().getDouble(playerName + ".Home." + homeName + ".Z"));
@@ -138,7 +132,7 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	public Map<String, Location> loadHomeList(String playerName) {
 		removeDeprecatedHomelist(playerName);
 		Map<String, Location> homes = new HashMap<>();
-		for(String home: getConfig().getConfigurationSection(playerName + ".Home").getKeys(false)) {
+		for (String home : getConfig().getConfigurationSection(playerName + ".Home").getKeys(false)) {
 			homes.put(home, loadHome(playerName, home));
 		}
 		return homes;
@@ -166,6 +160,18 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 		}
 	}
 	
+	/**
+	 * @since 1.2.6
+	 * @deprecated can be removed later
+	 */
+	@Deprecated
+	private void removeDeprecatedPlayerList() {
+		if (getConfig().contains("Player")) {
+			getConfig().set("Player", null);
+			save(getConfig(), getSavefile());
+		}
+	}
+
 	/**
 	 * @since 1.2.6
 	 * @deprecated can be removed later

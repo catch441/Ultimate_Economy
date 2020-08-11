@@ -14,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.ue.bank.logic.impl.BankValidationHandlerImpl;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;

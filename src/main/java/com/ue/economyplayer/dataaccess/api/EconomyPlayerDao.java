@@ -13,16 +13,8 @@ public interface EconomyPlayerDao {
 	 * Creates a new savefile if no one exists and loads an existing file if the
 	 * savefile already exists.
 	 * 
-	 * @param datafolder
 	 */
-	public void setupSavefile(String datafolder);
-
-	/**
-	 * Saves the player list.
-	 * 
-	 * @param playerList
-	 */
-	public void savePlayerList(List<String> playerList);
+	public void setupSavefile();
 
 	/**
 	 * Loads the player list.

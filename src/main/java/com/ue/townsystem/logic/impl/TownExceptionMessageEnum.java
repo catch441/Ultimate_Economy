@@ -1,4 +1,4 @@
-package com.ue.exceptions;
+package com.ue.townsystem.logic.impl;
 
 public enum TownExceptionMessageEnum {
 

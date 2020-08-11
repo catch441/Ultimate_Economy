@@ -6,7 +6,7 @@ import org.bukkit.Chunk;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.exceptions.TownSystemException;
+import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface TownworldManager {

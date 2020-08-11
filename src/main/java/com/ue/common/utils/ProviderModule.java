@@ -301,8 +301,8 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	EconomyPlayerValidationHandler provideEcoPlayerValidationHandler(MessageWrapper messageWrapper) {
-		return new EconomyPlayerValidationHandlerImpl(messageWrapper);
+	EconomyPlayerValidationHandler provideEcoPlayerValidationHandler() {
+		return new EconomyPlayerValidationHandlerImpl();
 	}
 
 	@Singleton

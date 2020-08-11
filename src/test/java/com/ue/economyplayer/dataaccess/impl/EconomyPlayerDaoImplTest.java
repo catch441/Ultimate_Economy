@@ -27,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.BukkitService;
-import com.ue.economyplayer.dataaccess.impl.EconomyPlayerDaoImpl;
 import com.ue.jobsystem.logic.api.Job;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,46 +52,52 @@ public class EconomyPlayerDaoImplTest {
 	public void setupSavefileTest() {
 		File result = new File("src/PlayerFile.yml");
 		assertFalse(result.exists());
-		ecoPlayerDao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
 		assertTrue(result.exists());
 	}
 
 	@Test
 	public void setupSavefileLoadTest() {
-		ecoPlayerDao.setupSavefile("src");
-		ecoPlayerDao.savePlayerList(new ArrayList<>());
-		ecoPlayerDao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
+		ecoPlayerDao.saveBankIban("myKthschnll", "myiban");
+		ecoPlayerDao.setupSavefile();
 		File result = new File("src/PlayerFile.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
 		assertTrue(result.exists());
-		assertTrue(config.isSet("Player"));
-	}
-
-	@Test
-	public void savePlayerListTest() {
-		ecoPlayerDao.setupSavefile("src");
-		ecoPlayerDao.savePlayerList(Arrays.asList("myKthschnll"));
-		File result = new File("src/PlayerFile.yml");
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
-		assertEquals(1, config.getStringList("Player").size());
-		assertEquals("myKthschnll", config.getStringList("Player").get(0));
+		assertTrue(config.isSet("myKthschnll"));
 	}
 
 	@Test
 	public void loadPlayerListTest() {
-		ecoPlayerDao.setupSavefile("src");
-		List<String> list = new ArrayList<>();
-		list.add("myKthschnll");
-		ecoPlayerDao.savePlayerList(Arrays.asList("myKthschnll"));
-		ecoPlayerDao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
+		ecoPlayerDao.saveBankIban("myKthschnll", "myiban");
+		ecoPlayerDao.setupSavefile();
 		List<String> result = ecoPlayerDao.loadPlayerList();
 		assertEquals(1, result.size());
 		assertEquals("myKthschnll", result.get(0));
 	}
+	
+	@Test
+	public void loadPlayerListOldTest() {
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
+		File file = new File("src/PlayerFile.yml");
+		YamlConfiguration configBefore = YamlConfiguration.loadConfiguration(file);
+		configBefore.set("Player", "myKthschnll");
+		assertDoesNotThrow(() -> configBefore.save(file));
+		ecoPlayerDao.setupSavefile();
+		ecoPlayerDao.loadPlayerList();
+		YamlConfiguration configAfter = YamlConfiguration.loadConfiguration(file);
+		assertFalse(configAfter.contains("Player"));
+	}
 
 	@Test
 	public void deleteEconomyPlayer() {
-		ecoPlayerDao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
 		File file = new File("src/PlayerFile.yml");
 		YamlConfiguration configBefore = YamlConfiguration.loadConfiguration(file);
 		configBefore.set("catch441", "testvalue");
@@ -104,7 +109,8 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void saveHomeTest() {
-		ecoPlayerDao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
 		World world = mock(World.class);
 		when(world.getName()).thenReturn("World");
 
@@ -124,14 +130,15 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void loadHomeListTest() {
-		ecoPlayerDao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
 		World world = mock(World.class);
 		when(world.getName()).thenReturn("World");
 		when(bukkitService.getWorld("World")).thenReturn(world);
 
 		Location loc = new Location(world, 1, 2, 3);
 		ecoPlayerDao.saveHome("kthschnll", "myHome", loc);
-		ecoPlayerDao.setupSavefile("src");
+		ecoPlayerDao.setupSavefile();
 		Map<String, Location> list = ecoPlayerDao.loadHomeList("kthschnll");
 		Location result = list.get("myHome");
 		assertEquals("World", result.getWorld().getName());
@@ -143,12 +150,13 @@ public class EconomyPlayerDaoImplTest {
 	
 	@Test
 	public void loadHomeListOldTest() {
-		ecoPlayerDao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
 		File file = new File("src/PlayerFile.yml");
 		YamlConfiguration configBefore = YamlConfiguration.loadConfiguration(file);
 		configBefore.set("kthschnll..Home.Homelist", Arrays.asList("myHome"));
 		assertDoesNotThrow(() -> configBefore.save(file));
-		ecoPlayerDao.setupSavefile("src");
+		ecoPlayerDao.setupSavefile();
 		ecoPlayerDao.loadHomeList("kthschnll");
 		YamlConfiguration configAfter = YamlConfiguration.loadConfiguration(file);
 		assertFalse(configAfter.isSet("kthschnll..Home.Homelist"));
@@ -156,9 +164,10 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void loadJoinedTownsTest() {
-		ecoPlayerDao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
 		ecoPlayerDao.saveJoinedTowns("kthschnll", Arrays.asList("mytown"));
-		ecoPlayerDao.setupSavefile("src");
+		ecoPlayerDao.setupSavefile();
 		List<String> list = ecoPlayerDao.loadJoinedTowns("kthschnll");
 		assertEquals(1, list.size());
 		assertEquals("mytown", list.get(0));
@@ -166,14 +175,15 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void loadJobsListTest() {
-		ecoPlayerDao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
 
 		List<Job> jobs = new ArrayList<>();
 		jobs.add(job);
 		ecoPlayerDao.saveJoinedJobsList("kthschnll", jobs);
-		ecoPlayerDao.setupSavefile("src");
+		ecoPlayerDao.setupSavefile();
 		List<String> list = ecoPlayerDao.loadJobsList("kthschnll");
 		assertEquals(1, list.size());
 		assertEquals("myjob", list.get(0));
@@ -181,9 +191,10 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void loadBankIbanTest() {
-		ecoPlayerDao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
 		ecoPlayerDao.saveBankIban("kthschnll", "myIban");
-		ecoPlayerDao.setupSavefile("src");
+		ecoPlayerDao.setupSavefile();
 		assertEquals("myIban", ecoPlayerDao.loadBankIban("kthschnll"));
 	}
 
@@ -192,13 +203,14 @@ public class EconomyPlayerDaoImplTest {
 		BankAccount account = mock(BankAccount.class);
 		when(bankManager.createBankAccount(20.5)).thenReturn(account);
 		when(account.getIban()).thenReturn("myIban");
-
-		ecoPlayerDao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
+		
 		File file = new File("src/PlayerFile.yml");
 		YamlConfiguration configBefore = YamlConfiguration.loadConfiguration(file);
 		configBefore.set("kthschnll.account amount", 20.5);
 		assertDoesNotThrow(() -> configBefore.save(file));
-		ecoPlayerDao.setupSavefile("src");
+		ecoPlayerDao.setupSavefile();
 		assertEquals("myIban", ecoPlayerDao.loadBankIban("kthschnll"));
 		verify(bankManager).createBankAccount(20.5);
 		YamlConfiguration configAfter = YamlConfiguration.loadConfiguration(file);
@@ -207,20 +219,22 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void loadScoreboardDisabledTest() {
-		ecoPlayerDao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
 		ecoPlayerDao.saveScoreboardDisabled("kthschnll", false);
-		ecoPlayerDao.setupSavefile("src");
+		ecoPlayerDao.setupSavefile();
 		assertFalse(ecoPlayerDao.loadScoreboardDisabled("kthschnll"));
 	}
 
 	@Test
 	public void loadScoreboardDisabledOldTest() {
-		ecoPlayerDao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
 		File file = new File("src/PlayerFile.yml");
 		YamlConfiguration configBefore = YamlConfiguration.loadConfiguration(file);
 		configBefore.set("kthschnll.bank", false);
 		assertDoesNotThrow(() -> configBefore.save(file));
-		ecoPlayerDao.setupSavefile("src");
+		ecoPlayerDao.setupSavefile();
 		assertFalse(ecoPlayerDao.loadScoreboardDisabled("kthschnll"));
 		YamlConfiguration configAfter = YamlConfiguration.loadConfiguration(file);
 		assertFalse(configAfter.isSet("kthschnll.bank"));

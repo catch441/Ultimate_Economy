@@ -4,7 +4,7 @@ import org.bukkit.entity.Player;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.exceptions.ShopSystemException;
+import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface Rentshop extends Playershop {

@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.ue.bank.dataaccess.api.BankDao;
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankValidationHandler;
-import com.ue.bank.logic.impl.BankAccountImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 @ExtendWith(MockitoExtension.class)

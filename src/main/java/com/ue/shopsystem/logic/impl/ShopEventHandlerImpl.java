@@ -12,7 +12,6 @@ import org.bukkit.inventory.ItemStack;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.logic.api.AbstractShop;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.Playershop;

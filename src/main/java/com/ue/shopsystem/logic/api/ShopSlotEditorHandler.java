@@ -3,7 +3,7 @@ package com.ue.shopsystem.logic.api;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 
-import com.ue.exceptions.ShopSystemException;
+import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface ShopSlotEditorHandler {

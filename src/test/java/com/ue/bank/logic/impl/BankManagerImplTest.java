@@ -20,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.ue.bank.dataaccess.api.BankDao;
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankValidationHandler;
-import com.ue.bank.logic.impl.BankManagerImpl;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
@@ -147,7 +146,7 @@ public class BankManagerImplTest {
 		bankManager.getBankAccounts().clear();
 		
 		assertEquals(0, bankManager.getBankAccounts().size());
-		bankManager.loadBankAccounts("src");
+		bankManager.loadBankAccounts();
 		assertEquals(2, bankManager.getBankAccounts().size());
 		assertEquals(account1.getIban(), bankManager.getBankAccounts().get(0).getIban());
 		assertEquals("10.0",
@@ -155,6 +154,6 @@ public class BankManagerImplTest {
 		assertEquals(account2.getIban(), bankManager.getBankAccounts().get(1).getIban());
 		assertEquals("10.0",
 				String.valueOf(bankManager.getBankAccounts().get(1).getAmount()));
-		verify(bankDao).setupSavefile("src");
+		verify(bankDao).setupSavefile();
 	}
 }

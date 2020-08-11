@@ -35,9 +35,8 @@ public interface BankManager {
 	/**
 	 * Loads all bank accounts.
 	 * 
-	 * @param dataFolder
 	 */
-	public void loadBankAccounts(String dataFolder);
+	public void loadBankAccounts();
 
 	/**
 	 * Returns a account by a given iban.

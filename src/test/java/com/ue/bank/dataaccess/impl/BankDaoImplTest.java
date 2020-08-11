@@ -3,6 +3,7 @@ package com.ue.bank.dataaccess.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,15 +14,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.ue.bank.dataaccess.impl.BankDaoImpl;
+import com.ue.common.utils.BukkitService;
 
 @ExtendWith(MockitoExtension.class)
 public class BankDaoImplTest {
 
 	@InjectMocks
 	BankDaoImpl dao;
+	@Mock
+	BukkitService bukkitService;
 
 	/**
 	 * Delete savefile.
@@ -34,7 +38,8 @@ public class BankDaoImplTest {
 
 	@Test
 	public void setupSavefileTest() {
-		dao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile();
 		File result = new File("src/BankAccounts.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
 		assertTrue(result.exists());
@@ -43,8 +48,9 @@ public class BankDaoImplTest {
 
 	@Test
 	public void setupSavefileLoadTest() {
-		dao.setupSavefile("src");
-		dao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile();
+		dao.setupSavefile();
 		File result = new File("src/BankAccounts.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
 		assertTrue(result.exists());
@@ -53,7 +59,8 @@ public class BankDaoImplTest {
 
 	@Test
 	public void saveIbanListTest() {
-		dao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile();
 		List<String> list = new ArrayList<>();
 		list.add("myiban");
 		dao.saveIbanList(list);
@@ -65,18 +72,20 @@ public class BankDaoImplTest {
 
 	@Test
 	public void loadIbanListTest() {
-		dao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile();
 		List<String> list = new ArrayList<>();
 		list.add("myiban");
 		dao.saveIbanList(list);
-		dao.setupSavefile("src");
+		dao.setupSavefile();
 		assertEquals(1, dao.loadIbanList().size());
 		assertEquals("myiban", dao.loadIbanList().get(0));
 	}
 
 	@Test
 	public void deleteAccountTest() {
-		dao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile();
 		dao.saveAmount("myiban", 20.0);
 		File result = new File("src/BankAccounts.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
@@ -88,7 +97,8 @@ public class BankDaoImplTest {
 
 	@Test
 	public void saveAmountTest() {
-		dao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile();
 		dao.saveAmount("myiban", 12.34);
 		File result = new File("src/BankAccounts.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
@@ -97,9 +107,10 @@ public class BankDaoImplTest {
 
 	@Test
 	public void loadAmountTest() {
-		dao.setupSavefile("src");
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile();
 		dao.saveAmount("myiban", 12.34);
-		dao.setupSavefile("src");
+		dao.setupSavefile();
 		assertEquals("12.34", String.valueOf(dao.loadAmount("myiban")));
 	}
 }

@@ -19,10 +19,10 @@ import org.junit.jupiter.api.Test;
 
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
-import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.logic.impl.RentDailyTask;
 import com.ue.shopsystem.logic.impl.RentshopImpl;
 import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
+import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 

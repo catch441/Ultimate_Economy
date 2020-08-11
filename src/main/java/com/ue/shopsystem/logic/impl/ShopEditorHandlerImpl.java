@@ -6,7 +6,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.ue.exceptions.ShopSystemException;
 import com.ue.shopsystem.logic.api.AbstractShop;
 import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.ShopEditorHandler;

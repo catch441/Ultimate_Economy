@@ -8,8 +8,6 @@ import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -19,6 +17,7 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
+import com.ue.common.utils.BukkitService;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
@@ -32,6 +31,7 @@ import com.ue.ultimate_economy.UltimateEconomy;
 
 public class EconomyPlayerImpl implements EconomyPlayer {
 
+	private final BukkitService bukkitService;
 	private final ConfigManager configManager;
 	private final BankManager bankManager;
 	private final JobManager jobManager;
@@ -50,6 +50,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	/**
 	 * Constructor for creating a new economyPlayer/loading an existing player.
 	 * 
+	 * @param bukkitService
 	 * @param validationHandler
 	 * @param ecoPlayerDao
 	 * @param messageWrapper
@@ -60,32 +61,29 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	 * @param name
 	 * @param isNew
 	 */
-	public EconomyPlayerImpl(EconomyPlayerValidationHandler validationHandler, EconomyPlayerDao ecoPlayerDao,
-			MessageWrapper messageWrapper, ConfigManager configManager, BankManager bankManager, JobManager jobManager,
-			Player player, String name, boolean isNew) {
+	public EconomyPlayerImpl(BukkitService bukkitService, EconomyPlayerValidationHandler validationHandler,
+			EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper, ConfigManager configManager,
+			BankManager bankManager, JobManager jobManager, Player player, String name, boolean isNew) {
 		this.configManager = configManager;
 		this.bankManager = bankManager;
 		this.jobManager = jobManager;
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerDao = ecoPlayerDao;
 		this.validationHandler = validationHandler;
+		this.bukkitService = bukkitService;
 		this.player = player;
 		if (isNew) {
 			setupNewPlayer(name);
 		} else {
 			loadExistingPlayer(name);
 		}
-		bossBar = Bukkit.createBossBar("", BarColor.GREEN, BarStyle.SOLID);
+		bossBar = bukkitService.createBossBar();
 		getBossBar().setVisible(false);
 	}
 
 	@Override
 	public boolean isOnline() {
-		if (getPlayer() == null) {
-			return false;
-		} else {
-			return true;
-		}
+		return !(getPlayer() == null);
 	}
 
 	@Override
@@ -193,9 +191,17 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	@Override
 	public void addHome(String homeName, Location location, boolean sendMessage) throws EconomyPlayerException {
+		validationHandler.checkForNotExistingHome(homes, homeName);
 		validationHandler.checkForNotReachedMaxHomes(reachedMaxHomes());
-		validationHandler.checkForNotExistingHome(getHomeList(), homeName);
-		getHomeList().put(homeName, location);
+		
+		System.out.println(homes.toString());
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		homes.put("teschd", location);
 		ecoPlayerDao.saveHome(getName(), homeName, location);
 		if (isOnline() && sendMessage) {
 			getPlayer().sendMessage(messageWrapper.getString("sethome", homeName));
@@ -224,7 +230,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		ecoPlayerDao.saveScoreboardDisabled(getName(), isScoreBoardDisabled());
 		if (isScoreBoardDisabled()) {
 			if (isOnline()) {
-				getPlayer().setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+				getPlayer().setScoreboard(bukkitService.createScoreBoard());
 			}
 		} else {
 			new UpdateScoreboardRunnable().runTask(UltimateEconomy.getInstance);
