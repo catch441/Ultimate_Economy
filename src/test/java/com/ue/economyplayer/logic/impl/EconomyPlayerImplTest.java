@@ -6,14 +6,25 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.anyMap;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +37,9 @@ import org.bukkit.Material;
 import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
+import org.bukkit.scoreboard.Scoreboard;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -51,11 +65,6 @@ import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
-
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
-import be.seeseemelk.mockbukkit.WorldMock;
-import be.seeseemelk.mockbukkit.entity.PlayerMock;
 
 @ExtendWith(MockitoExtension.class)
 public class EconomyPlayerImplTest {
@@ -144,13 +153,8 @@ public class EconomyPlayerImplTest {
 
 	@Test
 	public void isOnlineTest() {
-		BossBar bossBar = mock(BossBar.class);
-		BankAccount account = mock(BankAccount.class);
-		when(bukkitService.createBossBar()).thenReturn(bossBar);
-		when(bankManager.createBankAccount(0.0)).thenReturn(account);
-
-		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager, null, "kthschnll", true);
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		ecoPlayer.setPlayer(null);
 		assertFalse(ecoPlayer.isOnline());
 		ecoPlayer.setPlayer(mock(Player.class));
 		assertTrue(ecoPlayer.isOnline());
@@ -158,13 +162,7 @@ public class EconomyPlayerImplTest {
 
 	@Test
 	public void isScoreBoardDisabledTest() {
-		BossBar bossBar = mock(BossBar.class);
-		BankAccount account = mock(BankAccount.class);
-		when(bukkitService.createBossBar()).thenReturn(bossBar);
-		when(bankManager.createBankAccount(0.0)).thenReturn(account);
-
-		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager, null, "kthschnll", true);
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
 		assertTrue(ecoPlayer.isScoreBoardDisabled());
 		ecoPlayer.setScoreBoardDisabled(false);
 		assertFalse(ecoPlayer.isScoreBoardDisabled());
@@ -172,213 +170,126 @@ public class EconomyPlayerImplTest {
 
 	@Test
 	public void getNameTest() {
-		BossBar bossBar = mock(BossBar.class);
-		BankAccount account = mock(BankAccount.class);
-		when(bukkitService.createBossBar()).thenReturn(bossBar);
-		when(bankManager.createBankAccount(0.0)).thenReturn(account);
-
-		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager, null, "kthschnll", true);
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
 		assertEquals("kthschnll", ecoPlayer.getName());
 	}
 
 	@Test
 	public void addHomeTest() {
-		BossBar bossBar = mock(BossBar.class);
-		BankAccount account = mock(BankAccount.class);
-		//Location location = mock(Location.class);
-		Player player = mock(Player.class);
-		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		Location location = mock(Location.class);
 		when(configManager.getMaxHomes()).thenReturn(3);
-		when(bankManager.createBankAccount(0.0)).thenReturn(account);
 		when(messageWrapper.getString("sethome", "myHome")).thenReturn("My message.");
 
-		EconomyPlayerImpl ecoPlayer = new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager, player, "kthschnll", true);
-		try {
-			ecoPlayer.addHome("myHome", null, true);
-		} catch (EconomyPlayerException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		Map<String, Location> empty = new HashMap<String, Location>();
-		try {
-			verify(validationHandler).checkForNotExistingHome(empty, "myHome");
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertDoesNotThrow(() -> ecoPlayer.addHome("myHome", location, true));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForNotExistingHome(anyMap(), eq("myHome")));
 		assertTrue(ecoPlayer.getHomeList().containsKey("myHome"));
-		//assertTrue(ecoPlayer.getHomeList().containsValue(location));
+		assertTrue(ecoPlayer.getHomeList().containsValue(location));
 		assertEquals(1, ecoPlayer.getHomeList().size());
-		//assertDoesNotThrow(() -> verify(validationHandler).checkForNotReachedMaxHomes(false));
-		//verify(ecoPlayerDao).saveHome("kthschnll", "myHome", location);
-		verify(player).sendMessage("My message.");
+		assertDoesNotThrow(() -> verify(validationHandler).checkForNotReachedMaxHomes(false));
+		verify(ecoPlayerDao).saveHome("kthschnll", "myHome", location);
+		verify(ecoPlayer.getPlayer()).sendMessage("My message.");
 	}
 
 	@Test
-	public void addHomeTestWithAlredyExists() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			Location loc = new Location(world, 1, 2, 3);
-			ecoPlayer.addHome("myhome", loc, false);
-			ecoPlayer.addHome("myhome", loc, false);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertTrue(e instanceof EconomyPlayerException);
-			assertEquals("§cThis home already exists!", e.getMessage());
-		}
+	public void addHomeTestWithAlredyExists() throws EconomyPlayerException {
+		doThrow(EconomyPlayerException.class).when(validationHandler).checkForNotExistingHome(anyMap(), anyString());
+
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.addHome("myhome", null, false));
+		assertEquals(0, ecoPlayer.getHomeList().size());
+		verify(ecoPlayer.getPlayer(), never()).sendMessage(anyString());
 	}
 
 	@Test
-	public void addHomeTestWithReachedMaxHomes() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			Location loc = new Location(world, 1, 2, 3);
-			ecoPlayer.addHome("myhome", loc, false);
-			ecoPlayer.addHome("myhome1", loc, false);
-			ecoPlayer.addHome("myhome2", loc, false);
-			ecoPlayer.addHome("myhome3", loc, false);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertTrue(e instanceof EconomyPlayerException);
-			assertEquals("§cYou have already reached the maximum!", e.getMessage());
-		}
+	public void addHomeTestWithReachedMaxHomes() throws EconomyPlayerException {
+		when(configManager.getMaxHomes()).thenReturn(0);
+		doThrow(EconomyPlayerException.class).when(validationHandler).checkForNotReachedMaxHomes(true);
+
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.addHome("myhome", null, false));
+		assertEquals(0, ecoPlayer.getHomeList().size());
+		verify(ecoPlayer.getPlayer(), never()).sendMessage(anyString());
 	}
 
 	@Test
 	public void getHomeTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			Location loc = new Location(world, 1, 2, 3);
-			ecoPlayer.addHome("myhome", loc, false);
-			assertEquals(loc, ecoPlayer.getHome("myhome"));
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
+		Location location = mock(Location.class);
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertDoesNotThrow(() -> ecoPlayer.addHome("myhome", location, false));
+		assertDoesNotThrow(() -> assertEquals(location, ecoPlayer.getHome("myhome")));
+		Map<String, Location> homes = new HashMap<>();
+		homes.put("myhome", location);
+		assertDoesNotThrow(() -> verify(validationHandler).checkForExistingHome(homes, "myhome"));
 	}
 
 	@Test
-	public void getHomeTestWithNoHomes() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).getHome("myhome");
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertTrue(e instanceof EconomyPlayerException);
-			assertEquals("§cThis home does not exist!", e.getMessage());
-		}
+	public void getHomeTestWithNoHomes() throws EconomyPlayerException {
+		doThrow(EconomyPlayerException.class).when(validationHandler).checkForExistingHome(anyMap(), anyString());
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.getHome("myhome"));
 	}
 
 	@Test
 	public void removeHomeTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			Location loc = new Location(world, 1, 2, 3);
-			ecoPlayer.addHome("myhome", loc, false);
-			ecoPlayer.removeHome("myhome", true);
-			assertEquals("§6Your home §amyhome§6 was deleted.", player.nextMessage());
-			assertFalse(ecoPlayer.getHomeList().containsKey("myhome"));
-			assertFalse(ecoPlayer.getHomeList().containsValue(loc));
-			assertEquals(0, ecoPlayer.getHomeList().size());
-			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-			assertEquals(0, config.getStringList("catch441.Home.Homelist").size());
-			assertFalse(config.isSet("catch441.Home.myhome.Name"));
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
+		Location location = mock(Location.class);
+		when(messageWrapper.getString("delhome", "myhome")).thenReturn("My message.");
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertDoesNotThrow(() -> ecoPlayer.addHome("myhome", location, false));
+		assertDoesNotThrow(() -> ecoPlayer.removeHome("myhome", true));
+		assertFalse(ecoPlayer.getHomeList().containsKey("myhome"));
+		assertFalse(ecoPlayer.getHomeList().containsValue(location));
+		assertEquals(0, ecoPlayer.getHomeList().size());
+		verify(ecoPlayer.getPlayer()).sendMessage("My message.");
+		Map<String, Location> homes = new HashMap<>();
+		homes.put("myhome", location);
+		assertDoesNotThrow(() -> verify(validationHandler).checkForExistingHome(anyMap(), eq("myhome")));
 	}
 
 	@Test
-	public void removeHomeTestWithNoHomes() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).removeHome("myhome", true);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertTrue(e instanceof EconomyPlayerException);
-			assertEquals("§cThis home does not exist!", e.getMessage());
-		}
+	public void removeHomeTestWithNoHomes() throws EconomyPlayerException {
+		doThrow(EconomyPlayerException.class).when(validationHandler).checkForExistingHome(anyMap(), anyString());
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.removeHome("myhome", true));
 	}
 
 	@Test
 	public void reachedMaxHomesTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			Location loc = new Location(world, 1, 2, 3);
-			ecoPlayer.addHome("myhome", loc, false);
-			ecoPlayer.addHome("myhome1", loc, false);
-			assertFalse(ecoPlayer.reachedMaxHomes());
-			ecoPlayer.addHome("myhome2", loc, false);
-			assertTrue(ecoPlayer.reachedMaxHomes());
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
+		when(configManager.getMaxHomes()).thenReturn(1);
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertFalse(ecoPlayer.reachedMaxHomes());
+		assertDoesNotThrow(() -> ecoPlayer.addHome("myhome", null, false));
+		assertTrue(ecoPlayer.reachedMaxHomes());
 	}
 
 	@Test
 	public void reachedMaxJoinedJobsTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			JobController.createJob("job1");
-			JobController.createJob("job2");
-			ecoPlayer.joinJob(JobController.getJobList().get(0), false);
-			assertFalse(ecoPlayer.reachedMaxJoinedJobs());
-			ecoPlayer.joinJob(JobController.getJobList().get(1), false);
-			assertTrue(ecoPlayer.reachedMaxJoinedJobs());
-		} catch (EconomyPlayerException | GeneralEconomyException | JobSystemException e) {
-			fail();
-		}
+		when(configManager.getMaxJobs()).thenReturn(1);
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		Job job1 = mock(Job.class);
+		assertFalse(ecoPlayer.reachedMaxJoinedJobs());
+		assertDoesNotThrow(() -> ecoPlayer.joinJob(job1, false));
+		assertTrue(ecoPlayer.reachedMaxJoinedJobs());
 	}
 
 	@Test
 	public void getHomeListTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			Location loc = new Location(world, 1, 2, 3);
-			ecoPlayer.addHome("myhome", loc, false);
-			Map<String, Location> list = ecoPlayer.getHomeList();
-			assertEquals(1, list.size());
-			assertTrue(list.containsKey("myhome"));
-			assertTrue(list.containsValue(loc));
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
-
-	}
-
-	@Test
-	public void getBankAccountTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			String iban = ecoPlayer.getBankAccount().getIban();
-			assertEquals(BankManagerImpl.getBankAccountByIban(iban), ecoPlayer.getBankAccount());
-		} catch (EconomyPlayerException | GeneralEconomyException e) {
-			fail();
-		}
-
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		Location location = mock(Location.class);
+		assertDoesNotThrow(() -> ecoPlayer.addHome("myhome", location, false));
+		Map<String, Location> list = ecoPlayer.getHomeList();
+		assertEquals(1, list.size());
+		assertTrue(list.containsKey("myhome"));
+		assertTrue(list.containsValue(location));
 	}
 
 	@Test
 	public void hasEnoughtMoneyTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(10, false);
-			assertTrue(ecoPlayer.hasEnoughtMoney(10));
-			assertFalse(ecoPlayer.hasEnoughtMoney(20));
-		} catch (EconomyPlayerException | GeneralEconomyException e) {
-			fail();
-		}
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertDoesNotThrow(() -> when(ecoPlayer.getBankAccount().hasAmount(10)).thenReturn(true));
+		assertDoesNotThrow(() -> when(ecoPlayer.getBankAccount().hasAmount(20)).thenReturn(false));
+		assertDoesNotThrow(() -> assertTrue(ecoPlayer.hasEnoughtMoney(10)));
+		assertDoesNotThrow(() -> assertFalse(ecoPlayer.hasEnoughtMoney(20)));
 	}
 
 	@Test
@@ -420,37 +331,24 @@ public class EconomyPlayerImplTest {
 
 	@Test
 	public void joinJobTestWithMaxReached() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			JobController.createJob("myjob1");
-			JobController.createJob("myjob2");
-			JobController.createJob("myjob3");
-			JobController.createJob("myjob4");
-			ecoPlayer.joinJob(JobController.getJobList().get(0), false);
-			ecoPlayer.joinJob(JobController.getJobList().get(1), false);
-			ecoPlayer.joinJob(JobController.getJobList().get(2), false);
-			ecoPlayer.joinJob(JobController.getJobList().get(3), false);
-			fail();
-		} catch (EconomyPlayerException | JobSystemException | GeneralEconomyException e) {
-			assertTrue(e instanceof EconomyPlayerException);
-			assertEquals("§cYou have already reached the maximum!", e.getMessage());
-		}
+		when(configManager.getMaxJobs()).thenReturn(0);
+		assertDoesNotThrow(() -> doThrow(EconomyPlayerException.class).when(validationHandler)
+				.checkForNotReachedMaxJoinedJobs(true));
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		Job job = mock(Job.class);
+		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.joinJob(job, true));
+		assertEquals(0, ecoPlayer.getJobList().size());
+		verify(ecoPlayerDao, never()).saveJoinedJobsList(anyString(), anyList());
+		verify(ecoPlayer.getPlayer(), never()).sendMessage(anyString());
 	}
 
 	@Test
 	public void hasJobTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			JobController.createJob("myjob");
-			JobController.createJob("myjob2");
-			ecoPlayer.joinJob(JobController.getJobList().get(0), false);
-			assertTrue(ecoPlayer.hasJob(JobController.getJobList().get(0)));
-			assertFalse(ecoPlayer.hasJob(JobController.getJobList().get(1)));
-		} catch (EconomyPlayerException | GeneralEconomyException | JobSystemException e) {
-			fail();
-		}
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		Job job = mock(Job.class);
+		assertFalse(ecoPlayer.hasJob(job));
+		assertDoesNotThrow(() -> ecoPlayer.joinJob(job, false));
+		assertTrue(ecoPlayer.hasJob(job));
 	}
 
 	@Test
@@ -506,53 +404,53 @@ public class EconomyPlayerImplTest {
 
 	@Test
 	public void increasePlayerAmountTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.setScoreBoardDisabled(false);
-			ecoPlayer.increasePlayerAmount(10, true);
-			assertEquals("§6You got §a10.0§6 §a$§6", player.nextMessage());
-			assertEquals("10.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
-			server.getScheduler().performOneTick();
-			assertEquals("10.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
-			assertEquals(1, player.getScoreboard().getObjectives().size());
-			assertEquals("10", String
-					.valueOf(player.getScoreboard().getObjective("bank").getScore(ChatColor.GOLD + "$").getScore()));
-		} catch (EconomyPlayerException | GeneralEconomyException e) {
-			fail();
-		}
-	}
+		Scoreboard board = mock(Scoreboard.class);
+		Objective o = mock(Objective.class);
+		Score score = mock(Score.class);
+		when(bukkitService.createScoreBoard()).thenReturn(board);
+		when(board.registerNewObjective("bank", "dummy", "bank")).thenReturn(o);
+		when(o.getScore("§6$")).thenReturn(score);
 
-	@Test
-	public void increasePlayerAmountTestWithInvalidAmount() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(-10, false);
-			fail();
-		} catch (EconomyPlayerException | GeneralEconomyException e) {
-			assertTrue(e instanceof GeneralEconomyException);
-			assertEquals("§cThe parameter §4-10.0§c is invalid!", e.getMessage());
-		}
+		when(configManager.getCurrencyText(10.0)).thenReturn("$");
+		when(configManager.getCurrencyText(0.0)).thenReturn("$");
+		when(messageWrapper.getString("bank")).thenReturn("bank");
+		when(messageWrapper.getString("got_money", 10.0, "$")).thenReturn("My message.");
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		ecoPlayer.setScoreBoardDisabled(false);
+		// start test
+		when(ecoPlayer.getBankAccount().getAmount()).thenReturn(10.0);
+		reset(score);
+		assertDoesNotThrow(() -> ecoPlayer.increasePlayerAmount(10.0, true));
+
+		assertDoesNotThrow(() -> verify(ecoPlayer.getBankAccount()).increaseAmount(10.0));
+		verify(ecoPlayer.getPlayer()).sendMessage("My message.");
+		verify(score).setScore(10);
 	}
 
 	@Test
 	public void decreasePlayerAmountTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.setScoreBoardDisabled(false);
-			ecoPlayer.increasePlayerAmount(10, false);
-			ecoPlayer.decreasePlayerAmount(5, false);
-			server.getScheduler().performOneTick();
-			assertEquals("5.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
-			assertEquals(1, player.getScoreboard().getObjectives().size());
-			assertEquals("5", String
-					.valueOf(player.getScoreboard().getObjective("bank").getScore(ChatColor.GOLD + "$").getScore()));
-			ecoPlayer.decreasePlayerAmount(5, false);
-		} catch (EconomyPlayerException | GeneralEconomyException e) {
-			fail();
-		}
+		Scoreboard board = mock(Scoreboard.class);
+		Objective o = mock(Objective.class);
+		Score score = mock(Score.class);
+		when(bukkitService.createScoreBoard()).thenReturn(board);
+		when(board.registerNewObjective("bank", "dummy", "bank")).thenReturn(o);
+		when(o.getScore("§6$")).thenReturn(score);
+
+		when(configManager.getCurrencyText(10.0)).thenReturn("$");
+		when(configManager.getCurrencyText(0.0)).thenReturn("$");
+		when(messageWrapper.getString("bank")).thenReturn("bank");
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		ecoPlayer.setScoreBoardDisabled(false);
+		// start test
+		when(ecoPlayer.getBankAccount().getAmount()).thenReturn(10.0);
+		reset(score);
+		reset(ecoPlayer.getPlayer());
+		assertDoesNotThrow(() -> ecoPlayer.decreasePlayerAmount(10.0, true));
+
+		assertDoesNotThrow(() -> verify(ecoPlayer.getBankAccount()).decreaseAmount(10.0));
+		verify(ecoPlayer.getPlayer()).setScoreboard(board);
+		verifyNoMoreInteractions(ecoPlayer.getPlayer());
+		verify(score).setScore(10);
 	}
 
 	@Test
@@ -583,13 +481,8 @@ public class EconomyPlayerImplTest {
 
 	@Test
 	public void getPlayerTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			assertEquals(player, ecoPlayer.getPlayer());
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertEquals(ecoPlayer.getPlayer(), ecoPlayer.getPlayer());
 	}
 
 	@Test
@@ -650,131 +543,113 @@ public class EconomyPlayerImplTest {
 
 	@Test
 	public void addJoinedTownTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.addJoinedTown("mytown");
-			assertEquals(1, ecoPlayer.getJoinedTownList().size());
-			assertEquals("mytown", ecoPlayer.getJoinedTownList().get(0));
-			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-			assertEquals(1, config.getStringList("catch441.joinedTowns").size());
-			assertEquals("mytown", config.getStringList("catch441.joinedTowns").get(0));
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
+		when(configManager.getMaxJoinedTowns()).thenReturn(1);
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertDoesNotThrow(() -> ecoPlayer.addJoinedTown("mytown"));
+		assertEquals(1, ecoPlayer.getJoinedTownList().size());
+		assertEquals("mytown", ecoPlayer.getJoinedTownList().get(0));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForNotReachedMaxJoinedTowns(false));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForTownNotJoined(anyList(), eq("mytown")));
+		verify(ecoPlayerDao).saveJoinedTowns("kthschnll", Arrays.asList("mytown"));
 	}
 
 	@Test
-	public void addJoinedTownTestWithAlreadyJoined() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.addJoinedTown("mytown");
-			ecoPlayer.addJoinedTown("mytown");
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertTrue(e instanceof EconomyPlayerException);
-			assertEquals("§cYou already joined this town!", e.getMessage());
-		}
+	public void addJoinedTownTestWithAlreadyJoined() throws EconomyPlayerException {
+		doThrow(EconomyPlayerException.class).when(validationHandler).checkForTownNotJoined(anyList(), eq("mytown"));
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.addJoinedTown("mytown"));
+		assertEquals(0, ecoPlayer.getJoinedTownList().size());
+		verify(ecoPlayerDao, never()).saveJoinedTowns(anyString(), anyList());
 	}
 
 	@Test
-	public void addJoinedTownTestWithMaxTownsReached() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.addJoinedTown("mytown");
-			ecoPlayer.addJoinedTown("mytown1");
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertTrue(e instanceof EconomyPlayerException);
-			assertEquals("§cYou have already reached the maximum!", e.getMessage());
-		}
+	public void addJoinedTownTestWithMaxTownsReached() throws EconomyPlayerException {
+		when(configManager.getMaxJoinedTowns()).thenReturn(0);
+		doThrow(EconomyPlayerException.class).when(validationHandler).checkForNotReachedMaxJoinedTowns(true);
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.addJoinedTown("mytown"));
+		assertEquals(0, ecoPlayer.getJoinedTownList().size());
+		verify(ecoPlayerDao, never()).saveJoinedTowns(anyString(), anyList());
 	}
 
 	@Test
 	public void getJoinedTownListTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.addJoinedTown("mytown");
-			assertEquals(1, ecoPlayer.getJoinedTownList().size());
-			assertEquals("mytown", ecoPlayer.getJoinedTownList().get(0));
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertDoesNotThrow(() -> ecoPlayer.addJoinedTown("mytown"));
+		assertEquals(1, ecoPlayer.getJoinedTownList().size());
+		assertEquals("mytown", ecoPlayer.getJoinedTownList().get(0));
 	}
 
 	@Test
 	public void reachedMaxJoinedTownsTest() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			assertFalse(ecoPlayer.reachedMaxJoinedTowns());
-			ecoPlayer.addJoinedTown("mytown");
-			assertTrue(ecoPlayer.reachedMaxJoinedTowns());
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
+		when(configManager.getMaxJoinedTowns()).thenReturn(1);
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertFalse(ecoPlayer.reachedMaxJoinedTowns());
+		assertDoesNotThrow(() -> ecoPlayer.addJoinedTown("mytown"));
+		assertTrue(ecoPlayer.reachedMaxJoinedTowns());
 	}
 
 	@Test
 	public void removeJoinedTown() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.addJoinedTown("mytown");
-			ecoPlayer.removeJoinedTown("mytown");
-			assertEquals(0, ecoPlayer.getJoinedTownList().size());
-			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-			assertEquals(0, config.getStringList("catch441.joinedTowns").size());
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertDoesNotThrow(() -> ecoPlayer.addJoinedTown("mytown"));
+		reset(ecoPlayerDao);
+		reset(validationHandler);
+		assertDoesNotThrow(() -> ecoPlayer.removeJoinedTown("mytown"));
+		assertEquals(0, ecoPlayer.getJoinedTownList().size());
+		verify(ecoPlayerDao).saveJoinedTowns("kthschnll", new ArrayList<String>());
+		assertDoesNotThrow(() -> verify(validationHandler).checkForJoinedTown(anyList(), eq("mytown")));
 	}
 
 	@Test
-	public void removeJoinedTownWithTownNotJoined() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.removeJoinedTown("mytown");
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertTrue(e instanceof EconomyPlayerException);
-			assertEquals("§cYou didnt join this town yet!", e.getMessage());
-		}
+	public void removeJoinedTownWithTownNotJoined() throws EconomyPlayerException {
+		doThrow(EconomyPlayerException.class).when(validationHandler).checkForJoinedTown(anyList(), anyString());
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.removeJoinedTown("mytown"));
+		verify(ecoPlayerDao, never()).saveJoinedTowns(anyString(), anyList());
+		assertEquals(0, ecoPlayer.getJoinedTownList().size());
 	}
 
 	@Test
-	public void setScoreBoardDisabled() {
-		try {
-			EconomyPlayerManagerImpl.createEconomyPlayer("catch441");
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			assertTrue(ecoPlayer.isScoreBoardDisabled());
-			ecoPlayer.setScoreBoardDisabled(false);
-			assertFalse(ecoPlayer.isScoreBoardDisabled());
-			server.getScheduler().performOneTick();
-			assertEquals(1, player.getScoreboard().getObjectives().size());
-			assertNotNull("0", String.valueOf(player.getScoreboard().getObjective("bank")));
-			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-			assertFalse(config.getBoolean("catch441.bank"));
-			ecoPlayer.setScoreBoardDisabled(true);
-			server.getScheduler().performOneTick();
-			assertTrue(ecoPlayer.isScoreBoardDisabled());
-			assertEquals(0, player.getScoreboard().getObjectives().size());
-			// check savefile
-			File saveFile1 = new File(UltimateEconomy.getInstance.getDataFolder(), "PlayerFile.yml");
-			YamlConfiguration config1 = YamlConfiguration.loadConfiguration(saveFile1);
-			assertTrue(config1.getBoolean("catch441.scoreboardDisabled"));
-		} catch (EconomyPlayerException e) {
-			fail();
-		}
+	public void setScoreBoardDisabledTestFalse() {
+		Scoreboard board = mock(Scoreboard.class);
+		Objective o = mock(Objective.class);
+		Score score = mock(Score.class);
+		when(bukkitService.createScoreBoard()).thenReturn(board);
+		when(board.registerNewObjective("bank", "dummy", "bank")).thenReturn(o);
+		when(o.getScore("§6$")).thenReturn(score);
+
+		when(configManager.getCurrencyText(0.0)).thenReturn("$");
+		when(messageWrapper.getString("bank")).thenReturn("bank");
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		reset(ecoPlayer.getPlayer());
+		ecoPlayer.setScoreBoardDisabled(false);
+		assertFalse(ecoPlayer.isScoreBoardDisabled());
+		verify(ecoPlayerDao).saveScoreboardDisabled("kthschnll", false);
+		verify(ecoPlayer.getPlayer()).setScoreboard(board);
+		verify(board).registerNewObjective("bank", "dummy", "bank");
+	}
+
+	@Test
+	public void setScoreBoardDisabledTestTrue() {
+		Scoreboard board = mock(Scoreboard.class);
+		when(bukkitService.createScoreBoard()).thenReturn(board);
+
+		// invoked at player creation
+		EconomyPlayer ecoPlayer = createEcoPlayerMock();
+		assertTrue(ecoPlayer.isScoreBoardDisabled());
+		verify(ecoPlayerDao).saveScoreboardDisabled("kthschnll", true);
+		verify(ecoPlayer.getPlayer()).setScoreboard(board);
+		verify(board, never()).registerNewObjective("bank", "dummy", "bank");
+	}
+
+	private EconomyPlayer createEcoPlayerMock() {
+		BossBar bossBar = mock(BossBar.class);
+		BankAccount account = mock(BankAccount.class);
+		Player player = mock(Player.class);
+		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		when(bankManager.createBankAccount(0.0)).thenReturn(account);
+		return new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper, configManager,
+				bankManager, jobManager, player, "kthschnll", true);
 	}
 }

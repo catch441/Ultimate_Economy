@@ -20,12 +20,6 @@
 			<id>spigotImpl</id>
 			<url>https://your-repo.net/</url>
 		</repository>
-		<!-- for MockBukkit UE version -->
-		<repository>
-			<id>ProjectRepo</id>
-			<name>ProjectRepo</name>
-			<url>file://${project.basedir}/src/main/resources/libs</url>
-		</repository>
 		<repository>
 			<id>mojang</id>
 			<name>Mojang's Repository</name>
@@ -77,12 +71,6 @@
             <version>LATEST</version>
             <scope>test</scope>
         </dependency>
-		<dependency>
-			<groupId>MockBukkitUE</groupId>
-			<artifactId>MockBukkitUE</artifactId>
-			<version>0.2.2</version>
-			<scope>test</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>org.spigotmc</groupId>

@@ -10,7 +10,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
@@ -98,7 +97,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	@Override
 	public void joinJob(Job job, boolean sendMessage) throws EconomyPlayerException, JobSystemException {
-		validationHandler.checkForNotReachedMaxJoinedJobs(reachedMaxJoinedTowns());
+		validationHandler.checkForNotReachedMaxJoinedJobs(reachedMaxJoinedJobs());
 		validationHandler.checkForJobNotJoined(getJobList(), job);
 		getJobList().add(job);
 		ecoPlayerDao.saveJoinedJobsList(getName(), getJobList());
@@ -119,11 +118,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	@Override
 	public boolean hasJob(Job job) {
-		if (getJobList().contains(job)) {
-			return true;
-		} else {
-			return false;
-		}
+		return getJobList().contains(job);
 	}
 
 	@Override
@@ -164,44 +159,24 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	@Override
 	public boolean reachedMaxJoinedTowns() {
-		if (configManager.getMaxJoinedTowns() <= getJoinedTownList().size()) {
-			return true;
-		} else {
-			return false;
-		}
+		return getJoinedTownList().size() >= configManager.getMaxJoinedTowns();
 	}
 
 	@Override
 	public boolean reachedMaxHomes() {
-		if (configManager.getMaxHomes() <= getHomeList().size()) {
-			return true;
-		} else {
-			return false;
-		}
+		return getHomeList().size() >= configManager.getMaxHomes();
 	}
 
 	@Override
 	public boolean reachedMaxJoinedJobs() {
-		if (configManager.getMaxJobs() <= getJobList().size()) {
-			return true;
-		} else {
-			return false;
-		}
+		return getJobList().size() >= configManager.getMaxJobs();
 	}
 
 	@Override
 	public void addHome(String homeName, Location location, boolean sendMessage) throws EconomyPlayerException {
-		validationHandler.checkForNotExistingHome(homes, homeName);
+		validationHandler.checkForNotExistingHome(getHomeList(), homeName);
 		validationHandler.checkForNotReachedMaxHomes(reachedMaxHomes());
-		
-		System.out.println(homes.toString());
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		homes.put("teschd", location);
+		homes.put(homeName, location);
 		ecoPlayerDao.saveHome(getName(), homeName, location);
 		if (isOnline() && sendMessage) {
 			getPlayer().sendMessage(messageWrapper.getString("sethome", homeName));
@@ -233,7 +208,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 				getPlayer().setScoreboard(bukkitService.createScoreBoard());
 			}
 		} else {
-			new UpdateScoreboardRunnable().runTask(UltimateEconomy.getInstance);
+			updateScoreBoard();
 		}
 	}
 
@@ -256,7 +231,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	public void increasePlayerAmount(double amount, boolean sendMessage) throws GeneralEconomyException {
 		getBankAccount().increaseAmount(amount);
 		if (isOnline()) {
-			new UpdateScoreboardRunnable().runTask(UltimateEconomy.getInstance);
+			updateScoreBoard();
 			if (sendMessage) {
 				getPlayer().sendMessage(
 						messageWrapper.getString("got_money", amount, configManager.getCurrencyText(amount)));
@@ -270,7 +245,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		validationHandler.checkForEnoughMoney(getBankAccount(), amount, personal);
 		getBankAccount().decreaseAmount(amount);
 		if (isOnline()) {
-			new UpdateScoreboardRunnable().runTask(UltimateEconomy.getInstance);
+			updateScoreBoard();
 		}
 	}
 
@@ -313,14 +288,9 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		}
 	}
 
-	/*
-	 * Utility methods/classes
-	 * 
-	 */
-
 	private void setScoreboard(int score) {
 		if (!isScoreBoardDisabled()) {
-			Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
+			Scoreboard board = bukkitService.createScoreBoard();
 			Objective o = board.registerNewObjective("bank", "dummy", messageWrapper.getString("bank"));
 			o.setDisplaySlot(DisplaySlot.SIDEBAR);
 			o.getScore(ChatColor.GOLD + configManager.getCurrencyText(score)).setScore(score);
@@ -342,30 +312,12 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		this.name = name;
 	}
 
-	private class UpdateScoreboardRunnable extends BukkitRunnable {
-
-		@Override
-		public void run() {
-			updateScoreBoard();
-		}
-	}
-
-	/*
-	 * Setup methods
-	 * 
-	 */
-
 	private void setupNewPlayer(String name) {
 		setName(name);
 		setScoreBoardDisabled(true);
 		bankAccount = bankManager.createBankAccount(0.0);
 		ecoPlayerDao.saveBankIban(getName(), getBankAccount().getIban());
 	}
-
-	/*
-	 * Loading methods
-	 * 
-	 */
 
 	private void loadExistingPlayer(String name) {
 		setName(name);
