@@ -24,7 +24,6 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
-import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -96,7 +95,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	@Override
-	public void joinJob(Job job, boolean sendMessage) throws EconomyPlayerException, JobSystemException {
+	public void joinJob(Job job, boolean sendMessage) throws EconomyPlayerException {
 		validationHandler.checkForNotReachedMaxJoinedJobs(reachedMaxJoinedJobs());
 		validationHandler.checkForJobNotJoined(getJobList(), job);
 		getJobList().add(job);
@@ -215,11 +214,11 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	@Override
 	public void payToOtherPlayer(EconomyPlayer reciever, double amount, boolean sendMessage)
 			throws GeneralEconomyException, EconomyPlayerException {
-		reciever.increasePlayerAmount(amount, false);
 		decreasePlayerAmount(amount, true);
+		reciever.increasePlayerAmount(amount, false);
 		if (reciever.isOnline() && sendMessage) {
 			reciever.getPlayer().sendMessage(messageWrapper.getString("got_money_with_sender", amount,
-					configManager.getCurrencyText(amount), player.getName()));
+					configManager.getCurrencyText(amount), getName()));
 		}
 		if (isOnline() && sendMessage) {
 			getPlayer().sendMessage(messageWrapper.getString("gave_money", reciever.getName(), amount,
@@ -331,6 +330,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	private void loadBankAccount() {
 		String iban = ecoPlayerDao.loadBankIban(getName());
+		System.out.println(iban);
 		try {
 			bankAccount = bankManager.getBankAccountByIban(iban);
 		} catch (GeneralEconomyException e) {

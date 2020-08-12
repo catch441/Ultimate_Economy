@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.jobsystem.logic.api.Job;
-import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface EconomyPlayer {
@@ -201,9 +200,8 @@ public interface EconomyPlayer {
      * @param sendMessage
      *            when true then a message is send to the player
      * @throws EconomyPlayerException
-     * @throws JobSystemException
      */
-    public void joinJob(Job job, boolean sendMessage) throws EconomyPlayerException, JobSystemException;
+    public void joinJob(Job job, boolean sendMessage) throws EconomyPlayerException;
 
     /**
      * This method removes a job from this player.

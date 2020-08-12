@@ -187,7 +187,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 						ecoPlayer.joinJob(jobManager.getJobByName(displayname), true);
 					}
 				}
-			} catch (JobSystemException | GeneralEconomyException e) {
+			} catch (GeneralEconomyException e) {
 			} catch (EconomyPlayerException e) {
 				event.getWhoClicked().sendMessage(ChatColor.RED + e.getMessage());
 			}

@@ -1,4 +1,4 @@
-package com.ue.eventhandling;
+package com.ue.ultimate_economy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
