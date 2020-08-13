@@ -25,14 +25,27 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 
+	private final ConfigManager configManager;
+	private final MessageWrapper messageWrapper;
+	private final EconomyPlayerManager ecoPlayerManager;
+	private final TownworldManager townworldManager;
+
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param configManager
+	 * @param messageWrapper
+	 * @param ecoPlayerManager
+	 * @param townworldManager
+	 */
 	@Inject
-	ConfigManager configManager;
-	@Inject
-	MessageWrapper messageWrapper;
-	@Inject
-	EconomyPlayerManager ecoPlayerManager;
-	@Inject
-	TownworldManager townworldManager;
+	public EconomyPlayerCommandExecutorImpl(ConfigManager configManager, MessageWrapper messageWrapper,
+			EconomyPlayerManager ecoPlayerManager, TownworldManager townworldManager) {
+		this.configManager = configManager;
+		this.messageWrapper = messageWrapper;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.townworldManager = townworldManager;
+	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -133,8 +146,8 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 1) {
 			Location location = ecoPlayer.getHome(args[0]);
 			player.teleport(location);
-			townworldManager.performTownWorldLocationCheck(player.getWorld().getName(),
-					player.getLocation().getChunk(), ecoPlayer);
+			townworldManager.performTownWorldLocationCheck(player.getWorld().getName(), player.getLocation().getChunk(),
+					ecoPlayer);
 		} else if (args.length == 0) {
 			player.sendMessage(messageWrapper.getString("home_info", ecoPlayer.getHomeList().keySet().toString()));
 		} else {

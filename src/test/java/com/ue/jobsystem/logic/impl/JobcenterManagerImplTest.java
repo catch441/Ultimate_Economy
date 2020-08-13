@@ -1,8 +1,12 @@
-package com.ue.jobsystem;
+package com.ue.jobsystem.logic.impl;
 
+import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,115 +16,84 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.jobsystem.logic.api.Job;
-import com.ue.jobsystem.logic.api.JobController;
+import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
+import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
+import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
-import be.seeseemelk.mockbukkit.WorldMock;
-import be.seeseemelk.mockbukkit.entity.PlayerMock;
-import be.seeseemelk.mockbukkit.inventory.ChestInventoryMock;
+import dagger.Lazy;
 
-public class JobcenterControllerTest {
+@ExtendWith(MockitoExtension.class)
+//@RunWith(PowerMockRunner.class)
+//@PrepareForTest(JobcenterImpl.class)
+public class JobcenterManagerImplTest {
 
-	private static ServerMock server;
-	private static WorldMock world;
-	private static PlayerMock player;
-
-	/**
-	 * Init shop for tests.
-	 */
-	@BeforeAll
-	public static void initPlugin() {
-		server = MockBukkit.mock();
-		Bukkit.getLogger().setLevel(Level.OFF);
-		MockBukkit.load(UltimateEconomy.class);
-		world = new WorldMock(Material.GRASS_BLOCK, 1);
-		server.addWorld(world);
-		player = server.addPlayer("catch441");
-	}
-
-	/**
-	 * Unload mock bukkit.
-	 */
-	@AfterAll
-	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
-		for (int i = 0; i < size2; i++) {
-			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-		}
-		UltimateEconomy.getInstance.getDataFolder().delete();
-		server.setPlayers(0);
-		MockBukkit.unload();
-	}
-
-	/**
-	 * Unload all.
-	 */
-	@AfterEach
-	public void unload() {
-		int size = JobController.getJobList().size();
-		for (int i = 0; i < size; i++) {
-			JobController.deleteJob(JobController.getJobList().get(0));
-		}
-		int size2 = JobcenterManagerImpl.getJobcenterList().size();
-		for (int i = 0; i < size2; i++) {
-			try {
-				JobcenterManagerImpl.deleteJobcenter(JobcenterManagerImpl.getJobcenterList().get(0));
-			} catch (JobSystemException e) {
-				assertTrue(false);
-			}
-		}
-	}
+	@InjectMocks
+	JobcenterManagerImpl manager;
+	@Mock
+	MessageWrapper messageWrapper;
+	@Mock
+	EconomyPlayerManager ecoPlayerManager;
+	@Mock
+	JobsystemValidationHandler validationHandler;
 
 	@Test
 	public void getJobcenterByNameTest() {
-		try {
-			JobcenterManagerImpl.createJobcenter("other", new Location(world, 10, 1, 1), 9);
-			JobcenterManagerImpl.createJobcenter("center", new Location(world, 1, 1, 1), 9);
-			Jobcenter center = JobcenterManagerImpl.getJobcenterByName("center");
-			assertEquals("center", center.getName());
-		} catch (JobSystemException | GeneralEconomyException e) {
-			assertTrue(false);
-		}
+		World world = mock(World.class);
+		//Jobcenter center = mock(Jobcenter.class);
+		//when(center.getName()).thenReturn("center");
+		//assertDoesNotThrow(() -> PowerMockito.whenNew(JobcenterImpl.class).withAnyArguments().thenReturn((JobcenterImpl) center));
+		//assertDoesNotThrow(() -> manager.createJobcenter("other", new Location(world, 10, 1, 1), 9));
+		//assertDoesNotThrow(() -> manager.createJobcenter("center", new Location(world, 1, 1, 1), 9));
+		//Jobcenter result = assertDoesNotThrow(() -> manager.getJobcenterByName("center"));
+		//assertEquals(center, result);
 	}
 
 	@Test
 	public void getJobcenterByNameTestWithNoJobcenter() {
 		try {
-			JobcenterManagerImpl.getJobcenterByName("center");
-			assertTrue(false);
+			manager.getJobcenterByName("center");
+			fail();
 		} catch (GeneralEconomyException e) {
-			assertTrue(e instanceof GeneralEconomyException);
-			assertEquals("§c§4center§c does not exist!", e.getMessage());
+			assertEquals(1, e.getParams().length);
+			assertEquals("center", e.getParams()[0]);
+			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
 		}
 	}
 
 	@Test
 	public void getJobcenterNameListTest() {
-		try {
-			JobcenterManagerImpl.createJobcenter("center", new Location(world, 1, 1, 1), 9);
-			List<String> list = JobcenterManagerImpl.getJobcenterNameList();
-			assertEquals(1, list.size());
-			assertEquals("center", list.get(0));
-		} catch (JobSystemException | GeneralEconomyException e) {
-			assertTrue(false);
-		}
+		World world = mock(World.class);
+		assertDoesNotThrow(() -> manager.createJobcenter("center", new Location(world, 10, 1, 1), 9));
+		List<String> list = manager.getJobcenterNameList();
+		assertEquals(1, list.size());
+		assertEquals("center", list.get(0));
 	}
 
 	@Test
@@ -288,7 +261,7 @@ public class JobcenterControllerTest {
 			assertTrue(false);
 		}
 	}
-	
+
 	@Test
 	public void loadAllJobcenterTestWithLoadingError() {
 		try {

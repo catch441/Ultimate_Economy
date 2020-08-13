@@ -144,7 +144,7 @@ public class JobTabCompleterImpl implements TabCompleter {
 			return all;
 		} else {
 			List<String> list = new ArrayList<>();
-			for (String jobname : jobcenterManager.getJobcenterNameList()) {
+			for (String jobname : all) {
 				addIfMatching(list, jobname, arg);
 			}
 			return list;

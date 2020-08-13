@@ -15,13 +15,24 @@ import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
 public class BankManagerImpl implements BankManager {
 
-	@Inject
-	MessageWrapper messageWrapper;
-	@Inject
-	BankDao bankDao;
-	@Inject
-	BankValidationHandler validationHandler;
+	private final MessageWrapper messageWrapper;
+	private final BankDao bankDao;
+	private final BankValidationHandler validationHandler;
 	private List<BankAccount> accounts = new ArrayList<>();
+
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param messageWrapper
+	 * @param bankDao
+	 * @param validationHandler
+	 */
+	@Inject
+	public BankManagerImpl(MessageWrapper messageWrapper, BankDao bankDao, BankValidationHandler validationHandler) {
+		this.messageWrapper = messageWrapper;
+		this.bankDao = bankDao;
+		this.validationHandler = validationHandler;
+	}
 
 	@Override
 	public BankAccount createBankAccount(double startAmount) {
@@ -32,7 +43,8 @@ public class BankManagerImpl implements BankManager {
 	}
 
 	@Override
-	public BankAccount createExternalBankAccount(double startAmount, String externalIban) throws GeneralEconomyException {
+	public BankAccount createExternalBankAccount(double startAmount, String externalIban)
+			throws GeneralEconomyException {
 		validationHandler.checkForIbanIsFree(getIbanList(), externalIban);
 		BankAccount account = new BankAccountImpl(bankDao, validationHandler, startAmount, externalIban);
 		getBankAccounts().add(account);

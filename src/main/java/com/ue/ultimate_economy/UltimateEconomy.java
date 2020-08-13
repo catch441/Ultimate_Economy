@@ -229,11 +229,8 @@ public class UltimateEconomy extends JavaPlugin {
 				setupSetHomeCommand(map);
 				setupDeleteHomeCommand(map);
 			} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-				// TODO einkommentieren
-				// Bukkit.getLogger().warning("[Ultimate_Economy] Error on enable homes
-				// feature.");
-				// Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " +
-				// e.getMessage());
+				Bukkit.getLogger().warning("[Ultimate_Economy] Error on enable homes feature.");
+				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}

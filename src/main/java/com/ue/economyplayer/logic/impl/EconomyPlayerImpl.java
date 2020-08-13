@@ -330,7 +330,6 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	private void loadBankAccount() {
 		String iban = ecoPlayerDao.loadBankIban(getName());
-		System.out.println(iban);
 		try {
 			bankAccount = bankManager.getBankAccountByIban(iban);
 		} catch (GeneralEconomyException e) {

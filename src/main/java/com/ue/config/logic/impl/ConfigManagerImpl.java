@@ -7,8 +7,6 @@ import javax.inject.Inject;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.config.logic.api.ConfigManager;
-import com.ue.economyplayer.logic.api.EconomyPlayer;
-import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
@@ -16,7 +14,6 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	private final ConfigDao configDao;
 	private final MessageWrapper messageWrapper;
-	private final EconomyPlayerManager ecoPlayerManager;
 
 	private int maxHomes;
 	private int maxJobs;
@@ -31,18 +28,15 @@ public class ConfigManagerImpl implements ConfigManager {
 	private Locale locale;
 
 	/**
-	 * Config manager constructor.
+	 * Inject constructor.
 	 * 
-	 * @param ecoPlayerManager
 	 * @param configDao
 	 * @param messageWrapper
 	 */
 	@Inject
-	public ConfigManagerImpl(EconomyPlayerManager ecoPlayerManager, ConfigDao configDao,
-			MessageWrapper messageWrapper) {
+	public ConfigManagerImpl(ConfigDao configDao, MessageWrapper messageWrapper) {
 		this.configDao = configDao;
 		this.messageWrapper = messageWrapper;
-		this.ecoPlayerManager = ecoPlayerManager;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -168,15 +162,6 @@ public class ConfigManagerImpl implements ConfigManager {
 	public void setWildernessInteraction(boolean value) {
 		wildernessInteraction = value;
 		configDao.saveWildernessInteraction(wildernessInteraction);
-		if (value) {
-			for (EconomyPlayer player : ecoPlayerManager.getAllEconomyPlayers()) {
-				player.addWildernessPermission();
-			}
-		} else {
-			for (EconomyPlayer player : ecoPlayerManager.getAllEconomyPlayers()) {
-				player.denyWildernessPermission();
-			}
-		}
 	}
 
 	@Override

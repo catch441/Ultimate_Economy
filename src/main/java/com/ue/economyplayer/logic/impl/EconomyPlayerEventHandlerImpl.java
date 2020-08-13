@@ -15,7 +15,7 @@ public class EconomyPlayerEventHandlerImpl implements EconomyPlayerEventHandler 
 	private final EconomyPlayerManager ecoPlayerManager;
 
 	/**
-	 * Constructor for a new economy player event handler.
+	 * Inject constructor.
 	 * 
 	 * @param ecoPlayerManager
 	 * @param configManager

@@ -1,7 +1,6 @@
 package com.ue.economyplayer.dataaccess.impl;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -22,23 +20,28 @@ import com.ue.jobsystem.logic.api.Job;
 
 public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayerDao {
 
-	@Inject
-	BankManager bankManager;
-	@Inject
-	BukkitService bukkitService;
+	private final BankManager bankManager;
+	private final BukkitService bukkitService;
 	private File file;
 	private YamlConfiguration config;
+
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param bankManager
+	 * @param bukkitService
+	 */
+	@Inject
+	public EconomyPlayerDaoImpl(BankManager bankManager, BukkitService bukkitService) {
+		this.bankManager = bankManager;
+		this.bukkitService = bukkitService;
+	}
 
 	@Override
 	public void setupSavefile() {
 		file = new File(bukkitService.getDataFolderPath(), "PlayerFile.yml");
 		if (!file.exists()) {
-			try {
-				getSavefile().createNewFile();
-			} catch (IOException e) {
-				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create savefile");
-				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-			}
+			createFile(file);
 		}
 		config = YamlConfiguration.loadConfiguration(getSavefile());
 	}
@@ -159,7 +162,7 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 			save(getConfig(), getSavefile());
 		}
 	}
-	
+
 	/**
 	 * @since 1.2.6
 	 * @deprecated can be removed later

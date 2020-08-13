@@ -9,14 +9,30 @@ import org.bukkit.command.CommandSender;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class ConfigCommandExecutorImpl implements CommandExecutor {
 
+	private final ConfigManager configManager;
+	private final EconomyPlayerManager ecoPlayerManager;
+	private final MessageWrapper messageWrapper;
+
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param ecoPlayerManager
+	 * @param configManager
+	 * @param messageWrapper
+	 */
 	@Inject
-	ConfigManager configManager;
-	@Inject
-	MessageWrapper messageWrapper;
+	public ConfigCommandExecutorImpl(EconomyPlayerManager ecoPlayerManager, ConfigManager configManager,
+			MessageWrapper messageWrapper) {
+		this.configManager = configManager;
+		this.messageWrapper = messageWrapper;
+		this.ecoPlayerManager = ecoPlayerManager;
+	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -151,7 +167,17 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 
 	private boolean performWildernessInteractionCommand(String label, String[] args, CommandSender sender) {
 		if (args.length == 2) {
-			configManager.setWildernessInteraction(stringToBoolean(args[1]));
+			boolean input = stringToBoolean(args[1]);
+			configManager.setWildernessInteraction(input);
+			if (input) {
+				for (EconomyPlayer player : ecoPlayerManager.getAllEconomyPlayers()) {
+					player.addWildernessPermission();
+				}
+			} else {
+				for (EconomyPlayer player : ecoPlayerManager.getAllEconomyPlayers()) {
+					player.denyWildernessPermission();
+				}
+			}
 			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
 		} else {
 			sender.sendMessage("/" + label + " wildernessInteraction <true/false>");

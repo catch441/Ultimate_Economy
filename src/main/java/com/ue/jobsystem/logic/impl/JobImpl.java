@@ -1,36 +1,36 @@
 package com.ue.jobsystem.logic.impl;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
 
 import com.ue.jobsyste.dataaccess.api.JobDao;
-import com.ue.jobsystem.dataaccese.impl.JobDaoImpl;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobImpl implements Job {
 
 	@Inject
 	JobsystemValidationHandler validationHandler;
+	@Inject
+	JobDao jobDao;
 	private Map<String, Double> entityList = new HashMap<>();
 	private Map<String, Double> blockList = new HashMap<>();
 	private Map<String, Double> fisherList = new HashMap<>();
 	private String name;
-	private JobDao jobDao;
 
 	/**
-	 * Constructor to create a new or load a existing job.
+	 * Constructor to create a new or load an existing job.
 	 * 
 	 * @param name
+	 * @param isNew
 	 */
-	public JobImpl(String name) {
-		if (!new File(UltimateEconomy.getInstance.getDataFolder(), name + "-Job.yml").exists()) {
-			setupNewJob(name);
+	public JobImpl(String name, boolean isNew) {
+		jobDao.setupSavefile(name);
+		if (!isNew) {
+			setupJobName(name);
 		} else {
 			loadExistingJob(name);
 		}
@@ -38,17 +38,17 @@ public class JobImpl implements Job {
 
 	@Override
 	public void addFisherLootType(String lootType, double price) throws JobSystemException, GeneralEconomyException {
-		getValidationHandler().checkForValidFisherLootType(lootType);
-		getValidationHandler().checkForPositivValue(price);
-		getValidationHandler().checkForLoottypeNotInJob(getFisherList(), lootType);
+		validationHandler.checkForValidFisherLootType(lootType);
+		validationHandler.checkForPositivValue(price);
+		validationHandler.checkForLoottypeNotInJob(getFisherList(), lootType);
 		getFisherList().put(lootType, price);
 		jobDao.saveFisherList(getFisherList());
 	}
 
 	@Override
 	public void delFisherLootType(String lootType) throws JobSystemException, GeneralEconomyException {
-		getValidationHandler().checkForValidFisherLootType(lootType);
-		getValidationHandler().checkForLoottypeInJob(getFisherList(), lootType);
+		validationHandler.checkForValidFisherLootType(lootType);
+		validationHandler.checkForLoottypeInJob(getFisherList(), lootType);
 		getFisherList().remove(lootType);
 		jobDao.saveFisherList(getFisherList());
 	}
@@ -56,9 +56,9 @@ public class JobImpl implements Job {
 	@Override
 	public void addMob(String entity, double price) throws JobSystemException, GeneralEconomyException {
 		entity = entity.toUpperCase();
-		getValidationHandler().checkForValidEntityType(entity);
-		getValidationHandler().checkForEntityNotInJob(getEntityList(), entity);
-		getValidationHandler().checkForPositivValue(price);
+		validationHandler.checkForValidEntityType(entity);
+		validationHandler.checkForEntityNotInJob(getEntityList(), entity);
+		validationHandler.checkForPositivValue(price);
 		getEntityList().put(entity, price);
 		jobDao.saveEntityList(getEntityList());
 	}
@@ -66,8 +66,8 @@ public class JobImpl implements Job {
 	@Override
 	public void deleteMob(String entity) throws JobSystemException, GeneralEconomyException {
 		entity = entity.toUpperCase();
-		getValidationHandler().checkForValidEntityType(entity);
-		getValidationHandler().checkForEntityInJob(getEntityList(), entity);
+		validationHandler.checkForValidEntityType(entity);
+		validationHandler.checkForEntityInJob(getEntityList(), entity);
 		getEntityList().remove(entity);
 		jobDao.saveEntityList(getEntityList());
 	}
@@ -75,9 +75,9 @@ public class JobImpl implements Job {
 	@Override
 	public void addBlock(String material, double price) throws JobSystemException, GeneralEconomyException {
 		material = material.toUpperCase();
-		getValidationHandler().checkForValidMaterial(material);
-		getValidationHandler().checkForPositivValue(price);
-		getValidationHandler().checkForBlockNotInJob(getBlockList(), material);
+		validationHandler.checkForValidMaterial(material);
+		validationHandler.checkForPositivValue(price);
+		validationHandler.checkForBlockNotInJob(getBlockList(), material);
 		getBlockList().put(material, price);
 		jobDao.saveBlockList(getBlockList());
 	}
@@ -85,8 +85,8 @@ public class JobImpl implements Job {
 	@Override
 	public void deleteBlock(String material) throws JobSystemException, GeneralEconomyException {
 		material = material.toUpperCase();
-		getValidationHandler().checkForValidMaterial(material);
-		getValidationHandler().checkForBlockInJob(getBlockList(), material);
+		validationHandler.checkForValidMaterial(material);
+		validationHandler.checkForBlockInJob(getBlockList(), material);
 		getBlockList().remove(material);
 		jobDao.saveBlockList(getBlockList());
 	}
@@ -99,23 +99,23 @@ public class JobImpl implements Job {
 	@Override
 	public double getBlockPrice(String material) throws JobSystemException, GeneralEconomyException {
 		material = material.toUpperCase();
-		getValidationHandler().checkForValidMaterial(material);
-		getValidationHandler().checkForBlockInJob(getBlockList(), material);
+		validationHandler.checkForValidMaterial(material);
+		validationHandler.checkForBlockInJob(getBlockList(), material);
 		return getBlockList().get(material);
 	}
 
 	@Override
 	public double getFisherPrice(String lootType) throws JobSystemException, GeneralEconomyException {
-		getValidationHandler().checkForValidFisherLootType(lootType);
-		getValidationHandler().checkForLoottypeInJob(getFisherList(), lootType);
+		validationHandler.checkForValidFisherLootType(lootType);
+		validationHandler.checkForLoottypeInJob(getFisherList(), lootType);
 		return getFisherList().get(lootType);
 	}
 
 	@Override
 	public double getKillPrice(String entityName) throws JobSystemException, GeneralEconomyException {
 		entityName = entityName.toUpperCase();
-		getValidationHandler().checkForValidEntityType(entityName);
-		getValidationHandler().checkForEntityInJob(getEntityList(), entityName);
+		validationHandler.checkForValidEntityType(entityName);
+		validationHandler.checkForEntityInJob(getEntityList(), entityName);
 		return getEntityList().get(entityName);
 	}
 
@@ -139,37 +139,12 @@ public class JobImpl implements Job {
 		return fisherList;
 	}
 
-	/*
-	 * Utility methods
-	 * 
-	 */
-
-	private JobsystemValidationHandler getValidationHandler() {
-		return validationHandler;
-	}
-
-	/*
-	 * Setup methods
-	 * 
-	 */
-
-	private void setupNewJob(String name) {
-		jobDao = new JobDaoImpl(name, true);
-		setupJobName(name);
-	}
-
 	private void setupJobName(String name) {
 		this.name = name;
 		jobDao.saveJobName(name);
 	}
 
-	/*
-	 * Loading methods
-	 * 
-	 */
-
 	private void loadExistingJob(String name) {
-		jobDao = new JobDaoImpl(name, false);
 		fisherList = jobDao.loadFisherList();
 		entityList = jobDao.loadEntityList();
 		blockList = jobDao.loadBlockList();

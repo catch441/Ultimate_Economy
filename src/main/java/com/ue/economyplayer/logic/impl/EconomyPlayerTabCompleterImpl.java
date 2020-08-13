@@ -13,8 +13,17 @@ import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 
 public class EconomyPlayerTabCompleterImpl implements TabCompleter {
 
+	private final EconomyPlayerManager ecoPlayerManager;
+
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param ecoPlayerManager
+	 */
 	@Inject
-	EconomyPlayerManager ecoPlayerManager;
+	public EconomyPlayerTabCompleterImpl(EconomyPlayerManager ecoPlayerManager) {
+		this.ecoPlayerManager = ecoPlayerManager;
+	}
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

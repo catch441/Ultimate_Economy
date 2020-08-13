@@ -1,36 +1,29 @@
 package com.ue.jobsystem.dataaccese.impl;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bukkit.Bukkit;
+import javax.inject.Inject;
+
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import com.ue.common.utils.BukkitService;
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.jobsyste.dataaccess.api.JobDao;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobDaoImpl extends SaveFileUtils implements JobDao {
-
+	
+	@Inject
+	BukkitService bukkitService;
 	private File file;
 	private YamlConfiguration config;
 
-	/**
-	 * Constructor for creating a new SavefileHandler.
-	 * @param name
-	 * @param createFile if true, then a new save file is create, else a existing file gets loaded
-	 */
-	public JobDaoImpl(String name, boolean createFile) {
-		file = new File(UltimateEconomy.getInstance.getDataFolder(), name + "-Job.yml");
-		if (createFile) {
-			try {
-				getSavefile().createNewFile();
-			} catch (IOException e) {
-				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create job :" + name);
-				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-			}
+	@Override
+	public void setupSavefile(String name) {
+		file = new File(bukkitService.getDataFolderPath(), name + "-Job.yml");
+		if (!file.exists()) {
+			createFile(file);
 		}
 		config = YamlConfiguration.loadConfiguration(getSavefile());
 	}

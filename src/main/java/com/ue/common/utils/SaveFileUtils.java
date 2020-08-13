@@ -13,7 +13,7 @@ public class SaveFileUtils {
 	 * @param config
 	 * @param savefile
 	 */
-	public static void save(YamlConfiguration config, File savefile) {
+	public void save(YamlConfiguration config, File savefile) {
         try {
         	config.save(savefile);
         } catch (IOException e) {
@@ -21,4 +21,13 @@ public class SaveFileUtils {
             Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
         }
     }
+	
+	public void createFile(File file) {
+		try {
+			file.createNewFile();
+		} catch (IOException e) {
+			Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create savefile");
+			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+		}
+	}
 }

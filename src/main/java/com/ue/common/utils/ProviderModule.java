@@ -1,7 +1,5 @@
 package com.ue.common.utils;
 
-import java.io.File;
-
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -31,6 +29,10 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerEventHandlerImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerTabCompleterImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerValidationHandlerImpl;
+import com.ue.jobsyste.dataaccess.api.JobDao;
+import com.ue.jobsyste.dataaccess.api.JobcenterDao;
+import com.ue.jobsystem.dataaccese.impl.JobDaoImpl;
+import com.ue.jobsystem.dataaccese.impl.JobcenterDaoImpl;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemEventHandler;
@@ -71,6 +73,7 @@ import com.ue.ultimate_economy.UltimateEconomy;
 import com.ue.vault.UltimateEconomyVault;
 import com.ue.vault.VaultHook;
 
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import net.milkbowl.vault.economy.Economy;
@@ -82,6 +85,12 @@ public class ProviderModule {
 	@Provides
 	Metrics provideMetrics() {
 		return new Metrics(UltimateEconomy.getInstance, 4652);
+	}
+
+	@Singleton
+	@Provides
+	BukkitService provideBukkitService() {
+		return new BukkitService();
 	}
 
 	@Singleton
@@ -105,21 +114,24 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	ConfigManager provideConfigManager(EconomyPlayerManager ecoPlayerManager, ConfigDao configDao,
-			MessageWrapper messageWrapper) {
-		return new ConfigManagerImpl(ecoPlayerManager, configDao, messageWrapper);
+	ConfigManager provideConfigManager(ConfigDao configDao, MessageWrapper messageWrapper) {
+		return new ConfigManagerImpl(configDao, messageWrapper);
 	}
 
 	@Singleton
 	@Provides
-	BankManager providesBankManager() {
-		return new BankManagerImpl();
+	BankManager providesBankManager(MessageWrapper messageWrapper, BankDao bankDao,
+			BankValidationHandler validationHandler) {
+		return new BankManagerImpl(messageWrapper, bankDao, validationHandler);
 	}
 
 	@Singleton
 	@Provides
-	EconomyPlayerManager provideEcoPlayerManager() {
-		return new EconomyPlayerManagerImpl();
+	EconomyPlayerManager provideEcoPlayerManager(EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper,
+			EconomyPlayerValidationHandler validationHandler, BankManager bankManager, ConfigManager configManager,
+			Lazy<JobManager> jobManager, BukkitService bukkitService) {
+		return new EconomyPlayerManagerImpl(ecoPlayerDao, messageWrapper, validationHandler, bankManager, configManager,
+				jobManager, bukkitService);
 	}
 
 	@Singleton
@@ -164,15 +176,17 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	@Named("ConfigCommandExecutor")
-	CommandExecutor provideConfigCommandExecutor() {
-		return new ConfigCommandExecutorImpl();
+	CommandExecutor provideConfigCommandExecutor(EconomyPlayerManager ecoPlayerManager, ConfigManager configManager,
+			MessageWrapper messageWrapper) {
+		return new ConfigCommandExecutorImpl(ecoPlayerManager, configManager, messageWrapper);
 	}
 
 	@Singleton
 	@Provides
 	@Named("EconomyPlayerCommandExecutor")
-	CommandExecutor provideEconomyPlayerCommandExecutor() {
-		return new EconomyPlayerCommandExecutorImpl();
+	CommandExecutor provideEconomyPlayerCommandExecutor(ConfigManager configManager, MessageWrapper messageWrapper,
+			EconomyPlayerManager ecoPlayerManager, TownworldManager townworldManager) {
+		return new EconomyPlayerCommandExecutorImpl(configManager, messageWrapper, ecoPlayerManager, townworldManager);
 	}
 
 	@Singleton
@@ -204,14 +218,14 @@ public class ProviderModule {
 	CommandExecutor provideRentshopCommandExecutor(RentshopManager rentshopManager, MessageWrapper messageWrapper) {
 		return new RentshopCommandExecutorImpl(rentshopManager, messageWrapper);
 	}
-	
+
 	@Singleton
 	@Provides
 	@Named("TownCommandExecutor")
 	CommandExecutor provideTownCommandExecutor() {
 		return new TownCommandExecutorImpl();
 	}
-	
+
 	@Singleton
 	@Provides
 	@Named("TownworldCommandExecutor")
@@ -222,8 +236,8 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	@Named("EconomyPlayerTabCompleter")
-	TabCompleter provideEcoPlayerTabCompleter() {
-		return new EconomyPlayerTabCompleterImpl();
+	TabCompleter provideEcoPlayerTabCompleter(EconomyPlayerManager ecoPlayerManager) {
+		return new EconomyPlayerTabCompleterImpl(ecoPlayerManager);
 	}
 
 	@Singleton
@@ -260,14 +274,14 @@ public class ProviderModule {
 	TabCompleter provideRentshopTabCompleter(RentshopManager rentshopManager) {
 		return new RentshopTabCompleterImpl(rentshopManager);
 	}
-	
+
 	@Singleton
 	@Provides
 	@Named("TownTabCompleter")
 	TabCompleter provideTownTabCompleter() {
 		return new TownTabCompleterImpl();
 	}
-	
+
 	@Singleton
 	@Provides
 	@Named("TownworldTabCompleter")
@@ -277,20 +291,30 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	ConfigDao provideConfigDao() {
-		return new ConfigDaoImpl(new File(UltimateEconomy.getInstance.getDataFolder(), "config.yml"));
+	ConfigDao provideConfigDao(BukkitService bukkitService) {
+		return new ConfigDaoImpl(bukkitService);
 	}
 
 	@Singleton
 	@Provides
-	BankDao provideBankDao() {
-		return new BankDaoImpl();
+	BankDao provideBankDao(BukkitService bukkitService) {
+		return new BankDaoImpl(bukkitService);
 	}
 
 	@Singleton
 	@Provides
-	EconomyPlayerDao provideEcoPlayerDao() {
-		return new EconomyPlayerDaoImpl();
+	EconomyPlayerDao provideEcoPlayerDao(BankManager bankManager, BukkitService bukkitServic) {
+		return new EconomyPlayerDaoImpl(bankManager, bukkitServic);
+	}
+
+	@Provides
+	JobDao provideJobDao() {
+		return new JobDaoImpl();
+	}
+
+	@Provides
+	JobcenterDao provideJobcenterDao(BukkitService bukkitService) {
+		return new JobcenterDaoImpl(bukkitService);
 	}
 
 	@Singleton
@@ -301,8 +325,8 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	EconomyPlayerValidationHandler provideEcoPlayerValidationHandler() {
-		return new EconomyPlayerValidationHandlerImpl();
+	EconomyPlayerValidationHandler provideEcoPlayerValidationHandler(MessageWrapper messageWrapper) {
+		return new EconomyPlayerValidationHandlerImpl(messageWrapper);
 	}
 
 	@Singleton

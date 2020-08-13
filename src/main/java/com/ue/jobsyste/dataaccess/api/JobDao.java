@@ -56,4 +56,10 @@ public interface JobDao {
 	 * Deletes the savefile.
 	 */
 	public void deleteSavefile();
+
+	/**
+	 * Creates a new svefile or loads an existing one.
+	 * @param name jobname
+	 */
+	public void setupSavefile(String name);
 }

@@ -23,10 +23,11 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import com.ue.common.utils.DaggerServiceComponent;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.jobsystem.dataaccese.impl.JobcenterDaoImpl;
+import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
@@ -46,13 +47,16 @@ public class JobcenterImpl implements Jobcenter {
 	EconomyPlayerManager ecoPlayerManager;
 	@Inject
 	JobsystemValidationHandler validationHandler;
+	@Inject
+	JobcenterDao jobcenterDao;
+	@Inject
+	JobcenterDao savefileHandler;
 	private Villager villager;
 	private Location location;
 	private String name;
 	private int size;
 	private List<Job> jobs = new ArrayList<>();
 	private Inventory inventory;
-	private JobcenterDaoImpl savefileHandler;
 
 	/**
 	 * Constructor for creating a new jobcenter.
@@ -63,7 +67,7 @@ public class JobcenterImpl implements Jobcenter {
 	 * @throws JobSystemException
 	 */
 	public JobcenterImpl(String name, Location spawnLocation, int size) throws JobSystemException {
-		savefileHandler = new JobcenterDaoImpl(name, true);
+		savefileHandler.setupSavefile(name);
 		setupNewJobcenter(name, spawnLocation, size);
 	}
 
@@ -73,7 +77,7 @@ public class JobcenterImpl implements Jobcenter {
 	 * @param name
 	 */
 	public JobcenterImpl(String name) {
-		savefileHandler = new JobcenterDaoImpl(name, false);
+		savefileHandler.setupSavefile(name);
 		loadExistingJobcenter(name);
 	}
 
@@ -175,7 +179,7 @@ public class JobcenterImpl implements Jobcenter {
 	 * 
 	 */
 
-	private JobcenterDaoImpl getSavefileHandler() {
+	private JobcenterDao getSavefileHandler() {
 		return savefileHandler;
 	}
 

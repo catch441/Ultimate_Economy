@@ -15,23 +15,45 @@ import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.jobsystem.logic.api.JobManager;
 
+import dagger.Lazy;
+
 public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 
-	@Inject
-	EconomyPlayerDao ecoPlayerDao;
-	@Inject
-	MessageWrapper messageWrapper;
-	@Inject
-	EconomyPlayerValidationHandler validationHandler;
-	@Inject
-	BankManager bankManager;
-	@Inject
-	ConfigManager configManager;
-	@Inject
-	JobManager jobManager;
-	@Inject
-	BukkitService bukkitService;
+	private final EconomyPlayerDao ecoPlayerDao;
+	private final MessageWrapper messageWrapper;
+	private final EconomyPlayerValidationHandler validationHandler;
+	private final BankManager bankManager;
+	private final ConfigManager configManager;
+	// lazy because of circulating dependency, cannot resolved with refactoring
+	// the object will never be created, thats just fine, because it is only used
+	// duron load player jobs and not during runtime
+	private final Lazy<JobManager> jobManager;
+	private final BukkitService bukkitService;
 	private List<EconomyPlayer> economyPlayers = new ArrayList<>();
+
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param ecoPlayerDao
+	 * @param messageWrapper
+	 * @param validationHandler
+	 * @param bankManager
+	 * @param configManager
+	 * @param jobManager
+	 * @param bukkitService
+	 */
+	@Inject
+	public EconomyPlayerManagerImpl(EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper,
+			EconomyPlayerValidationHandler validationHandler, BankManager bankManager, ConfigManager configManager,
+			Lazy<JobManager> jobManager, BukkitService bukkitService) {
+		this.ecoPlayerDao = ecoPlayerDao;
+		this.messageWrapper = messageWrapper;
+		this.validationHandler = validationHandler;
+		this.bankManager = bankManager;
+		this.configManager = configManager;
+		this.jobManager = jobManager;
+		this.bukkitService = bukkitService;
+	}
 
 	@Override
 	public List<String> getEconomyPlayerNameList() {
@@ -61,7 +83,7 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	public void createEconomyPlayer(String playerName) throws EconomyPlayerException {
 		validationHandler.checkForPlayerDoesNotExist(getEconomyPlayerNameList(), playerName);
 		getAllEconomyPlayers().add(new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager, bukkitService.getPlayer(playerName), playerName, true));
+				configManager, bankManager, jobManager.get(), bukkitService.getPlayer(playerName), playerName, true));
 	}
 
 	@Override
@@ -76,9 +98,9 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 		ecoPlayerDao.setupSavefile();
 		List<String> playerList = ecoPlayerDao.loadPlayerList();
 		for (String player : playerList) {
-			getAllEconomyPlayers()
-					.add(new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
-							configManager, bankManager, jobManager, bukkitService.getPlayer(player), player, false));
+			getAllEconomyPlayers().add(
+					new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper, configManager,
+							bankManager, jobManager.get(), bukkitService.getPlayer(player), player, false));
 		}
 	}
 }

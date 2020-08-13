@@ -15,17 +15,28 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class EconomyPlayerValidationHandlerImpl implements EconomyPlayerValidationHandler {
 
+	private final MessageWrapper messageWrapper;
+
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param messageWrapper
+	 */
 	@Inject
-	MessageWrapper messageWrapper;
+	public EconomyPlayerValidationHandlerImpl(MessageWrapper messageWrapper) {
+		this.messageWrapper = messageWrapper;
+	}
 
 	@Override
 	public void checkForEnoughMoney(BankAccount account, double amount, boolean personal)
 			throws EconomyPlayerException, GeneralEconomyException {
 		if (!account.hasAmount(amount)) {
 			if (personal) {
-				throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
+				throw new EconomyPlayerException(messageWrapper,
+						EconomyPlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
 			} else {
-				throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_NON_PERSONAL);
+				throw new EconomyPlayerException(messageWrapper,
+						EconomyPlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_NON_PERSONAL);
 			}
 		}
 	}
@@ -92,9 +103,10 @@ public class EconomyPlayerValidationHandlerImpl implements EconomyPlayerValidati
 			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.JOB_ALREADY_JOINED);
 		}
 	}
-	
+
 	@Override
-	public void checkForPlayerDoesNotExist(List<String> playerNameList, String playerName) throws EconomyPlayerException {
+	public void checkForPlayerDoesNotExist(List<String> playerNameList, String playerName)
+			throws EconomyPlayerException {
 		if (playerNameList.contains(playerName)) {
 			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.PLAYER_ALREADY_EXIST);
 		}

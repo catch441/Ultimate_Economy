@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import com.ue.common.utils.BukkitService;
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.config.dataaccess.api.ConfigDao;
 
@@ -16,12 +17,14 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	
 	/**
 	 * Config Data Access constructor.
-	 * @param file
 	 */
 	@Inject
-	public ConfigDaoImpl(File file) {
+	public ConfigDaoImpl(BukkitService bukkitService) {
+		file = new File(bukkitService.getDataFolderPath(), "config.yml");
+		if (!file.exists()) {
+			createFile(file);
+		}
 		fileConfig = YamlConfiguration.loadConfiguration(file);
-		this.file = file;
 	}
 
 	@Override

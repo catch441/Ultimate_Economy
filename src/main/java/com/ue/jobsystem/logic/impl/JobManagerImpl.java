@@ -82,7 +82,7 @@ public class JobManagerImpl implements JobManager {
 	@Override
 	public void createJob(String jobName) throws GeneralEconomyException {
 		validationHandler.checkForJobNameDoesNotExist(getJobNameList(), jobName);
-		getJobList().add(new JobImpl(jobName));
+		getJobList().add(new JobImpl(jobName, true));
 		saveJobNameList();
 	}
 
@@ -91,7 +91,7 @@ public class JobManagerImpl implements JobManager {
 		for (String jobName : UltimateEconomy.getInstance.getConfig().getStringList("JobList")) {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), jobName + "-Job.yml");
 			if (file.exists()) {
-				getJobList().add(new JobImpl(jobName));
+				getJobList().add(new JobImpl(jobName, false));
 			} else {
 				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the job " + jobName);
 				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: No savefile found!");

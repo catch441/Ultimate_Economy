@@ -36,8 +36,8 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	 * @param messageWrapper
 	 */
 	@Inject
-	public JobcenterManagerImpl(JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
-			MessageWrapper messageWrapper) {
+	public JobcenterManagerImpl(JobsystemValidationHandler validationHandler,
+			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
@@ -93,8 +93,8 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	}
 
 	private boolean otherJobcenterHasJob(Job job) throws JobSystemException {
-		for (Jobcenter jobCenter2 : getJobcenterList()) {
-			if (jobCenter2.hasJob(job)) {
+		for (Jobcenter jobCenter : getJobcenterList()) {
+			if (jobCenter.hasJob(job)) {
 				return true;
 			}
 		}
@@ -106,7 +106,8 @@ public class JobcenterManagerImpl implements JobcenterManager {
 			throws JobSystemException, GeneralEconomyException {
 		validationHandler.checkForJobcenterNameDoesNotExist(getJobcenterNameList(), name);
 		validationHandler.checkForValidSize(size);
-		getJobcenterList().add(new JobcenterImpl(name, spawnLocation, size));
+		getJobcenterList().add(
+				new JobcenterImpl(name, spawnLocation, size));
 		saveJobcenterNameList();
 	}
 
@@ -115,7 +116,8 @@ public class JobcenterManagerImpl implements JobcenterManager {
 		for (String jobCenterName : UltimateEconomy.getInstance.getConfig().getStringList("JobCenterNames")) {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), jobCenterName + "-JobCenter.yml");
 			if (file.exists()) {
-				getJobcenterList().add(new JobcenterImpl(jobCenterName));
+				getJobcenterList()
+						.add(new JobcenterImpl(jobCenterName));
 			} else {
 				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the jobcenter " + jobCenterName);
 				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: No savefile found!");

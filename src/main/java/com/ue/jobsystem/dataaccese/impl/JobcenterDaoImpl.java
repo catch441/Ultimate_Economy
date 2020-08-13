@@ -1,38 +1,39 @@
 package com.ue.jobsystem.dataaccese.impl;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
-import org.bukkit.Bukkit;
+import javax.inject.Inject;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import com.ue.common.utils.BukkitService;
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.jobsystem.logic.api.Job;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {
 
+	private final BukkitService bukkitService;
 	private File file;
 	private YamlConfiguration config;
-
+	
 	/**
-	 * Constructor for creating a new jonbcenter savefile handler.
-	 * @param name
-	 * @param createFile
+	 * Inject constructor.
+	 * @param bukkitService
 	 */
-	public JobcenterDaoImpl(String name, boolean createFile) {
-		file = new File(UltimateEconomy.getInstance.getDataFolder(), name + "-JobCenter.yml");
-		if (createFile) {
-			try {
-				getSavefile().createNewFile();
-			} catch (IOException e) {
-				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create savefile");
-				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-			}
+	@Inject
+	public JobcenterDaoImpl(BukkitService bukkitService) {
+		this.bukkitService = bukkitService;
+	}
+
+	@Override
+	public void setupSavefile(String name) {
+		file = new File(bukkitService.getDataFolderPath(), name + "-JobCenter.yml");
+		if (!file.exists()) {
+			createFile(file);
 		}
 		config = YamlConfiguration.loadConfiguration(getSavefile());
 	}
@@ -92,8 +93,7 @@ public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {
 	@Override
 	public Location loadJobcenterLocation() {
 		convertOldJobcenterLocation();
-		return new Location(                      
-				UltimateEconomy.getInstance.getServer().getWorld(getConfig().getString("JobcenterLocation.World")),
+		return new Location(bukkitService.getWorld(getConfig().getString("JobcenterLocation.World")),
 				getConfig().getDouble("JobcenterLocation.x"), getConfig().getDouble("JobcenterLocation.y"),
 				getConfig().getDouble("JobcenterLocation.z"));
 	}
@@ -126,10 +126,11 @@ public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {
 	@Deprecated
 	private void convertOldJobcenterLocation() {
 		if (getConfig().isSet("ShopLocation.World")) {
-			Location location = new Location(
-					UltimateEconomy.getInstance.getServer().getWorld(getConfig().getString("ShopLocation.World")),
+			Location location = new Location(bukkitService.getWorld(getConfig().getString("ShopLocation.World")),
 					getConfig().getDouble("ShopLocation.x"), getConfig().getDouble("ShopLocation.y"),
 					getConfig().getDouble("ShopLocation.z"));
+			getConfig().set("ShopLocation", null);
+			save(getConfig(), getSavefile());
 			saveJobcenterLocation(location);
 		}
 	}
@@ -145,6 +146,7 @@ public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {
 			slot--;
 			getConfig().set("Jobs." + jobName + ".ItemSlot", null);
 			getConfig().set("Jobs." + jobName + ".Slot", slot);
+			save(getConfig(), getSavefile());
 		}
 	}
 }
