@@ -6,6 +6,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Scoreboard;
 
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -26,7 +27,7 @@ public class BukkitService {
 	 * Returns a bukkit player or null, if player is not online.
 	 * 
 	 * @param name
-	 * @return
+	 * @return player
 	 */
 	public Player getPlayer(String name) {
 		return Bukkit.getPlayer(name);
@@ -48,6 +49,14 @@ public class BukkitService {
 	 */
 	public String getDataFolderPath() {
 		return UltimateEconomy.getInstance.getDataFolder().getPath();
+	}
+	
+	/**
+	 * Returns the plugin instance.
+	 * @return ultimate economy plugin
+	 */
+	public Plugin getPluginInstance() {
+		return UltimateEconomy.getInstance;
 	}
 
 	/**

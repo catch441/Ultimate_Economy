@@ -351,9 +351,9 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	JobsystemEventHandler provideJobsystemEventHandler(JobcenterManager jobcenterManager, JobManager jobManager,
-			EconomyPlayerManager ecoPlayerManager) {
-		return new JobsystemEventHandlerImpl(jobcenterManager, jobManager, ecoPlayerManager);
+	JobsystemEventHandler provideJobsystemEventHandler(BukkitService bukkitService, JobcenterManager jobcenterManager,
+			JobManager jobManager, EconomyPlayerManager ecoPlayerManager) {
+		return new JobsystemEventHandlerImpl(bukkitService, jobcenterManager, jobManager, ecoPlayerManager);
 	}
 
 	@Singleton

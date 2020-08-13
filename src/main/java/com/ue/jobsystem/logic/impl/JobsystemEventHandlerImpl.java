@@ -24,6 +24,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
+import com.ue.common.utils.BukkitService;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
@@ -32,7 +33,6 @@ import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemEventHandler;
 import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 
@@ -46,27 +46,30 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobManager jobManager;
 	private final JobcenterManager jobcenterManager;
+	private final BukkitService bukkitService;
 
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param bukkitService
 	 * @param jobcenterManager
 	 * @param jobManager
 	 * @param ecoPlayerManager
 	 */
 	@Inject
-	public JobsystemEventHandlerImpl(JobcenterManager jobcenterManager, JobManager jobManager,
-			EconomyPlayerManager ecoPlayerManager) {
+	public JobsystemEventHandlerImpl(BukkitService bukkitService, JobcenterManager jobcenterManager,
+			JobManager jobManager, EconomyPlayerManager ecoPlayerManager) {
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.jobManager = jobManager;
 		this.jobcenterManager = jobcenterManager;
+		this.bukkitService = bukkitService;
 	}
 
 	@Override
 	public void handleSetBlock(BlockPlaceEvent event) {
 		if (event.getPlayer().getGameMode() == GameMode.SURVIVAL && !(event.getBlock().getType() == Material.SPAWNER)) {
 			event.getBlock().setMetadata("placedBy",
-					new FixedMetadataValue(UltimateEconomy.getInstance, event.getPlayer().getName()));
+					new FixedMetadataValue(bukkitService.getPluginInstance(), event.getPlayer().getName()));
 		}
 	}
 

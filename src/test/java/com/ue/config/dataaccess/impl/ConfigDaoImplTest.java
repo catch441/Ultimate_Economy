@@ -4,43 +4,40 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.ue.common.utils.BukkitService;
+import com.ue.config.dataaccess.api.ConfigDao;
+
+@ExtendWith(MockitoExtension.class)
 public class ConfigDaoImplTest {
 
-	private File file;
-	private ConfigDaoImpl dao;
-
-	@BeforeEach
-	public void setup() {
-		file = new File("src/BankAccounts.yml");
-		try {
-			file.createNewFile();
-			dao = new ConfigDaoImpl(file);
-		} catch (IOException e) {
-			fail();
-		}
-	}
+	@Mock
+	BukkitService bukkitService;
 
 	/**
 	 * Unload all.
 	 */
 	@AfterEach
 	public void unload() {
-		file.delete();
+		new File("src/config.yml").delete();
 	}
 
 	@Test
 	public void saveMaxRentedDaysTest() {
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		File file = new File("src/config.yml");
 		dao.saveMaxRentedDays(4);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals(4, config.getInt("MaxRentedDays"));
@@ -48,12 +45,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxRentedDaysTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		dao = new ConfigDaoImpl(bukkitService);
 		dao.saveMaxRentedDays(6);
 		assertEquals(6, dao.loadMaxRentedDays());
 	}
 
 	@Test
 	public void hasMaxRentedDaysTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
 		dao.saveMaxRentedDays(6);
 		assertTrue(dao.hasMaxRentedDays());
 		dao.saveMaxRentedDays(null);
@@ -62,6 +62,9 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void saveExtendedInteractionTest() {
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		File file = new File("src/config.yml");
 		dao.saveExtendedInteraction(true);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertTrue(config.getBoolean("ExtendedInteraction"));
@@ -69,12 +72,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadExtendedInteractionTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		dao = new ConfigDaoImpl(bukkitService);
 		dao.saveExtendedInteraction(false);
 		assertFalse(dao.loadExtendedInteraction());
 	}
 
 	@Test
 	public void hasExtendedInteractionTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
 		dao.saveExtendedInteraction(false);
 		assertTrue(dao.hasExtendedInteraction());
 		dao.saveExtendedInteraction(null);
@@ -83,6 +89,9 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void saveWildernessInteractionTest() {
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		File file = new File("src/config.yml");
 		dao.saveWildernessInteraction(true);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertTrue(config.getBoolean("WildernessInteraction"));
@@ -90,12 +99,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadWildernessInteractionTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		dao = new ConfigDaoImpl(bukkitService);
 		dao.saveWildernessInteraction(false);
 		assertFalse(dao.loadWildernessInteraction());
 	}
 
 	@Test
 	public void hasWildernessInteractionTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
 		dao.saveWildernessInteraction(false);
 		assertTrue(dao.hasWildernessInteraction());
 		dao.saveWildernessInteraction(null);
@@ -104,6 +116,9 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void saveCurrencyPlTest() {
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		File file = new File("src/config.yml");
 		dao.saveCurrencyPl("kths");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals("kths", config.getString("currencyPl"));
@@ -111,12 +126,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadCurrencyPlTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		dao = new ConfigDaoImpl(bukkitService);
 		dao.saveCurrencyPl("coins");
 		assertEquals("coins", dao.loadCurrencyPl());
 	}
 
 	@Test
 	public void hasCurrencyPlTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
 		dao.saveCurrencyPl("kths");
 		assertTrue(dao.hasCurrencyPl());
 		dao.saveCurrencyPl(null);
@@ -125,6 +143,9 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void saveCurrencySgTest() {
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		File file = new File("src/config.yml");
 		dao.saveCurrencySg("kth");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals("kth", config.getString("currencySg"));
@@ -132,12 +153,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadCurrencySgTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		dao = new ConfigDaoImpl(bukkitService);
 		dao.saveCurrencySg("coin");
 		assertEquals("coin", dao.loadCurrencySg());
 	}
 
 	@Test
 	public void hasCurrencySgTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
 		dao.saveCurrencySg("kth");
 		assertTrue(dao.hasCurrencySg());
 		dao.saveCurrencySg(null);
@@ -146,6 +170,9 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void saveHomesFeatureTest() {
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		File file = new File("src/config.yml");
 		dao.saveHomesFeature(true);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertTrue(config.getBoolean("homes"));
@@ -153,12 +180,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadHomesFeatureTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		dao = new ConfigDaoImpl(bukkitService);
 		dao.saveHomesFeature(false);
 		assertFalse(dao.loadHomesFeature());
 	}
 
 	@Test
 	public void hasHomesFeatureTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
 		dao.saveHomesFeature(false);
 		assertTrue(dao.hasHomesFeature());
 		dao.saveHomesFeature(null);
@@ -167,6 +197,9 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void saveMaxPlayershops() {
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		File file = new File("src/config.yml");
 		dao.saveMaxPlayershops(4);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals(4, config.getInt("MaxPlayershops"));
@@ -174,12 +207,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxPlayershopsTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		dao = new ConfigDaoImpl(bukkitService);
 		dao.saveMaxPlayershops(6);
 		assertEquals(6, dao.loadMaxPlayershops());
 	}
 
 	@Test
 	public void hasMaxPlayershopsTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
 		dao.saveMaxPlayershops(6);
 		assertTrue(dao.hasMaxPlayershops());
 		dao.saveMaxPlayershops(null);
@@ -188,6 +224,9 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void saveMaxJoinedTownsTest() {
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		File file = new File("src/config.yml");
 		dao.saveMaxJoinedTowns(4);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals(4, config.getInt("MaxJoinedTowns"));
@@ -195,12 +234,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxJoinedTownsTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		dao = new ConfigDaoImpl(bukkitService);
 		dao.saveMaxJoinedTowns(6);
 		assertEquals(6, dao.loadMaxJoinedTowns());
 	}
 
 	@Test
 	public void hasMaxJoinedTownsTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
 		dao.saveMaxJoinedTowns(6);
 		assertTrue(dao.hasMaxJoinedTowns());
 		dao.saveMaxJoinedTowns(null);
@@ -209,6 +251,9 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void saveMaxJobsTest() {
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		File file = new File("src/config.yml");
 		dao.saveMaxJobs(4);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals(4, config.getInt("MaxJobs"));
@@ -216,12 +261,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxJobsTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		dao = new ConfigDaoImpl(bukkitService);
 		dao.saveMaxJobs(6);
 		assertEquals(6, dao.loadMaxJobs());
 	}
 
 	@Test
 	public void hasMaxJobsTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
 		dao.saveMaxJobs(6);
 		assertTrue(dao.hasMaxJobs());
 		dao.saveMaxJobs(null);
@@ -230,6 +278,9 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void saveMaxHomesTest() {
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		File file = new File("src/config.yml");
 		dao.saveMaxHomes(4);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals(4, config.getInt("MaxHomes"));
@@ -237,12 +288,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxHomesTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		dao = new ConfigDaoImpl(bukkitService);
 		dao.saveMaxHomes(6);
 		assertEquals(6, dao.loadMaxHomes());
 	}
 
 	@Test
 	public void hasMaxHomesTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
 		dao.saveMaxHomes(6);
 		assertTrue(dao.hasMaxHomes());
 		dao.saveMaxHomes(null);
@@ -251,6 +305,9 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void saveCountryTest() {
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		File file = new File("src/config.yml");
 		dao.saveCountry("DE");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals("DE", config.getString("localeCountry"));
@@ -258,12 +315,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadCountryTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		dao = new ConfigDaoImpl(bukkitService);
 		dao.saveCountry("DE");
 		assertEquals("DE", dao.loadCountry());
 	}
 
 	@Test
 	public void hasCountryTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
 		dao.saveCountry("DE");
 		assertTrue(dao.hasCountry());
 		dao.saveCountry(null);
@@ -272,6 +332,9 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void saveLanguageTest() {
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		File file = new File("src/config.yml");
 		dao.saveLanguage("de");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals("de", config.getString("localeLanguage"));
@@ -279,12 +342,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadLanguageTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		dao = new ConfigDaoImpl(bukkitService);
 		dao.saveLanguage("de");
 		assertEquals("de", dao.loadLanguage());
 	}
 
 	@Test
 	public void hasLanguageTest() {
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
 		dao.saveLanguage("de");
 		assertTrue(dao.hasLanguage());
 		dao.saveLanguage(null);
@@ -294,12 +360,15 @@ public class ConfigDaoImplTest {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void removeDeprecatedTest() {
+		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(bukkitService);
+		File file = new File("src/config.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		config.set("TownNames", Arrays.asList("town1", "town2"));
 		assertDoesNotThrow(() -> config.save(file));
-		dao = new ConfigDaoImpl(file);
+		dao = new ConfigDaoImpl(bukkitService);
 		dao.removeDeprecated();
 		YamlConfiguration config2 = YamlConfiguration.loadConfiguration(file);
-		assertFalse(config2.contains("TownNames"));
+		assertFalse(config2.isSet("TownNames"));
 	}
 }

@@ -5,13 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.dataaccess.api.ConfigDao;
-import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
@@ -135,28 +130,18 @@ public class ConfigManagerImplTest {
 
 	@Test
 	public void setWildernessInteractionTest() {
-		List<EconomyPlayer> list = new ArrayList<>();
-		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		list.add(ecoPlayer);
-		when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(list);
 		assertFalse(manager.isWildernessInteraction());
 		manager.setWildernessInteraction(true);
 		assertTrue(manager.isWildernessInteraction());
 		verify(dao).saveWildernessInteraction(true);
-		verify(ecoPlayer).addWildernessPermission();
 	}
 	
 	@Test
 	public void setWildernessInteractionTestWithFalse() {
-		List<EconomyPlayer> list = new ArrayList<>();
-		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		list.add(ecoPlayer);
-		when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(list);
 		assertFalse(manager.isWildernessInteraction());
 		manager.setWildernessInteraction(false);
 		assertFalse(manager.isWildernessInteraction());
 		verify(dao).saveWildernessInteraction(false);
-		verify(ecoPlayer).denyWildernessPermission();
 	}
 
 	@Test

@@ -14,9 +14,11 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 
 	private final YamlConfiguration fileConfig;
 	private final File file;
-	
+
 	/**
 	 * Config Data Access constructor.
+	 * 
+	 * @param bukkitService
 	 */
 	@Inject
 	public ConfigDaoImpl(BukkitService bukkitService) {
@@ -84,7 +86,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	public boolean hasCurrencyPl() {
 		return fileConfig.isSet("currencyPl");
 	}
-	
+
 	@Override
 	public void saveCurrencyPl(String currencyPl) {
 		fileConfig.set("currencyPl", currencyPl);
@@ -100,7 +102,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	public boolean hasCurrencySg() {
 		return fileConfig.isSet("currencySg");
 	}
-	
+
 	@Override
 	public void saveCurrencySg(String currencySg) {
 		fileConfig.set("currencySg", currencySg);
@@ -116,7 +118,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	public boolean hasHomesFeature() {
 		return fileConfig.isSet("homes");
 	}
-	
+
 	@Override
 	public void saveHomesFeature(Boolean homesFeature) {
 		fileConfig.set("homes", homesFeature);
@@ -132,7 +134,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	public boolean hasMaxPlayershops() {
 		return fileConfig.isSet("MaxPlayershops");
 	}
-	
+
 	@Override
 	public void saveMaxPlayershops(Integer maxPlayershops) {
 		fileConfig.set("MaxPlayershops", maxPlayershops);
@@ -148,7 +150,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	public boolean hasMaxJoinedTowns() {
 		return fileConfig.isSet("MaxJoinedTowns");
 	}
-	
+
 	@Override
 	public void saveMaxJoinedTowns(Integer maxJoinedTowns) {
 		fileConfig.set("MaxJoinedTowns", maxJoinedTowns);
@@ -164,7 +166,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	public boolean hasMaxJobs() {
 		return fileConfig.isSet("MaxJobs");
 	}
-	
+
 	@Override
 	public void saveMaxJobs(Integer maxJobs) {
 		fileConfig.set("MaxJobs", maxJobs);
@@ -180,13 +182,13 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	public boolean hasMaxHomes() {
 		return fileConfig.isSet("MaxHomes");
 	}
-	
+
 	@Override
 	public void saveMaxHomes(Integer maxHomes) {
 		fileConfig.set("MaxHomes", maxHomes);
 		save(fileConfig, file);
 	}
-	
+
 	@Override
 	public String loadCountry() {
 		return fileConfig.getString("localeCountry");
@@ -196,13 +198,13 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	public boolean hasCountry() {
 		return fileConfig.isSet("localeCountry");
 	}
-	
+
 	@Override
 	public void saveCountry(String country) {
 		fileConfig.set("localeCountry", country);
 		save(fileConfig, file);
 	}
-	
+
 	@Override
 	public String loadLanguage() {
 		return fileConfig.getString("localeLanguage");
@@ -212,13 +214,13 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	public boolean hasLanguage() {
 		return fileConfig.isSet("localeLanguage");
 	}
-	
+
 	@Override
 	public void saveLanguage(String language) {
 		fileConfig.set("localeLanguage", language);
 		save(fileConfig, file);
 	}
-	
+
 	@Deprecated
 	@Override
 	public void removeDeprecated() {

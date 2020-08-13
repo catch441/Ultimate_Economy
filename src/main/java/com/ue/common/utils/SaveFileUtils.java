@@ -22,6 +22,10 @@ public class SaveFileUtils {
         }
     }
 	
+	/**
+	 * Creates a new file.
+	 * @param file
+	 */
 	public void createFile(File file) {
 		try {
 			file.createNewFile();
