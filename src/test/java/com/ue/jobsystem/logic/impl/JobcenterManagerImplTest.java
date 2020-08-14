@@ -3,53 +3,48 @@ package com.ue.jobsystem.logic.impl;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
+import com.ue.common.utils.ServiceComponent;
+import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
+import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
-import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
+import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
-import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
@@ -69,20 +64,32 @@ public class JobcenterManagerImplTest {
 	@Mock
 	JobsystemValidationHandler validationHandler;
 	@Mock
-	BukkitService bukkitService;
+	ServerProvider serverProvider;
 	@Mock
 	Lazy<JobManager> jobManager;
-	
+	@Mock
+	ConfigDao configDao;
+	@Mock
+	ComponentProvider componentProvider;
+
 	@Test
 	public void getJobcenterByNameTest() {
+		createJobcenter("other");
+		createJobcenter("center");
+		Jobcenter result = assertDoesNotThrow(() -> manager.getJobcenterByName("center"));
+		assertEquals("center", result.getName());
+
+		new File("src/other-JobCenter.yml").delete();
+		new File("src/center-JobCenter.yml").delete();
+	}
+
+	private void createJobcenter(String name) {
 		Inventory inventory = mock(Inventory.class);
-		when(bukkitService.createInventory(null, 9,  "other")).thenReturn(inventory);
+		when(serverProvider.createInventory(null, 9, name)).thenReturn(inventory);
 		ItemMeta meta = mock(ItemMeta.class);
-		when(bukkitService.getItemMeta(any(ItemStack.class))).thenReturn(meta);
+		when(serverProvider.getItemMeta(any(ItemStack.class))).thenReturn(meta);
 		UltimateEconomy plugin = mock(UltimateEconomy.class);
-		when(bukkitService.getPluginInstance()).thenReturn(plugin);
-		Jobcenter center = mock(Jobcenter.class);
-		when(center.getName()).thenReturn("center");
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
 		Location location = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
 		World world = mock(World.class);
@@ -90,13 +97,10 @@ public class JobcenterManagerImplTest {
 		when(location.getWorld()).thenReturn(world);
 		Villager villager = mock(Villager.class);
 		when(world.spawnEntity(location, EntityType.VILLAGER)).thenReturn(villager);
-		assertDoesNotThrow(() -> manager.createJobcenter("other", location, 9));
-		assertDoesNotThrow(() -> manager.createJobcenter("center", location, 9));
-		Jobcenter result = assertDoesNotThrow(() -> manager.getJobcenterByName("center"));
-		assertEquals(center, result);
-		
-		new File("src/other-JobCenter.yml").delete();
-		new File("src/center-JobCenter.yml").delete();
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		when(serviceComponent.getJobcenterDao()).thenReturn(mock(JobcenterDao.class));
+		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		assertDoesNotThrow(() -> manager.createJobcenter(name, location, 9));
 	}
 
 	@Test
@@ -113,192 +117,139 @@ public class JobcenterManagerImplTest {
 
 	@Test
 	public void getJobcenterNameListTest() {
-		World world = mock(World.class);
-		assertDoesNotThrow(() -> manager.createJobcenter("center", new Location(world, 10, 1, 1), 9));
+		createJobcenter("center");
 		List<String> list = manager.getJobcenterNameList();
 		assertEquals(1, list.size());
 		assertEquals("center", list.get(0));
+		new File("src/center-JobCenter.yml").delete();
 	}
 
 	@Test
 	public void getJobcenterListTest() {
-		try {
-			JobcenterManagerImpl.createJobcenter("center", new Location(world, 1, 1, 1), 9);
-			List<Jobcenter> centers = JobcenterManagerImpl.getJobcenterList();
-			assertEquals(1, centers.size());
-			assertEquals("center", centers.get(0).getName());
-		} catch (JobSystemException | GeneralEconomyException e) {
-			assertTrue(false);
-		}
+		createJobcenter("center");
+		List<Jobcenter> centers = manager.getJobcenterList();
+		assertEquals(1, centers.size());
+		assertEquals("center", centers.get(0).getName());
+		new File("src/center-JobCenter.yml").delete();
 	}
 
 	@Test
 	public void despawnAllVillagersTest() {
-		try {
-			Location loc = new Location(world, 1, 1, 1);
-			JobcenterManagerImpl.createJobcenter("center", loc, 9);
-			assertEquals(1, world.getNearbyEntities(loc, 0, 0, 0).size());
-			JobcenterManagerImpl.despawnAllVillagers();
-			assertEquals(0, world.getNearbyEntities(loc, 0, 0, 0).size());
-		} catch (JobSystemException | GeneralEconomyException e) {
-			assertTrue(false);
-		}
+		Inventory inventory = mock(Inventory.class);
+		when(serverProvider.createInventory(null, 9, "center")).thenReturn(inventory);
+		ItemMeta meta = mock(ItemMeta.class);
+		when(serverProvider.getItemMeta(any(ItemStack.class))).thenReturn(meta);
+		UltimateEconomy plugin = mock(UltimateEconomy.class);
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		Location location = mock(Location.class);
+		Chunk chunk = mock(Chunk.class);
+		World world = mock(World.class);
+		when(location.getChunk()).thenReturn(chunk);
+		when(location.getWorld()).thenReturn(world);
+		Villager villager = mock(Villager.class);
+		when(world.spawnEntity(location, EntityType.VILLAGER)).thenReturn(villager);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		when(serviceComponent.getJobcenterDao()).thenReturn(mock(JobcenterDao.class));
+		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		assertDoesNotThrow(() -> manager.createJobcenter("center", location, 9));
+
+		manager.despawnAllVillagers();
+		verify(villager).remove();
+		new File("src/center-JobCenter.yml").delete();
 	}
 
 	@Test
 	public void deleteJobcenterTest() {
-		try {
-			Location loc = new Location(world, 1, 1, 1);
-			Location loc2 = new Location(world, 2, 1, 1);
-			JobcenterManagerImpl.createJobcenter("center", loc, 9);
-			JobcenterManagerImpl.createJobcenter("center1", loc2, 9);
-			JobController.createJob("myjob");
-			JobController.createJob("myjob1");
-			Job job = JobController.getJobList().get(0);
-			Job job1 = JobController.getJobList().get(1);
-			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
-			Jobcenter center1 = JobcenterManagerImpl.getJobcenterList().get(1);
-			center.addJob(job, "stone", 0);
-			center.addJob(job1, "stone", 1);
-			center1.addJob(job1, "stone", 0);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getEconomyPlayerByName("catch441");
-			ecoPlayer.joinJob(job, false);
-			ecoPlayer.joinJob(job1, false);
-			JobcenterManagerImpl.deleteJobcenter(center);
-			assertEquals(0, world.getNearbyEntities(loc, 0, 0, 0).size());
-			List<String> list = UltimateEconomy.getInstance.getConfig().getStringList("JobCenterNames");
-			assertEquals(1, list.size());
-			assertEquals("center1", list.get(0));
-			// check players
-			assertEquals(1, ecoPlayer.getJobList().size());
-			assertEquals(job1, ecoPlayer.getJobList().get(0));
-		} catch (JobSystemException | GeneralEconomyException | EconomyPlayerException e) {
-			assertTrue(false);
-		}
+		Jobcenter jobcenter = mock(Jobcenter.class);
+		Job job0 = mock(Job.class);
+		Job job = mock(Job.class);
+		when(jobcenter.getJobList()).thenReturn(Arrays.asList(job0, job));
+		manager.getJobcenterList().add(jobcenter);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		when(ecoPlayer.hasJob(job)).thenReturn(true);
+		when(ecoPlayer.hasJob(job0)).thenReturn(true);
+		when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(Arrays.asList(ecoPlayer));
+		assertDoesNotThrow(() -> manager.deleteJobcenter(jobcenter));
+		verify(jobcenter).deleteJobcenter();
+		assertEquals(0, manager.getJobcenterList().size());
+		assertDoesNotThrow(() -> verify(ecoPlayer).leaveJob(job, false));
+		verify(configDao).saveJobcenterList(new ArrayList<>());
+	}
+	
+	@Test
+	public void deleteJobcenterTestWithJobInOtherJobcenter() {
+		Jobcenter jobcenter0 = mock(Jobcenter.class);
+		when(jobcenter0.getName()).thenReturn("center0");
+		Jobcenter jobcenter = mock(Jobcenter.class);
+		Job job0 = mock(Job.class);
+		Job job = mock(Job.class);
+		when(jobcenter0.hasJob(job)).thenReturn(true);
+		when(jobcenter0.hasJob(job0)).thenReturn(true);
+		when(jobcenter.getJobList()).thenReturn(Arrays.asList(job0, job));
+		manager.getJobcenterList().add(jobcenter);
+		manager.getJobcenterList().add(jobcenter0);
+		assertDoesNotThrow(() -> manager.deleteJobcenter(jobcenter));
+		verify(jobcenter).deleteJobcenter();
+		assertEquals(1, manager.getJobcenterList().size());
+		verify(configDao).saveJobcenterList(Arrays.asList("center0"));
+		assertDoesNotThrow(() -> verify(ecoPlayerManager, never()).getAllEconomyPlayers());
 	}
 
 	@Test
-	public void createJobcenterTestWithAlreadyExists() {
-		try {
-			Location loc = new Location(world, 1, 1, 1);
-			JobcenterManagerImpl.createJobcenter("center", loc, 9);
-			JobcenterManagerImpl.createJobcenter("center", loc, 9);
-			assertTrue(false);
-		} catch (JobSystemException | GeneralEconomyException e) {
-			assertTrue(e instanceof GeneralEconomyException);
-			assertEquals("§c§4center§c already exists!", e.getMessage());
-		}
+	public void createJobcenterTestWithAlreadyExists() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(validationHandler)
+				.checkForJobcenterNameDoesNotExist(new ArrayList<>(), "center");
+		assertThrows(GeneralEconomyException.class, () -> manager.createJobcenter("center", null, 9));
+		assertEquals(0, manager.getJobcenterList().size());
+		verify(configDao, never()).saveJobcenterList(anyList());
 	}
 
 	@Test
-	public void createJobcenterTestWithInvalidSize() {
-		try {
-			Location loc = new Location(world, 1, 1, 1);
-			JobcenterManagerImpl.createJobcenter("center", loc, 6);
-			assertTrue(false);
-		} catch (JobSystemException | GeneralEconomyException e) {
-			assertTrue(e instanceof GeneralEconomyException);
-			assertEquals("§cThe parameter §46§c is invalid!", e.getMessage());
-		}
+	public void createJobcenterTestWithInvalidSize() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidSize(9);
+		assertThrows(GeneralEconomyException.class, () -> manager.createJobcenter("center", null, 9));
+		assertEquals(0, manager.getJobcenterList().size());
+		verify(configDao, never()).saveJobcenterList(anyList());
 	}
 
 	@Test
 	public void createJobcenterTest() {
-		try {
-			Location loc = new Location(world, 1, 2, 3);
-			JobcenterManagerImpl.createJobcenter("center", loc, 9);
-			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
-			assertEquals("center", center.getName());
-			assertEquals(0, center.getJobList().size());
-			// check villager
-			List<Entity> list = new ArrayList<Entity>(world.getNearbyEntities(loc, 0, 0, 0));
-			assertEquals("center", list.get(0).getCustomName());
-			// check inventory
-			center.openInv(player);
-			ChestInventoryMock inv = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
-			assertEquals(9, inv.getSize());
-			assertEquals("center", inv.getName());
-			assertNull(inv.getItem(0));
-			assertNull(inv.getItem(1));
-			assertNull(inv.getItem(2));
-			assertNull(inv.getItem(3));
-			assertNull(inv.getItem(4));
-			assertNull(inv.getItem(5));
-			assertNull(inv.getItem(6));
-			assertNull(inv.getItem(7));
-			assertEquals(Material.ANVIL, inv.getItem(8).getType());
-			assertEquals("Info", inv.getItem(8).getItemMeta().getDisplayName());
-			assertEquals(2, inv.getItem(8).getItemMeta().getLore().size());
-			assertEquals("§6Leftclick: §aJoin", inv.getItem(8).getItemMeta().getLore().get(0));
-			assertEquals("§6Rightclick: §cLeave", inv.getItem(8).getItemMeta().getLore().get(1));
-			// check savefile
-			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "center-JobCenter.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-			assertEquals("center", config.getString("JobCenterName"));
-			assertEquals(9, config.getInt("JobCenterSize"));
-			assertEquals("1.0", config.getString("JobcenterLocation.x"));
-			assertEquals("2.0", config.getString("JobcenterLocation.y"));
-			assertEquals("3.0", config.getString("JobcenterLocation.z"));
-			assertEquals("World", config.getString("JobcenterLocation.World"));
-		} catch (JobSystemException | GeneralEconomyException e) {
-			assertTrue(false);
-		}
+		createJobcenter("center");
+		assertDoesNotThrow(
+				() -> verify(validationHandler).checkForJobcenterNameDoesNotExist(new ArrayList<>(), "center"));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(9));
+		verify(configDao).saveJobcenterList(Arrays.asList("center"));
+		Jobcenter center = manager.getJobcenterList().get(0);
+		assertEquals("center", center.getName());
 	}
 
 	@Test
 	public void loadAllJobcenterTest() {
-		try {
-			Location loc = new Location(world, 1, 2, 3);
-			JobcenterManagerImpl.createJobcenter("center", loc, 9);
-			JobController.createJob("myjob");
-			Job job = JobController.getJobList().get(0);
-			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
-			center.addJob(job, "stone", 0);
-			JobcenterManagerImpl.getJobcenterList().clear();
-			assertEquals(0, JobcenterManagerImpl.getJobcenterList().size());
-			JobcenterManagerImpl.loadAllJobcenters();
-			assertEquals(1, JobcenterManagerImpl.getJobcenterList().size());
-			Jobcenter result = JobcenterManagerImpl.getJobcenterList().get(0);
-			assertEquals("center", result.getName());
-			assertEquals(1, result.getJobList().size());
-			assertEquals(job, result.getJobList().get(0));
-			// check inventory
-			result.openInv(player);
-			ChestInventoryMock inv = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
-			assertEquals(9, inv.getSize());
-			assertEquals("center", inv.getName());
-			assertEquals(Material.STONE, inv.getItem(0).getType());
-			assertEquals("myjob", inv.getItem(0).getItemMeta().getDisplayName());
-			assertNull(inv.getItem(1));
-			assertNull(inv.getItem(2));
-			assertNull(inv.getItem(3));
-			assertNull(inv.getItem(4));
-			assertNull(inv.getItem(5));
-			assertNull(inv.getItem(6));
-			assertNull(inv.getItem(7));
-			assertEquals(Material.ANVIL, inv.getItem(8).getType());
-			assertEquals("Info", inv.getItem(8).getItemMeta().getDisplayName());
-			assertEquals(2, inv.getItem(8).getItemMeta().getLore().size());
-			assertEquals("§6Leftclick: §aJoin", inv.getItem(8).getItemMeta().getLore().get(0));
-			assertEquals("§6Rightclick: §cLeave", inv.getItem(8).getItemMeta().getLore().get(1));
-		} catch (JobSystemException | GeneralEconomyException | EconomyPlayerException e) {
-			assertTrue(false);
-		}
-	}
+		Villager villager = mock(Villager.class);
+		Inventory inventory = mock(Inventory.class);
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("center"))).thenReturn(inventory);
+		ItemMeta meta = mock(ItemMeta.class);
+		when(serverProvider.getItemMeta(any(ItemStack.class))).thenReturn(meta);
+		UltimateEconomy plugin = mock(UltimateEconomy.class);
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		Location location = mock(Location.class);
+		Chunk chunk = mock(Chunk.class);
+		World world = mock(World.class);
+		when(location.getChunk()).thenReturn(chunk);
+		when(location.getWorld()).thenReturn(world);
+		when(world.spawnEntity(location, EntityType.VILLAGER)).thenReturn(villager);
+		when(configDao.loadJobcenterList()).thenReturn(Arrays.asList("center"));
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		JobcenterDao jobcenterDao = mock(JobcenterDao.class);
+		when(jobcenterDao.loadJobcenterLocation()).thenReturn(location);
+		when(serviceComponent.getJobcenterDao()).thenReturn(jobcenterDao);
+		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		manager.loadAllJobcenters();
+		
+		Jobcenter center = manager.getJobcenterList().get(0);
+		assertEquals("center", center.getName());
+		verify(jobcenterDao).loadJobcenterSize();
 
-	@Test
-	public void loadAllJobcenterTestWithLoadingError() {
-		try {
-			Location loc = new Location(world, 1, 2, 3);
-			JobcenterManagerImpl.createJobcenter("center", loc, 9);
-			JobcenterManagerImpl.getJobcenterList().clear();
-			assertEquals(0, JobcenterManagerImpl.getJobcenterList().size());
-			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "center-JobCenter.yml");
-			file.delete();
-			JobcenterManagerImpl.loadAllJobcenters();
-			assertEquals(0, JobcenterManagerImpl.getJobcenterList().size());
-		} catch (JobSystemException | GeneralEconomyException e) {
-			assertTrue(false);
-		}
+		new File("src/center-JobCenter.yml").delete();
 	}
 }

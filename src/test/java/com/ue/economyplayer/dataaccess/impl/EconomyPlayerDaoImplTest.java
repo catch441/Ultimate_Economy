@@ -26,7 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 import com.ue.jobsystem.logic.api.Job;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,7 +37,7 @@ public class EconomyPlayerDaoImplTest {
 	@Mock
 	BankManager bankManager;
 	@Mock
-	BukkitService bukkitService;
+	ServerProvider serverProvider;
 
 	/**
 	 * Delete savefile.
@@ -52,14 +52,14 @@ public class EconomyPlayerDaoImplTest {
 	public void setupSavefileTest() {
 		File result = new File("src/PlayerFile.yml");
 		assertFalse(result.exists());
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		assertTrue(result.exists());
 	}
 
 	@Test
 	public void setupSavefileLoadTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		ecoPlayerDao.saveBankIban("myKthschnll", "myiban");
 		ecoPlayerDao.setupSavefile();
@@ -71,7 +71,7 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void loadPlayerListTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		ecoPlayerDao.saveBankIban("myKthschnll", "myiban");
 		ecoPlayerDao.setupSavefile();
@@ -82,7 +82,7 @@ public class EconomyPlayerDaoImplTest {
 	
 	@Test
 	public void loadPlayerListOldTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		File file = new File("src/PlayerFile.yml");
 		YamlConfiguration configBefore = YamlConfiguration.loadConfiguration(file);
@@ -96,7 +96,7 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void deleteEconomyPlayer() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		File file = new File("src/PlayerFile.yml");
 		YamlConfiguration configBefore = YamlConfiguration.loadConfiguration(file);
@@ -109,7 +109,7 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void saveHomeTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		World world = mock(World.class);
 		when(world.getName()).thenReturn("World");
@@ -130,11 +130,11 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void loadHomeListTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		World world = mock(World.class);
 		when(world.getName()).thenReturn("World");
-		when(bukkitService.getWorld("World")).thenReturn(world);
+		when(serverProvider.getWorld("World")).thenReturn(world);
 
 		Location loc = new Location(world, 1, 2, 3);
 		ecoPlayerDao.saveHome("kthschnll", "myHome", loc);
@@ -150,7 +150,7 @@ public class EconomyPlayerDaoImplTest {
 	
 	@Test
 	public void loadHomeListOldTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		File file = new File("src/PlayerFile.yml");
 		YamlConfiguration configBefore = YamlConfiguration.loadConfiguration(file);
@@ -164,7 +164,7 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void loadJoinedTownsTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		ecoPlayerDao.saveJoinedTowns("kthschnll", Arrays.asList("mytown"));
 		ecoPlayerDao.setupSavefile();
@@ -175,7 +175,7 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void loadJobsListTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
@@ -191,7 +191,7 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void loadBankIbanTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		ecoPlayerDao.saveBankIban("kthschnll", "myIban");
 		ecoPlayerDao.setupSavefile();
@@ -203,7 +203,7 @@ public class EconomyPlayerDaoImplTest {
 		BankAccount account = mock(BankAccount.class);
 		when(bankManager.createBankAccount(20.5)).thenReturn(account);
 		when(account.getIban()).thenReturn("myIban");
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		
 		File file = new File("src/PlayerFile.yml");
@@ -219,7 +219,7 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void loadScoreboardDisabledTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		ecoPlayerDao.saveScoreboardDisabled("kthschnll", false);
 		ecoPlayerDao.setupSavefile();
@@ -228,7 +228,7 @@ public class EconomyPlayerDaoImplTest {
 
 	@Test
 	public void loadScoreboardDisabledOldTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		File file = new File("src/PlayerFile.yml");
 		YamlConfiguration configBefore = YamlConfiguration.loadConfiguration(file);

@@ -1,5 +1,7 @@
 package com.ue.config.dataaccess.api;
 
+import java.util.List;
+
 public interface ConfigDao {
 
 	/**
@@ -255,7 +257,22 @@ public interface ConfigDao {
 	public void saveLanguage(String language);
 
 	/**
+	 * Saves the jobcenter list.
+	 * 
+	 * @param jobcenters
+	 */
+	public void saveJobcenterList(List<String> jobcenters);
+
+	/**
+	 * Loads the jobcenter list.
+	 * 
+	 * @return jobcenter names
+	 */
+	public List<String> loadJobcenterList();
+
+	/**
 	 * Remove deprecated stuff.
+	 * 
 	 * @deprecated
 	 * @since 1.2.6
 	 */

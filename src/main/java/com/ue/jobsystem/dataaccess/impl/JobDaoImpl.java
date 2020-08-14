@@ -8,20 +8,20 @@ import javax.inject.Inject;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.jobsyste.dataaccess.api.JobDao;
 
 public class JobDaoImpl extends SaveFileUtils implements JobDao {
 	
 	@Inject
-	BukkitService bukkitService;
+	ServerProvider serverProvider;
 	private File file;
 	private YamlConfiguration config;
 
 	@Override
 	public void setupSavefile(String name) {
-		file = new File(bukkitService.getDataFolderPath(), name + "-Job.yml");
+		file = new File(serverProvider.getDataFolderPath(), name + "-Job.yml");
 		if (!file.exists()) {
 			createFile(file);
 		}

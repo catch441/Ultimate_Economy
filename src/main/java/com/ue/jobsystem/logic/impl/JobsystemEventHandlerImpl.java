@@ -24,7 +24,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
@@ -46,30 +46,30 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobManager jobManager;
 	private final JobcenterManager jobcenterManager;
-	private final BukkitService bukkitService;
+	private final ServerProvider serverProvider;
 
 	/**
 	 * Inject constructor.
 	 * 
-	 * @param bukkitService
+	 * @param serverProvider
 	 * @param jobcenterManager
 	 * @param jobManager
 	 * @param ecoPlayerManager
 	 */
 	@Inject
-	public JobsystemEventHandlerImpl(BukkitService bukkitService, JobcenterManager jobcenterManager,
+	public JobsystemEventHandlerImpl(ServerProvider serverProvider, JobcenterManager jobcenterManager,
 			JobManager jobManager, EconomyPlayerManager ecoPlayerManager) {
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.jobManager = jobManager;
 		this.jobcenterManager = jobcenterManager;
-		this.bukkitService = bukkitService;
+		this.serverProvider = serverProvider;
 	}
 
 	@Override
 	public void handleSetBlock(BlockPlaceEvent event) {
 		if (event.getPlayer().getGameMode() == GameMode.SURVIVAL && !(event.getBlock().getType() == Material.SPAWNER)) {
 			event.getBlock().setMetadata("placedBy",
-					new FixedMetadataValue(bukkitService.getPluginInstance(), event.getPlayer().getName()));
+					new FixedMetadataValue(serverProvider.getPluginInstance(), event.getPlayer().getName()));
 		}
 	}
 

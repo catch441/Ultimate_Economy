@@ -9,29 +9,29 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.jobsystem.logic.api.Job;
 
 public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {
 
-	private final BukkitService bukkitService;
+	private final ServerProvider serverProvider;
 	private File file;
 	private YamlConfiguration config;
 	
 	/**
 	 * Inject constructor.
-	 * @param bukkitService
+	 * @param serverProvider
 	 */
 	@Inject
-	public JobcenterDaoImpl(BukkitService bukkitService) {
-		this.bukkitService = bukkitService;
+	public JobcenterDaoImpl(ServerProvider serverProvider) {
+		this.serverProvider = serverProvider;
 	}
 
 	@Override
 	public void setupSavefile(String name) {
-		file = new File(bukkitService.getDataFolderPath(), name + "-JobCenter.yml");
+		file = new File(serverProvider.getDataFolderPath(), name + "-JobCenter.yml");
 		if (!file.exists()) {
 			createFile(file);
 		}
@@ -93,7 +93,7 @@ public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {
 	@Override
 	public Location loadJobcenterLocation() {
 		convertOldJobcenterLocation();
-		return new Location(bukkitService.getWorld(getConfig().getString("JobcenterLocation.World")),
+		return new Location(serverProvider.getWorld(getConfig().getString("JobcenterLocation.World")),
 				getConfig().getDouble("JobcenterLocation.x"), getConfig().getDouble("JobcenterLocation.y"),
 				getConfig().getDouble("JobcenterLocation.z"));
 	}
@@ -126,7 +126,7 @@ public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {
 	@Deprecated
 	private void convertOldJobcenterLocation() {
 		if (getConfig().isSet("ShopLocation.World")) {
-			Location location = new Location(bukkitService.getWorld(getConfig().getString("ShopLocation.World")),
+			Location location = new Location(serverProvider.getWorld(getConfig().getString("ShopLocation.World")),
 					getConfig().getDouble("ShopLocation.x"), getConfig().getDouble("ShopLocation.y"),
 					getConfig().getDouble("ShopLocation.z"));
 			getConfig().set("ShopLocation", null);

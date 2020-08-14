@@ -21,8 +21,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.ue.common.utils.BukkitService;
-import com.ue.common.utils.DaggerServiceComponent;
+import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
@@ -34,7 +33,6 @@ import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 public class JobcenterImpl implements Jobcenter {
 
@@ -43,7 +41,7 @@ public class JobcenterImpl implements Jobcenter {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobsystemValidationHandler validationHandler;
 	private final JobcenterDao jobcenterDao;
-	private final BukkitService bukkitService;
+	private final ServerProvider serverProvider;
 	private Villager villager;
 	private Location location;
 	private String name;
@@ -54,25 +52,26 @@ public class JobcenterImpl implements Jobcenter {
 	/**
 	 * Constructor for creating a new jobcenter.
 	 * 
+	 * @param jobcenterDao
 	 * @param jobManager
 	 * @param jobcenterManager
 	 * @param ecoPlayerManager
 	 * @param validationHandler
-	 * @param bukkitService
+	 * @param serverProvider
 	 * @param name
 	 * @param spawnLocation
 	 * @param size
 	 * @throws JobSystemException
 	 */
-	public JobcenterImpl(JobManager jobManager, JobcenterManager jobcenterManager,
+	public JobcenterImpl(JobcenterDao jobcenterDao, JobManager jobManager, JobcenterManager jobcenterManager,
 			EconomyPlayerManager ecoPlayerManager, JobsystemValidationHandler validationHandler,
-			BukkitService bukkitService, String name, Location spawnLocation, int size) throws JobSystemException {
+			ServerProvider serverProvider, String name, Location spawnLocation, int size) throws JobSystemException {
 		this.jobManager = jobManager;
 		this.jobcenterManager = jobcenterManager;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
-		this.bukkitService = bukkitService;
-		jobcenterDao = DaggerServiceComponent.builder().build().getJobcenterDao();
+		this.serverProvider = serverProvider;
+		this.jobcenterDao = jobcenterDao;
 		jobcenterDao.setupSavefile(name);
 		setupNewJobcenter(name, spawnLocation, size);
 	}
@@ -80,22 +79,23 @@ public class JobcenterImpl implements Jobcenter {
 	/**
 	 * Constructor for loading an existing jobcenter.
 	 * 
+	 * @param jobcenterDao
 	 * @param jobManager
 	 * @param jobcenterManager
 	 * @param ecoPlayerManager
 	 * @param validationHandler
-	 * @param bukkitService
+	 * @param serverProvider
 	 * @param name
 	 */
-	public JobcenterImpl(JobManager jobManager, JobcenterManager jobcenterManager,
+	public JobcenterImpl(JobcenterDao jobcenterDao, JobManager jobManager, JobcenterManager jobcenterManager,
 			EconomyPlayerManager ecoPlayerManager, JobsystemValidationHandler validationHandler,
-			BukkitService bukkitService, String name) {
+			ServerProvider serverProvider, String name) {
 		this.jobManager = jobManager;
 		this.jobcenterManager = jobcenterManager;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
-		this.bukkitService = bukkitService;
-		jobcenterDao = DaggerServiceComponent.builder().build().getJobcenterDao();
+		this.serverProvider = serverProvider;
+		this.jobcenterDao = jobcenterDao;
 		jobcenterDao.setupSavefile(name);
 		loadExistingJobcenter(name);
 	}
@@ -112,10 +112,10 @@ public class JobcenterImpl implements Jobcenter {
 		jobcenterDao.saveJobNameList(getJobNameList());
 		jobcenterDao.saveJob(job, itemMaterial, slot);
 		ItemStack jobItem = new ItemStack(Material.valueOf(itemMaterial));
-		ItemMeta meta = bukkitService.getItemMeta(jobItem);
+		ItemMeta meta = serverProvider.getItemMeta(jobItem);
 		meta.setDisplayName(job.getName());
 		meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-		bukkitService.setItemMeta(jobItem, meta);
+		serverProvider.setItemMeta(jobItem, meta);
 		inventory.setItem(slot, jobItem);
 	}
 
@@ -212,12 +212,11 @@ public class JobcenterImpl implements Jobcenter {
 	private void setupNewJobcenter(String name, Location spawnLocation, int size) {
 		this.name = name;
 		this.size = size;
-		System.out.println(size);
 		location = spawnLocation;
 		jobcenterDao.saveJobcenterName(name);
 		jobcenterDao.saveJobcenterSize(size);
 		jobcenterDao.saveJobcenterLocation(location);
-		inventory = bukkitService.createInventory(villager, size, getName());
+		inventory = serverProvider.createInventory(villager, size, getName());
 		setupDefaultJobcenterInventory();
 		setupVillager();
 	}
@@ -225,13 +224,13 @@ public class JobcenterImpl implements Jobcenter {
 	private void setupDefaultJobcenterInventory() {
 		int slot = inventory.getSize() - 1;
 		ItemStack info = new ItemStack(Material.ANVIL);
-		ItemMeta meta = bukkitService.getItemMeta(info);
+		ItemMeta meta = serverProvider.getItemMeta(info);
 		meta.setDisplayName("Info");
 		List<String> lore = new ArrayList<>();
 		lore.add(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "Join");
 		lore.add(ChatColor.GOLD + "Rightclick: " + ChatColor.RED + "Leave");
 		meta.setLore(lore);
-		bukkitService.setItemMeta(info, meta);
+		serverProvider.setItemMeta(info, meta);
 		inventory.setItem(slot, info);
 	}
 
@@ -246,7 +245,7 @@ public class JobcenterImpl implements Jobcenter {
 		}
 		villager = (Villager) getJobcenterLocation().getWorld().spawnEntity(location, EntityType.VILLAGER);
 		villager.setCustomName(name);
-		villager.setMetadata("ue-type", new FixedMetadataValue(bukkitService.getPluginInstance(), EconomyVillager.JOBCENTER));
+		villager.setMetadata("ue-type", new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.JOBCENTER));
 		villager.setCustomNameVisible(true);
 		villager.setProfession(Villager.Profession.NITWIT);
 		villager.setSilent(true);
@@ -261,7 +260,7 @@ public class JobcenterImpl implements Jobcenter {
 		location = jobcenterDao.loadJobcenterLocation();
 		size = jobcenterDao.loadJobcenterSize();
 		setupVillager();
-		inventory = bukkitService.createInventory(villager, size, getName());
+		inventory = serverProvider.createInventory(villager, size, getName());
 		setupDefaultJobcenterInventory();
 		loadJobs();
 	}
@@ -272,10 +271,10 @@ public class JobcenterImpl implements Jobcenter {
 				Job job = jobManager.getJobByName(jobName);
 				getJobList().add(job);
 				ItemStack jobItem = new ItemStack(jobcenterDao.loadJobItemMaterial(job));
-				ItemMeta meta = bukkitService.getItemMeta(jobItem);
+				ItemMeta meta = serverProvider.getItemMeta(jobItem);
 				meta.setDisplayName(job.getName());
 				meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-				bukkitService.setItemMeta(jobItem, meta);
+				serverProvider.setItemMeta(jobItem, meta);
 				inventory.setItem(jobcenterDao.loadJobSlot(job), jobItem);
 			} catch (GeneralEconomyException e) {
 				Bukkit.getLogger().warning(

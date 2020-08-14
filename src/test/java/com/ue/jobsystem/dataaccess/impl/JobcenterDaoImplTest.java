@@ -23,7 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 import com.ue.jobsystem.dataaccess.impl.JobcenterDaoImpl;
 import com.ue.jobsystem.logic.api.Job;
 
@@ -33,7 +33,7 @@ public class JobcenterDaoImplTest {
 	@InjectMocks
 	JobcenterDaoImpl jobcenterDao;
 	@Mock
-	BukkitService bukkitService;
+	ServerProvider serverProvider;
 
 	/**
 	 * Deletes the savefile.
@@ -46,7 +46,7 @@ public class JobcenterDaoImplTest {
 	
 	@Test
 	public void deleteSavefileTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		File file = new File("src/kthcenter-JobCenter.yml");
 		assertTrue(file.exists());
@@ -58,17 +58,17 @@ public class JobcenterDaoImplTest {
 	public void setupSavefileTest() {
 		File result = new File("src/kthcenter-JobCenter.yml");
 		assertFalse(result.exists());
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		assertTrue(result.exists());
 	}
 
 	@Test
 	public void constructorLoadTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		jobcenterDao.saveJobcenterSize(9);
-		jobcenterDao.setupSavefile("kthjob");
+		jobcenterDao.setupSavefile("kthcenter");
 		File file = new File("src/kthcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertTrue(file.exists());
@@ -77,7 +77,7 @@ public class JobcenterDaoImplTest {
 
 	@Test
 	public void saveJobcenterSizeTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		jobcenterDao.saveJobcenterSize(9);
 		File file = new File("src/kthcenter-JobCenter.yml");
@@ -87,7 +87,7 @@ public class JobcenterDaoImplTest {
 
 	@Test
 	public void saveJobcenterNameTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		jobcenterDao.saveJobcenterName("myname");
 		File file = new File("src/kthcenter-JobCenter.yml");
@@ -97,7 +97,7 @@ public class JobcenterDaoImplTest {
 
 	@Test
 	public void saveJobcenterLocationTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		World world = mock(World.class);
 		when(world.getName()).thenReturn("World");
@@ -113,7 +113,7 @@ public class JobcenterDaoImplTest {
 
 	@Test
 	public void saveJobNameListTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		List<String> list = new ArrayList<>();
 		list.add("myjob");
@@ -126,7 +126,7 @@ public class JobcenterDaoImplTest {
 
 	@Test
 	public void saveJobTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
@@ -139,7 +139,7 @@ public class JobcenterDaoImplTest {
 
 	@Test
 	public void saveJobTestWithDelete() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
@@ -152,7 +152,7 @@ public class JobcenterDaoImplTest {
 
 	@Test
 	public void loadJobcenterSizeTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		jobcenterDao.saveJobcenterSize(9);
 		jobcenterDao.setupSavefile("kthcenter");
@@ -161,11 +161,11 @@ public class JobcenterDaoImplTest {
 
 	@Test
 	public void loadJobcenterLocationTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		World world = mock(World.class);
 		when(world.getName()).thenReturn("World");
-		when(bukkitService.getWorld("World")).thenReturn(world);
+		when(serverProvider.getWorld("World")).thenReturn(world);
 		Location loc = new Location(world, 1, 2, 3);
 		jobcenterDao.saveJobcenterLocation(loc);
 		jobcenterDao.setupSavefile("kthcenter");
@@ -187,8 +187,8 @@ public class JobcenterDaoImplTest {
 		save(file, config);
 		World world = mock(World.class);
 		when(world.getName()).thenReturn("World");
-		when(bukkitService.getWorld("World")).thenReturn(world);
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getWorld("World")).thenReturn(world);
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		Location result = jobcenterDao.loadJobcenterLocation();
 		assertEquals(world, result.getWorld());
@@ -201,7 +201,7 @@ public class JobcenterDaoImplTest {
 
 	@Test
 	public void loadJobSlotTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
@@ -218,7 +218,7 @@ public class JobcenterDaoImplTest {
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		config.set("Jobs.myjob.ItemSlot", 9);
 		save(file, config);
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		assertEquals(8, jobcenterDao.loadJobSlot(job));
 		YamlConfiguration configAfter = YamlConfiguration.loadConfiguration(file);
@@ -227,7 +227,7 @@ public class JobcenterDaoImplTest {
 
 	@Test
 	public void loadJobNameListTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		List<String> list = new ArrayList<>();
 		list.add("myjob");
@@ -239,7 +239,7 @@ public class JobcenterDaoImplTest {
 
 	@Test
 	public void loadJobItemMaterialTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");

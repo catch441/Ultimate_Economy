@@ -83,14 +83,20 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
+	ComponentProvider provideComponentProvider() {
+		return new ComponentProvider();
+	}
+
+	@Singleton
+	@Provides
 	Metrics provideMetrics() {
 		return new Metrics(UltimateEconomy.getInstance, 4652);
 	}
 
 	@Singleton
 	@Provides
-	BukkitService provideBukkitService() {
-		return new BukkitService();
+	ServerProvider provideBukkitService() {
+		return new ServerProvider();
 	}
 
 	@Singleton
@@ -129,9 +135,9 @@ public class ProviderModule {
 	@Provides
 	EconomyPlayerManager provideEcoPlayerManager(EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper,
 			EconomyPlayerValidationHandler validationHandler, BankManager bankManager, ConfigManager configManager,
-			Lazy<JobManager> jobManager, BukkitService bukkitService) {
+			Lazy<JobManager> jobManager, ServerProvider serverProvider) {
 		return new EconomyPlayerManagerImpl(ecoPlayerDao, messageWrapper, validationHandler, bankManager, configManager,
-				jobManager, bukkitService);
+				jobManager, serverProvider);
 	}
 
 	@Singleton
@@ -143,9 +149,11 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	JobcenterManager provideJobcenterManager(Lazy<JobManager> jobManager, BukkitService bukkitService, JobsystemValidationHandler validationHandler,
+	JobcenterManager provideJobcenterManager(ComponentProvider componentProvider, ConfigDao configDao,
+			Lazy<JobManager> jobManager, ServerProvider serverProvider, JobsystemValidationHandler validationHandler,
 			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
-		return new JobcenterManagerImpl(jobManager, bukkitService, validationHandler, ecoPlayerManager, messageWrapper);
+		return new JobcenterManagerImpl(componentProvider, configDao, jobManager, serverProvider, validationHandler,
+				ecoPlayerManager, messageWrapper);
 	}
 
 	@Singleton
@@ -291,19 +299,19 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	ConfigDao provideConfigDao(BukkitService bukkitService) {
-		return new ConfigDaoImpl(bukkitService);
+	ConfigDao provideConfigDao(ServerProvider serverProvider) {
+		return new ConfigDaoImpl(serverProvider);
 	}
 
 	@Singleton
 	@Provides
-	BankDao provideBankDao(BukkitService bukkitService) {
-		return new BankDaoImpl(bukkitService);
+	BankDao provideBankDao(ServerProvider serverProvider) {
+		return new BankDaoImpl(serverProvider);
 	}
 
 	@Singleton
 	@Provides
-	EconomyPlayerDao provideEcoPlayerDao(BankManager bankManager, BukkitService bukkitServic) {
+	EconomyPlayerDao provideEcoPlayerDao(BankManager bankManager, ServerProvider bukkitServic) {
 		return new EconomyPlayerDaoImpl(bankManager, bukkitServic);
 	}
 
@@ -313,8 +321,8 @@ public class ProviderModule {
 	}
 
 	@Provides
-	JobcenterDao provideJobcenterDao(BukkitService bukkitService) {
-		return new JobcenterDaoImpl(bukkitService);
+	JobcenterDao provideJobcenterDao(ServerProvider serverProvider) {
+		return new JobcenterDaoImpl(serverProvider);
 	}
 
 	@Singleton
@@ -351,9 +359,9 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	JobsystemEventHandler provideJobsystemEventHandler(BukkitService bukkitService, JobcenterManager jobcenterManager,
+	JobsystemEventHandler provideJobsystemEventHandler(ServerProvider serverProvider, JobcenterManager jobcenterManager,
 			JobManager jobManager, EconomyPlayerManager ecoPlayerManager) {
-		return new JobsystemEventHandlerImpl(bukkitService, jobcenterManager, jobManager, ecoPlayerManager);
+		return new JobsystemEventHandlerImpl(serverProvider, jobcenterManager, jobManager, ecoPlayerManager);
 	}
 
 	@Singleton

@@ -17,6 +17,11 @@ public interface ServiceComponent {
 	 * @param plugin
 	 */
 	void inject(UltimateEconomy plugin);
-	
+
+	/**
+	 * Provides a jobcenter data access object.
+	 * 
+	 * @return jobcenter dao
+	 */
 	JobcenterDao getJobcenterDao();
 }

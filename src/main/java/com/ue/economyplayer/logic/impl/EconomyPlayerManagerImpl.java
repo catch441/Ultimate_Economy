@@ -6,7 +6,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import com.ue.bank.logic.api.BankManager;
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
@@ -28,7 +28,7 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	// the object will never be created, thats just fine, because it is only used
 	// during load player jobs and not during runtime
 	private final Lazy<JobManager> jobManager;
-	private final BukkitService bukkitService;
+	private final ServerProvider serverProvider;
 	private List<EconomyPlayer> economyPlayers = new ArrayList<>();
 
 	/**
@@ -40,19 +40,19 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	 * @param bankManager
 	 * @param configManager
 	 * @param jobManager
-	 * @param bukkitService
+	 * @param serverProvider
 	 */
 	@Inject
 	public EconomyPlayerManagerImpl(EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper,
 			EconomyPlayerValidationHandler validationHandler, BankManager bankManager, ConfigManager configManager,
-			Lazy<JobManager> jobManager, BukkitService bukkitService) {
+			Lazy<JobManager> jobManager, ServerProvider serverProvider) {
 		this.ecoPlayerDao = ecoPlayerDao;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
 		this.bankManager = bankManager;
 		this.configManager = configManager;
 		this.jobManager = jobManager;
-		this.bukkitService = bukkitService;
+		this.serverProvider = serverProvider;
 	}
 
 	@Override
@@ -82,8 +82,8 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	@Override
 	public void createEconomyPlayer(String playerName) throws EconomyPlayerException {
 		validationHandler.checkForPlayerDoesNotExist(getEconomyPlayerNameList(), playerName);
-		getAllEconomyPlayers().add(new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager.get(), bukkitService.getPlayer(playerName), playerName, true));
+		getAllEconomyPlayers().add(new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
+				configManager, bankManager, jobManager.get(), serverProvider.getPlayer(playerName), playerName, true));
 	}
 
 	@Override
@@ -99,8 +99,8 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 		List<String> playerList = ecoPlayerDao.loadPlayerList();
 		for (String player : playerList) {
 			getAllEconomyPlayers().add(
-					new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper, configManager,
-							bankManager, jobManager.get(), bukkitService.getPlayer(player), player, false));
+					new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper, configManager,
+							bankManager, jobManager.get(), serverProvider.getPlayer(player), player, false));
 		}
 	}
 }

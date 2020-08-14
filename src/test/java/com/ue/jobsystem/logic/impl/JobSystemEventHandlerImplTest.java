@@ -40,7 +40,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
@@ -61,7 +61,7 @@ public class JobSystemEventHandlerImplTest {
 	@Mock
 	JobcenterManager jobcenterManager;
 	@Mock
-	BukkitService bukkitService;
+	ServerProvider serverProvider;
 
 	@Test
 	public void handleSetBlockTestSurvival() {
@@ -72,7 +72,7 @@ public class JobSystemEventHandlerImplTest {
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		when(player.getName()).thenReturn("kthschnll");
 		when(block.getType()).thenReturn(Material.STONE);
-		when(bukkitService.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
 
 		eventHandler.handleSetBlock(event);
 		verify(block).setMetadata(eq("placedBy"), any(FixedMetadataValue.class));

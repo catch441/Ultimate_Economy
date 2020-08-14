@@ -37,7 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
@@ -51,7 +51,7 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 public class EconomyPlayerImplTest {
 
 	@Mock
-	BukkitService bukkitService;
+	ServerProvider serverProvider;
 	@Mock
 	ConfigManager configManager;
 	@Mock
@@ -70,10 +70,10 @@ public class EconomyPlayerImplTest {
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
 		Player player = mock(Player.class);
-		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
 		when(account.getIban()).thenReturn("myiban");
-		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
+		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
 				configManager, bankManager, jobManager, player, "kthschnll", true);
 
 		assertEquals("kthschnll", ecoPlayer.getName());
@@ -85,7 +85,7 @@ public class EconomyPlayerImplTest {
 		verify(bankManager).createBankAccount(0.0);
 		verify(ecoPlayerDao).saveBankIban("kthschnll", "myiban");
 		verify(ecoPlayerDao).saveScoreboardDisabled("kthschnll", true);
-		verify(bukkitService).createBossBar();
+		verify(serverProvider).createBossBar();
 		verify(bossBar).setVisible(false);
 	}
 
@@ -94,14 +94,14 @@ public class EconomyPlayerImplTest {
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
 		Player player = mock(Player.class);
-		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		assertDoesNotThrow(() -> when(bankManager.getBankAccountByIban("myiban")).thenReturn(account));
 		when(ecoPlayerDao.loadBankIban("kthschnll")).thenReturn("myiban");
 		when(ecoPlayerDao.loadScoreboardDisabled("kthschnll")).thenReturn(false);
 		Scoreboard board = mock(Scoreboard.class);
 		Objective o = mock(Objective.class);
 		Score score = mock(Score.class);
-		when(bukkitService.createScoreBoard()).thenReturn(board);
+		when(serverProvider.createScoreBoard()).thenReturn(board);
 		when(board.registerNewObjective("bank", "dummy", null)).thenReturn(o);
 		when(o.getScore("§6null")).thenReturn(score);
 		Location location = mock(Location.class);
@@ -112,7 +112,7 @@ public class EconomyPlayerImplTest {
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		when(ecoPlayerDao.loadJoinedTowns("kthschnll")).thenReturn(Arrays.asList("mytown"));
-		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper,
+		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
 				configManager, bankManager, jobManager, player, "kthschnll", false);
 		
 		assertEquals("kthschnll", ecoPlayer.getName());
@@ -125,7 +125,7 @@ public class EconomyPlayerImplTest {
 		assertEquals(job, ecoPlayer.getJobList().get(0));
 		assertEquals(1, ecoPlayer.getJoinedTownList().size());
 		assertEquals("mytown", ecoPlayer.getJoinedTownList().get(0));
-		verify(bukkitService).createBossBar();
+		verify(serverProvider).createBossBar();
 		verify(bossBar).setVisible(false);
 		verify(ecoPlayerDao).loadScoreboardDisabled("kthschnll");
 		verify(ecoPlayerDao).loadJoinedTowns("kthschnll");
@@ -367,7 +367,7 @@ public class EconomyPlayerImplTest {
 		Scoreboard board = mock(Scoreboard.class);
 		Objective o = mock(Objective.class);
 		Score score = mock(Score.class);
-		when(bukkitService.createScoreBoard()).thenReturn(board);
+		when(serverProvider.createScoreBoard()).thenReturn(board);
 		when(board.registerNewObjective("bank", "dummy", "bank")).thenReturn(o);
 		when(o.getScore("§6$")).thenReturn(score);
 
@@ -392,7 +392,7 @@ public class EconomyPlayerImplTest {
 		Scoreboard board = mock(Scoreboard.class);
 		Objective o = mock(Objective.class);
 		Score score = mock(Score.class);
-		when(bukkitService.createScoreBoard()).thenReturn(board);
+		when(serverProvider.createScoreBoard()).thenReturn(board);
 		when(board.registerNewObjective("bank", "dummy", "bank")).thenReturn(o);
 		when(o.getScore("§6$")).thenReturn(score);
 
@@ -534,7 +534,7 @@ public class EconomyPlayerImplTest {
 		Scoreboard board = mock(Scoreboard.class);
 		Objective o = mock(Objective.class);
 		Score score = mock(Score.class);
-		when(bukkitService.createScoreBoard()).thenReturn(board);
+		when(serverProvider.createScoreBoard()).thenReturn(board);
 		when(board.registerNewObjective("bank", "dummy", "bank")).thenReturn(o);
 		when(o.getScore("§6$")).thenReturn(score);
 
@@ -552,7 +552,7 @@ public class EconomyPlayerImplTest {
 	@Test
 	public void setScoreBoardDisabledTestTrue() {
 		Scoreboard board = mock(Scoreboard.class);
-		when(bukkitService.createScoreBoard()).thenReturn(board);
+		when(serverProvider.createScoreBoard()).thenReturn(board);
 
 		// invoked at player creation
 		EconomyPlayer ecoPlayer = createEcoPlayerMock();
@@ -566,9 +566,9 @@ public class EconomyPlayerImplTest {
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
 		Player player = mock(Player.class);
-		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
-		return new EconomyPlayerImpl(bukkitService, validationHandler, ecoPlayerDao, messageWrapper, configManager,
+		return new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper, configManager,
 				bankManager, jobManager, player, "kthschnll", true);
 	}
 }

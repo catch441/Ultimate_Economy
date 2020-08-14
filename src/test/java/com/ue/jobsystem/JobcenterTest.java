@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -14,6 +15,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -88,6 +90,44 @@ public class JobcenterTest {
 			}
 		}
 	}
+	
+	/**
+	 * Location loc = new Location(world, 1, 2, 3);
+			JobcenterManagerImpl.createJobcenter("center", loc, 9);
+			Jobcenter center = JobcenterManagerImpl.getJobcenterList().get(0);
+			assertEquals("center", center.getName());
+			assertEquals(0, center.getJobList().size());
+			// check villager
+			List<Entity> list = new ArrayList<Entity>(world.getNearbyEntities(loc, 0, 0, 0));
+			assertEquals("center", list.get(0).getCustomName());
+			// check inventory
+			center.openInv(player);
+			ChestInventoryMock inv = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			assertEquals(9, inv.getSize());
+			assertEquals("center", inv.getName());
+			assertNull(inv.getItem(0));
+			assertNull(inv.getItem(1));
+			assertNull(inv.getItem(2));
+			assertNull(inv.getItem(3));
+			assertNull(inv.getItem(4));
+			assertNull(inv.getItem(5));
+			assertNull(inv.getItem(6));
+			assertNull(inv.getItem(7));
+			assertEquals(Material.ANVIL, inv.getItem(8).getType());
+			assertEquals("Info", inv.getItem(8).getItemMeta().getDisplayName());
+			assertEquals(2, inv.getItem(8).getItemMeta().getLore().size());
+			assertEquals("§6Leftclick: §aJoin", inv.getItem(8).getItemMeta().getLore().get(0));
+			assertEquals("§6Rightclick: §cLeave", inv.getItem(8).getItemMeta().getLore().get(1));
+			// check savefile
+			File file = new File(UltimateEconomy.getInstance.getDataFolder(), "center-JobCenter.yml");
+			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+			assertEquals("center", config.getString("JobCenterName"));
+			assertEquals(9, config.getInt("JobCenterSize"));
+			assertEquals("1.0", config.getString("JobcenterLocation.x"));
+			assertEquals("2.0", config.getString("JobcenterLocation.y"));
+			assertEquals("3.0", config.getString("JobcenterLocation.z"));
+			assertEquals("World", config.getString("JobcenterLocation.World"));
+	 */
 	
 	@Test
 	public void doubleVillagerTest() {

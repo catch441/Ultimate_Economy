@@ -13,7 +13,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import com.ue.jobsystem.logic.api.Job;
@@ -21,7 +21,7 @@ import com.ue.jobsystem.logic.api.Job;
 public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayerDao {
 
 	private final BankManager bankManager;
-	private final BukkitService bukkitService;
+	private final ServerProvider serverProvider;
 	private File file;
 	private YamlConfiguration config;
 
@@ -29,17 +29,17 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	 * Inject constructor.
 	 * 
 	 * @param bankManager
-	 * @param bukkitService
+	 * @param serverProvider
 	 */
 	@Inject
-	public EconomyPlayerDaoImpl(BankManager bankManager, BukkitService bukkitService) {
+	public EconomyPlayerDaoImpl(BankManager bankManager, ServerProvider serverProvider) {
 		this.bankManager = bankManager;
-		this.bukkitService = bukkitService;
+		this.serverProvider = serverProvider;
 	}
 
 	@Override
 	public void setupSavefile() {
-		file = new File(bukkitService.getDataFolderPath(), "PlayerFile.yml");
+		file = new File(serverProvider.getDataFolderPath(), "PlayerFile.yml");
 		if (!file.exists()) {
 			createFile(file);
 		}
@@ -125,7 +125,7 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	}
 
 	private Location loadHome(String playerName, String homeName) {
-		return new Location(bukkitService.getWorld(getConfig().getString(playerName + ".Home." + homeName + ".World")),
+		return new Location(serverProvider.getWorld(getConfig().getString(playerName + ".Home." + homeName + ".World")),
 				getConfig().getDouble(playerName + ".Home." + homeName + ".X"),
 				getConfig().getDouble(playerName + ".Home." + homeName + ".Y"),
 				getConfig().getDouble(playerName + ".Home." + homeName + ".Z"));

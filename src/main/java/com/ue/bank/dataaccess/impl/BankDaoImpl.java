@@ -9,28 +9,28 @@ import javax.inject.Inject;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ue.bank.dataaccess.api.BankDao;
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.SaveFileUtils;
 
 public class BankDaoImpl extends SaveFileUtils implements BankDao {
 
-	private final BukkitService bukkitService;
+	private final ServerProvider serverProvider;
 	private File file;
 	private YamlConfiguration config;
 	
 	/**
 	 * Inject constructor.
 	 * 
-	 * @param bukkitService
+	 * @param serverProvider
 	 */
 	@Inject
-	public BankDaoImpl(BukkitService bukkitService) {
-		this.bukkitService = bukkitService;
+	public BankDaoImpl(ServerProvider serverProvider) {
+		this.serverProvider = serverProvider;
 	}
 	
 	@Override
 	public void setupSavefile() {
-		file = new File(bukkitService.getDataFolderPath(), "BankAccounts.yml");
+		file = new File(serverProvider.getDataFolderPath(), "BankAccounts.yml");
 		if(!file.exists()) {
 			createFile(file);
 			config = YamlConfiguration.loadConfiguration(getSavefile());

@@ -15,7 +15,7 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import com.ue.ultimate_economy.UltimateEconomy;
 
-public class BukkitService {
+public class ServerProvider {
 
 	/**
 	 * Returns a bukkit world or null, if no world with the given name exists.
@@ -52,13 +52,7 @@ public class BukkitService {
 	 * @return path
 	 */
 	public String getDataFolderPath() {
-		if (UltimateEconomy.getInstance != null) {
-			return UltimateEconomy.getInstance.getDataFolder().getPath();
-		} else {
-			// WORKAROUND for tests, that can't mock the bukkit service because of direct
-			// dependency provision
-			return "src";
-		}
+		return UltimateEconomy.getInstance.getDataFolder().getPath();
 	}
 
 	/**
@@ -90,18 +84,20 @@ public class BukkitService {
 	public Inventory createInventory(InventoryHolder owner, int size, String name) {
 		return Bukkit.createInventory(owner, size, name);
 	}
-	
+
 	/**
-	 * Returns the stack meta, that is provided by the  Bukkit ItemFactory.
+	 * Returns the stack meta, that is provided by the Bukkit ItemFactory.
+	 * 
 	 * @param stack
 	 * @return itemMeta
 	 */
 	public ItemMeta getItemMeta(ItemStack stack) {
 		return stack.getItemMeta();
 	}
-	
+
 	/**
-	 * Sets the item meta for a stack. Performed by the  Bukkit ItemFactory.
+	 * Sets the item meta for a stack. Performed by the Bukkit ItemFactory.
+	 * 
 	 * @param stack
 	 * @param meta
 	 */

@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
@@ -49,13 +49,13 @@ public class EconomyPlayerManagerImplTest {
 	@Mock
 	Lazy<JobManager> jobManager;
 	@Mock
-	BukkitService bukkitService;
+	ServerProvider serverProvider;
 
 	@Test
 	public void createEconomyPlayerTest() {
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
-		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
 		assertDoesNotThrow(() -> ecoPlayerManager.createEconomyPlayer("catch441"));
 		assertEquals(1, ecoPlayerManager.getAllEconomyPlayers().size());
@@ -75,7 +75,7 @@ public class EconomyPlayerManagerImplTest {
 	public void getEconomyPlayerNameListTest() {
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
-		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
 
 		assertDoesNotThrow(() -> ecoPlayerManager.createEconomyPlayer("catch441"));
@@ -88,7 +88,7 @@ public class EconomyPlayerManagerImplTest {
 	public void getEconomyPlayerByNameTest() throws EconomyPlayerException {
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
-		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
 
 		assertDoesNotThrow(() -> ecoPlayerManager.createEconomyPlayer("catch441"));
@@ -110,7 +110,7 @@ public class EconomyPlayerManagerImplTest {
 	public void getAllEconomyPlayersTest() {
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
-		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
 
 		assertDoesNotThrow(() -> ecoPlayerManager.createEconomyPlayer("catch441"));
@@ -125,7 +125,7 @@ public class EconomyPlayerManagerImplTest {
 	public void deleteEconomyPlayerTest() {
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
-		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
 
 		assertDoesNotThrow(() -> ecoPlayerManager.createEconomyPlayer("catch441"));
@@ -138,7 +138,7 @@ public class EconomyPlayerManagerImplTest {
 	@Test
 	public void loadAllEconomyPlayers() {
 		BossBar bossBar = mock(BossBar.class);
-		when(bukkitService.createBossBar()).thenReturn(bossBar);
+		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(ecoPlayerDao.loadPlayerList()).thenReturn(Arrays.asList("catch441"));
 		
 		ecoPlayerManager.getAllEconomyPlayers().clear();

@@ -17,7 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 
 @ExtendWith(MockitoExtension.class)
 public class BankDaoImplTest {
@@ -25,7 +25,7 @@ public class BankDaoImplTest {
 	@InjectMocks
 	BankDaoImpl dao;
 	@Mock
-	BukkitService bukkitService;
+	ServerProvider serverProvider;
 
 	/**
 	 * Delete savefile.
@@ -38,7 +38,7 @@ public class BankDaoImplTest {
 
 	@Test
 	public void setupSavefileTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		dao.setupSavefile();
 		File result = new File("src/BankAccounts.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
@@ -48,7 +48,7 @@ public class BankDaoImplTest {
 
 	@Test
 	public void setupSavefileLoadTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		dao.setupSavefile();
 		dao.setupSavefile();
 		File result = new File("src/BankAccounts.yml");
@@ -59,7 +59,7 @@ public class BankDaoImplTest {
 
 	@Test
 	public void saveIbanListTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		dao.setupSavefile();
 		List<String> list = new ArrayList<>();
 		list.add("myiban");
@@ -72,7 +72,7 @@ public class BankDaoImplTest {
 
 	@Test
 	public void loadIbanListTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		dao.setupSavefile();
 		List<String> list = new ArrayList<>();
 		list.add("myiban");
@@ -84,7 +84,7 @@ public class BankDaoImplTest {
 
 	@Test
 	public void deleteAccountTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		dao.setupSavefile();
 		dao.saveAmount("myiban", 20.0);
 		File result = new File("src/BankAccounts.yml");
@@ -97,7 +97,7 @@ public class BankDaoImplTest {
 
 	@Test
 	public void saveAmountTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		dao.setupSavefile();
 		dao.saveAmount("myiban", 12.34);
 		File result = new File("src/BankAccounts.yml");
@@ -107,7 +107,7 @@ public class BankDaoImplTest {
 
 	@Test
 	public void loadAmountTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		dao.setupSavefile();
 		dao.saveAmount("myiban", 12.34);
 		dao.setupSavefile();

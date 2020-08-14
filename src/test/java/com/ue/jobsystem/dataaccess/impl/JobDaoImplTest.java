@@ -21,7 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 import com.ue.jobsystem.dataaccess.impl.JobDaoImpl;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,7 +30,7 @@ public class JobDaoImplTest {
 	@InjectMocks
 	JobDaoImpl jobDao;
 	@Mock
-	BukkitService bukkitService;
+	ServerProvider serverProvider;
 	
 	/**
 	 * Delete savefile.
@@ -45,14 +45,14 @@ public class JobDaoImplTest {
 	public void setupSavefileTest() {
 		File result = new File("src/kthjob-Job.yml");
 		assertFalse(result.exists());
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobDao.setupSavefile("kthjob");
 		assertTrue(result.exists());
 	}
 	
 	@Test
 	public void setupSavefileLoadTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobDao.setupSavefile("kthjob");
 		jobDao.saveJobName("myjob");
 		jobDao.setupSavefile("kthjob");
@@ -64,7 +64,7 @@ public class JobDaoImplTest {
 	
 	@Test
 	public void deleteSavefileTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobDao.setupSavefile("kthjob");
 		File file = new File("src/kthjob-Job.yml");
 		assertTrue(file.exists());
@@ -74,7 +74,7 @@ public class JobDaoImplTest {
 	
 	@Test
 	public void saveJobNameTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobDao.setupSavefile("kthjob");
 		jobDao.saveJobName("myjob");
 		File file = new File("src/kthjob-Job.yml");
@@ -84,7 +84,7 @@ public class JobDaoImplTest {
 	
 	@Test
 	public void saveBlocklistTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobDao.setupSavefile("kthjob");
 		Map<String,Double> list = new HashMap<>();
 		list.put("dirt", 2.0);
@@ -96,7 +96,7 @@ public class JobDaoImplTest {
 	
 	@Test
 	public void saveFisherlistTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobDao.setupSavefile("kthjob");
 		Map<String,Double> list = new HashMap<>();
 		list.put("fish", 2.0);
@@ -108,7 +108,7 @@ public class JobDaoImplTest {
 	
 	@Test
 	public void saveEntitylistTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobDao.setupSavefile("kthjob");
 		Map<String,Double> list = new HashMap<>();
 		list.put("cow", 2.0);
@@ -120,7 +120,7 @@ public class JobDaoImplTest {
 	
 	@Test
 	public void loadJobNameTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobDao.setupSavefile("kthjob");
 		jobDao.saveJobName("myjob1");
 		jobDao.setupSavefile("kthjob");
@@ -129,7 +129,7 @@ public class JobDaoImplTest {
 	
 	@Test
 	public void loadBlocklistTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobDao.setupSavefile("kthjob");
 		assertTrue(jobDao.loadBlockList().isEmpty());
 		Map<String,Double> list = new HashMap<>();
@@ -144,7 +144,7 @@ public class JobDaoImplTest {
 	
 	@Test
 	public void loadFisherlistTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobDao.setupSavefile("kthjob");
 		assertTrue(jobDao.loadFisherList().isEmpty());
 		Map<String,Double> list = new HashMap<>();
@@ -159,7 +159,7 @@ public class JobDaoImplTest {
 	
 	@Test
 	public void loadEntitylistTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobDao.setupSavefile("kthjob");
 		assertTrue(jobDao.loadEntityList().isEmpty());
 		Map<String,Double> list = new HashMap<>();
@@ -174,7 +174,7 @@ public class JobDaoImplTest {
 	
 	@Test
 	public void loadBlocklistDeprecatedTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobDao.setupSavefile("kthjob");
 		File file = new File("src/kthjob-Job.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -195,7 +195,7 @@ public class JobDaoImplTest {
 	
 	@Test
 	public void loadFisherlistDeprecatedTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobDao.setupSavefile("kthjob");
 		File file = new File("src/kthjob-Job.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -215,7 +215,7 @@ public class JobDaoImplTest {
 	
 	@Test
 	public void loadEntitylistDeprecatedTest() {
-		when(bukkitService.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobDao.setupSavefile("kthjob");
 		File file = new File("src/kthjob-Job.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);

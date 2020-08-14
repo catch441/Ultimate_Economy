@@ -1,12 +1,13 @@
 package com.ue.config.dataaccess.impl;
 
 import java.io.File;
+import java.util.List;
 
 import javax.inject.Inject;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.config.dataaccess.api.ConfigDao;
 
@@ -18,11 +19,11 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	/**
 	 * Config Data Access constructor.
 	 * 
-	 * @param bukkitService
+	 * @param serverProvider
 	 */
 	@Inject
-	public ConfigDaoImpl(BukkitService bukkitService) {
-		file = new File(bukkitService.getDataFolderPath(), "config.yml");
+	public ConfigDaoImpl(ServerProvider serverProvider) {
+		file = new File(serverProvider.getDataFolderPath(), "config.yml");
 		if (!file.exists()) {
 			createFile(file);
 		}
@@ -219,6 +220,17 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	public void saveLanguage(String language) {
 		fileConfig.set("localeLanguage", language);
 		save(fileConfig, file);
+	}
+	
+	@Override
+	public void saveJobcenterList(List<String> jobcenters) {
+		fileConfig.set("JobCenterNames", jobcenters);
+		save(fileConfig, file);
+	}
+	
+	@Override
+	public List<String> loadJobcenterList() {
+		return fileConfig.getStringList("JobCenterNames");
 	}
 
 	@Deprecated

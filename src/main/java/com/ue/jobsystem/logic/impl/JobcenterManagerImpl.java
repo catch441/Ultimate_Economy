@@ -1,6 +1,5 @@
 package com.ue.jobsystem.logic.impl;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,11 +8,14 @@ import javax.inject.Inject;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
+import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
+import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
@@ -21,7 +23,6 @@ import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 import dagger.Lazy;
 
@@ -35,25 +36,32 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	// the object will never be created, thats just fine, because it is only used
 	// during load jobcenter jobs and not during runtime
 	private final Lazy<JobManager> jobManager;
-	private final BukkitService bukkitService;
-	
+	private final ServerProvider serverProvider;
+	private final ConfigDao configDao;
+	private final ComponentProvider componentProvider;
+
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param componentProvider
+	 * @param configDao
 	 * @param jobManager
-	 * @param bukkitService
+	 * @param serverProvider
 	 * @param validationHandler
 	 * @param ecoPlayerManager
 	 * @param messageWrapper
 	 */
 	@Inject
-	public JobcenterManagerImpl(Lazy<JobManager> jobManager, BukkitService bukkitService, JobsystemValidationHandler validationHandler,
-			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
+	public JobcenterManagerImpl(ComponentProvider componentProvider, ConfigDao configDao, Lazy<JobManager> jobManager, ServerProvider serverProvider,
+			JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
+			MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
-		this.bukkitService = bukkitService;
+		this.serverProvider = serverProvider;
 		this.jobManager = jobManager;
+		this.configDao = configDao;
+		this.componentProvider = componentProvider;
 	}
 
 	@Override
@@ -89,7 +97,7 @@ public class JobcenterManagerImpl implements JobcenterManager {
 				removeJobFromAllPlayers(job);
 			}
 		}
-		saveJobcenterNameList();
+		configDao.saveJobcenterList(getJobcenterNameList());
 	}
 
 	private void removeJobFromAllPlayers(Job job) {
@@ -119,22 +127,18 @@ public class JobcenterManagerImpl implements JobcenterManager {
 			throws JobSystemException, GeneralEconomyException {
 		validationHandler.checkForJobcenterNameDoesNotExist(getJobcenterNameList(), name);
 		validationHandler.checkForValidSize(size);
-		getJobcenterList().add(new JobcenterImpl(jobManager.get(), this, ecoPlayerManager, validationHandler, bukkitService,
-				name, spawnLocation, size));
-		saveJobcenterNameList();
+		JobcenterDao jobcenterDao = componentProvider.getServiceComponent().getJobcenterDao();
+		getJobcenterList().add(new JobcenterImpl(jobcenterDao, jobManager.get(), this, ecoPlayerManager, validationHandler,
+				serverProvider, name, spawnLocation, size));
+		configDao.saveJobcenterList(getJobcenterNameList());
 	}
 
 	@Override
 	public void loadAllJobcenters() {
-		for (String jobCenterName : UltimateEconomy.getInstance.getConfig().getStringList("JobCenterNames")) {
-			File file = new File(UltimateEconomy.getInstance.getDataFolder(), jobCenterName + "-JobCenter.yml");
-			if (file.exists()) {
-				getJobcenterList().add(new JobcenterImpl(jobManager.get(), this, ecoPlayerManager, validationHandler,
-						bukkitService, jobCenterName));
-			} else {
-				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the jobcenter " + jobCenterName);
-				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: No savefile found!");
-			}
+		for (String jobCenterName : configDao.loadJobcenterList()) {
+			JobcenterDao jobcenterDao = componentProvider.getServiceComponent().getJobcenterDao();
+			getJobcenterList().add(new JobcenterImpl(jobcenterDao, jobManager.get(), this, ecoPlayerManager, validationHandler,
+					serverProvider, jobCenterName));
 		}
 	}
 
@@ -143,18 +147,5 @@ public class JobcenterManagerImpl implements JobcenterManager {
 		for (Jobcenter jobcenter : getJobcenterList()) {
 			jobcenter.despawnVillager();
 		}
-	}
-
-	/*
-	 * Save methods
-	 * 
-	 */
-
-	/*
-	 * TODO exclude in dao
-	 */
-	private void saveJobcenterNameList() {
-		UltimateEconomy.getInstance.getConfig().set("JobCenterNames", getJobcenterNameList());
-		UltimateEconomy.getInstance.saveConfig();
 	}
 }

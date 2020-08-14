@@ -16,7 +16,7 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
-import com.ue.common.utils.BukkitService;
+import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
@@ -29,7 +29,7 @@ import com.ue.ultimate_economy.UltimateEconomy;
 
 public class EconomyPlayerImpl implements EconomyPlayer {
 
-	private final BukkitService bukkitService;
+	private final ServerProvider serverProvider;
 	private final ConfigManager configManager;
 	private final BankManager bankManager;
 	private final JobManager jobManager;
@@ -48,7 +48,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	/**
 	 * Constructor for creating a new economyPlayer/loading an existing player.
 	 * 
-	 * @param bukkitService
+	 * @param serverProvider
 	 * @param validationHandler
 	 * @param ecoPlayerDao
 	 * @param messageWrapper
@@ -59,7 +59,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	 * @param name
 	 * @param isNew
 	 */
-	public EconomyPlayerImpl(BukkitService bukkitService, EconomyPlayerValidationHandler validationHandler,
+	public EconomyPlayerImpl(ServerProvider serverProvider, EconomyPlayerValidationHandler validationHandler,
 			EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper, ConfigManager configManager,
 			BankManager bankManager, JobManager jobManager, Player player, String name, boolean isNew) {
 		this.configManager = configManager;
@@ -68,14 +68,14 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerDao = ecoPlayerDao;
 		this.validationHandler = validationHandler;
-		this.bukkitService = bukkitService;
+		this.serverProvider = serverProvider;
 		this.player = player;
 		if (isNew) {
 			setupNewPlayer(name);
 		} else {
 			loadExistingPlayer(name);
 		}
-		bossBar = bukkitService.createBossBar();
+		bossBar = serverProvider.createBossBar();
 		getBossBar().setVisible(false);
 	}
 
@@ -204,7 +204,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		ecoPlayerDao.saveScoreboardDisabled(getName(), isScoreBoardDisabled());
 		if (isScoreBoardDisabled()) {
 			if (isOnline()) {
-				getPlayer().setScoreboard(bukkitService.createScoreBoard());
+				getPlayer().setScoreboard(serverProvider.createScoreBoard());
 			}
 		} else {
 			updateScoreBoard();
@@ -289,7 +289,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	private void setScoreboard(int score) {
 		if (!isScoreBoardDisabled()) {
-			Scoreboard board = bukkitService.createScoreBoard();
+			Scoreboard board = serverProvider.createScoreBoard();
 			Objective o = board.registerNewObjective("bank", "dummy", messageWrapper.getString("bank"));
 			o.setDisplaySlot(DisplaySlot.SIDEBAR);
 			o.getScore(ChatColor.GOLD + configManager.getCurrencyText(score)).setScore(score);
