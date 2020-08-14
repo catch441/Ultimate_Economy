@@ -10,6 +10,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +21,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
@@ -31,6 +35,8 @@ public class ConfigCommandExecutorImplTest {
 	ConfigManager configManager;
 	@Mock
 	MessageWrapper messageWrapper;
+	@Mock
+	EconomyPlayerManager ecoPlayerManager;
 
 	@Test
 	public void zeroArgs() {
@@ -402,6 +408,8 @@ public class ConfigCommandExecutorImplTest {
 
 	@Test
 	public void wildernessInteractionCommandTestWithAll() {
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(Arrays.asList(ecoPlayer));
 		Player player = mock(Player.class);
 		when(messageWrapper.getString("config_change", "false"))
 				.thenReturn("§6The configuration was changed to §afalse§6.");
@@ -414,12 +422,14 @@ public class ConfigCommandExecutorImplTest {
 		verify(player).sendMessage("§6The configuration was changed to §afalse§6.");
 		verifyNoMoreInteractions(player);
 		verify(configManager).setWildernessInteraction(false);
+		verify(ecoPlayer).denyWildernessPermission();
 		String[] args1 = { "wildernessInteraction", "true" };
 		boolean result1 = executor.onCommand(player, null, "ue-config", args1);
 		assertTrue(result1);
 		verify(player).sendMessage("§6The configuration was changed to §atrue§6.");
 		verifyNoMoreInteractions(player);
 		verify(configManager).setWildernessInteraction(true);
+		verify(ecoPlayer).addWildernessPermission();
 	}
 
 	@Test

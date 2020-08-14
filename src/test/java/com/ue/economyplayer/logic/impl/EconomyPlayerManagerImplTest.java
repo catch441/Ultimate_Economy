@@ -29,6 +29,8 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.jobsystem.logic.api.JobManager;
 
+import dagger.Lazy;
+
 @ExtendWith(MockitoExtension.class)
 public class EconomyPlayerManagerImplTest {
 
@@ -45,7 +47,7 @@ public class EconomyPlayerManagerImplTest {
 	@Mock
 	ConfigManager configManager;
 	@Mock
-	JobManager jobManager;
+	Lazy<JobManager> jobManager;
 	@Mock
 	BukkitService bukkitService;
 

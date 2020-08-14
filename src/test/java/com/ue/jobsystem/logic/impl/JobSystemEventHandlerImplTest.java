@@ -48,8 +48,6 @@ import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
-import com.ue.jobsystem.logic.impl.JobSystemException;
-import com.ue.jobsystem.logic.impl.JobsystemEventHandlerImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class JobSystemEventHandlerImplTest {

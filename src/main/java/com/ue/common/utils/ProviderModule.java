@@ -31,8 +31,8 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerTabCompleterImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerValidationHandlerImpl;
 import com.ue.jobsyste.dataaccess.api.JobDao;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
-import com.ue.jobsystem.dataaccese.impl.JobDaoImpl;
-import com.ue.jobsystem.dataaccese.impl.JobcenterDaoImpl;
+import com.ue.jobsystem.dataaccess.impl.JobDaoImpl;
+import com.ue.jobsystem.dataaccess.impl.JobcenterDaoImpl;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemEventHandler;
@@ -143,9 +143,9 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	JobcenterManager provideJobcenterManager(JobsystemValidationHandler validationHandler,
+	JobcenterManager provideJobcenterManager(Lazy<JobManager> jobManager, BukkitService bukkitService, JobsystemValidationHandler validationHandler,
 			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
-		return new JobcenterManagerImpl(validationHandler, ecoPlayerManager, messageWrapper);
+		return new JobcenterManagerImpl(jobManager, bukkitService, validationHandler, ecoPlayerManager, messageWrapper);
 	}
 
 	@Singleton

@@ -6,6 +6,10 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Scoreboard;
 
@@ -48,11 +52,18 @@ public class BukkitService {
 	 * @return path
 	 */
 	public String getDataFolderPath() {
-		return UltimateEconomy.getInstance.getDataFolder().getPath();
+		if (UltimateEconomy.getInstance != null) {
+			return UltimateEconomy.getInstance.getDataFolder().getPath();
+		} else {
+			// WORKAROUND for tests, that can't mock the bukkit service because of direct
+			// dependency provision
+			return "src";
+		}
 	}
-	
+
 	/**
 	 * Returns the plugin instance.
+	 * 
 	 * @return ultimate economy plugin
 	 */
 	public Plugin getPluginInstance() {
@@ -66,5 +77,35 @@ public class BukkitService {
 	 */
 	public Scoreboard createScoreBoard() {
 		return Bukkit.getScoreboardManager().getNewScoreboard();
+	}
+
+	/**
+	 * Returns a bukkit inventory with the given parameters.
+	 * 
+	 * @param owner
+	 * @param size
+	 * @param name
+	 * @return inventory
+	 */
+	public Inventory createInventory(InventoryHolder owner, int size, String name) {
+		return Bukkit.createInventory(owner, size, name);
+	}
+	
+	/**
+	 * Returns the stack meta, that is provided by the  Bukkit ItemFactory.
+	 * @param stack
+	 * @return itemMeta
+	 */
+	public ItemMeta getItemMeta(ItemStack stack) {
+		return stack.getItemMeta();
+	}
+	
+	/**
+	 * Sets the item meta for a stack. Performed by the  Bukkit ItemFactory.
+	 * @param stack
+	 * @param meta
+	 */
+	public void setItemMeta(ItemStack stack, ItemMeta meta) {
+		stack.setItemMeta(meta);
 	}
 }

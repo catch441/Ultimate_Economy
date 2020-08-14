@@ -35,4 +35,12 @@ public class JobSystemException extends Exception {
 	public Object[] getParams() {
 		return params;
 	}
+	
+	/**
+	 * Returns the key.
+	 * @return job exception message key
+	 */
+	public JobExceptionMessageEnum getKey() {
+		return key;
+	}
 }

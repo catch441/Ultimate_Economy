@@ -26,7 +26,7 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	private final ConfigManager configManager;
 	// lazy because of circulating dependency, cannot resolved with refactoring
 	// the object will never be created, thats just fine, because it is only used
-	// duron load player jobs and not during runtime
+	// during load player jobs and not during runtime
 	private final Lazy<JobManager> jobManager;
 	private final BukkitService bukkitService;
 	private List<EconomyPlayer> economyPlayers = new ArrayList<>();

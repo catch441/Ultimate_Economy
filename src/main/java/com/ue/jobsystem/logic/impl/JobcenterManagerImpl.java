@@ -9,11 +9,13 @@ import javax.inject.Inject;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
+import com.ue.common.utils.BukkitService;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.jobsystem.logic.api.Job;
+import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
@@ -21,26 +23,37 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 import com.ue.ultimate_economy.UltimateEconomy;
 
+import dagger.Lazy;
+
 public class JobcenterManagerImpl implements JobcenterManager {
 
 	private List<Jobcenter> jobCenterList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobsystemValidationHandler validationHandler;
-
+	// lazy because of circulating dependency, cannot resolved with refactoring
+	// the object will never be created, thats just fine, because it is only used
+	// during load jobcenter jobs and not during runtime
+	private final Lazy<JobManager> jobManager;
+	private final BukkitService bukkitService;
+	
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param jobManager
+	 * @param bukkitService
 	 * @param validationHandler
 	 * @param ecoPlayerManager
 	 * @param messageWrapper
 	 */
 	@Inject
-	public JobcenterManagerImpl(JobsystemValidationHandler validationHandler,
+	public JobcenterManagerImpl(Lazy<JobManager> jobManager, BukkitService bukkitService, JobsystemValidationHandler validationHandler,
 			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
+		this.bukkitService = bukkitService;
+		this.jobManager = jobManager;
 	}
 
 	@Override
@@ -106,8 +119,8 @@ public class JobcenterManagerImpl implements JobcenterManager {
 			throws JobSystemException, GeneralEconomyException {
 		validationHandler.checkForJobcenterNameDoesNotExist(getJobcenterNameList(), name);
 		validationHandler.checkForValidSize(size);
-		getJobcenterList().add(
-				new JobcenterImpl(name, spawnLocation, size));
+		getJobcenterList().add(new JobcenterImpl(jobManager.get(), this, ecoPlayerManager, validationHandler, bukkitService,
+				name, spawnLocation, size));
 		saveJobcenterNameList();
 	}
 
@@ -116,8 +129,8 @@ public class JobcenterManagerImpl implements JobcenterManager {
 		for (String jobCenterName : UltimateEconomy.getInstance.getConfig().getStringList("JobCenterNames")) {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), jobCenterName + "-JobCenter.yml");
 			if (file.exists()) {
-				getJobcenterList()
-						.add(new JobcenterImpl(jobCenterName));
+				getJobcenterList().add(new JobcenterImpl(jobManager.get(), this, ecoPlayerManager, validationHandler,
+						bukkitService, jobCenterName));
 			} else {
 				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the jobcenter " + jobCenterName);
 				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: No savefile found!");

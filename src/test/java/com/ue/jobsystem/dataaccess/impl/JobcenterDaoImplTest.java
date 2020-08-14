@@ -24,7 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.common.utils.BukkitService;
-import com.ue.jobsystem.dataaccese.impl.JobcenterDaoImpl;
+import com.ue.jobsystem.dataaccess.impl.JobcenterDaoImpl;
 import com.ue.jobsystem.logic.api.Job;
 
 @ExtendWith(MockitoExtension.class)

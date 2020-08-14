@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,11 +17,18 @@ import java.util.List;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Villager;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -28,10 +38,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.ue.common.utils.BukkitService;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
@@ -50,8 +58,6 @@ import com.ue.ultimate_economy.UltimateEconomy;
 import dagger.Lazy;
 
 @ExtendWith(MockitoExtension.class)
-//@RunWith(PowerMockRunner.class)
-//@PrepareForTest(JobcenterImpl.class)
 public class JobcenterManagerImplTest {
 
 	@InjectMocks
@@ -62,17 +68,35 @@ public class JobcenterManagerImplTest {
 	EconomyPlayerManager ecoPlayerManager;
 	@Mock
 	JobsystemValidationHandler validationHandler;
-
+	@Mock
+	BukkitService bukkitService;
+	@Mock
+	Lazy<JobManager> jobManager;
+	
 	@Test
 	public void getJobcenterByNameTest() {
+		Inventory inventory = mock(Inventory.class);
+		when(bukkitService.createInventory(null, 9,  "other")).thenReturn(inventory);
+		ItemMeta meta = mock(ItemMeta.class);
+		when(bukkitService.getItemMeta(any(ItemStack.class))).thenReturn(meta);
+		UltimateEconomy plugin = mock(UltimateEconomy.class);
+		when(bukkitService.getPluginInstance()).thenReturn(plugin);
+		Jobcenter center = mock(Jobcenter.class);
+		when(center.getName()).thenReturn("center");
+		Location location = mock(Location.class);
+		Chunk chunk = mock(Chunk.class);
 		World world = mock(World.class);
-		//Jobcenter center = mock(Jobcenter.class);
-		//when(center.getName()).thenReturn("center");
-		//assertDoesNotThrow(() -> PowerMockito.whenNew(JobcenterImpl.class).withAnyArguments().thenReturn((JobcenterImpl) center));
-		//assertDoesNotThrow(() -> manager.createJobcenter("other", new Location(world, 10, 1, 1), 9));
-		//assertDoesNotThrow(() -> manager.createJobcenter("center", new Location(world, 1, 1, 1), 9));
-		//Jobcenter result = assertDoesNotThrow(() -> manager.getJobcenterByName("center"));
-		//assertEquals(center, result);
+		when(location.getChunk()).thenReturn(chunk);
+		when(location.getWorld()).thenReturn(world);
+		Villager villager = mock(Villager.class);
+		when(world.spawnEntity(location, EntityType.VILLAGER)).thenReturn(villager);
+		assertDoesNotThrow(() -> manager.createJobcenter("other", location, 9));
+		assertDoesNotThrow(() -> manager.createJobcenter("center", location, 9));
+		Jobcenter result = assertDoesNotThrow(() -> manager.getJobcenterByName("center"));
+		assertEquals(center, result);
+		
+		new File("src/other-JobCenter.yml").delete();
+		new File("src/center-JobCenter.yml").delete();
 	}
 
 	@Test

@@ -1,4 +1,4 @@
-package com.ue.jobsystem.dataaccese.impl;
+package com.ue.jobsystem.dataaccess.impl;
 
 import java.io.File;
 import java.util.HashMap;

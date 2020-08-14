@@ -160,9 +160,6 @@ public class JobsystemValidationHandlerImpl implements JobsystemValidationHandle
 	}
 
 	private boolean isSlotEmpty(Inventory inventory, int slot) {
-		if (inventory.getItem(slot) == null || inventory.getItem(slot).getType() == Material.AIR) {
-			return true;
-		}
-		return false;
+		return (inventory.getItem(slot) == null || inventory.getItem(slot).getType() == Material.AIR);
 	}
 }
