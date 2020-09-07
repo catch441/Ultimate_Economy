@@ -13,6 +13,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
+import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -216,9 +217,9 @@ public class JobcenterImpl implements Jobcenter {
 		jobcenterDao.saveJobcenterName(name);
 		jobcenterDao.saveJobcenterSize(size);
 		jobcenterDao.saveJobcenterLocation(location);
+		setupVillager();
 		inventory = serverProvider.createInventory(villager, size, getName());
 		setupDefaultJobcenterInventory();
-		setupVillager();
 	}
 
 	private void setupDefaultJobcenterInventory() {
@@ -247,7 +248,7 @@ public class JobcenterImpl implements Jobcenter {
 		villager.setCustomName(name);
 		villager.setMetadata("ue-type", new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.JOBCENTER));
 		villager.setCustomNameVisible(true);
-		villager.setProfession(Villager.Profession.NITWIT);
+		villager.setProfession(Profession.NITWIT);
 		villager.setSilent(true);
 		villager.setCollidable(false);
 		villager.setInvulnerable(true);

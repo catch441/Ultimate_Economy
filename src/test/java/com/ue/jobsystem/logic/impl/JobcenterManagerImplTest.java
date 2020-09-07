@@ -45,7 +45,6 @@ import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
-import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 import com.ue.ultimate_economy.UltimateEconomy;
@@ -85,7 +84,8 @@ public class JobcenterManagerImplTest {
 
 	private void createJobcenter(String name) {
 		Inventory inventory = mock(Inventory.class);
-		when(serverProvider.createInventory(null, 9, name)).thenReturn(inventory);
+		Villager villager = mock(Villager.class);
+		when(serverProvider.createInventory(villager, 9, name)).thenReturn(inventory);
 		ItemMeta meta = mock(ItemMeta.class);
 		when(serverProvider.getItemMeta(any(ItemStack.class))).thenReturn(meta);
 		UltimateEconomy plugin = mock(UltimateEconomy.class);
@@ -95,7 +95,6 @@ public class JobcenterManagerImplTest {
 		World world = mock(World.class);
 		when(location.getChunk()).thenReturn(chunk);
 		when(location.getWorld()).thenReturn(world);
-		Villager villager = mock(Villager.class);
 		when(world.spawnEntity(location, EntityType.VILLAGER)).thenReturn(villager);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		when(serviceComponent.getJobcenterDao()).thenReturn(mock(JobcenterDao.class));
@@ -136,7 +135,8 @@ public class JobcenterManagerImplTest {
 	@Test
 	public void despawnAllVillagersTest() {
 		Inventory inventory = mock(Inventory.class);
-		when(serverProvider.createInventory(null, 9, "center")).thenReturn(inventory);
+		Villager villager = mock(Villager.class);
+		when(serverProvider.createInventory(villager, 9, "center")).thenReturn(inventory);
 		ItemMeta meta = mock(ItemMeta.class);
 		when(serverProvider.getItemMeta(any(ItemStack.class))).thenReturn(meta);
 		UltimateEconomy plugin = mock(UltimateEconomy.class);
@@ -146,7 +146,6 @@ public class JobcenterManagerImplTest {
 		World world = mock(World.class);
 		when(location.getChunk()).thenReturn(chunk);
 		when(location.getWorld()).thenReturn(world);
-		Villager villager = mock(Villager.class);
 		when(world.spawnEntity(location, EntityType.VILLAGER)).thenReturn(villager);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		when(serviceComponent.getJobcenterDao()).thenReturn(mock(JobcenterDao.class));

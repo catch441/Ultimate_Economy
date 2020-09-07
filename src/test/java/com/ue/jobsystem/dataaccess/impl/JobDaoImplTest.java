@@ -22,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.common.utils.ServerProvider;
-import com.ue.jobsystem.dataaccess.impl.JobDaoImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class JobDaoImplTest {
