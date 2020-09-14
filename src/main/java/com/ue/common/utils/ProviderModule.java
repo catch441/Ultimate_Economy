@@ -6,6 +6,8 @@ import javax.inject.Singleton;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ue.bank.dataaccess.api.BankDao;
 import com.ue.bank.dataaccess.impl.BankDaoImpl;
@@ -142,11 +144,12 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	JobManager provideJobManager(ComponentProvider componentProvider, JobcenterManager jobcenterManager,
-			JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
-			MessageWrapper messageWrapper) {
-		return new JobManagerImpl(componentProvider, jobcenterManager, validationHandler, ecoPlayerManager,
-				messageWrapper);
+	JobManager provideJobManager(ConfigDao configDao, ComponentProvider componentProvider,
+			JobcenterManager jobcenterManager, JobsystemValidationHandler validationHandler,
+			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
+		Logger logger = LoggerFactory.getLogger(JobManagerImpl.class.getName());
+		return new JobManagerImpl(configDao, componentProvider, jobcenterManager, validationHandler, ecoPlayerManager,
+				messageWrapper, logger);
 	}
 
 	@Singleton
@@ -154,8 +157,9 @@ public class ProviderModule {
 	JobcenterManager provideJobcenterManager(ComponentProvider componentProvider, ConfigDao configDao,
 			Lazy<JobManager> jobManager, ServerProvider serverProvider, JobsystemValidationHandler validationHandler,
 			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
+		Logger logger = LoggerFactory.getLogger(JobcenterManagerImpl.class.getName());
 		return new JobcenterManagerImpl(componentProvider, configDao, jobManager, serverProvider, validationHandler,
-				ecoPlayerManager, messageWrapper);
+				ecoPlayerManager, messageWrapper, logger);
 	}
 
 	@Singleton

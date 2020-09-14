@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,6 +20,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.slf4j.Logger;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
@@ -37,6 +37,7 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class JobcenterImpl implements Jobcenter {
 
+	private final Logger logger;
 	private final JobManager jobManager;
 	private final JobcenterManager jobcenterManager;
 	private final EconomyPlayerManager ecoPlayerManager;
@@ -53,6 +54,7 @@ public class JobcenterImpl implements Jobcenter {
 	/**
 	 * Constructor for creating a new jobcenter.
 	 * 
+	 * @param logger
 	 * @param jobcenterDao
 	 * @param jobManager
 	 * @param jobcenterManager
@@ -64,10 +66,12 @@ public class JobcenterImpl implements Jobcenter {
 	 * @param size
 	 * @throws JobSystemException
 	 */
-	public JobcenterImpl(JobcenterDao jobcenterDao, JobManager jobManager, JobcenterManager jobcenterManager,
-			EconomyPlayerManager ecoPlayerManager, JobsystemValidationHandler validationHandler,
-			ServerProvider serverProvider, String name, Location spawnLocation, int size) throws JobSystemException {
+	public JobcenterImpl(Logger logger, JobcenterDao jobcenterDao, JobManager jobManager,
+			JobcenterManager jobcenterManager, EconomyPlayerManager ecoPlayerManager,
+			JobsystemValidationHandler validationHandler, ServerProvider serverProvider, String name,
+			Location spawnLocation, int size) throws JobSystemException {
 		this.jobManager = jobManager;
+		this.logger = logger;
 		this.jobcenterManager = jobcenterManager;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
@@ -80,6 +84,7 @@ public class JobcenterImpl implements Jobcenter {
 	/**
 	 * Constructor for loading an existing jobcenter.
 	 * 
+	 * @param logger
 	 * @param jobcenterDao
 	 * @param jobManager
 	 * @param jobcenterManager
@@ -88,10 +93,11 @@ public class JobcenterImpl implements Jobcenter {
 	 * @param serverProvider
 	 * @param name
 	 */
-	public JobcenterImpl(JobcenterDao jobcenterDao, JobManager jobManager, JobcenterManager jobcenterManager,
-			EconomyPlayerManager ecoPlayerManager, JobsystemValidationHandler validationHandler,
-			ServerProvider serverProvider, String name) {
+	public JobcenterImpl(Logger logger, JobcenterDao jobcenterDao, JobManager jobManager,
+			JobcenterManager jobcenterManager, EconomyPlayerManager ecoPlayerManager,
+			JobsystemValidationHandler validationHandler, ServerProvider serverProvider, String name) {
 		this.jobManager = jobManager;
+		this.logger = logger;
 		this.jobcenterManager = jobcenterManager;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
@@ -133,8 +139,8 @@ public class JobcenterImpl implements Jobcenter {
 					try {
 						ecoPlayer.leaveJob(job, false);
 					} catch (EconomyPlayerException e) {
-						Bukkit.getLogger().warning("[Ultimate_Economy] Failed to leave the job " + job.getName());
-						Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+						logger.warn("[Ultimate_Economy] Failed to leave the job " + job.getName());
+						logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 					}
 				}
 			}
@@ -246,7 +252,8 @@ public class JobcenterImpl implements Jobcenter {
 		}
 		villager = (Villager) getJobcenterLocation().getWorld().spawnEntity(location, EntityType.VILLAGER);
 		villager.setCustomName(name);
-		villager.setMetadata("ue-type", new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.JOBCENTER));
+		villager.setMetadata("ue-type",
+				new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.JOBCENTER));
 		villager.setCustomNameVisible(true);
 		villager.setProfession(Profession.NITWIT);
 		villager.setSilent(true);
@@ -278,9 +285,8 @@ public class JobcenterImpl implements Jobcenter {
 				serverProvider.setItemMeta(jobItem, meta);
 				inventory.setItem(jobcenterDao.loadJobSlot(job), jobItem);
 			} catch (GeneralEconomyException e) {
-				Bukkit.getLogger().warning(
-						"[Ultimate_Economy] Failed to load the job " + jobName + " for the jobcenter " + getName());
-				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+				logger.warn("[Ultimate_Economy] Failed to load the job " + jobName + " for the jobcenter " + getName());
+				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}

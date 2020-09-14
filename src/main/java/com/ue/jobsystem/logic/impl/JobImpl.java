@@ -20,6 +20,8 @@ public class JobImpl implements Job {
 	/**
 	 * Constructor to create a new or load an existing job.
 	 * 
+	 * @param validationHandler
+	 * @param jobDao
 	 * @param name
 	 * @param isNew
 	 */

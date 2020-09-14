@@ -1,6 +1,9 @@
 JobCenterNames:
 - center1
 - center2
+JobList:
+- job1
+- job2
 MaxJoinedTowns: 6
 MaxPlayershops: 6
 localeCountry: DE

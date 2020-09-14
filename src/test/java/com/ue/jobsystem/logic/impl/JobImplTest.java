@@ -26,7 +26,7 @@ import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 @ExtendWith(MockitoExtension.class)
-public class JobTest {
+public class JobImplTest {
 
 	@Mock
 	JobDao jobDao;

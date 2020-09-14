@@ -5,8 +5,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ComponentProvider;
@@ -28,6 +29,7 @@ import dagger.Lazy;
 
 public class JobcenterManagerImpl implements JobcenterManager {
 
+	private final Logger logger;
 	private List<Jobcenter> jobCenterList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerManager ecoPlayerManager;
@@ -50,11 +52,13 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	 * @param validationHandler
 	 * @param ecoPlayerManager
 	 * @param messageWrapper
+	 * @param logger
 	 */
 	@Inject
 	public JobcenterManagerImpl(ComponentProvider componentProvider, ConfigDao configDao, Lazy<JobManager> jobManager, ServerProvider serverProvider,
 			JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
-			MessageWrapper messageWrapper) {
+			MessageWrapper messageWrapper, Logger logger) {
+		this.logger = logger;
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
@@ -106,8 +110,8 @@ public class JobcenterManagerImpl implements JobcenterManager {
 				try {
 					ecoPlayer.leaveJob(job, false);
 				} catch (EconomyPlayerException e) {
-					Bukkit.getLogger().warning("[Ultimate_Economy] Failed leave the job " + job.getName());
-					Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+					logger.warn("[Ultimate_Economy] Failed to leave the job " + job.getName());
+					logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 				}
 			}
 		}
@@ -128,7 +132,8 @@ public class JobcenterManagerImpl implements JobcenterManager {
 		validationHandler.checkForJobcenterNameDoesNotExist(getJobcenterNameList(), name);
 		validationHandler.checkForValidSize(size);
 		JobcenterDao jobcenterDao = componentProvider.getServiceComponent().getJobcenterDao();
-		getJobcenterList().add(new JobcenterImpl(jobcenterDao, jobManager.get(), this, ecoPlayerManager, validationHandler,
+		Logger logger = LoggerFactory.getLogger(JobcenterImpl.class);
+		getJobcenterList().add(new JobcenterImpl(logger, jobcenterDao, jobManager.get(), this, ecoPlayerManager, validationHandler,
 				serverProvider, name, spawnLocation, size));
 		configDao.saveJobcenterList(getJobcenterNameList());
 	}
@@ -137,7 +142,8 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	public void loadAllJobcenters() {
 		for (String jobCenterName : configDao.loadJobcenterList()) {
 			JobcenterDao jobcenterDao = componentProvider.getServiceComponent().getJobcenterDao();
-			getJobcenterList().add(new JobcenterImpl(jobcenterDao, jobManager.get(), this, ecoPlayerManager, validationHandler,
+			Logger logger = LoggerFactory.getLogger(JobcenterImpl.class);
+			getJobcenterList().add(new JobcenterImpl(logger, jobcenterDao, jobManager.get(), this, ecoPlayerManager, validationHandler,
 					serverProvider, jobCenterName));
 		}
 	}

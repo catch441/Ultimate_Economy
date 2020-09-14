@@ -269,6 +269,20 @@ public interface ConfigDao {
 	 * @return jobcenter names
 	 */
 	public List<String> loadJobcenterList();
+	
+	/**
+	 * Saves the job list.
+	 * 
+	 * @param jobs
+	 */
+	public void saveJobList(List<String> jobs);
+	
+	/**
+	 * Loads the job list.
+	 * 
+	 * @return job names
+	 */
+	public List<String> loadJobList();
 
 	/**
 	 * Remove deprecated stuff.

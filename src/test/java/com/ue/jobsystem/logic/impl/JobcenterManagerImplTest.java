@@ -32,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
@@ -40,6 +41,7 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
@@ -70,6 +72,8 @@ public class JobcenterManagerImplTest {
 	ConfigDao configDao;
 	@Mock
 	ComponentProvider componentProvider;
+	@Mock
+	Logger logger;
 
 	@Test
 	public void getJobcenterByNameTest() {
@@ -173,6 +177,28 @@ public class JobcenterManagerImplTest {
 		assertEquals(0, manager.getJobcenterList().size());
 		assertDoesNotThrow(() -> verify(ecoPlayer).leaveJob(job, false));
 		verify(configDao).saveJobcenterList(new ArrayList<>());
+	}
+	
+	@Test
+	public void deleteJobcenterTestWithFailedToLeaveJob() throws EconomyPlayerException {
+		Jobcenter jobcenter = mock(Jobcenter.class);
+		Job job = mock(Job.class);
+		when(jobcenter.getJobList()).thenReturn(Arrays.asList(job));
+		manager.getJobcenterList().add(jobcenter);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
+		when(job.getName()).thenReturn("myJob");
+		when(e.getMessage()).thenReturn("my error message");
+		when(ecoPlayer.hasJob(job)).thenReturn(true);
+		when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(Arrays.asList(ecoPlayer));
+		doThrow(e).when(ecoPlayer).leaveJob(job, false);
+		assertDoesNotThrow(() -> manager.deleteJobcenter(jobcenter));
+		verify(jobcenter).deleteJobcenter();
+		assertEquals(0, manager.getJobcenterList().size());
+		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.leaveJob(job, false));
+		verify(configDao).saveJobcenterList(new ArrayList<>());
+		verify(logger).warn("[Ultimate_Economy] Failed to leave the job myJob");
+		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
 	}
 	
 	@Test

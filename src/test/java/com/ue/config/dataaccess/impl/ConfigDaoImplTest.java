@@ -374,6 +374,25 @@ public class ConfigDaoImplTest {
 		dao.saveLanguage(null);
 		assertFalse(dao.hasLanguage());
 	}
+	
+	@Test
+	public void saveJobListTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		File file = new File("src/config.yml");
+		dao.saveJobList(Arrays.asList("myJob"));
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		assertEquals(1, config.getStringList("JobList").size());
+		assertEquals("myJob", config.getStringList("JobList").get(0));
+	}
+	
+	@Test
+	public void loadJobListTest() {
+		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		dao = new ConfigDaoImpl(serverProvider);
+		dao.saveJobList(Arrays.asList("job1", "job2"));
+		assertEquals(Arrays.asList("job1", "job2"), dao.loadJobList());
+	}
 
 	@SuppressWarnings("deprecation")
 	@Test

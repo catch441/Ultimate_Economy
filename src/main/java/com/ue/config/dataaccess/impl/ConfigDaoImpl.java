@@ -232,6 +232,18 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	public List<String> loadJobcenterList() {
 		return fileConfig.getStringList("JobCenterNames");
 	}
+	
+	@Override
+	public void saveJobList(List<String> jobs) {
+		fileConfig.set("JobList", jobs);
+		save(fileConfig, file);
+	}
+	
+	@Override
+	public List<String> loadJobList() {
+		return fileConfig.getStringList("JobList");
+	}
+	
 
 	@Deprecated
 	@Override
