@@ -1,7 +1,10 @@
 package com.ue.jobsystem;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.List;
@@ -15,72 +18,45 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.ue.common.utils.ComponentProvider;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServiceComponent;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
+import com.ue.jobsyste.dataaccess.api.JobDao;
 import com.ue.jobsystem.logic.api.Job;
-import com.ue.jobsystem.logic.api.JobController;
+import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
+import com.ue.jobsystem.logic.api.JobcenterManager;
+import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import com.ue.jobsystem.logic.impl.JobManagerImpl;
 import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
-import be.seeseemelk.mockbukkit.WorldMock;
+@ExtendWith(MockitoExtension.class)
+public class JobManagerImplTest {
 
-public class JobControllerTest {
-
-	private static ServerMock server;
-	private static WorldMock world;
-
-	/**
-	 * Init shop for tests.
-	 */
-	@BeforeAll
-	public static void initPlugin() {
-		server = MockBukkit.mock();
-		Bukkit.getLogger().setLevel(Level.OFF);
-		MockBukkit.load(UltimateEconomy.class);
-		world = new WorldMock(Material.GRASS_BLOCK, 1);
-		server.addWorld(world);
-		server.addPlayer("catch441");
-	}
-
-	/**
-	 * Unload mock bukkit.
-	 */
-	@AfterAll
-	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
-		for (int i = 0; i < size2; i++) {
-			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-		}
-		UltimateEconomy.getInstance.getDataFolder().delete();
-		server.setPlayers(0);
-		MockBukkit.unload();
-	}
-
-	/**
-	 * Unload all.
-	 */
-	@AfterEach
-	public void unload() {
-		int size = JobController.getJobList().size();
-		for (int i = 0; i < size; i++) {
-			JobController.deleteJob(JobController.getJobList().get(0));
-		}
-		int size2 = JobcenterManagerImpl.getJobcenterList().size();
-		for (int i = 0; i < size2; i++) {
-			try {
-				JobcenterManagerImpl.deleteJobcenter(JobcenterManagerImpl.getJobcenterList().get(0));
-			} catch (JobSystemException e) {
-				assertTrue(false);
-			}
-		}
-	}
+	@InjectMocks
+	JobManagerImpl jobManager;
+	@Mock
+	ComponentProvider componentProvider;
+	@Mock
+	JobcenterManager jobcenterManager;
+	@Mock
+	JobsystemValidationHandler validationHandler;
+	@Mock
+	EconomyPlayerManager ecoPlayerManager;
+	@Mock
+	MessageWrapper messageWrapper;
 
 	@Test
 	public void loadAllJobsTest() {
@@ -109,7 +85,7 @@ public class JobControllerTest {
 			assertTrue(false);
 		}
 	}
-	
+
 	@Test
 	public void loadAllJobsTestWithLoadingError() {
 		try {
@@ -230,15 +206,12 @@ public class JobControllerTest {
 
 	@Test
 	public void getJobByNameTest() {
-		try {
-			JobController.createJob("other");
-			JobController.createJob("myjob");
-			Job job = JobController.getJobByName("myjob");
-			assertEquals(JobController.getJobList().get(1), job);
-			assertEquals("myjob", job.getName());
-		} catch (GeneralEconomyException e) {
-			assertTrue(false);
-		}
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		JobDao jobDao = mock(JobDao.class);
+		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serviceComponent.getJobDao()).thenReturn(jobDao);
+		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
+		assertDoesNotThrow(() -> assertEquals("myJob", jobManager.getJobByName("myJob").getName()));
 	}
 
 	@Test

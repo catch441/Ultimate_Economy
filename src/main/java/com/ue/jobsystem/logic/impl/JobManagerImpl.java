@@ -8,10 +8,12 @@ import javax.inject.Inject;
 
 import org.bukkit.Bukkit;
 
+import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.jobsyste.dataaccess.api.JobDao;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
@@ -28,22 +30,26 @@ public class JobManagerImpl implements JobManager {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobsystemValidationHandler validationHandler;
 	private final JobcenterManager jobcenterManager;
+	private final ComponentProvider componentProvider;
 
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param componentProvider
 	 * @param jobcenterManager
 	 * @param validationHandler
 	 * @param ecoPlayerManager
 	 * @param messageWrapper
 	 */
 	@Inject
-	public JobManagerImpl(JobcenterManager jobcenterManager, JobsystemValidationHandler validationHandler,
-			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
+	public JobManagerImpl(ComponentProvider componentProvider, JobcenterManager jobcenterManager,
+			JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
+			MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
 		this.jobcenterManager = jobcenterManager;
+		this.componentProvider = componentProvider;
 	}
 
 	@Override
@@ -82,7 +88,8 @@ public class JobManagerImpl implements JobManager {
 	@Override
 	public void createJob(String jobName) throws GeneralEconomyException {
 		validationHandler.checkForJobNameDoesNotExist(getJobNameList(), jobName);
-		getJobList().add(new JobImpl(jobName, true));
+		JobDao jobDao = componentProvider.getServiceComponent().getJobDao();
+		getJobList().add(new JobImpl(validationHandler, jobDao, jobName, true));
 		saveJobNameList();
 	}
 
@@ -91,7 +98,8 @@ public class JobManagerImpl implements JobManager {
 		for (String jobName : UltimateEconomy.getInstance.getConfig().getStringList("JobList")) {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), jobName + "-Job.yml");
 			if (file.exists()) {
-				getJobList().add(new JobImpl(jobName, false));
+				JobDao jobDao = componentProvider.getServiceComponent().getJobDao();
+				getJobList().add(new JobImpl(validationHandler, jobDao, jobName, false));
 			} else {
 				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the job " + jobName);
 				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: No savefile found!");

@@ -3,8 +3,6 @@ package com.ue.jobsystem.logic.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import com.ue.jobsyste.dataaccess.api.JobDao;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
@@ -12,10 +10,8 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class JobImpl implements Job {
 
-	@Inject
-	JobsystemValidationHandler validationHandler;
-	@Inject
-	JobDao jobDao;
+	private final JobsystemValidationHandler validationHandler;
+	private final JobDao jobDao;
 	private Map<String, Double> entityList = new HashMap<>();
 	private Map<String, Double> blockList = new HashMap<>();
 	private Map<String, Double> fisherList = new HashMap<>();
@@ -27,9 +23,11 @@ public class JobImpl implements Job {
 	 * @param name
 	 * @param isNew
 	 */
-	public JobImpl(String name, boolean isNew) {
+	public JobImpl(JobsystemValidationHandler validationHandler, JobDao jobDao, String name, boolean isNew) {
+		this.jobDao = jobDao;
+		this.validationHandler = validationHandler;
 		jobDao.setupSavefile(name);
-		if (!isNew) {
+		if (isNew) {
 			setupJobName(name);
 		} else {
 			loadExistingJob(name);

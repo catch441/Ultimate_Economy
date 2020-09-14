@@ -142,9 +142,11 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	JobManager provideJobManager(JobcenterManager jobcenterManager, JobsystemValidationHandler validationHandler,
-			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
-		return new JobManagerImpl(jobcenterManager, validationHandler, ecoPlayerManager, messageWrapper);
+	JobManager provideJobManager(ComponentProvider componentProvider, JobcenterManager jobcenterManager,
+			JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
+			MessageWrapper messageWrapper) {
+		return new JobManagerImpl(componentProvider, jobcenterManager, validationHandler, ecoPlayerManager,
+				messageWrapper);
 	}
 
 	@Singleton

@@ -2,6 +2,7 @@ package com.ue.common.utils;
 
 import javax.inject.Singleton;
 
+import com.ue.jobsyste.dataaccess.api.JobDao;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.ultimate_economy.UltimateEconomy;
 
@@ -24,4 +25,11 @@ public interface ServiceComponent {
 	 * @return jobcenter dao
 	 */
 	JobcenterDao getJobcenterDao();
+	
+	/**
+	 * Provides a job data access object.
+	 * 
+	 * @return job dao
+	 */
+	JobDao getJobDao();
 }
