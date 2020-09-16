@@ -118,11 +118,11 @@ public class JobcenterImpl implements Jobcenter {
 		getJobList().add(job);
 		jobcenterDao.saveJobNameList(getJobNameList());
 		jobcenterDao.saveJob(job, itemMaterial, slot);
-		ItemStack jobItem = new ItemStack(Material.valueOf(itemMaterial));
-		ItemMeta meta = serverProvider.getItemMeta(jobItem);
+		ItemStack jobItem = serverProvider.createItemStack(Material.valueOf(itemMaterial), 1);
+		ItemMeta meta = jobItem.getItemMeta();
 		meta.setDisplayName(job.getName());
 		meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-		serverProvider.setItemMeta(jobItem, meta);
+		jobItem.setItemMeta(meta);
 		inventory.setItem(slot, jobItem);
 	}
 
@@ -230,14 +230,14 @@ public class JobcenterImpl implements Jobcenter {
 
 	private void setupDefaultJobcenterInventory() {
 		int slot = inventory.getSize() - 1;
-		ItemStack info = new ItemStack(Material.ANVIL);
-		ItemMeta meta = serverProvider.getItemMeta(info);
+		ItemStack info = serverProvider.createItemStack(Material.ANVIL, 1);
+		ItemMeta meta = info.getItemMeta();
 		meta.setDisplayName("Info");
 		List<String> lore = new ArrayList<>();
 		lore.add(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "Join");
 		lore.add(ChatColor.GOLD + "Rightclick: " + ChatColor.RED + "Leave");
 		meta.setLore(lore);
-		serverProvider.setItemMeta(info, meta);
+		info.setItemMeta(meta);
 		inventory.setItem(slot, info);
 	}
 
@@ -278,11 +278,11 @@ public class JobcenterImpl implements Jobcenter {
 			try {
 				Job job = jobManager.getJobByName(jobName);
 				getJobList().add(job);
-				ItemStack jobItem = new ItemStack(jobcenterDao.loadJobItemMaterial(job));
-				ItemMeta meta = serverProvider.getItemMeta(jobItem);
+				ItemStack jobItem = serverProvider.createItemStack(jobcenterDao.loadJobItemMaterial(job), 1);
+				ItemMeta meta = jobItem.getItemMeta();
 				meta.setDisplayName(job.getName());
 				meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-				serverProvider.setItemMeta(jobItem, meta);
+				jobItem.setItemMeta(meta);
 				inventory.setItem(jobcenterDao.loadJobSlot(job), jobItem);
 			} catch (GeneralEconomyException e) {
 				logger.warn("[Ultimate_Economy] Failed to load the job " + jobName + " for the jobcenter " + getName());

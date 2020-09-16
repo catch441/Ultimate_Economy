@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.boss.BossBar;
@@ -13,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
+import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
@@ -29,6 +29,7 @@ import com.ue.ultimate_economy.UltimateEconomy;
 
 public class EconomyPlayerImpl implements EconomyPlayer {
 
+	private final Logger logger;
 	private final ServerProvider serverProvider;
 	private final ConfigManager configManager;
 	private final BankManager bankManager;
@@ -48,6 +49,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	/**
 	 * Constructor for creating a new economyPlayer/loading an existing player.
 	 * 
+	 * @param logger
 	 * @param serverProvider
 	 * @param validationHandler
 	 * @param ecoPlayerDao
@@ -59,11 +61,13 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	 * @param name
 	 * @param isNew
 	 */
-	public EconomyPlayerImpl(ServerProvider serverProvider, EconomyPlayerValidationHandler validationHandler,
-			EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper, ConfigManager configManager,
-			BankManager bankManager, JobManager jobManager, Player player, String name, boolean isNew) {
+	public EconomyPlayerImpl(Logger logger, ServerProvider serverProvider,
+			EconomyPlayerValidationHandler validationHandler, EconomyPlayerDao ecoPlayerDao,
+			MessageWrapper messageWrapper, ConfigManager configManager, BankManager bankManager, JobManager jobManager,
+			Player player, String name, boolean isNew) {
 		this.configManager = configManager;
 		this.bankManager = bankManager;
+		this.logger = logger;
 		this.jobManager = jobManager;
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerDao = ecoPlayerDao;
@@ -333,8 +337,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		try {
 			bankAccount = bankManager.getBankAccountByIban(iban);
 		} catch (GeneralEconomyException e) {
-			Bukkit.getLogger().warning(
-					"[Ultimate_Economy] Failed to load the bank account " + iban + " for the player " + getName());
+			logger.warn("[Ultimate_Economy] Failed to load the bank account " + iban + " for the player " + getName());
 		}
 	}
 
@@ -343,8 +346,8 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			try {
 				getJobList().add(jobManager.getJobByName(jobName));
 			} catch (GeneralEconomyException e) {
-				Bukkit.getLogger().warning(
-						"[Ultimate_Economy] " + messageWrapper.getErrorString("job_does_not_exist") + ":" + jobName);
+				logger.warn(
+						"[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}

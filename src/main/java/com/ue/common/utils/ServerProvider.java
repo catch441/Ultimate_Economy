@@ -1,6 +1,7 @@
 package com.ue.common.utils;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -9,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Scoreboard;
 
@@ -86,22 +86,14 @@ public class ServerProvider {
 	}
 
 	/**
-	 * Returns the stack meta, that is provided by the Bukkit ItemFactory.
+	 * Creates a new itemstack. Makes it possible to use the verify method of
+	 * mockito in the unit tests.
 	 * 
-	 * @param stack
-	 * @return itemMeta
+	 * @param material
+	 * @param amount
+	 * @return item stack
 	 */
-	public ItemMeta getItemMeta(ItemStack stack) {
-		return stack.getItemMeta();
-	}
-
-	/**
-	 * Sets the item meta for a stack. Performed by the Bukkit ItemFactory.
-	 * 
-	 * @param stack
-	 * @param meta
-	 */
-	public void setItemMeta(ItemStack stack, ItemMeta meta) {
-		stack.setItemMeta(meta);
+	public ItemStack createItemStack(Material material, int amount) {
+		return new ItemStack(material, amount);
 	}
 }

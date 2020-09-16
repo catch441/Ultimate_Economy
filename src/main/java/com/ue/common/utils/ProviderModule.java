@@ -222,8 +222,9 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	@Named("AdminshopCommandExecutor")
-	CommandExecutor provideAdminshopCommandExecutor(AdminshopManager adminshopManager, MessageWrapper messageWrapper) {
-		return new AdminshopCommandExecutorImpl(adminshopManager, messageWrapper);
+	CommandExecutor provideAdminshopCommandExecutor(AdminshopManager adminshopManager, MessageWrapper messageWrapper,
+			ServerProvider serverProvider) {
+		return new AdminshopCommandExecutorImpl(adminshopManager, messageWrapper, serverProvider);
 	}
 
 	@Singleton

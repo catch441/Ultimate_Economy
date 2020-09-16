@@ -17,6 +17,11 @@ public class AdminshopTabCompleterImpl extends TabCompleterUtils implements TabC
 	
 	private final AdminshopManager adminshopManager;
 	
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param adminshopManager
+	 */
 	@Inject
 	public AdminshopTabCompleterImpl(AdminshopManager adminshopManager) {
 		this.adminshopManager = adminshopManager;

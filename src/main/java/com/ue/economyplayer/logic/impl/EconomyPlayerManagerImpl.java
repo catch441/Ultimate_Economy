@@ -5,6 +5,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.MessageWrapper;
@@ -82,8 +85,10 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	@Override
 	public void createEconomyPlayer(String playerName) throws EconomyPlayerException {
 		validationHandler.checkForPlayerDoesNotExist(getEconomyPlayerNameList(), playerName);
-		getAllEconomyPlayers().add(new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager.get(), serverProvider.getPlayer(playerName), playerName, true));
+		Logger logger = LoggerFactory.getLogger(EconomyPlayerImpl.class);
+		getAllEconomyPlayers().add(new EconomyPlayerImpl(logger, serverProvider, validationHandler, ecoPlayerDao,
+				messageWrapper, configManager, bankManager, jobManager.get(), serverProvider.getPlayer(playerName),
+				playerName, true));
 	}
 
 	@Override
@@ -98,9 +103,10 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 		ecoPlayerDao.setupSavefile();
 		List<String> playerList = ecoPlayerDao.loadPlayerList();
 		for (String player : playerList) {
-			getAllEconomyPlayers().add(
-					new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper, configManager,
-							bankManager, jobManager.get(), serverProvider.getPlayer(player), player, false));
+			Logger logger = LoggerFactory.getLogger(EconomyPlayerImpl.class);
+			getAllEconomyPlayers().add(new EconomyPlayerImpl(logger, serverProvider, validationHandler, ecoPlayerDao,
+					messageWrapper, configManager, bankManager, jobManager.get(), serverProvider.getPlayer(player),
+					player, false));
 		}
 	}
 }

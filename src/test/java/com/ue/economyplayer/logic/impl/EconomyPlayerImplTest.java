@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
@@ -64,6 +65,8 @@ public class EconomyPlayerImplTest {
 	EconomyPlayerDao ecoPlayerDao;
 	@Mock
 	EconomyPlayerValidationHandler validationHandler;
+	@Mock
+	Logger logger;
 
 	@Test
 	public void constructorNewTest() {
@@ -73,7 +76,7 @@ public class EconomyPlayerImplTest {
 		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
 		when(account.getIban()).thenReturn("myiban");
-		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
+		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(logger, serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
 				configManager, bankManager, jobManager, player, "kthschnll", true);
 
 		assertEquals("kthschnll", ecoPlayer.getName());
@@ -112,7 +115,7 @@ public class EconomyPlayerImplTest {
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		when(ecoPlayerDao.loadJoinedTowns("kthschnll")).thenReturn(Arrays.asList("mytown"));
-		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
+		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(logger, serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
 				configManager, bankManager, jobManager, player, "kthschnll", false);
 		
 		assertEquals("kthschnll", ecoPlayer.getName());
@@ -135,6 +138,53 @@ public class EconomyPlayerImplTest {
 		verify(account).getAmount();
 		assertDoesNotThrow(() -> verify(jobManager).getJobByName("myjob"));
 		assertDoesNotThrow(() -> verify(bankManager).getBankAccountByIban("myiban"));
+	}
+	
+	@Test
+	public void constructorLoadTestWithLoadingErrors() throws GeneralEconomyException {
+		BossBar bossBar = mock(BossBar.class);
+		Player player = mock(Player.class);
+		GeneralEconomyException e = mock(GeneralEconomyException.class);
+		when(e.getMessage()).thenReturn("my error message");
+		when(serverProvider.createBossBar()).thenReturn(bossBar);
+		doThrow(e).when(bankManager).getBankAccountByIban("myiban");
+		doThrow(e).when(jobManager).getJobByName("myjob");
+		when(ecoPlayerDao.loadBankIban("kthschnll")).thenReturn("myiban");
+		when(ecoPlayerDao.loadScoreboardDisabled("kthschnll")).thenReturn(false);
+		Scoreboard board = mock(Scoreboard.class);
+		Objective o = mock(Objective.class);
+		Score score = mock(Score.class);
+		when(serverProvider.createScoreBoard()).thenReturn(board);
+		when(board.registerNewObjective("bank", "dummy", null)).thenReturn(o);
+		when(o.getScore("§6null")).thenReturn(score);
+		Location location = mock(Location.class);
+		Map<String, Location> homes = new HashMap<>();
+		homes.put("myhome", location);
+		when(ecoPlayerDao.loadHomeList("kthschnll")).thenReturn(homes);
+		when(ecoPlayerDao.loadJobsList("kthschnll")).thenReturn(Arrays.asList("myjob"));
+		when(ecoPlayerDao.loadJoinedTowns("kthschnll")).thenReturn(Arrays.asList("mytown"));
+		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(logger, serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
+				configManager, bankManager, jobManager, player, "kthschnll", false);
+		
+		assertEquals("kthschnll", ecoPlayer.getName());
+		assertFalse(ecoPlayer.isScoreBoardDisabled());
+		assertEquals(ecoPlayer.getBankAccount(), ecoPlayer.getBankAccount());
+		assertTrue(ecoPlayer.getHomeList().containsKey("myhome"));
+		assertEquals(location, ecoPlayer.getHomeList().get("myhome"));
+		assertEquals(1, ecoPlayer.getHomeList().size());
+		assertEquals(1, ecoPlayer.getJoinedTownList().size());
+		assertEquals("mytown", ecoPlayer.getJoinedTownList().get(0));
+		verify(serverProvider).createBossBar();
+		verify(bossBar).setVisible(false);
+		verify(ecoPlayerDao).loadScoreboardDisabled("kthschnll");
+		verify(ecoPlayerDao).loadJoinedTowns("kthschnll");
+		verify(ecoPlayerDao).loadHomeList("kthschnll");
+		verify(ecoPlayerDao).loadJobsList("kthschnll");
+		verify(ecoPlayerDao).loadBankIban("kthschnll");
+		assertThrows(GeneralEconomyException.class, () -> jobManager.getJobByName("myjob"));
+		assertThrows(GeneralEconomyException.class, () -> bankManager.getBankAccountByIban("myiban"));
+		verify(logger).warn("[Ultimate_Economy] Failed to load the bank account myiban for the player kthschnll");
+		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
 	}
 
 	@Test
@@ -568,7 +618,7 @@ public class EconomyPlayerImplTest {
 		Player player = mock(Player.class);
 		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
-		return new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper, configManager,
+		return new EconomyPlayerImpl(logger, serverProvider, validationHandler, ecoPlayerDao, messageWrapper, configManager,
 				bankManager, jobManager, player, "kthschnll", true);
 	}
 }

@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
@@ -22,17 +23,21 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 
 	private final AdminshopManager adminshopManager;
 	private final MessageWrapper messageWrapper;
+	private final ServerProvider serverProvider;
 
 	/**
 	 * Inject constructor.
 	 * 
 	 * @param adminshopManager
 	 * @param messageWrapper
+	 * @param serverProvider
 	 */
 	@Inject
-	public AdminshopCommandExecutorImpl(AdminshopManager adminshopManager, MessageWrapper messageWrapper) {
+	public AdminshopCommandExecutorImpl(AdminshopManager adminshopManager, MessageWrapper messageWrapper,
+			ServerProvider serverProvider) {
 		this.adminshopManager = adminshopManager;
 		this.messageWrapper = messageWrapper;
+		this.serverProvider = serverProvider;
 	}
 
 	@Override
@@ -162,7 +167,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 5) {
 			try {
 				EntityType.valueOf(args[2].toUpperCase());
-				ItemStack itemStack = new ItemStack(Material.SPAWNER, 1);
+				ItemStack itemStack = serverProvider.createItemStack(Material.SPAWNER, 1);
 				ItemMeta meta = itemStack.getItemMeta();
 				meta.setDisplayName(args[2].toUpperCase());
 				itemStack.setItemMeta(meta);

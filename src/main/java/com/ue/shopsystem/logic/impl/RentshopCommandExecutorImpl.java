@@ -49,7 +49,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	public boolean performCommand(String label, String[] args, Player player)
+	private boolean performCommand(String label, String[] args, Player player)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException, ShopSystemException {
 		switch (RentshopCommandEnum.getEnum(args[0])) {
 		case CHANGEPROFESSION:

@@ -35,4 +35,13 @@ public class ShopSystemException extends Exception {
 	public Object[] getParams() {
 		return params;
 	}
+	
+	/**
+	 * Returns the message enum key.
+	 * 
+	 * @return key
+	 */
+	public ShopExceptionMessageEnum getKey() {
+		return key;
+	}
 }
