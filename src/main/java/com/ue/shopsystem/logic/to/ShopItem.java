@@ -43,7 +43,7 @@ public class ShopItem {
 	 * @return ItemStack
 	 */
 	public ItemStack getItemStack() {
-		return itemStack.clone();
+		return itemStack;
 	}
 
 	/**

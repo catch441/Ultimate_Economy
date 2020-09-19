@@ -9,7 +9,9 @@ import javax.inject.Inject;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
+import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
+import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
@@ -23,17 +25,21 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	private List<Adminshop> adminShopList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
 	private final ShopValidationHandler validationHandler;
+	private final ComponentProvider componentProvider;
 
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param componentProvider
 	 * @param validationHandler
 	 * @param messageWrapper
 	 */
 	@Inject
-	public AdminshopManagerImpl(ShopValidationHandler validationHandler, MessageWrapper messageWrapper) {
+	public AdminshopManagerImpl(ComponentProvider componentProvider, ShopValidationHandler validationHandler,
+			MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
+		this.componentProvider = componentProvider;
 	}
 
 	@Override
@@ -98,7 +104,8 @@ public class AdminshopManagerImpl implements AdminshopManager {
 		validationHandler.checkForValidShopName(name);
 		validationHandler.checkForValidSize(size);
 		validationHandler.checkForShopNameIsFree(getAdminshopNameList(), name, null);
-		getAdminshopList().add(new AdminshopImpl(name, generateFreeAdminShopId(), spawnLocation, size));
+		ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+		getAdminshopList().add(new AdminshopImpl(name, generateFreeAdminShopId(), spawnLocation, size, shopDao));
 		UltimateEconomy.getInstance.getConfig().set("AdminShopIds", getAdminshopIdList());
 		UltimateEconomy.getInstance.saveConfig();
 	}
@@ -145,7 +152,8 @@ public class AdminshopManagerImpl implements AdminshopManager {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
 			if (file.exists()) {
 				try {
-					getAdminshopList().add(new AdminshopImpl(null, shopId));
+					ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+					getAdminshopList().add(new AdminshopImpl(null, shopId, shopDao));
 				} catch (TownSystemException e) {
 					Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
 					Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
@@ -162,7 +170,8 @@ public class AdminshopManagerImpl implements AdminshopManager {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), shopName + ".yml");
 			if (file.exists()) {
 				try {
-					getAdminshopList().add(new AdminshopImpl(shopName, generateFreeAdminShopId()));
+					ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+					getAdminshopList().add(new AdminshopImpl(shopName, generateFreeAdminShopId(), shopDao));
 				} catch (TownSystemException e) {
 					Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopName);
 					Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());

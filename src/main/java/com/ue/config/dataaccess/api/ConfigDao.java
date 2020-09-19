@@ -283,6 +283,18 @@ public interface ConfigDao {
 	 * @return job names
 	 */
 	public List<String> loadJobList();
+	
+	/**
+	 * Loads the playershop ids.
+	 * @return id list
+	 */
+	public List<String> loadPlayershopIds();
+	
+	/**
+	 * Saves the playershop ids.
+	 * @param ids
+	 */
+	public void savePlayershopIds(List<String> ids);
 
 	/**
 	 * Remove deprecated stuff.
@@ -291,5 +303,34 @@ public interface ConfigDao {
 	 * @since 1.2.6
 	 */
 	@Deprecated
-	public void removeDeprecated();
+	public void removeDeprecatedTownNames();
+
+	/**
+	 * Remove deprecated stuff.
+	 * 
+	 * @deprecated
+	 * @since 1.2.6
+	 */
+	@Deprecated
+	public void removeDeprecatedPlayerShopNames();
+
+	/**
+	 * Returns true, if the value exists.
+	 * 
+	 * @deprecated
+	 * @since 1.2.6
+	 * @return boolean
+	 */
+	@Deprecated
+	public boolean hasPlayerShopNames();
+
+	/**
+	 * Loads the playershop names.
+	 * 
+	 * @deprecated
+	 * @since 1.2.6
+	 * @return playershop names
+	 */
+	@Deprecated
+	public List<String> loadPlayerShopNames();
 }

@@ -21,7 +21,7 @@ import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.shopsystem.logic.impl.RentshopTabCompleterImpl;
 
 @ExtendWith(MockitoExtension.class)
-public class RentshopTabCompleterTest {
+public class RentshopTabCompleterImplTest {
 
 	@InjectMocks
 	RentshopTabCompleterImpl tabCompleter;

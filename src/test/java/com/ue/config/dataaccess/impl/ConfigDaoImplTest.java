@@ -393,10 +393,29 @@ public class ConfigDaoImplTest {
 		dao.saveJobList(Arrays.asList("job1", "job2"));
 		assertEquals(Arrays.asList("job1", "job2"), dao.loadJobList());
 	}
+	
+	@Test
+	public void loadPlayershopIdsTest() {
+		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		dao = new ConfigDaoImpl(serverProvider);
+		dao.savePlayershopIds(Arrays.asList("id1", "id2"));
+		assertEquals(Arrays.asList("id1", "id2"), dao.loadPlayershopIds());
+	}
+	
+	@Test
+	public void savePlayershopIdsTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		File file = new File("src/config.yml");
+		dao.savePlayershopIds(Arrays.asList("id"));
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		assertEquals(1, config.getStringList("PlayerShopIds").size());
+		assertEquals("id", config.getStringList("PlayerShopIds").get(0));
+	}
 
 	@SuppressWarnings("deprecation")
 	@Test
-	public void removeDeprecatedTest() {
+	public void removeDeprecatedTownNamesTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider);
 		File file = new File("src/config.yml");
@@ -404,8 +423,49 @@ public class ConfigDaoImplTest {
 		config.set("TownNames", Arrays.asList("town1", "town2"));
 		assertDoesNotThrow(() -> config.save(file));
 		dao = new ConfigDaoImpl(serverProvider);
-		dao.removeDeprecated();
+		dao.removeDeprecatedTownNames();
 		YamlConfiguration config2 = YamlConfiguration.loadConfiguration(file);
 		assertFalse(config2.isSet("TownNames"));
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Test
+	public void removeDeprecatedPlayerShopNamesTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		File file = new File("src/config.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("PlayerShopNames", Arrays.asList("shop1", "shop2"));
+		assertDoesNotThrow(() -> config.save(file));
+		dao = new ConfigDaoImpl(serverProvider);
+		dao.removeDeprecatedPlayerShopNames();
+		YamlConfiguration config2 = YamlConfiguration.loadConfiguration(file);
+		assertFalse(config2.isSet("PlayerShopNames"));
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Test
+	public void hasPlayerShopNamesTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		File file = new File("src/config.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("PlayerShopNames", Arrays.asList("shop1", "shop2"));
+		assertDoesNotThrow(() -> config.save(file));
+		dao = new ConfigDaoImpl(serverProvider);
+		assertTrue(dao.hasPlayerShopNames());
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Test
+	public void loadPlayerShopNamesTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		File file = new File("src/config.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("PlayerShopNames", Arrays.asList("shop1", "shop2"));
+		assertDoesNotThrow(() -> config.save(file));
+		dao = new ConfigDaoImpl(serverProvider);
+		assertEquals(Arrays.asList("shop1", "shop2"), dao.loadPlayerShopNames());
 	}
 }

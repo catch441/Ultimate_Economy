@@ -1,50 +1,66 @@
 package com.ue.shopsystem.logic.impl;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
+import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
+import com.ue.shopsystem.dataaccess.api.ShopDao;
+import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
-import com.ue.townsystem.logic.api.Town;
-import com.ue.townsystem.logic.api.Townworld;
-import com.ue.townsystem.logic.api.TownworldManager;
+import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 public class PlayershopManagerImpl implements PlayershopManager {
 
 	private List<Playershop> playerShopList = new ArrayList<>();
-
+	private final Logger logger;
 	private final MessageWrapper messageWrapper;
 	private final ShopValidationHandler validationHandler;
-	private final TownworldManager townworldManager;
+	private final TownsystemValidationHandler townsystemValidationHandler;
+	private final ComponentProvider componentProvider;
+	private final ConfigDao configDao;
+	private final ServerProvider serverProvider;
+	private final CustomSkullService customSkullService;
 
 	/**
 	 * Inject constructor.
 	 * 
-	 * @param townworldManager
+	 * @param configDao
+	 * @param townsystemValidationHandler
 	 * @param validationHandler
 	 * @param messageWrapper
+	 * @param componentProvider
+	 * @param logger
+	 * @param serverProvider
+	 * @param customSkullService
 	 */
 	@Inject
-	public PlayershopManagerImpl(TownworldManager townworldManager, ShopValidationHandler validationHandler,
-			MessageWrapper messageWrapper) {
+	public PlayershopManagerImpl(ConfigDao configDao, TownsystemValidationHandler townsystemValidationHandler,
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ComponentProvider componentProvider,
+			Logger logger, ServerProvider serverProvider, CustomSkullService customSkullService) {
+		this.configDao = configDao;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
-		this.townworldManager = townworldManager;
+		this.townsystemValidationHandler = townsystemValidationHandler;
+		this.componentProvider = componentProvider;
+		this.logger = logger;
+		this.serverProvider = serverProvider;
+		this.customSkullService = customSkullService;
 	}
 
 	@Override
@@ -63,7 +79,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	@Override
 	public List<String> getPlayerShopUniqueNameList() {
 		List<String> list = new ArrayList<>();
-		for (Playershop shop : getPlayerShops()) {
+		for (Playershop shop : playerShopList) {
 			list.add(shop.getName() + "_" + shop.getOwner().getName());
 		}
 		return list;
@@ -71,7 +87,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 
 	@Override
 	public Playershop getPlayerShopByUniqueName(String name) throws GeneralEconomyException {
-		for (Playershop shop : getPlayerShops()) {
+		for (Playershop shop : playerShopList) {
 			if (name.equals(shop.getName() + "_" + shop.getOwner().getName())) {
 				return shop;
 			}
@@ -81,7 +97,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 
 	@Override
 	public Playershop getPlayerShopById(String id) throws GeneralEconomyException {
-		for (Playershop shop : getPlayerShops()) {
+		for (Playershop shop : playerShopList) {
 			if (shop.getShopId().equals(id)) {
 				return shop;
 			}
@@ -91,13 +107,13 @@ public class PlayershopManagerImpl implements PlayershopManager {
 
 	@Override
 	public List<Playershop> getPlayerShops() {
-		return playerShopList;
+		return new ArrayList<>(playerShopList);
 	}
 
 	@Override
 	public List<String> getPlayershopIdList() {
 		List<String> list = new ArrayList<>();
-		for (Playershop shop : getPlayerShops()) {
+		for (Playershop shop : playerShopList) {
 			list.add(shop.getShopId());
 		}
 		return list;
@@ -108,34 +124,34 @@ public class PlayershopManagerImpl implements PlayershopManager {
 			throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		validationHandler.checkForValidShopName(name);
 		validationHandler.checkForMaxPlayershopsForPlayer(getPlayerShops(), ecoPlayer);
-		checkForTownworldPlotPermission(spawnLocation, ecoPlayer);
+		townsystemValidationHandler.checkForTownworldPlotPermission(spawnLocation, ecoPlayer);
 		validationHandler.checkForShopNameIsFree(getPlayerShopUniqueNameList(), name, ecoPlayer);
 		validationHandler.checkForValidSize(size);
-		getPlayerShops().add(new PlayershopImpl(name, ecoPlayer, generateFreePlayerShopId(), spawnLocation, size));
-		UltimateEconomy.getInstance.getConfig().set("PlayerShopIds", getPlayershopIdList());
-		UltimateEconomy.getInstance.saveConfig();
+		Logger logger = LoggerFactory.getLogger(PlayershopImpl.class);
+		ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+		playerShopList.add(new PlayershopImpl(name, ecoPlayer, generateFreePlayerShopId(), spawnLocation, size, shopDao,
+				serverProvider, customSkullService, logger));
+		configDao.savePlayershopIds(getPlayershopIdList());
 	}
 
 	@Override
 	public void deletePlayerShop(Playershop playershop) {
-		getPlayerShops().remove(playershop);
+		playerShopList.remove(playershop);
 		playershop.deleteShop();
-		// to make sure that all references are no more available
-		playershop = null;
-		UltimateEconomy.getInstance.getConfig().set("PlayerShopIds", getPlayershopIdList());
-		UltimateEconomy.getInstance.saveConfig();
+		configDao.savePlayershopIds(getPlayershopIdList());
 	}
 
 	@Override
 	public void despawnAllVillagers() {
-		for (Playershop shop : getPlayerShops()) {
+		for (Playershop shop : playerShopList) {
 			shop.despawnVillager();
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void loadAllPlayerShops() {
-		if (UltimateEconomy.getInstance.getConfig().contains("PlayerShopNames")) {
+		if (configDao.hasPlayerShopNames()) {
 			playerShopsOldLoadingAll();
 		} else {
 			playerShopsNewLoadingAll();
@@ -143,66 +159,34 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	}
 
 	private void playerShopsNewLoadingAll() {
-		for (String shopId : UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopIds")) {
-			File file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
-			if (file.exists()) {
-				try {
-					getPlayerShops().add(new PlayershopImpl(null, shopId));
-				} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException
-						| ShopSystemException e) {
-					Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
-					Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-				}
-			} else {
-				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
+		for (String shopId : configDao.loadPlayershopIds()) {
+			try {
+				Logger logger = LoggerFactory.getLogger(PlayershopImpl.class);
+				ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+				playerShopList
+						.add(new PlayershopImpl(null, shopId, shopDao, serverProvider, customSkullService, logger));
+			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException | ShopSystemException e) {
+				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
+				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}
 
 	@Deprecated
 	private void playerShopsOldLoadingAll() {
-		for (String shopName : UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopNames")) {
-			File file = new File(UltimateEconomy.getInstance.getDataFolder(), shopName + ".yml");
-			if (file.exists()) {
-				String shopId = generateFreePlayerShopId();
-				try {
-					getPlayerShops().add(new PlayershopImpl(shopName, shopId));
-				} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException
-						| ShopSystemException e) {
-					Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopName);
-					Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-				}
-			} else {
-				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopName);
+		for (String shopName : configDao.loadPlayerShopNames()) {
+			String shopId = generateFreePlayerShopId();
+			try {
+				Logger logger = LoggerFactory.getLogger(PlayershopImpl.class);
+				ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+				playerShopList
+						.add(new PlayershopImpl(shopName, shopId, shopDao, serverProvider, customSkullService, logger));
+			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException | ShopSystemException e) {
+				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopName);
+				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
-		// convert to new shopId save system
-		UltimateEconomy.getInstance.getConfig().set("PlayerShopNames", null);
-		UltimateEconomy.getInstance.getConfig().set("PlayerShopIds", getPlayershopIdList());
-		UltimateEconomy.getInstance.saveConfig();
-	}
-
-	/*
-	 * Validation check methods
-	 * 
-	 */
-
-	/*
-	 * TODO extract to townworld validation handler
-	 */
-	private void checkForTownworldPlotPermission(Location spawnLocation, EconomyPlayer ecoPlayer)
-			throws EconomyPlayerException, TownSystemException {
-		if (townworldManager.isTownWorld(spawnLocation.getWorld().getName())) {
-			Townworld townworld = townworldManager.getTownWorldByName(spawnLocation.getWorld().getName());
-			if (townworld.isChunkFree(spawnLocation.getChunk())) {
-				throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
-			} else {
-				Town town = townworld.getTownByChunk(spawnLocation.getChunk());
-				if (!town.hasBuildPermissions(ecoPlayer,
-						town.getPlotByChunk(spawnLocation.getChunk().getX() + "/" + spawnLocation.getChunk().getZ()))) {
-					throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
-				}
-			}
-		}
+		configDao.removeDeprecatedPlayerShopNames();
+		configDao.savePlayershopIds(getPlayershopIdList());
 	}
 }

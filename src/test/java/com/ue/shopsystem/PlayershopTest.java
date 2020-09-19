@@ -28,73 +28,85 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.shopsystem.logic.api.Playershop;
-import com.ue.shopsystem.logic.api.PlayershopController;
 import com.ue.shopsystem.logic.impl.PlayershopImpl;
 import com.ue.shopsystem.logic.impl.ShopSystemException;
-import com.ue.townsystem.api.TownManagerImpl;
 import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.townsystem.logic.impl.TownworldManagerImpl;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
-import be.seeseemelk.mockbukkit.WorldMock;
-import be.seeseemelk.mockbukkit.entity.PlayerMock;
-import be.seeseemelk.mockbukkit.inventory.ChestInventoryMock;
-
 public class PlayershopTest {
 
 	private static final String SLOTEMPTY = "http://textures.minecraft.net/texture/"
 			+ "b55d5019c8d55bcb9dc3494ccc3419757f89c3384cf3c9abec3f18831f35b0";
-	private static ServerMock server;
-	private static WorldMock world;
-	private static PlayerMock owner, otherPlayer;
-
-	@BeforeAll
-	public static void initPlugin() {
-		server = MockBukkit.mock();
-		Bukkit.getLogger().setLevel(Level.OFF);
-		MockBukkit.load(UltimateEconomy.class);
-		world = new WorldMock(Material.GRASS_BLOCK, 1);
-		server.addWorld(world);
-		owner = server.addPlayer("catch441");
-		otherPlayer = server.addPlayer("Wulfgar");
-	}
 
 	/**
-	 * Unload mock bukkit.
+	 * Location location = new Location(world, 1.5, 2.3, 6.9);
+		try {
+			PlayershopController.createPlayerShop("myshop", location, 9,
+					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
+			Playershop response = PlayershopController.getPlayerShops().get(0);
+			assertEquals(world, response.getWorld());
+			assertEquals("P0", response.getShopId());
+			assertEquals("myshop", response.getName());
+			assertEquals(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), response.getOwner());
+			assertEquals(EconomyVillager.PLAYERSHOP, response.getShopVillager().getMetadata("ue-type").get(0).value());
+			// check shop inventory
+			ChestInventoryMock shopInv = (ChestInventoryMock) response.getShopInventory();
+			assertEquals(9, shopInv.getSize());
+			assertEquals("myshop", shopInv.getName());
+			assertEquals(Material.CRAFTING_TABLE, shopInv.getItem(7).getType());
+			assertEquals("Stock", shopInv.getItem(7).getItemMeta().getDisplayName());
+			assertEquals(2, shopInv.getItem(7).getItemMeta().getLore().size());
+			assertEquals(ChatColor.RED + "Only for Shopowner", shopInv.getItem(7).getItemMeta().getLore().get(0));
+			assertEquals(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile",
+					shopInv.getItem(7).getItemMeta().getLore().get(1));
+			assertEquals(Material.ANVIL, shopInv.getItem(8).getType());
+			assertEquals("Info", shopInv.getItem(8).getItemMeta().getDisplayName());
+			assertEquals("§6Rightclick: §asell specified amount", shopInv.getItem(8).getItemMeta().getLore().get(0));
+			assertEquals("§6Shift-Rightclick: §asell all", shopInv.getItem(8).getItemMeta().getLore().get(1));
+			assertEquals("§6Leftclick: §abuy", shopInv.getItem(8).getItemMeta().getLore().get(2));
+			// check editor inventory
+			response.openEditor(player);
+			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			player.closeInventory();
+			assertEquals(9, editor.getSize());
+			assertEquals("myshop-Editor", editor.getName());
+			assertNull(editor.getItem(7));
+			assertNull(editor.getItem(8));
+			// check stock inventory
+			ChestInventoryMock stock = (ChestInventoryMock) response.getStockpileInventory();
+			assertEquals(9, stock.getSize());
+			assertEquals("myshop-Stock", stock.getName());
+			assertNull(stock.getItem(0));
+			assertNull(stock.getItem(1));
+			assertNull(stock.getItem(2));
+			assertNull(stock.getItem(3));
+			assertNull(stock.getItem(4));
+			assertNull(stock.getItem(5));
+			assertNull(stock.getItem(6));
+			assertNull(stock.getItem(7));
+			assertEquals("Infos", stock.getItem(8).getItemMeta().getDisplayName());
+			assertEquals(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "close stockpile",
+					stock.getItem(8).getItemMeta().getLore().get(0));
+			assertEquals(ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "add specified amount",
+					stock.getItem(8).getItemMeta().getLore().get(1));
+			assertEquals(ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "add all",
+					stock.getItem(8).getItemMeta().getLore().get(2));
+			assertEquals(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "get specified amount",
+					stock.getItem(8).getItemMeta().getLore().get(3));
+			// check savefile
+			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "P0.yml");
+			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
+			assertEquals("catch441", config.getString("Owner"));
+			assertEquals(1, UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopIds").size());
+			assertEquals("P0", UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopIds").get(0));
+		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | EconomyPlayerException e) {
+			fail();
+		}
 	 */
-	@AfterAll
-	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
-		for (int i = 0; i < size2; i++) {
-			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-		}
-		UltimateEconomy.getInstance.getDataFolder().delete();
-		server.setPlayers(0);
-		MockBukkit.unload();
-	}
-
-	/**
-	 * Unload all.
-	 */
-	@AfterEach
-	public void unload() {
-		int size = PlayershopController.getPlayerShops().size();
-		for (int i = 0; i < size; i++) {
-			PlayershopController.deletePlayerShop(PlayershopController.getPlayerShops().get(0));
-		}
-		if (TownworldManagerImpl.getTownWorldList().size() != 0) {
-			try {
-				TownworldManagerImpl.deleteTownWorld(world.getName());
-			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException e) {
-				fail();
-			}
-		}
-	}
-
+	
 	@Test
 	public void loadConstructorTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);

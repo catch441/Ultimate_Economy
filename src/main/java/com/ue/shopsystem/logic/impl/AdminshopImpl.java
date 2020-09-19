@@ -10,6 +10,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.to.ShopItem;
@@ -31,9 +32,10 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 * @param shopId
 	 * @param spawnLocation
 	 * @param size
+	 * @param shopDao
 	 */
-	public AdminshopImpl(String name, String shopId, Location spawnLocation, int size) {
-		super(name, shopId, spawnLocation, size);
+	public AdminshopImpl(String name, String shopId, Location spawnLocation, int size, ShopDao shopDao) {
+		super(name, shopId, spawnLocation, size, shopDao);
 		getShopVillager().setMetadata("ue-type",
 				new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.ADMINSHOP));
 	}
@@ -44,10 +46,11 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 * 
 	 * @param name
 	 * @param shopId
+	 * @param shopDao
 	 * @throws TownSystemException
 	 */
-	public AdminshopImpl(String name, String shopId) throws TownSystemException {
-		super(name, shopId);
+	public AdminshopImpl(String name, String shopId, ShopDao shopDao) throws TownSystemException {
+		super(name, shopId, shopDao);
 		getShopVillager().setMetadata("ue-type",
 				new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.ADMINSHOP));
 	}

@@ -22,6 +22,7 @@ public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {
 	
 	/**
 	 * Inject constructor.
+	 * 
 	 * @param serverProvider
 	 */
 	@Inject

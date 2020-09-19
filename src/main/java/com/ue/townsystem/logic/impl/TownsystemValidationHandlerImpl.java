@@ -14,23 +14,28 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.townsystem.logic.api.Plot;
+import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
+import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
 public class TownsystemValidationHandlerImpl implements TownsystemValidationHandler {
 
 	private final MessageWrapper messageWrapper;
+	private final TownworldManager townworldManager;
 
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param townworldManager
 	 * @param messageWrapper
 	 */
 	@Inject
-	public TownsystemValidationHandlerImpl(MessageWrapper messageWrapper) {
+	public TownsystemValidationHandlerImpl(TownworldManager townworldManager, MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
+		this.townworldManager = townworldManager;
 	}
 
 	@Override
@@ -246,6 +251,23 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 	public void checkForTownworldHasTown(List<String> townNames, String town) throws GeneralEconomyException {
 		if (!townNames.contains(town)) {
 			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, town);
+		}
+	}
+
+	@Override
+	public void checkForTownworldPlotPermission(Location location, EconomyPlayer ecoPlayer)
+			throws EconomyPlayerException, TownSystemException {
+		if (townworldManager.isTownWorld(location.getWorld().getName())) {
+			Townworld townworld = townworldManager.getTownWorldByName(location.getWorld().getName());
+			if (townworld.isChunkFree(location.getChunk())) {
+				throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
+			} else {
+				Town town = townworld.getTownByChunk(location.getChunk());
+				if (!town.hasBuildPermissions(ecoPlayer,
+						town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
+					throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
+				}
+			}
 		}
 	}
 }

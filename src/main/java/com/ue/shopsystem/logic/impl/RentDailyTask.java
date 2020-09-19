@@ -1,38 +1,44 @@
 package com.ue.shopsystem.logic.impl;
 
-import java.util.Calendar;
-
-import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.slf4j.Logger;
 
 import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class RentDailyTask extends BukkitRunnable {
 
+	private final Logger logger;
 	private final MessageWrapper messageWrapper;
 	private final RentshopManager rentshopManager;
+	private final ServerProvider serverProvider;
 
 	/**
 	 * Default constructor.
 	 * 
+	 * @param logger
+	 * @param serverProvider
 	 * @param rentshopManager
 	 * @param messageWrapper
 	 */
-	public RentDailyTask(RentshopManager rentshopManager, MessageWrapper messageWrapper) {
+	public RentDailyTask(Logger logger, ServerProvider serverProvider, RentshopManager rentshopManager,
+			MessageWrapper messageWrapper) {
+		this.serverProvider = serverProvider;
+		this.logger = logger;
 		this.messageWrapper = messageWrapper;
-		this.rentshopManager= rentshopManager;
+		this.rentshopManager = rentshopManager;
 	}
 
 	@Override
 	public void run() {
 		for (Rentshop shop : rentshopManager.getRentShops()) {
 			if (!shop.isRentable()) {
-				if (getActualTime() >= shop.getRentUntil()) {
+				if (serverProvider.getActualTime() >= shop.getRentUntil()) {
 					resetShop(shop);
-				} else if ((shop.getRentUntil() - getActualTime()) < 600000) {
+				} else if ((shop.getRentUntil() - serverProvider.getActualTime()) < 600000) {
 					sendReminder(shop);
 				}
 			}
@@ -49,12 +55,8 @@ public class RentDailyTask extends BukkitRunnable {
 		try {
 			shop.resetShop();
 		} catch (ShopSystemException | GeneralEconomyException e) {
-			Bukkit.getLogger().warning("[Ultimate_Economy] Error on rent task");
-			Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+			logger.warn("[Ultimate_Economy] Error on rent task: reset shop");
+			logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 		}
-	}
-
-	private long getActualTime() {
-		return Calendar.getInstance().getTimeInMillis();
 	}
 }

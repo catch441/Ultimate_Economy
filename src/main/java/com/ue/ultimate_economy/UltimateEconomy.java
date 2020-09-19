@@ -45,7 +45,6 @@ import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.RentshopManager;
-import com.ue.shopsystem.logic.impl.RentDailyTask;
 import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.vault.VaultHook;
@@ -315,8 +314,7 @@ public class UltimateEconomy extends JavaPlugin {
 	private void setupPlugin() {
 		configManager.setupConfig();
 		skullService.setup();
-		// setup and start RentDailyTask
-		new RentDailyTask(rentshopManager, messageWrapper).runTaskTimerAsynchronously(this, 1, 1000);
+		rentshopManager.setupRentDailyTask();
 	}
 
 	@Override

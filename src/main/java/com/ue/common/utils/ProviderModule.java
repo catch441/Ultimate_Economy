@@ -45,6 +45,8 @@ import com.ue.jobsystem.logic.impl.JobTabCompleterImpl;
 import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
 import com.ue.jobsystem.logic.impl.JobsystemEventHandlerImpl;
 import com.ue.jobsystem.logic.impl.JobsystemValidationHandlerImpl;
+import com.ue.shopsystem.dataaccess.api.ShopDao;
+import com.ue.shopsystem.dataaccess.impl.ShopDaoImpl;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.PlayershopManager;
@@ -147,7 +149,7 @@ public class ProviderModule {
 	JobManager provideJobManager(ConfigDao configDao, ComponentProvider componentProvider,
 			JobcenterManager jobcenterManager, JobsystemValidationHandler validationHandler,
 			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
-		Logger logger = LoggerFactory.getLogger(JobManagerImpl.class.getName());
+		Logger logger = LoggerFactory.getLogger(JobManagerImpl.class);
 		return new JobManagerImpl(configDao, componentProvider, jobcenterManager, validationHandler, ecoPlayerManager,
 				messageWrapper, logger);
 	}
@@ -157,28 +159,33 @@ public class ProviderModule {
 	JobcenterManager provideJobcenterManager(ComponentProvider componentProvider, ConfigDao configDao,
 			Lazy<JobManager> jobManager, ServerProvider serverProvider, JobsystemValidationHandler validationHandler,
 			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
-		Logger logger = LoggerFactory.getLogger(JobcenterManagerImpl.class.getName());
+		Logger logger = LoggerFactory.getLogger(JobcenterManagerImpl.class);
 		return new JobcenterManagerImpl(componentProvider, configDao, jobManager, serverProvider, validationHandler,
 				ecoPlayerManager, messageWrapper, logger);
 	}
 
 	@Singleton
 	@Provides
-	AdminshopManager provideAdminshopManager(ShopValidationHandler validationHandler, MessageWrapper messageWrapper) {
-		return new AdminshopManagerImpl(validationHandler, messageWrapper);
-	}
-
-	@Singleton
-	@Provides
-	PlayershopManager providePlayershopManager(TownworldManager townworldManager,
+	AdminshopManager provideAdminshopManager(ComponentProvider componentProvider,
 			ShopValidationHandler validationHandler, MessageWrapper messageWrapper) {
-		return new PlayershopManagerImpl(townworldManager, validationHandler, messageWrapper);
+		return new AdminshopManagerImpl(componentProvider, validationHandler, messageWrapper);
 	}
 
 	@Singleton
 	@Provides
-	RentshopManager provideRentshopManager(ShopValidationHandler validationHandler, MessageWrapper messageWrapper) {
-		return new RentshopManagerImpl(validationHandler, messageWrapper);
+	PlayershopManager providePlayershopManager(ConfigDao configDao, ComponentProvider componentProvider,
+			TownsystemValidationHandler townsystemValidationHandler, ShopValidationHandler validationHandler,
+			MessageWrapper messageWrapper, ServerProvider serverProvider, CustomSkullService skullService) {
+		Logger logger = LoggerFactory.getLogger(PlayershopManagerImpl.class);
+		return new PlayershopManagerImpl(configDao, townsystemValidationHandler, validationHandler, messageWrapper,
+				componentProvider, logger, serverProvider, skullService);
+	}
+
+	@Singleton
+	@Provides
+	RentshopManager provideRentshopManager(ComponentProvider componentProvider, ServerProvider serverProvider,
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper) {
+		return new RentshopManagerImpl(serverProvider, validationHandler, messageWrapper, componentProvider);
 	}
 
 	@Singleton
@@ -332,6 +339,11 @@ public class ProviderModule {
 		return new JobcenterDaoImpl(serverProvider);
 	}
 
+	@Provides
+	ShopDao provideShopDao(ServerProvider serverProvider) {
+		return new ShopDaoImpl(serverProvider);
+	}
+
 	@Singleton
 	@Provides
 	BankValidationHandler provideBankValidationHandler(MessageWrapper messageWrapper) {
@@ -380,8 +392,9 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	TownsystemValidationHandler provideTownsystemValidationHandler(MessageWrapper messageWrapper) {
-		return new TownsystemValidationHandlerImpl(messageWrapper);
+	TownsystemValidationHandler provideTownsystemValidationHandler(TownworldManager townworldManager,
+			MessageWrapper messageWrapper) {
+		return new TownsystemValidationHandlerImpl(townworldManager, messageWrapper);
 	}
 
 	@Singleton

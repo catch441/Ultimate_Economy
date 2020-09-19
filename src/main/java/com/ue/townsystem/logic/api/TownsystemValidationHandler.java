@@ -280,4 +280,15 @@ public interface TownsystemValidationHandler {
 	 * @throws GeneralEconomyException
 	 */
 	public void checkForTownworldHasTown(List<String> townNames, String town) throws GeneralEconomyException;
+
+	/**
+	 * Check for player has permissions on a plot.
+	 * 
+	 * @param location
+	 * @param ecoPlayer
+	 * @throws EconomyPlayerException
+	 * @throws TownSystemException
+	 */
+	public void checkForTownworldPlotPermission(Location location, EconomyPlayer ecoPlayer)
+			throws EconomyPlayerException, TownSystemException;
 }

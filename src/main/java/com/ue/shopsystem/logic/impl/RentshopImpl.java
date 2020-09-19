@@ -10,6 +10,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.impl.TownSystemException;
@@ -32,9 +33,10 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * @param size
 	 * @param shopId
 	 * @param rentalFee
+	 * @param shopDao
 	 */
-	public RentshopImpl(Location spawnLocation, int size, String shopId, double rentalFee) {
-		super("RentShop#" + shopId, null, shopId, spawnLocation, size);
+	public RentshopImpl(Location spawnLocation, int size, String shopId, double rentalFee, ShopDao shopDao) {
+		super("RentShop#" + shopId, null, shopId, spawnLocation, size, shopDao);
 		setupNewRentshop(rentalFee);
 	}
 
@@ -43,14 +45,15 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * is unique.
 	 * 
 	 * @param shopId
+	 * @param shopDao
 	 * @throws TownSystemException
 	 * @throws EconomyPlayerException
 	 * @throws ShopSystemException
 	 * @throws GeneralEconomyException
 	 */
-	public RentshopImpl(String shopId)
+	public RentshopImpl(String shopId, ShopDao shopDao)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException, ShopSystemException {
-		super(null, shopId);
+		super(null, shopId, shopDao);
 		loadExistingRentshop();
 	}
 

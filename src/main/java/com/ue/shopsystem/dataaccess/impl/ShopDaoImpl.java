@@ -1,7 +1,6 @@
 package com.ue.shopsystem.dataaccess.impl;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.ue.common.utils.SaveFileUtils;
+import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
@@ -25,36 +25,34 @@ import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 
-	private File file;
-	private YamlConfiguration config;
 	@Inject
 	EconomyPlayerManager ecoPlayerManager;
 	@Inject
 	ShopValidationHandler validationHandler;
 	@Inject
 	TownsystemValidationHandler townsystemValidationHandler;
+	private File file;
+	private YamlConfiguration config;
+	private final ServerProvider serverProvider;
 
 	/**
-	 * Constructor for a new shop savefile handler.
+	 * Inject constructor.
 	 * 
-	 * @param validationHandler
-	 * @param messageWrapper
-	 * @param ecoPlayerManager
-	 * @param shopId
+	 * @param serverProvider
 	 */
-	public ShopDaoImpl(String shopId) {
-		file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
-		if (!getSavefile().exists()) {
-			try {
-				getSavefile().createNewFile();
-			} catch (IOException e) {
-				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create savefile");
-				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-			}
+	@Inject
+	public ShopDaoImpl(ServerProvider serverProvider) {
+		this.serverProvider = serverProvider;
+	}
+	
+	@Override
+	public void setupSavefile(String shopId) {
+		file = new File(serverProvider.getDataFolderPath(), shopId + ".yml");
+		if (!file.exists()) {
+			createFile(file);
 		}
 		config = YamlConfiguration.loadConfiguration(getSavefile());
 	}

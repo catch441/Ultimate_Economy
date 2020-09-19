@@ -43,7 +43,7 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
 @ExtendWith(MockitoExtension.class)
-public class ShopValidationHandlerTest {
+public class ShopValidationHandlerImplTest {
 
 	@InjectMocks
 	ShopValidationHandlerImpl validationHandler;

@@ -210,4 +210,11 @@ public interface ShopDao {
 	 * Deletes the savefile.
 	 */
 	public void deleteFile();
+
+	/**
+	 * Setup a new savefile.
+	 * 
+	 * @param shopId
+	 */
+	public void setupSavefile(String shopId);
 }

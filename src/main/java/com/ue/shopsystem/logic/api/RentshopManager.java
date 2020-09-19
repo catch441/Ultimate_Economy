@@ -9,6 +9,11 @@ import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface RentshopManager {
+	
+	/**
+	 * Starts the rent daily task, that checks, if the rentshop has to be resetted.
+	 */
+	public void setupRentDailyTask();
 
 	/**
 	 * Returns a free unique id for a rentshop.

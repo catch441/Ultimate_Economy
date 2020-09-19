@@ -9,9 +9,14 @@ import javax.inject.Inject;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
@@ -25,17 +30,24 @@ public class RentshopManagerImpl implements RentshopManager {
 	private List<Rentshop> rentShopList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
 	private final ShopValidationHandler validationHandler;
+	private final ServerProvider serverProvider;
+	private final ComponentProvider componentProvider;
 
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param serverProvider
 	 * @param validationHandler
 	 * @param messageWrapper
+	 * @param componentProvider
 	 */
 	@Inject
-	public RentshopManagerImpl(ShopValidationHandler validationHandler, MessageWrapper messageWrapper) {
+	public RentshopManagerImpl(ServerProvider serverProvider, ShopValidationHandler validationHandler,
+			MessageWrapper messageWrapper, ComponentProvider componentProvider) {
+		this.serverProvider = serverProvider;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
+		this.componentProvider = componentProvider;
 	}
 
 	@Override
@@ -108,7 +120,8 @@ public class RentshopManagerImpl implements RentshopManager {
 	public Rentshop createRentShop(Location spawnLocation, int size, double rentalFee) throws GeneralEconomyException {
 		validationHandler.checkForValidSize(size);
 		validationHandler.checkForPositiveValue(rentalFee);
-		Rentshop shop = new RentshopImpl(spawnLocation, size, generateFreeRentShopId(), rentalFee);
+		ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+		Rentshop shop = new RentshopImpl(spawnLocation, size, generateFreeRentShopId(), rentalFee, shopDao);
 		getRentShops().add(shop);
 		UltimateEconomy.getInstance.getConfig().set("RentShopIds", getRentShopIdList());
 		UltimateEconomy.getInstance.saveConfig();
@@ -138,7 +151,8 @@ public class RentshopManagerImpl implements RentshopManager {
 			File file = new File(UltimateEconomy.getInstance.getDataFolder(), shopId + ".yml");
 			if (file.exists()) {
 				try {
-					getRentShops().add(new RentshopImpl(shopId));
+					ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+					getRentShops().add(new RentshopImpl(shopId, shopDao));
 				} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException
 						| ShopSystemException e) {
 					Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
@@ -148,5 +162,12 @@ public class RentshopManagerImpl implements RentshopManager {
 				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to load the shop " + shopId);
 			}
 		}
+	}
+
+	@Override
+	public void setupRentDailyTask() {
+		Logger logger = LoggerFactory.getLogger(RentDailyTask.class.getName());
+		new RentDailyTask(logger, serverProvider, this, messageWrapper)
+				.runTaskTimerAsynchronously(serverProvider.getPluginInstance(), 1, 1000);
 	}
 }

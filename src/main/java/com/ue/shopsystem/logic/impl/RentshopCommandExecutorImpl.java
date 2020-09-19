@@ -40,6 +40,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 				if (args.length != 0) {
 					return performCommand(label, args, player);
 				}
+				return false;
 			} catch (NumberFormatException e) {
 				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", "number"));
 			} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException | TownSystemException e) {

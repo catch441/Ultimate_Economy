@@ -1,5 +1,7 @@
 package com.ue.common.utils;
 
+import java.util.Calendar;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -62,6 +64,16 @@ public class ServerProvider {
 	 */
 	public Plugin getPluginInstance() {
 		return UltimateEconomy.getInstance;
+	}
+
+	/**
+	 * Returns the actual time in milliseconds. Its not the servertime, its the real
+	 * life time.
+	 * 
+	 * @return time in ms
+	 */
+	public long getActualTime() {
+		return Calendar.getInstance().getTimeInMillis();
 	}
 
 	/**

@@ -38,11 +38,6 @@ import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
-import be.seeseemelk.mockbukkit.WorldMock;
-import be.seeseemelk.mockbukkit.inventory.ChestInventoryMock;
-
 public class RentshopControllerTest {
 
 	private static final String ONE = "http://textures.minecraft.net/texture/"
@@ -54,41 +49,6 @@ public class RentshopControllerTest {
 	private static ServerMock server;
 	private static WorldMock world;
 	private static Player player;
-
-	@BeforeAll
-	public static void initPlugin() {
-		server = MockBukkit.mock();
-		Bukkit.getLogger().setLevel(Level.OFF);
-		MockBukkit.load(UltimateEconomy.class);
-		world = new WorldMock(Material.GRASS_BLOCK, 1);
-		server.addWorld(world);
-		player = server.addPlayer("catch441");
-	}
-
-	/**
-	 * Unload mock bukkit.
-	 */
-	@AfterAll
-	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
-		for (int i = 0; i < size2; i++) {
-			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-		}
-		UltimateEconomy.getInstance.getDataFolder().delete();
-		server.setPlayers(0);
-		MockBukkit.unload();
-	}
-
-	/**
-	 * Unload all.
-	 */
-	@AfterEach
-	public void unload() {
-		int size = RentshopManagerImpl.getRentShops().size();
-		for (int i = 0; i < size; i++) {
-			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
-		}
-	}
 
 	@Test
 	public void generateFreeRentShopIdTest() {

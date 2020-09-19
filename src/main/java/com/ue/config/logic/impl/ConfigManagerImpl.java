@@ -54,7 +54,7 @@ public class ConfigManagerImpl implements ConfigManager {
 			setupCurrencyPl();
 			setupCurrencySg();
 			setupLocale();
-			configDao.removeDeprecated();
+			configDao.removeDeprecatedTownNames();
 		} catch (GeneralEconomyException e) {
 		}
 	}

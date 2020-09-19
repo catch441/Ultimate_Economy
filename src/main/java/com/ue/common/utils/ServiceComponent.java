@@ -4,6 +4,7 @@ import javax.inject.Singleton;
 
 import com.ue.jobsyste.dataaccess.api.JobDao;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
+import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.ultimate_economy.UltimateEconomy;
 
 import dagger.Component;
@@ -32,4 +33,11 @@ public interface ServiceComponent {
 	 * @return job dao
 	 */
 	JobDao getJobDao();
+	
+	/**
+	 * Provides a shop data access object.
+	 * 
+	 * @return shop dao
+	 */
+	ShopDao getShopDao();
 }

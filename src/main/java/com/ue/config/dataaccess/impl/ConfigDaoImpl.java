@@ -240,15 +240,44 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	}
 	
 	@Override
+	public List<String> loadPlayershopIds() {
+		return fileConfig.getStringList("PlayerShopIds");
+	}
+	
+	@Override
+	public void savePlayershopIds(List<String> ids) {
+		fileConfig.set("PlayerShopIds", ids);
+		save(fileConfig, file);
+	}
+	
+	@Override
 	public List<String> loadJobList() {
 		return fileConfig.getStringList("JobList");
 	}
 	
+	@Deprecated
+	@Override
+	public List<String> loadPlayerShopNames() {
+		return fileConfig.getStringList("PlayerShopNames");
+	}
+	
+	@Deprecated
+	@Override
+	public boolean hasPlayerShopNames() {
+		return fileConfig.isSet("PlayerShopNames");
+	}
 
 	@Deprecated
 	@Override
-	public void removeDeprecated() {
+	public void removeDeprecatedTownNames() {
 		fileConfig.set("TownNames", null);
+		save(fileConfig, file);
+	}
+	
+	@Deprecated
+	@Override
+	public void removeDeprecatedPlayerShopNames() {
+		fileConfig.set("PlayerShopNames", null);
 		save(fileConfig, file);
 	}
 }

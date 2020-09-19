@@ -1,11 +1,11 @@
 package com.ue.shopsystem.logic.impl;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.ue.common.utils.ServerProvider;
 import com.ue.shopsystem.logic.api.AbstractShop;
 import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.ShopEditorHandler;
@@ -14,24 +14,27 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 public class ShopEditorHandlerImpl implements ShopEditorHandler {
 
 	private final CustomSkullService skullService;
+	private final ServerProvider serverProvider;
 	private Inventory editor;
 	private AbstractShop shop;
 
 	/**
 	 * Constructor for a new shop editor handler.
 	 * 
+	 * @param serverProvider
 	 * @param skullService
 	 * @param shop
 	 */
-	public ShopEditorHandlerImpl(CustomSkullService skullService, AbstractShop shop) {
+	public ShopEditorHandlerImpl(ServerProvider serverProvider, CustomSkullService skullService, AbstractShop shop) {
 		this.shop = shop;
 		this.skullService = skullService;
+		this.serverProvider = serverProvider;
 		setup(1);
 	}
 
 	@Override
 	public void setup(int reservedSlots) {
-		editor = Bukkit.createInventory(getShop().getShopVillager(), getShop().getSize(),
+		editor = serverProvider.createInventory(getShop().getShopVillager(), getShop().getSize(),
 				getShop().getName() + "-Editor");
 		for (int i = 0; i < (getShop().getSize() - reservedSlots); i++) {
 			if(getShop().getShopInventory().getItem(i) != null) {
@@ -61,7 +64,7 @@ public class ShopEditorHandlerImpl implements ShopEditorHandler {
 
 	@Override
 	public void changeInventoryName(String newName) {
-		Inventory editorNew = Bukkit.createInventory(getShop().getShopVillager(), getShop().getSize(),
+		Inventory editorNew = serverProvider.createInventory(getShop().getShopVillager(), getShop().getSize(),
 				newName + "-Editor");
 		editorNew.setContents(editor.getContents());
 		editor = editorNew;

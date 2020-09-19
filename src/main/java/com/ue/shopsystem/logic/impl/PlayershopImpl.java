@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,9 +13,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.slf4j.Logger;
 
+import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.shopsystem.dataaccess.api.ShopDao;
+import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.to.ShopItem;
@@ -24,7 +27,6 @@ import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
@@ -44,9 +46,14 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 * @param shopId
 	 * @param spawnLocation
 	 * @param size
+	 * @param shopDao
+	 * @param serverProvider
+	 * @param customSkullService
+	 * @param logger
 	 */
-	public PlayershopImpl(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size) {
-		super(name, shopId, spawnLocation, size);
+	public PlayershopImpl(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size,
+			ShopDao shopDao, ServerProvider serverProvider, CustomSkullService customSkullService, Logger logger) {
+		super(name, shopId, spawnLocation, size, shopDao, serverProvider, customSkullService, logger);
 		setupPlayerShop(owner);
 	}
 
@@ -54,16 +61,21 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 * Constructor for loading an existing playershop. No validation, if the shopId
 	 * is unique. If name != null then use old loading otherwise use new loading.
 	 * 
-	 * @param name   deprecated
+	 * @param name               deprecated
 	 * @param shopId
+	 * @param shopDao
+	 * @param serverProvider
+	 * @param customSkullService
+	 * @param logger
 	 * @throws TownSystemException
 	 * @throws EconomyPlayerException
 	 * @throws ShopSystemException
 	 * @throws GeneralEconomyException
 	 */
-	public PlayershopImpl(String name, String shopId)
+	public PlayershopImpl(String name, String shopId, ShopDao shopDao, ServerProvider serverProvider,
+			CustomSkullService customSkullService, Logger logger)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException, ShopSystemException {
-		super(name, shopId);
+		super(name, shopId, shopDao, serverProvider, customSkullService, logger);
 		loadExistingPlayerShop(name);
 	}
 
@@ -322,8 +334,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	}
 
 	private void setupStockpile() {
-		stockPile = Bukkit.createInventory(getShopVillager(), getSize(), getName() + "-Stock");
-		ItemStack stockpileSwitchItem = new ItemStack(Material.CRAFTING_TABLE, 1);
+		stockPile = serverProvider.createInventory(getShopVillager(), getSize(), getName() + "-Stock");
+		ItemStack stockpileSwitchItem = serverProvider.createItemStack(Material.CRAFTING_TABLE, 1);
 		ItemMeta meta = stockpileSwitchItem.getItemMeta();
 		List<String> infos = new ArrayList<>();
 		infos.add(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "close stockpile");
@@ -342,11 +354,11 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
 	private void setupEconomyVillagerType() {
 		getShopVillager().setMetadata("ue-type",
-				new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP));
+				new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.PLAYERSHOP));
 	}
 
 	private void setupShopInvDefaultStockItem() {
-		ItemStack itemStack = new ItemStack(Material.CRAFTING_TABLE);
+		ItemStack itemStack = serverProvider.createItemStack(Material.CRAFTING_TABLE, 1);
 		ItemMeta meta = itemStack.getItemMeta();
 		meta.setDisplayName("Stock");
 		itemStack.setItemMeta(meta);

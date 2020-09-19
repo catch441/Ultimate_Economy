@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -14,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.shopsystem.logic.api.AbstractShop;
 import com.ue.shopsystem.logic.api.CustomSkullService;
@@ -30,27 +30,30 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	private final CustomSkullService skullService;
 	private final ShopValidationHandler validationHandler;
 	private final MessageWrapper messageWrapper;
+	private final ServerProvider serverProvider;
 
 	/**
 	 * Constructor for a new Slot Editor handler.
 	 * 
+	 * @param serverProvider
 	 * @param messageWrapper
 	 * @param validationHandler
 	 * @param skullService
 	 * @param shop
 	 */
-	public ShopSlotEditorHandlerImpl(MessageWrapper messageWrapper, ShopValidationHandler validationHandler,
+	public ShopSlotEditorHandlerImpl(ServerProvider serverProvider, MessageWrapper messageWrapper, ShopValidationHandler validationHandler,
 			CustomSkullService skullService, AbstractShop shop) {
 		this.shop = shop;
 		this.skullService = skullService;
 		this.validationHandler = validationHandler;
 		this.messageWrapper = messageWrapper;
+		this.serverProvider = serverProvider;
 		selectedEditorSlot = 0;
 		setupSlotEditor();
 	}
 
 	private void setupSlotEditor() {
-		slotEditor = Bukkit.createInventory(getShop().getShopVillager(), 27, getShop().getName() + "-SlotEditor");
+		slotEditor = serverProvider.createInventory(getShop().getShopVillager(), 27, getShop().getName() + "-SlotEditor");
 		setupFactorItem();
 		setupSaveItem();
 		setupExitItem();
@@ -64,7 +67,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	}
 
 	private void setupRemoveItem() {
-		ItemStack item = new ItemStack(Material.BARRIER);
+		ItemStack item = serverProvider.createItemStack(Material.BARRIER, 1);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(ChatColor.RED + "remove item");
 		item.setItemMeta(meta);
@@ -72,7 +75,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	}
 
 	private void setupExitItem() {
-		ItemStack item = new ItemStack(Material.RED_WOOL);
+		ItemStack item = serverProvider.createItemStack(Material.RED_WOOL, 1);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(ChatColor.RED + "exit without save");
 		item.setItemMeta(meta);
@@ -80,7 +83,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	}
 
 	private void setupSaveItem() {
-		ItemStack item = new ItemStack(Material.GREEN_WOOL);
+		ItemStack item = serverProvider.createItemStack(Material.GREEN_WOOL, 1);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(ChatColor.YELLOW + "save changes");
 		item.setItemMeta(meta);
@@ -94,7 +97,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 
 	@Override
 	public void changeInventoryName(String newName) {
-		Inventory slotEditorNew = Bukkit.createInventory(getShop().getShopVillager(), 27, newName + "-SlotEditor");
+		Inventory slotEditorNew = serverProvider.createInventory(getShop().getShopVillager(), 27, newName + "-SlotEditor");
 		slotEditorNew.setContents(getSlotEditorInventory().getContents());
 		slotEditor = slotEditorNew;
 	}
