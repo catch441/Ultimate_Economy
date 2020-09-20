@@ -1,4 +1,4 @@
-package com.ue.shopsystem;
+package com.ue.shopsystem.logic.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -30,6 +30,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
@@ -41,70 +43,8 @@ import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
-import be.seeseemelk.mockbukkit.WorldMock;
-import be.seeseemelk.mockbukkit.entity.PlayerMock;
-import be.seeseemelk.mockbukkit.inventory.ChestInventoryMock;
-import be.seeseemelk.mockbukkit.inventory.meta.CraftMetaItemMock;
-
-public class AdminshopControllerTest {
-
-	private static final String SLOTEMPTY = "http://textures.minecraft.net/texture/"
-			+ "b55d5019c8d55bcb9dc3494ccc3419757f89c3384cf3c9abec3f18831f35b0";
-	private static final String SLOTFILLED = "http://textures.minecraft.net/texture/"
-			+ "9e42f682e430b55b61204a6f8b76d5227d278ed9ec4d98bda4a7a4830a4b6";
-	private static final String K_OFF = "http://textures.minecraft.net/texture/"
-			+ "e883b5beb4e601c3cbf50505c8bd552e81b996076312cffe27b3cc1a29e3";
-	private static ServerMock server;
-	private static WorldMock world;
-	private static PlayerMock player;
-
-	/**
-	 * Init shop for tests.
-	 */
-	@BeforeAll
-	public static void initPlugin() {
-		server = MockBukkit.mock();
-		Bukkit.getLogger().setLevel(Level.OFF);
-		MockBukkit.load(UltimateEconomy.class);
-		world = new WorldMock(Material.GRASS_BLOCK, 1);
-		server.addWorld(world);
-		player = server.addPlayer("catch441");
-	}
-
-	/**
-	 * Unload mock bukkit.
-	 */
-	@AfterAll
-	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
-		for (int i = 0; i < size2; i++) {
-			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-		}
-		UltimateEconomy.getInstance.getDataFolder().delete();
-		server.setPlayers(0);
-		MockBukkit.unload();
-	}
-
-	/**
-	 * Unload all adminshopss.
-	 */
-	@AfterEach
-	public void unloadAdminshops() {
-		int size = AdminshopManagerImpl.getAdminshopList().size();
-		for (int i = 0; i < size; i++) {
-			try {
-				AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
-			} catch (ShopSystemException e) {
-				fail();
-			}
-		}
-		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
-		for (int i = 0; i < size2; i++) {
-			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-		}
-	}
+@ExtendWith(MockitoExtension.class)
+public class AdminshopManagerImplTest {
 
 	@Test
 	public void createNewAdminshopTestWithInvalidSize() {
