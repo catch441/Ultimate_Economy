@@ -36,6 +36,7 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.shopsystem.logic.api.AbstractShop;
+import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.impl.AdminshopImpl;
 import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
 import com.ue.shopsystem.logic.impl.ShopSystemException;
@@ -45,14 +46,6 @@ import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
-import be.seeseemelk.mockbukkit.WorldMock;
-import be.seeseemelk.mockbukkit.entity.PlayerMock;
-import be.seeseemelk.mockbukkit.inventory.ChestInventoryMock;
-import be.seeseemelk.mockbukkit.inventory.meta.CraftMetaItemMock;
-import be.seeseemelk.mockbukkit.inventory.meta.CraftMetaPotionMock;
-
 public class AdminshopTest {
 
 	private static final String SLOTEMPTY = "http://textures.minecraft.net/texture/"
@@ -61,51 +54,110 @@ public class AdminshopTest {
 			+ "9e42f682e430b55b61204a6f8b76d5227d278ed9ec4d98bda4a7a4830a4b6";
 	private static final String K_OFF = "http://textures.minecraft.net/texture/"
 			+ "e883b5beb4e601c3cbf50505c8bd552e81b996076312cffe27b3cc1a29e3";
-	private static ServerMock server;
-	private static WorldMock world;
-	private static PlayerMock player;
 
 	/**
-	 * Init shop for tests.
+	 * AdminshopManagerImpl.createAdminShop("myshop", location, 9);
+			List<Adminshop> list = AdminshopManagerImpl.getAdminshopList();
+			assertEquals(1, list.size());
+			Adminshop shop = list.get(0);
+			assertEquals(world, shop.getWorld());
+			assertEquals("A0", shop.getShopId());
+			assertEquals("myshop", shop.getName());
+			assertEquals(EconomyVillager.ADMINSHOP, shop.getShopVillager().getMetadata("ue-type").get(0).value());
+			assertEquals(0, shop.getItemList().size());
+			assertEquals(location, shop.getShopLocation());
+			assertEquals(Profession.NITWIT, shop.getShopVillager().getProfession());
+			assertEquals(location, shop.getShopVillager().getLocation());
+			// check inventory
+			ChestInventoryMock shopInv = (ChestInventoryMock) shop.getShopInventory();
+			assertEquals(9, shopInv.getSize());
+			assertEquals("myshop", shopInv.getName());
+			assertNull(shopInv.getItem(0));
+			assertNull(shopInv.getItem(1));
+			assertNull(shopInv.getItem(2));
+			assertNull(shopInv.getItem(3));
+			assertNull(shopInv.getItem(4));
+			assertNull(shopInv.getItem(5));
+			assertNull(shopInv.getItem(6));
+			assertNull(shopInv.getItem(7));
+			assertEquals(Material.ANVIL, shopInv.getItem(8).getType());
+			assertEquals("Info", shopInv.getItem(8).getItemMeta().getDisplayName());
+			assertEquals("§6Rightclick: §asell specified amount", shopInv.getItem(8).getItemMeta().getLore().get(0));
+			assertEquals("§6Shift-Rightclick: §asell all", shopInv.getItem(8).getItemMeta().getLore().get(1));
+			assertEquals("§6Leftclick: §abuy", shopInv.getItem(8).getItemMeta().getLore().get(2));
+			// check editor inventory
+			shop.openEditor(player);
+			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			player.closeInventory();
+			assertEquals(9, editor.getSize());
+			assertEquals("myshop-Editor", editor.getName());
+			assertEquals(Material.PLAYER_HEAD, editor.getItem(0).getType());
+			assertEquals(Material.PLAYER_HEAD, editor.getItem(1).getType());
+			assertEquals(Material.PLAYER_HEAD, editor.getItem(2).getType());
+			assertEquals(Material.PLAYER_HEAD, editor.getItem(3).getType());
+			assertEquals(Material.PLAYER_HEAD, editor.getItem(4).getType());
+			assertEquals(Material.PLAYER_HEAD, editor.getItem(5).getType());
+			assertEquals(Material.PLAYER_HEAD, editor.getItem(6).getType());
+			assertEquals(Material.PLAYER_HEAD, editor.getItem(7).getType());
+			assertNull(editor.getItem(8));
+			assertEquals("Slot 1", editor.getItem(0).getItemMeta().getDisplayName());
+			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
+			assertEquals("Slot 3", editor.getItem(2).getItemMeta().getDisplayName());
+			assertEquals("Slot 4", editor.getItem(3).getItemMeta().getDisplayName());
+			assertEquals("Slot 5", editor.getItem(4).getItemMeta().getDisplayName());
+			assertEquals("Slot 6", editor.getItem(5).getItemMeta().getDisplayName());
+			assertEquals("Slot 7", editor.getItem(6).getItemMeta().getDisplayName());
+			assertEquals("Slot 8", editor.getItem(7).getItemMeta().getDisplayName());
+			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
+			assertEquals(SLOTEMPTY,
+					editor.getItem(0).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+			assertEquals(SLOTEMPTY,
+					editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+			assertEquals(SLOTEMPTY,
+					editor.getItem(2).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+			assertEquals(SLOTEMPTY,
+					editor.getItem(3).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+			assertEquals(SLOTEMPTY,
+					editor.getItem(4).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+			assertEquals(SLOTEMPTY,
+					editor.getItem(5).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+			assertEquals(SLOTEMPTY,
+					editor.getItem(6).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+			assertEquals(SLOTEMPTY,
+					editor.getItem(7).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+			// check slot editor inventory
+			shop.openSlotEditor(player, 0);
+			ChestInventoryMock slotEditor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			player.closeInventory();
+			assertEquals(27, slotEditor.getSize());
+			assertEquals("myshop-SlotEditor", slotEditor.getName());
+			assertEquals(Material.RED_WOOL, slotEditor.getItem(7).getType());
+			assertEquals(Material.GREEN_WOOL, slotEditor.getItem(8).getType());
+			assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(12).getType());
+			assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(21).getType());
+			assertEquals(Material.BARRIER, slotEditor.getItem(26).getType());
+			assertEquals("§cexit without save", slotEditor.getItem(7).getItemMeta().getDisplayName());
+			assertEquals("§esave changes", slotEditor.getItem(8).getItemMeta().getDisplayName());
+			assertEquals("factor off", slotEditor.getItem(12).getItemMeta().getDisplayName());
+			assertEquals("factor off", slotEditor.getItem(21).getItemMeta().getDisplayName());
+			assertEquals("§cremove item", slotEditor.getItem(26).getItemMeta().getDisplayName());
+			assertEquals(K_OFF, slotEditor.getItem(12).getItemMeta().getPersistentDataContainer().get(key,
+					PersistentDataType.STRING));
+			assertEquals(K_OFF, slotEditor.getItem(21).getItemMeta().getPersistentDataContainer().get(key,
+					PersistentDataType.STRING));
+			// check savefile
+			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "A0.yml");
+			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
+			assertEquals(0, config.getStringList("ShopItemList").size());
+			assertEquals("1.5", String.valueOf(config.getDouble("ShopLocation.x")));
+			assertEquals("2.3", String.valueOf(config.getDouble("ShopLocation.y")));
+			assertEquals("6.9", String.valueOf(config.getDouble("ShopLocation.z")));
+			assertEquals("World", config.getString("ShopLocation.World"));
+			assertEquals("myshop", config.getString("ShopName"));
+			assertEquals(9, config.getInt("ShopSize"));
+			assertEquals(1, UltimateEconomy.getInstance.getConfig().getStringList("AdminShopIds").size());
+			assertEquals("A0", UltimateEconomy.getInstance.getConfig().getStringList("AdminShopIds").get(0));
 	 */
-	@BeforeAll
-	public static void initPlugin() {
-		server = MockBukkit.mock();
-		Bukkit.getLogger().setLevel(Level.OFF);
-		MockBukkit.load(UltimateEconomy.class);
-		world = new WorldMock(Material.GRASS_BLOCK, 1);
-		server.addWorld(world);
-		player = server.addPlayer("kthschnll");
-	}
-
-	/**
-	 * Unload mock bukkit.
-	 */
-	@AfterAll
-	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
-		for (int i = 0; i < size2; i++) {
-			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-		}
-		UltimateEconomy.getInstance.getDataFolder().delete();
-		server.setPlayers(0);
-		MockBukkit.unload();
-	}
-
-	/**
-	 * Unload all adminshopss.
-	 */
-	@AfterEach
-	public void unloadAdminshops() {
-		int size = AdminshopManagerImpl.getAdminshopList().size();
-		for (int i = 0; i < size; i++) {
-			try {
-				AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
-			} catch (ShopSystemException e) {
-				fail();
-			}
-		}
-	}
 	
 	@Test
 	public void sellShopItemTestWithInvalidSlot() {

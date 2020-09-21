@@ -14,36 +14,7 @@ import org.junit.jupiter.api.Test;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
-
 public class MessageWrapperTest {
-
-	/**
-	 * Init for tests.
-	 */
-	@BeforeAll
-	public static void initPlugin() {
-		MockBukkit.mock();
-		Bukkit.getLogger().setLevel(Level.OFF);
-		MockBukkit.load(UltimateEconomy.class);
-	}
-
-	/**
-	 * Unload mock bukkit.
-	 */
-	@AfterAll
-	public static void deleteSavefiles() {
-		UltimateEconomy.getInstance.getDataFolder().delete();
-		MockBukkit.unload();
-	}
-
-	@AfterEach
-	public void resetLanguage() {
-		UltimateEconomy.getInstance.getConfig().set("localeLanguage", "en");
-		UltimateEconomy.getInstance.getConfig().set("localeCountry", "US");
-		UltimateEconomy.getInstance.saveConfig();
-		MessageWrapper.loadLanguage();
-	}
 
 	@Test
 	public void loadLanguageTestWithNoConfig() {

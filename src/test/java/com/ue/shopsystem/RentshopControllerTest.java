@@ -46,8 +46,6 @@ public class RentshopControllerTest {
 			+ "9e198fd831cb61f3927f21cf8a7463af5ea3c7e43bd3e8ec7d2948631cce879";
 	private static final String PLUS = "http://textures.minecraft.net/texture/"
 			+ "9a2d891c6ae9f6baa040d736ab84d48344bb6b70d7f1a280dd12cbac4d777";
-	private static ServerMock server;
-	private static WorldMock world;
 	private static Player player;
 
 	@Test

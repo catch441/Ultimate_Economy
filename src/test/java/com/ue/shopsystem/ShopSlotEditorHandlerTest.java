@@ -35,13 +35,6 @@ import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
-import be.seeseemelk.mockbukkit.WorldMock;
-import be.seeseemelk.mockbukkit.entity.PlayerMock;
-import be.seeseemelk.mockbukkit.inventory.ChestInventoryMock;
-import be.seeseemelk.mockbukkit.inventory.PlayerInventoryViewMock;
-
 public class ShopSlotEditorHandlerTest {
 
 	private static final String MINUS = "http://textures.minecraft.net/texture/"
@@ -62,62 +55,6 @@ public class ShopSlotEditorHandlerTest {
 			+ "e5da4847272582265bdaca367237c96122b139f4e597fbc6667d3fb75fea7cf6";
 	private static final String SELL = "http://textures.minecraft.net/texture/"
 			+ "abae89e92ac362635ba3e9fb7c12b7ddd9b38adb11df8aa1aff3e51ac428a4";
-	private static ServerMock server;
-	private static WorldMock world;
-	private static PlayerMock player;
-
-	/**
-	 * Init shop for tests.
-	 */
-	@BeforeAll
-	public static void initPlugin() {
-		server = MockBukkit.mock();
-		Bukkit.getLogger().setLevel(Level.OFF);
-		MockBukkit.load(UltimateEconomy.class);
-		world = new WorldMock(Material.GRASS_BLOCK, 1);
-		server.addWorld(world);
-		server.setPlayers(0);
-		EconomyPlayerManagerImpl.getAllEconomyPlayers().clear();
-		player = server.addPlayer("kthschnll");
-	}
-
-	/**
-	 * Unload mock bukkit.
-	 */
-	@AfterAll
-	public static void deleteSavefiles() {
-		int size2 = EconomyPlayerManagerImpl.getAllEconomyPlayers().size();
-		for (int i = 0; i < size2; i++) {
-			EconomyPlayerManagerImpl.deleteEconomyPlayer(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-		}
-		UltimateEconomy.getInstance.getDataFolder().delete();
-		server.setPlayers(0);
-		MockBukkit.unload();
-	}
-	
-	@BeforeEach
-	public void load() {
-		try {
-			AdminshopManagerImpl.createAdminShop("myshop", new Location(world,5,3,7), 9);
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			fail();
-		}
-	}
-
-	/**
-	 * Unload all.
-	 */
-	@AfterEach
-	public void unload() {
-		int size = AdminshopManagerImpl.getAdminshopList().size();
-		for (int i = 0; i < size; i++) {
-			try {
-				AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
-			} catch (ShopSystemException e) {
-				fail();
-			}
-		}
-	}
 	
 	@Test
 	public void constructorTest() {

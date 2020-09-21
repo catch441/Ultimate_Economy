@@ -7,17 +7,27 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.slf4j.Logger;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.jobsyste.dataaccess.api.JobDao;
 
 public class JobDaoImpl extends SaveFileUtils implements JobDao {
-	
+
+	private final ServerProvider serverProvider;
+
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param serverProvider
+	 * @param logger
+	 */
 	@Inject
-	ServerProvider serverProvider;
-	private File file;
-	private YamlConfiguration config;
+	public JobDaoImpl(ServerProvider serverProvider, Logger logger) {
+		super(logger);
+		this.serverProvider = serverProvider;
+	}
 
 	@Override
 	public void setupSavefile(String name) {
@@ -31,7 +41,7 @@ public class JobDaoImpl extends SaveFileUtils implements JobDao {
 	@Override
 	public void saveJobName(String name) {
 		getConfig().set("Jobname", name);
-		save(getConfig(),getSavefile());
+		save(getConfig(), getSavefile());
 	}
 
 	@Override
@@ -40,7 +50,7 @@ public class JobDaoImpl extends SaveFileUtils implements JobDao {
 		for (String key : blockList.keySet()) {
 			getConfig().set("BlockList." + key, blockList.get(key));
 		}
-		save(getConfig(),getSavefile());
+		save(getConfig(), getSavefile());
 	}
 
 	@Override
@@ -49,7 +59,7 @@ public class JobDaoImpl extends SaveFileUtils implements JobDao {
 		for (String key : fisherList.keySet()) {
 			getConfig().set("FisherList." + key, fisherList.get(key));
 		}
-		save(getConfig(),getSavefile());
+		save(getConfig(), getSavefile());
 	}
 
 	@Override
@@ -58,7 +68,7 @@ public class JobDaoImpl extends SaveFileUtils implements JobDao {
 		for (String key : entityList.keySet()) {
 			getConfig().set("EntityList." + key, entityList.get(key));
 		}
-		save(getConfig(),getSavefile());
+		save(getConfig(), getSavefile());
 	}
 
 	@Override

@@ -167,8 +167,11 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	AdminshopManager provideAdminshopManager(ComponentProvider componentProvider,
-			ShopValidationHandler validationHandler, MessageWrapper messageWrapper) {
-		return new AdminshopManagerImpl(componentProvider, validationHandler, messageWrapper);
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ServerProvider serverProvider,
+			CustomSkullService skullService, ConfigDao configDao) {
+		Logger logger = LoggerFactory.getLogger(AdminshopManagerImpl.class);
+		return new AdminshopManagerImpl(componentProvider, validationHandler, messageWrapper, logger, serverProvider,
+				skullService, configDao);
 	}
 
 	@Singleton
@@ -314,34 +317,42 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	ConfigDao provideConfigDao(ServerProvider serverProvider) {
-		return new ConfigDaoImpl(serverProvider);
+		Logger logger = LoggerFactory.getLogger(ConfigDaoImpl.class);
+		return new ConfigDaoImpl(serverProvider, logger);
 	}
 
 	@Singleton
 	@Provides
 	BankDao provideBankDao(ServerProvider serverProvider) {
-		return new BankDaoImpl(serverProvider);
+		Logger logger = LoggerFactory.getLogger(BankDaoImpl.class);
+		return new BankDaoImpl(serverProvider, logger);
 	}
 
 	@Singleton
 	@Provides
 	EconomyPlayerDao provideEcoPlayerDao(BankManager bankManager, ServerProvider bukkitServic) {
-		return new EconomyPlayerDaoImpl(bankManager, bukkitServic);
+		Logger logger = LoggerFactory.getLogger(EconomyPlayerDaoImpl.class);
+		return new EconomyPlayerDaoImpl(bankManager, bukkitServic, logger);
 	}
 
 	@Provides
-	JobDao provideJobDao() {
-		return new JobDaoImpl();
+	JobDao provideJobDao(ServerProvider serverProvider) {
+		Logger logger = LoggerFactory.getLogger(JobDaoImpl.class);
+		return new JobDaoImpl(serverProvider, logger);
 	}
 
 	@Provides
 	JobcenterDao provideJobcenterDao(ServerProvider serverProvider) {
-		return new JobcenterDaoImpl(serverProvider);
+		Logger logger = LoggerFactory.getLogger(JobcenterDaoImpl.class);
+		return new JobcenterDaoImpl(serverProvider, logger);
 	}
 
 	@Provides
-	ShopDao provideShopDao(ServerProvider serverProvider) {
-		return new ShopDaoImpl(serverProvider);
+	ShopDao provideShopDao(ServerProvider serverProvider, EconomyPlayerManager ecoPlayerManager,
+			ShopValidationHandler validationHandler, TownsystemValidationHandler townsystemValidationHandler) {
+		Logger logger = LoggerFactory.getLogger(ShopDaoImpl.class);
+		return new ShopDaoImpl(serverProvider, ecoPlayerManager, validationHandler, townsystemValidationHandler,
+				logger);
 	}
 
 	@Singleton

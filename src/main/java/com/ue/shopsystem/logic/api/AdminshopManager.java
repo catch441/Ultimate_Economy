@@ -71,9 +71,8 @@ public interface AdminshopManager {
 	 * This method should be used to delete a adminshop.
 	 * 
 	 * @param adminshop
-	 * @throws ShopSystemException
 	 */
-	public void deleteAdminShop(Adminshop adminshop) throws ShopSystemException;
+	public void deleteAdminShop(Adminshop adminshop);
 	
 	/**
 	 * This method despawns all adminshop villager.
@@ -85,6 +84,4 @@ public interface AdminshopManager {
 	 * 
 	 */
 	public void loadAllAdminShops();
-	
-	
 }

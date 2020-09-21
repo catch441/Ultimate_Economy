@@ -1,557 +1,382 @@
 package com.ue.shopsystem.logic.impl;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.logging.Level;
+import java.util.Arrays;
 
-import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Villager.Profession;
+import org.bukkit.World;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.bukkit.plugin.Plugin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 
-import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
+import com.ue.common.utils.ComponentProvider;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
+import com.ue.common.utils.ServiceComponent;
+import com.ue.config.dataaccess.api.ConfigDao;
+import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Adminshop;
+import com.ue.shopsystem.logic.api.CustomSkullService;
+import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
 import com.ue.shopsystem.logic.impl.ShopSystemException;
-import com.ue.shopsystem.logic.to.ShopItem;
-import com.ue.ultimate_economy.EconomyVillager;
+import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.UltimateEconomy;
+import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
 @ExtendWith(MockitoExtension.class)
 public class AdminshopManagerImplTest {
 
+	@InjectMocks
+	AdminshopManagerImpl adminshopManager;
+	@Mock
+	MessageWrapper messageWrapper;
+	@Mock
+	ShopValidationHandler validationHandler;
+	@Mock
+	ComponentProvider componentProvider;
+	@Mock
+	ServerProvider serverProvider;
+	@Mock
+	Logger logger;
+	@Mock
+	CustomSkullService skullService;
+	@Mock
+	ConfigDao configDao;
+
 	@Test
-	public void createNewAdminshopTestWithInvalidSize() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			AdminshopManagerImpl.createAdminShop("myshop", location, 5);
-			fail();
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			assertTrue(e instanceof GeneralEconomyException);
-			assertEquals("§cThe parameter §45§c is invalid!", e.getMessage());
-		}
+	public void createNewAdminshopTestWithInvalidSize() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidSize(5);
+		assertThrows(GeneralEconomyException.class, () -> adminshopManager.createAdminShop("myshop", null, 5));
+		assertEquals(0, adminshopManager.getAdminshopList().size());
+		verifyNoInteractions(configDao);
 	}
 
 	@Test
-	public void createNewAdminshopTestWithExistingName() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			fail();
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			assertTrue(e instanceof GeneralEconomyException);
-			assertEquals("§c§4myshop§c already exists!", e.getMessage());
-		}
+	public void createNewAdminshopTestWithExistingName() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForShopNameIsFree(anyList(), eq("my_shop"),
+				eq(null));
+		assertThrows(GeneralEconomyException.class, () -> adminshopManager.createAdminShop("my_shop", null, 5));
+		assertEquals(0, adminshopManager.getAdminshopList().size());
+		verifyNoInteractions(configDao);
 	}
 
 	@Test
-	public void createNewAdminshopTestWithInvalidName() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			AdminshopManagerImpl.createAdminShop("my_shop", location, 9);
-			fail();
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			assertTrue(e instanceof ShopSystemException);
-			assertEquals("§cThis shopname is invalid! Use a name without _!", e.getMessage());
-		}
+	public void createNewAdminshopTestWithInvalidName() throws ShopSystemException {
+		doThrow(ShopSystemException.class).when(validationHandler).checkForValidShopName("my_shop");
+		assertThrows(ShopSystemException.class, () -> adminshopManager.createAdminShop("my_shop", null, 5));
+		assertEquals(0, adminshopManager.getAdminshopList().size());
+		verifyNoInteractions(configDao);
 	}
 
 	@Test
 	public void createNewAdminshopTestSuccess() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			List<Adminshop> list = AdminshopManagerImpl.getAdminshopList();
-			assertEquals(1, list.size());
-			Adminshop shop = list.get(0);
-			assertEquals(world, shop.getWorld());
-			assertEquals("A0", shop.getShopId());
-			assertEquals("myshop", shop.getName());
-			assertEquals(EconomyVillager.ADMINSHOP, shop.getShopVillager().getMetadata("ue-type").get(0).value());
-			assertEquals(0, shop.getItemList().size());
-			assertEquals(location, shop.getShopLocation());
-			assertEquals(Profession.NITWIT, shop.getShopVillager().getProfession());
-			assertEquals(location, shop.getShopVillager().getLocation());
-			// check inventory
-			ChestInventoryMock shopInv = (ChestInventoryMock) shop.getShopInventory();
-			assertEquals(9, shopInv.getSize());
-			assertEquals("myshop", shopInv.getName());
-			assertNull(shopInv.getItem(0));
-			assertNull(shopInv.getItem(1));
-			assertNull(shopInv.getItem(2));
-			assertNull(shopInv.getItem(3));
-			assertNull(shopInv.getItem(4));
-			assertNull(shopInv.getItem(5));
-			assertNull(shopInv.getItem(6));
-			assertNull(shopInv.getItem(7));
-			assertEquals(Material.ANVIL, shopInv.getItem(8).getType());
-			assertEquals("Info", shopInv.getItem(8).getItemMeta().getDisplayName());
-			assertEquals("§6Rightclick: §asell specified amount", shopInv.getItem(8).getItemMeta().getLore().get(0));
-			assertEquals("§6Shift-Rightclick: §asell all", shopInv.getItem(8).getItemMeta().getLore().get(1));
-			assertEquals("§6Leftclick: §abuy", shopInv.getItem(8).getItemMeta().getLore().get(2));
-			// check editor inventory
-			shop.openEditor(player);
-			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
-			player.closeInventory();
-			assertEquals(9, editor.getSize());
-			assertEquals("myshop-Editor", editor.getName());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(0).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(1).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(2).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(3).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(4).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(5).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(6).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(7).getType());
-			assertNull(editor.getItem(8));
-			assertEquals("Slot 1", editor.getItem(0).getItemMeta().getDisplayName());
-			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
-			assertEquals("Slot 3", editor.getItem(2).getItemMeta().getDisplayName());
-			assertEquals("Slot 4", editor.getItem(3).getItemMeta().getDisplayName());
-			assertEquals("Slot 5", editor.getItem(4).getItemMeta().getDisplayName());
-			assertEquals("Slot 6", editor.getItem(5).getItemMeta().getDisplayName());
-			assertEquals("Slot 7", editor.getItem(6).getItemMeta().getDisplayName());
-			assertEquals("Slot 8", editor.getItem(7).getItemMeta().getDisplayName());
-			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-			assertEquals(SLOTEMPTY,
-					editor.getItem(0).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(2).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(3).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(4).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(5).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(6).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(7).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			// check slot editor inventory
-			shop.openSlotEditor(player,0);
-			ChestInventoryMock slotEditor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
-			player.closeInventory();
-			assertEquals(27, slotEditor.getSize());
-			assertEquals("myshop-SlotEditor", slotEditor.getName());
-			assertEquals(Material.RED_WOOL, slotEditor.getItem(7).getType());
-			assertEquals(Material.GREEN_WOOL, slotEditor.getItem(8).getType());
-			assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(12).getType());
-			assertEquals(Material.PLAYER_HEAD, slotEditor.getItem(21).getType());
-			assertEquals(Material.BARRIER, slotEditor.getItem(26).getType());
-			assertEquals("§cexit without save", slotEditor.getItem(7).getItemMeta().getDisplayName());
-			assertEquals("§esave changes", slotEditor.getItem(8).getItemMeta().getDisplayName());
-			assertEquals("factor off", slotEditor.getItem(12).getItemMeta().getDisplayName());
-			assertEquals("factor off", slotEditor.getItem(21).getItemMeta().getDisplayName());
-			assertEquals("§cremove item", slotEditor.getItem(26).getItemMeta().getDisplayName());
-			assertEquals(K_OFF, slotEditor.getItem(12).getItemMeta().getPersistentDataContainer().get(key,
-					PersistentDataType.STRING));
-			assertEquals(K_OFF, slotEditor.getItem(21).getItemMeta().getPersistentDataContainer().get(key,
-					PersistentDataType.STRING));
-			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "A0.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-			assertEquals(0, config.getStringList("ShopItemList").size());
-			assertEquals("1.5", String.valueOf(config.getDouble("ShopLocation.x")));
-			assertEquals("2.3", String.valueOf(config.getDouble("ShopLocation.y")));
-			assertEquals("6.9", String.valueOf(config.getDouble("ShopLocation.z")));
-			assertEquals("World", config.getString("ShopLocation.World"));
-			assertEquals("myshop", config.getString("ShopName"));
-			assertEquals(9, config.getInt("ShopSize"));
-			assertEquals(1, UltimateEconomy.getInstance.getConfig().getStringList("AdminShopIds").size());
-			assertEquals("A0", UltimateEconomy.getInstance.getConfig().getStringList("AdminShopIds").get(0));
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			fail();
-		}
+		Plugin plugin = mock(Plugin.class);
+		Location loc = mock(Location.class);
+		World world = mock(World.class);
+		Villager villager = mock(Villager.class);
+		Chunk chunk = mock(Chunk.class);
+		ShopDao shopDao = mock(ShopDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		ItemStack infoItem = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		Inventory inv = mock(Inventory.class);
+		when(meta.getDisplayName()).thenReturn("Info");
+		when(serverProvider.createInventory(eq(villager), anyInt(), anyString())).thenReturn(inv);
+		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
+		when(loc.getWorld()).thenReturn(world);
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(infoItem.getItemMeta()).thenReturn(meta);
+		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
+		when(loc.getChunk()).thenReturn(chunk);
+		when(serviceComponent.getShopDao()).thenReturn(shopDao);
+		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		assertDoesNotThrow(() -> adminshopManager.createAdminShop("myshop", loc, 9));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidShopName("myshop"));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(9));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForShopNameIsFree(anyList(), eq("myshop"), eq(null)));
+		verify(configDao).saveAdminshopIds(anyList());
+		assertEquals(1, adminshopManager.getAdminshopList().size());
+		Adminshop shop = adminshopManager.getAdminshopList().get(0);
+		assertEquals("myshop", shop.getName());
+		assertEquals("A0", shop.getShopId());
 	}
 
 	@Test
 	public void deleteAdminshopTest() {
-		try {
-			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
-			AdminshopManagerImpl.deleteAdminShop(AdminshopManagerImpl.getAdminshopList().get(0));
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "A0.yml");
-			assertFalse(saveFile.exists());
-			assertEquals(0, UltimateEconomy.getInstance.getConfig().getStringList("AdminShopIds").size());
-			assertEquals(0, AdminshopManagerImpl.getAdminshopList().size());
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			fail();
-		}
+		Plugin plugin = mock(Plugin.class);
+		Location loc = mock(Location.class);
+		World world = mock(World.class);
+		Villager villager = mock(Villager.class);
+		Chunk chunk = mock(Chunk.class);
+		ShopDao shopDao = mock(ShopDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		ItemStack infoItem = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		Inventory inv = mock(Inventory.class);
+		when(meta.getDisplayName()).thenReturn("Info");
+		when(serverProvider.createInventory(eq(villager), anyInt(), anyString())).thenReturn(inv);
+		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
+		when(loc.getWorld()).thenReturn(world);
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(infoItem.getItemMeta()).thenReturn(meta);
+		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
+		when(loc.getChunk()).thenReturn(chunk);
+		when(serviceComponent.getShopDao()).thenReturn(shopDao);
+		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		assertDoesNotThrow(() -> adminshopManager.createAdminShop("myshop", loc, 9));
+		Adminshop shop = adminshopManager.getAdminshopList().get(0);
+		adminshopManager.deleteAdminShop(shop);
+		// verify that the delete method of the shop is called
+		verify(shopDao).deleteFile();
+		verify(configDao).saveAdminshopIds(new ArrayList<>());
+		assertEquals(0, adminshopManager.getAdminshopList().size());
 	}
 
 	@Test
 	public void getAdminShopByNameFailTest() {
 		try {
-			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
-			AdminshopManagerImpl.getAdminShopByName("myshop2");
+			createAdminshop();
+			adminshopManager.getAdminShopByName("myshop2");
 			fail();
-		} catch (GeneralEconomyException | ShopSystemException e) {
-			assertTrue(e instanceof GeneralEconomyException);
-			assertEquals("§c§4myshop2§c does not exist!", e.getMessage());
+		} catch (GeneralEconomyException e) {
+			assertEquals(1, e.getParams().length);
+			assertEquals("myshop2", e.getParams()[0]);
+			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
 		}
 	}
 
 	@Test
 	public void getAdminShopByNameTest() {
-		try {
-			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
-			AdminshopManagerImpl.createAdminShop("myshop2", new Location(world, 1.5, 2.3, 6.9), 9);
-			Adminshop shop = AdminshopManagerImpl.getAdminShopByName("myshop");
-			assertNotNull(shop);
-			assertEquals("myshop", shop.getName());
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			fail();
-		}
+		createAdminshop();
+		Adminshop shop = assertDoesNotThrow(() -> adminshopManager.getAdminShopByName("myshop"));
+		assertNotNull(shop);
+		assertEquals("myshop", shop.getName());
 	}
 
 	@Test
 	public void getAdminshopByIdTest() {
-		try {
-			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
-			Adminshop shop = AdminshopManagerImpl.getAdminShopById("A0");
-			assertNotNull(shop);
-			assertEquals("A0", shop.getShopId());
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			fail();
-		}
+		createAdminshop();
+		Adminshop shop = assertDoesNotThrow(() -> adminshopManager.getAdminShopById("A0"));
+		assertNotNull(shop);
+		assertEquals("A0", shop.getShopId());
 	}
 
 	@Test
 	public void getAdminshopByIdFailTest() {
 		try {
-			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
-			AdminshopManagerImpl.getAdminShopById("A1");
+			createAdminshop();
+			adminshopManager.getAdminShopById("A1");
 			fail();
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			assertTrue(e instanceof GeneralEconomyException);
-			assertEquals("§c§4A1§c does not exist!", e.getMessage());
+		} catch (GeneralEconomyException e) {
+			assertEquals(1, e.getParams().length);
+			assertEquals("A1", e.getParams()[0]);
+			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
 		}
 	}
 
 	@Test
 	public void generateFreeAdminShopIdTest() {
-		try {
-			String id1 = AdminshopManagerImpl.generateFreeAdminShopId();
-			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
-			String id2 = AdminshopManagerImpl.generateFreeAdminShopId();
-			assertEquals("A0", id1);
-			assertEquals("A1", id2);
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			fail();
-		}
+		String id1 = adminshopManager.generateFreeAdminShopId();
+		createAdminshop();
+		String id2 = adminshopManager.generateFreeAdminShopId();
+		assertEquals("A0", id1);
+		assertEquals("A1", id2);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void loadAllAdminShopsTest() {
-		try {
-			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			assertEquals(1, AdminshopManagerImpl.getAdminshopList().size());
-			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
-			AdminshopManagerImpl.getAdminshopList().clear();
-			assertEquals(0, AdminshopManagerImpl.getAdminshopList().size());
-			AdminshopManagerImpl.loadAllAdminShops();
-			assertEquals(1, AdminshopManagerImpl.getAdminshopList().size());
-			Adminshop shop = AdminshopManagerImpl.getAdminshopList().get(0);
-			assertEquals(world, shop.getWorld());
-			assertEquals("A0", shop.getShopId());
-			assertEquals("myshop", shop.getName());
-			assertEquals(EconomyVillager.ADMINSHOP, shop.getShopVillager().getMetadata("ue-type").get(0).value());
-			assertEquals(0, shop.getItemList().size());
-			assertEquals(location, shop.getShopLocation());
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			fail();
-		}
-	}
+		Plugin plugin = mock(Plugin.class);
+		Location loc = mock(Location.class);
+		World world = mock(World.class);
+		Villager villager = mock(Villager.class);
+		Chunk chunk = mock(Chunk.class);
+		ShopDao shopDao = mock(ShopDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		ItemStack infoItem = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		Inventory inv = mock(Inventory.class);
+		assertDoesNotThrow(() -> when(shopDao.loadShopLocation()).thenReturn(loc));
+		when(shopDao.loadShopSize()).thenReturn(9);
+		when(shopDao.loadShopName()).thenReturn("myshop");
+		when(meta.getDisplayName()).thenReturn("Info");
+		when(serverProvider.createInventory(eq(villager), anyInt(), anyString())).thenReturn(inv);
+		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
+		when(loc.getWorld()).thenReturn(world);
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(infoItem.getItemMeta()).thenReturn(meta);
+		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
+		when(loc.getChunk()).thenReturn(chunk);
+		when(serviceComponent.getShopDao()).thenReturn(shopDao);
+		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(configDao.hasAdminShopNames()).thenReturn(false);
+		when(configDao.loadAdminshopIds()).thenReturn(Arrays.asList("A0"));
 
-	@Test
-	public void loadAllAdminShopsTestWithProfession() {
-		try {
-			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			AdminshopManagerImpl.getAdminshopList().get(0).changeProfession(Profession.ARMORER);
-			assertEquals(1, AdminshopManagerImpl.getAdminshopList().size());
-			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
-			AdminshopManagerImpl.getAdminshopList().clear();
-			assertEquals(0, AdminshopManagerImpl.getAdminshopList().size());
-			AdminshopManagerImpl.loadAllAdminShops();
-			assertEquals(1, AdminshopManagerImpl.getAdminshopList().size());
-			Adminshop shop = AdminshopManagerImpl.getAdminshopList().get(0);
-			assertEquals(world, shop.getWorld());
-			assertEquals("A0", shop.getShopId());
-			assertEquals("myshop", shop.getName());
-			assertEquals(Profession.ARMORER, shop.getShopVillager().getProfession());
-			assertEquals(EconomyVillager.ADMINSHOP, shop.getShopVillager().getMetadata("ue-type").get(0).value());
-			assertEquals(0, shop.getItemList().size());
-			assertEquals(location, shop.getShopLocation());
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			fail();
-		}
-	}
-
-	@Test
-	public void loadAllAdminShopsTestWithItems() {
-		ItemStack spawner = new ItemStack(Material.SPAWNER, 1);
-		ItemMeta spawnerMeta = spawner.getItemMeta();
-		spawnerMeta.setDisplayName("COW");
-		spawner.setItemMeta(spawnerMeta);
-		ItemStack enchantedTool = new ItemStack(Material.DIAMOND_PICKAXE, 16);
-		enchantedTool.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
-		CraftMetaItemMock enchantedToolMeta = (CraftMetaItemMock) enchantedTool.getItemMeta();
-		enchantedToolMeta.setDamage(10);
-		enchantedTool.setItemMeta(enchantedToolMeta);
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			Adminshop shop = AdminshopManagerImpl.getAdminshopList().get(0);
-			shop.addShopItem(0, 5, 10, enchantedTool);
-			shop.addShopItem(1, 0, 20, spawner);
-			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
-			AdminshopManagerImpl.getAdminshopList().clear();
-			AdminshopManagerImpl.loadAllAdminShops();
-			Adminshop response = AdminshopManagerImpl.getAdminshopList().get(0);
-			enchantedTool.setAmount(1);
-			String itemString = enchantedTool.toString();
-			String itemStringSpawner = "SPAWNER_COW";
-			assertEquals(2, response.getItemList().size());
-			ShopItem item = response.getItemList().get(0);
-			assertEquals(itemString, item.getItemString());
-			assertEquals(16, item.getAmount());
-			assertEquals("5.0", String.valueOf(item.getSellPrice()));
-			assertEquals("10.0", String.valueOf(item.getBuyPrice()));
-			assertEquals(0, item.getStock());
-			assertEquals(Material.DIAMOND_PICKAXE, item.getItemStack().getType());
-			ShopItem item2 = response.getItemList().get(1);
-			assertEquals("SPAWNER_COW", item2.getItemString());
-			assertEquals(1, item2.getAmount());
-			assertEquals("0.0", String.valueOf(item2.getSellPrice()));
-			assertEquals("20.0", String.valueOf(item2.getBuyPrice()));
-			assertEquals(0, item2.getStock());
-			assertEquals(Material.SPAWNER, item2.getItemStack().getType());
-			// check shop inventory
-			Inventory inv = response.getShopInventory();
-			ItemStack shopItem = inv.getItem(0);
-			assertEquals(Material.DIAMOND_PICKAXE, shopItem.getType());
-			assertEquals(1, shopItem.getEnchantments().size());
-			assertTrue(shopItem.getEnchantments().containsKey(Enchantment.DURABILITY));
-			assertTrue(shopItem.getEnchantments().containsValue(1));
-			assertEquals(10, ((CraftMetaItemMock) enchantedTool.getItemMeta()).getDamage());
-			assertEquals(16, shopItem.getAmount());
-			assertEquals(2, shopItem.getItemMeta().getLore().size());
-			assertEquals("§616 buy for §a10.0 $", shopItem.getItemMeta().getLore().get(0));
-			assertEquals("§616 sell for §a5.0 $", shopItem.getItemMeta().getLore().get(1));
-			// check editor inventory
-			shop.openEditor(player);
-			Inventory editor = player.getOpenInventory().getTopInventory();
-			player.closeInventory();
-			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-			assertEquals("Slot 1", editor.getItem(0).getItemMeta().getDisplayName());
-			assertEquals(SLOTFILLED,
-					editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "A0.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-			assertEquals("5.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".sellPrice")));
-			assertEquals("10.0", String.valueOf(config.getDouble("ShopItems." + itemString + ".buyPrice")));
-			assertEquals(0, config.getInt("ShopItems." + itemString + ".Slot"));
-			assertEquals(16, config.getInt("ShopItems." + itemString + ".Amount"));
-			assertEquals(enchantedTool.toString(), config.getItemStack("ShopItems." + itemString + ".Name").toString());
-			// check shop inventory
-			ItemStack shopItemSpawner = inv.getItem(1);
-			assertEquals(Material.SPAWNER, shopItemSpawner.getType());
-			assertEquals(1, shopItemSpawner.getAmount());
-			assertEquals("COW", shopItemSpawner.getItemMeta().getDisplayName());
-			assertEquals(1, shopItemSpawner.getItemMeta().getLore().size());
-			assertEquals("§61 buy for §a20.0 $", shopItemSpawner.getItemMeta().getLore().get(0));
-			// check editor inventory
-			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
-			assertEquals(SLOTFILLED,
-					editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			// check savefile
-			assertEquals("0.0", String.valueOf(config.getDouble("ShopItems." + itemStringSpawner + ".sellPrice")));
-			assertEquals("20.0", String.valueOf(config.getDouble("ShopItems." + itemStringSpawner + ".buyPrice")));
-			assertEquals(1, config.getInt("ShopItems." + itemStringSpawner + ".Slot"));
-			assertEquals(1, config.getInt("ShopItems." + itemStringSpawner + ".Amount"));
-			assertEquals(itemStringSpawner, config.getString("ShopItems." + itemStringSpawner + ".Name").toString());
-		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
-			fail();
-		}
+		adminshopManager.loadAllAdminShops();
+		assertEquals(1, adminshopManager.getAdminshopList().size());
+		// to verify that the loading constructor of the shop is used
+		verify(shopDao).loadShopName();
+		verifyNoInteractions(logger);
 	}
 
 	@Test
 	public void despawnAllVillagersTest() {
-		try {
-			AdminshopManagerImpl.createAdminShop("myshop", new Location(world, 1.5, 2.3, 6.9), 9);
-			Collection<Entity> entities1 = world
-					.getNearbyEntities(AdminshopManagerImpl.getAdminshopList().get(0).getShopLocation(), 0, 0, 0);
-			AdminshopManagerImpl.despawnAllVillagers();
-			Collection<Entity> entities2 = world
-					.getNearbyEntities(AdminshopManagerImpl.getAdminshopList().get(0).getShopLocation(), 0, 0, 0);
-			assertEquals(1, entities1.size());
-			assertEquals(0, entities2.size());
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			fail();
-		}
+		createAdminshop();
+		createAdminshop();
+		Adminshop shop1 = assertDoesNotThrow(() -> adminshopManager.getAdminshopList().get(0));
+		Adminshop shop2 = assertDoesNotThrow(() -> adminshopManager.getAdminshopList().get(0));
+		adminshopManager.despawnAllVillagers();
+		verify(shop1.getShopVillager()).remove();
+		verify(shop2.getShopVillager()).remove();
 	}
-	
+
+	@SuppressWarnings("deprecation")
 	@Test
-	public void loadAllAdminShopsTestWithRenaming() {
-		try {
-			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
-			AdminshopManagerImpl.getAdminshopList().clear();
-			UltimateEconomy.getInstance.getConfig().set("AdminshopIds",
-					UltimateEconomy.getInstance.getConfig().get("AdminShopIds"));
-			UltimateEconomy.getInstance.saveConfig();
-			AdminshopManagerImpl.loadAllAdminShops();
-			assertTrue(UltimateEconomy.getInstance.getConfig().isSet("AdminShopIds"));
-			assertFalse(UltimateEconomy.getInstance.getConfig().isSet("AdminshopIds"));
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			fail();
-		}
+	public void loadAllAdminShopsTestWithLoadingError() throws TownSystemException {
+		Location loc = mock(Location.class);
+		ShopDao shopDao = mock(ShopDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		TownSystemException e = mock(TownSystemException.class);
+		when(e.getMessage()).thenReturn("my error message");
+		assertDoesNotThrow(() -> when(shopDao.loadShopLocation()).thenReturn(loc));
+		when(shopDao.loadShopSize()).thenReturn(9);
+		when(shopDao.loadShopName()).thenReturn("myshop");
+		when(serviceComponent.getShopDao()).thenReturn(shopDao);
+		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(configDao.hasAdminShopNames()).thenReturn(false);
+		when(configDao.loadAdminshopIds()).thenReturn(Arrays.asList("A0"));
+		when(shopDao.loadShopLocation()).thenThrow(e);
+		adminshopManager.loadAllAdminShops();
+		assertEquals(0, adminshopManager.getAdminshopList().size());
+		// to verify that the loading constructor of the shop is used
+		verify(shopDao).loadShopName();
+		verify(logger).warn("[Ultimate_Economy] Failed to load the shop A0");
+		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+		verifyNoMoreInteractions(logger);
 	}
-	
-	@Test
-	public void loadAllAdminShopsTestWithDeletedSavefile() {
-		try {
-			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
-			AdminshopManagerImpl.getAdminshopList().clear();
-			File savefile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
-			savefile.delete();
-			AdminshopManagerImpl.loadAllAdminShops();
-			assertEquals(0,AdminshopManagerImpl.getAdminshopList().size());
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			fail();
-		}
-	}
-	
-	@Test
-	public void loadAllAdminShopsTestWithInvalidSavedWorld() {
-		try {
-			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
-			AdminshopManagerImpl.getAdminshopList().clear();
-			File savefile = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(savefile);
-			config.set("ShopLocation.World", "something");
-			config.save(savefile);
-			AdminshopManagerImpl.loadAllAdminShops();
-			assertEquals(0,AdminshopManagerImpl.getAdminshopList().size());
-		} catch (IOException | ShopSystemException | GeneralEconomyException e) {
-			fail();
-		}
-	}
-	
+
+	@SuppressWarnings("deprecation")
 	@Test
 	public void loadAllAdminshopsOldTest() {
-		try {
-			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
-			AdminshopManagerImpl.getAdminshopList().clear();
-			// create old state
-			List<String> list = new ArrayList<String>();
-			list.add("myshop");
- 			UltimateEconomy.getInstance.getConfig().set("ShopNames", list);
-			UltimateEconomy.getInstance.getConfig().set("AdminShopIds", null);
-			UltimateEconomy.getInstance.saveConfig();
-			File old = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(old);
-			old.delete();
-			File newFile = new File(UltimateEconomy.getInstance.getDataFolder(),"myshop.yml");
-			newFile.createNewFile();
-			config.save(newFile);
-			// load
-			AdminshopManagerImpl.loadAllAdminShops();
-			assertTrue(UltimateEconomy.getInstance.getConfig().isSet("AdminShopIds"));
-			assertFalse(UltimateEconomy.getInstance.getConfig().isSet("ShopNames"));
-			assertTrue(new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml").exists());
-			assertFalse(new File(UltimateEconomy.getInstance.getDataFolder(),"myshop.yml").exists());
-		} catch (ShopSystemException | GeneralEconomyException | IOException e) {
-			fail();
-		}
+		Plugin plugin = mock(Plugin.class);
+		Location loc = mock(Location.class);
+		World world = mock(World.class);
+		Villager villager = mock(Villager.class);
+		Chunk chunk = mock(Chunk.class);
+		ShopDao shopDao = mock(ShopDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		ItemStack infoItem = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		Inventory inv = mock(Inventory.class);
+		assertDoesNotThrow(() -> when(shopDao.loadShopLocation()).thenReturn(loc));
+		when(shopDao.loadShopSize()).thenReturn(9);
+		when(shopDao.loadShopName()).thenReturn("myshop");
+		when(meta.getDisplayName()).thenReturn("Info");
+		when(serverProvider.createInventory(eq(villager), anyInt(), anyString())).thenReturn(inv);
+		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
+		when(loc.getWorld()).thenReturn(world);
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(infoItem.getItemMeta()).thenReturn(meta);
+		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
+		when(loc.getChunk()).thenReturn(chunk);
+		when(serviceComponent.getShopDao()).thenReturn(shopDao);
+		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(configDao.hasAdminShopNames()).thenReturn(true);
+		when(configDao.loadAdminShopNames()).thenReturn(Arrays.asList("myshop"));
+		adminshopManager.loadAllAdminShops();
+		assertEquals(1, adminshopManager.getAdminshopList().size());
+		assertEquals("A0", adminshopManager.getAdminshopList().get(0).getShopId());
+		assertEquals("myshop", adminshopManager.getAdminshopList().get(0).getName());
+		// to verify that the loading constructor of the shop is used
+		verify(shopDao).loadShopName();
+		verify(configDao).removeDeprecatedAdminshopNames();
+		verify(configDao).saveAdminshopIds(anyList());
+		verifyNoInteractions(logger);
 	}
-	
+
+	@SuppressWarnings("deprecation")
 	@Test
-	public void loadAllAdminshopsOldTestWithInvalidSavedWorld() {
-		try {
-			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
-			AdminshopManagerImpl.getAdminshopList().clear();
-			// create old state
-			List<String> list = new ArrayList<String>();
-			list.add("myshop");
- 			UltimateEconomy.getInstance.getConfig().set("ShopNames", list);
-			UltimateEconomy.getInstance.getConfig().set("AdminShopIds", null);
-			UltimateEconomy.getInstance.saveConfig();
-			File old = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(old);
-			config.set("ShopLocation.World", "something");
-			old.delete();
-			File newFile = new File(UltimateEconomy.getInstance.getDataFolder(),"myshop.yml");
-			newFile.createNewFile();
-			config.save(newFile);
-			// load
-			AdminshopManagerImpl.loadAllAdminShops();
-			assertEquals(0,AdminshopManagerImpl.getAdminshopList().size());
-		} catch (ShopSystemException | GeneralEconomyException | IOException e) {
-			fail();
-		}
+	public void loadAllAdminshopsOldTestWithLoadingError() throws TownSystemException {
+		Plugin plugin = mock(Plugin.class);
+		Location loc = mock(Location.class);
+		ShopDao shopDao = mock(ShopDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		TownSystemException e = mock(TownSystemException.class);
+		when(e.getMessage()).thenReturn("my error message");
+		assertDoesNotThrow(() -> when(shopDao.loadShopLocation()).thenReturn(loc));
+		when(shopDao.loadShopSize()).thenReturn(9);
+		when(shopDao.loadShopName()).thenReturn("myshop");
+		when(serviceComponent.getShopDao()).thenReturn(shopDao);
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(configDao.hasAdminShopNames()).thenReturn(true);
+		when(configDao.loadAdminShopNames()).thenReturn(Arrays.asList("myshop"));
+		when(shopDao.loadShopLocation()).thenThrow(e);
+		adminshopManager.loadAllAdminShops();
+		assertEquals(0, adminshopManager.getAdminshopList().size());
+		// to verify that the loading constructor of the shop is used
+		verify(shopDao).loadShopName();
+		verify(logger).warn("[Ultimate_Economy] Failed to load the shop myshop");
+		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+		verifyNoMoreInteractions(logger);
+		verify(configDao).removeDeprecatedAdminshopNames();
+		verify(configDao).saveAdminshopIds(anyList());
 	}
-	
-	@Test
-	public void loadAllAdminShopsOldTestWithDeletedSavefile() {
-		try {
-			Location location = new Location(world, 1.5, 2.3, 6.9);
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			AdminshopManagerImpl.getAdminshopList().get(0).despawnVillager();
-			AdminshopManagerImpl.getAdminshopList().clear();
-			// create old state
-			List<String> list = new ArrayList<String>();
-			list.add("myshop");
- 			UltimateEconomy.getInstance.getConfig().set("ShopNames", list);
-			UltimateEconomy.getInstance.getConfig().set("AdminShopIds", null);
-			UltimateEconomy.getInstance.saveConfig();
-			File file = new File(UltimateEconomy.getInstance.getDataFolder(),"A0.yml");
-			file.delete();
-			// load
-			AdminshopManagerImpl.loadAllAdminShops();
-			assertEquals(0,AdminshopManagerImpl.getAdminshopList().size());
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			fail();
-		}
+
+	private void createAdminshop() {
+		Plugin plugin = mock(Plugin.class);
+		Location loc = mock(Location.class);
+		World world = mock(World.class);
+		Villager villager = mock(Villager.class);
+		Chunk chunk = mock(Chunk.class);
+		ShopDao shopDao = mock(ShopDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		ItemStack infoItem = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		Inventory inv = mock(Inventory.class);
+		when(meta.getDisplayName()).thenReturn("Info");
+		when(serverProvider.createInventory(eq(villager), anyInt(), anyString())).thenReturn(inv);
+		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
+		when(loc.getWorld()).thenReturn(world);
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(infoItem.getItemMeta()).thenReturn(meta);
+		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
+		when(loc.getChunk()).thenReturn(chunk);
+		when(serviceComponent.getShopDao()).thenReturn(shopDao);
+		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		assertDoesNotThrow(() -> adminshopManager.createAdminShop("myshop", loc, 9));
 	}
 }

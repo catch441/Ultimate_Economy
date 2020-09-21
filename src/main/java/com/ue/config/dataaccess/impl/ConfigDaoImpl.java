@@ -6,6 +6,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.slf4j.Logger;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.SaveFileUtils;
@@ -13,271 +14,311 @@ import com.ue.config.dataaccess.api.ConfigDao;
 
 public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 
-	private final YamlConfiguration fileConfig;
-	private final File file;
-
 	/**
 	 * Config Data Access constructor.
 	 * 
 	 * @param serverProvider
+	 * @param logger
 	 */
 	@Inject
-	public ConfigDaoImpl(ServerProvider serverProvider) {
+	public ConfigDaoImpl(ServerProvider serverProvider, Logger logger) {
+		super(logger);
 		file = new File(serverProvider.getDataFolderPath(), "config.yml");
 		if (!file.exists()) {
 			createFile(file);
 		}
-		fileConfig = YamlConfiguration.loadConfiguration(file);
+		config = YamlConfiguration.loadConfiguration(file);
 	}
 
 	@Override
 	public int loadMaxRentedDays() {
-		return fileConfig.getInt("MaxRentedDays");
+		return config.getInt("MaxRentedDays");
 	}
 
 	@Override
 	public boolean hasMaxRentedDays() {
-		return fileConfig.isSet("MaxRentedDays");
+		return config.isSet("MaxRentedDays");
 	}
 
 	@Override
 	public void saveMaxRentedDays(Integer maxRentedDays) {
-		fileConfig.set("MaxRentedDays", maxRentedDays);
-		save(fileConfig, file);
+		config.set("MaxRentedDays", maxRentedDays);
+		save(config, file);
 	}
 
 	@Override
 	public boolean loadExtendedInteraction() {
-		return fileConfig.getBoolean("ExtendedInteraction");
+		return config.getBoolean("ExtendedInteraction");
 	}
 
 	@Override
 	public boolean hasExtendedInteraction() {
-		return fileConfig.isSet("ExtendedInteraction");
+		return config.isSet("ExtendedInteraction");
 	}
 
 	@Override
 	public void saveExtendedInteraction(Boolean extendedInteraction) {
-		fileConfig.set("ExtendedInteraction", extendedInteraction);
-		save(fileConfig, file);
+		config.set("ExtendedInteraction", extendedInteraction);
+		save(config, file);
 	}
 
 	@Override
 	public boolean loadWildernessInteraction() {
-		return fileConfig.getBoolean("WildernessInteraction");
+		return config.getBoolean("WildernessInteraction");
 	}
 
 	@Override
 	public boolean hasWildernessInteraction() {
-		return fileConfig.isSet("WildernessInteraction");
+		return config.isSet("WildernessInteraction");
 	}
 
 	@Override
 	public void saveWildernessInteraction(Boolean wildernessInteraction) {
-		fileConfig.set("WildernessInteraction", wildernessInteraction);
-		save(fileConfig, file);
+		config.set("WildernessInteraction", wildernessInteraction);
+		save(config, file);
 	}
 
 	@Override
 	public String loadCurrencyPl() {
-		return fileConfig.getString("currencyPl");
+		return config.getString("currencyPl");
 	}
 
 	@Override
 	public boolean hasCurrencyPl() {
-		return fileConfig.isSet("currencyPl");
+		return config.isSet("currencyPl");
 	}
 
 	@Override
 	public void saveCurrencyPl(String currencyPl) {
-		fileConfig.set("currencyPl", currencyPl);
-		save(fileConfig, file);
+		config.set("currencyPl", currencyPl);
+		save(config, file);
 	}
 
 	@Override
 	public String loadCurrencySg() {
-		return fileConfig.getString("currencySg");
+		return config.getString("currencySg");
 	}
 
 	@Override
 	public boolean hasCurrencySg() {
-		return fileConfig.isSet("currencySg");
+		return config.isSet("currencySg");
 	}
 
 	@Override
 	public void saveCurrencySg(String currencySg) {
-		fileConfig.set("currencySg", currencySg);
-		save(fileConfig, file);
+		config.set("currencySg", currencySg);
+		save(config, file);
 	}
 
 	@Override
 	public boolean loadHomesFeature() {
-		return fileConfig.getBoolean("homes");
+		return config.getBoolean("homes");
 	}
 
 	@Override
 	public boolean hasHomesFeature() {
-		return fileConfig.isSet("homes");
+		return config.isSet("homes");
 	}
 
 	@Override
 	public void saveHomesFeature(Boolean homesFeature) {
-		fileConfig.set("homes", homesFeature);
-		save(fileConfig, file);
+		config.set("homes", homesFeature);
+		save(config, file);
 	}
 
 	@Override
 	public int loadMaxPlayershops() {
-		return fileConfig.getInt("MaxPlayershops");
+		return config.getInt("MaxPlayershops");
 	}
 
 	@Override
 	public boolean hasMaxPlayershops() {
-		return fileConfig.isSet("MaxPlayershops");
+		return config.isSet("MaxPlayershops");
 	}
 
 	@Override
 	public void saveMaxPlayershops(Integer maxPlayershops) {
-		fileConfig.set("MaxPlayershops", maxPlayershops);
-		save(fileConfig, file);
+		config.set("MaxPlayershops", maxPlayershops);
+		save(config, file);
 	}
 
 	@Override
 	public int loadMaxJoinedTowns() {
-		return fileConfig.getInt("MaxJoinedTowns");
+		return config.getInt("MaxJoinedTowns");
 	}
 
 	@Override
 	public boolean hasMaxJoinedTowns() {
-		return fileConfig.isSet("MaxJoinedTowns");
+		return config.isSet("MaxJoinedTowns");
 	}
 
 	@Override
 	public void saveMaxJoinedTowns(Integer maxJoinedTowns) {
-		fileConfig.set("MaxJoinedTowns", maxJoinedTowns);
-		save(fileConfig, file);
+		config.set("MaxJoinedTowns", maxJoinedTowns);
+		save(config, file);
 	}
 
 	@Override
 	public int loadMaxJobs() {
-		return fileConfig.getInt("MaxJobs");
+		return config.getInt("MaxJobs");
 	}
 
 	@Override
 	public boolean hasMaxJobs() {
-		return fileConfig.isSet("MaxJobs");
+		return config.isSet("MaxJobs");
 	}
 
 	@Override
 	public void saveMaxJobs(Integer maxJobs) {
-		fileConfig.set("MaxJobs", maxJobs);
-		save(fileConfig, file);
+		config.set("MaxJobs", maxJobs);
+		save(config, file);
 	}
 
 	@Override
 	public int loadMaxHomes() {
-		return fileConfig.getInt("MaxHomes");
+		return config.getInt("MaxHomes");
 	}
 
 	@Override
 	public boolean hasMaxHomes() {
-		return fileConfig.isSet("MaxHomes");
+		return config.isSet("MaxHomes");
 	}
 
 	@Override
 	public void saveMaxHomes(Integer maxHomes) {
-		fileConfig.set("MaxHomes", maxHomes);
-		save(fileConfig, file);
+		config.set("MaxHomes", maxHomes);
+		save(config, file);
 	}
 
 	@Override
 	public String loadCountry() {
-		return fileConfig.getString("localeCountry");
+		return config.getString("localeCountry");
 	}
 
 	@Override
 	public boolean hasCountry() {
-		return fileConfig.isSet("localeCountry");
+		return config.isSet("localeCountry");
 	}
 
 	@Override
 	public void saveCountry(String country) {
-		fileConfig.set("localeCountry", country);
-		save(fileConfig, file);
+		config.set("localeCountry", country);
+		save(config, file);
 	}
 
 	@Override
 	public String loadLanguage() {
-		return fileConfig.getString("localeLanguage");
+		return config.getString("localeLanguage");
 	}
 
 	@Override
 	public boolean hasLanguage() {
-		return fileConfig.isSet("localeLanguage");
+		return config.isSet("localeLanguage");
 	}
 
 	@Override
 	public void saveLanguage(String language) {
-		fileConfig.set("localeLanguage", language);
-		save(fileConfig, file);
+		config.set("localeLanguage", language);
+		save(config, file);
 	}
-	
+
 	@Override
 	public void saveJobcenterList(List<String> jobcenters) {
-		fileConfig.set("JobCenterNames", jobcenters);
-		save(fileConfig, file);
+		config.set("JobCenterNames", jobcenters);
+		save(config, file);
 	}
-	
+
 	@Override
 	public List<String> loadJobcenterList() {
-		return fileConfig.getStringList("JobCenterNames");
+		return config.getStringList("JobCenterNames");
 	}
-	
+
 	@Override
 	public void saveJobList(List<String> jobs) {
-		fileConfig.set("JobList", jobs);
-		save(fileConfig, file);
+		config.set("JobList", jobs);
+		save(config, file);
 	}
-	
+
 	@Override
 	public List<String> loadPlayershopIds() {
-		return fileConfig.getStringList("PlayerShopIds");
+		return config.getStringList("PlayerShopIds");
 	}
-	
+
 	@Override
 	public void savePlayershopIds(List<String> ids) {
-		fileConfig.set("PlayerShopIds", ids);
-		save(fileConfig, file);
+		config.set("PlayerShopIds", ids);
+		save(config, file);
 	}
-	
+
+	@Override
+	public List<String> loadAdminshopIds() {
+		changeAdminshopIdSavename();
+		return config.getStringList("AdminShopIds");
+	}
+
+	@Deprecated
+	private void changeAdminshopIdSavename() {
+		if (config.contains("AdminshopIds")) {
+			config.set("AdminShopIds", config.get("AdminshopIds"));
+			config.set("AdminshopIds", null);
+			save(config, file);
+		}
+	}
+
+	@Override
+	public void saveAdminshopIds(List<String> ids) {
+		config.set("AdminShopIds", ids);
+		save(config, file);
+	}
+
 	@Override
 	public List<String> loadJobList() {
-		return fileConfig.getStringList("JobList");
+		return config.getStringList("JobList");
 	}
-	
+
 	@Deprecated
 	@Override
 	public List<String> loadPlayerShopNames() {
-		return fileConfig.getStringList("PlayerShopNames");
+		return config.getStringList("PlayerShopNames");
 	}
-	
+
 	@Deprecated
 	@Override
 	public boolean hasPlayerShopNames() {
-		return fileConfig.isSet("PlayerShopNames");
+		return config.isSet("PlayerShopNames");
 	}
 
 	@Deprecated
 	@Override
 	public void removeDeprecatedTownNames() {
-		fileConfig.set("TownNames", null);
-		save(fileConfig, file);
+		config.set("TownNames", null);
+		save(config, file);
 	}
-	
+
 	@Deprecated
 	@Override
 	public void removeDeprecatedPlayerShopNames() {
-		fileConfig.set("PlayerShopNames", null);
-		save(fileConfig, file);
+		config.set("PlayerShopNames", null);
+		save(config, file);
+	}
+	
+	
+	@Deprecated
+	@Override
+	public List<String> loadAdminShopNames() {
+		return config.getStringList("ShopNames");
+	}
+
+	@Deprecated
+	@Override
+	public boolean hasAdminShopNames() {
+		return config.isSet("ShopNames");
+	}
+
+	@Deprecated
+	@Override
+	public void removeDeprecatedAdminshopNames() {
+		config.set("ShopNames", null);
+		save(config, file);
 	}
 }

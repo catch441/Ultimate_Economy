@@ -6,13 +6,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.slf4j.Logger;
 
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.common.utils.ServerProvider;
@@ -28,26 +28,31 @@ import com.ue.townsystem.logic.impl.TownSystemException;
 
 public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 
-	@Inject
-	EconomyPlayerManager ecoPlayerManager;
-	@Inject
-	ShopValidationHandler validationHandler;
-	@Inject
-	TownsystemValidationHandler townsystemValidationHandler;
-	private File file;
-	private YamlConfiguration config;
 	private final ServerProvider serverProvider;
+	private final EconomyPlayerManager ecoPlayerManager;
+	private final ShopValidationHandler validationHandler;
+	private final TownsystemValidationHandler townsystemValidationHandler;
 
 	/**
 	 * Inject constructor.
 	 * 
 	 * @param serverProvider
+	 * @param ecoPlayerManager
+	 * @param validationHandler
+	 * @param townsystemValidationHandler
+	 * @param logger
 	 */
 	@Inject
-	public ShopDaoImpl(ServerProvider serverProvider) {
+	public ShopDaoImpl(ServerProvider serverProvider, EconomyPlayerManager ecoPlayerManager,
+			ShopValidationHandler validationHandler, TownsystemValidationHandler townsystemValidationHandler,
+			Logger logger) {
+		super(logger);
 		this.serverProvider = serverProvider;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.validationHandler = validationHandler;
+		this.townsystemValidationHandler = townsystemValidationHandler;
 	}
-	
+
 	@Override
 	public void setupSavefile(String shopId) {
 		file = new File(serverProvider.getDataFolderPath(), shopId + ".yml");
@@ -194,7 +199,7 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	public Location loadShopLocation() throws TownSystemException {
 		String world = getConfig().getString("ShopLocation.World");
 		townsystemValidationHandler.checkForWorldExists(world);
-		return new Location(Bukkit.getWorld(world), getConfig().getDouble("ShopLocation.x"),
+		return new Location(serverProvider.getWorld(world), getConfig().getDouble("ShopLocation.x"),
 				getConfig().getDouble("ShopLocation.y"), getConfig().getDouble("ShopLocation.z"));
 	}
 
@@ -262,10 +267,6 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 		getSavefile().delete();
 	}
 
-	/*
-	 * Deprecated methods
-	 */
-
 	/**
 	 * @deprecated can be removed later
 	 */
@@ -277,8 +278,8 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 						.getEconomyPlayerByName(name.substring(name.indexOf("_") + 1));
 				saveOwner(ecoPlayer);
 			} catch (EconomyPlayerException e) {
-				Bukkit.getLogger().warning("[Ultimate_Economy] Error on save config to file");
-				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+				logger.warn("[Ultimate_Economy] Error on save config to file");
+				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}

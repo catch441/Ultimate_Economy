@@ -295,6 +295,18 @@ public interface ConfigDao {
 	 * @param ids
 	 */
 	public void savePlayershopIds(List<String> ids);
+	
+	/**
+	 * Loads the adminshop ids.
+	 * @return id list
+	 */
+	public List<String> loadAdminshopIds();
+	
+	/**
+	 * Saves the adminshop ids.
+	 * @param ids
+	 */
+	public void saveAdminshopIds(List<String> ids);
 
 	/**
 	 * Remove deprecated stuff.
@@ -333,4 +345,33 @@ public interface ConfigDao {
 	 */
 	@Deprecated
 	public List<String> loadPlayerShopNames();
+
+	/**
+	 * Loads the adminshop names.
+	 * 
+	 * @deprecated
+	 * @since 1.2.6
+	 * @return adminshop names
+	 */
+	@Deprecated
+	public List<String> loadAdminShopNames();
+
+	/**
+	 * Returns true, if the value exists.
+	 * 
+	 * @deprecated
+	 * @since 1.2.6
+	 * @return boolean
+	 */
+	@Deprecated
+	public boolean hasAdminShopNames();
+
+	/**
+	 * Remove deprecated stuff.
+	 * 
+	 * @deprecated
+	 * @since 1.2.6
+	 */
+	@Deprecated
+	public void removeDeprecatedAdminshopNames();
 }

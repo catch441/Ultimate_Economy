@@ -1,28 +1,27 @@
 package com.ue.shopsystem.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.slf4j.Logger;
 
+import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.api.AdminshopManager;
+import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 
-	@Inject
-	AdminshopManager adminshopManager;
+	private final AdminshopManager adminshopManager;
 
 	/**
 	 * Constructor for creating a new adminShop. No validation, if the shopId is
@@ -33,11 +32,18 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 * @param spawnLocation
 	 * @param size
 	 * @param shopDao
+	 * @param serverProvider
+	 * @param skullService
+	 * @param logger
+	 * @param adminshopManager
 	 */
-	public AdminshopImpl(String name, String shopId, Location spawnLocation, int size, ShopDao shopDao) {
-		super(name, shopId, spawnLocation, size, shopDao);
+	public AdminshopImpl(String name, String shopId, Location spawnLocation, int size, ShopDao shopDao,
+			ServerProvider serverProvider, CustomSkullService skullService, Logger logger,
+			AdminshopManager adminshopManager) {
+		super(name, shopId, spawnLocation, size, shopDao, serverProvider, skullService, logger);
+		this.adminshopManager = adminshopManager;
 		getShopVillager().setMetadata("ue-type",
-				new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.ADMINSHOP));
+				new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.ADMINSHOP));
 	}
 
 	/**
@@ -47,12 +53,19 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 * @param name
 	 * @param shopId
 	 * @param shopDao
+	 * @param serverProvider
+	 * @param skullService
+	 * @param logger
+	 * @param adminshopManager
 	 * @throws TownSystemException
 	 */
-	public AdminshopImpl(String name, String shopId, ShopDao shopDao) throws TownSystemException {
-		super(name, shopId, shopDao);
+	public AdminshopImpl(String name, String shopId, ShopDao shopDao, ServerProvider serverProvider,
+			CustomSkullService skullService, Logger logger, AdminshopManager adminshopManager)
+			throws TownSystemException {
+		super(name, shopId, shopDao, serverProvider, skullService, logger);
+		this.adminshopManager = adminshopManager;
 		getShopVillager().setMetadata("ue-type",
-				new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.ADMINSHOP));
+				new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.ADMINSHOP));
 	}
 
 	@Override

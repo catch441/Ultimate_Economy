@@ -349,7 +349,7 @@ public class PlayershopManagerImplTest {
 
 	@SuppressWarnings("deprecation")
 	@Test
-	public void loadAllPlayerShopsTestWithLOadingError() throws TownSystemException {
+	public void loadAllPlayerShopsTestWithLoadingError() throws TownSystemException {
 		Location loc = mock(Location.class);
 		ShopDao shopDao = mock(ShopDao.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);

@@ -63,7 +63,7 @@ public class JobcenterDaoImplTest {
 	}
 
 	@Test
-	public void constructorLoadTest() {
+	public void setupSavefileLoadTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		jobcenterDao.setupSavefile("kthcenter");
 		jobcenterDao.saveJobcenterSize(9);

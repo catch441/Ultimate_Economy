@@ -31,8 +31,6 @@ public class TownsystemDaoImpl extends SaveFileUtils implements TownsystemDao {
 	EconomyPlayerManager ecoPlayerManager;
 	@Inject
 	BankManager bankManager;
-	private File file;
-	private YamlConfiguration config;
 
 	/**
 	 * Default constructor.

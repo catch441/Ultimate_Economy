@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
@@ -24,6 +25,8 @@ public class ConfigDaoImplTest {
 
 	@Mock
 	ServerProvider serverProvider;
+	@Mock
+	Logger logger;
 
 	/**
 	 * Unload all.
@@ -36,7 +39,7 @@ public class ConfigDaoImplTest {
 	@Test
 	public void saveJobcenterListTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.saveJobcenterList(Arrays.asList("center1", "center2"));
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -45,8 +48,8 @@ public class ConfigDaoImplTest {
 	
 	@Test
 	public void loadJobcenterListTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveJobcenterList(Arrays.asList("center1", "center2"));
 		assertEquals(Arrays.asList("center1", "center2"), dao.loadJobcenterList());
 	}
@@ -54,7 +57,7 @@ public class ConfigDaoImplTest {
 	@Test
 	public void saveMaxRentedDaysTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.saveMaxRentedDays(4);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -63,15 +66,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxRentedDaysTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxRentedDays(6);
 		assertEquals(6, dao.loadMaxRentedDays());
 	}
 
 	@Test
 	public void hasMaxRentedDaysTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxRentedDays(6);
 		assertTrue(dao.hasMaxRentedDays());
 		dao.saveMaxRentedDays(null);
@@ -81,7 +84,7 @@ public class ConfigDaoImplTest {
 	@Test
 	public void saveExtendedInteractionTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.saveExtendedInteraction(true);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -90,15 +93,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadExtendedInteractionTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveExtendedInteraction(false);
 		assertFalse(dao.loadExtendedInteraction());
 	}
 
 	@Test
 	public void hasExtendedInteractionTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveExtendedInteraction(false);
 		assertTrue(dao.hasExtendedInteraction());
 		dao.saveExtendedInteraction(null);
@@ -108,7 +111,7 @@ public class ConfigDaoImplTest {
 	@Test
 	public void saveWildernessInteractionTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.saveWildernessInteraction(true);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -117,15 +120,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadWildernessInteractionTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveWildernessInteraction(false);
 		assertFalse(dao.loadWildernessInteraction());
 	}
 
 	@Test
 	public void hasWildernessInteractionTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveWildernessInteraction(false);
 		assertTrue(dao.hasWildernessInteraction());
 		dao.saveWildernessInteraction(null);
@@ -135,7 +138,7 @@ public class ConfigDaoImplTest {
 	@Test
 	public void saveCurrencyPlTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.saveCurrencyPl("kths");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -144,15 +147,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadCurrencyPlTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveCurrencyPl("coins");
 		assertEquals("coins", dao.loadCurrencyPl());
 	}
 
 	@Test
 	public void hasCurrencyPlTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveCurrencyPl("kths");
 		assertTrue(dao.hasCurrencyPl());
 		dao.saveCurrencyPl(null);
@@ -162,7 +165,7 @@ public class ConfigDaoImplTest {
 	@Test
 	public void saveCurrencySgTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.saveCurrencySg("kth");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -171,15 +174,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadCurrencySgTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveCurrencySg("coin");
 		assertEquals("coin", dao.loadCurrencySg());
 	}
 
 	@Test
 	public void hasCurrencySgTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveCurrencySg("kth");
 		assertTrue(dao.hasCurrencySg());
 		dao.saveCurrencySg(null);
@@ -189,7 +192,7 @@ public class ConfigDaoImplTest {
 	@Test
 	public void saveHomesFeatureTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.saveHomesFeature(true);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -198,15 +201,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadHomesFeatureTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveHomesFeature(false);
 		assertFalse(dao.loadHomesFeature());
 	}
 
 	@Test
 	public void hasHomesFeatureTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveHomesFeature(false);
 		assertTrue(dao.hasHomesFeature());
 		dao.saveHomesFeature(null);
@@ -216,7 +219,7 @@ public class ConfigDaoImplTest {
 	@Test
 	public void saveMaxPlayershops() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.saveMaxPlayershops(4);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -225,15 +228,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxPlayershopsTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxPlayershops(6);
 		assertEquals(6, dao.loadMaxPlayershops());
 	}
 
 	@Test
 	public void hasMaxPlayershopsTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxPlayershops(6);
 		assertTrue(dao.hasMaxPlayershops());
 		dao.saveMaxPlayershops(null);
@@ -243,7 +246,7 @@ public class ConfigDaoImplTest {
 	@Test
 	public void saveMaxJoinedTownsTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.saveMaxJoinedTowns(4);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -252,15 +255,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxJoinedTownsTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxJoinedTowns(6);
 		assertEquals(6, dao.loadMaxJoinedTowns());
 	}
 
 	@Test
 	public void hasMaxJoinedTownsTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxJoinedTowns(6);
 		assertTrue(dao.hasMaxJoinedTowns());
 		dao.saveMaxJoinedTowns(null);
@@ -270,7 +273,7 @@ public class ConfigDaoImplTest {
 	@Test
 	public void saveMaxJobsTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.saveMaxJobs(4);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -279,15 +282,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxJobsTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxJobs(6);
 		assertEquals(6, dao.loadMaxJobs());
 	}
 
 	@Test
 	public void hasMaxJobsTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxJobs(6);
 		assertTrue(dao.hasMaxJobs());
 		dao.saveMaxJobs(null);
@@ -297,7 +300,7 @@ public class ConfigDaoImplTest {
 	@Test
 	public void saveMaxHomesTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.saveMaxHomes(4);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -306,15 +309,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxHomesTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxHomes(6);
 		assertEquals(6, dao.loadMaxHomes());
 	}
 
 	@Test
 	public void hasMaxHomesTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxHomes(6);
 		assertTrue(dao.hasMaxHomes());
 		dao.saveMaxHomes(null);
@@ -324,7 +327,7 @@ public class ConfigDaoImplTest {
 	@Test
 	public void saveCountryTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.saveCountry("DE");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -333,15 +336,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadCountryTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveCountry("DE");
 		assertEquals("DE", dao.loadCountry());
 	}
 
 	@Test
 	public void hasCountryTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveCountry("DE");
 		assertTrue(dao.hasCountry());
 		dao.saveCountry(null);
@@ -351,7 +354,7 @@ public class ConfigDaoImplTest {
 	@Test
 	public void saveLanguageTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.saveLanguage("de");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -360,15 +363,15 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadLanguageTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveLanguage("de");
 		assertEquals("de", dao.loadLanguage());
 	}
 
 	@Test
 	public void hasLanguageTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveLanguage("de");
 		assertTrue(dao.hasLanguage());
 		dao.saveLanguage(null);
@@ -378,7 +381,7 @@ public class ConfigDaoImplTest {
 	@Test
 	public void saveJobListTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.saveJobList(Arrays.asList("myJob"));
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -388,16 +391,16 @@ public class ConfigDaoImplTest {
 	
 	@Test
 	public void loadJobListTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveJobList(Arrays.asList("job1", "job2"));
 		assertEquals(Arrays.asList("job1", "job2"), dao.loadJobList());
 	}
 	
 	@Test
 	public void loadPlayershopIdsTest() {
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
-		dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.savePlayershopIds(Arrays.asList("id1", "id2"));
 		assertEquals(Arrays.asList("id1", "id2"), dao.loadPlayershopIds());
 	}
@@ -405,24 +408,59 @@ public class ConfigDaoImplTest {
 	@Test
 	public void savePlayershopIdsTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		dao.savePlayershopIds(Arrays.asList("id"));
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals(1, config.getStringList("PlayerShopIds").size());
 		assertEquals("id", config.getStringList("PlayerShopIds").get(0));
 	}
+	
+	@Test
+	public void loadAdminshopIdsTest() {
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
+		dao.saveAdminshopIds(Arrays.asList("id1", "id2"));
+		assertEquals(Arrays.asList("id1", "id2"), dao.loadAdminshopIds());
+	}
+	
+	@Test
+	public void loadAdminshopIdsTestWithDeprecatedRenaming() {
+		File file = new File("src/config.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("AdminshopIds", Arrays.asList("id1", "id2"));
+		save(file, config);
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
+		dao.saveAdminshopIds(Arrays.asList("id1", "id2"));
+		assertEquals(Arrays.asList("id1", "id2"), dao.loadAdminshopIds());
+		config = YamlConfiguration.loadConfiguration(file);
+		assertFalse(config.contains("AdminshopIds"));
+		assertTrue(config.contains("AdminShopIds"));
+	}
+	
+	@Test
+	public void saveAdminshopIdsTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		File file = new File("src/config.yml");
+		dao.saveAdminshopIds(Arrays.asList("id"));
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		assertEquals(1, config.getStringList("AdminShopIds").size());
+		assertEquals("id", config.getStringList("AdminShopIds").get(0));
+	}
 
 	@SuppressWarnings("deprecation")
 	@Test
 	public void removeDeprecatedTownNamesTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		config.set("TownNames", Arrays.asList("town1", "town2"));
 		assertDoesNotThrow(() -> config.save(file));
-		dao = new ConfigDaoImpl(serverProvider);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.removeDeprecatedTownNames();
 		YamlConfiguration config2 = YamlConfiguration.loadConfiguration(file);
 		assertFalse(config2.isSet("TownNames"));
@@ -432,12 +470,12 @@ public class ConfigDaoImplTest {
 	@Test
 	public void removeDeprecatedPlayerShopNamesTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		config.set("PlayerShopNames", Arrays.asList("shop1", "shop2"));
 		assertDoesNotThrow(() -> config.save(file));
-		dao = new ConfigDaoImpl(serverProvider);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.removeDeprecatedPlayerShopNames();
 		YamlConfiguration config2 = YamlConfiguration.loadConfiguration(file);
 		assertFalse(config2.isSet("PlayerShopNames"));
@@ -447,12 +485,12 @@ public class ConfigDaoImplTest {
 	@Test
 	public void hasPlayerShopNamesTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		config.set("PlayerShopNames", Arrays.asList("shop1", "shop2"));
 		assertDoesNotThrow(() -> config.save(file));
-		dao = new ConfigDaoImpl(serverProvider);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		assertTrue(dao.hasPlayerShopNames());
 	}
 	
@@ -460,12 +498,57 @@ public class ConfigDaoImplTest {
 	@Test
 	public void loadPlayerShopNamesTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		ConfigDao dao = new ConfigDaoImpl(serverProvider);
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		File file = new File("src/config.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		config.set("PlayerShopNames", Arrays.asList("shop1", "shop2"));
 		assertDoesNotThrow(() -> config.save(file));
-		dao = new ConfigDaoImpl(serverProvider);
+		dao = new ConfigDaoImpl(serverProvider, logger);
 		assertEquals(Arrays.asList("shop1", "shop2"), dao.loadPlayerShopNames());
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Test
+	public void removeDeprecatedAdminShopNamesTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		File file = new File("src/config.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("ShopNames", Arrays.asList("shop1", "shop2"));
+		assertDoesNotThrow(() -> config.save(file));
+		dao = new ConfigDaoImpl(serverProvider, logger);
+		dao.removeDeprecatedAdminshopNames();
+		YamlConfiguration config2 = YamlConfiguration.loadConfiguration(file);
+		assertFalse(config2.isSet("ShopNames"));
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Test
+	public void hasAdminShopNamesTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		File file = new File("src/config.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("ShopNames", Arrays.asList("shop1", "shop2"));
+		assertDoesNotThrow(() -> config.save(file));
+		dao = new ConfigDaoImpl(serverProvider, logger);
+		assertTrue(dao.hasAdminShopNames());
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Test
+	public void loadAdminShopNamesTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		File file = new File("src/config.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("ShopNames", Arrays.asList("shop1", "shop2"));
+		assertDoesNotThrow(() -> config.save(file));
+		dao = new ConfigDaoImpl(serverProvider, logger);
+		assertEquals(Arrays.asList("shop1", "shop2"), dao.loadAdminShopNames());
+	}
+	
+	private void save(File file, YamlConfiguration config) {
+		assertDoesNotThrow(() -> config.save(file));
 	}
 }
