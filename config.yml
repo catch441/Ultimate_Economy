@@ -1,0 +1,19 @@
+PlayerShopIds:
+- id1
+- id2
+JobCenterNames:
+- center1
+- center2
+AdminShopIds:
+- id1
+- id2
+JobList:
+- job1
+- job2
+MaxJoinedTowns: 6
+MaxPlayershops: 6
+localeCountry: DE
+ExtendedInteraction: false
+MaxRentedDays: 6
+homes: false
+localeLanguage: de

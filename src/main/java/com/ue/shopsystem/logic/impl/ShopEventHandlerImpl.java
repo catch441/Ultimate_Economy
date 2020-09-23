@@ -105,7 +105,8 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 			reservedSlots = 1;
 		}
 		if (event.getClick() == ClickType.MIDDLE) {
-			handleSwitchStockpile(abstractShop, ecoPlayer, economyVillager);
+			String inventoryName = event.getView().getTitle();
+			handleSwitchStockpile(abstractShop, ecoPlayer, economyVillager, inventoryName);
 		} else if (event.getRawSlot() < (abstractShop.getSize() - reservedSlots)
 				|| event.getRawSlot() >= abstractShop.getSize()) {
 			switch (event.getClick()) {
@@ -125,9 +126,8 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 	}
 
 	private void handleSwitchStockpile(AbstractShop abstractShop, EconomyPlayer ecoPlayer,
-			EconomyVillager economyVillager) throws ShopSystemException {
+			EconomyVillager economyVillager, String inventoryName) throws ShopSystemException {
 		if (economyVillager == EconomyVillager.PLAYERSHOP) {
-			String inventoryName = ecoPlayer.getPlayer().getOpenInventory().getTitle();
 			if ((abstractShop.getName() + "-Stock").equals(inventoryName)) {
 				abstractShop.openShopInventory(ecoPlayer.getPlayer());
 			} else {
@@ -138,6 +138,9 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 
 	private void handleBuy(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
 			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
+		// check if click was inside the shop inventory, buying should be only possible
+		// inside the
+		// shop inventory, not the player inventory
 		if (event.getClickedInventory() != event.getWhoClicked().getInventory()) {
 			int slot = event.getSlot();
 			abstractShop.buyShopItem(slot, ecoPlayer, true);
@@ -156,14 +159,10 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 		ShopItem shopItem = abstractShop.getShopItem(event.getCurrentItem());
 		if (ecoPlayer.getPlayer().getInventory().containsAtLeast(shopItem.getItemStack(), 1)) {
-			ItemStack original = shopItem.getItemStack().clone();
-			original.setAmount(1);
 			int sellAmount = 0;
 			for (ItemStack is : event.getWhoClicked().getInventory().getStorageContents()) {
 				if (is != null) {
-					ItemStack stack = new ItemStack(is);
-					stack.setAmount(1);
-					if (stack.equals(original)) {
+					if (is.isSimilar(shopItem.getItemStack())) {
 						sellAmount = sellAmount + is.getAmount();
 					}
 				}

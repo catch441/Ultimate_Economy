@@ -207,7 +207,7 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	public ShopItem loadItem(String itemString) {
 		ItemStack stack = null;
 		if (itemString.contains("SPAWNER_")) {
-			stack = new ItemStack(Material.SPAWNER, 1);
+			stack = serverProvider.createItemStack(Material.SPAWNER, 1);
 			ItemMeta meta = stack.getItemMeta();
 			String name = getConfig().getString("ShopItems." + itemString + ".Name");
 			meta.setDisplayName(name.substring(8));

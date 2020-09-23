@@ -1,23 +1,23 @@
 package com.ue.shopsystem.dataaccess.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -25,9 +25,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,14 +36,13 @@ import org.slf4j.Logger;
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
-import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.shopsystem.dataaccess.impl.ShopDaoImpl;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 @ExtendWith(MockitoExtension.class)
 public class ShopDaoImplTest {
@@ -133,32 +130,49 @@ public class ShopDaoImplTest {
 
 	@Test
 	public void saveShopItemTestWithSpawner() {
-		ItemStack stack = new ItemStack(Material.SPAWNER);
-		ItemMeta meta = stack.getItemMeta();
-		meta.setDisplayName("COW");
-		stack.setItemMeta(meta);
-		ShopItem item = new ShopItem(stack, 1, 2, 3, 4);
-		savefileHandler.saveShopItem(item, false);
-		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "A0.yml");
+		ItemStack stack = mock(ItemStack.class);
+		ShopItem item = mock(ShopItem.class);
+		when(item.getItemStack()).thenReturn(stack);
+		when(item.getItemString()).thenReturn("SPAWNER_COW");
+		when(item.getSlot()).thenReturn(4);
+		when(item.getAmount()).thenReturn(1);
+		when(item.getSellPrice()).thenReturn(2.0);
+		when(item.getBuyPrice()).thenReturn(3.0);
+		when(stack.getType()).thenReturn(Material.SPAWNER);
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		shopDao.setupSavefile("A1");
+		shopDao.saveShopItem(item, false);
+		File file = new File("src/A1.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		assertEquals("SPAWNER_COW", config.getString("ShopItems." + item.getItemString() + ".Name"));
-		assertEquals("4", config.getString("ShopItems." + item.getItemString() + ".Slot"));
-		assertEquals("true", config.getString("ShopItems." + item.getItemString() + ".newSaveMethod"));
-		assertEquals("2.0", config.getString("ShopItems." + item.getItemString() + ".sellPrice"));
-		assertEquals("3.0", config.getString("ShopItems." + item.getItemString() + ".buyPrice"));
-		assertEquals("1", config.getString("ShopItems." + item.getItemString() + ".Amount"));
+		assertEquals("4", config.getString("ShopItems.SPAWNER_COW.Slot"));
+		assertEquals("true", config.getString("ShopItems.SPAWNER_COW.newSaveMethod"));
+		assertEquals("2.0", config.getString("ShopItems.SPAWNER_COW.sellPrice"));
+		assertEquals("3.0", config.getString("ShopItems.SPAWNER_COW.buyPrice"));
+		assertEquals("1", config.getString("ShopItems.SPAWNER_COW.Amount"));
+		assertEquals("SPAWNER_COW", config.getString("ShopItems.SPAWNER_COW.Name"));
+
 	}
 
 	@Test
 	public void saveShopItemTestWitDelete() {
-		ItemStack stack = new ItemStack(Material.SPAWNER);
-		ItemMeta meta = stack.getItemMeta();
-		meta.setDisplayName("COW");
-		stack.setItemMeta(meta);
-		ShopItem item = new ShopItem(stack, 1, 2, 3, 4);
-		savefileHandler.saveShopItem(item, false);
-		savefileHandler.saveShopItem(item, true);
-		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "A0.yml");
+		ItemStack stack = mock(ItemStack.class);
+		ShopItem item = mock(ShopItem.class);
+		when(item.getItemStack()).thenReturn(stack);
+		Map<String, Object> map = new HashMap<>();
+		map.put("==", "org.bukkit.inventory.ItemStack");
+		map.put("v", 1976);
+		map.put("type", "STONE");
+		when(stack.serialize()).thenReturn(map);
+		when(item.getItemString()).thenReturn("ItemStack{STONE x 1}");
+		when(item.getSlot()).thenReturn(4);
+		when(item.getAmount()).thenReturn(1);
+		when(item.getSellPrice()).thenReturn(2.0);
+		when(item.getBuyPrice()).thenReturn(3.0);
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		shopDao.setupSavefile("A1");
+		shopDao.saveShopItem(item, false);
+		shopDao.saveShopItem(item, true);
+		File file = new File("src/A1.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertNull(config.getString("ShopItems." + item.getItemString() + ".Name"));
 		assertNull(config.getString("ShopItems." + item.getItemString() + ".Slot"));
@@ -329,52 +343,80 @@ public class ShopDaoImplTest {
 		assertEquals("2.0", String.valueOf(loaded.getY()));
 		assertEquals("3.0", String.valueOf(loaded.getZ()));
 		assertEquals(world, loaded.getWorld());
+		assertDoesNotThrow(() -> verify(townsystemValidationHandler).checkForWorldExists("World"));
 	}
 
 	@Test
-	public void loadShopLocationTestWithInvalidWorld() {
-		WorldMock world2 = new WorldMock();
-		world2.setName("newWorld");
-		Location loc = new Location(world2, 1, 2, 3);
-		savefileHandler.saveShopLocation(loc);
-		try {
-			savefileHandler.loadShopLocation();
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals("§cThe world §4<unknown>§c does not exist on this server!", e.getMessage());
-		}
+	public void loadShopLocationTestWithInvalidWorld() throws TownSystemException {
+		doThrow(TownSystemException.class).when(townsystemValidationHandler).checkForWorldExists("World");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		shopDao.setupSavefile("A1");
+		World world = mock(World.class);
+		when(world.getName()).thenReturn("World");
+		Location loc = new Location(world, 1, 2, 3);
+		shopDao.saveShopLocation(loc);
+		assertThrows(TownSystemException.class, () -> shopDao.loadShopLocation());
 	}
 
 	@Test
 	public void loadItemTest() {
-		ItemStack stack = new ItemStack(Material.STONE);
-		ShopItem item = new ShopItem(stack, 1, 2, 3, 4);
-		savefileHandler.saveShopItem(item, false);
-		ShopItem result = savefileHandler.loadItem("ItemStack{STONE x 1}");
-		assertEquals("ItemStack{STONE x 1}", result.getItemString());
+		ItemStack stack = mock(ItemStack.class);
+		ShopItem item = mock(ShopItem.class);
+		when(item.getItemStack()).thenReturn(stack);
+		Map<String, Object> map = new HashMap<>();
+		map.put("==", "org.bukkit.inventory.ItemStack");
+		map.put("v", 1976);
+		map.put("type", "STONE");
+		when(stack.serialize()).thenReturn(map);
+		when(item.getItemString()).thenReturn("ItemStack{STONE x 1}");
+		when(item.getSlot()).thenReturn(4);
+		when(item.getAmount()).thenReturn(1);
+		when(item.getSellPrice()).thenReturn(2.0);
+		when(item.getBuyPrice()).thenReturn(3.0);
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		shopDao.setupSavefile("A1");
+		shopDao.saveShopItem(item, false);
+		ShopItem result = shopDao.loadItem("ItemStack{STONE x 1}");
 		assertEquals(4, result.getSlot());
 		assertEquals("2.0", String.valueOf(result.getSellPrice()));
 		assertEquals("3.0", String.valueOf(result.getBuyPrice()));
 		assertEquals(1, result.getAmount());
-		assertEquals(Material.STONE, result.getItemStack().getType());
+		
+		//cannot be tested
+		//assertEquals("ItemStack{STONE x 1}", result.getItemString());
+		//assertNotNull(result.getItemStack());
 	}
 
 	@Test
 	public void loadItemTestWithSpawner() {
-		ItemStack stack = new ItemStack(Material.SPAWNER);
-		ItemMeta meta = stack.getItemMeta();
-		meta.setDisplayName("PIG");
-		stack.setItemMeta(meta);
-		ShopItem item = new ShopItem(stack, 1, 2, 3, 4);
-		savefileHandler.saveShopItem(item, false);
-		ShopItem result = savefileHandler.loadItem("SPAWNER_PIG");
+		ItemStack stack = mock(ItemStack.class);
+		ShopItem item = mock(ShopItem.class);
+		when(item.getItemStack()).thenReturn(stack);
+		when(item.getItemString()).thenReturn("SPAWNER_PIG");
+		when(item.getSlot()).thenReturn(4);
+		when(item.getAmount()).thenReturn(1);
+		when(item.getSellPrice()).thenReturn(2.0);
+		when(item.getBuyPrice()).thenReturn(3.0);
+		when(stack.getType()).thenReturn(Material.SPAWNER);
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		shopDao.setupSavefile("A1");
+		shopDao.saveShopItem(item, false);
+		ItemStack stackResult = mock(ItemStack.class);
+		ItemStack stackResultCopy = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		when(serverProvider.createItemStack(Material.SPAWNER, 1)).thenReturn(stackResult);
+		when(stackResult.getItemMeta()).thenReturn(meta);
+		when(stackResult.clone()).thenReturn(stackResultCopy);
+		when(stackResult.getType()).thenReturn(Material.SPAWNER);
+		when(meta.getDisplayName()).thenReturn("PIG");
+		ShopItem result = shopDao.loadItem("SPAWNER_PIG");
+		verify(meta).setDisplayName("PIG");
 		assertEquals("SPAWNER_PIG", result.getItemString());
 		assertEquals(4, result.getSlot());
 		assertEquals("2.0", String.valueOf(result.getSellPrice()));
 		assertEquals("3.0", String.valueOf(result.getBuyPrice()));
 		assertEquals(1, result.getAmount());
-		assertEquals(Material.SPAWNER, result.getItemStack().getType());
-		assertEquals("PIG", result.getItemStack().getItemMeta().getDisplayName());
+		assertEquals(stackResultCopy, result.getItemStack());
 	}
 
 	@Test
@@ -393,30 +435,38 @@ public class ShopDaoImplTest {
 
 	@Test
 	public void changeSavefileNameTest() {
-		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "A2.yml");
-		try {
-			file.createNewFile();
-			savefileHandler.changeSavefileName(UltimateEconomy.getInstance.getDataFolder(), "A3");
-			File result = new File(UltimateEconomy.getInstance.getDataFolder(), "A2.yml");
-			assertTrue(result.exists());
-			result.delete();
-		} catch (IOException | ShopSystemException e) {
-			fail();
-		}
+		shopDao.setupSavefile("A2");
+		assertDoesNotThrow(() -> shopDao.changeSavefileName(new File("src"), "A3"));
+		File result = new File("src/A2.yml");
+		assertFalse(result.exists());
+		File result2 = new File("src/A3.yml");
+		assertTrue(result2.exists());
+		assertDoesNotThrow(() -> verify(validationHandler).checkForRenamingSavefileIsPossible(any(File.class)));
+		result2.delete();
+		result.delete();
 	}
 
 	@Test
-	public void changeSavefileNameTestWithNotPossible() {
-		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "A2.yml");
-		try {
-			file.createNewFile();
-			savefileHandler.changeSavefileName(UltimateEconomy.getInstance.getDataFolder(), "A0");
-			fail();
-		} catch (IOException | ShopSystemException e) {
-			assertTrue(e instanceof ShopSystemException);
-			assertEquals("§cAn error occurred while renaming!", e.getMessage());
-			file.delete();
-		}
+	public void changeSavefileNameTestWithNotPossible() throws ShopSystemException {
+		doThrow(ShopSystemException.class).when(validationHandler).checkForRenamingSavefileIsPossible(any());
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		shopDao.setupSavefile("A2");
+		assertThrows(ShopSystemException.class, () -> shopDao.changeSavefileName(new File("src"), "A3"));
+		File result = new File("src/A2.yml");
+		assertTrue(result.exists());
+		File result2 = new File("src/A3.yml");
+		assertFalse(result2.exists());
+		result2.delete();
+		result.delete();
+	}
+	
+	@Test
+	public void deleteSavefileTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		shopDao.setupSavefile("A1");
+		shopDao.deleteFile();
+		File result = new File("src/A1.yml");
+		assertFalse(result.exists());
 	}
 
 	@Test
@@ -463,27 +513,40 @@ public class ShopDaoImplTest {
 
 	@Test
 	public void loadOwnerTestWithOldConvert() {
-		assertEquals("kthschnll", savefileHandler.loadOwner("kthschnll"));
-		File file = new File(UltimateEconomy.getInstance.getDataFolder(), "A0.yml");
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		shopDao.setupSavefile("A1");
+		when(ecoPlayer.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
+		assertEquals("catch441", shopDao.loadOwner("myshop_catch441"));
+		File file = new File("src/A1.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		assertEquals("kthschnll", config.getString("Owner"));
+		assertEquals("catch441", config.getString("Owner"));
 	}
 
 	@Test
-	public void loadOwnerTestWithInvalidPlayer() {
-		savefileHandler.loadOwner("myshop_catch441");
-		// only logged
+	public void loadOwnerTestWithInvalidPlayer() throws EconomyPlayerException {
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
+		when(e.getMessage()).thenReturn("my error message");
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
+		shopDao.setupSavefile("A1");
+		shopDao.loadOwner("myshop_catch441");
+		verify(logger).warn("[Ultimate_Economy] Error on save config to file");
+		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
 	}
 
 	@Test
 	public void loadItemNameListTestWithOldConvert() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		shopDao.setupSavefile("A1");
 		List<String> list = new ArrayList<>();
 		list.add("kth1");
 		list.add("kth2");
 		list.add("ANVIL_0");
 		list.add("CRAFTING_TABLE_0");
-		savefileHandler.saveItemNames(list);
-		List<String> result = savefileHandler.loadItemNameList();
+		shopDao.saveItemNames(list);
+		List<String> result = shopDao.loadItemNameList();
 		assertEquals(2, result.size());
 		assertEquals("kth1", result.get(0));
 		assertEquals("kth2", result.get(1));

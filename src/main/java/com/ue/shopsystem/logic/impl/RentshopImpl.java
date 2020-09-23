@@ -12,6 +12,7 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Rentshop;
+import com.ue.shopsystem.logic.api.RentshopRentGuiHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.EconomyVillager;
@@ -307,7 +308,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		}
 	}
 
-	protected RentshopRentGuiHandlerImpl getRentGuiHandler() {
+	protected RentshopRentGuiHandler getRentGuiHandler() {
 		return rentGuiHandler;
 	}
 
