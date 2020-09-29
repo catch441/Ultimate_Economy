@@ -24,7 +24,7 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 
-	private Inventory slotEditor;
+	private Inventory slotEditorInv;
 	private int selectedEditorSlot;
 	private AbstractShop shop;
 	private final CustomSkullService skullService;
@@ -53,11 +53,11 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	}
 
 	private void setupSlotEditor() {
-		slotEditor = serverProvider.createInventory(getShop().getShopVillager(), 27, getShop().getName() + "-SlotEditor");
+		slotEditorInv = serverProvider.createInventory(getShop().getShopVillager(), 27, getShop().getName() + "-SlotEditor");
 		setupFactorItem();
-		setupSaveItem();
-		setupExitItem();
-		setupRemoveItem();
+		setupDefaultItem(Material.GREEN_WOOL, ChatColor.YELLOW + "save changes", 8);
+		setupDefaultItem(Material.RED_WOOL, ChatColor.RED + "exit without save", 7);
+		setupDefaultItem(Material.BARRIER, ChatColor.RED + "remove item", 26);
 	}
 
 	private void setupFactorItem() {
@@ -65,51 +65,31 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		getSlotEditorInventory().setItem(12, item);
 		getSlotEditorInventory().setItem(21, item);
 	}
-
-	private void setupRemoveItem() {
-		ItemStack item = serverProvider.createItemStack(Material.BARRIER, 1);
+	
+	private void setupDefaultItem(Material material, String displayName, int slot) {
+		ItemStack item = serverProvider.createItemStack(material, 1);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(ChatColor.RED + "remove item");
+		meta.setDisplayName(displayName);
 		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(26, item);
-	}
-
-	private void setupExitItem() {
-		ItemStack item = serverProvider.createItemStack(Material.RED_WOOL, 1);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(ChatColor.RED + "exit without save");
-		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(7, item);
-	}
-
-	private void setupSaveItem() {
-		ItemStack item = serverProvider.createItemStack(Material.GREEN_WOOL, 1);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(ChatColor.YELLOW + "save changes");
-		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(8, item);
+		getSlotEditorInventory().setItem(slot, item);
 	}
 
 	@Override
 	public Inventory getSlotEditorInventory() {
-		return slotEditor;
+		return slotEditorInv;
 	}
 
 	@Override
 	public void changeInventoryName(String newName) {
 		Inventory slotEditorNew = serverProvider.createInventory(getShop().getShopVillager(), 27, newName + "-SlotEditor");
 		slotEditorNew.setContents(getSlotEditorInventory().getContents());
-		slotEditor = slotEditorNew;
+		slotEditorInv = slotEditorNew;
 	}
 
 	@Override
 	public void setSelectedSlot(int slot) throws ShopSystemException, GeneralEconomyException {
 		selectedEditorSlot = slot;
 		setupSlotEditorWithShopItemInformations(slot);
-	}
-
-	private int getSelectedSlot() {
-		return selectedEditorSlot;
 	}
 
 	private AbstractShop getShop() {
@@ -139,7 +119,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 
 	private void setupSlotItemInSlotEditor(int slot) throws GeneralEconomyException, ShopSystemException {
 		if (validationHandler.isSlotEmpty(slot, getShop().getShopInventory(), 1)) {
-			ItemStack item = new ItemStack(Material.BARRIER);
+			ItemStack item = serverProvider.createItemStack(Material.BARRIER, 1);
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName(ChatColor.GREEN + "select item");
 			item.setItemMeta(meta);
@@ -177,12 +157,13 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	@Override
 	public void handleSlotEditor(InventoryClickEvent event) {
 		if (event.getCurrentItem() != null) {
+			event.setCancelled(true);
 			Player player = (Player) event.getWhoClicked();
 			try {
 				int slot = event.getSlot();
 				String operator = getOperatorForHandleSlotEditor(event, slot);
 				double price = getPriceForHandleSlotEditor(event, slot);
-				ItemStack editorItemStack = slotEditor.getItem(0);
+				ItemStack editorItemStack = slotEditorInv.getItem(0);
 				String command = null;
 				if (event.getCurrentItem().getItemMeta() != null) {
 					command = event.getCurrentItem().getItemMeta().getDisplayName();
@@ -247,39 +228,36 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		double sellPrice = Double
 				.valueOf(getSlotEditorInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
 		validationHandler.checkForPricesGreaterThenZero(sellPrice, buyPrice);
-		ItemStack itemStack = getSlotEditorInventory().getItem(0);
-		// make a copy of the edited/created item
-		ItemStack stackInEditor = new ItemStack(itemStack);
-		stackInEditor.setAmount(1);
+		ItemStack stackInEditor = getSlotEditorInventory().getItem(0);
 		try {
-			ShopItem shopItem = getShop().getShopItem(getSelectedSlot());
+			ShopItem shopItem = getShop().getShopItem(selectedEditorSlot);
 			// slot is occupied, check if item changed
-			if (!shopItem.getItemString().equals(stackInEditor.toString())) {
+			if (!shopItem.getItemStack().isSimilar(stackInEditor)) {
 				// remove and add
 				handleRemoveItem(player);
-				getShop().addShopItem(getSelectedSlot(), sellPrice, buyPrice, itemStack);
+				getShop().addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
 				player.sendMessage(
-						messageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
+						messageWrapper.getString("shop_addItem", stackInEditor.getType().toString().toLowerCase()));
 			} else {
 				// edit
-				player.sendMessage(getShop().editShopItem(getSelectedSlot(), String.valueOf(itemStack.getAmount()),
+				player.sendMessage(getShop().editShopItem(selectedEditorSlot, String.valueOf(stackInEditor.getAmount()),
 						String.valueOf(sellPrice), String.valueOf(buyPrice)));
 			}
 		} catch (GeneralEconomyException | ShopSystemException e) {
 			// item is new
 			validationHandler.checkForItemDoesNotExist(stackInEditor.toString(), getShop().getItemList());
-			if (itemStack.getType() != Material.BARRIER) {
-				getShop().addShopItem(getSelectedSlot(), sellPrice, buyPrice, itemStack);
+			if (stackInEditor.getType() != Material.BARRIER) {
+				getShop().addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
 				player.sendMessage(
-						messageWrapper.getString("shop_addItem", itemStack.getType().toString().toLowerCase()));
+						messageWrapper.getString("shop_addItem", stackInEditor.getType().toString().toLowerCase()));
 			}
 		}
 	}
 
 	private void handleRemoveItem(Player player) throws ShopSystemException, GeneralEconomyException {
-		ItemStack item = getShop().getShopItem(getSelectedSlot()).getItemStack();
+		ItemStack item = getShop().getShopItem(selectedEditorSlot).getItemStack();
 		String deletedIem = item.getType().toString().toLowerCase();
-		getShop().removeShopItem(getSelectedSlot());
+		getShop().removeShopItem(selectedEditorSlot);
 		if (item.getType() == Material.SPAWNER) {
 			player.sendMessage(
 					messageWrapper.getString("shop_removeSpawner", item.getItemMeta().getDisplayName().toLowerCase()));
@@ -338,6 +316,8 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 			} else {
 				if (editorItemStack.getAmount() > value) {
 					editorItemStack.setAmount(editorItemStack.getAmount() - value);
+				} else {
+					editorItemStack.setAmount(1);
 				}
 			}
 		}
@@ -360,11 +340,11 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		case 13:
 		case 14:
 		case 15:
-			return Double.valueOf(event.getInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
+			return Double.valueOf(getSlotEditorInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
 		case 22:
 		case 23:
 		case 24:
-			return Double.valueOf(event.getInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
+			return Double.valueOf(getSlotEditorInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
 		default:
 			return 0.0;
 		}
@@ -375,15 +355,15 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		case 4:
 		case 5:
 		case 6:
-			return event.getInventory().getItem(2).getItemMeta().getDisplayName();
+			return getSlotEditorInventory().getItem(2).getItemMeta().getDisplayName();
 		case 13:
 		case 14:
 		case 15:
-			return event.getInventory().getItem(11).getItemMeta().getDisplayName();
+			return getSlotEditorInventory().getItem(11).getItemMeta().getDisplayName();
 		case 22:
 		case 23:
 		case 24:
-			return event.getInventory().getItem(20).getItemMeta().getDisplayName();
+			return getSlotEditorInventory().getItem(20).getItemMeta().getDisplayName();
 		default:
 			return null;
 		}
