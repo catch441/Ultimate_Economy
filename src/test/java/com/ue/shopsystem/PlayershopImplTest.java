@@ -1,112 +1,155 @@
 package com.ue.shopsystem;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 
+import com.ue.common.utils.ComponentProvider;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
+import com.ue.common.utils.ServiceComponent;
+import com.ue.config.dataaccess.api.ConfigDao;
+import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
+import com.ue.shopsystem.dataaccess.api.ShopDao;
+import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.Playershop;
+import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.impl.PlayershopImpl;
 import com.ue.shopsystem.logic.impl.ShopSystemException;
+import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.townsystem.logic.impl.TownworldManagerImpl;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.UltimateEconomy;
 
-public class PlayershopTest {
+@ExtendWith(MockitoExtension.class)
+public class PlayershopImplTest {
 
-	private static final String SLOTEMPTY = "http://textures.minecraft.net/texture/"
-			+ "b55d5019c8d55bcb9dc3494ccc3419757f89c3384cf3c9abec3f18831f35b0";
+	@Mock
+	ServerProvider serverProvider;
+	@Mock
+	MessageWrapper messageWrapper;
+	@Mock
+	ShopValidationHandler validationHandler;
+	@Mock
+	TownsystemValidationHandler townsystemValidationHandler;
+	@Mock
+	ComponentProvider componentProvider;
+	@Mock
+	ConfigDao configDao;
+	@Mock
+	Logger logger;
+	@Mock
+	CustomSkullService customSkullService;
+	@Mock
+	ConfigManager configManager;
 
 	/**
-	 * Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-			Playershop response = PlayershopController.getPlayerShops().get(0);
-			assertEquals(world, response.getWorld());
-			assertEquals("P0", response.getShopId());
-			assertEquals("myshop", response.getName());
-			assertEquals(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), response.getOwner());
-			assertEquals(EconomyVillager.PLAYERSHOP, response.getShopVillager().getMetadata("ue-type").get(0).value());
-			// check shop inventory
-			ChestInventoryMock shopInv = (ChestInventoryMock) response.getShopInventory();
-			assertEquals(9, shopInv.getSize());
-			assertEquals("myshop", shopInv.getName());
-			assertEquals(Material.CRAFTING_TABLE, shopInv.getItem(7).getType());
-			assertEquals("Stock", shopInv.getItem(7).getItemMeta().getDisplayName());
-			assertEquals(2, shopInv.getItem(7).getItemMeta().getLore().size());
-			assertEquals(ChatColor.RED + "Only for Shopowner", shopInv.getItem(7).getItemMeta().getLore().get(0));
-			assertEquals(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile",
-					shopInv.getItem(7).getItemMeta().getLore().get(1));
-			assertEquals(Material.ANVIL, shopInv.getItem(8).getType());
-			assertEquals("Info", shopInv.getItem(8).getItemMeta().getDisplayName());
-			assertEquals("§6Rightclick: §asell specified amount", shopInv.getItem(8).getItemMeta().getLore().get(0));
-			assertEquals("§6Shift-Rightclick: §asell all", shopInv.getItem(8).getItemMeta().getLore().get(1));
-			assertEquals("§6Leftclick: §abuy", shopInv.getItem(8).getItemMeta().getLore().get(2));
-			// check editor inventory
-			response.openEditor(player);
-			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
-			player.closeInventory();
-			assertEquals(9, editor.getSize());
-			assertEquals("myshop-Editor", editor.getName());
-			assertNull(editor.getItem(7));
-			assertNull(editor.getItem(8));
-			// check stock inventory
-			ChestInventoryMock stock = (ChestInventoryMock) response.getStockpileInventory();
-			assertEquals(9, stock.getSize());
-			assertEquals("myshop-Stock", stock.getName());
-			assertNull(stock.getItem(0));
-			assertNull(stock.getItem(1));
-			assertNull(stock.getItem(2));
-			assertNull(stock.getItem(3));
-			assertNull(stock.getItem(4));
-			assertNull(stock.getItem(5));
-			assertNull(stock.getItem(6));
-			assertNull(stock.getItem(7));
-			assertEquals("Infos", stock.getItem(8).getItemMeta().getDisplayName());
-			assertEquals(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "close stockpile",
-					stock.getItem(8).getItemMeta().getLore().get(0));
-			assertEquals(ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "add specified amount",
-					stock.getItem(8).getItemMeta().getLore().get(1));
-			assertEquals(ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "add all",
-					stock.getItem(8).getItemMeta().getLore().get(2));
-			assertEquals(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "get specified amount",
-					stock.getItem(8).getItemMeta().getLore().get(3));
-			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "P0.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-			assertEquals("catch441", config.getString("Owner"));
-			assertEquals(1, UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopIds").size());
-			assertEquals("P0", UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopIds").get(0));
-		} catch (ShopSystemException | GeneralEconomyException | TownSystemException | EconomyPlayerException e) {
-			fail();
-		}
+	 * Location location = new Location(world, 1.5, 2.3, 6.9); try {
+	 * PlayershopController.createPlayerShop("myshop", location, 9,
+	 * EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0)); Playershop response
+	 * = PlayershopController.getPlayerShops().get(0); assertEquals(world,
+	 * response.getWorld()); assertEquals("P0", response.getShopId());
+	 * assertEquals("myshop", response.getName());
+	 * assertEquals(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0),
+	 * response.getOwner()); assertEquals(EconomyVillager.PLAYERSHOP,
+	 * response.getShopVillager().getMetadata("ue-type").get(0).value()); // check
+	 * shop inventory ChestInventoryMock shopInv = (ChestInventoryMock)
+	 * response.getShopInventory(); assertEquals(9, shopInv.getSize());
+	 * assertEquals("myshop", shopInv.getName());
+	 * assertEquals(Material.CRAFTING_TABLE, shopInv.getItem(7).getType());
+	 * assertEquals("Stock", shopInv.getItem(7).getItemMeta().getDisplayName());
+	 * assertEquals(2, shopInv.getItem(7).getItemMeta().getLore().size());
+	 * assertEquals(ChatColor.RED + "Only for Shopowner",
+	 * shopInv.getItem(7).getItemMeta().getLore().get(0));
+	 * assertEquals(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN +
+	 * "open/close stockpile", shopInv.getItem(7).getItemMeta().getLore().get(1));
+	 * assertEquals(Material.ANVIL, shopInv.getItem(8).getType());
+	 * assertEquals("Info", shopInv.getItem(8).getItemMeta().getDisplayName());
+	 * assertEquals("§6Rightclick: §asell specified amount",
+	 * shopInv.getItem(8).getItemMeta().getLore().get(0));
+	 * assertEquals("§6Shift-Rightclick: §asell all",
+	 * shopInv.getItem(8).getItemMeta().getLore().get(1));
+	 * assertEquals("§6Leftclick: §abuy",
+	 * shopInv.getItem(8).getItemMeta().getLore().get(2)); // check editor inventory
+	 * response.openEditor(player); ChestInventoryMock editor = (ChestInventoryMock)
+	 * player.getOpenInventory().getTopInventory(); player.closeInventory();
+	 * assertEquals(9, editor.getSize()); assertEquals("myshop-Editor",
+	 * editor.getName()); assertNull(editor.getItem(7));
+	 * assertNull(editor.getItem(8)); // check stock inventory ChestInventoryMock
+	 * stock = (ChestInventoryMock) response.getStockpileInventory();
+	 * assertEquals(9, stock.getSize()); assertEquals("myshop-Stock",
+	 * stock.getName()); assertNull(stock.getItem(0)); assertNull(stock.getItem(1));
+	 * assertNull(stock.getItem(2)); assertNull(stock.getItem(3));
+	 * assertNull(stock.getItem(4)); assertNull(stock.getItem(5));
+	 * assertNull(stock.getItem(6)); assertNull(stock.getItem(7));
+	 * assertEquals("Infos", stock.getItem(8).getItemMeta().getDisplayName());
+	 * assertEquals(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "close
+	 * stockpile", stock.getItem(8).getItemMeta().getLore().get(0));
+	 * assertEquals(ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "add
+	 * specified amount", stock.getItem(8).getItemMeta().getLore().get(1));
+	 * assertEquals(ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "add
+	 * all", stock.getItem(8).getItemMeta().getLore().get(2));
+	 * assertEquals(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "get
+	 * specified amount", stock.getItem(8).getItemMeta().getLore().get(3)); // check
+	 * savefile File saveFile = new
+	 * File(UltimateEconomy.getInstance.getDataFolder(), "P0.yml");
+	 * YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
+	 * assertEquals("catch441", config.getString("Owner")); assertEquals(1,
+	 * UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopIds").size());
+	 * assertEquals("P0",
+	 * UltimateEconomy.getInstance.getConfig().getStringList("PlayerShopIds").get(0));
+	 * } catch (ShopSystemException | GeneralEconomyException | TownSystemException
+	 * | EconomyPlayerException e) { fail(); }
 	 */
-	
+
 	@Test
 	public void loadConstructorTest() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -178,37 +221,69 @@ public class PlayershopTest {
 		}
 	}
 
-	@Test
-	public void buyShopItemTestWithTooSmallStock() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-			Playershop shop = PlayershopController.getPlayerShops().get(0);
-			shop.addShopItem(0, 1, 2, new ItemStack(Material.STONE));
-			EconomyPlayer player = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(1);
-			shop.buyShopItem(0, player, true);
-			fail();
-		} catch (ShopSystemException | TownSystemException | EconomyPlayerException | GeneralEconomyException e) {
-			assertTrue(e instanceof ShopSystemException);
-			assertEquals("§cThis item is unavailable!", e.getMessage());
-		}
+	private Playershop createPlayershop() {
+		Plugin plugin = mock(Plugin.class);
+		Location loc = mock(Location.class);
+		World world = mock(World.class);
+		Villager villager = mock(Villager.class);
+		Chunk chunk = mock(Chunk.class);
+		ShopDao shopDao = mock(ShopDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		ItemStack infoItem = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		Inventory inv = mock(Inventory.class);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		when(meta.getDisplayName()).thenReturn("Info");
+		when(serverProvider.createInventory(eq(villager), anyInt(), anyString())).thenReturn(inv);
+		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
+		when(loc.getWorld()).thenReturn(world);
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(infoItem.getItemMeta()).thenReturn(meta);
+		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
+		when(loc.getChunk()).thenReturn(chunk);
+		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		return new PlayershopImpl("myshop", ecoPlayer, "P0", loc, 9, shopDao, serverProvider, customSkullService,
+				logger, validationHandler, null, messageWrapper, configManager, null, null);
 	}
 
 	@Test
-	public void buyShopItemTestWithInvalidSlot() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			PlayershopController.createPlayerShop("myshop", location, 9,
-					EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0));
-			Playershop shop = PlayershopController.getPlayerShops().get(0);
-			EconomyPlayer player = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(1);
-			shop.buyShopItem(10, player, true);
-			fail();
-		} catch (ShopSystemException | TownSystemException | EconomyPlayerException | GeneralEconomyException e) {
-			assertTrue(e instanceof GeneralEconomyException);
-			assertEquals("§cThe parameter §411§c is invalid!", e.getMessage());
-		}
+	public void buyShopItemTestWithTooSmallStock() throws ShopSystemException {
+		Playershop shop = createPlayershop();
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemMeta stackMeta = mock(ItemMeta.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		when(stack.getAmount()).thenReturn(1);
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 2, stack));		
+		doThrow(ShopSystemException.class).when(validationHandler).checkForValidStockDecrease(0, 1);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		Player player = mock(Player.class);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		
+		assertThrows(ShopSystemException.class, () -> shop.buyShopItem(0, ecoPlayer, true));
+	
+		verify(player, never()).sendMessage(anyString());
+		assertDoesNotThrow(() -> verify(ecoPlayer, never()).decreasePlayerAmount(anyDouble(), eq(true)));
+	}
+
+	@Test
+	public void buyShopItemTestWithInvalidSlot() throws GeneralEconomyException {
+		Playershop shop = createPlayershop();
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemMeta stackMeta = mock(ItemMeta.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		when(stack.getAmount()).thenReturn(1);
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 2, stack));		
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidSlot(9, 9, 2);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		assertThrows(GeneralEconomyException.class, () -> shop.buyShopItem(9, ecoPlayer, true));
+	
+		assertDoesNotThrow(() -> verify(ecoPlayer, never()).decreasePlayerAmount(anyDouble(), eq(true)));
 	}
 
 	@Test
@@ -376,7 +451,7 @@ public class PlayershopTest {
 			fail();
 		}
 	}
-	
+
 	@Test
 	public void buyShopItemTestWithNoBuyPrice() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);
@@ -563,7 +638,7 @@ public class PlayershopTest {
 			fail();
 		}
 	}
-	
+
 	@Test
 	public void sellShopItemTestOnyBuyPrice() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);

@@ -168,27 +168,33 @@ public class ProviderModule {
 	@Provides
 	AdminshopManager provideAdminshopManager(ComponentProvider componentProvider,
 			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ServerProvider serverProvider,
-			CustomSkullService skullService, ConfigDao configDao) {
+			CustomSkullService skullService, ConfigDao configDao, ConfigManager configManager) {
 		Logger logger = LoggerFactory.getLogger(AdminshopManagerImpl.class);
 		return new AdminshopManagerImpl(componentProvider, validationHandler, messageWrapper, logger, serverProvider,
-				skullService, configDao);
+				skullService, configDao, configManager);
 	}
 
 	@Singleton
 	@Provides
 	PlayershopManager providePlayershopManager(ConfigDao configDao, ComponentProvider componentProvider,
 			TownsystemValidationHandler townsystemValidationHandler, ShopValidationHandler validationHandler,
-			MessageWrapper messageWrapper, ServerProvider serverProvider, CustomSkullService skullService) {
+			MessageWrapper messageWrapper, ServerProvider serverProvider, CustomSkullService skullService,
+			EconomyPlayerManager ecoPlayerManager, ConfigManager configManager, TownworldManager townworldManager) {
 		Logger logger = LoggerFactory.getLogger(PlayershopManagerImpl.class);
 		return new PlayershopManagerImpl(configDao, townsystemValidationHandler, validationHandler, messageWrapper,
-				componentProvider, logger, serverProvider, skullService);
+				componentProvider, logger, serverProvider, skullService, ecoPlayerManager, configManager,
+				townworldManager);
 	}
 
 	@Singleton
 	@Provides
 	RentshopManager provideRentshopManager(ComponentProvider componentProvider, ServerProvider serverProvider,
-			ShopValidationHandler validationHandler, MessageWrapper messageWrapper) {
-		return new RentshopManagerImpl(serverProvider, validationHandler, messageWrapper, componentProvider);
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, CustomSkullService skullService,
+			EconomyPlayerManager ecoPlayerManager, ConfigManager configManager, TownworldManager townworldManager,
+			PlayershopManager playershopManager, ConfigDao configDao) {
+		Logger logger = LoggerFactory.getLogger(RentshopManagerImpl.class);
+		return new RentshopManagerImpl(serverProvider, validationHandler, messageWrapper, componentProvider, logger,
+				skullService, ecoPlayerManager, configManager, townworldManager, playershopManager, configDao);
 	}
 
 	@Singleton

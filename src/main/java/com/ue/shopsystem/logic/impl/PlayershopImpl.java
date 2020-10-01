@@ -3,8 +3,6 @@ package com.ue.shopsystem.logic.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,13 +13,17 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.slf4j.Logger;
 
+import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
+import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.PlayershopManager;
+import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
@@ -30,10 +32,9 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
-	@Inject
-	PlayershopManager playershopManager;
-	@Inject
-	TownworldManager townworldManager;
+	protected final EconomyPlayerManager ecoPlayerManager;
+	protected final TownworldManager townworldManager;
+	protected final PlayershopManager playershopManager;
 	private EconomyPlayer owner;
 	private Inventory stockPile;
 
@@ -50,10 +51,23 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 * @param serverProvider
 	 * @param customSkullService
 	 * @param logger
+	 * @param validationHandler
+	 * @param ecoPlayerManager
+	 * @param messageWrapper
+	 * @param configManager
+	 * @param townworldManager
+	 * @param playershopManager
 	 */
 	public PlayershopImpl(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size,
-			ShopDao shopDao, ServerProvider serverProvider, CustomSkullService customSkullService, Logger logger) {
-		super(name, shopId, spawnLocation, size, shopDao, serverProvider, customSkullService, logger);
+			ShopDao shopDao, ServerProvider serverProvider, CustomSkullService customSkullService, Logger logger,
+			ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
+			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,
+			PlayershopManager playershopManager) {
+		super(name, shopId, spawnLocation, size, shopDao, serverProvider, customSkullService, logger, validationHandler,
+				messageWrapper, configManager);
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.townworldManager = townworldManager;
+		this.playershopManager = playershopManager;
 		setupPlayerShop(owner);
 	}
 
@@ -67,15 +81,27 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 * @param serverProvider
 	 * @param customSkullService
 	 * @param logger
+	 * @param validationHandler
+	 * @param ecoPlayerManager
+	 * @param messageWrapper
+	 * @param configManager
+	 * @param townworldManager
+	 * @param playershopManager
 	 * @throws TownSystemException
 	 * @throws EconomyPlayerException
 	 * @throws ShopSystemException
 	 * @throws GeneralEconomyException
 	 */
 	public PlayershopImpl(String name, String shopId, ShopDao shopDao, ServerProvider serverProvider,
-			CustomSkullService customSkullService, Logger logger)
+			CustomSkullService customSkullService, Logger logger, ShopValidationHandler validationHandler,
+			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper, ConfigManager configManager,
+			TownworldManager townworldManager, PlayershopManager playershopManager)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException, ShopSystemException {
-		super(name, shopId, shopDao, serverProvider, customSkullService, logger);
+		super(name, shopId, shopDao, serverProvider, customSkullService, logger, validationHandler, messageWrapper,
+				configManager);
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.townworldManager = townworldManager;
+		this.playershopManager = playershopManager;
 		loadExistingPlayerShop(name);
 	}
 

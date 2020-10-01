@@ -45,6 +45,67 @@ public class RentshopTest {
 	private static final String SEVEN = "http://textures.minecraft.net/texture/"
 			+ "9e198fd831cb61f3927f21cf8a7463af5ea3c7e43bd3e8ec7d2948631cce879";
 	
+	/**
+	 * Location location = new Location(world, 1.5, 2.3, 6.9);
+		try {
+			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 5);
+			assertEquals(world, shop.getWorld());
+			assertEquals("R0", shop.getShopId());
+			assertEquals("RentShop#R0", shop.getName());
+			assertNull(shop.getOwner());
+			assertEquals(EconomyVillager.PLAYERSHOP_RENTABLE,
+					shop.getShopVillager().getMetadata("ue-type").get(0).value());
+			assertEquals("5.0", String.valueOf(shop.getRentalFee()));
+			assertTrue(shop.isRentable());
+			assertEquals(0L, shop.getRentUntil());
+			// check rentshop gui
+			shop.openRentGUI(player);
+			ChestInventoryMock gui = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
+			player.closeInventory();
+			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
+			assertEquals("RentShop#R0", gui.getName());
+			assertEquals(9, gui.getSize());
+			assertEquals(Material.GREEN_WOOL, gui.getItem(0).getType());
+			assertEquals(ChatColor.YELLOW + "Rent", gui.getItem(0).getItemMeta().getDisplayName());
+			assertEquals(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + 5.0,
+					gui.getItem(0).getItemMeta().getLore().get(0));
+			assertEquals(Material.CLOCK, gui.getItem(1).getType());
+			assertEquals(1, gui.getItem(1).getItemMeta().getLore().size());
+			assertEquals(ChatColor.YELLOW + "Duration", gui.getItem(1).getItemMeta().getDisplayName());
+			assertEquals(ChatColor.GOLD + "Duration: " + ChatColor.GREEN + 1 + ChatColor.GOLD + " Day",
+					gui.getItem(1).getItemMeta().getLore().get(0));
+			assertEquals(Material.PLAYER_HEAD, gui.getItem(3).getType());
+			assertNull(gui.getItem(3).getItemMeta().getLore());
+			assertEquals("plus", gui.getItem(3).getItemMeta().getDisplayName());
+			assertEquals(PLUS,
+					gui.getItem(3).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+			assertEquals(Material.PLAYER_HEAD, gui.getItem(4).getType());
+			assertEquals(1, gui.getItem(4).getItemMeta().getLore().size());
+			assertEquals("one", gui.getItem(4).getItemMeta().getDisplayName());
+			assertEquals(ChatColor.GOLD + "Duration: " + ChatColor.GREEN + 1 + ChatColor.GOLD + " Day",
+					gui.getItem(4).getItemMeta().getLore().get(0));
+			assertEquals(ONE,
+					gui.getItem(4).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+			assertEquals(Material.PLAYER_HEAD, gui.getItem(4).getType());
+			assertEquals(1, gui.getItem(5).getItemMeta().getLore().size());
+			assertEquals("seven", gui.getItem(5).getItemMeta().getDisplayName());
+			assertEquals(ChatColor.GOLD + "Duration: " + ChatColor.GREEN + 1 + ChatColor.GOLD + " Day",
+					gui.getItem(5).getItemMeta().getLore().get(0));
+			assertEquals(SEVEN,
+					gui.getItem(5).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
+			// check savefile
+			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "R0.yml");
+			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
+			assertEquals("5.0", config.getString("RentalFee"));
+			assertTrue(config.getBoolean("Rentable"));
+			assertEquals(1, UltimateEconomy.getInstance.getConfig().getStringList("RentShopIds").size());
+			assertEquals("R0", UltimateEconomy.getInstance.getConfig().getStringList("RentShopIds").get(0));
+			assertNull(config.getString("RentUntil"));
+		} catch (GeneralEconomyException | ShopSystemException e) {
+			fail();
+		}
+	 */
+	
 	@Test
 	public void constructorLoadTestWithNotRented() {
 		Location location = new Location(world, 1.5, 2.3, 6.9);

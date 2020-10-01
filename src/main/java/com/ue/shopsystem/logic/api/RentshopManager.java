@@ -23,13 +23,6 @@ public interface RentshopManager {
 	public String generateFreeRentShopId();
 	
 	/**
-	 * This method returns a list of rentshop ids.
-	 * 
-	 * @return List of Strings
-	 */
-	public List<String> getRentShopIdList();
-	
-	/**
 	 * This method returns a rentshop by the shipId.
 	 * 
 	 * @param id

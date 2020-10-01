@@ -10,6 +10,9 @@ AdminShopIds:
 JobList:
 - job1
 - job2
+RentShopIds:
+- id1
+- id2
 MaxJoinedTowns: 6
 MaxPlayershops: 6
 localeCountry: DE

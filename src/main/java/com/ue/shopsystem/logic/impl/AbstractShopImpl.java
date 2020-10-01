@@ -7,9 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -31,7 +28,6 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
-import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.AbstractShop;
@@ -46,14 +42,9 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 public abstract class AbstractShopImpl implements AbstractShop {
 
 	protected final ServerProvider serverProvider;
-	@Inject
-	ConfigManager configManager;
-	@Inject
-	ShopValidationHandler validationHandler;
-	@Inject
-	MessageWrapper messageWrapper;
-	@Inject
-	EconomyPlayerManager ecoPlayerManager;
+	protected final CustomSkullService skullService;
+	protected final MessageWrapper messageWrapper;
+	protected final ConfigManager configManager;
 	private Villager villager;
 	private Location location;
 	private Inventory shopInventory;
@@ -63,7 +54,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	private String shopId;
 	private final Logger logger;
 	private final ShopDao shopDao;
-	private final CustomSkullService skullService;
+	private final ShopValidationHandler validationHandler;
 	private ShopSlotEditorHandler slotEditorHandler;
 	private ShopEditorHandler editorHandler;
 
@@ -78,13 +69,20 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 * @param serverProvider
 	 * @param skullService
 	 * @param logger
+	 * @param validationHandler
+	 * @param messageWrapper
+	 * @param configManager
 	 */
 	public AbstractShopImpl(String name, String shopId, Location spawnLocation, int size, ShopDao shopDao,
-			ServerProvider serverProvider, CustomSkullService skullService, Logger logger) {
+			ServerProvider serverProvider, CustomSkullService skullService, Logger logger,
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ConfigManager configManager) {
 		this.shopDao = shopDao;
 		this.serverProvider = serverProvider;
 		this.skullService = skullService;
 		this.logger = logger;
+		this.validationHandler = validationHandler;
+		this.messageWrapper = messageWrapper;
+		this.configManager = configManager;
 		shopDao.setupSavefile(shopId);
 		setupNewShop(name, shopId, spawnLocation, size);
 		slotEditorHandler = new ShopSlotEditorHandlerImpl(serverProvider, messageWrapper, validationHandler,
@@ -97,20 +95,27 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 * unique. If name != null then use old loading otherwise use new loading. If
 	 * you choose old loading, the savefile gets converted to the new save system.
 	 * 
-	 * @param name           deprecated
+	 * @param name              deprecated
 	 * @param shopId
 	 * @param shopDao
 	 * @param serverProvider
 	 * @param skullService
 	 * @param logger
+	 * @param validationHandler
+	 * @param messageWrapper
+	 * @param configManager
 	 * @throws TownSystemException
 	 */
 	public AbstractShopImpl(String name, String shopId, ShopDao shopDao, ServerProvider serverProvider,
-			CustomSkullService skullService, Logger logger) throws TownSystemException {
+			CustomSkullService skullService, Logger logger, ShopValidationHandler validationHandler,
+			MessageWrapper messageWrapper, ConfigManager configManager) throws TownSystemException {
 		this.shopDao = shopDao;
 		this.serverProvider = serverProvider;
 		this.skullService = skullService;
 		this.logger = logger;
+		this.validationHandler = validationHandler;
+		this.messageWrapper = messageWrapper;
+		this.configManager = configManager;
 		shopDao.setupSavefile(shopId);
 		if (name != null) {
 			loadExistingShopOld(name, shopId);
@@ -414,7 +419,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	protected void changeInventoryNames(String name) {
-		Inventory inventoryNew = Bukkit.createInventory(getShopVillager(), getSize(), name);
+		Inventory inventoryNew = serverProvider.createInventory(getShopVillager(), getSize(), name);
 		inventoryNew.setContents(shopInventory.getContents());
 		shopInventory = inventoryNew;
 		getEditorHandler().changeInventoryName(name);
@@ -463,6 +468,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + " "
 					+ configManager.getCurrencyText(sellPrice));
 		} else {
+			System.out.println(configManager == null);
 			list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + " "
 					+ configManager.getCurrencyText(buyPrice));
 			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + " "

@@ -238,6 +238,17 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 		config.set("JobList", jobs);
 		save(config, file);
 	}
+	
+	@Override
+	public List<String> loadRentshopIds() {
+		return config.getStringList("RentShopIds");
+	}
+
+	@Override
+	public void saveRentshopIds(List<String> ids) {
+		config.set("RentShopIds", ids);
+		save(config, file);
+	}
 
 	@Override
 	public List<String> loadPlayershopIds() {

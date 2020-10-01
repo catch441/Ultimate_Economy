@@ -12,6 +12,7 @@ import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
+import com.ue.config.logic.api.ConfigManager;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.api.AdminshopManager;
@@ -31,6 +32,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	private final Logger logger;
 	private final CustomSkullService skullService;
 	private final ConfigDao configDao;
+	private final ConfigManager configManager;
 
 	/**
 	 * Inject constructor.
@@ -42,11 +44,12 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	 * @param serverProvider
 	 * @param skullService
 	 * @param configDao
+	 * @param configManager
 	 */
 	@Inject
 	public AdminshopManagerImpl(ComponentProvider componentProvider, ShopValidationHandler validationHandler,
 			MessageWrapper messageWrapper, Logger logger, ServerProvider serverProvider,
-			CustomSkullService skullService, ConfigDao configDao) {
+			CustomSkullService skullService, ConfigDao configDao, ConfigManager configManager) {
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
 		this.componentProvider = componentProvider;
@@ -54,6 +57,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 		this.serverProvider = serverProvider;
 		this.skullService = skullService;
 		this.configDao = configDao;
+		this.configManager = configManager;
 	}
 
 	@Override
@@ -120,7 +124,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 		validationHandler.checkForShopNameIsFree(getAdminshopNameList(), name, null);
 		ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
 		adminShopList.add(new AdminshopImpl(name, generateFreeAdminShopId(), spawnLocation, size, shopDao,
-				serverProvider, skullService, logger, this));
+				serverProvider, skullService, logger, this, validationHandler, messageWrapper, configManager));
 		configDao.saveAdminshopIds(getAdminshopIdList());
 	}
 
@@ -152,7 +156,8 @@ public class AdminshopManagerImpl implements AdminshopManager {
 		for (String shopId : configDao.loadAdminshopIds()) {
 			try {
 				ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
-				adminShopList.add(new AdminshopImpl(null, shopId, shopDao, serverProvider, skullService, logger, this));
+				adminShopList.add(new AdminshopImpl(null, shopId, shopDao, serverProvider, skullService, logger, this,
+						validationHandler, messageWrapper, configManager));
 			} catch (TownSystemException e) {
 				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
@@ -166,7 +171,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 			try {
 				ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
 				adminShopList.add(new AdminshopImpl(shopName, generateFreeAdminShopId(), shopDao, serverProvider,
-						skullService, logger, this));
+						skullService, logger, this, validationHandler, messageWrapper, configManager));
 			} catch (TownSystemException e) {
 				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopName);
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());

@@ -164,11 +164,14 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 				String operator = getOperatorForHandleSlotEditor(event, slot);
 				double price = getPriceForHandleSlotEditor(event, slot);
 				ItemStack editorItemStack = slotEditorInv.getItem(0);
-				String command = null;
-				if (event.getCurrentItem().getItemMeta() != null) {
-					command = event.getCurrentItem().getItemMeta().getDisplayName();
+				// to exclude any interactio with the selected item
+				if(editorItemStack != event.getCurrentItem()) {
+					String command = "";
+					if (event.getCurrentItem().getItemMeta() != null) {
+						command = event.getCurrentItem().getItemMeta().getDisplayName();
+					}
+					handleSlotEditorCommand(event, player, slot, operator, price, editorItemStack, command);
 				}
-				handleSlotEditorCommand(event, player, slot, operator, price, editorItemStack, command);
 			} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException e) {
 				player.sendMessage(e.getMessage());
 			}
@@ -215,7 +218,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 
 	private void handleAddItemToSlotEditor(ItemStack clickedItem) {
 		if (clickedItem.getType() != Material.SPAWNER) {
-			ItemStack editorItemStack = new ItemStack(clickedItem);
+			ItemStack editorItemStack = clickedItem.clone();
 			editorItemStack.setAmount(1);
 			getSlotEditorInventory().setItem(0, editorItemStack);
 		}

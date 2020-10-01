@@ -7,23 +7,31 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.slf4j.Logger;
 
+import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
+import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
+import com.ue.shopsystem.logic.api.CustomSkullService;
+import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopRentGuiHandler;
+import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
+import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
 	private double rentalFee;
 	private long rentUntil;
-	private boolean rentable; // true, if the shop is not rented
+	private boolean rentable;
 	private RentshopRentGuiHandlerImpl rentGuiHandler;
 
 	/**
@@ -35,9 +43,24 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * @param shopId
 	 * @param rentalFee
 	 * @param shopDao
+	 * @param serverProvider
+	 * @param skullService
+	 * @param logger
+	 * @param validationHandler
+	 * @param ecoPlayerManager
+	 * @param messageWrapper
+	 * @param configManager
+	 * @param townworldManager
+	 * @param playershopManager
 	 */
-	public RentshopImpl(Location spawnLocation, int size, String shopId, double rentalFee, ShopDao shopDao) {
-		super("RentShop#" + shopId, null, shopId, spawnLocation, size, shopDao);
+	public RentshopImpl(Location spawnLocation, int size, String shopId, double rentalFee, ShopDao shopDao,
+			ServerProvider serverProvider, CustomSkullService skullService, Logger logger,
+			ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
+			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,
+			PlayershopManager playershopManager) {
+		super("RentShop#" + shopId, null, shopId, spawnLocation, size, shopDao, serverProvider, skullService, logger,
+				validationHandler, ecoPlayerManager, messageWrapper, configManager, townworldManager,
+				playershopManager);
 		setupNewRentshop(rentalFee);
 	}
 
@@ -47,14 +70,26 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * 
 	 * @param shopId
 	 * @param shopDao
+	 * @param serverProvider
+	 * @param skullService
+	 * @param logger
+	 * @param validationHandler
+	 * @param ecoPlayerManager
+	 * @param messageWrapper
+	 * @param configManager
+	 * @param townworldManager
+	 * @param playershopManager
 	 * @throws TownSystemException
 	 * @throws EconomyPlayerException
 	 * @throws ShopSystemException
 	 * @throws GeneralEconomyException
 	 */
-	public RentshopImpl(String shopId, ShopDao shopDao)
+	public RentshopImpl(String shopId, ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
+			Logger logger, ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
+			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager, PlayershopManager playershopManager)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException, ShopSystemException {
-		super(null, shopId, shopDao);
+		super(null, shopId, shopDao, serverProvider, skullService, logger, validationHandler, ecoPlayerManager,
+				messageWrapper, configManager, townworldManager, playershopManager);
 		loadExistingRentshop();
 	}
 
@@ -243,7 +278,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		changeOwner(player);
 		changeShopName("Shop#" + getShopId());
 		rentable = false;
-		setRentUntil(Calendar.getInstance().getTimeInMillis() + (86400000 * duration));
+		rentUntil = Calendar.getInstance().getTimeInMillis() + (86400000 * duration);
 		getShopDao().saveRentable(isRentable());
 		getShopDao().saveRentUntil(getRentUntil());
 	}
@@ -286,9 +321,9 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	public void resetShop() throws ShopSystemException, GeneralEconomyException {
 		removeAllItems();
 		setOwner(null);
-		getShopDao().saveOwner(null);
-		setRentUntil(0L);
+		rentUntil = 0L;
 		rentable = true;
+		getShopDao().saveOwner(null);
 		getShopDao().saveRentUntil(0L);
 		getShopDao().saveRentable(true);
 		changeProfession(Profession.NITWIT);
@@ -312,15 +347,6 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		return rentGuiHandler;
 	}
 
-	/**
-	 * Set the rent until value. Only public for unit tests.
-	 * 
-	 * @param rentUntil
-	 */
-	public void setRentUntil(long rentUntil) {
-		this.rentUntil = rentUntil;
-	}
-
 	/*
 	 * Setup methods
 	 * 
@@ -330,13 +356,13 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		setupRentalFee(rentalFee);
 		setupRentable();
 		rentGuiHandler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager, skullService, configManager,
-				this);
+				this, serverProvider);
 		setupEconomyVillagerType();
 	}
 
 	private void setupEconomyVillagerType() {
 		getShopVillager().setMetadata("ue-type",
-				new FixedMetadataValue(UltimateEconomy.getInstance, EconomyVillager.PLAYERSHOP_RENTABLE));
+				new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.PLAYERSHOP_RENTABLE));
 	}
 
 	private void setupVillagerName() {
@@ -355,17 +381,12 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		getShopDao().saveRentalFee(rentalFee);
 	}
 
-	/*
-	 * Loading methods
-	 * 
-	 */
-
 	private void loadExistingRentshop() {
 		rentalFee = getShopDao().loadRentalFee();
 		rentable = getShopDao().loadRentable();
-		setRentUntil(getShopDao().loadRentUntil());
+		rentUntil = getShopDao().loadRentUntil();
 		rentGuiHandler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager, skullService, configManager,
-				this);
+				this, serverProvider);
 		setupEconomyVillagerType();
 		setupVillagerName();
 	}

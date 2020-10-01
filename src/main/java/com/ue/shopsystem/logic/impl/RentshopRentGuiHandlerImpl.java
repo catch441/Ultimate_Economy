@@ -3,7 +3,6 @@ package com.ue.shopsystem.logic.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -12,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
@@ -26,6 +26,7 @@ public class RentshopRentGuiHandlerImpl implements RentshopRentGuiHandler {
 	private final CustomSkullService skullService;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final MessageWrapper messageWrapper;
+	private final ServerProvider serverProvider;
 	private Rentshop shop;
 	private Inventory rentShopGUIInv;
 
@@ -37,22 +38,25 @@ public class RentshopRentGuiHandlerImpl implements RentshopRentGuiHandler {
 	 * @param skullService
 	 * @param configManager
 	 * @param shop
+	 * @param serverProvider
 	 */
 	public RentshopRentGuiHandlerImpl(MessageWrapper messageWrapper, EconomyPlayerManager ecoPlayerManager,
-			CustomSkullService skullService, ConfigManager configManager, Rentshop shop) {
+			CustomSkullService skullService, ConfigManager configManager, Rentshop shop,
+			ServerProvider serverProvider) {
 		this.shop = shop;
 		this.configManager = configManager;
 		this.skullService = skullService;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.messageWrapper = messageWrapper;
+		this.serverProvider = serverProvider;
 		setupRentGui();
 	}
 
 	private void setupRentGui() {
-		rentShopGUIInv = Bukkit.createInventory(getShop().getShopVillager(), 9, getShop().getName());
+		rentShopGUIInv = serverProvider.createInventory(getShop().getShopVillager(), 9, getShop().getName());
 		List<String> loreList = new ArrayList<>();
 		loreList.add(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + getShop().getRentalFee());
-		ItemStack itemStack = new ItemStack(Material.GREEN_WOOL, 1);
+		ItemStack itemStack = serverProvider.createItemStack(Material.GREEN_WOOL, 1);
 		ItemMeta meta = itemStack.getItemMeta();
 		meta.setDisplayName(ChatColor.YELLOW + "Rent");
 		meta.setLore(loreList);

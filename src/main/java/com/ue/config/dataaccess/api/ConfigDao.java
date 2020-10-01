@@ -307,6 +307,18 @@ public interface ConfigDao {
 	 * @param ids
 	 */
 	public void saveAdminshopIds(List<String> ids);
+	
+	/**
+	 * Loads the rentshop ids.
+	 * @return ids
+	 */
+	public List<String> loadRentshopIds();
+	
+	/**
+	 * Saves the rentshop ids.
+	 * @param ids
+	 */
+	public void saveRentshopIds(List<String> ids);
 
 	/**
 	 * Remove deprecated stuff.

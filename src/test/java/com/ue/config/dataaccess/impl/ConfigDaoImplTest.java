@@ -417,6 +417,25 @@ public class ConfigDaoImplTest {
 	}
 	
 	@Test
+	public void loadRentshopIdsTest() {
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
+		dao.saveRentshopIds(Arrays.asList("id1", "id2"));
+		assertEquals(Arrays.asList("id1", "id2"), dao.loadRentshopIds());
+	}
+	
+	@Test
+	public void saveRentshopIdsTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		File file = new File("src/config.yml");
+		dao.saveRentshopIds(Arrays.asList("id"));
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		assertEquals(1, config.getStringList("RentShopIds").size());
+		assertEquals("id", config.getStringList("RentShopIds").get(0));
+	}
+	
+	@Test
 	public void loadAdminshopIdsTest() {
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);

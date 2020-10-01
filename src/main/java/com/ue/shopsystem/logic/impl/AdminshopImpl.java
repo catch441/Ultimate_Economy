@@ -7,13 +7,16 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.slf4j.Logger;
 
+import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
+import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.CustomSkullService;
+import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.EconomyVillager;
@@ -36,11 +39,16 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 * @param skullService
 	 * @param logger
 	 * @param adminshopManager
+	 * @param validationHandler
+	 * @param messageWrapper
+	 * @param configManager
 	 */
 	public AdminshopImpl(String name, String shopId, Location spawnLocation, int size, ShopDao shopDao,
 			ServerProvider serverProvider, CustomSkullService skullService, Logger logger,
-			AdminshopManager adminshopManager) {
-		super(name, shopId, spawnLocation, size, shopDao, serverProvider, skullService, logger);
+			AdminshopManager adminshopManager, ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
+			ConfigManager configManager) {
+		super(name, shopId, spawnLocation, size, shopDao, serverProvider, skullService, logger, validationHandler,
+				messageWrapper, configManager);
 		this.adminshopManager = adminshopManager;
 		getShopVillager().setMetadata("ue-type",
 				new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.ADMINSHOP));
@@ -57,12 +65,17 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 * @param skullService
 	 * @param logger
 	 * @param adminshopManager
+	 * @param validationHandler
+	 * @param messageWrapper
+	 * @param configManager
 	 * @throws TownSystemException
 	 */
 	public AdminshopImpl(String name, String shopId, ShopDao shopDao, ServerProvider serverProvider,
-			CustomSkullService skullService, Logger logger, AdminshopManager adminshopManager)
+			CustomSkullService skullService, Logger logger, AdminshopManager adminshopManager,
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ConfigManager configManager)
 			throws TownSystemException {
-		super(name, shopId, shopDao, serverProvider, skullService, logger);
+		super(name, shopId, shopDao, serverProvider, skullService, logger, validationHandler, messageWrapper,
+				configManager);
 		this.adminshopManager = adminshopManager;
 		getShopVillager().setMetadata("ue-type",
 				new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.ADMINSHOP));
