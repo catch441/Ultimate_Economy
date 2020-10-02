@@ -83,8 +83,8 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 
 	@Override
 	public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
-		getValidationHandler().checkForShopNameIsFree(adminshopManager.getAdminshopNameList(), name, null);
-		getValidationHandler().checkForValidShopName(name);
+		validationHandler.checkForShopNameIsFree(adminshopManager.getAdminshopNameList(), name, null);
+		validationHandler.checkForValidShopName(name);
 		setName(name);
 		getShopDao().saveShopName(name);
 		changeInventoryNames(name);
@@ -97,10 +97,10 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	@Override
 	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
 			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
-		getValidationHandler().checkForValidSlot(slot, getSize(), 1);
-		getValidationHandler().checkForPlayerIsOnline(ecoPlayer);
-		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
-		getValidationHandler().checkForPlayerInventoryNotFull(ecoPlayer.getPlayer().getInventory());
+		validationHandler.checkForValidSlot(slot, getSize(), 1);
+		validationHandler.checkForPlayerIsOnline(ecoPlayer);
+		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
+		validationHandler.checkForPlayerInventoryNotFull(ecoPlayer.getPlayer().getInventory());
 		ShopItem shopItem = getShopItem(slot);
 		if (shopItem.getBuyPrice() != 0.0) {
 			// if player has not enough money, then the decrease method throws a

@@ -45,6 +45,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	protected final CustomSkullService skullService;
 	protected final MessageWrapper messageWrapper;
 	protected final ConfigManager configManager;
+	protected final ShopValidationHandler validationHandler;
 	private Villager villager;
 	private Location location;
 	private Inventory shopInventory;
@@ -54,7 +55,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	private String shopId;
 	private final Logger logger;
 	private final ShopDao shopDao;
-	private final ShopValidationHandler validationHandler;
 	private ShopSlotEditorHandler slotEditorHandler;
 	private ShopEditorHandler editorHandler;
 
@@ -131,7 +131,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	@Override
 	public List<ShopItem> getItemList() throws ShopSystemException {
-		return new ArrayList<>(getShopItemMap().values());
+		return new ArrayList<>(shopItems.values());
 	}
 
 	@Override
@@ -161,8 +161,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	@Override
 	public ShopItem getShopItem(int slot) throws GeneralEconomyException, ShopSystemException {
-		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
-		return getShopItemMap().get(slot);
+		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
+		return shopItems.get(slot);
 	}
 
 	@Override
@@ -177,7 +177,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		}
 		original.setAmount(1);
 		String clickedItemString = original.toString();
-		for (ShopItem item : getShopItemMap().values()) {
+		for (ShopItem item : shopItems.values()) {
 			if (item.getItemString().equals(clickedItemString)) {
 				return item;
 			}
@@ -194,9 +194,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	@Override
 	public void changeShopSize(int newSize)
 			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
-		getValidationHandler();
-		getValidationHandler().checkForValidSize(newSize);
-		getValidationHandler().checkForResizePossible(getShopInventory(), getSize(), newSize, 1);
+		validationHandler.checkForValidSize(newSize);
+		validationHandler.checkForResizePossible(getShopInventory(), getSize(), newSize, 1);
 		setSize(newSize);
 		getShopDao().saveShopSize(newSize);
 		setupShopInventory();
@@ -207,14 +206,14 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	@Override
 	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack)
 			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
-		getValidationHandler().checkForSlotIsEmpty(slot, getShopInventory(), 1);
-		getValidationHandler().checkForValidPrice(String.valueOf(sellPrice));
-		getValidationHandler().checkForValidPrice(String.valueOf(buyPrice));
-		getValidationHandler().checkForPricesGreaterThenZero(sellPrice, buyPrice);
+		validationHandler.checkForSlotIsEmpty(slot, getShopInventory(), 1);
+		validationHandler.checkForValidPrice(String.valueOf(sellPrice));
+		validationHandler.checkForValidPrice(String.valueOf(buyPrice));
+		validationHandler.checkForPricesGreaterThenZero(sellPrice, buyPrice);
 		ShopItem shopItem = new ShopItem(itemStack, itemStack.getAmount(), sellPrice, buyPrice, slot);
 		String itemString = shopItem.getItemString();
-		getValidationHandler().checkForItemDoesNotExist(itemString, getItemList());
-		getShopItemMap().put(slot, shopItem);
+		validationHandler.checkForItemDoesNotExist(itemString, getItemList());
+		shopItems.put(slot, shopItem);
 		getEditorHandler().setOccupied(true, slot);
 		getShopDao().saveItemNames(getUniqueItemStringList());
 		getShopDao().saveShopItem(shopItem, false);
@@ -224,11 +223,11 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	@Override
 	public String editShopItem(int slot, String newAmount, String newSellPrice, String newBuyPrice)
 			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
-		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
-		getValidationHandler().checkForValidAmount(newAmount);
-		getValidationHandler().checkForValidPrice(newSellPrice);
-		getValidationHandler().checkForValidPrice(newBuyPrice);
-		getValidationHandler().checkForOnePriceGreaterThenZeroIfBothAvailable(newSellPrice, newBuyPrice);
+		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
+		validationHandler.checkForValidAmount(newAmount);
+		validationHandler.checkForValidPrice(newSellPrice);
+		validationHandler.checkForValidPrice(newBuyPrice);
+		validationHandler.checkForOnePriceGreaterThenZeroIfBothAvailable(newSellPrice, newBuyPrice);
 		ShopItem shopItem = getShopItem(slot);
 		String itemString = shopItem.getItemString();
 		String message = ChatColor.GOLD + "Updated ";
@@ -256,12 +255,12 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	@Override
 	public void removeShopItem(int slot) throws ShopSystemException, GeneralEconomyException {
-		getValidationHandler().checkForItemCanBeDeleted(slot, getSize());
-		getValidationHandler().checkForValidSlot(slot, getSize(), 1);
-		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
+		validationHandler.checkForItemCanBeDeleted(slot, getSize());
+		validationHandler.checkForValidSlot(slot, getSize(), 1);
+		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
 		ShopItem shopItem = getShopItem(slot);
 		getShopInventory().clear(slot);
-		getShopItemMap().remove(slot);
+		shopItems.remove(slot);
 		getShopDao().saveItemNames(getUniqueItemStringList());
 		getEditorHandler().setOccupied(false, slot);
 		getShopDao().saveShopItem(shopItem, true);
@@ -274,9 +273,9 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	@Override
 	public void sellShopItem(int slot, int amount, EconomyPlayer ecoPlayer, boolean sendMessage)
 			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
-		getValidationHandler().checkForValidSlot(slot, getSize(), 1);
-		getValidationHandler().checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
-		getValidationHandler().checkForPlayerIsOnline(ecoPlayer);
+		validationHandler.checkForValidSlot(slot, getSize(), 1);
+		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
+		validationHandler.checkForPlayerIsOnline(ecoPlayer);
 		ShopItem shopItem = getShopItem(slot);
 		if (shopItem.getSellPrice() != 0.0) {
 			double sellPrice = shopItem.getSellPrice() / shopItem.getAmount() * amount;
@@ -354,18 +353,13 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	protected void removeItemFromInventory(Inventory inventory, ItemStack item, int removeAmount) {
-		ItemStack original = item.clone();
 		for (ItemStack s : inventory.getStorageContents()) {
 			if (s != null) {
 				ItemStack stack = s.clone();
-				original.setAmount(1);
-				int amountStack = stack.getAmount();
-				stack.setAmount(1);
-				if (item.equals(stack) && removeAmount != 0) {
-					if (removeAmount >= amountStack) {
-						stack.setAmount(amountStack);
+				if (item.isSimilar(stack) && removeAmount != 0) {
+					if (removeAmount >= stack.getAmount()) {
 						inventory.removeItem(stack);
-						removeAmount -= amountStack;
+						removeAmount -= stack.getAmount();
 					} else {
 						stack.setAmount(removeAmount);
 						inventory.removeItem(stack);
@@ -376,20 +370,12 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		}
 	}
 
-	protected ShopValidationHandler getValidationHandler() {
-		return validationHandler;
-	}
-
 	protected ShopSlotEditorHandler getSlotEditorHandler() {
 		return slotEditorHandler;
 	}
 
 	protected ShopEditorHandler getEditorHandler() {
 		return editorHandler;
-	}
-
-	private Map<Integer, ShopItem> getShopItemMap() {
-		return shopItems;
 	}
 
 	private List<String> getUniqueItemStringList() {
@@ -468,7 +454,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + " "
 					+ configManager.getCurrencyText(sellPrice));
 		} else {
-			System.out.println(configManager == null);
 			list.add(ChatColor.GOLD + String.valueOf(amount) + " buy for " + ChatColor.GREEN + buyPrice + " "
 					+ configManager.getCurrencyText(buyPrice));
 			list.add(ChatColor.GOLD + String.valueOf(amount) + " sell for " + ChatColor.GREEN + sellPrice + " "
@@ -586,7 +571,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	protected void loadShopItem(String itemString) {
 		ShopItem shopItem = getShopDao().loadItem(itemString);
-		getShopItemMap().put(shopItem.getSlot(), shopItem);
+		shopItems.put(shopItem.getSlot(), shopItem);
 		addShopItemToInv(shopItem.getItemStack(), shopItem.getAmount(), shopItem.getSlot(), shopItem.getSellPrice(),
 				shopItem.getBuyPrice());
 	}
