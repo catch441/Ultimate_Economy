@@ -10,7 +10,6 @@ import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -105,10 +104,11 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 * @param messageWrapper
 	 * @param configManager
 	 * @throws TownSystemException
+	 * @throws ShopSystemException 
 	 */
 	public AbstractShopImpl(String name, String shopId, ShopDao shopDao, ServerProvider serverProvider,
 			CustomSkullService skullService, Logger logger, ShopValidationHandler validationHandler,
-			MessageWrapper messageWrapper, ConfigManager configManager) throws TownSystemException {
+			MessageWrapper messageWrapper, ConfigManager configManager) throws TownSystemException, ShopSystemException {
 		this.shopDao = shopDao;
 		this.serverProvider = serverProvider;
 		this.skullService = skullService;
@@ -145,11 +145,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	@Override
-	public World getWorld() {
-		return getShopLocation().getWorld();
-	}
-
-	@Override
 	public ShopDao getShopDao() {
 		return shopDao;
 	}
@@ -167,7 +162,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	@Override
 	public ShopItem getShopItem(ItemStack stack) throws ShopSystemException {
-		ItemStack original = new ItemStack(stack);
+		ItemStack original = stack.clone();
 		ItemMeta itemMeta = original.getItemMeta();
 		if (itemMeta.hasLore()) {
 			List<String> loreList = itemMeta.getLore();
@@ -246,7 +241,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 			getShopDao().saveShopItemBuyPrice(itemString, shopItem.getBuyPrice());
 			message = message + ChatColor.GREEN + "buyPrice ";
 		}
-		loadShopItem(itemString);
+		addShopItemToInv(shopItem.getItemStack(), shopItem.getAmount(), shopItem.getSlot(), shopItem.getSellPrice(),
+				shopItem.getBuyPrice());
 		message = message + ChatColor.GOLD + "for item " + ChatColor.GREEN
 				+ shopItem.getItemStack().getType().name().toLowerCase();
 		return message;
@@ -294,6 +290,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	@Override
 	public void openSlotEditor(Player player, int slot) throws ShopSystemException, GeneralEconomyException {
+		validationHandler.checkForValidSlot(slot, getSize(), 1);
 		getSlotEditorHandler().setSelectedSlot(slot);
 		player.openInventory(getSlotEditorHandler().getSlotEditorInventory());
 	}
@@ -307,7 +304,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	public void deleteShop() {
 		despawnVillager();
 		getShopDao().deleteFile();
-		getWorld().save();
+		getShopLocation().getWorld().save();
 	}
 
 	@Override
@@ -582,13 +579,14 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 */
 
 	@Deprecated
-	private void loadExistingShopOld(String name, String shopId) throws TownSystemException {
+	private void loadExistingShopOld(String name, String shopId) throws TownSystemException, ShopSystemException {
 		try {
 			getShopDao().changeSavefileName(serverProvider.getPluginInstance().getDataFolder(), shopId);
 			loadExistingShop(shopId);
 		} catch (ShopSystemException e) {
 			logger.warn("[Ultimate_Economy] Failed to change savefile name to new save system");
 			logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+			throw e;
 		}
 	}
 }

@@ -69,11 +69,12 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 * @param messageWrapper
 	 * @param configManager
 	 * @throws TownSystemException
+	 * @throws ShopSystemException 
 	 */
 	public AdminshopImpl(String name, String shopId, ShopDao shopDao, ServerProvider serverProvider,
 			CustomSkullService skullService, Logger logger, AdminshopManager adminshopManager,
 			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ConfigManager configManager)
-			throws TownSystemException {
+			throws TownSystemException, ShopSystemException {
 		super(name, shopId, shopDao, serverProvider, skullService, logger, validationHandler, messageWrapper,
 				configManager);
 		this.adminshopManager = adminshopManager;

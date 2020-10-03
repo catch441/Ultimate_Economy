@@ -3,7 +3,6 @@ package com.ue.shopsystem.logic.api;
 import java.util.List;
 
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Villager.Profession;
@@ -47,13 +46,6 @@ public abstract interface AbstractShop {
 	 * @return location
 	 */
 	public Location getShopLocation();
-
-	/**
-	 * Returns the world in which the shop is.
-	 * 
-	 * @return World
-	 */
-	public World getWorld();
 
 	/**
 	 * Returns the savefile handler of this shop.

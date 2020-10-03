@@ -109,6 +109,16 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	public void openStockpile(Player player) throws ShopSystemException {
 		player.openInventory(getStockpileInventory());
 	}
+	
+	/**
+	 * Overridden, because of reserved slots. {@inheritDoc}
+	 */
+	@Override
+	public void openSlotEditor(Player player, int slot) throws ShopSystemException, GeneralEconomyException {
+		validationHandler.checkForValidSlot(slot, getSize(), 2);
+		getSlotEditorHandler().setSelectedSlot(slot);
+		player.openInventory(getSlotEditorHandler().getSlotEditorInventory());
+	}
 
 	/**
 	 * Overridden, because of the shop owner. {@inheritDoc}

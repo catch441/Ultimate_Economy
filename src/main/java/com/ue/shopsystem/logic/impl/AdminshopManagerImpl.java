@@ -158,7 +158,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 				ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
 				adminShopList.add(new AdminshopImpl(null, shopId, shopDao, serverProvider, skullService, logger, this,
 						validationHandler, messageWrapper, configManager));
-			} catch (TownSystemException e) {
+			} catch (TownSystemException | ShopSystemException e) {
 				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
@@ -172,7 +172,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 				ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
 				adminShopList.add(new AdminshopImpl(shopName, generateFreeAdminShopId(), shopDao, serverProvider,
 						skullService, logger, this, validationHandler, messageWrapper, configManager));
-			} catch (TownSystemException e) {
+			} catch (TownSystemException | ShopSystemException e) {
 				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopName);
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
