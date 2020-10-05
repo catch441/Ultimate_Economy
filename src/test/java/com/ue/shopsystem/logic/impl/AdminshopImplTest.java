@@ -2,12 +2,7 @@ package com.ue.shopsystem.logic.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -27,18 +22,12 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Level;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.World;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -47,15 +36,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.potion.PotionData;
-import org.bukkit.potion.PotionType;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -68,24 +50,16 @@ import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
-import com.ue.shopsystem.logic.api.AbstractShop;
 import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.CustomSkullService;
-import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.impl.AdminshopImpl;
-import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
-import com.ue.shopsystem.logic.impl.PlayershopImpl;
 import com.ue.shopsystem.logic.impl.ShopExceptionMessageEnum;
 import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.shopsystem.logic.to.ShopItem;
-import com.ue.townsystem.logic.impl.TownSystemException;
-import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 @ExtendWith(MockitoExtension.class)
 public class AdminshopImplTest {
@@ -327,6 +301,9 @@ public class AdminshopImplTest {
 		Inventory inv = mock(Inventory.class);
 		Inventory editorStuff = mock(Inventory.class);
 		ShopItem shopItem = mock(ShopItem.class);
+		Entity entity = mock(Entity.class);
+		when(entity.getCustomName()).thenReturn("myshop");
+		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(entity));
 		when(infoItemMeta.getDisplayName()).thenReturn("Info");
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-SlotEditor"))).thenReturn(editorStuff);
@@ -357,10 +334,11 @@ public class AdminshopImplTest {
 		when(shopItem.getBuyPrice()).thenReturn(3.0);
 		when(shopItem.getItemStack()).thenReturn(shopItemStack);
 		when(inv.getItem(0)).thenReturn(shopItemStack);
-
+		
 		Adminshop shop = assertDoesNotThrow(() -> new AdminshopImpl(null, "A0", shopDao, serverProvider, skullService,
 				logger, adminshopManager, validationHandler, messageWrapper, configManager));
 
+		verify(entity).remove();
 		verify(shopDao).setupSavefile("A0");
 		verify(shop.getShopVillager()).setCustomName("myshop");
 		verify(shop.getShopVillager()).setCustomNameVisible(true);
@@ -386,7 +364,7 @@ public class AdminshopImplTest {
 		verify(shopItemStackMeta).setLore(Arrays.asList("§65 buy for §a3.0 $", "§65 sell for §a2.0 $"));
 		verify(inv).setItem(0, shopItemStack);
 	}
-	
+
 	@Test
 	public void constructorOldTestWithError() throws ShopSystemException {
 		Plugin plugin = mock(Plugin.class);
@@ -396,14 +374,14 @@ public class AdminshopImplTest {
 		when(plugin.getDataFolder()).thenReturn(dataFolder);
 		when(e.getMessage()).thenReturn("my error message");
 		doThrow(e).when(shopDao).changeSavefileName(dataFolder, "A0");
-		
-		assertThrows(ShopSystemException.class, () -> new AdminshopImpl("myshop", "A0", shopDao, serverProvider, skullService,
-				logger, adminshopManager, validationHandler, messageWrapper, configManager));
-	
+
+		assertThrows(ShopSystemException.class, () -> new AdminshopImpl("myshop", "A0", shopDao, serverProvider,
+				skullService, logger, adminshopManager, validationHandler, messageWrapper, configManager));
+
 		verify(logger).warn("[Ultimate_Economy] Failed to change savefile name to new save system");
 		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
 	}
-	
+
 	@Test
 	public void constructorLoadOldTest() {
 		Plugin plugin = mock(Plugin.class);
@@ -454,8 +432,8 @@ public class AdminshopImplTest {
 		File dataFolder = mock(File.class);
 		when(plugin.getDataFolder()).thenReturn(dataFolder);
 
-		Adminshop shop = assertDoesNotThrow(() -> new AdminshopImpl("myshop", "A0", shopDao, serverProvider, skullService,
-				logger, adminshopManager, validationHandler, messageWrapper, configManager));
+		Adminshop shop = assertDoesNotThrow(() -> new AdminshopImpl("myshop", "A0", shopDao, serverProvider,
+				skullService, logger, adminshopManager, validationHandler, messageWrapper, configManager));
 
 		verifyNoInteractions(logger);
 		assertDoesNotThrow(() -> verify(shopDao).changeSavefileName(dataFolder, "A0"));
@@ -484,7 +462,7 @@ public class AdminshopImplTest {
 		verify(shopItemStackMeta).setLore(Arrays.asList("§65 buy for §a3.0 $", "§65 sell for §a2.0 $"));
 		verify(inv).setItem(0, shopItemStack);
 	}
-	
+
 	@Test
 	public void deleteShopTest() {
 		Adminshop shop = createAdminshop();
@@ -1114,190 +1092,74 @@ public class AdminshopImplTest {
 	}
 
 	@Test
-	public void changeShopSizeTestWithGreaterSize() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			AbstractShop shop = AdminshopManagerImpl.getAdminshopList().get(0);
-			shop.changeShopSize(18);
-			assertEquals(18, shop.getSize());
-			// check inventories
-			assertEquals(18, shop.getShopInventory().getSize());
-			assertEquals(Material.ANVIL, shop.getShopInventory().getItem(17).getType());
-			assertEquals("Info", shop.getShopInventory().getItem(17).getItemMeta().getDisplayName());
-			assertEquals("§6Rightclick: §asell specified amount",
-					shop.getShopInventory().getItem(17).getItemMeta().getLore().get(0));
-			assertEquals("§6Shift-Rightclick: §asell all",
-					shop.getShopInventory().getItem(17).getItemMeta().getLore().get(1));
-			assertEquals("§6Leftclick: §abuy", shop.getShopInventory().getItem(17).getItemMeta().getLore().get(2));
-			shop.openEditor(player);
-			Inventory editor = player.getOpenInventory().getTopInventory();
-			player.closeInventory();
-			assertEquals(18, editor.getSize());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(0).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(1).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(2).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(3).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(4).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(5).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(6).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(7).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(8).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(9).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(10).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(11).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(12).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(13).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(14).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(15).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(16).getType());
-			assertNull(editor.getItem(17));
-			assertEquals("Slot 1", editor.getItem(0).getItemMeta().getDisplayName());
-			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
-			assertEquals("Slot 3", editor.getItem(2).getItemMeta().getDisplayName());
-			assertEquals("Slot 4", editor.getItem(3).getItemMeta().getDisplayName());
-			assertEquals("Slot 5", editor.getItem(4).getItemMeta().getDisplayName());
-			assertEquals("Slot 6", editor.getItem(5).getItemMeta().getDisplayName());
-			assertEquals("Slot 7", editor.getItem(6).getItemMeta().getDisplayName());
-			assertEquals("Slot 8", editor.getItem(7).getItemMeta().getDisplayName());
-			assertEquals("Slot 9", editor.getItem(8).getItemMeta().getDisplayName());
-			assertEquals("Slot 10", editor.getItem(9).getItemMeta().getDisplayName());
-			assertEquals("Slot 11", editor.getItem(10).getItemMeta().getDisplayName());
-			assertEquals("Slot 12", editor.getItem(11).getItemMeta().getDisplayName());
-			assertEquals("Slot 13", editor.getItem(12).getItemMeta().getDisplayName());
-			assertEquals("Slot 14", editor.getItem(13).getItemMeta().getDisplayName());
-			assertEquals("Slot 15", editor.getItem(14).getItemMeta().getDisplayName());
-			assertEquals("Slot 16", editor.getItem(15).getItemMeta().getDisplayName());
-			assertEquals("Slot 17", editor.getItem(16).getItemMeta().getDisplayName());
-			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-			assertEquals(SLOTEMPTY,
-					editor.getItem(0).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(2).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(3).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(4).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(5).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(6).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(7).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(8).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(9).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(10).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(11).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(12).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(13).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(14).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(15).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(16).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "A0.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-			assertEquals(18, config.getInt("ShopSize"));
-		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
-			fail();
-		}
+	public void changeShopSizeTest() {
+		Adminshop shop = createAdminshop();
+		
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		when(stack.getAmount()).thenReturn(2);
+		when(stack.toString()).thenReturn("item string");
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
+		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 4, stack));
+		
+		ShopItem shopItem = assertDoesNotThrow(() -> shop.getShopItem(0));
+		when(shopDao.loadItem("item string")).thenReturn(shopItem);
+		
+		Inventory oldInv = shop.getShopInventory();
+		Inventory inv = mock(Inventory.class);
+		Inventory editorStuff = mock(Inventory.class);
+		ItemStack empty = mock(ItemStack.class);
+		ItemStack filled = mock(ItemStack.class);
+		ItemStack infoItem = mock(ItemStack.class);
+		ItemMeta infoItemMeta = mock(ItemMeta.class);
+		when(inv.getItem(0)).thenReturn(stackClone);
+		when(infoItemMeta.getDisplayName()).thenReturn("Info");
+		when(infoItem.getItemMeta()).thenReturn(infoItemMeta);
+		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(infoItem);
+		when(skullService.getSkullWithName(eq("SLOTFILLED"), anyString())).thenReturn(filled);
+		when(skullService.getSkullWithName(eq("SLOTEMPTY"), anyString())).thenReturn(empty);
+		when(serverProvider.createInventory(shop.getShopVillager(), 18, "myshop-Editor")).thenReturn(editorStuff);
+		when(serverProvider.createInventory(shop.getShopVillager(), 18, "myshop")).thenReturn(inv);
+		assertDoesNotThrow(() -> shop.changeShopSize(18));
+		verify(shopDao).saveShopSize(18);
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(18));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForResizePossible(oldInv, 9, 18, 1));
+		assertEquals(18, shop.getSize());
+		
+		verify(editorStuff, times(16)).setItem(anyInt(), eq(empty));
+		verify(editorStuff).setItem(0, filled);
+
+		verify(serverProvider).createInventory(shop.getShopVillager(), 18, "myshop");
+		verify(serverProvider).createInventory(shop.getShopVillager(), 18, "myshop-Editor");
+
+		verify(inv).setItem(0, stackClone);
+		
+		verify(infoItemMeta).setDisplayName("Info");
+		verify(infoItem, times(2)).setItemMeta(infoItemMeta);
+		verify(infoItemMeta).setLore(Arrays.asList("§6Rightclick: §asell specified amount",
+				"§6Shift-Rightclick: §asell all", "§6Leftclick: §abuy"));
+		verify(inv).setItem(17, infoItem);
+		verify(inv, times(2)).setItem(anyInt(), any(ItemStack.class));
 	}
 
 	@Test
-	public void changeShopSizeTestWithSmallerSize() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			AdminshopManagerImpl.createAdminShop("myshop", location, 18);
-			AbstractShop shop = AdminshopManagerImpl.getAdminshopList().get(0);
-			shop.changeShopSize(9);
-			assertEquals(9, shop.getSize());
-			assertEquals(Material.ANVIL, shop.getShopInventory().getItem(8).getType());
-			assertEquals("Info", shop.getShopInventory().getItem(8).getItemMeta().getDisplayName());
-			assertEquals("§6Rightclick: §asell specified amount",
-					shop.getShopInventory().getItem(8).getItemMeta().getLore().get(0));
-			assertEquals("§6Shift-Rightclick: §asell all",
-					shop.getShopInventory().getItem(8).getItemMeta().getLore().get(1));
-			assertEquals("§6Leftclick: §abuy", shop.getShopInventory().getItem(8).getItemMeta().getLore().get(2));
-			shop.openEditor(player);
-			Inventory editor = player.getOpenInventory().getTopInventory();
-			player.closeInventory();
-			assertEquals(9, editor.getSize());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(0).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(1).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(2).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(3).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(4).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(5).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(6).getType());
-			assertEquals(Material.PLAYER_HEAD, editor.getItem(7).getType());
-			assertNull(editor.getItem(8));
-			assertEquals("Slot 1", editor.getItem(0).getItemMeta().getDisplayName());
-			assertEquals("Slot 2", editor.getItem(1).getItemMeta().getDisplayName());
-			assertEquals("Slot 3", editor.getItem(2).getItemMeta().getDisplayName());
-			assertEquals("Slot 4", editor.getItem(3).getItemMeta().getDisplayName());
-			assertEquals("Slot 5", editor.getItem(4).getItemMeta().getDisplayName());
-			assertEquals("Slot 6", editor.getItem(5).getItemMeta().getDisplayName());
-			assertEquals("Slot 7", editor.getItem(6).getItemMeta().getDisplayName());
-			assertEquals("Slot 8", editor.getItem(7).getItemMeta().getDisplayName());
-			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-			assertEquals(SLOTEMPTY,
-					editor.getItem(0).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(1).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(2).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(3).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(4).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(5).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(6).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(SLOTEMPTY,
-					editor.getItem(7).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
-			fail();
-		}
+	public void changeShopSizeTestWithInvalidSize() throws GeneralEconomyException {
+		Adminshop shop = createAdminshop();
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidSize(18);
+		assertThrows(GeneralEconomyException.class, () -> shop.changeShopSize(18));
+		assertEquals(9, shop.getSize());
 	}
 
 	@Test
-	public void changeShopSizeTestWithInvalidSize() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			AbstractShop shop = AdminshopManagerImpl.getAdminshopList().get(0);
-			shop.changeShopSize(5);
-			fail();
-		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
-			assertTrue(e instanceof GeneralEconomyException);
-			assertEquals("§cThe parameter §45§c is invalid!", e.getMessage());
-		}
-	}
-
-	@Test
-	public void changeShopSizeTestWithOccupiedSlots() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			AdminshopManagerImpl.createAdminShop("myshop", location, 18);
-			AbstractShop shop = AdminshopManagerImpl.getAdminshopList().get(0);
-			shop.addShopItem(15, 0, 1, new ItemStack(Material.STONE));
-			shop.changeShopSize(9);
-			fail();
-		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
-			assertTrue(e instanceof ShopSystemException);
-			assertEquals("§cChanging the shop size has failed due to occupied slots!", e.getMessage());
-		}
+	public void changeShopSizeTestWithOccupiedSlots() throws ShopSystemException, GeneralEconomyException {
+		Adminshop shop = createAdminshop();
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForResizePossible(shop.getShopInventory(),
+				9, 18, 1);
+		assertThrows(GeneralEconomyException.class, () -> shop.changeShopSize(18));
+		assertEquals(9, shop.getSize());
 	}
 
 	@Test
@@ -1305,22 +1167,6 @@ public class AdminshopImplTest {
 		Adminshop shop = createAdminshop();
 		shop.despawnVillager();
 		verify(shop.getShopVillager()).remove();
-	}
-
-	@Test
-	public void getEditorInventoryTest() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			AdminshopManagerImpl.createAdminShop("myshop", location, 9);
-			AbstractShop shop = AdminshopManagerImpl.getAdminshopList().get(0);
-			shop.openEditor(player);
-			ChestInventoryMock editor = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
-			player.closeInventory();
-			assertNotNull(editor);
-			assertEquals("myshop-Editor", editor.getName());
-		} catch (ShopSystemException | GeneralEconomyException e) {
-			fail();
-		}
 	}
 
 	@Test
@@ -1359,7 +1205,11 @@ public class AdminshopImplTest {
 		ItemMeta searchStackCloneMeta = mock(ItemMeta.class);
 		when(searchStackClone.toString()).thenReturn("item string");
 		when(searchStackCloneMeta.hasLore()).thenReturn(true);
-		when(searchStackCloneMeta.getLore()).thenReturn(Arrays.asList("some lore"));
+		ArrayList<String> lore = new ArrayList<>();
+		lore.add("some lore");
+		lore.add("2 buy for 10");
+		lore.add("2 sell for 5");
+		when(searchStackCloneMeta.getLore()).thenReturn(lore);
 		when(searchStackClone.getItemMeta()).thenReturn(searchStackCloneMeta);
 		when(searchStack.clone()).thenReturn(searchStackClone);
 		when(stack.getAmount()).thenReturn(1);

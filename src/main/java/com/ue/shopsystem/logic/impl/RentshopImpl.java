@@ -266,6 +266,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 			setupShopName(name);
 			changeInventoryNames(name);
 			getShopVillager().setCustomName(name + "#" + getShopId());
+			setupStockpile();
 		}
 	}
 

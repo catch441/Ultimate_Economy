@@ -194,8 +194,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		setSize(newSize);
 		getShopDao().saveShopSize(newSize);
 		setupShopInventory();
-		getEditorHandler().setup(1);
 		reloadShopItems();
+		getEditorHandler().setup(1);
 	}
 
 	@Override
@@ -554,10 +554,10 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		setupShopVillager();
 		getShopVillager().setProfession(getShopDao().loadShopVillagerProfession());
 		setupShopInventory();
-		loadShopItems();
 		editorHandler = new ShopEditorHandlerImpl(serverProvider, skullService, this);
 		slotEditorHandler = new ShopSlotEditorHandlerImpl(serverProvider, messageWrapper, validationHandler,
 				skullService, this);
+		loadShopItems();
 	}
 
 	private void loadShopItems() {

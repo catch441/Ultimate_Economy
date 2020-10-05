@@ -374,7 +374,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		setupEconomyVillagerType();
 	}
 
-	private void setupStockpile() {
+	protected void setupStockpile() {
 		stockPile = serverProvider.createInventory(getShopVillager(), getSize(), getName() + "-Stock");
 		ItemStack stockpileSwitchItem = serverProvider.createItemStack(Material.CRAFTING_TABLE, 1);
 		ItemMeta meta = stockpileSwitchItem.getItemMeta();
