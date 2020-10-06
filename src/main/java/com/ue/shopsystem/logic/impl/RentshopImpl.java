@@ -1,7 +1,5 @@
 package com.ue.shopsystem.logic.impl;
 
-import java.util.Calendar;
-
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
@@ -265,7 +263,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		} else {
 			setupShopName(name);
 			changeInventoryNames(name);
-			getShopVillager().setCustomName(name + "#" + getShopId());
+			getShopVillager().setCustomName(name);
 			setupStockpile();
 		}
 	}
@@ -274,12 +272,14 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	public void rentShop(EconomyPlayer player, int duration)
 			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 		validationHandler.checkForIsRentable(isRentable());
+		// minus 1 because the validator can then prevent, that the duration is 0
+		validationHandler.checkForPositiveValue(duration - 1);
 		// throws a playerexception, if the player has not enough money.
 		player.decreasePlayerAmount(duration * getRentalFee(), true);
 		changeOwner(player);
 		changeShopName("Shop#" + getShopId());
 		rentable = false;
-		rentUntil = Calendar.getInstance().getTimeInMillis() + (86400000 * duration);
+		rentUntil = serverProvider.getActualTime() + (86400000 * duration);
 		getShopDao().saveRentable(isRentable());
 		getShopDao().saveRentUntil(getRentUntil());
 	}
@@ -328,7 +328,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		getShopDao().saveRentUntil(0L);
 		getShopDao().saveRentable(true);
 		changeProfession(Profession.NITWIT);
-		changeShopName("RentShop");
+		changeShopName("RentShop#" + getShopId());
 	}
 
 	/*

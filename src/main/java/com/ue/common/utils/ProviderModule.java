@@ -119,7 +119,8 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	MessageWrapper provideMessageWrapper() {
-		return new MessageWrapper();
+		Logger logger = LoggerFactory.getLogger(MessageWrapper.class);
+		return new MessageWrapper(logger);
 	}
 
 	@Singleton

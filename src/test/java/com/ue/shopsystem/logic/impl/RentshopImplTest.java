@@ -7,40 +7,38 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.Arrays;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.World;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -55,23 +53,17 @@ import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.CustomSkullService;
-import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
-import com.ue.shopsystem.logic.impl.PlayershopImpl;
 import com.ue.shopsystem.logic.impl.RentshopImpl;
-import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
 import com.ue.shopsystem.logic.impl.ShopSystemException;
+import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.TownworldManager;
-import com.ue.townsystem.logic.impl.TownSystemException;
-import com.ue.ultimate_economy.EconomyVillager;
 import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 @ExtendWith(MockitoExtension.class)
 public class RentshopImplTest {
@@ -103,59 +95,92 @@ public class RentshopImplTest {
 	@Mock
 	EconomyPlayerManager ecoPlayerManager;
 
-	/**
-	 * Location location = new Location(world, 1.5, 2.3, 6.9); try { Rentshop shop =
-	 * RentshopManagerImpl.createRentShop(location, 9, 5); assertEquals(world,
-	 * shop.getWorld()); assertEquals("R0", shop.getShopId());
-	 * assertEquals("RentShop#R0", shop.getName()); assertNull(shop.getOwner());
-	 * assertEquals(EconomyVillager.PLAYERSHOP_RENTABLE,
-	 * shop.getShopVillager().getMetadata("ue-type").get(0).value());
-	 * assertEquals("5.0", String.valueOf(shop.getRentalFee()));
-	 * assertTrue(shop.isRentable()); assertEquals(0L, shop.getRentUntil()); //
-	 * check rentshop gui shop.openRentGUI(player); ChestInventoryMock gui =
-	 * (ChestInventoryMock) player.getOpenInventory().getTopInventory();
-	 * player.closeInventory(); NamespacedKey key = new
-	 * NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-	 * assertEquals("RentShop#R0", gui.getName()); assertEquals(9, gui.getSize());
-	 * assertEquals(Material.GREEN_WOOL, gui.getItem(0).getType());
-	 * assertEquals(ChatColor.YELLOW + "Rent",
-	 * gui.getItem(0).getItemMeta().getDisplayName()); assertEquals(ChatColor.GOLD +
-	 * "RentalFee: " + ChatColor.GREEN + 5.0,
-	 * gui.getItem(0).getItemMeta().getLore().get(0)); assertEquals(Material.CLOCK,
-	 * gui.getItem(1).getType()); assertEquals(1,
-	 * gui.getItem(1).getItemMeta().getLore().size()); assertEquals(ChatColor.YELLOW
-	 * + "Duration", gui.getItem(1).getItemMeta().getDisplayName());
-	 * assertEquals(ChatColor.GOLD + "Duration: " + ChatColor.GREEN + 1 +
-	 * ChatColor.GOLD + " Day", gui.getItem(1).getItemMeta().getLore().get(0));
-	 * assertEquals(Material.PLAYER_HEAD, gui.getItem(3).getType());
-	 * assertNull(gui.getItem(3).getItemMeta().getLore()); assertEquals("plus",
-	 * gui.getItem(3).getItemMeta().getDisplayName()); assertEquals(PLUS,
-	 * gui.getItem(3).getItemMeta().getPersistentDataContainer().get(key,
-	 * PersistentDataType.STRING)); assertEquals(Material.PLAYER_HEAD,
-	 * gui.getItem(4).getType()); assertEquals(1,
-	 * gui.getItem(4).getItemMeta().getLore().size()); assertEquals("one",
-	 * gui.getItem(4).getItemMeta().getDisplayName()); assertEquals(ChatColor.GOLD +
-	 * "Duration: " + ChatColor.GREEN + 1 + ChatColor.GOLD + " Day",
-	 * gui.getItem(4).getItemMeta().getLore().get(0)); assertEquals(ONE,
-	 * gui.getItem(4).getItemMeta().getPersistentDataContainer().get(key,
-	 * PersistentDataType.STRING)); assertEquals(Material.PLAYER_HEAD,
-	 * gui.getItem(4).getType()); assertEquals(1,
-	 * gui.getItem(5).getItemMeta().getLore().size()); assertEquals("seven",
-	 * gui.getItem(5).getItemMeta().getDisplayName()); assertEquals(ChatColor.GOLD +
-	 * "Duration: " + ChatColor.GREEN + 1 + ChatColor.GOLD + " Day",
-	 * gui.getItem(5).getItemMeta().getLore().get(0)); assertEquals(SEVEN,
-	 * gui.getItem(5).getItemMeta().getPersistentDataContainer().get(key,
-	 * PersistentDataType.STRING)); // check savefile File saveFile = new
-	 * File(UltimateEconomy.getInstance.getDataFolder(), "R0.yml");
-	 * YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-	 * assertEquals("5.0", config.getString("RentalFee"));
-	 * assertTrue(config.getBoolean("Rentable")); assertEquals(1,
-	 * UltimateEconomy.getInstance.getConfig().getStringList("RentShopIds").size());
-	 * assertEquals("R0",
-	 * UltimateEconomy.getInstance.getConfig().getStringList("RentShopIds").get(0));
-	 * assertNull(config.getString("RentUntil")); } catch (GeneralEconomyException |
-	 * ShopSystemException e) { fail(); }
-	 */
+	@Test
+	public void constructorNewTest() {
+		Plugin plugin = mock(Plugin.class);
+		Location loc = mock(Location.class);
+		World world = mock(World.class);
+		Villager villager = mock(Villager.class);
+		Chunk chunk = mock(Chunk.class);
+		ItemStack stockInfoItem = mock(ItemStack.class);
+		ItemStack infoItem = mock(ItemStack.class);
+		ItemStack stuff = mock(ItemStack.class);
+		ItemMeta stuffMeta = mock(ItemMeta.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		ItemMeta stockInfoItemMeta = mock(ItemMeta.class);
+		Inventory inv = mock(Inventory.class);
+		Inventory invStock = mock(Inventory.class);
+		Inventory editorStuff = mock(Inventory.class);
+		when(meta.getDisplayName()).thenReturn("Info");
+		when(stockInfoItemMeta.getDisplayName()).thenReturn("Stock");
+		when(stockInfoItem.getItemMeta()).thenReturn(stockInfoItemMeta);
+		when(stuff.getItemMeta()).thenReturn(stuffMeta);
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-Editor"))).thenReturn(editorStuff);
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-SlotEditor")))
+				.thenReturn(editorStuff);
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0"))).thenReturn(inv);
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-Stock"))).thenReturn(invStock);
+		when(serverProvider.createItemStack(Material.CRAFTING_TABLE, 1)).thenReturn(stockInfoItem);
+		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(infoItem);
+		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(stuff);
+		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(stuff);
+		when(serverProvider.createItemStack(Material.BARRIER, 1)).thenReturn(stuff);
+		when(serverProvider.createItemStack(Material.CLOCK, 1)).thenReturn(stuff);
+		when(loc.getWorld()).thenReturn(world);
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(infoItem.getItemMeta()).thenReturn(meta);
+		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
+		when(loc.getChunk()).thenReturn(chunk);
+		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		RentshopImpl shop = new RentshopImpl(loc, 9, "R0", 5.5, shopDao, serverProvider, customSkullService, logger,
+				validationHandler, null, messageWrapper, configManager, townworldManager, playershopManager);
+
+		verify(shopDao).setupSavefile("R0");
+		verify(shopDao).saveItemNames(new ArrayList<>());
+		verify(shopDao).saveShopLocation(loc);
+		verify(shopDao).saveShopName("RentShop#R0");
+		verify(shopDao, never()).saveOwner(any(EconomyPlayer.class));
+		verify(shop.getShopVillager()).setCustomName("RentShop#R0");
+		verify(shop.getShopVillager()).setCustomNameVisible(true);
+		verify(shop.getShopVillager()).setSilent(true);
+		verify(shop.getShopVillager()).setVillagerLevel(2);
+		verify(shop.getShopVillager()).setCollidable(false);
+		verify(shop.getShopVillager()).setInvulnerable(true);
+		verify(shop.getShopVillager()).setProfession(Profession.NITWIT);
+		verify(shop.getShopVillager()).setMetadata(eq("ue-id"), any(FixedMetadataValue.class));
+		verify(shop.getShopVillager(), times(2)).setMetadata(eq("ue-type"), any(FixedMetadataValue.class));
+		assertEquals("R0", shop.getShopId());
+		assertEquals(loc, shop.getShopLocation());
+		assertNull(shop.getOwner());
+		assertEquals("RentShop#R0", shop.getName());
+
+		verify(meta).setDisplayName("Info");
+		verify(infoItem, times(4)).setItemMeta(meta);
+		verify(meta).setLore(Arrays.asList("§6Rightclick: §asell specified amount", "§6Shift-Rightclick: §asell all",
+				"§6Leftclick: §abuy"));
+		verify(inv).setItem(8, infoItem);
+
+		verify(stockInfoItemMeta).setDisplayName("Stock");
+		verify(stockInfoItem, times(3)).setItemMeta(stockInfoItemMeta);
+		verify(stockInfoItemMeta).setLore(Arrays.asList(ChatColor.RED + "Only for Shopowner",
+				ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile"));
+		verify(inv).setItem(7, stockInfoItem);
+
+		// stockpile
+		verify(stockInfoItemMeta).setDisplayName("Infos");
+		verify(stockInfoItemMeta)
+				.setLore(Arrays.asList(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "close stockpile",
+						ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "add specified amount",
+						ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "add all",
+						ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "get specified amount"));
+		assertDoesNotThrow(() -> verify(shop.getStockpileInventory()).setItem(8, stockInfoItem));
+		// rentshop
+		assertEquals(5.5, shop.getRentalFee());
+		verify(shopDao).saveRentalFee(5.5);
+		assertTrue(shop.isRentable());
+		verify(shopDao).saveRentable(true);
+		assertNotNull(shop.getEditorHandler());
+	}
 
 	private RentshopImpl createRentshop() {
 		Plugin plugin = mock(Plugin.class);
@@ -187,73 +212,95 @@ public class RentshopImplTest {
 
 	@Test
 	public void constructorLoadTestWithNotRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			RentshopManagerImpl.createRentShop(location, 9, 10);
-			Rentshop shop = new RentshopImpl("R0");
-			assertEquals("10.0", String.valueOf(shop.getRentalFee()));
-			assertTrue(shop.isRentable());
-			assertEquals("RentShop#R0", shop.getShopVillager().getCustomName());
-			assertNull(shop.getOwner());
-			assertEquals(EconomyVillager.PLAYERSHOP_RENTABLE,
-					shop.getShopVillager().getMetadata("ue-type").get(0).value());
-			// check rentshop gui
-			shop.openRentGUI(player);
-			ChestInventoryMock gui = (ChestInventoryMock) player.getOpenInventory().getTopInventory();
-			assertEquals(9, gui.getSize());
-			assertEquals("RentShop#R0", gui.getName());
-			assertEquals(1, gui.getItem(0).getAmount());
-			assertEquals(Material.GREEN_WOOL, gui.getItem(0).getType());
-			assertEquals(ChatColor.YELLOW + "Rent", gui.getItem(0).getItemMeta().getDisplayName());
-			assertEquals(1, gui.getItem(0).getItemMeta().getLore().size());
-			assertEquals("§6RentalFee: §a10.0", gui.getItem(0).getItemMeta().getLore().get(0));
-			assertEquals(1, gui.getItem(1).getAmount());
-			assertEquals(Material.CLOCK, gui.getItem(1).getType());
-			assertEquals(ChatColor.YELLOW + "Duration", gui.getItem(1).getItemMeta().getDisplayName());
-			assertEquals(1, gui.getItem(1).getItemMeta().getLore().size());
-			assertEquals("§6Duration: §a1§6 Day", gui.getItem(1).getItemMeta().getLore().get(0));
-			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-			assertEquals(1, gui.getItem(3).getAmount());
-			assertEquals(Material.PLAYER_HEAD, gui.getItem(3).getType());
-			assertEquals("plus", gui.getItem(3).getItemMeta().getDisplayName());
-			assertEquals(PLUS,
-					gui.getItem(3).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(1, gui.getItem(4).getAmount());
-			assertEquals(Material.PLAYER_HEAD, gui.getItem(4).getType());
-			assertEquals("one", gui.getItem(4).getItemMeta().getDisplayName());
-			assertEquals(1, gui.getItem(4).getItemMeta().getLore().size());
-			assertEquals("§6Duration: §a1§6 Day", gui.getItem(4).getItemMeta().getLore().get(0));
-			assertEquals(ONE,
-					gui.getItem(4).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(1, gui.getItem(5).getAmount());
-			assertEquals(Material.PLAYER_HEAD, gui.getItem(5).getType());
-			assertEquals("seven", gui.getItem(5).getItemMeta().getDisplayName());
-			assertEquals(1, gui.getItem(5).getItemMeta().getLore().size());
-			assertEquals("§6Duration: §a1§6 Day", gui.getItem(5).getItemMeta().getLore().get(0));
-			assertEquals(SEVEN,
-					gui.getItem(5).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-		} catch (GeneralEconomyException | TownSystemException | EconomyPlayerException | ShopSystemException e) {
-			fail();
-		}
-	}
+		Plugin plugin = mock(Plugin.class);
+		Location loc = mock(Location.class);
+		World world = mock(World.class);
+		Villager villager = mock(Villager.class);
+		Chunk chunk = mock(Chunk.class);
+		ItemStack stockInfoItem = mock(ItemStack.class);
+		ItemStack infoItem = mock(ItemStack.class);
+		ItemStack stuff = mock(ItemStack.class);
+		ItemMeta stuffMeta = mock(ItemMeta.class);
+		ItemMeta infoItemMeta = mock(ItemMeta.class);
+		ItemMeta stockInfoItemMeta = mock(ItemMeta.class);
+		Inventory inv = mock(Inventory.class);
+		Inventory invStock = mock(Inventory.class);
+		Inventory editorStuff = mock(Inventory.class);
+		when(stockInfoItemMeta.getDisplayName()).thenReturn("Stock");
+		when(infoItemMeta.getDisplayName()).thenReturn("Info");
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-Editor"))).thenReturn(editorStuff);
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-SlotEditor")))
+				.thenReturn(editorStuff);
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0"))).thenReturn(inv);
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-Stock"))).thenReturn(invStock);
+		when(serverProvider.createItemStack(Material.CRAFTING_TABLE, 1)).thenReturn(stockInfoItem);
+		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(infoItem);
+		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(stuff);
+		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(stuff);
+		when(serverProvider.createItemStack(Material.BARRIER, 1)).thenReturn(stuff);
+		when(serverProvider.createItemStack(Material.CLOCK, 1)).thenReturn(stuff);
+		when(loc.getWorld()).thenReturn(world);
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(stuff.getItemMeta()).thenReturn(stuffMeta);
+		when(infoItem.getItemMeta()).thenReturn(infoItemMeta);
+		when(stockInfoItem.getItemMeta()).thenReturn(stockInfoItemMeta);
+		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
+		when(loc.getChunk()).thenReturn(chunk);
+		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(stockInfoItem);
 
-	@Test
-	public void constructorLoadTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop setup = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
-			setup.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 10);
-			Rentshop shop = new RentshopImpl("R0");
-			assertEquals("10.0", String.valueOf(shop.getRentalFee()));
-			assertFalse(shop.isRentable());
-			assertEquals("Shop#R0_catch441", shop.getShopVillager().getCustomName());
-			assertEquals(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), shop.getOwner());
-			assertEquals(EconomyVillager.PLAYERSHOP_RENTABLE,
-					shop.getShopVillager().getMetadata("ue-type").get(0).value());
-		} catch (GeneralEconomyException | TownSystemException | EconomyPlayerException | ShopSystemException e) {
-			fail();
-		}
+		when(shopDao.loadShopName()).thenReturn("RentShop#R0");
+		when(shopDao.loadShopSize()).thenReturn(9);
+		assertDoesNotThrow(() -> when(shopDao.loadShopLocation()).thenReturn(loc));
+		when(shopDao.loadShopVillagerProfession()).thenReturn(Profession.ARMORER);
+		when(shopDao.loadOwner(null)).thenReturn(null);
+		when(shopDao.loadItemNameList()).thenReturn(new ArrayList<>());
+		when(shopDao.loadRentable()).thenReturn(true);
+		when(shopDao.loadRentalFee()).thenReturn(5.5);
+		when(shopDao.loadRentUntil()).thenReturn(0L);
+		RentshopImpl shop = assertDoesNotThrow(
+				() -> new RentshopImpl("R0", shopDao, serverProvider, customSkullService, logger, validationHandler,
+						ecoPlayerManager, messageWrapper, configManager, townworldManager, playershopManager));
+
+		verify(shopDao).setupSavefile("R0");
+		verify(shop.getShopVillager(), times(2)).setCustomName("RentShop#R0");
+		verify(shop.getShopVillager()).setCustomNameVisible(true);
+		verify(shop.getShopVillager()).setSilent(true);
+		verify(shop.getShopVillager()).setVillagerLevel(2);
+		verify(shop.getShopVillager()).setCollidable(false);
+		verify(shop.getShopVillager()).setInvulnerable(true);
+		verify(shop.getShopVillager()).setProfession(Profession.NITWIT);
+		verify(shop.getShopVillager()).setMetadata(eq("ue-id"), any(FixedMetadataValue.class));
+		verify(shop.getShopVillager(), times(2)).setMetadata(eq("ue-type"), any(FixedMetadataValue.class));
+		assertEquals("R0", shop.getShopId());
+		assertEquals(loc, shop.getShopLocation());
+		assertNull(shop.getOwner());
+		assertEquals("RentShop#R0", shop.getName());
+
+		verify(stockInfoItemMeta).setDisplayName("Stock");
+		verify(stockInfoItem, times(5)).setItemMeta(stockInfoItemMeta);
+		verify(stockInfoItemMeta).setLore(Arrays.asList(ChatColor.RED + "Only for Shopowner",
+				ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile"));
+		verify(inv).setItem(7, stockInfoItem);
+
+		verify(infoItemMeta).setDisplayName("Info");
+		verify(infoItem, times(2)).setItemMeta(infoItemMeta);
+		verify(infoItemMeta).setLore(Arrays.asList("§6Rightclick: §asell specified amount",
+				"§6Shift-Rightclick: §asell all", "§6Leftclick: §abuy"));
+		verify(inv).setItem(8, infoItem);
+
+		// stockpile
+		verify(stockInfoItemMeta).setDisplayName("Infos");
+		verify(stockInfoItemMeta)
+				.setLore(Arrays.asList(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "close stockpile",
+						ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "add specified amount",
+						ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "add all",
+						ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "get specified amount"));
+		assertDoesNotThrow(() -> verify(shop.getStockpileInventory()).setItem(8, stockInfoItem));
+		// rentshop
+		assertEquals(5.5, shop.getRentalFee());
+		assertTrue(shop.isRentable());
+		assertEquals(0L, shop.getRentUntil());
+		assertNotNull(shop.getEditorHandler());
 	}
 
 	@Test
@@ -277,175 +324,208 @@ public class RentshopImplTest {
 
 	@Test
 	public void changeShopNameTestWithNotRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			shop.changeShopName("newname");
-			assertEquals("newname", shop.getName());
-			assertEquals("newname#R0", shop.getShopVillager().getCustomName());
-			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "R0.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-			assertEquals("newname", config.getString("ShopName"));
-		} catch (GeneralEconomyException | ShopSystemException e) {
-			fail();
-		}
+		Plugin plugin = mock(Plugin.class);
+		Location loc = mock(Location.class);
+		World world = mock(World.class);
+		Villager villager = mock(Villager.class);
+		Chunk chunk = mock(Chunk.class);
+		ItemStack infoItem = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		Inventory inv = mock(Inventory.class);
+		Inventory invStock = mock(Inventory.class);
+		Inventory editor = mock(Inventory.class);
+		Inventory slotEditor = mock(Inventory.class);
+		when(meta.getDisplayName()).thenReturn("Info");
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-Editor"))).thenReturn(editor);
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-SlotEditor")))
+				.thenReturn(slotEditor);
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0"))).thenReturn(inv);
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-Stock"))).thenReturn(invStock);
+		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
+		when(loc.getWorld()).thenReturn(world);
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(infoItem.getItemMeta()).thenReturn(meta);
+		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
+		when(loc.getChunk()).thenReturn(chunk);
+		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		Rentshop shop = new RentshopImpl(loc, 9, "R0", 5.5, shopDao, serverProvider, customSkullService, logger,
+				validationHandler, null, messageWrapper, configManager, townworldManager, playershopManager);
+
+		Inventory invNew = mock(Inventory.class);
+		Inventory editorNew = mock(Inventory.class);
+		Inventory slotEditorNew = mock(Inventory.class);
+		Inventory stockNew = mock(Inventory.class);
+
+		when(serverProvider.createInventory(shop.getShopVillager(), 9, "newName")).thenReturn(invNew);
+		when(serverProvider.createInventory(shop.getShopVillager(), 9, "newName-Editor")).thenReturn(editorNew);
+		when(serverProvider.createInventory(shop.getShopVillager(), 27, "newName-SlotEditor"))
+				.thenReturn(slotEditorNew);
+		when(serverProvider.createInventory(shop.getShopVillager(), 9, "newName-Stock")).thenReturn(stockNew);
+
+		assertDoesNotThrow(() -> shop.changeShopName("newName"));
+
+		assertEquals("newName", shop.getName());
+		verify(shopDao).saveShopName("newName");
+		verify(invNew).setContents(inv.getContents());
+		verify(editorNew).setContents(editor.getContents());
+		verify(slotEditorNew).setContents(slotEditor.getContents());
+
+		verify(shop.getShopVillager()).setCustomName("newName");
 	}
 
 	@Test
 	public void changeShopNameTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(100, false);
-			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 10);
-			shop.changeShopName("newname");
-			assertEquals("newname", shop.getName());
-			assertEquals("newname_catch441", shop.getShopVillager().getCustomName());
-			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "R0.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-			assertEquals("newname", config.getString("ShopName"));
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		Inventory inv = mock(Inventory.class);
+		Inventory invStock = mock(Inventory.class);
+		Inventory editor = mock(Inventory.class);
+		Inventory slotEditor = mock(Inventory.class);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-Editor")))
+				.thenReturn(editor);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-SlotEditor")))
+				.thenReturn(slotEditor);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0"))).thenReturn(inv);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-Stock")))
+				.thenReturn(invStock);
+
+		assertDoesNotThrow(() -> shop.rentShop(ecoPlayer, 1));
+
+		Inventory invNew = mock(Inventory.class);
+		Inventory editorNew = mock(Inventory.class);
+		Inventory slotEditorNew = mock(Inventory.class);
+		Inventory stockNew = mock(Inventory.class);
+
+		when(serverProvider.createInventory(shop.getShopVillager(), 9, "newName")).thenReturn(invNew);
+		when(serverProvider.createInventory(shop.getShopVillager(), 9, "newName-Editor")).thenReturn(editorNew);
+		when(serverProvider.createInventory(shop.getShopVillager(), 27, "newName-SlotEditor"))
+				.thenReturn(slotEditorNew);
+		when(serverProvider.createInventory(shop.getShopVillager(), 9, "newName-Stock")).thenReturn(stockNew);
+		when(ecoPlayer.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> shop.changeShopName("newName"));
+
+		assertEquals("newName", shop.getName());
+		verify(shopDao).saveShopName("newName");
+		verify(invNew).setContents(inv.getContents());
+		verify(editorNew).setContents(editor.getContents());
+		verify(slotEditorNew).setContents(slotEditor.getContents());
+
+		verify(shop.getShopVillager()).setCustomName("newName_catch441");
 	}
 
 	@Test
 	public void rentShopTest() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			assertEquals("0.0", String.valueOf(ecoPlayer.getBankAccount().getAmount()));
-			assertEquals(ecoPlayer, shop.getOwner());
-			assertEquals("Shop#R0", shop.getName());
-			assertFalse(shop.isRentable());
-			// TODO rent until
-			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "R0.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-			assertFalse(config.getBoolean("Rentable"));
-			assertNotNull(config.getString("RentUntil"));
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+
+		Inventory inv = mock(Inventory.class);
+		Inventory invStock = mock(Inventory.class);
+		Inventory editorStuff = mock(Inventory.class);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-Editor")))
+				.thenReturn(editorStuff);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-SlotEditor")))
+				.thenReturn(editorStuff);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0"))).thenReturn(inv);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-Stock")))
+				.thenReturn(invStock);
+		when(serverProvider.getActualTime()).thenReturn(10L);
+
+		assertDoesNotThrow(() -> shop.rentShop(ecoPlayer, 2));
+
+		verify(shopDao).saveOwner(ecoPlayer);
+		verify(shopDao).saveRentable(false);
+		verify(shopDao).saveRentUntil(172800010L);
+		assertDoesNotThrow(() -> verify(ecoPlayer).decreasePlayerAmount(11.0, true));
+		assertFalse(shop.isRentable());
+		assertEquals(172800010L, shop.getRentUntil());
+		assertEquals(ecoPlayer, shop.getOwner());
+		assertEquals("Shop#R0", shop.getName());
+		assertDoesNotThrow(() -> verify(validationHandler, times(2)).checkForIsRentable(true));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForPositiveValue(1));
 	}
 
 	@Test
-	public void rentShopTestWithNotEnoughMoney() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			shop.rentShop(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), 10);
-			fail();
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			assertTrue(e instanceof EconomyPlayerException);
-			assertEquals("§cYou have not enough money!", e.getMessage());
-		}
+	public void rentShopTestWithNotEnoughMoney() throws GeneralEconomyException, EconomyPlayerException {
+		Rentshop shop = createRentshop();
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		doThrow(EconomyPlayerException.class).when(ecoPlayer).decreasePlayerAmount(5.5, true);
+		assertThrows(EconomyPlayerException.class, () -> shop.rentShop(ecoPlayer, 1));
 	}
 
 	@Test
-	public void rentShopTestWithAlreadyRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.rentShop(ecoPlayer, 10);
-			fail();
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			assertTrue(e instanceof ShopSystemException);
-			assertEquals("§cThis shop is rented!", e.getMessage());
-		}
+	public void rentShopTestWithInvalidDuration() throws GeneralEconomyException {
+		Rentshop shop = createRentshop();
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForPositiveValue(-1);
+		assertThrows(GeneralEconomyException.class, () -> shop.rentShop(null, 0));
+	}
+
+	@Test
+	public void rentShopTestWithAlreadyRented() throws ShopSystemException {
+		Rentshop shop = createRentshop();
+		rentThisShop(shop);
+		doThrow(ShopSystemException.class).when(validationHandler).checkForIsRentable(false);
+		assertThrows(ShopSystemException.class, () -> shop.rentShop(null, 1));
 	}
 
 	@Test
 	public void resetShopTest() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.addShopItem(0, 1, 1, new ItemStack(Material.STONE));
-			shop.resetShop();
-			assertNull(shop.getOwner());
-			assertEquals(0L, shop.getRentUntil());
-			assertTrue(shop.isRentable());
-			assertEquals(Profession.NITWIT, shop.getShopVillager().getProfession());
-			assertEquals("RentShop", shop.getName());
-			assertEquals("RentShop#R0", shop.getShopVillager().getCustomName());
-			assertEquals(0, shop.getItemList().size());
-			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "R0.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-			assertTrue(config.getBoolean("Rentable"));
-			assertEquals(0L, config.getLong("RentUntil"));
-			assertNull(config.getString("Owner"));
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		rentThisShop(shop);
+
+		assertDoesNotThrow(() -> shop.resetShop());
+
+		verify(shopDao).saveOwner(null);
+		verify(shopDao, times(2)).saveRentable(true);
+		verify(shopDao).saveRentUntil(0L);
+		assertNull(shop.getOwner());
+		assertEquals(0L, shop.getRentUntil());
+		assertTrue(shop.isRentable());
+		verify(shop.getShopVillager(), times(2)).setProfession(Profession.NITWIT);
+		assertEquals("RentShop#R0", shop.getName());
+		verify(shop.getShopVillager(), times(2)).setCustomName("RentShop#R0");
+		assertDoesNotThrow(() -> assertEquals(0, shop.getItemList().size()));
 	}
 
 	@Test
 	public void changeRentalFee() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			shop.changeRentalFee(25);
-			assertEquals("25.0", String.valueOf(shop.getRentalFee()));
-			// check savefile
-			File saveFile = new File(UltimateEconomy.getInstance.getDataFolder(), "R0.yml");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(saveFile);
-			assertEquals("25.0", config.getString("RentalFee"));
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		assertDoesNotThrow(() -> shop.changeRentalFee(4.4));
+		assertEquals(4.4, shop.getRentalFee());
+		verify(shopDao).saveRentalFee(4.4);
+		assertDoesNotThrow(() -> verify(validationHandler).checkForPositiveValue(4.4));
 	}
 
 	@Test
-	public void changeRentalFeeWithNegativValue() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			shop.changeRentalFee(-25);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertTrue(e instanceof GeneralEconomyException);
-			assertEquals("§cThe parameter §4-25.0§c is invalid!", e.getMessage());
-		}
+	public void changeRentalFeeWithNegativValue() throws GeneralEconomyException {
+		Rentshop shop = createRentshop();
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForPositiveValue(-1);
+		assertThrows(GeneralEconomyException.class, () -> shop.changeRentalFee(-1));
+		assertEquals(5.5, shop.getRentalFee());
+		verify(shopDao, never()).saveRentalFee(4.4);
 	}
 
 	@Test
 	public void changeShopSizeTestWithNotRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			shop.changeShopSize(18);
-			assertEquals(18, shop.getSize());
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+
+		assertDoesNotThrow(() -> shop.changeShopSize(18));
+
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(18));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForResizePossible(shop.getShopInventory(), 9, 18, 2));
+		assertEquals(18, shop.getSize());
+		verify(shopDao).saveShopSize(18);
+		verify(serverProvider).createInventory(shop.getShopVillager(), 18, "RentShop#R0");
+		verify(serverProvider).createInventory(shop.getShopVillager(), 18, "RentShop#R0-Stock");
+		verify(serverProvider).createInventory(shop.getShopVillager(), 18, "RentShop#R0-Editor");
 	}
 
 	@Test
-	public void changeShopSizeTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.changeShopSize(18);
-			fail();
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			assertTrue(e instanceof ShopSystemException);
-			assertEquals("§cThis shop is rented!", e.getMessage());
-		}
+	public void changeShopSizeTestWithRented() throws ShopSystemException {
+		Rentshop shop = createRentshop();
+		rentThisShop(shop);
+		doThrow(ShopSystemException.class).when(validationHandler).checkForIsRentable(false);
+		assertThrows(ShopSystemException.class, () -> shop.changeShopSize(18));
+		assertEquals(9, shop.getSize());
 	}
 
 	@Test
@@ -485,31 +565,24 @@ public class RentshopImplTest {
 
 	@Test
 	public void changeOwnerTest() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			shop.changeOwner(ecoPlayer);
-			assertEquals(ecoPlayer, shop.getOwner());
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		EconomyPlayer newOwner = mock(EconomyPlayer.class);
+		when(newOwner.getName()).thenReturn("wejink");
+		when(playershopManager.getPlayerShopUniqueNameList()).thenReturn(new ArrayList<>());
+		assertDoesNotThrow(() -> shop.changeOwner(newOwner));
+		assertEquals(newOwner, shop.getOwner());
+		verify(shopDao).saveOwner(newOwner);
+		verify(shop.getShopVillager()).setCustomName("RentShop#R0_wejink");
+		assertDoesNotThrow(() -> verify(validationHandler).checkForChangeOwnerIsPossible(new ArrayList<>(), newOwner,
+				"RentShop#R0"));
 	}
 
 	@Test
-	public void changeOwnerTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.changeOwner(ecoPlayer);
-			fail();
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			assertTrue(e instanceof ShopSystemException);
-			assertEquals("§cThis shop is rented!", e.getMessage());
-		}
+	public void changeOwnerTestWithRented() throws ShopSystemException {
+		Rentshop shop = createRentshop();
+		rentThisShop(shop);
+		doThrow(ShopSystemException.class).when(validationHandler).checkForIsRentable(false);
+		assertThrows(ShopSystemException.class, () -> shop.changeOwner(null));
 	}
 
 	@Test
@@ -522,16 +595,37 @@ public class RentshopImplTest {
 
 	@Test
 	public void addShopTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.addShopItem(0, 1, 0, new ItemStack(Material.STONE));
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		rentThisShop(shop);
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		when(stack.getAmount()).thenReturn(2);
+		when(stack.toString()).thenReturn("item string");
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
+		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 4, stack));
+		verify(shopDao).saveItemNames(Arrays.asList("item string"));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string"), anyList()));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsEmpty(0, shop.getShopInventory(), 1));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("1.0"));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("4.0"));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForPricesGreaterThenZero(1.0, 4.0));
+		assertDoesNotThrow(() -> assertEquals(1, shop.getItemList().size()));
+		ShopItem shopItem = assertDoesNotThrow(() -> shop.getShopItem(0));
+		verify(shopDao).saveShopItem(shopItem, false);
+		assertEquals(2, shopItem.getAmount());
+		assertEquals(4.0, shopItem.getBuyPrice());
+		assertEquals(1.0, shopItem.getSellPrice());
+		assertEquals(0, shopItem.getSlot());
+		assertEquals("item string", shopItem.getItemString());
+		assertEquals(stackClone, shopItem.getItemStack());
+		// verify that the set occupied method of the editor is called
+		verify(customSkullService).getSkullWithName("SLOTFILLED", "Slot 1");
+		verify(shop.getShopInventory()).setItem(0, stackClone);
+		verify(stackClone).setAmount(2);
+		verify(stackMetaClone).setLore(Arrays.asList("§62 buy for §a4.0 $", "§62 sell for §a1.0 $"));
 	}
 
 	@Test
@@ -543,17 +637,33 @@ public class RentshopImplTest {
 
 	@Test
 	public void editShopTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.addShopItem(0, 1, 0, new ItemStack(Material.STONE));
-			shop.editShopItem(0, "none", "none", "1");
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		rentThisShop(shop);
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		when(stack.getAmount()).thenReturn(2);
+		when(stack.toString()).thenReturn("item string");
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
+		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 4, stack));
+		when(stackClone.getType()).thenReturn(Material.STONE);
+
+		String response = assertDoesNotThrow(() -> shop.editShopItem(0, "5", "15", "25"));
+
+		assertEquals("§6Updated §aamount §asellPrice §abuyPrice §6for item §astone", response);
+
+		assertDoesNotThrow(() -> verify(validationHandler, times(4)).checkForIsRented(false));
+		verify(shopDao).saveShopItemSellPrice("item string", 15.0);
+		verify(shopDao).saveShopItemBuyPrice("item string", 25.0);
+		verify(shopDao).saveShopItemAmount("item string", 5);
+		assertDoesNotThrow(() -> assertEquals(5, shop.getShopItem(0).getAmount()));
+		assertDoesNotThrow(() -> assertEquals(15.0, shop.getShopItem(0).getSellPrice()));
+		assertDoesNotThrow(() -> assertEquals(25.0, shop.getShopItem(0).getBuyPrice()));
+		verify(shop.getShopInventory(), times(2)).setItem(0, stackClone);
+		verify(stackClone).setAmount(5);
+		verify(stackMetaClone).setLore(Arrays.asList("§65 buy for §a25.0 $", "§65 sell for §a15.0 $"));
 	}
 
 	@Test
@@ -564,18 +674,51 @@ public class RentshopImplTest {
 	}
 
 	@Test
-	public void getShopItemTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.addShopItem(0, 1, 0, new ItemStack(Material.STONE));
-			shop.getShopItem(new ItemStack(Material.STONE));
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+	public void getShopItemTestWithRentedAndSlot() {
+		Rentshop shop = createRentshop();
+		rentThisShop(shop);
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		when(stack.getAmount()).thenReturn(1);
+		when(stack.toString()).thenReturn("item string");
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		assertDoesNotThrow(() -> shop.addShopItem(3, 1, 2, stack));
+
+		ShopItem shopItem = assertDoesNotThrow(() -> shop.getShopItem(3));
+
+		assertEquals(stackClone, shopItem.getItemStack());
+	}
+
+	@Test
+	public void getShopItemTestWithRentedAndItem() {
+		Rentshop shop = createRentshop();
+		rentThisShop(shop);
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack searchStack = mock(ItemStack.class);
+		ItemStack searchStackClone = mock(ItemStack.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		ItemMeta searchStackCloneMeta = mock(ItemMeta.class);
+		when(searchStackClone.toString()).thenReturn("item string");
+		when(searchStackCloneMeta.hasLore()).thenReturn(true);
+		ArrayList<String> lore = new ArrayList<>();
+		lore.add("some lore");
+		lore.add("2 buy for 10");
+		lore.add("2 sell for 5");
+		when(searchStackCloneMeta.getLore()).thenReturn(lore);
+		when(searchStackClone.getItemMeta()).thenReturn(searchStackCloneMeta);
+		when(searchStack.clone()).thenReturn(searchStackClone);
+		when(stack.getAmount()).thenReturn(1);
+		when(stack.toString()).thenReturn("item string");
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		assertDoesNotThrow(() -> shop.addShopItem(3, 1, 2, stack));
+
+		ShopItem shopItem = assertDoesNotThrow(() -> shop.getShopItem(searchStack));
+
+		assertEquals(stackClone, shopItem.getItemStack());
 	}
 
 	@Test
@@ -587,17 +730,30 @@ public class RentshopImplTest {
 
 	@Test
 	public void isAvailableTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.addShopItem(0, 1, 0, new ItemStack(Material.STONE));
-			shop.isAvailable(0);
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		rentThisShop(shop);
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack shopInvStack = mock(ItemStack.class);
+		ItemStack shopInvStackClone = mock(ItemStack.class);
+		ItemMeta shopInvStackMeta = mock(ItemMeta.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		when(shopInvStackClone.getItemMeta()).thenReturn(shopInvStackMeta);
+		when(shop.getShopInventory().getItem(3)).thenReturn(shopInvStack);
+		when(stack.getAmount()).thenReturn(1);
+		when(stack.toString()).thenReturn("item string");
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		when(shopInvStack.clone()).thenReturn(shopInvStackClone);
+		assertDoesNotThrow(() -> shop.addShopItem(3, 1, 2, stack));
+		assertDoesNotThrow(() -> shop.addShopItem(4, 1, 2, stack));
+
+		assertDoesNotThrow(() -> shop.increaseStock(3, 1));
+
+		assertDoesNotThrow(() -> assertTrue(shop.isAvailable(3)));
+		assertDoesNotThrow(() -> assertFalse(shop.isAvailable(4)));
+		assertDoesNotThrow(() -> verify(validationHandler, times(2)).checkForValidSlot(3, 9, 2));
+		assertDoesNotThrow(() -> verify(validationHandler, times(12)).checkForIsRented(false));
 	}
 
 	@Test
@@ -625,18 +781,33 @@ public class RentshopImplTest {
 
 	@Test
 	public void decreaseStockTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.addShopItem(0, 1, 0, new ItemStack(Material.STONE));
-			shop.increaseStock(0, 10);
-			shop.decreaseStock(0, 5);
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		rentThisShop(shop);
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack shopInvStack = mock(ItemStack.class);
+		ItemStack shopInvStackClone = mock(ItemStack.class);
+		ItemMeta shopInvStackMeta = mock(ItemMeta.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		when(shopInvStackClone.getItemMeta()).thenReturn(shopInvStackMeta);
+		when(shop.getShopInventory().getItem(3)).thenReturn(shopInvStack);
+		when(stack.getAmount()).thenReturn(1);
+		when(stack.toString()).thenReturn("item string");
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		when(shopInvStack.clone()).thenReturn(shopInvStackClone);
+		assertDoesNotThrow(() -> shop.addShopItem(3, 1, 2, stack));
+
+		assertDoesNotThrow(() -> shop.increaseStock(3, 10));
+		assertDoesNotThrow(() -> shop.decreaseStock(3, 5));
+
+		assertDoesNotThrow(() -> verify(validationHandler, times(9)).checkForIsRented(false));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForPositiveValue(5));
+		assertDoesNotThrow(() -> verify(validationHandler, times(2)).checkForValidSlot(3, 9, 2));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidStockDecrease(10, 5));
+		verify(shopDao).saveStock("item string", 5);
+		verify(shopInvStackMeta).setLore(Arrays.asList("§a5§6 Items"));
+		assertDoesNotThrow(() -> assertEquals(5, shop.getShopItem(3).getStock()));
 	}
 
 	@Test
@@ -648,17 +819,31 @@ public class RentshopImplTest {
 
 	@Test
 	public void increaseStockTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.addShopItem(0, 1, 0, new ItemStack(Material.STONE));
-			shop.increaseStock(0, 10);
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		rentThisShop(shop);
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack shopInvStack = mock(ItemStack.class);
+		ItemStack shopInvStackClone = mock(ItemStack.class);
+		ItemMeta shopInvStackMeta = mock(ItemMeta.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		when(shopInvStackClone.getItemMeta()).thenReturn(shopInvStackMeta);
+		when(shop.getShopInventory().getItem(3)).thenReturn(shopInvStack);
+		when(stack.getAmount()).thenReturn(1);
+		when(stack.toString()).thenReturn("item string");
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		when(shopInvStack.clone()).thenReturn(shopInvStackClone);
+		assertDoesNotThrow(() -> shop.addShopItem(3, 1, 2, stack));
+
+		assertDoesNotThrow(() -> shop.increaseStock(3, 1));
+
+		assertDoesNotThrow(() -> verify(validationHandler, times(6)).checkForIsRented(false));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForPositiveValue(1));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSlot(3, 9, 2));
+		verify(shopDao).saveStock("item string", 1);
+		verify(shopInvStackMeta).setLore(Arrays.asList("§a1§6 Item"));
+		assertDoesNotThrow(() -> verify(shop.getStockpileInventory(), times(2)).setItem(3, shopInvStackClone));
 	}
 
 	@Test
@@ -670,17 +855,29 @@ public class RentshopImplTest {
 
 	@Test
 	public void removeShopItemTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.addShopItem(0, 1, 0, new ItemStack(Material.STONE));
-			shop.removeShopItem(0);
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		rentThisShop(shop);
+
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		when(stack.getAmount()).thenReturn(1);
+		when(stack.toString()).thenReturn("item string");
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		when(shop.getShopInventory().getItem(3)).thenReturn(stack);
+		assertDoesNotThrow(() -> shop.addShopItem(3, 1, 2, stack));
+		reset(shop.getShopInventory());
+		assertDoesNotThrow(() -> shop.removeShopItem(3));
+
+		assertDoesNotThrow(() -> verify(validationHandler, times(5)).checkForIsRented(false));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForItemCanBeDeleted(3, 9));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSlot(3, 9, 2));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsNotEmpty(3, shop.getShopInventory(), 2));
+		verify(shop.getShopInventory()).clear(3);
+		verify(shopDao).saveShopItem(any(), eq(true));
+		assertDoesNotThrow(() -> assertEquals(0, shop.getItemList().size()));
+		assertDoesNotThrow(() -> verify(shop.getStockpileInventory()).clear(3));
 	}
 
 	@Test
@@ -726,16 +923,29 @@ public class RentshopImplTest {
 
 	@Test
 	public void openSlotEditorTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.openSlotEditor(player, 0);
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		Inventory inv = mock(Inventory.class);
+		Inventory invStock = mock(Inventory.class);
+		Inventory slotEditor = mock(Inventory.class);
+		Inventory editor = mock(Inventory.class);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-Editor")))
+				.thenReturn(editor);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-SlotEditor")))
+				.thenReturn(slotEditor);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0"))).thenReturn(inv);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-Stock")))
+				.thenReturn(invStock);
+		assertDoesNotThrow(() -> shop.rentShop(ecoPlayer, 1));
+		assertDoesNotThrow(() -> when(validationHandler.isSlotEmpty(0, shop.getShopInventory(), 1)).thenReturn(true));
+
+		Player player = mock(Player.class);
+		assertDoesNotThrow(() -> shop.openSlotEditor(player, 0));
+
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSlot(0, 9, 2));
+		verify(player).openInventory(slotEditor);
+		// verify that the selected slot method is executed
+		assertDoesNotThrow(() -> verify(validationHandler, times(2)).isSlotEmpty(0, shop.getShopInventory(), 1));
 	}
 
 	@Test
@@ -747,16 +957,26 @@ public class RentshopImplTest {
 
 	@Test
 	public void openEditorTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.openEditor(player);
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		Inventory inv = mock(Inventory.class);
+		Inventory invStock = mock(Inventory.class);
+		Inventory slotEditor = mock(Inventory.class);
+		Inventory editor = mock(Inventory.class);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-Editor")))
+				.thenReturn(editor);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-SlotEditor")))
+				.thenReturn(slotEditor);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0"))).thenReturn(inv);
+		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-Stock")))
+				.thenReturn(invStock);
+		assertDoesNotThrow(() -> shop.rentShop(ecoPlayer, 1));
+		Player player = mock(Player.class);
+
+		assertDoesNotThrow(() -> shop.openEditor(player));
+
+		verify(player).openInventory(editor);
+		assertDoesNotThrow(() -> verify(validationHandler).checkForIsRented(false));
 	}
 
 	@Test
@@ -768,18 +988,43 @@ public class RentshopImplTest {
 
 	@Test
 	public void buyShopItemTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.addShopItem(0, 1, 0, new ItemStack(Material.STONE));
-			shop.increaseStock(0, 10);
-			shop.buyShopItem(0, EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), false);
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		rentThisShop(shop);
+
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack stackCloneClone = mock(ItemStack.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		Player player = mock(Player.class);
+		PlayerInventory inv = mock(PlayerInventory.class);
+		when(stack.getAmount()).thenReturn(2);
+		when(stack.toString()).thenReturn("item string");
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		when(stackClone.clone()).thenReturn(stackCloneClone);
+		assertDoesNotThrow(() -> shop.addShopItem(3, 1, 4, stack));
+		assertDoesNotThrow(() -> shop.increaseStock(3, 2));
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		when(player.getInventory()).thenReturn(inv);
+		when(configManager.getCurrencyText(4.0)).thenReturn("$");
+		when(messageWrapper.getString("shop_buy_plural", "2", 4.0, "$")).thenReturn("my message");
+
+		assertDoesNotThrow(() -> shop.buyShopItem(3, ecoPlayer, true));
+
+		assertDoesNotThrow(() -> verify(validationHandler, times(8)).checkForIsRented(false));
+		assertDoesNotThrow(() -> verify(validationHandler, times(2)).checkForValidStockDecrease(2, 2));
+		assertDoesNotThrow(() -> verify(validationHandler, times(3)).checkForValidSlot(3, 9, 2));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerIsOnline(ecoPlayer));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsNotEmpty(3, shop.getShopInventory(), 2));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerInventoryNotFull(inv));
+		verify(stackCloneClone).setAmount(2);
+		verify(inv).addItem(stackCloneClone);
+		verify(shopDao, times(2)).saveStock("item string", 0);
+		verify(player).sendMessage("my message");
+		assertDoesNotThrow(() -> verify(ecoPlayer).decreasePlayerAmount(4.0, true));
+		assertDoesNotThrow(() -> verify(shop.getOwner()).increasePlayerAmount(4.0, false));
+		assertDoesNotThrow(() -> assertEquals(0, shop.getShopItem(3).getStock()));
 	}
 
 	@Test
@@ -791,16 +1036,45 @@ public class RentshopImplTest {
 
 	@Test
 	public void sellShopItemTestWithRented() {
-		Location location = new Location(world, 1.5, 2.3, 6.9);
-		try {
-			Rentshop shop = RentshopManagerImpl.createRentShop(location, 9, 10);
-			EconomyPlayer ecoPlayer = EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0);
-			ecoPlayer.increasePlayerAmount(100, false);
-			shop.rentShop(ecoPlayer, 10);
-			shop.addShopItem(0, 1, 0, new ItemStack(Material.STONE));
-			shop.sellShopItem(0, 1, EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0), false);
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
-			fail();
-		}
+		Rentshop shop = createRentshop();
+		rentThisShop(shop);
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack stackCloneClone = mock(ItemStack.class);
+		ItemStack contentStack = mock(ItemStack.class);
+		ItemStack contentStackClone = mock(ItemStack.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		Player player = mock(Player.class);
+		PlayerInventory inv = mock(PlayerInventory.class);
+		ItemStack[] contents = new ItemStack[1];
+		contents[0] = contentStack;
+		when(contentStackClone.getAmount()).thenReturn(10);
+		when(inv.getStorageContents()).thenReturn(contents);
+		when(player.getInventory()).thenReturn(inv);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		when(stack.getAmount()).thenReturn(1);
+		when(stack.toString()).thenReturn("item string");
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		when(stackClone.clone()).thenReturn(stackCloneClone);
+		when(contentStack.clone()).thenReturn(contentStackClone);
+		assertDoesNotThrow(() -> shop.addShopItem(3, 1, 2, stack));
+		when(stackCloneClone.isSimilar(contentStackClone)).thenReturn(true);
+		when(configManager.getCurrencyText(1.0)).thenReturn("$");
+		when(messageWrapper.getString("shop_sell_singular", "1", 1.0, "$")).thenReturn("my message");
+
+		assertDoesNotThrow(() -> shop.sellShopItem(3, 1, ecoPlayer, true));
+
+		assertDoesNotThrow(() -> verify(validationHandler, times(6)).checkForIsRented(false));
+		assertDoesNotThrow(() -> verify(validationHandler, times(2)).checkForValidSlot(3, 9, 2));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsNotEmpty(3, shop.getShopInventory(), 2));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerIsOnline(ecoPlayer));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForShopOwnerHasEnoughMoney(shop.getOwner(), 1.0));
+		assertDoesNotThrow(() -> verify(ecoPlayer).increasePlayerAmount(1.0, false));
+		assertDoesNotThrow(() -> verify(shop.getOwner()).decreasePlayerAmount(1.0, true));
+		assertDoesNotThrow(() -> assertEquals(1, shop.getShopItem(3).getStock()));
+		verify(inv).removeItem(contentStackClone);
+		verify(player).sendMessage("my message");
 	}
 }

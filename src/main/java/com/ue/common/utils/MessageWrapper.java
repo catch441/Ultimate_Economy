@@ -7,30 +7,34 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.bukkit.Bukkit;
+import javax.inject.Inject;
+
 import org.bukkit.ChatColor;
+import org.slf4j.Logger;
 
 public class MessageWrapper {
 
-	private ResourceBundle messages;
+	protected ResourceBundle messages;
+	private final Logger logger;
+	
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param logger
+	 */
+	@Inject
+	public MessageWrapper(Logger logger) {
+		this.logger = logger;
+	}
 
 	/**
 	 * Load the language from the config.
 	 * @param locale
 	 */
 	public void loadLanguage(Locale locale) {
-		Bukkit.getLogger().info("[Ultimate_Economy] Loading language file: '" + locale.getLanguage() + "' '"
+		logger.info("[Ultimate_Economy] Loading language file: '" + locale.getLanguage() + "' '"
 				+ locale.getCountry() + "'");
 		messages = ResourceBundle.getBundle("language.MessagesBundle", locale, new UTF8Control());
-	}
-
-	/**
-	 * Returns the message bundle with the actiual language.
-	 * 
-	 * @return messages as ResourceBundle
-	 */
-	public ResourceBundle getMessages() {
-		return messages;
 	}
 
 	/**
@@ -41,7 +45,7 @@ public class MessageWrapper {
 	 */
 	public String getErrorString(String key) {
 		try {
-			return ChatColor.RED + getMessages().getString(key);
+			return ChatColor.RED + messages.getString(key);
 		} catch (MissingResourceException e) {
 			return '!' + key + '!';
 		}
@@ -64,7 +68,7 @@ public class MessageWrapper {
 					colored.add("§4null§c");
 				}
 			}
-			String message = "§c" + getMessages().getString(key);
+			String message = "§c" + messages.getString(key);
 			String newMessage = MessageFormat.format(message, colored.toArray());
 			return ChatColor.translateAlternateColorCodes('§', newMessage);
 		} catch (MissingResourceException e) {
@@ -80,7 +84,7 @@ public class MessageWrapper {
 	 */
 	public String getString(String key) {
 		try {
-			return ChatColor.GOLD + getMessages().getString(key);
+			return ChatColor.GOLD + messages.getString(key);
 		} catch (MissingResourceException e) {
 			return '!' + key + '!';
 		}
@@ -104,7 +108,7 @@ public class MessageWrapper {
 					colored.add("§anull§6");
 				}
 			}
-			String message = "§6" + getMessages().getString(key);
+			String message = "§6" + messages.getString(key);
 			String newMessage = MessageFormat.format(message, colored.toArray());
 			return ChatColor.translateAlternateColorCodes('§', newMessage);
 		} catch (MissingResourceException e) {

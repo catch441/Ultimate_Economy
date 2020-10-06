@@ -54,17 +54,17 @@ public class RentshopRentGuiHandlerImpl implements RentshopRentGuiHandler {
 
 	private void setupRentGui() {
 		rentShopGUIInv = serverProvider.createInventory(getShop().getShopVillager(), 9, getShop().getName());
-		List<String> loreList = new ArrayList<>();
-		loreList.add(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + getShop().getRentalFee());
+		List<String> loreListRent = new ArrayList<>();
+		loreListRent.add(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + getShop().getRentalFee());
 		ItemStack itemStack = serverProvider.createItemStack(Material.GREEN_WOOL, 1);
 		ItemMeta meta = itemStack.getItemMeta();
 		meta.setDisplayName(ChatColor.YELLOW + "Rent");
-		meta.setLore(loreList);
+		meta.setLore(loreListRent);
 		itemStack.setItemMeta(meta);
 		getRentGui().setItem(0, itemStack);
-		loreList.clear();
+		List<String> loreList = new ArrayList<>();
 		loreList.add(ChatColor.GOLD + "Duration: " + ChatColor.GREEN + 1 + ChatColor.GOLD + " Day");
-		itemStack.setType(Material.CLOCK);
+		itemStack = serverProvider.createItemStack(Material.CLOCK, 1);
 		meta = itemStack.getItemMeta();
 		meta.setLore(loreList);
 		meta.setDisplayName(ChatColor.YELLOW + "Duration");
@@ -94,8 +94,9 @@ public class RentshopRentGuiHandlerImpl implements RentshopRentGuiHandler {
 	}
 
 	@Override
-	public void handleRentShopGUIClick(InventoryClickEvent event) {
-		if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
+	public void handleRentShopGUIClick(InventoryClickEvent event) {	
+		if (event.getCurrentItem() != null) {
+			event.setCancelled(true);			
 			String durationString = event.getInventory().getItem(1).getItemMeta().getLore().get(0);
 			durationString = ChatColor.stripColor(durationString);
 			int duration = Integer.valueOf(
@@ -143,8 +144,13 @@ public class RentshopRentGuiHandlerImpl implements RentshopRentGuiHandler {
 					duration = configManager.getMaxRentedDays();
 				}
 			}
-		} else if (duration > value) {
-			duration -= value;
+		} else {
+			if (duration > value) {
+				duration -= value;
+			} else {
+				duration = 1;
+			}
+			
 		}
 		refreshDurationOnRentGUI(duration);
 		refreshRentalFeeOnRentGUI(duration);

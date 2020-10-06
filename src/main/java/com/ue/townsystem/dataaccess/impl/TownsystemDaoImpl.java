@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
@@ -31,13 +32,17 @@ public class TownsystemDaoImpl extends SaveFileUtils implements TownsystemDao {
 	EconomyPlayerManager ecoPlayerManager;
 	@Inject
 	BankManager bankManager;
+	private final Logger logger;
 
 	/**
 	 * Default constructor.
 	 * 
 	 * @param world
+	 * @param logger
 	 */
-	public TownsystemDaoImpl(String world) {
+	public TownsystemDaoImpl(String world, Logger logger) {
+		super(logger);
+		this.logger = logger;
 		file = new File(UltimateEconomy.getInstance.getDataFolder(), world + "_TownWorld" + ".yml");
 		if (!file.exists()) {
 			try {

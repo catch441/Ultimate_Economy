@@ -1,375 +1,430 @@
 package com.ue.shopsystem;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType.SlotType;
-import org.bukkit.persistence.PersistentDataType;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.ue.config.logic.impl.ConfigManagerImpl;
-import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
-import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
+import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
+import com.ue.config.logic.api.ConfigManager;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerManager;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.shopsystem.logic.api.CustomSkullService;
+import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.impl.RentshopRentGuiHandlerImpl;
+import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.UltimateEconomy;
 
+@ExtendWith(MockitoExtension.class)
 public class RentshopRentGuiHandlerTest {
+
+	@Mock
+	ConfigManager configManager;
+	@Mock
+	CustomSkullService skullService;
+	@Mock
+	EconomyPlayerManager ecoPlayerManager;
+	@Mock
+	MessageWrapper messageWrapper;
+	@Mock
+	ServerProvider serverProvider;
+	@Mock
+	Rentshop shop;
 	
-	private static final String PLUS = "http://textures.minecraft.net/texture/"
-			+ "9a2d891c6ae9f6baa040d736ab84d48344bb6b70d7f1a280dd12cbac4d777";
-	private static final String ONE = "http://textures.minecraft.net/texture/"
-			+ "d2a6f0e84daefc8b21aa99415b16ed5fdaa6d8dc0c3cd591f49ca832b575";
-	private static final String SEVEN = "http://textures.minecraft.net/texture/"
-			+ "9e198fd831cb61f3927f21cf8a7463af5ea3c7e43bd3e8ec7d2948631cce879";
-	private static final String MINUS = "http://textures.minecraft.net/texture/"
-			+ "935e4e26eafc11b52c11668e1d6634e7d1d0d21c411cb085f9394268eb4cdfba";
-	
+	private RentshopRentGuiHandlerImpl createHandler() {
+		Villager villager = mock(Villager.class);
+		Inventory inv = mock(Inventory.class);
+		ItemStack rentItem = mock(ItemStack.class);
+		ItemStack plusItem = mock(ItemStack.class);
+		ItemStack oneItem = mock(ItemStack.class);
+		ItemStack sevenItem = mock(ItemStack.class);
+		ItemStack clockItem = mock(ItemStack.class);
+		ItemMeta rentItemMeta = mock(ItemMeta.class);
+		ItemMeta clockItemMeta = mock(ItemMeta.class);
+		ItemMeta oneItemMeta = mock(ItemMeta.class);
+		ItemMeta sevenItemMeta = mock(ItemMeta.class);
+		when(sevenItem.getItemMeta()).thenReturn(sevenItemMeta);
+		when(oneItem.getItemMeta()).thenReturn(oneItemMeta);
+		when(clockItem.getItemMeta()).thenReturn(clockItemMeta);
+		when(rentItem.getItemMeta()).thenReturn(rentItemMeta);
+		when(skullService.getSkullWithName("PLUS", "plus")).thenReturn(plusItem);
+		when(skullService.getSkullWithName("ONE", "one")).thenReturn(oneItem);
+		when(skullService.getSkullWithName("SEVEN", "seven")).thenReturn(sevenItem);
+		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(rentItem);
+		when(serverProvider.createItemStack(Material.CLOCK, 1)).thenReturn(clockItem);
+		when(shop.getShopVillager()).thenReturn(villager);
+		when(shop.getName()).thenReturn("Shop#R0");
+		when(shop.getRentalFee()).thenReturn(5.5);
+		when(serverProvider.createInventory(villager, 9, "Shop#R0")).thenReturn(inv);
+		return new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager,
+				skullService, configManager, shop, serverProvider);
+	}
+
 	@Test
 	public void constructorTest() {
-		try {
-			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
-			ChestInventoryMock gui = (ChestInventoryMock) handler.getRentGui();
-			assertEquals(9, gui.getSize());
-			assertEquals("RentShop#R0", gui.getName());
-			assertEquals(1, gui.getItem(0).getAmount());
-			assertEquals(Material.GREEN_WOOL, gui.getItem(0).getType());
-			assertEquals(ChatColor.YELLOW + "Rent", gui.getItem(0).getItemMeta().getDisplayName());
-			assertEquals(1, gui.getItem(0).getItemMeta().getLore().size());
-			assertEquals("§6RentalFee: §a4.5", gui.getItem(0).getItemMeta().getLore().get(0));		
-			assertEquals(1, gui.getItem(1).getAmount());
-			assertEquals(Material.CLOCK, gui.getItem(1).getType());
-			assertEquals(ChatColor.YELLOW + "Duration", gui.getItem(1).getItemMeta().getDisplayName());
-			assertEquals(1, gui.getItem(1).getItemMeta().getLore().size());
-			assertEquals("§6Duration: §a1§6 Day", gui.getItem(1).getItemMeta().getLore().get(0));
-			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-			assertEquals(1, gui.getItem(3).getAmount());
-			assertEquals(Material.PLAYER_HEAD, gui.getItem(3).getType());
-			assertEquals("plus", gui.getItem(3).getItemMeta().getDisplayName());
-			assertEquals(PLUS,
-					gui.getItem(3).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));	
-			assertEquals(1, gui.getItem(4).getAmount());
-			assertEquals(Material.PLAYER_HEAD, gui.getItem(4).getType());
-			assertEquals("one", gui.getItem(4).getItemMeta().getDisplayName());
-			assertEquals(1, gui.getItem(4).getItemMeta().getLore().size());
-			assertEquals("§6Duration: §a1§6 Day", gui.getItem(4).getItemMeta().getLore().get(0));
-			assertEquals(ONE,
-					gui.getItem(4).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			assertEquals(1, gui.getItem(5).getAmount());
-			assertEquals(Material.PLAYER_HEAD, gui.getItem(5).getType());
-			assertEquals("seven", gui.getItem(5).getItemMeta().getDisplayName());
-			assertEquals(1, gui.getItem(5).getItemMeta().getLore().size());
-			assertEquals("§6Duration: §a1§6 Day", gui.getItem(5).getItemMeta().getLore().get(0));
-			assertEquals(SEVEN,
-					gui.getItem(5).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));
-			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		Villager villager = mock(Villager.class);
+		Inventory inv = mock(Inventory.class);
+		ItemStack rentItem = mock(ItemStack.class);
+		ItemStack plusItem = mock(ItemStack.class);
+		ItemStack oneItem = mock(ItemStack.class);
+		ItemStack sevenItem = mock(ItemStack.class);
+		ItemStack clockItem = mock(ItemStack.class);
+		ItemMeta rentItemMeta = mock(ItemMeta.class);
+		ItemMeta clockItemMeta = mock(ItemMeta.class);
+		ItemMeta oneItemMeta = mock(ItemMeta.class);
+		ItemMeta sevenItemMeta = mock(ItemMeta.class);
+		when(sevenItem.getItemMeta()).thenReturn(sevenItemMeta);
+		when(oneItem.getItemMeta()).thenReturn(oneItemMeta);
+		when(clockItem.getItemMeta()).thenReturn(clockItemMeta);
+		when(rentItem.getItemMeta()).thenReturn(rentItemMeta);
+		when(skullService.getSkullWithName("PLUS", "plus")).thenReturn(plusItem);
+		when(skullService.getSkullWithName("ONE", "one")).thenReturn(oneItem);
+		when(skullService.getSkullWithName("SEVEN", "seven")).thenReturn(sevenItem);
+		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(rentItem);
+		when(serverProvider.createItemStack(Material.CLOCK, 1)).thenReturn(clockItem);
+		when(shop.getShopVillager()).thenReturn(villager);
+		when(shop.getName()).thenReturn("Shop#R0");
+		when(shop.getRentalFee()).thenReturn(5.5);
+		when(serverProvider.createInventory(villager, 9, "Shop#R0")).thenReturn(inv);
+		new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager,
+				skullService, configManager, shop, serverProvider);
+
+		List<String> lore = Arrays.asList("§6Duration: §a1§6 Day");
+		List<String> rentLore = Arrays.asList("§6RentalFee: §a5.5");
+
+		verify(rentItemMeta).setDisplayName("§eRent");
+		verify(rentItemMeta).setLore(rentLore);
+		verify(rentItem).setItemMeta(rentItemMeta);
+		verify(inv).setItem(0, rentItem);
+
+		verify(clockItemMeta).setLore(lore);
+		verify(clockItem).setItemMeta(clockItemMeta);
+		verify(inv).setItem(1, clockItem);
+		verify(plusItem, never()).setItemMeta(any(ItemMeta.class));
+		verify(inv).setItem(3, plusItem);
+		verify(oneItemMeta).setLore(lore);
+		verify(oneItem).setItemMeta(oneItemMeta);
+		verify(inv).setItem(4, oneItem);
+		verify(sevenItemMeta).setLore(lore);
+		verify(sevenItem).setItemMeta(sevenItemMeta);
+		verify(inv).setItem(5, sevenItem);
 	}
-	
+
 	@Test
 	public void handleRentShopGuiClickTestPlusClick() {
-		try {
-			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
-			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
-			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 3, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(event);
-			ChestInventoryMock gui = (ChestInventoryMock) handler.getRentGui();
-			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-			assertEquals(1, gui.getItem(3).getAmount());
-			assertEquals(Material.PLAYER_HEAD, gui.getItem(3).getType());
-			assertEquals("minus", gui.getItem(3).getItemMeta().getDisplayName());
-			assertEquals(MINUS,
-					gui.getItem(3).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));	
-			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		RentshopRentGuiHandlerImpl handler = createHandler();
+		
+		InventoryClickEvent event = mock(InventoryClickEvent.class);
+		
+		ItemStack clickedItem = mock(ItemStack.class);
+		ItemMeta clickedItemMeta = mock(ItemMeta.class);
+		when(clickedItem.getItemMeta()).thenReturn(clickedItemMeta);
+		when(clickedItemMeta.getDisplayName()).thenReturn("plus");
+		
+		ItemStack operationItem = mock(ItemStack.class);
+		ItemMeta operationItemMeta = mock(ItemMeta.class);
+		when(operationItem.getItemMeta()).thenReturn(operationItemMeta);
+		when(handler.getRentGui().getItem(3)).thenReturn(operationItem);
+		when(operationItemMeta.getDisplayName()).thenReturn("plus");
+		
+		ItemStack durationItem = mock(ItemStack.class);
+		ItemMeta durationItemMeta = mock(ItemMeta.class);
+		when(durationItem.getItemMeta()).thenReturn(durationItemMeta);
+		when(handler.getRentGui().getItem(1)).thenReturn(durationItem);
+		List<String> lore = Arrays.asList("§6Duration: §a1§6 Day");
+		when(durationItemMeta.getLore()).thenReturn(lore);
+			
+		when(event.getCurrentItem()).thenReturn(clickedItem);
+		when(event.getInventory()).thenReturn(handler.getRentGui());
+		
+		ItemStack minusItem = mock(ItemStack.class);
+		when(skullService.getSkullWithName("MINUS", "minus")).thenReturn(minusItem);
+		
+		handler.handleRentShopGUIClick(event);
+		
+		verify(event).setCancelled(true);
+		verify(handler.getRentGui()).setItem(3, minusItem);
 	}
-	
+
 	@Test
 	public void handleRentShopGuiClickTestMinusClick() {
-		try {
-			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
-			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
-			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 3, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(event);
-			handler.handleRentShopGUIClick(event);
-			ChestInventoryMock gui = (ChestInventoryMock) handler.getRentGui();
-			NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
-			assertEquals(1, gui.getItem(3).getAmount());
-			assertEquals(Material.PLAYER_HEAD, gui.getItem(3).getType());
-			assertEquals("plus", gui.getItem(3).getItemMeta().getDisplayName());
-			assertEquals(PLUS,
-					gui.getItem(3).getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING));	
-			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		RentshopRentGuiHandlerImpl handler = createHandler();
+		
+		InventoryClickEvent event = mock(InventoryClickEvent.class);
+		
+		ItemStack clickedItem = mock(ItemStack.class);
+		ItemMeta clickedItemMeta = mock(ItemMeta.class);
+		when(clickedItem.getItemMeta()).thenReturn(clickedItemMeta);
+		when(clickedItemMeta.getDisplayName()).thenReturn("minus");
+		
+		ItemStack operationItem = mock(ItemStack.class);
+		ItemMeta operationItemMeta = mock(ItemMeta.class);
+		when(operationItem.getItemMeta()).thenReturn(operationItemMeta);
+		when(handler.getRentGui().getItem(3)).thenReturn(operationItem);
+		when(operationItemMeta.getDisplayName()).thenReturn("minus");
+		
+		ItemStack durationItem = mock(ItemStack.class);
+		ItemMeta durationItemMeta = mock(ItemMeta.class);
+		when(durationItem.getItemMeta()).thenReturn(durationItemMeta);
+		when(handler.getRentGui().getItem(1)).thenReturn(durationItem);
+		List<String> lore = Arrays.asList("§6Duration: §a1§6 Day");
+		when(durationItemMeta.getLore()).thenReturn(lore);
+			
+		when(event.getCurrentItem()).thenReturn(clickedItem);
+		when(event.getInventory()).thenReturn(handler.getRentGui());
+		
+		ItemStack plusItem = mock(ItemStack.class);
+		when(skullService.getSkullWithName("PLUS", "plus")).thenReturn(plusItem);
+		
+		handler.handleRentShopGUIClick(event);
+		
+		verify(event).setCancelled(true);
+		verify(handler.getRentGui(), times(1)).setItem(3, plusItem);
 	}
-	
+
 	@Test
 	public void handleRentShopGuiClickTestPlusOneClick() {
-		try {
-			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
-			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
-			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 4, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(event);
-			ChestInventoryMock gui = (ChestInventoryMock) handler.getRentGui();
-			List<String> list = new ArrayList<>();
-			list.add("§6Duration: §a2§6 Days");
-			assertEquals(list, gui.getItem(1).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(4).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(5).getItemMeta().getLore());
-			list.clear();
-			list.add("§6RentalFee: §a9.0");
-			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		when(configManager.getMaxRentedDays()).thenReturn(10);
+		testPlusMinusDuration("Days", "Days", "plus", "one", 1, 2, 11.0);
 	}
-	
+
 	@Test
 	public void handleRentShopGuiClickTestMinusOneClick() {
-		try {
-			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
-			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
-			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 4, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(event);
-			InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 3, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(switchToMinus);
-			handler.handleRentShopGUIClick(event);
-			ChestInventoryMock gui = (ChestInventoryMock) handler.getRentGui();
-			List<String> list = new ArrayList<>();
-			list.add("§6Duration: §a1§6 Day");
-			assertEquals(list, gui.getItem(1).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(4).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(5).getItemMeta().getLore());
-			list.clear();
-			list.add("§6RentalFee: §a4.5");
-			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		testPlusMinusDuration("Days", "Days", "minus", "one", 3, 2, 11.0);
 	}
-	
+
+	private void testPlusMinusDuration(String dayDaysOld, String dayDaysNew, String operation, String amount, int durationOld, int durationNew, double fee) {
+		RentshopRentGuiHandlerImpl handler = createHandler();
+		
+		InventoryClickEvent event = mock(InventoryClickEvent.class);
+		
+		ItemStack clickedItem = mock(ItemStack.class);
+		ItemMeta clickedItemMeta = mock(ItemMeta.class);
+		when(clickedItem.getItemMeta()).thenReturn(clickedItemMeta);
+		when(clickedItemMeta.getDisplayName()).thenReturn(amount);
+		
+		ItemStack operationItem = mock(ItemStack.class);
+		ItemMeta operationItemMeta = mock(ItemMeta.class);
+		when(operationItem.getItemMeta()).thenReturn(operationItemMeta);
+		when(handler.getRentGui().getItem(3)).thenReturn(operationItem);
+		when(operationItemMeta.getDisplayName()).thenReturn(operation);
+		
+		ItemStack durationItem = mock(ItemStack.class);
+		ItemMeta durationItemMeta = mock(ItemMeta.class);
+		when(durationItem.getItemMeta()).thenReturn(durationItemMeta);
+		when(handler.getRentGui().getItem(1)).thenReturn(durationItem);
+		List<String> lore = Arrays.asList("§6Duration: §a" + durationOld + "§6 "+ dayDaysOld);
+		when(durationItemMeta.getLore()).thenReturn(lore);
+			
+		when(event.getCurrentItem()).thenReturn(clickedItem);
+		when(event.getInventory()).thenReturn(handler.getRentGui());
+				
+		ItemStack loreUpdateItem = mock(ItemStack.class);
+		ItemMeta loreUpdateItemMeta = mock(ItemMeta.class);
+		when(loreUpdateItem.getItemMeta()).thenReturn(loreUpdateItemMeta);
+		when(handler.getRentGui().getItem(5)).thenReturn(loreUpdateItem);
+		when(handler.getRentGui().getItem(4)).thenReturn(loreUpdateItem);
+		
+		ItemStack loreUpdateRentItem = mock(ItemStack.class);
+		ItemMeta loreUpdateRentItemMeta = mock(ItemMeta.class);
+		when(loreUpdateRentItem.getItemMeta()).thenReturn(loreUpdateRentItemMeta);
+		when(handler.getRentGui().getItem(0)).thenReturn(loreUpdateRentItem);
+				
+		handler.handleRentShopGUIClick(event);
+		
+		verify(event).setCancelled(true);
+		List<String> newLore = Arrays.asList("§6Duration: §a" + durationNew + "§6 " + dayDaysNew);
+		List<String> newLoreFee = Arrays.asList("§6RentalFee: §a" + fee);
+		verify(loreUpdateItemMeta, times(2)).setLore(newLore);
+		verify(loreUpdateRentItemMeta).setLore(newLoreFee);
+		verify(handler.getRentGui().getItem(1).getItemMeta()).setLore(newLore);
+	}
+
 	@Test
 	public void handleRentShopGuiClickTestMinusOneClickMore() {
-		try {
-			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
-			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
-			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 4, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(event);
-			InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 3, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(switchToMinus);
-			handler.handleRentShopGUIClick(event);
-			handler.handleRentShopGUIClick(event);
-			handler.handleRentShopGUIClick(event);
-			ChestInventoryMock gui = (ChestInventoryMock) handler.getRentGui();
-			List<String> list = new ArrayList<>();
-			list.add("§6Duration: §a1§6 Day");
-			assertEquals(list, gui.getItem(1).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(4).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(5).getItemMeta().getLore());
-			list.clear();
-			list.add("§6RentalFee: §a4.5");
-			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		testPlusMinusDuration("Day", "Day", "minus", "one", 1, 1, 5.5);
 	}
-	
+
 	@Test
 	public void handleRentShopGuiClickTestPlusOneClickMore() {
-		try {
-			ConfigManagerImpl.setMaxRentedDays(3);
-			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
-			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
-			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 4, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(event);
-			handler.handleRentShopGUIClick(event);
-			handler.handleRentShopGUIClick(event);
-			handler.handleRentShopGUIClick(event);
-			ChestInventoryMock gui = (ChestInventoryMock) handler.getRentGui();
-			List<String> list = new ArrayList<>();
-			list.add("§6Duration: §a3§6 Days");
-			assertEquals(list, gui.getItem(1).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(4).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(5).getItemMeta().getLore());
-			list.clear();
-			list.add("§6RentalFee: §a13.5");
-			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
-			ConfigManagerImpl.setMaxRentedDays(14);
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		when(configManager.getMaxRentedDays()).thenReturn(10);
+		testPlusMinusDuration("Days", "Days", "plus", "one", 10, 10, 55.0);
 	}
 
 	@Test
 	public void handleRentShopGuiClickTestPlusSevenClick() {
-		try {
-			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
-			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
-			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 5, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(event);
-			ChestInventoryMock gui = (ChestInventoryMock) handler.getRentGui();
-			List<String> list = new ArrayList<>();
-			list.add("§6Duration: §a8§6 Days");
-			assertEquals(list, gui.getItem(1).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(4).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(5).getItemMeta().getLore());
-			list.clear();
-			list.add("§6RentalFee: §a36.0");
-			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		when(configManager.getMaxRentedDays()).thenReturn(10);
+		testPlusMinusDuration("Day", "Days", "plus", "seven", 1, 8, 44.0);
 	}
-	
+
 	@Test
 	public void handleRentShopGuiClickTestMinusSevenClick() {
-		try {
-			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
-			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
-			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 5, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(event);
-			InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 3, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(switchToMinus);
-			handler.handleRentShopGUIClick(event);
-			ChestInventoryMock gui = (ChestInventoryMock) handler.getRentGui();
-			List<String> list = new ArrayList<>();
-			list.add("§6Duration: §a1§6 Day");
-			assertEquals(list, gui.getItem(1).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(4).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(5).getItemMeta().getLore());
-			list.clear();
-			list.add("§6RentalFee: §a4.5");
-			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		testPlusMinusDuration("Days", "Days", "minus", "seven", 9, 2, 11.0);
 	}
-	
+
 	@Test
 	public void handleRentShopGuiClickTestMinusSevenClickMore() {
-		try {
-			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
-			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
-			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 5, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(event);
-			InventoryClickEvent switchToMinus = new InventoryClickEvent(view, SlotType.CONTAINER, 3, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(switchToMinus);
-			handler.handleRentShopGUIClick(event);
-			handler.handleRentShopGUIClick(event);
-			handler.handleRentShopGUIClick(event);
-			ChestInventoryMock gui = (ChestInventoryMock) handler.getRentGui();
-			List<String> list = new ArrayList<>();
-			list.add("§6Duration: §a1§6 Day");
-			assertEquals(list, gui.getItem(1).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(4).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(5).getItemMeta().getLore());
-			list.clear();
-			list.add("§6RentalFee: §a4.5");
-			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		testPlusMinusDuration("Days", "Day", "minus", "seven", 5, 1, 5.5);
 	}
-	
+
 	@Test
 	public void handleRentShopGuiClickTestPlusSevenClickMore() {
-		try {
-			ConfigManagerImpl.setMaxRentedDays(14);
-			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
-			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
-			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 5, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(event);
-			handler.handleRentShopGUIClick(event);
-			handler.handleRentShopGUIClick(event);
-			handler.handleRentShopGUIClick(event);
-			ChestInventoryMock gui = (ChestInventoryMock) handler.getRentGui();
-			List<String> list = new ArrayList<>();
-			list.add("§6Duration: §a14§6 Days");
-			assertEquals(list, gui.getItem(1).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(4).getItemMeta().getLore());
-			assertEquals(list, gui.getItem(5).getItemMeta().getLore());
-			list.clear();
-			list.add("§6RentalFee: §a63.0");
-			assertEquals(list, gui.getItem(0).getItemMeta().getLore());
-			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		when(configManager.getMaxRentedDays()).thenReturn(10);
+		testPlusMinusDuration("Days", "Days", "plus", "seven", 6, 10, 55.0);
 	}
-	
+
 	@Test
-	public void handleRentShopGuiClickTestRentClickError() {
-		try {
-			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
-			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
-			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(event);
-			assertEquals("§cYou have not enough money!", player.nextMessage());
-			assertNull(player.nextMessage());
-			assertNull(player.getOpenInventory().getTopInventory());
-			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+	public void handleRentShopGuiClickTestRentClickError() throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+		Villager villager = mock(Villager.class);
+		Inventory inv = mock(Inventory.class);
+		ItemStack rentItem = mock(ItemStack.class);
+		ItemStack plusItem = mock(ItemStack.class);
+		ItemStack oneItem = mock(ItemStack.class);
+		ItemStack sevenItem = mock(ItemStack.class);
+		ItemStack clockItem = mock(ItemStack.class);
+		ItemMeta rentItemMeta = mock(ItemMeta.class);
+		ItemMeta clockItemMeta = mock(ItemMeta.class);
+		ItemMeta oneItemMeta = mock(ItemMeta.class);
+		ItemMeta sevenItemMeta = mock(ItemMeta.class);
+		when(sevenItem.getItemMeta()).thenReturn(sevenItemMeta);
+		when(oneItem.getItemMeta()).thenReturn(oneItemMeta);
+		when(clockItem.getItemMeta()).thenReturn(clockItemMeta);
+		when(rentItem.getItemMeta()).thenReturn(rentItemMeta);
+		when(skullService.getSkullWithName("PLUS", "plus")).thenReturn(plusItem);
+		when(skullService.getSkullWithName("ONE", "one")).thenReturn(oneItem);
+		when(skullService.getSkullWithName("SEVEN", "seven")).thenReturn(sevenItem);
+		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(rentItem);
+		when(serverProvider.createItemStack(Material.CLOCK, 1)).thenReturn(clockItem);
+		when(shop.getShopVillager()).thenReturn(villager);
+		when(shop.getName()).thenReturn("Shop#R0");
+		when(shop.getRentalFee()).thenReturn(5.5);
+		when(serverProvider.createInventory(villager, 9, "Shop#R0")).thenReturn(inv);
+		RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager,
+				skullService, configManager, shop, serverProvider);
+		
+		InventoryClickEvent event = mock(InventoryClickEvent.class);
+		
+		ItemStack clickedItem = mock(ItemStack.class);
+		ItemMeta clickedItemMeta = mock(ItemMeta.class);
+		when(clickedItem.getItemMeta()).thenReturn(clickedItemMeta);
+		when(clickedItemMeta.getDisplayName()).thenReturn("Rent");
+		
+		ItemStack operationItem = mock(ItemStack.class);
+		ItemMeta operationItemMeta = mock(ItemMeta.class);
+		when(operationItem.getItemMeta()).thenReturn(operationItemMeta);
+		when(handler.getRentGui().getItem(3)).thenReturn(operationItem);
+		when(operationItemMeta.getDisplayName()).thenReturn("plus");
+		
+		ItemStack durationItem = mock(ItemStack.class);
+		ItemMeta durationItemMeta = mock(ItemMeta.class);
+		when(durationItem.getItemMeta()).thenReturn(durationItemMeta);
+		when(handler.getRentGui().getItem(1)).thenReturn(durationItem);
+		List<String> lore = Arrays.asList("§6Duration: §a2§6 Days");
+		when(durationItemMeta.getLore()).thenReturn(lore);
+
+		Player player = mock(Player.class);
+		when(event.getCurrentItem()).thenReturn(clickedItem);
+		when(event.getInventory()).thenReturn(handler.getRentGui());
+		when(event.getWhoClicked()).thenReturn(player);
+		when(player.getName()).thenReturn("catch441");
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
+			
+		
+		ShopSystemException e = mock(ShopSystemException.class);
+		when(e.getMessage()).thenReturn("my error message");
+		doThrow(e).when(shop).rentShop(ecoPlayer, 2);
+		
+		handler.handleRentShopGUIClick(event);
+		
+		verify(event).setCancelled(true);
+		verify(player).sendMessage("my error message");
+		verify(player).closeInventory();
 	}
-	
+
 	@Test
 	public void handleRentShopGuiClickTestRentClick() {
-		try {
-			EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0).increasePlayerAmount(4.5, false);
-			RentshopManagerImpl.createRentShop(new Location(world,6,7,6), 9, 4.5);
-			RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(RentshopManagerImpl.getRentShops().get(0));
-			PlayerInventoryViewMock view = new PlayerInventoryViewMock(player, handler.getRentGui());
-			InventoryClickEvent event = new InventoryClickEvent(view, SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PICKUP_ONE);
-			handler.handleRentShopGUIClick(event);
-			assertEquals("§6You rented this shop.", player.nextMessage());
-			assertNull(player.nextMessage());
-			assertNull(player.getOpenInventory().getTopInventory());
-			assertTrue(RentshopManagerImpl.getRentShops().get(0).isOwner(EconomyPlayerManagerImpl.getAllEconomyPlayers().get(0)));
-			RentshopManagerImpl.deleteRentShop(RentshopManagerImpl.getRentShops().get(0));
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		Villager villager = mock(Villager.class);
+		Inventory inv = mock(Inventory.class);
+		ItemStack rentItem = mock(ItemStack.class);
+		ItemStack plusItem = mock(ItemStack.class);
+		ItemStack oneItem = mock(ItemStack.class);
+		ItemStack sevenItem = mock(ItemStack.class);
+		ItemStack clockItem = mock(ItemStack.class);
+		ItemMeta rentItemMeta = mock(ItemMeta.class);
+		ItemMeta clockItemMeta = mock(ItemMeta.class);
+		ItemMeta oneItemMeta = mock(ItemMeta.class);
+		ItemMeta sevenItemMeta = mock(ItemMeta.class);
+		when(sevenItem.getItemMeta()).thenReturn(sevenItemMeta);
+		when(oneItem.getItemMeta()).thenReturn(oneItemMeta);
+		when(clockItem.getItemMeta()).thenReturn(clockItemMeta);
+		when(rentItem.getItemMeta()).thenReturn(rentItemMeta);
+		when(skullService.getSkullWithName("PLUS", "plus")).thenReturn(plusItem);
+		when(skullService.getSkullWithName("ONE", "one")).thenReturn(oneItem);
+		when(skullService.getSkullWithName("SEVEN", "seven")).thenReturn(sevenItem);
+		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(rentItem);
+		when(serverProvider.createItemStack(Material.CLOCK, 1)).thenReturn(clockItem);
+		when(shop.getShopVillager()).thenReturn(villager);
+		when(shop.getName()).thenReturn("Shop#R0");
+		when(shop.getRentalFee()).thenReturn(5.5);
+		when(serverProvider.createInventory(villager, 9, "Shop#R0")).thenReturn(inv);
+		RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager,
+				skullService, configManager, shop, serverProvider);
+		
+		InventoryClickEvent event = mock(InventoryClickEvent.class);
+		
+		ItemStack clickedItem = mock(ItemStack.class);
+		ItemMeta clickedItemMeta = mock(ItemMeta.class);
+		when(clickedItem.getItemMeta()).thenReturn(clickedItemMeta);
+		when(clickedItemMeta.getDisplayName()).thenReturn("Rent");
+		
+		ItemStack operationItem = mock(ItemStack.class);
+		ItemMeta operationItemMeta = mock(ItemMeta.class);
+		when(operationItem.getItemMeta()).thenReturn(operationItemMeta);
+		when(handler.getRentGui().getItem(3)).thenReturn(operationItem);
+		when(operationItemMeta.getDisplayName()).thenReturn("plus");
+		
+		ItemStack durationItem = mock(ItemStack.class);
+		ItemMeta durationItemMeta = mock(ItemMeta.class);
+		when(durationItem.getItemMeta()).thenReturn(durationItemMeta);
+		when(handler.getRentGui().getItem(1)).thenReturn(durationItem);
+		List<String> lore = Arrays.asList("§6Duration: §a2§6 Days");
+		when(durationItemMeta.getLore()).thenReturn(lore);
+
+		Player player = mock(Player.class);
+		when(event.getCurrentItem()).thenReturn(clickedItem);
+		when(event.getInventory()).thenReturn(handler.getRentGui());
+		when(event.getWhoClicked()).thenReturn(player);
+		when(player.getName()).thenReturn("catch441");
+		when(messageWrapper.getString("rent_rented")).thenReturn("my message");
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
+				
+		handler.handleRentShopGUIClick(event);
+		
+		verify(event).setCancelled(true);
+		assertDoesNotThrow(() -> verify(shop).rentShop(ecoPlayer, 2));
+		verify(player).sendMessage("my message");
+		verify(player).closeInventory();
 	}
 }

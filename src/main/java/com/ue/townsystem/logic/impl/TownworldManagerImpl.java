@@ -13,6 +13,8 @@ import org.bukkit.Chunk;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
@@ -132,7 +134,8 @@ public class TownworldManagerImpl implements TownworldManager {
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		townsystemValidationHandler.checkForWorldExists(world);
 		townsystemValidationHandler.checkForTownworldDoesNotExist(townWorldList, world);
-		TownsystemDao townsystemDao = new TownsystemDaoImpl(world);
+		Logger logger = LoggerFactory.getLogger(TownsystemDao.class);
+		TownsystemDao townsystemDao = new TownsystemDaoImpl(world, logger);
 		townWorldList.put(world, new TownworldImpl(townsystemDao, world, true));
 		saveTownworldNameList();
 	}
@@ -151,7 +154,8 @@ public class TownworldManagerImpl implements TownworldManager {
 	public void loadAllTownWorlds() {
 		for (String townWorldName : UltimateEconomy.getInstance.getConfig().getStringList("TownWorlds")) {
 			try {
-				TownsystemDao townsystemDao = new TownsystemDaoImpl(townWorldName);
+				Logger logger = LoggerFactory.getLogger(TownsystemDao.class);
+				TownsystemDao townsystemDao = new TownsystemDaoImpl(townWorldName, logger);
 				Townworld townworld = new TownworldImpl(townsystemDao, townWorldName, false);
 				townNameList.addAll(townworld.getTownNameList());
 				townWorldList.put(townWorldName, townworld);
