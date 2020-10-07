@@ -178,8 +178,8 @@ public class ShopSlotEditorHandlerImplTest {
 		verify(inv).setItem(4, one);
 		verify(inv).setItem(13, one);
 		verify(inv).setItem(22, one);
-		verify(inv).setItem(9, sell);
-		verify(inv).setItem(18, buy);
+		verify(inv).setItem(18, sell);
+		verify(inv).setItem(9, buy);
 		verify(inv).setItem(0, empty);
 		verify(plus, times(2)).setItemMeta(plusMeta);
 		verify(twenty, times(2)).setItemMeta(twentyMeta);
@@ -253,8 +253,8 @@ public class ShopSlotEditorHandlerImplTest {
 		verify(inv).setItem(4, one);
 		verify(inv).setItem(13, one);
 		verify(inv).setItem(22, one);
-		verify(inv).setItem(9, sell);
-		verify(inv).setItem(18, buy);
+		verify(inv).setItem(18, sell);
+		verify(inv).setItem(9, buy);
 		verify(inv).setItem(0, filled);
 		verify(plus, times(2)).setItemMeta(plusMeta);
 		verify(twenty, times(2)).setItemMeta(twentyMeta);
@@ -621,7 +621,7 @@ public class ShopSlotEditorHandlerImplTest {
 	}
 
 	@Test
-	public void handleSlotEditorTestSaveChangesEdit() {
+	public void handleSlotEditorTestSaveChangesEditWithAllChanged() {
 		ShopSlotEditorHandlerImpl handler = createSlotEditorHandler();
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		ItemStack currentItem = mock(ItemStack.class);
@@ -646,15 +646,58 @@ public class ShopSlotEditorHandlerImplTest {
 		when(sellPriceItem.getItemMeta()).thenReturn(sellPriceItemMeta);
 		when(currentItemMeta.getDisplayName()).thenReturn("save changes");
 		when(sellPriceItemMeta.getLore()).thenReturn(Arrays.asList(ChatColor.GOLD + "Price: 3.0"));
-		when(buyPriceItemMeta.getLore()).thenReturn(Arrays.asList(ChatColor.GOLD + "Price: 0.0"));
+		when(buyPriceItemMeta.getLore()).thenReturn(Arrays.asList(ChatColor.GOLD + "Price: 1.5"));
 		assertDoesNotThrow(() -> when(shop.getShopItem(0)).thenReturn(shopItem));
 		when(shopItem.getItemStack()).thenReturn(shopItemStack);
 		when(shopItemStack.isSimilar(selectedItem)).thenReturn(true);
-		assertDoesNotThrow(() -> when(shop.editShopItem(0, "20", "3.0", "0.0")).thenReturn("edit message"));
+		assertDoesNotThrow(() -> when(shop.editShopItem(0, "20", "3.0", "1.5")).thenReturn("edit message"));
 
 		handler.handleSlotEditor(event);
 
-		assertDoesNotThrow(() -> verify(validationHandler).checkForPricesGreaterThenZero(3.0, 0.0));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForPricesGreaterThenZero(3.0, 1.5));
+		assertDoesNotThrow(() -> verify(shop).openEditor(player));
+		verify(player).sendMessage("edit message");
+		verify(event).setCancelled(true);
+	}
+	
+	@Test
+	public void handleSlotEditorTestSaveChangesEditWithNothingChanged() {
+		ShopSlotEditorHandlerImpl handler = createSlotEditorHandler();
+		InventoryClickEvent event = mock(InventoryClickEvent.class);
+		ItemStack currentItem = mock(ItemStack.class);
+		ItemStack buyPriceItem = mock(ItemStack.class);
+		ItemStack sellPriceItem = mock(ItemStack.class);
+		ItemStack selectedItem = mock(ItemStack.class);
+		ItemStack shopItemStack = mock(ItemStack.class);
+		ShopItem shopItem = mock(ShopItem.class);
+		ItemMeta buyPriceItemMeta = mock(ItemMeta.class);
+		ItemMeta sellPriceItemMeta = mock(ItemMeta.class);
+		ItemMeta currentItemMeta = mock(ItemMeta.class);
+		Player player = mock(Player.class);
+		when(selectedItem.getAmount()).thenReturn(20);
+		when(handler.getSlotEditorInventory().getItem(9)).thenReturn(buyPriceItem);
+		when(handler.getSlotEditorInventory().getItem(18)).thenReturn(sellPriceItem);
+		when(handler.getSlotEditorInventory().getItem(0)).thenReturn(selectedItem);
+		when(event.getCurrentItem()).thenReturn(currentItem);
+		when(event.getWhoClicked()).thenReturn(player);
+		when(event.getSlot()).thenReturn(8);
+		when(currentItem.getItemMeta()).thenReturn(currentItemMeta);
+		when(buyPriceItem.getItemMeta()).thenReturn(buyPriceItemMeta);
+		when(sellPriceItem.getItemMeta()).thenReturn(sellPriceItemMeta);
+		when(currentItemMeta.getDisplayName()).thenReturn("save changes");
+		when(sellPriceItemMeta.getLore()).thenReturn(Arrays.asList(ChatColor.GOLD + "Price: 3.0"));
+		when(buyPriceItemMeta.getLore()).thenReturn(Arrays.asList(ChatColor.GOLD + "Price: 1.5"));
+		assertDoesNotThrow(() -> when(shop.getShopItem(0)).thenReturn(shopItem));
+		when(shopItem.getItemStack()).thenReturn(shopItemStack);
+		when(shopItem.getSellPrice()).thenReturn(3.0);
+		when(shopItem.getBuyPrice()).thenReturn(1.5);
+		when(shopItem.getAmount()).thenReturn(20);
+		when(shopItemStack.isSimilar(selectedItem)).thenReturn(true);
+		assertDoesNotThrow(() -> when(shop.editShopItem(0, "none", "none", "none")).thenReturn("edit message"));
+
+		handler.handleSlotEditor(event);
+
+		assertDoesNotThrow(() -> verify(validationHandler).checkForPricesGreaterThenZero(3.0, 1.5));
 		assertDoesNotThrow(() -> verify(shop).openEditor(player));
 		verify(player).sendMessage("edit message");
 		verify(event).setCancelled(true);

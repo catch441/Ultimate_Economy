@@ -136,7 +136,7 @@ public class JobsystemValidationHandlerImpl implements JobsystemValidationHandle
 			throw new JobSystemException(messageWrapper, JobExceptionMessageEnum.JOB_NOT_EXIST_IN_JOBCENTER);
 		}
 	}
-	
+
 	@Override
 	public void checkForJobNameDoesNotExist(List<String> jobList, String jobName) throws GeneralEconomyException {
 		if (jobList.contains(jobName)) {
@@ -144,16 +144,18 @@ public class JobsystemValidationHandlerImpl implements JobsystemValidationHandle
 					jobName);
 		}
 	}
-	
+
 	@Override
 	public void checkForValidSize(int size) throws GeneralEconomyException {
-		if (size % 9 != 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, size);
+		if (size % 9 != 0 || size > 54) {
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
+					size);
 		}
 	}
 
 	@Override
-	public void checkForJobcenterNameDoesNotExist(List<String> jobcenterList, String name) throws GeneralEconomyException {
+	public void checkForJobcenterNameDoesNotExist(List<String> jobcenterList, String name)
+			throws GeneralEconomyException {
 		if (jobcenterList.contains(name)) {
 			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, name);
 		}

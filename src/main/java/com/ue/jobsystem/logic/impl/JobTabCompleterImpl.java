@@ -53,25 +53,30 @@ public class JobTabCompleterImpl implements TabCompleter {
 	}
 
 	private List<String> handleJobTabComplete(String[] args) {
-		switch (args[1]) {
-		case "":
-			return getAllJobCommands();
-		case "addItem":
-		case "removeItem":
-			return handleAddRemoveItemTabComplete(args);
-		case "addMob":
-		case "deleteMob":
-			return handleAddDeleteMobTabComplete(args);
-		case "addFisher":
-		case "removeFisher":
-			return handleAddRemoveFisherTabComplete(args);
-		case "delete":
-			return handleJobDeleteTabComplete(args);
-		case "create":
-			return new ArrayList<>();
-		default:
-			return getMatchingJobCommands(args);
+		if(args.length > 1) {
+			switch (args[1]) {
+			case "":
+				return getAllJobCommands();
+			case "addItem":
+			case "removeItem":
+				return handleAddRemoveItemTabComplete(args);
+			case "addMob":
+			case "removeMob":
+				return handleAddRemoveMobTabComplete(args);
+			case "addFisher":
+			case "removeFisher":
+				return handleAddRemoveFisherTabComplete(args);
+			case "delete":
+				return handleJobDeleteTabComplete(args);
+			case "create":
+				return new ArrayList<>();
+			default:
+				if(args.length == 2) {
+					return getMatchingJobCommands(args);
+				}
+			}
 		}
+		return new ArrayList<>();
 	}
 
 	private List<String> handleAddRemoveItemTabComplete(String[] args) {
@@ -84,7 +89,7 @@ public class JobTabCompleterImpl implements TabCompleter {
 		}
 	}
 
-	private List<String> handleAddDeleteMobTabComplete(String[] args) {
+	private List<String> handleAddRemoveMobTabComplete(String[] args) {
 		if (args.length == 4) {
 			return getEntityList(args[3]);
 		} else if (args.length == 3) {

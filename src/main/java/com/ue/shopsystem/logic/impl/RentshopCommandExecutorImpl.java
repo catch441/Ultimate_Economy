@@ -95,7 +95,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 	private boolean performDeleteCommand(String label, String[] args, Player player) throws GeneralEconomyException {
 		if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 			if (args.length == 2) {
-				rentshopManager.deleteRentShop(rentshopManager.getRentShopByUniqueName(args[1], null));
+				rentshopManager.deleteRentShop(rentshopManager.getRentShopByUniqueName(args[1]));
 				player.sendMessage(messageWrapper.getString("shop_delete", args[1]));
 			} else {
 				player.sendMessage("/" + label + " delete <shopname>");
@@ -108,7 +108,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 			if (args.length == 2) {
-				rentshopManager.getRentShopByUniqueName(args[1], null).moveShop(player.getLocation());
+				rentshopManager.getRentShopByUniqueName(args[1]).moveShop(player.getLocation());
 			} else {
 				player.sendMessage("/" + label + " move <shopname>");
 			}
@@ -120,7 +120,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 		if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 			if (args.length == 3) {
-				rentshopManager.getRentShopByUniqueName(args[1], null).changeShopSize(Integer.valueOf(args[2]));
+				rentshopManager.getRentShopByUniqueName(args[1]).changeShopSize(Integer.valueOf(args[2]));
 				player.sendMessage(messageWrapper.getString("shop_resize", args[2]));
 			} else {
 				player.sendMessage("/" + label + " resize <shopname> <new size>");
@@ -133,7 +133,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 			throws GeneralEconomyException {
 		if (args.length == 3) {
 			try {
-				rentshopManager.getRentShopByUniqueName(args[1], player)
+				rentshopManager.getRentShopByUniqueName(args[1] + "_" + player.getName())
 						.changeProfession(Profession.valueOf(args[2].toUpperCase()));
 				player.sendMessage(messageWrapper.getString("profession_changed"));
 			} catch (IllegalArgumentException e) {
@@ -148,7 +148,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 	private boolean performRenameCommand(String label, String[] args, Player player)
 			throws ShopSystemException, GeneralEconomyException {
 		if (args.length == 3) {
-			rentshopManager.getRentShopByUniqueName(args[1], player).changeShopName(args[2]);
+			rentshopManager.getRentShopByUniqueName(args[1] + "_" + player.getName()).changeShopName(args[2]);
 			player.sendMessage(messageWrapper.getString("shop_rename", args[1], args[2]));
 		} else {
 			player.sendMessage("/" + label + " rename <oldName> <newName>");
@@ -159,7 +159,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 	private boolean performEditShopCommand(String label, String[] args, Player player)
 			throws ShopSystemException, GeneralEconomyException {
 		if (args.length == 2) {
-			rentshopManager.getRentShopByUniqueName(args[1], player).openEditor(player);
+			rentshopManager.getRentShopByUniqueName(args[1] + "_" + player.getName()).openEditor(player);
 		} else {
 			player.sendMessage("/" + label + " editShop <shopname>");
 		}

@@ -230,6 +230,18 @@ public class JobSystemValidationHandlerTest {
 			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
 		}
 	}
+	
+	@Test
+	public void checkForValidSizeTestGreater() {
+		try {
+			validationHandler.checkForValidSize(63);
+			fail();
+		} catch (GeneralEconomyException e) {
+			assertEquals(1, e.getParams().length);
+			assertEquals(63, e.getParams()[0]);
+			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
+		}
+	}
 
 	@Test
 	public void checkForJobNameDoesNotExistTestValid() {

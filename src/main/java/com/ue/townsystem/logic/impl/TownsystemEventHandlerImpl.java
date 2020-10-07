@@ -22,23 +22,38 @@ import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.Town;
-import com.ue.townsystem.logic.api.TownmanagerEventHandler;
+import com.ue.townsystem.logic.api.TownsystemEventHandler;
 import com.ue.townsystem.logic.api.Townworld;
 import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
-public class TownsystemEventHandlerImpl implements TownmanagerEventHandler {
+public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 
+	private final ConfigManager configManager;
+	private final TownworldManager townworldManager;
+	private final EconomyPlayerManager ecoPlayerManager;
+	private final MessageWrapper messageWrapper;
+	private final EconomyPlayerValidationHandler ecoPlayerValidationHandler;
+
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param configManager
+	 * @param townworldManager
+	 * @param ecoPlayerManager
+	 * @param messageWrapper
+	 * @param ecoPlayerValidationHandler
+	 */
 	@Inject
-	ConfigManager configManager;
-	@Inject
-	TownworldManager townworldManager;
-	@Inject
-	EconomyPlayerManager ecoPlayerManager;
-	@Inject
-	MessageWrapper messageWrapper;
-	@Inject
-	EconomyPlayerValidationHandler ecoPlayerValidationHandler;
+	public TownsystemEventHandlerImpl(ConfigManager configManager, TownworldManager townworldManager,
+			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
+			EconomyPlayerValidationHandler ecoPlayerValidationHandler) {
+		this.configManager = configManager;
+		this.townworldManager = townworldManager;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.messageWrapper = messageWrapper;
+		this.ecoPlayerValidationHandler = ecoPlayerValidationHandler;
+	}
 
 	@Override
 	public void handlePlayerTeleport(PlayerTeleportEvent event) {

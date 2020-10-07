@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -39,6 +37,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
 import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.Updater;
 import com.ue.common.utils.Updater.UpdateResult;
 import com.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
@@ -46,38 +45,46 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.jobsystem.logic.api.JobsystemEventHandler;
 import com.ue.shopsystem.logic.api.ShopEventHandler;
 import com.ue.shopsystem.logic.impl.Spawner;
-import com.ue.townsystem.logic.impl.TownsystemEventHandlerImpl;
+import com.ue.townsystem.logic.api.TownsystemEventHandler;
 
 public class UltimateEconomyEventHandler implements Listener {
 
-	@Inject
-	EconomyPlayerEventHandler ecoPlayerEventHandler;
-	@Inject
-	MessageWrapper messageWrapper;
-	@Inject
-	JobsystemEventHandler jobsystemEventHandler;
-	@Inject
-	ShopEventHandler shopEventHandler;
-	private UltimateEconomy plugin;
+	private final EconomyPlayerEventHandler ecoPlayerEventHandler;
+	private final MessageWrapper messageWrapper;
+	private final JobsystemEventHandler jobsystemEventHandler;
+	private final ShopEventHandler shopEventHandler;
+	private final ServerProvider serverProvider;
+	private final TownsystemEventHandler townSystemEventHandler;
 	private UpdateResult updateResult;
 	private List<String> spawnerlist;
 	private File spawner;
-	private TownsystemEventHandlerImpl townSystemEventHandler;
-	
+
 	/**
 	 * Constructor of ultimate economy event handler.
 	 * 
-	 * @param plugin
+	 * @param townSystemEventHandler
+	 * @param serverProvider
+	 * @param shopEventHandler
+	 * @param jobsystemEventHandler
+	 * @param ecoPlayerEventHandler
+	 * @param messageWrapper
 	 * @param spawnerlist
 	 * @param spawner
 	 */
-	public UltimateEconomyEventHandler(UltimateEconomy plugin, List<String> spawnerlist, File spawner) {
-		this.plugin = plugin;
+	public UltimateEconomyEventHandler(TownsystemEventHandler townSystemEventHandler, ServerProvider serverProvider,
+			ShopEventHandler shopEventHandler, JobsystemEventHandler jobsystemEventHandler,
+			EconomyPlayerEventHandler ecoPlayerEventHandler, MessageWrapper messageWrapper, List<String> spawnerlist,
+			File spawner) {
+		this.ecoPlayerEventHandler = ecoPlayerEventHandler;
+		this.shopEventHandler = shopEventHandler;
+		this.jobsystemEventHandler = jobsystemEventHandler;
+		this.messageWrapper = messageWrapper;
+		this.serverProvider = serverProvider;
+		this.townSystemEventHandler = townSystemEventHandler;
 		// version check
-		updateResult = Updater.checkForUpdate(plugin.getDescription().getVersion());
+		updateResult = Updater.checkForUpdate(serverProvider.getPluginInstance().getDescription().getVersion());
 		this.spawnerlist = spawnerlist;
 		this.spawner = spawner;
-		townSystemEventHandler = new TownsystemEventHandlerImpl();
 	}
 
 	/**
@@ -108,18 +115,19 @@ public class UltimateEconomyEventHandler implements Listener {
 	@EventHandler
 	public void onNPCOpenInv(PlayerInteractEntityEvent event) {
 		Entity entity = event.getRightClicked();
-		if (entity instanceof Villager && entity.hasMetadata("ue-type")) {	
+		if (entity instanceof Villager && entity.hasMetadata("ue-type")) {
 			handleEconomyVillagerOpenInv(event, entity);
 		}
 	}
 
 	private void handleEconomyVillagerOpenInv(PlayerInteractEntityEvent event, Entity entity) {
-		EconomyVillager economyVillager = EconomyVillager.getEnum(entity.getMetadata("ue-type").get(0).value().toString());
+		EconomyVillager economyVillager = EconomyVillager
+				.getEnum(entity.getMetadata("ue-type").get(0).value().toString());
 		switch (economyVillager) {
 		case JOBCENTER:
 			jobsystemEventHandler.handleOpenInventory(event);
 			break;
-		case ADMINSHOP:				
+		case ADMINSHOP:
 		case PLAYERSHOP:
 		case PLAYERSHOP_RENTABLE:
 			shopEventHandler.handleOpenInventory(event);
@@ -217,7 +225,7 @@ public class UltimateEconomyEventHandler implements Listener {
 			if (event.getBlock().getBlockData().getMaterial() == Material.SPAWNER
 					&& event.getItemInHand().getItemMeta().getDisplayName().contains("-")) {
 				handleSetSpawner(event);
-			} 
+			}
 		}
 		jobsystemEventHandler.handleSetBlock(event);
 	}
@@ -228,10 +236,10 @@ public class UltimateEconomyEventHandler implements Listener {
 		if (spawnerowner.equals(event.getPlayer().getName())) {
 			String string = event.getItemInHand().getItemMeta().getDisplayName();
 			Spawner.setSpawner(EntityType.valueOf(string.substring(0, string.lastIndexOf("-"))), event.getBlock());
-			event.getBlock().setMetadata("name",
-					new FixedMetadataValue(plugin, string.substring(string.lastIndexOf("-") + 1)));
-			event.getBlock().setMetadata("entity",
-					new FixedMetadataValue(plugin, string.substring(0, string.lastIndexOf("-"))));
+			event.getBlock().setMetadata("name", new FixedMetadataValue(serverProvider.getPluginInstance(),
+					string.substring(string.lastIndexOf("-") + 1)));
+			event.getBlock().setMetadata("entity", new FixedMetadataValue(serverProvider.getPluginInstance(),
+					string.substring(0, string.lastIndexOf("-"))));
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(spawner);
 			double x = event.getBlock().getX();
 			double y = event.getBlock().getY();
@@ -239,8 +247,8 @@ public class UltimateEconomyEventHandler implements Listener {
 			String spawnername = String.valueOf(x) + String.valueOf(y) + String.valueOf(z);
 			spawnername = spawnername.replace(".", "-");
 			spawnerlist.add(spawnername);
-			plugin.getConfig().set("Spawnerlist", spawnerlist);
-			plugin.saveConfig();
+			serverProvider.getPluginInstance().getConfig().set("Spawnerlist", spawnerlist);
+			serverProvider.getPluginInstance().saveConfig();
 			config.set(spawnername + ".X", x);
 			config.set(spawnername + ".Y", y);
 			config.set(spawnername + ".Z", z);
@@ -297,8 +305,8 @@ public class UltimateEconomyEventHandler implements Listener {
 					String spawnername = String.valueOf(x) + String.valueOf(y) + String.valueOf(z);
 					spawnername = spawnername.replace(".", "-");
 					spawnerlist.remove(spawnername);
-					plugin.getConfig().set("Spawnerlist", spawnerlist);
-					plugin.saveConfig();
+					serverProvider.getPluginInstance().getConfig().set("Spawnerlist", spawnerlist);
+					serverProvider.getPluginInstance().saveConfig();
 					config.set(spawnername, null);
 					saveFile(spawner, config);
 					ItemStack stack = new ItemStack(Material.SPAWNER, 1);
@@ -324,8 +332,8 @@ public class UltimateEconomyEventHandler implements Listener {
 			String spawnername = String.valueOf(x) + String.valueOf(y) + String.valueOf(z);
 			spawnername = spawnername.replace(".", "-");
 			spawnerlist.remove(spawnername);
-			plugin.getConfig().set("Spawnerlist", spawnerlist);
-			plugin.saveConfig();
+			serverProvider.getPluginInstance().getConfig().set("Spawnerlist", spawnerlist);
+			serverProvider.getPluginInstance().saveConfig();
 			config.set(spawnername, null);
 			saveFile(spawner, config);
 		}

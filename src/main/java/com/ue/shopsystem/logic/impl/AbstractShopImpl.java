@@ -276,7 +276,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		if (shopItem.getSellPrice() != 0.0) {
 			double sellPrice = shopItem.getSellPrice() / shopItem.getAmount() * amount;
 			ecoPlayer.increasePlayerAmount(sellPrice, false);
-			removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack().clone(), amount);
+			removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack(), amount);
 			if (sendMessage) {
 				sendBuySellPlayerMessage(amount, ecoPlayer, sellPrice, "sell");
 			}
@@ -554,10 +554,12 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		setupShopVillager();
 		getShopVillager().setProfession(getShopDao().loadShopVillagerProfession());
 		setupShopInventory();
-		editorHandler = new ShopEditorHandlerImpl(serverProvider, skullService, this);
 		slotEditorHandler = new ShopSlotEditorHandlerImpl(serverProvider, messageWrapper, validationHandler,
 				skullService, this);
 		loadShopItems();
+		editorHandler = new ShopEditorHandlerImpl(serverProvider, skullService, this);
+		
+		
 	}
 
 	private void loadShopItems() {

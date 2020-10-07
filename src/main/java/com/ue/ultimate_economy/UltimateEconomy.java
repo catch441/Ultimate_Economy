@@ -32,20 +32,25 @@ import org.bukkit.plugin.java.JavaPluginLoader;
 import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.DaggerServiceComponent;
 import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.JobcenterManager;
+import com.ue.jobsystem.logic.api.JobsystemEventHandler;
 import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.RentshopManager;
+import com.ue.shopsystem.logic.api.ShopEventHandler;
 import com.ue.shopsystem.logic.impl.ShopSystemException;
+import com.ue.townsystem.logic.api.TownsystemEventHandler;
 import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.vault.VaultHook;
 
@@ -81,6 +86,16 @@ public class UltimateEconomy extends JavaPlugin {
 	MessageWrapper messageWrapper;
 	@Inject
 	CustomSkullService skullService;
+	@Inject
+	ServerProvider serverProvider;
+	@Inject
+	ShopEventHandler shopEventHandler;
+	@Inject
+	JobsystemEventHandler jobsystemEventHandler;
+	@Inject
+	EconomyPlayerEventHandler ecoPlayerEventHandler;
+	@Inject
+	TownsystemEventHandler townsystemEventHandler;
 	@Inject
 	@Named("ConfigCommandExecutor")
 	CommandExecutor configCommandExecutor;
@@ -206,8 +221,8 @@ public class UltimateEconomy extends JavaPlugin {
 		getConfig().options().copyDefaults(true);
 		saveConfig();
 		// setup eventhandler
-		getServer().getPluginManager().registerEvents(new UltimateEconomyEventHandler(this, spawnerlist, spawner),
-				this);
+		getServer().getPluginManager().registerEvents(new UltimateEconomyEventHandler(townsystemEventHandler, serverProvider, shopEventHandler,
+				jobsystemEventHandler, ecoPlayerEventHandler, messageWrapper, spawnerlist, spawner), this);
 	}
 
 	private void setupVault() {

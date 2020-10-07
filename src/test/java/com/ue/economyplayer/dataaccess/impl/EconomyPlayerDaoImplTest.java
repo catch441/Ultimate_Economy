@@ -149,6 +149,15 @@ public class EconomyPlayerDaoImplTest {
 	}
 	
 	@Test
+	public void loadHomeListTestWithoudHomes() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
+
+		Map<String, Location> list = ecoPlayerDao.loadHomeList("catch441");
+		assertEquals(0, list.size());
+	}
+	
+	@Test
 	public void loadHomeListOldTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();

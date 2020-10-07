@@ -3,7 +3,6 @@ package com.ue.shopsystem.logic.api;
 import java.util.List;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
 import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
@@ -34,16 +33,15 @@ public interface RentshopManager {
 	/**
 	 * This method returns a rentshop by a unique name.
 	 * <p>
-	 * rented: name = name and param player
+	 * rented: name = name + owner
 	 * <p>
 	 * not rented: name = RentShop# + shopId
 	 * 
 	 * @param name
-	 * @param player only necessary if rented
 	 * @return RentShop
 	 * @throws GeneralEconomyException
 	 */
-	public Rentshop getRentShopByUniqueName(String name, Player player) throws GeneralEconomyException;
+	public Rentshop getRentShopByUniqueName(String name) throws GeneralEconomyException;
 	
 	/**
 	 * This method returns a list of rentshop names. name = name_owner || RentShop#

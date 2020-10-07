@@ -21,8 +21,10 @@ public class ShopItemTest {
 	public void constructorTest() {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack clone = mock(ItemStack.class);
+		ItemStack cloneClone = mock(ItemStack.class);
 		when(stack.toString()).thenReturn("ItemStack{STONE x 1}");
 		when(stack.clone()).thenReturn(clone);
+		when(clone.clone()).thenReturn(cloneClone);
 		ShopItem item = new ShopItem(stack, 10, 2, 3, 0);
 		assertEquals(0, item.getSlot());
 		assertEquals(10, item.getAmount());
@@ -30,7 +32,7 @@ public class ShopItemTest {
 		assertEquals("3.0", String.valueOf(item.getBuyPrice()));
 		assertEquals("ItemStack{STONE x 1}", item.getItemString());
 		verify(stack).setAmount(1);
-		assertEquals(clone, item.getItemStack());
+		assertEquals(cloneClone, item.getItemStack());
 		assertEquals(0, item.getStock());
 	}
 	
@@ -38,11 +40,13 @@ public class ShopItemTest {
 	public void constructorTestWithSpawner() {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack clone = mock(ItemStack.class);
+		ItemStack cloneClone = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
 		when(stack.getType()).thenReturn(Material.SPAWNER);
 		when(stack.getItemMeta()).thenReturn(meta);
 		when(meta.getDisplayName()).thenReturn("COW");
 		when(stack.clone()).thenReturn(clone);
+		when(clone.clone()).thenReturn(cloneClone);
 		ShopItem item = new ShopItem(stack, 10, 2, 3, 0);
 		assertEquals(0, item.getSlot());
 		assertEquals(10, item.getAmount());
@@ -50,7 +54,7 @@ public class ShopItemTest {
 		assertEquals("3.0", String.valueOf(item.getBuyPrice()));
 		assertEquals("SPAWNER_COW", item.getItemString());
 		verify(stack).setAmount(1);
-		assertEquals(clone, item.getItemStack());
+		assertEquals(cloneClone, item.getItemStack());
 		assertEquals(0, item.getStock());
 	}
 }

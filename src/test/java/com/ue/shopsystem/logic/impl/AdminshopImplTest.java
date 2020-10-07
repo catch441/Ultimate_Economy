@@ -293,20 +293,23 @@ public class AdminshopImplTest {
 		Chunk chunk = mock(Chunk.class);
 		ItemStack skullInfoItem = mock(ItemStack.class);
 		ItemStack infoItem = mock(ItemStack.class);
+		ItemStack emptyItem = mock(ItemStack.class);
 		ItemStack stuff = mock(ItemStack.class);
-		ItemStack shopItemStack = mock(ItemStack.class);
+		ItemStack filledItem = mock(ItemStack.class);
+		ItemStack shopItemStack = mock(ItemStack.class);	
 		ItemMeta shopItemStackMeta = mock(ItemMeta.class);
 		ItemMeta stuffMeta = mock(ItemMeta.class);
 		ItemMeta infoItemMeta = mock(ItemMeta.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory editorStuff = mock(Inventory.class);
+		Inventory editor = mock(Inventory.class);
+		Inventory slotEditor = mock(Inventory.class);
 		ShopItem shopItem = mock(ShopItem.class);
 		Entity entity = mock(Entity.class);
 		when(entity.getCustomName()).thenReturn("myshop");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(entity));
 		when(infoItemMeta.getDisplayName()).thenReturn("Info");
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editorStuff);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-SlotEditor"))).thenReturn(editorStuff);
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editor);
+		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-SlotEditor"))).thenReturn(slotEditor);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop"))).thenReturn(inv);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(infoItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(stuff);
@@ -317,10 +320,13 @@ public class AdminshopImplTest {
 		when(serverProvider.getPluginInstance()).thenReturn(plugin);
 		when(shopItemStack.getItemMeta()).thenReturn(shopItemStackMeta);
 		when(stuff.getItemMeta()).thenReturn(stuffMeta);
+		
 		when(infoItem.getItemMeta()).thenReturn(infoItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(skullInfoItem);
+		when(skullService.getSkullWithName("SLOTFILLED", "Slot 1")).thenReturn(filledItem);
+		when(skullService.getSkullWithName(eq("SLOTEMPTY"), anyString())).thenReturn(emptyItem);
+		when(skullService.getSkullWithName(eq("K_OFF"), anyString())).thenReturn(skullInfoItem);
 
 		when(shopDao.loadShopName()).thenReturn("myshop");
 		when(shopDao.loadShopSize()).thenReturn(9);
@@ -338,6 +344,8 @@ public class AdminshopImplTest {
 		Adminshop shop = assertDoesNotThrow(() -> new AdminshopImpl(null, "A0", shopDao, serverProvider, skullService,
 				logger, adminshopManager, validationHandler, messageWrapper, configManager));
 
+		verify(editor).setItem(0, filledItem);
+		verify(editor, times(7)).setItem(anyInt(), eq(emptyItem));
 		verify(entity).remove();
 		verify(shopDao).setupSavefile("A0");
 		verify(shop.getShopVillager()).setCustomName("myshop");
@@ -670,11 +678,13 @@ public class AdminshopImplTest {
 		Adminshop shop = createAdminshop();
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack stackCloneClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
 		when(stack.getAmount()).thenReturn(2);
 		when(stack.toString()).thenReturn("item string");
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
+		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 4, stack));
 		verify(shopDao).saveItemNames(Arrays.asList("item string"));
@@ -691,7 +701,7 @@ public class AdminshopImplTest {
 		assertEquals(1.0, shopItem.getSellPrice());
 		assertEquals(0, shopItem.getSlot());
 		assertEquals("item string", shopItem.getItemString());
-		assertEquals(stackClone, shopItem.getItemStack());
+		assertEquals(stackCloneClone, shopItem.getItemStack());
 		// verify that the set occupied method of the editor is called
 		verify(skullService).getSkullWithName("SLOTFILLED", "Slot 1");
 		verify(shop.getShopInventory()).setItem(0, stackClone);
@@ -704,11 +714,13 @@ public class AdminshopImplTest {
 		Adminshop shop = createAdminshop();
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack stackCloneClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
 		when(stack.getAmount()).thenReturn(2);
 		when(stack.toString()).thenReturn("item string");
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
+		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> shop.addShopItem(0, 0, 4, stack));
 		verify(shopDao).saveItemNames(Arrays.asList("item string"));
@@ -725,7 +737,7 @@ public class AdminshopImplTest {
 		assertEquals(0.0, shopItem.getSellPrice());
 		assertEquals(0, shopItem.getSlot());
 		assertEquals("item string", shopItem.getItemString());
-		assertEquals(stackClone, shopItem.getItemStack());
+		assertEquals(stackCloneClone, shopItem.getItemStack());
 		// verify that the set occupied method of the editor is called
 		verify(skullService).getSkullWithName("SLOTFILLED", "Slot 1");
 		verify(shop.getShopInventory()).setItem(0, stackClone);
@@ -738,11 +750,13 @@ public class AdminshopImplTest {
 		Adminshop shop = createAdminshop();
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack stackCloneClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
 		when(stack.getAmount()).thenReturn(2);
 		when(stack.toString()).thenReturn("item string");
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
+		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 0, stack));
 		verify(shopDao).saveItemNames(Arrays.asList("item string"));
@@ -759,7 +773,7 @@ public class AdminshopImplTest {
 		assertEquals(1.0, shopItem.getSellPrice());
 		assertEquals(0, shopItem.getSlot());
 		assertEquals("item string", shopItem.getItemString());
-		assertEquals(stackClone, shopItem.getItemStack());
+		assertEquals(stackCloneClone, shopItem.getItemStack());
 		// verify that the set occupied method of the editor is called
 		verify(skullService).getSkullWithName("SLOTFILLED", "Slot 1");
 		verify(shop.getShopInventory()).setItem(0, stackClone);
@@ -797,14 +811,18 @@ public class AdminshopImplTest {
 		Adminshop shop = createAdminshop();
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack stackCloneClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		ItemMeta stackMetaCloneClone = mock(ItemMeta.class);
 		when(stack.getAmount()).thenReturn(2);
 		when(stack.toString()).thenReturn("item string");
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
+		when(stackCloneClone.getItemMeta()).thenReturn(stackMetaCloneClone);
+		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 4, stack));
-		when(stackClone.getType()).thenReturn(Material.STONE);
+		when(stackCloneClone.getType()).thenReturn(Material.STONE);
 
 		String response = assertDoesNotThrow(() -> shop.editShopItem(0, "5", "15", "25"));
 
@@ -816,9 +834,9 @@ public class AdminshopImplTest {
 		assertDoesNotThrow(() -> assertEquals(5, shop.getShopItem(0).getAmount()));
 		assertDoesNotThrow(() -> assertEquals(15.0, shop.getShopItem(0).getSellPrice()));
 		assertDoesNotThrow(() -> assertEquals(25.0, shop.getShopItem(0).getBuyPrice()));
-		verify(shop.getShopInventory(), times(2)).setItem(0, stackClone);
-		verify(stackClone).setAmount(5);
-		verify(stackMetaClone).setLore(Arrays.asList("§65 buy for §a25.0 $", "§65 sell for §a15.0 $"));
+		verify(shop.getShopInventory()).setItem(0, stackCloneClone);
+		verify(stackCloneClone).setAmount(5);
+		verify(stackMetaCloneClone).setLore(Arrays.asList("§65 buy for §a25.0 $", "§65 sell for §a15.0 $"));
 	}
 
 	@Test
@@ -826,14 +844,18 @@ public class AdminshopImplTest {
 		Adminshop shop = createAdminshop();
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack stackCloneClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		ItemMeta stackMetaCloneClone = mock(ItemMeta.class);
 		when(stack.getAmount()).thenReturn(2);
 		when(stack.toString()).thenReturn("item string");
+		when(stackCloneClone.getItemMeta()).thenReturn(stackMetaCloneClone);
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
+		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 4, stack));
-		when(stackClone.getType()).thenReturn(Material.STONE);
+		when(stackCloneClone.getType()).thenReturn(Material.STONE);
 
 		String response = assertDoesNotThrow(() -> shop.editShopItem(0, "5", "none", "none"));
 
@@ -843,9 +865,9 @@ public class AdminshopImplTest {
 		assertDoesNotThrow(() -> assertEquals(5, shop.getShopItem(0).getAmount()));
 		assertDoesNotThrow(() -> assertEquals(1.0, shop.getShopItem(0).getSellPrice()));
 		assertDoesNotThrow(() -> assertEquals(4.0, shop.getShopItem(0).getBuyPrice()));
-		verify(shop.getShopInventory(), times(2)).setItem(0, stackClone);
-		verify(stackClone).setAmount(5);
-		verify(stackMetaClone).setLore(Arrays.asList("§62 buy for §a4.0 $", "§62 sell for §a1.0 $"));
+		verify(shop.getShopInventory()).setItem(0, stackCloneClone);
+		verify(stackCloneClone).setAmount(5);
+		verify(stackMetaCloneClone).setLore(Arrays.asList("§65 buy for §a4.0 $", "§65 sell for §a1.0 $"));
 	}
 
 	@Test
@@ -853,14 +875,18 @@ public class AdminshopImplTest {
 		Adminshop shop = createAdminshop();
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack stackCloneClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		ItemMeta stackMetaCloneClone = mock(ItemMeta.class);
+		when(stackCloneClone.getItemMeta()).thenReturn(stackMetaCloneClone);
 		when(stack.getAmount()).thenReturn(2);
 		when(stack.toString()).thenReturn("item string");
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
+		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 4, stack));
-		when(stackClone.getType()).thenReturn(Material.STONE);
+		when(stackCloneClone.getType()).thenReturn(Material.STONE);
 
 		String response = assertDoesNotThrow(() -> shop.editShopItem(0, "none", "15", "none"));
 
@@ -870,9 +896,9 @@ public class AdminshopImplTest {
 		assertDoesNotThrow(() -> assertEquals(2, shop.getShopItem(0).getAmount()));
 		assertDoesNotThrow(() -> assertEquals(15.0, shop.getShopItem(0).getSellPrice()));
 		assertDoesNotThrow(() -> assertEquals(4.0, shop.getShopItem(0).getBuyPrice()));
-		verify(shop.getShopInventory(), times(2)).setItem(0, stackClone);
-		verify(stackClone, times(2)).setAmount(2);
-		verify(stackMetaClone).setLore(Arrays.asList("§62 buy for §a4.0 $", "§62 sell for §a15.0 $"));
+		verify(shop.getShopInventory()).setItem(0, stackCloneClone);
+		verify(stackCloneClone).setAmount(2);
+		verify(stackMetaCloneClone).setLore(Arrays.asList("§62 buy for §a4.0 $", "§62 sell for §a15.0 $"));
 	}
 
 	@Test
@@ -880,14 +906,18 @@ public class AdminshopImplTest {
 		Adminshop shop = createAdminshop();
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack stackCloneClone = mock(ItemStack.class);
+		ItemMeta stackMetaCloneClone = mock(ItemMeta.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
 		when(stack.getAmount()).thenReturn(2);
 		when(stack.toString()).thenReturn("item string");
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
+		when(stackCloneClone.getItemMeta()).thenReturn(stackMetaCloneClone);
+		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 4, stack));
-		when(stackClone.getType()).thenReturn(Material.STONE);
+		when(stackCloneClone.getType()).thenReturn(Material.STONE);
 
 		String response = assertDoesNotThrow(() -> shop.editShopItem(0, "none", "none", "25"));
 
@@ -897,9 +927,9 @@ public class AdminshopImplTest {
 		assertDoesNotThrow(() -> assertEquals(2, shop.getShopItem(0).getAmount()));
 		assertDoesNotThrow(() -> assertEquals(1.0, shop.getShopItem(0).getSellPrice()));
 		assertDoesNotThrow(() -> assertEquals(25.0, shop.getShopItem(0).getBuyPrice()));
-		verify(shop.getShopInventory(), times(2)).setItem(0, stackClone);
-		verify(stackClone, times(2)).setAmount(2);
-		verify(stackMetaClone).setLore(Arrays.asList("§62 buy for §a25.0 $", "§62 sell for §a1.0 $"));
+		verify(shop.getShopInventory()).setItem(0, stackCloneClone);
+		verify(stackCloneClone).setAmount(2);
+		verify(stackMetaCloneClone).setLore(Arrays.asList("§62 buy for §a25.0 $", "§62 sell for §a1.0 $"));
 	}
 
 	@Test
@@ -1097,11 +1127,15 @@ public class AdminshopImplTest {
 		
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack stackCloneClone = mock(ItemStack.class);
+		ItemMeta stackMetaCloneClone = mock(ItemMeta.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
 		when(stack.getAmount()).thenReturn(2);
 		when(stack.toString()).thenReturn("item string");
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
+		when(stackCloneClone.getItemMeta()).thenReturn(stackMetaCloneClone);
+		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 4, stack));
 		
@@ -1135,7 +1169,7 @@ public class AdminshopImplTest {
 		verify(serverProvider).createInventory(shop.getShopVillager(), 18, "myshop");
 		verify(serverProvider).createInventory(shop.getShopVillager(), 18, "myshop-Editor");
 
-		verify(inv).setItem(0, stackClone);
+		verify(inv).setItem(0, stackCloneClone);
 		
 		verify(infoItemMeta).setDisplayName("Info");
 		verify(infoItem, times(2)).setItemMeta(infoItemMeta);
@@ -1174,16 +1208,18 @@ public class AdminshopImplTest {
 		Adminshop shop = createAdminshop();
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack stackCloneClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
 		when(stack.getAmount()).thenReturn(1);
 		when(stack.toString()).thenReturn("item string");
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
+		when(stackClone.clone()).thenReturn(stackCloneClone);
 		assertDoesNotThrow(() -> shop.addShopItem(3, 1, 2, stack));
 
 		ShopItem shopItem = assertDoesNotThrow(() -> shop.getShopItem(3));
 
-		assertEquals(stackClone, shopItem.getItemStack());
+		assertEquals(stackCloneClone, shopItem.getItemStack());
 	}
 
 	@Test
@@ -1199,6 +1235,7 @@ public class AdminshopImplTest {
 		Adminshop shop = createAdminshop();
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack stackCloneClone = mock(ItemStack.class);
 		ItemStack searchStack = mock(ItemStack.class);
 		ItemStack searchStackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
@@ -1216,11 +1253,12 @@ public class AdminshopImplTest {
 		when(stack.toString()).thenReturn("item string");
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
+		when(stackClone.clone()).thenReturn(stackCloneClone);
 		assertDoesNotThrow(() -> shop.addShopItem(3, 1, 2, stack));
 
 		ShopItem shopItem = assertDoesNotThrow(() -> shop.getShopItem(searchStack));
 
-		assertEquals(stackClone, shopItem.getItemStack());
+		assertEquals(stackCloneClone, shopItem.getItemStack());
 	}
 
 	@Test

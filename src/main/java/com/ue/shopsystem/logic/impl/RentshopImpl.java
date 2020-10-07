@@ -252,20 +252,13 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	}
 
 	/**
-	 * Overridden, because the naming convention is a other and a check for rentable
+	 * Overridden, because check for rentable
 	 * is needed. {@inheritDoc}
 	 */
 	@Override
 	public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
-		validationHandler.checkForValidShopName(name);
-		if (!isRentable()) {
-			super.changeShopName(name);
-		} else {
-			setupShopName(name);
-			changeInventoryNames(name);
-			getShopVillager().setCustomName(name);
-			setupStockpile();
-		}
+		validationHandler.checkForIsRented(isRentable());
+		super.changeShopName(name);
 	}
 
 	@Override
@@ -277,8 +270,8 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		// throws a playerexception, if the player has not enough money.
 		player.decreasePlayerAmount(duration * getRentalFee(), true);
 		changeOwner(player);
-		changeShopName("Shop#" + getShopId());
 		rentable = false;
+		changeShopName("Shop#" + getShopId());
 		rentUntil = serverProvider.getActualTime() + (86400000 * duration);
 		getShopDao().saveRentable(isRentable());
 		getShopDao().saveRentUntil(getRentUntil());
@@ -323,12 +316,17 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		removeAllItems();
 		setOwner(null);
 		rentUntil = 0L;
-		rentable = true;
 		getShopDao().saveOwner(null);
 		getShopDao().saveRentUntil(0L);
-		getShopDao().saveRentable(true);
 		changeProfession(Profession.NITWIT);
-		changeShopName("RentShop#" + getShopId());
+		
+		setupShopName("RentShop#" + getShopId());
+		changeInventoryNames("RentShop#" + getShopId());
+		getShopVillager().setCustomName("RentShop#" + getShopId());
+		setupStockpile();		
+		
+		rentable = true;
+		getShopDao().saveRentable(true);
 	}
 
 	/*

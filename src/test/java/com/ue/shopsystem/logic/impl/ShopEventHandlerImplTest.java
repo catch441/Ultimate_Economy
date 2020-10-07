@@ -545,6 +545,40 @@ public class ShopEventHandlerImplTest {
 		assertDoesNotThrow(() -> verify(shop).openStockpile(player));
 		verify(player, never()).sendMessage(anyString());
 	}
+	
+	@Test
+	public void handleInventoryClickTestRentshopSwitchStockpile() {
+		RentshopImpl shop = mock(RentshopImpl.class);
+		Villager villager = mock(Villager.class);
+		Plugin plugin = mock(Plugin.class);
+		Inventory shopInv = mock(Inventory.class);
+		Player player = mock(Player.class);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		InventoryView view = mock(InventoryView.class);
+		ItemStack clickedItem = mock(ItemStack.class);
+		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "R0");
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.PLAYERSHOP_RENTABLE);
+		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
+		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
+		assertDoesNotThrow(() -> when(rentshopManager.getRentShopById("R0"))).thenReturn(shop);
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		InventoryClickEvent event = mock(InventoryClickEvent.class);
+		when(event.getInventory()).thenReturn(shopInv);
+		when(shopInv.getHolder()).thenReturn(villager);
+		when(event.getCurrentItem()).thenReturn(clickedItem);
+		when(view.getTitle()).thenReturn("myshop");
+		when(shop.getName()).thenReturn("myshop");
+		when(event.getView()).thenReturn(view);
+		when(event.getClick()).thenReturn(ClickType.MIDDLE);
+		when(event.getWhoClicked()).thenReturn(player);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		when(shop.isRentable()).thenReturn(false);
+		eventHandler.handleInventoryClick(event);
+		verify(event).setCancelled(true);
+		assertDoesNotThrow(() -> verify(shop).openStockpile(player));
+		verify(player, never()).sendMessage(anyString());
+	}
 
 	@Test
 	public void handleInventoryClickTestPlayershopSwitchStockpileBack() {

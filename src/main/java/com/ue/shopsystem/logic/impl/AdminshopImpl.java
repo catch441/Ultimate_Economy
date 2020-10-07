@@ -107,7 +107,7 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 			// if player has not enough money, then the decrease method throws a
 			// playerexception
 			ecoPlayer.decreasePlayerAmount(shopItem.getBuyPrice(), true);
-			ItemStack stack = shopItem.getItemStack().clone();
+			ItemStack stack = shopItem.getItemStack();
 			stack.setAmount(shopItem.getAmount());
 			if (stack.getType() == Material.SPAWNER) {
 				ItemMeta meta = stack.getItemMeta();

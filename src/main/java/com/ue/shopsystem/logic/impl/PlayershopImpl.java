@@ -140,7 +140,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 			// playerexception
 			ecoPlayer.decreasePlayerAmount(shopItem.getBuyPrice(), true);
 			getOwner().increasePlayerAmount(shopItem.getBuyPrice(), false);
-			ItemStack stack = shopItem.getItemStack().clone();
+			ItemStack stack = shopItem.getItemStack();
 			stack.setAmount(shopItem.getAmount());
 			ecoPlayer.getPlayer().getInventory().addItem(stack);
 			decreaseStock(slot, shopItem.getAmount());
@@ -152,7 +152,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
 	private void buyItemAsOwner(int slot, EconomyPlayer ecoPlayer, boolean sendMessage, ShopItem shopItem)
 			throws GeneralEconomyException, ShopSystemException {
-		ItemStack stack = shopItem.getItemStack().clone();
+		ItemStack stack = shopItem.getItemStack();
 		int amount = shopItem.getAmount();
 		if (shopItem.getStock() < shopItem.getAmount()) {
 			amount = shopItem.getStock();
@@ -179,7 +179,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		double sellPrice = shopItem.getSellPrice() / shopItem.getAmount() * amount;
 		if (isOwner(ecoPlayer)) {
 			increaseStock(slot, amount);
-			removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack().clone(), amount);
+			removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack(), amount);
 			if (sendMessage) {
 				sendBuySellOwnerMessage(amount, "added");
 			}
@@ -188,7 +188,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 			ecoPlayer.increasePlayerAmount(sellPrice, false);
 			getOwner().decreasePlayerAmount(sellPrice, true);
 			increaseStock(slot, amount);
-			removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack().clone(), amount);
+			removeItemFromInventory(ecoPlayer.getPlayer().getInventory(), shopItem.getItemStack(), amount);
 			sendBuySellPlayerMessage(amount, ecoPlayer, sellPrice, "sell");
 		}
 	}

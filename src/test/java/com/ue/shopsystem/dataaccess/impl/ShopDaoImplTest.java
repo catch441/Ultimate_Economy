@@ -403,10 +403,12 @@ public class ShopDaoImplTest {
 		shopDao.saveShopItem(item, false);
 		ItemStack stackResult = mock(ItemStack.class);
 		ItemStack stackResultCopy = mock(ItemStack.class);
+		ItemStack stackResultCopyClone = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
 		when(serverProvider.createItemStack(Material.SPAWNER, 1)).thenReturn(stackResult);
 		when(stackResult.getItemMeta()).thenReturn(meta);
 		when(stackResult.clone()).thenReturn(stackResultCopy);
+		when(stackResultCopy.clone()).thenReturn(stackResultCopyClone);
 		when(stackResult.getType()).thenReturn(Material.SPAWNER);
 		when(meta.getDisplayName()).thenReturn("PIG");
 		ShopItem result = shopDao.loadItem("SPAWNER_PIG");
@@ -416,7 +418,7 @@ public class ShopDaoImplTest {
 		assertEquals("2.0", String.valueOf(result.getSellPrice()));
 		assertEquals("3.0", String.valueOf(result.getBuyPrice()));
 		assertEquals(1, result.getAmount());
-		assertEquals(stackResultCopy, result.getItemStack());
+		assertEquals(stackResultCopyClone, result.getItemStack());
 	}
 
 	@Test

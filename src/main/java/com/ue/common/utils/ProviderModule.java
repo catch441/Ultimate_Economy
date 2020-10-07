@@ -65,10 +65,12 @@ import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
 import com.ue.shopsystem.logic.impl.RentshopTabCompleterImpl;
 import com.ue.shopsystem.logic.impl.ShopEventHandlerImpl;
 import com.ue.shopsystem.logic.impl.ShopValidationHandlerImpl;
+import com.ue.townsystem.logic.api.TownsystemEventHandler;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.townsystem.logic.impl.TownCommandExecutorImpl;
 import com.ue.townsystem.logic.impl.TownTabCompleterImpl;
+import com.ue.townsystem.logic.impl.TownsystemEventHandlerImpl;
 import com.ue.townsystem.logic.impl.TownsystemValidationHandlerImpl;
 import com.ue.townsystem.logic.impl.TownworldCommandExecutorImpl;
 import com.ue.townsystem.logic.impl.TownworldManagerImpl;
@@ -389,6 +391,22 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
+	TownsystemValidationHandler provideTownsystemValidationHandler(TownworldManager townworldManager,
+			MessageWrapper messageWrapper) {
+		return new TownsystemValidationHandlerImpl(townworldManager, messageWrapper);
+	}
+
+	@Singleton
+	@Provides
+	TownsystemEventHandler provideTownsystemEventHandler(EconomyPlayerValidationHandler ecoPlayerValidationHandler,
+			EconomyPlayerManager ecoPlayerManager, ConfigManager configManager, TownworldManager townworldManager,
+			MessageWrapper messageWrapper) {
+		return new TownsystemEventHandlerImpl(configManager, townworldManager, ecoPlayerManager, messageWrapper,
+				ecoPlayerValidationHandler);
+	}
+
+	@Singleton
+	@Provides
 	EconomyPlayerEventHandler provideEcoPlayerEventHandler(EconomyPlayerManager ecoPlayerManager,
 			ConfigManager configManager) {
 		return new EconomyPlayerEventHandlerImpl(ecoPlayerManager, configManager);
@@ -406,13 +424,6 @@ public class ProviderModule {
 	ShopEventHandler provideShopEventHandler(RentshopManager rentshopManager, AdminshopManager adminshopManager,
 			PlayershopManager playershopManager, EconomyPlayerManager ecoPlayerManager) {
 		return new ShopEventHandlerImpl(rentshopManager, adminshopManager, playershopManager, ecoPlayerManager);
-	}
-
-	@Singleton
-	@Provides
-	TownsystemValidationHandler provideTownsystemValidationHandler(TownworldManager townworldManager,
-			MessageWrapper messageWrapper) {
-		return new TownsystemValidationHandlerImpl(townworldManager, messageWrapper);
 	}
 
 	@Singleton

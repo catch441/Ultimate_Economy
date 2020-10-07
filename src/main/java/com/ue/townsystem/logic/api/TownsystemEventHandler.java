@@ -7,7 +7,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-public interface TownmanagerEventHandler {
+public interface TownsystemEventHandler {
 
 	/**
 	 * Handles the player teleport event for the townsystem.

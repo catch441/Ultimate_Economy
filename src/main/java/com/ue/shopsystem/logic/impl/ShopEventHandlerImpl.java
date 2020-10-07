@@ -127,7 +127,7 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 
 	private void handleSwitchStockpile(AbstractShop abstractShop, EconomyPlayer ecoPlayer,
 			EconomyVillager economyVillager, String inventoryName) throws ShopSystemException {
-		if (economyVillager == EconomyVillager.PLAYERSHOP) {
+		if (economyVillager == EconomyVillager.PLAYERSHOP || economyVillager == EconomyVillager.PLAYERSHOP_RENTABLE) {
 			if ((abstractShop.getName() + "-Stock").equals(inventoryName)) {
 				abstractShop.openShopInventory(ecoPlayer.getPlayer());
 			} else {

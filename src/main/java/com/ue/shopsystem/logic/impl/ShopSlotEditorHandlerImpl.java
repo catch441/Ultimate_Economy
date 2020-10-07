@@ -112,8 +112,8 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		setupItemsInSlotEditor(Arrays.asList(6, 15, 24), "twenty", listBuy, listSell);
 		setupItemsInSlotEditor(Arrays.asList(5, 14, 23), "ten", listBuy, listSell);
 		setupItemsInSlotEditor(Arrays.asList(4, 13, 22), "one", listBuy, listSell);
-		addSkullToSlotEditor("sellprice", 9, listSell, "SELL");
-		addSkullToSlotEditor("buyprice", 18, listBuy, "BUY");
+		addSkullToSlotEditor("sellprice", 18, listSell, "SELL");
+		addSkullToSlotEditor("buyprice", 9, listBuy, "BUY");
 		setupSlotItemInSlotEditor(slot);
 	}
 
@@ -243,8 +243,11 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 						messageWrapper.getString("shop_addItem", stackInEditor.getType().toString().toLowerCase()));
 			} else {
 				// edit
-				player.sendMessage(getShop().editShopItem(selectedEditorSlot, String.valueOf(stackInEditor.getAmount()),
-						String.valueOf(sellPrice), String.valueOf(buyPrice)));
+				String amountString = generateChangeAmountString(stackInEditor.getAmount(), shopItem);
+				String sellPriceString = generateChangeSellPriceString(sellPrice, shopItem);
+				String buyPriceString = generateChangeBuyPriceString(buyPrice, shopItem);
+				player.sendMessage(getShop().editShopItem(selectedEditorSlot, amountString,
+						sellPriceString, buyPriceString));
 			}
 		} catch (GeneralEconomyException | ShopSystemException e) {
 			// item is new
@@ -255,6 +258,27 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 						messageWrapper.getString("shop_addItem", stackInEditor.getType().toString().toLowerCase()));
 			}
 		}
+	}
+	
+	private String generateChangeAmountString(int value, ShopItem shopItem) {
+		if(shopItem.getAmount() == value) {
+			return "none";
+		}
+		return String.valueOf(value);
+	}
+	
+	private String generateChangeSellPriceString(double value, ShopItem shopItem) {
+		if(shopItem.getSellPrice() == value) {
+			return "none";
+		}
+		return String.valueOf(value);
+	}
+	
+	private String generateChangeBuyPriceString(double value, ShopItem shopItem) {
+		if(shopItem.getBuyPrice() == value) {
+			return "none";
+		}
+		return String.valueOf(value);
 	}
 
 	private void handleRemoveItem(Player player) throws ShopSystemException, GeneralEconomyException {

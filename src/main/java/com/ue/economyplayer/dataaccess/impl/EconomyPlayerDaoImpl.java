@@ -138,8 +138,10 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	public Map<String, Location> loadHomeList(String playerName) {
 		removeDeprecatedHomelist(playerName);
 		Map<String, Location> homes = new HashMap<>();
-		for (String home : getConfig().getConfigurationSection(playerName + ".Home").getKeys(false)) {
-			homes.put(home, loadHome(playerName, home));
+		if(getConfig().getConfigurationSection(playerName + ".Home") != null) {
+			for (String home : getConfig().getConfigurationSection(playerName + ".Home").getKeys(false)) {
+				homes.put(home, loadHome(playerName, home));
+			}
 		}
 		return homes;
 	}

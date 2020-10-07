@@ -25,7 +25,6 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -154,7 +153,7 @@ public class RentshopManagerImplTest {
 	@Test
 	public void getRentShopByUniqueNameTestWithNotRented() {
 		createRentshop();
-		Rentshop shop = assertDoesNotThrow(() -> rentshopManager.getRentShopByUniqueName("RentShop#R0", null));
+		Rentshop shop = assertDoesNotThrow(() -> rentshopManager.getRentShopByUniqueName("RentShop#R0"));
 		assertEquals("R0", shop.getShopId());
 		assertEquals("RentShop#R0", shop.getName());
 	}
@@ -163,11 +162,9 @@ public class RentshopManagerImplTest {
 	public void getRentShopByUniqueNameTestWithRented() {
 		Rentshop shop = createRentshop();
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("catch441");
 		when(ecoPlayer.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> shop.rentShop(ecoPlayer, 1));
-		Rentshop result = assertDoesNotThrow(() -> rentshopManager.getRentShopByUniqueName("Shop#R0", player));
+		Rentshop result = assertDoesNotThrow(() -> rentshopManager.getRentShopByUniqueName("Shop#R0_catch441"));
 		assertEquals("R0", result.getShopId());
 		assertEquals("Shop#R0", result.getName());
 	}
@@ -176,7 +173,7 @@ public class RentshopManagerImplTest {
 	public void getRentShopByUniqueNameTestWithoutShop() {
 		try {
 			createRentshop();
-			rentshopManager.getRentShopByUniqueName("RentShop#R1", null);
+			rentshopManager.getRentShopByUniqueName("RentShop#R1");
 			fail();
 		} catch (GeneralEconomyException e) {
 			assertEquals(1, e.getParams().length);

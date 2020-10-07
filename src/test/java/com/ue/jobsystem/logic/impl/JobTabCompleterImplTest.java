@@ -59,11 +59,10 @@ public class JobTabCompleterImplTest {
 	}
 
 	@Test
-	public void zeroArgsTestWithMatching3() {
-		String[] args = { "jo" };
+	public void oneArgJobTest() {
+		String[] args = { "job" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-		assertEquals(1, result.size());
-		assertEquals("job", result.get(0));
+		assertEquals(0, result.size());
 	}
 
 	@Test
@@ -421,7 +420,7 @@ public class JobTabCompleterImplTest {
 	public void jobAddItemArgTestItemArg() {
 		String[] args = { "job", "addItem", "myjob", "" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-		assertEquals(1539, result.size());
+		assertEquals(1540, result.size());
 	}
 
 	@Test
@@ -497,7 +496,7 @@ public class JobTabCompleterImplTest {
 	public void jobAddMobArgTestWithMobArg() {
 		String[] args = { "job", "addMob", "myjob", "" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-		assertEquals(108, result.size());
+		assertEquals(109, result.size());
 	}
 
 	@Test
@@ -510,7 +509,7 @@ public class JobTabCompleterImplTest {
 	@Test
 	public void jobRemoveMobArgTest() {
 		when(jobManager.getJobNameList()).thenReturn(Arrays.asList("job1", "job2"));
-		String[] args = { "job", "deleteMob", "" };
+		String[] args = { "job", "removeMob", "" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(2, result.size());
 		assertEquals("job1", result.get(0));
@@ -520,7 +519,7 @@ public class JobTabCompleterImplTest {
 	@Test
 	public void jobRemoveMobArgTestWithMatching() {
 		when(jobManager.getJobNameList()).thenReturn(Arrays.asList("job1", "job2"));
-		String[] args = { "job", "deleteMob", "1" };
+		String[] args = { "job", "removeMob", "1" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(1, result.size());
 		assertEquals("job1", result.get(0));
@@ -528,7 +527,7 @@ public class JobTabCompleterImplTest {
 
 	@Test
 	public void jobRemoveMobArgTestWithMobArgMatching() {
-		String[] args = { "job", "deleteMob", "myjob", "_drag" };
+		String[] args = { "job", "removeMob", "myjob", "_drag" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(1, result.size());
 		assertEquals("ender_dragon", result.get(0));
@@ -536,7 +535,7 @@ public class JobTabCompleterImplTest {
 
 	@Test
 	public void jobRemoveMobArgTestWithMoreArgs() {
-		String[] args = { "job", "deleteMob", "myjob", "cow", "" };
+		String[] args = { "job", "removeMob", "myjob", "cow", "" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(0, result.size());
 	}

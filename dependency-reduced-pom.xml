@@ -22,15 +22,7 @@
               <artifactId>dagger-compiler</artifactId>
               <version>2.28.3</version>
             </path>
-            <path>
-              <groupId>dev.arunkumar</groupId>
-              <artifactId>scabbard-processor</artifactId>
-              <version>0.4.0</version>
-            </path>
           </annotationProcessorPaths>
-          <compilerArgs>
-            <arg>-Ascabbard.outputFormat=svg</arg>
-          </compilerArgs>
         </configuration>
       </plugin>
       <plugin>
@@ -41,10 +33,8 @@
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.0.0</version>
         <configuration>
-          <excludes>
-            <exclude>**/libs/**</exclude>
-          </excludes>
           <encoding>UTF-8</encoding>
+          <outputDirectory>D:\Programme\bukkitserver\paper-1.16.3\plugins\</outputDirectory>
         </configuration>
       </plugin>
       <plugin>
@@ -74,11 +64,6 @@
             </configuration>
           </execution>
         </executions>
-        <configuration>
-          <excludes>
-            <exclude>**/libs/**</exclude>
-          </excludes>
-        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
@@ -120,10 +105,6 @@
       <id>mojang</id>
       <name>Mojang's Repository</name>
       <url>https://libraries.minecraft.net/</url>
-    </repository>
-    <repository>
-      <id>jcenter</id>
-      <url>https://jcenter.bintray.com</url>
     </repository>
   </repositories>
   <dependencies>
@@ -192,7 +173,7 @@
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot</artifactId>
-      <version>1.16.1</version>
+      <version>1.16.3</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -237,9 +218,9 @@
     </dependency>
   </dependencies>
   <properties>
+    <junit.platform.version>1.5</junit.platform.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit.jupiter.version>5.5.2</junit.jupiter.version>
-    <junit.platform.version>1.5</junit.platform.version>
   </properties>
 </project>
 

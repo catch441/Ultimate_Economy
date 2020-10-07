@@ -1156,7 +1156,7 @@ public class PlayershopImplTest {
 		assertEquals(1.0, shopItem.getSellPrice());
 		assertEquals(0, shopItem.getSlot());
 		assertEquals("item string", shopItem.getItemString());
-		assertEquals(stackClone, shopItem.getItemStack());
+		assertEquals(stackCloneClone, shopItem.getItemStack());
 		// verify that the set occupied method of the editor is called
 		verify(customSkullService).getSkullWithName("SLOTFILLED", "Slot 1");
 		verify(shop.getShopInventory()).setItem(0, stackClone);

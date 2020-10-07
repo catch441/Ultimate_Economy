@@ -6,7 +6,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,14 +99,14 @@ public class RentshopManagerImpl implements RentshopManager {
 	}
 
 	@Override
-	public Rentshop getRentShopByUniqueName(String name, Player player) throws GeneralEconomyException {
+	public Rentshop getRentShopByUniqueName(String name) throws GeneralEconomyException {
 		for (Rentshop shop : getRentShops()) {
 			if (shop.isRentable()) {
 				if (("RentShop#" + shop.getShopId()).equals(name)) {
 					return shop;
 				}
 			} else {
-				if ((name + "_" + player.getName()).equals(shop.getName() + "_" + shop.getOwner().getName())) {
+				if ((name).equals(shop.getName() + "_" + shop.getOwner().getName())) {
 					return shop;
 				}
 			}

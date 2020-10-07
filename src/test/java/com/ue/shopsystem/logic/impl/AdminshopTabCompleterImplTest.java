@@ -203,7 +203,7 @@ public class AdminshopTabCompleterImplTest {
 	public void addSpawnerTestThreeArgs() {
 		String[] args = { "addSpawner", "myshop1", "" };
 		List<String> list = tabCompleter.onTabComplete(null, null, null, args);
-		assertEquals(108, list.size());
+		assertEquals(109, list.size());
 	}
 
 	@Test
