@@ -21,16 +21,31 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class TownCommandExecutorImpl implements CommandExecutor {
 
+	private final ConfigManager configManager;
+	private final EconomyPlayerManager ecoPlayerManager;
+	private final TownworldManager townworldManager;
+	private final MessageWrapper messageWrapper;
+	private final TownsystemValidationHandler townsystemValidationHandler;
+
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param configManager
+	 * @param ecoPlayerManager
+	 * @param townworldManager
+	 * @param messageWrapper
+	 * @param townsystemValidationHandler
+	 */
 	@Inject
-	ConfigManager configManager;
-	@Inject
-	EconomyPlayerManager ecoPlayerManager;
-	@Inject
-	TownworldManager townworldManager;
-	@Inject
-	MessageWrapper messageWrapper;
-	@Inject
-	TownsystemValidationHandler townsystemValidationHandler;
+	public TownCommandExecutorImpl(ConfigManager configManager, EconomyPlayerManager ecoPlayerManager,
+			TownworldManager townworldManager, MessageWrapper messageWrapper,
+			TownsystemValidationHandler townsystemValidationHandler) {
+		this.configManager = configManager;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.townsystemValidationHandler = townsystemValidationHandler;
+		this.messageWrapper = messageWrapper;
+		this.townworldManager = townworldManager;
+	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -41,6 +56,7 @@ public class TownCommandExecutorImpl implements CommandExecutor {
 				if (args.length != 0) {
 					return performCommand(label, args, player, ecoPlayer);
 				}
+				return false;
 			} catch (EconomyPlayerException | TownSystemException | GeneralEconomyException e) {
 				player.sendMessage(e.getMessage());
 			} catch (NumberFormatException e) {
@@ -214,7 +230,7 @@ public class TownCommandExecutorImpl implements CommandExecutor {
 			town.decreaseTownBankAmount(amount);
 			ecoPlayer.increasePlayerAmount(amount, true);
 		} else {
-			player.sendMessage("/" + label + " pay <town> <amount>");
+			player.sendMessage("/" + label + " withdraw <town> <amount>");
 		}
 		return true;
 	}
@@ -262,10 +278,10 @@ public class TownCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performPlotSetForRent(String label, String[] args, Player player, EconomyPlayer ecoPlayer) {
-		if (args.length == 4) {
+		if (args.length == 3) {
 			// TODO
 		} else {
-			player.sendMessage("/" + label + " plot setForRent <town> <price/24h>");
+			player.sendMessage("/" + label + " plot setForRent <price/24h>");
 		}
 		return true;
 	}

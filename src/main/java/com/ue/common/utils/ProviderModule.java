@@ -256,8 +256,11 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	@Named("TownCommandExecutor")
-	CommandExecutor provideTownCommandExecutor() {
-		return new TownCommandExecutorImpl();
+	CommandExecutor provideTownCommandExecutor(ConfigManager configManager, EconomyPlayerManager ecoPlayerManager,
+			TownworldManager townworldManager, MessageWrapper messageWrapper,
+			TownsystemValidationHandler townsystemValidationHandler) {
+		return new TownCommandExecutorImpl(configManager, ecoPlayerManager, townworldManager, messageWrapper,
+				townsystemValidationHandler);
 	}
 
 	@Singleton
