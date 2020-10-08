@@ -319,8 +319,8 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	@Named("TownworldTabCompleter")
-	TabCompleter provideTownworldTabCompleter() {
-		return new TownworldTabCompleterImpl();
+	TabCompleter provideTownworldTabCompleter(ServerProvider serverProvider) {
+		return new TownworldTabCompleterImpl(serverProvider);
 	}
 
 	@Singleton
@@ -429,6 +429,7 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	CustomSkullService provideCustomSkullService() {
-		return new CustomSkullServiceImpl();
+		Logger logger = LoggerFactory.getLogger(CustomSkullServiceImpl.class);
+		return new CustomSkullServiceImpl(logger);
 	}
 }

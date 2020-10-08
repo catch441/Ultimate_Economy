@@ -3,16 +3,30 @@ package com.ue.townsystem.logic.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Bukkit;
+import javax.inject.Inject;
+
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
+import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.TabCompleterUtils;
 
 public class TownworldTabCompleterImpl extends TabCompleterUtils implements TabCompleter {
 
+	private final ServerProvider serverProvider;
+	
+	/**
+	 * Inject constructor. 
+	 * 
+	 * @param serverProvider
+	 */
+	@Inject
+	public TownworldTabCompleterImpl(ServerProvider serverProvider) {
+		this.serverProvider = serverProvider;
+	}
+	
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		switch (args[0]) {
@@ -42,7 +56,7 @@ public class TownworldTabCompleterImpl extends TabCompleterUtils implements TabC
 
 	private List<String> getAllMatchingWorlds(String[] args) {
 		List<String> list = new ArrayList<>();
-		for (World world : Bukkit.getWorlds()) {
+		for (World world : serverProvider.getWorlds()) {
 			if (world.getName().contains(args[1])) {
 				list.add(world.getName());
 			}
@@ -52,7 +66,7 @@ public class TownworldTabCompleterImpl extends TabCompleterUtils implements TabC
 
 	private List<String> getAllWorlds() {
 		List<String> list = new ArrayList<>();
-		for (World world : Bukkit.getWorlds()) {
+		for (World world : serverProvider.getWorlds()) {
 			list.add(world.getName());
 		}
 		return list;

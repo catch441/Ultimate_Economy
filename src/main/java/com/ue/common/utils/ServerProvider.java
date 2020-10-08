@@ -1,6 +1,7 @@
 package com.ue.common.utils;
 
 import java.util.Calendar;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -27,6 +28,15 @@ public class ServerProvider {
 	 */
 	public World getWorld(String world) {
 		return Bukkit.getWorld(world);
+	}
+	
+	/**
+	 * Returns a list pf all bukkit worlds.
+	 * 
+	 * @return list of worlds
+	 */
+	public List<World> getWorlds() {
+		return Bukkit.getWorlds();
 	}
 
 	/**
