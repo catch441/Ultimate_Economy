@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.common.utils.ServerProvider;
+import com.ue.townsystem.logic.api.TownworldManager;
 
 @ExtendWith(MockitoExtension.class)
 public class TownworldTabCompleterImplTest {
@@ -23,6 +24,8 @@ public class TownworldTabCompleterImplTest {
 	TownworldTabCompleterImpl tabCompleter;
 	@Mock
 	ServerProvider serverProvider;
+	@Mock
+	TownworldManager townworldManager;
 	
 	@Test
 	public void zeroArgsTest() {
@@ -87,11 +90,7 @@ public class TownworldTabCompleterImplTest {
 	
 	@Test
 	public void disableTest() {
-		World world1 = mock(World.class);
-		World world2 = mock(World.class);
-		when(world2.getName()).thenReturn("world2");
-		when(world1.getName()).thenReturn("world1");
-		when(serverProvider.getWorlds()).thenReturn(Arrays.asList(world1, world2));
+		when(townworldManager.getTownWorldNameList()).thenReturn(Arrays.asList("world1", "world2"));
 		String[] args = { "disable", "" };
 		List<String> list = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(2, list.size());
@@ -101,11 +100,7 @@ public class TownworldTabCompleterImplTest {
 	
 	@Test
 	public void disableTestWithMatching() {
-		World world1 = mock(World.class);
-		World world2 = mock(World.class);
-		when(world2.getName()).thenReturn("world2");
-		when(world1.getName()).thenReturn("world1");
-		when(serverProvider.getWorlds()).thenReturn(Arrays.asList(world1, world2));
+		when(townworldManager.getTownWorldNameList()).thenReturn(Arrays.asList("world1", "world2"));
 		String[] args = { "disable", "2" };
 		List<String> list = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(1, list.size());
@@ -121,11 +116,7 @@ public class TownworldTabCompleterImplTest {
 	
 	@Test
 	public void setFoundationPriceTest() {
-		World world1 = mock(World.class);
-		World world2 = mock(World.class);
-		when(world2.getName()).thenReturn("world2");
-		when(world1.getName()).thenReturn("world1");
-		when(serverProvider.getWorlds()).thenReturn(Arrays.asList(world1, world2));
+		when(townworldManager.getTownWorldNameList()).thenReturn(Arrays.asList("world1", "world2"));
 		String[] args = { "setFoundationPrice", "" };
 		List<String> list = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(2, list.size());
@@ -135,11 +126,7 @@ public class TownworldTabCompleterImplTest {
 	
 	@Test
 	public void setFoundationPriceTestWithMatching() {
-		World world1 = mock(World.class);
-		World world2 = mock(World.class);
-		when(world2.getName()).thenReturn("world2");
-		when(world1.getName()).thenReturn("world1");
-		when(serverProvider.getWorlds()).thenReturn(Arrays.asList(world1, world2));
+		when(townworldManager.getTownWorldNameList()).thenReturn(Arrays.asList("world1", "world2"));
 		String[] args = { "setFoundationPrice", "2" };
 		List<String> list = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(1, list.size());
@@ -155,11 +142,7 @@ public class TownworldTabCompleterImplTest {
 	
 	@Test
 	public void setExpandPriceTest() {
-		World world1 = mock(World.class);
-		World world2 = mock(World.class);
-		when(world2.getName()).thenReturn("world2");
-		when(world1.getName()).thenReturn("world1");
-		when(serverProvider.getWorlds()).thenReturn(Arrays.asList(world1, world2));
+		when(townworldManager.getTownWorldNameList()).thenReturn(Arrays.asList("world1", "world2"));
 		String[] args = { "setExpandPrice", "" };
 		List<String> list = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(2, list.size());
@@ -169,11 +152,7 @@ public class TownworldTabCompleterImplTest {
 	
 	@Test
 	public void setExpandPriceTestWithMatching() {
-		World world1 = mock(World.class);
-		World world2 = mock(World.class);
-		when(world2.getName()).thenReturn("world2");
-		when(world1.getName()).thenReturn("world1");
-		when(serverProvider.getWorlds()).thenReturn(Arrays.asList(world1, world2));
+		when(townworldManager.getTownWorldNameList()).thenReturn(Arrays.asList("world1", "world2"));
 		String[] args = { "setExpandPrice", "2" };
 		List<String> list = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(1, list.size());

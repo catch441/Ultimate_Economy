@@ -12,29 +12,34 @@ import org.bukkit.command.TabCompleter;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.TabCompleterUtils;
+import com.ue.townsystem.logic.api.TownworldManager;
 
 public class TownworldTabCompleterImpl extends TabCompleterUtils implements TabCompleter {
 
 	private final ServerProvider serverProvider;
-	
+	private final TownworldManager townworldManager;
+
 	/**
-	 * Inject constructor. 
+	 * Inject constructor.
 	 * 
 	 * @param serverProvider
+	 * @param townworldManager
 	 */
 	@Inject
-	public TownworldTabCompleterImpl(ServerProvider serverProvider) {
+	public TownworldTabCompleterImpl(ServerProvider serverProvider, TownworldManager townworldManager) {
 		this.serverProvider = serverProvider;
+		this.townworldManager = townworldManager;
 	}
-	
+
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		switch (args[0]) {
 		case "enable":
+			return handleEnableTabCompleter(args);
 		case "disable":
 		case "setFoundationPrice":
 		case "setExpandPrice":
-			return handleSetExpandPriceTabCompleter(args);
+			return handleExistingWorldTabCompleter(args);
 		case "":
 			return getAllCommands();
 		default:
@@ -42,7 +47,23 @@ public class TownworldTabCompleterImpl extends TabCompleterUtils implements TabC
 		}
 	}
 
-	private List<String> handleSetExpandPriceTabCompleter(String[] args) {
+	private List<String> handleExistingWorldTabCompleter(String[] args) {
+		if (args.length == 2) {
+			if (args[1].equals("")) {
+				return townworldManager.getTownWorldNameList();
+			} else {
+				List<String> list = new ArrayList<>();
+				for (String name : townworldManager.getTownWorldNameList()) {
+					addIfMatching(list, name, args[1]);
+				}
+				return list;
+			}
+		} else {
+			return new ArrayList<>();
+		}
+	}
+
+	private List<String> handleEnableTabCompleter(String[] args) {
 		if (args.length == 2) {
 			if (args[1].equals("")) {
 				return getAllWorlds();
@@ -57,9 +78,7 @@ public class TownworldTabCompleterImpl extends TabCompleterUtils implements TabC
 	private List<String> getAllMatchingWorlds(String[] args) {
 		List<String> list = new ArrayList<>();
 		for (World world : serverProvider.getWorlds()) {
-			if (world.getName().contains(args[1])) {
-				list.add(world.getName());
-			}
+			addIfMatching(list, world.getName(), args[1]);
 		}
 		return list;
 	}
