@@ -6,12 +6,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.slf4j.Logger;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -45,25 +48,36 @@ public class CustomSkullServiceImpl implements CustomSkullService {
 			+ "d42a4802b6b2deb49cfbb4b7e267e2f9ad45da24c73286f97bef91d21616496";
 	public final String slotempty = "http://textures.minecraft.net/texture/"
 			+ "b55d5019c8d55bcb9dc3494ccc3419757f89c3384cf3c9abec3f18831f35b0";
+	private final Logger logger;
+
+	private Map<String, ItemStack> customSkullMap = new HashMap<>();
 	
-	private Map<String,ItemStack> customSkullMap = new HashMap<>();
-	
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param logger
+	 */
+	@Inject
+	public CustomSkullServiceImpl(Logger logger) {
+		this.logger = logger;
+	}
+
 	@Override
 	public void setup() {
-		customSkullMap.put("SLOTEMPTY", getSkull(slotempty,""));
-		customSkullMap.put("SLOTFILLED", getSkull(slotfilled,""));
-		customSkullMap.put("K_ON", getSkull(kOn,""));
-		customSkullMap.put("K_OFF", getSkull(kOff,""));
-		customSkullMap.put("SELL", getSkull(sell,""));
-		customSkullMap.put("BUY", getSkull(buy,""));
-		customSkullMap.put("TWENTY", getSkull(twenty,""));
-		customSkullMap.put("TEN", getSkull(ten,""));
-		customSkullMap.put("SEVEN", getSkull(seven,""));
-		customSkullMap.put("ONE", getSkull(one,""));
-		customSkullMap.put("MINUS", getSkull(minus,""));
-		customSkullMap.put("PLUS", getSkull(plus,""));
+		customSkullMap.put("SLOTEMPTY", getSkull(slotempty, ""));
+		customSkullMap.put("SLOTFILLED", getSkull(slotfilled, ""));
+		customSkullMap.put("K_ON", getSkull(kOn, ""));
+		customSkullMap.put("K_OFF", getSkull(kOff, ""));
+		customSkullMap.put("SELL", getSkull(sell, ""));
+		customSkullMap.put("BUY", getSkull(buy, ""));
+		customSkullMap.put("TWENTY", getSkull(twenty, ""));
+		customSkullMap.put("TEN", getSkull(ten, ""));
+		customSkullMap.put("SEVEN", getSkull(seven, ""));
+		customSkullMap.put("ONE", getSkull(one, ""));
+		customSkullMap.put("MINUS", getSkull(minus, ""));
+		customSkullMap.put("PLUS", getSkull(plus, ""));
 	}
-	
+
 	@Override
 	public ItemStack getSkullWithName(String skull, String name) {
 		skull = skull.toUpperCase();
@@ -73,7 +87,7 @@ public class CustomSkullServiceImpl implements CustomSkullService {
 		item.setItemMeta(meta);
 		return item;
 	}
-	
+
 	private ItemStack getSkull(String url, String name) {
 		ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
 		if (url.isEmpty()) {
@@ -93,10 +107,8 @@ public class CustomSkullServiceImpl implements CustomSkullService {
 			profileField.setAccessible(true);
 			profileField.set(headMeta, profile);
 		} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-			// TODO Bukkit.getLogger().warning("[Ultimate_Economy] Failed to request skull
-			// texture from minecraft.");
-			// Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " +
-			// e.getMessage());
+			logger.warn("[Ultimate_Economy] Failed to request skull texture from minecraft.");
+			logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 		}
 		headMeta.setDisplayName(name);
 		head.setItemMeta(headMeta);
