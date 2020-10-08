@@ -14,17 +14,29 @@ import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class TownworldCommandExecutorImpl implements CommandExecutor {
 
+	private final ConfigManager configManager;
+	private final TownworldManager townworldManager;
+	private final MessageWrapper messageWrapper;
+
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param configManager
+	 * @param townworldManager
+	 * @param messageWrapper
+	 */
 	@Inject
-	ConfigManager configManager;
-	@Inject
-	TownworldManager townworldManager;
-	@Inject
-	MessageWrapper messageWrapper;
+	public TownworldCommandExecutorImpl(ConfigManager configManager, TownworldManager townworldManager,
+			MessageWrapper messageWrapper) {
+		this.configManager = configManager;
+		this.messageWrapper = messageWrapper;
+		this.townworldManager = townworldManager;
+	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		try {
-			if (args.length != 1) {
+			if (args.length > 0) {
 				return performCommand(sender, label, args);
 			} else {
 				return false;
@@ -39,7 +51,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 
 	private boolean performCommand(CommandSender sender, String label, String[] args)
 			throws EconomyPlayerException, GeneralEconomyException, TownSystemException {
-		switch (TownworldCommandEnum.valueOf(args[0])) {
+		switch (TownworldCommandEnum.getEnum(args[0])) {
 		case DISABLE:
 			return performDisableCommand(sender, label, args);
 		case ENABLE:
@@ -60,7 +72,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 			sender.sendMessage(messageWrapper.getString("townworld_setExpandPrice", args[2],
 					configManager.getCurrencyText(Double.valueOf(args[2]))));
 		} else {
-			sender.sendMessage("/" + label + " setExpandPrice <world> <price / chunk");
+			sender.sendMessage("/" + label + " setExpandPrice <world> <price/chunk>");
 		}
 		return true;
 	}
