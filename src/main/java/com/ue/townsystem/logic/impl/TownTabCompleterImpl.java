@@ -5,10 +5,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.slf4j.Logger;
 
 import com.ue.common.utils.TabCompleterUtils;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
@@ -16,39 +16,50 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.townsystem.logic.api.TownworldManager;
 
 public class TownTabCompleterImpl extends TabCompleterUtils implements TabCompleter {
-	
+
+	private final TownworldManager townworldManager;
+	private final EconomyPlayerManager ecoPlayerManager;
+	private final Logger logger;
+
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param logger
+	 * @param townworldManager
+	 * @param ecoPlayerManager
+	 */
 	@Inject
-	TownworldManager townworldManager;
-	@Inject
-	EconomyPlayerManager ecoPlayerManager;
+	public TownTabCompleterImpl(Logger logger, TownworldManager townworldManager,
+			EconomyPlayerManager ecoPlayerManager) {
+		this.townworldManager = townworldManager;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.logger = logger;
+	}
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		if (command.getName().equals("town")) {
-			switch (args[0]) {
-			case "expand":
-			case "setTownSpawn":
-			case "bank":
-			case "withdraw":
-			case "rename":
-			case "delete":
-			case "addDeputy":
-			case "removeDeputy":
-				return handleJoinedTownNameTabComplete(sender, args);
-			case "tp":
-			case "pay":
-				return handleTownNameTabComplete(args);
-			case "plot":
-				return handlePlotTabComplete(args);
-			case "":
-				return getListWithAllCommands();
-			case "create":
-				return new ArrayList<>();
-			default:
-				return getListOfMatchingCommands(args);
-			}
+		switch (args[0]) {
+		case "expand":
+		case "setTownSpawn":
+		case "bank":
+		case "withdraw":
+		case "rename":
+		case "delete":
+		case "addDeputy":
+		case "removeDeputy":
+			return handleJoinedTownNameTabComplete(sender, args);
+		case "tp":
+		case "pay":
+			return handleTownNameTabComplete(args);
+		case "plot":
+			return handlePlotTabComplete(args);
+		case "":
+			return getListWithAllCommands();
+		case "create":
+			return new ArrayList<>();
+		default:
+			return getListOfMatchingCommands(args);
 		}
-		return new ArrayList<>();
 	}
 
 	private List<String> handleTownNameTabComplete(String[] args) {
@@ -72,14 +83,13 @@ public class TownTabCompleterImpl extends TabCompleterUtils implements TabComple
 				if (args[1].equals("")) {
 					list.addAll(ecoPlayerManager.getEconomyPlayerByName(sender.getName()).getJoinedTownList());
 				} else {
-					List<String> list2 = ecoPlayerManager.getEconomyPlayerByName(sender.getName())
-							.getJoinedTownList();
+					List<String> list2 = ecoPlayerManager.getEconomyPlayerByName(sender.getName()).getJoinedTownList();
 					for (String string : list2) {
 						addIfMatching(list, string, args[1]);
 					}
 				}
 			} catch (EconomyPlayerException e) {
-				Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
+				logger.warn("[Ultimate_Economy] " + e.getMessage());
 			}
 		}
 		return list;

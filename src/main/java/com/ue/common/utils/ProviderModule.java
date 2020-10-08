@@ -312,15 +312,16 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	@Named("TownTabCompleter")
-	TabCompleter provideTownTabCompleter() {
-		return new TownTabCompleterImpl();
+	TabCompleter provideTownTabCompleter(TownworldManager townworldManager, EconomyPlayerManager ecoPlayerManager) {
+		Logger logger = LoggerFactory.getLogger(TownTabCompleterImpl.class);
+		return new TownTabCompleterImpl(logger, townworldManager, ecoPlayerManager);
 	}
 
 	@Singleton
 	@Provides
 	@Named("TownworldTabCompleter")
-	TabCompleter provideTownworldTabCompleter(ServerProvider serverProvider) {
-		return new TownworldTabCompleterImpl(serverProvider);
+	TabCompleter provideTownworldTabCompleter(ServerProvider serverProvider, TownworldManager townworldManager) {
+		return new TownworldTabCompleterImpl(serverProvider, townworldManager);
 	}
 
 	@Singleton
