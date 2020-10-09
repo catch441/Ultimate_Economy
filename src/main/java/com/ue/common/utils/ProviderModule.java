@@ -202,8 +202,11 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	TownworldManager provideTownworldManager() {
-		return new TownworldManagerImpl();
+	TownworldManager provideTownworldManager(EconomyPlayerValidationHandler ecoPlayerValidationHandler,
+			BankManager bankManager, EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
+			TownsystemValidationHandler townsystemValidationHandler) {
+		return new TownworldManagerImpl(ecoPlayerValidationHandler, bankManager, ecoPlayerManager, messageWrapper,
+				townsystemValidationHandler);
 	}
 
 	@Singleton
@@ -396,9 +399,9 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	TownsystemValidationHandler provideTownsystemValidationHandler(TownworldManager townworldManager,
-			MessageWrapper messageWrapper) {
-		return new TownsystemValidationHandlerImpl(townworldManager, messageWrapper);
+	TownsystemValidationHandler provideTownsystemValidationHandler(ServerProvider serverProvider,
+			Lazy<TownworldManager> townworldManager, MessageWrapper messageWrapper) {
+		return new TownsystemValidationHandlerImpl(serverProvider, townworldManager, messageWrapper);
 	}
 
 	@Singleton

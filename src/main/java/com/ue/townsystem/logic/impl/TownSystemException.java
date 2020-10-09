@@ -35,4 +35,13 @@ public class TownSystemException extends Exception {
 	public Object[] getParams() {
 		return params;
 	}
+	
+	/**
+	 * Returns the message key.
+	 * 
+	 * @return key
+	 */
+	public TownExceptionMessageEnum getKey() {
+		return key;
+	}
 }

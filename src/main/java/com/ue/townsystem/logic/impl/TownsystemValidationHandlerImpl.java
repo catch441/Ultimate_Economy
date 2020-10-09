@@ -5,11 +5,11 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
 import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
@@ -21,26 +21,31 @@ import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
+import dagger.Lazy;
+
 public class TownsystemValidationHandlerImpl implements TownsystemValidationHandler {
 
 	private final MessageWrapper messageWrapper;
-	private final TownworldManager townworldManager;
+	private final Lazy<TownworldManager> townworldManager;
+	private final ServerProvider serverProvider;
 
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param serverProvider
 	 * @param townworldManager
 	 * @param messageWrapper
 	 */
 	@Inject
-	public TownsystemValidationHandlerImpl(TownworldManager townworldManager, MessageWrapper messageWrapper) {
+	public TownsystemValidationHandlerImpl(ServerProvider serverProvider, Lazy<TownworldManager> townworldManager, MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
 		this.townworldManager = townworldManager;
+		this.serverProvider = serverProvider;
 	}
 
 	@Override
 	public void checkForWorldExists(String world) throws TownSystemException {
-		if (Bukkit.getWorld(world) == null) {
+		if (serverProvider.getWorld(world) == null) {
 			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, world);
 		}
 	}
@@ -112,7 +117,7 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 
 	@Override
 	public void checkForPlayerHasDeputyPermission(boolean hasDeputyPermissions)
-			throws TownSystemException, EconomyPlayerException {
+			throws EconomyPlayerException {
 		if (!hasDeputyPermissions) {
 			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
 		}
@@ -149,7 +154,7 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 
 	@Override
 	public void checkForPlayerIsMayor(EconomyPlayer mayor, EconomyPlayer player)
-			throws TownSystemException, EconomyPlayerException {
+			throws EconomyPlayerException {
 		if (!mayor.equals(player)) {
 			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
 		}
@@ -157,7 +162,7 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 
 	@Override
 	public void checkForPlayerIsNotMayor(EconomyPlayer mayor, EconomyPlayer player)
-			throws EconomyPlayerException, TownSystemException {
+			throws EconomyPlayerException {
 		if (mayor.equals(player)) {
 			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_ARE_THE_OWNER);
 		}
@@ -257,8 +262,8 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 	@Override
 	public void checkForTownworldPlotPermission(Location location, EconomyPlayer ecoPlayer)
 			throws EconomyPlayerException, TownSystemException {
-		if (townworldManager.isTownWorld(location.getWorld().getName())) {
-			Townworld townworld = townworldManager.getTownWorldByName(location.getWorld().getName());
+		if (townworldManager.get().isTownWorld(location.getWorld().getName())) {
+			Townworld townworld = townworldManager.get().getTownWorldByName(location.getWorld().getName());
 			if (townworld.isChunkFree(location.getChunk())) {
 				throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
 			} else {

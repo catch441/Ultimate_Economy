@@ -104,8 +104,8 @@ public class TownCommandExecutorImplTest {
 	}
 
 	@Test
-	public void addDeputyCommandTestWithoutPermissions() throws TownSystemException, EconomyPlayerException {
-		TownSystemException e = mock(TownSystemException.class);
+	public void addDeputyCommandTestWithoutPermissions() throws EconomyPlayerException {
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		EconomyPlayer otherPlayer = mock(EconomyPlayer.class);
 		Town town = mock(Town.class);
@@ -368,8 +368,8 @@ public class TownCommandExecutorImplTest {
 	}
 
 	@Test
-	public void removeDeputyCommandTestWithoutPermissions() throws TownSystemException, EconomyPlayerException {
-		TownSystemException e = mock(TownSystemException.class);
+	public void removeDeputyCommandTestWithoutPermissions() throws EconomyPlayerException {
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		EconomyPlayer otherPlayer = mock(EconomyPlayer.class);
 		Town town = mock(Town.class);
@@ -559,8 +559,8 @@ public class TownCommandExecutorImplTest {
 	}
 
 	@Test
-	public void withdrawCommandTestWithoutPermission() throws TownSystemException, EconomyPlayerException {
-		TownSystemException e = mock(TownSystemException.class);
+	public void withdrawCommandTestWithoutPermission() throws EconomyPlayerException {
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Town town = mock(Town.class);
 		when(e.getMessage()).thenReturn("my error message");

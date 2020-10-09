@@ -135,11 +135,10 @@ public interface TownsystemValidationHandler {
 	 * 
 	 * @param mayor
 	 * @param player
-	 * @throws TownSystemException
 	 * @throws EconomyPlayerException
 	 */
 	public void checkForPlayerIsMayor(EconomyPlayer mayor, EconomyPlayer player)
-			throws TownSystemException, EconomyPlayerException;
+			throws EconomyPlayerException;
 
 	/**
 	 * Check for player is not mayor.
@@ -147,10 +146,9 @@ public interface TownsystemValidationHandler {
 	 * @param mayor
 	 * @param player
 	 * @throws EconomyPlayerException
-	 * @throws TownSystemException
 	 */
 	public void checkForPlayerIsNotMayor(EconomyPlayer mayor, EconomyPlayer player)
-			throws EconomyPlayerException, TownSystemException;
+			throws EconomyPlayerException;
 
 	/**
 	 * Check for town does not exist.
@@ -222,11 +220,10 @@ public interface TownsystemValidationHandler {
 	 * Check for player has deputy permission.
 	 * 
 	 * @param hasDeputyPermissions
-	 * @throws TownSystemException
 	 * @throws EconomyPlayerException
 	 */
 	public void checkForPlayerHasDeputyPermission(boolean hasDeputyPermissions)
-			throws TownSystemException, EconomyPlayerException;
+			throws EconomyPlayerException;
 
 	/**
 	 * Check for chunk is connected to town.

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -34,46 +32,54 @@ import com.ue.ultimate_economy.UltimateEconomy;
 
 public class PlotImpl implements Plot {
 
-	@Inject
-	MessageWrapper messageWrapper;
-	@Inject
-	TownsystemValidationHandler validationHandler;
+	private final MessageWrapper messageWrapper;
+	private final TownsystemValidationHandler validationHandler;
+	private final TownsystemDao townsystemDao;
+	private final String chunkCoords;
 	private EconomyPlayer owner;
 	private List<EconomyPlayer> residents;
-	private final String chunkCoords;
 	private boolean isForSale;
 	private double salePrice;
 	private Villager villager;
 	private Inventory salesVillagerInv;
 	private Town town;
-	private final TownsystemDao townsystemDao;
 
 	/**
 	 * Creating a new plot constructor.
 	 * 
+	 * @param chunkCoords       (format "X/Z")
+	 * @param validationHandler
+	 * @param messageWrapper
 	 * @param townsystemDao
 	 * @param town
 	 * @param owner
-	 * @param chunkCoords   (format "X/Z")
 	 */
-	public PlotImpl(TownsystemDao townsystemDao, Town town, EconomyPlayer owner, String chunkCoords) {
+	public PlotImpl(String chunkCoords, TownsystemValidationHandler validationHandler, MessageWrapper messageWrapper,
+			TownsystemDao townsystemDao, Town town, EconomyPlayer owner) {
 		this.chunkCoords = chunkCoords;
 		this.town = town;
 		this.townsystemDao = townsystemDao;
+		this.messageWrapper = messageWrapper;
+		this.validationHandler = validationHandler;
 		setupNewPlot(owner);
 	}
 
 	/**
 	 * Loading an existing plot constructor.
 	 * 
+	 * @param chunkCoords       (format "X/Z")
+	 * @param validationHandler
+	 * @param messageWrapper
 	 * @param townsystemDao
 	 * @param town
-	 * @param chunkCoords   (format "X/Z")
 	 */
-	public PlotImpl(TownsystemDao townsystemDao, Town town, String chunkCoords) {
+	public PlotImpl(String chunkCoords, TownsystemValidationHandler validationHandler, MessageWrapper messageWrapper,
+			TownsystemDao townsystemDao, Town town) {
 		this.chunkCoords = chunkCoords;
 		this.town = town;
 		this.townsystemDao = townsystemDao;
+		this.messageWrapper = messageWrapper;
+		this.validationHandler = validationHandler;
 		loadExistingPlot();
 	}
 
