@@ -414,13 +414,14 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(town.getPlotByChunk("1/2")).thenReturn(plot));
 		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
+		when(messageWrapper.getString("town_plot_setForSale")).thenReturn("my message");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 
 		String[] args = { "plot", "setForSale", "2.5" };
 		boolean result = executor.onCommand(player, null, "town", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(plot).setForSale(2.5, loc, ecoPlayer, true));
-		verify(player, never()).sendMessage(anyString());
+		assertDoesNotThrow(() -> verify(plot).setForSale(2.5, loc, ecoPlayer));
+		verify(player).sendMessage("my message");
 	}
 	
 	@Test

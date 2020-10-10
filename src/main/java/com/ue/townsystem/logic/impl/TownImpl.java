@@ -21,10 +21,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.townsystem.dataaccess.api.TownsystemDao;
@@ -43,6 +45,8 @@ public class TownImpl implements Town {
 	private final TownsystemValidationHandler validationHandler;
 	private final BankManager bankManager;
 	private final TownworldManager townworldManager;
+	private final ServerProvider serverProvider;
+	private final Logger logger;
 
 	private final TownsystemDao townsystemDao;
 	private String townName;
@@ -66,18 +70,23 @@ public class TownImpl implements Town {
 	 * @param messageWrapper
 	 * @param townsystemDao
 	 * @param townworld
+	 * @param serverProvider
+	 * @param logger
 	 * @throws EconomyPlayerException
 	 * @throws TownSystemException
 	 * @throws GeneralEconomyException
 	 */
 	public TownImpl(String townName, TownworldManager townworldManager, BankManager bankManager,
 			TownsystemValidationHandler validationHandler, MessageWrapper messageWrapper, TownsystemDao townsystemDao,
-			Townworld townworld) throws EconomyPlayerException, TownSystemException, GeneralEconomyException {
+			Townworld townworld, ServerProvider serverProvider, Logger logger)
+			throws EconomyPlayerException, TownSystemException, GeneralEconomyException {
 		this.townsystemDao = townsystemDao;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
 		this.bankManager = bankManager;
 		this.townworldManager = townworldManager;
+		this.serverProvider = serverProvider;
+		this.logger = logger;
 		loadExistingTown(townworld, townName);
 	}
 
@@ -93,19 +102,23 @@ public class TownImpl implements Town {
 	 * @param messageWrapper
 	 * @param townsystemDao
 	 * @param townworld
+	 * @param serverProvider
+	 * @param logger
 	 * @throws TownSystemException
 	 * @throws EconomyPlayerException
 	 * @throws GeneralEconomyException
 	 */
 	public TownImpl(EconomyPlayer mayor, String townName, Location location, TownworldManager townworldManager,
 			BankManager bankManager, TownsystemValidationHandler validationHandler, MessageWrapper messageWrapper,
-			TownsystemDao townsystemDao, Townworld townworld)
+			TownsystemDao townsystemDao, Townworld townworld, ServerProvider serverProvider, Logger logger)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		this.townsystemDao = townsystemDao;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
 		this.bankManager = bankManager;
 		this.townworldManager = townworldManager;
+		this.serverProvider = serverProvider;
+		this.logger =logger;
 		setupNewTown(townworld, mayor, townName, location);
 	}
 
@@ -117,8 +130,8 @@ public class TownImpl implements Town {
 		deputies = new ArrayList<>();
 		Chunk startChunk = location.getChunk();
 		String startChunkCoords = startChunk.getX() + "/" + startChunk.getZ();
-		getPlots().put(startChunkCoords,
-				new PlotImpl(startChunkCoords, validationHandler, messageWrapper, townsystemDao, this, mayor));
+		getPlots().put(startChunkCoords, new PlotImpl(startChunkCoords, validationHandler,
+				townsystemDao, this, mayor, serverProvider));
 		setupMayor(mayor);
 		setupTownManager(location);
 		bankAccount = bankManager.createBankAccount(0);
@@ -174,8 +187,8 @@ public class TownImpl implements Town {
 		validationHandler.checkForPlayerHasDeputyPermission(hasDeputyPermissions(player));
 		validationHandler.checkForChunkIsConnectedToTown(isChunkConnectedToTown(chunk.getX(), chunk.getZ()));
 		decreaseTownBankAmount(getTownworld().getExpandPrice());
-		Plot plot = new PlotImpl(chunk.getX() + "/" + chunk.getZ(), validationHandler, messageWrapper, townsystemDao,
-				this, player);
+		Plot plot = new PlotImpl(chunk.getX() + "/" + chunk.getZ(), validationHandler, townsystemDao,
+				this, player, serverProvider);
 		getPlots().put(plot.getChunkCoords(), plot);
 		townworldManager.performTownworldLocationCheckAllPlayers();
 		if (player.isOnline() && sendMessage) {
@@ -491,8 +504,14 @@ public class TownImpl implements Town {
 
 	private void loadPlots() {
 		for (String coords : townsystemDao.loadTownPlotCoords(getTownName())) {
-			Plot plot = new PlotImpl(coords, validationHandler, messageWrapper, townsystemDao, this);
-			plots.put(coords, plot);
+			Plot plot;
+			try {
+				plot = new PlotImpl(coords, validationHandler, townsystemDao, this, serverProvider);
+				plots.put(coords, plot);
+			} catch (EconomyPlayerException | TownSystemException e) {
+				logger.warn("[Ultimate_Economy] Failed to load plot " + coords + " of town " + getTownName());
+				logger.warn(" [Ultimate_Economy] Caused by: " + e.getMessage());
+			}
 		}
 	}
 

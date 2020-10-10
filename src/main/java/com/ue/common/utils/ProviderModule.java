@@ -204,9 +204,10 @@ public class ProviderModule {
 	@Provides
 	TownworldManager provideTownworldManager(EconomyPlayerValidationHandler ecoPlayerValidationHandler,
 			BankManager bankManager, EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
-			TownsystemValidationHandler townsystemValidationHandler) {
+			TownsystemValidationHandler townsystemValidationHandler, ServerProvider serverProvider) {
+		Logger logger = LoggerFactory.getLogger("Townsystem");
 		return new TownworldManagerImpl(ecoPlayerValidationHandler, bankManager, ecoPlayerManager, messageWrapper,
-				townsystemValidationHandler);
+				townsystemValidationHandler, serverProvider, logger);
 	}
 
 	@Singleton

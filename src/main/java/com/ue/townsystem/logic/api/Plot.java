@@ -18,12 +18,10 @@ public interface Plot {
      * @param salePrice
      * @param playerLocation
      * @param player
-     * @param sendMessage
-     *            when true a message is send to the receiver and this player
      * @throws TownSystemException
      * @throws EconomyPlayerException
      */
-    public void setForSale(double salePrice, Location playerLocation, EconomyPlayer player, boolean sendMessage)
+    public void setForSale(double salePrice, Location playerLocation, EconomyPlayer player)
 	    throws TownSystemException, EconomyPlayerException;
     
     /**
@@ -31,8 +29,9 @@ public interface Plot {
      * 
      * @param newLocation
      * @throws EconomyPlayerException
+     * @throws TownSystemException 
      */
-    public void moveSaleVillager(Location newLocation) throws EconomyPlayerException;
+    public void moveSaleVillager(Location newLocation) throws EconomyPlayerException, TownSystemException;
 
     /**
      * Returns the salePrice for this slot.
@@ -126,8 +125,9 @@ public interface Plot {
      * Opens the inventory of the saleManager.
      * 
      * @param player
+     * @throws TownSystemException 
      */
-    public void openSaleVillagerInv(Player player);
+    public void openSaleVillagerInv(Player player) throws TownSystemException;
     
     /**
      * Returns the town of the plot.

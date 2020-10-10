@@ -9,9 +9,11 @@ import java.util.Map.Entry;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
@@ -30,6 +32,8 @@ public class TownworldImpl implements Townworld {
 	private final TownworldManager townworldManager;
 	private final MessageWrapper messageWrapper;
 	private final BankManager bankManager;
+	private final ServerProvider serverProvider;
+	private final Logger logger;
 
 	private final TownsystemDao townsystemDao;
 	private double foundationPrice, expandPrice;
@@ -47,21 +51,21 @@ public class TownworldImpl implements Townworld {
 	 * @param townworldManager
 	 * @param messageWrapper
 	 * @param bankManager
-	 * @throws EconomyPlayerException
-	 * @throws TownSystemException
-	 * @throws GeneralEconomyException
+	 * @param logger
+	 * @param serverProvider
 	 */
 	public TownworldImpl(String world, boolean isNew, TownsystemDao townsystemDao,
 			TownsystemValidationHandler townsystemValidationHandler,
 			EconomyPlayerValidationHandler ecoPlayerValidationHandler, TownworldManager townworldManager,
-			MessageWrapper messageWrapper, BankManager bankManager)
-			throws EconomyPlayerException, TownSystemException, GeneralEconomyException {
+			MessageWrapper messageWrapper, BankManager bankManager, Logger logger, ServerProvider serverProvider) {
 		this.townsystemDao = townsystemDao;
 		this.townsystemValidationHandler = townsystemValidationHandler;
 		this.ecoPlayerValidationHandler = ecoPlayerValidationHandler;
 		this.townworldManager = townworldManager;
 		this.messageWrapper = messageWrapper;
 		this.bankManager = bankManager;
+		this.logger = logger;
+		this.serverProvider = serverProvider;
 		worldName = world;
 		if (isNew) {
 			setupNewTownworld(world);
@@ -70,12 +74,17 @@ public class TownworldImpl implements Townworld {
 		}
 	}
 
-	private void loadExistingTownworld() throws EconomyPlayerException, TownSystemException, GeneralEconomyException {
+	private void loadExistingTownworld() {
 		foundationPrice = townsystemDao.loadFoundationPrice();
 		expandPrice = townsystemDao.loadExpandPrice();
 		for (String townName : getTownNameList()) {
-			towns.put(townName, new TownImpl(townName, townworldManager, bankManager, townsystemValidationHandler,
-					messageWrapper, townsystemDao, this));
+			try {
+				towns.put(townName, new TownImpl(townName, townworldManager, bankManager, townsystemValidationHandler,
+						messageWrapper, townsystemDao, this, serverProvider, logger));
+			} catch (EconomyPlayerException | TownSystemException | GeneralEconomyException e) {
+				logger.warn("[Ultimate_Economy] Failed to load town " + townName);
+				logger.warn(" [Ultimate_Economy] Caused by: " + e.getMessage());
+			}
 		}
 	}
 
@@ -108,7 +117,7 @@ public class TownworldImpl implements Townworld {
 		ecoPlayerValidationHandler.checkForNotReachedMaxJoinedTowns(player.reachedMaxJoinedTowns());
 		ecoPlayerValidationHandler.checkForEnoughMoney(player.getBankAccount(), getFoundationPrice(), true);
 		Town town = new TownImpl(player, townName, location, townworldManager, bankManager, townsystemValidationHandler,
-				messageWrapper, townsystemDao, this);
+				messageWrapper, townsystemDao, this, serverProvider, logger);
 		towns.put(town.getTownName(), town);
 		player.decreasePlayerAmount(getFoundationPrice(), true);
 		townNames.add(townName);

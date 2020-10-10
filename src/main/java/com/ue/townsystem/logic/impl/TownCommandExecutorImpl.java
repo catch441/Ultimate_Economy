@@ -270,7 +270,8 @@ public class TownCommandExecutorImpl implements CommandExecutor {
 			Town town = townworld.getTownByChunk(player.getLocation().getChunk());
 			Plot plot = town.getPlotByChunk(
 					player.getLocation().getChunk().getX() + "/" + player.getLocation().getChunk().getZ());
-			plot.setForSale(Double.valueOf(args[2]), player.getLocation(), ecoPlayer, true);
+			plot.setForSale(Double.valueOf(args[2]), player.getLocation(), ecoPlayer);
+			player.sendMessage(messageWrapper.getString("town_plot_setForSale"));
 		} else {
 			player.sendMessage("/" + label + " plot setForSale <price>");
 		}
