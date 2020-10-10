@@ -238,12 +238,13 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(townworldManager.getTownByName("mytown")).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-
+		when(messageWrapper.getString("town_expand")).thenReturn("my message");
+		
 		String[] args = { "expand", "mytown" };
 		boolean result = executor.onCommand(player, null, "town", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(town).expandTown(chunk, ecoPlayer, true));
-		verify(player, never()).sendMessage(anyString());
+		assertDoesNotThrow(() -> verify(town).expandTown(chunk, ecoPlayer));
+		verify(player).sendMessage("my message");
 	}
 
 	@Test
@@ -496,16 +497,21 @@ public class TownCommandExecutorImplTest {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Town town = mock(Town.class);
 		Location loc = mock(Location.class);
+		when(loc.getX()).thenReturn(1.0);
+		when(loc.getY()).thenReturn(2.0);
+		when(loc.getZ()).thenReturn(3.0);
 		when(player.getLocation()).thenReturn(loc);
 		assertDoesNotThrow(() -> when(townworldManager.getTownByName("mytown")).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-
+		when(messageWrapper.getString("town_setTownSpawn", 1, 2, 3)).thenReturn("my message");
+		
 		String[] args = { "setTownSpawn", "mytown" };
 		boolean result = executor.onCommand(player, null, "town", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(town).changeTownSpawn(loc, ecoPlayer, true));
-		verify(player, never()).sendMessage(anyString());
+		assertDoesNotThrow(() -> verify(town).changeTownSpawn(loc, ecoPlayer));
+		
+		verify(player).sendMessage("my message");
 	}
 
 	@Test

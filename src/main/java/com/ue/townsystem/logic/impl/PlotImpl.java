@@ -192,7 +192,7 @@ public class PlotImpl implements Plot {
 
 	@Override
 	public List<EconomyPlayer> getResidents() {
-		return residents;
+		return new ArrayList<>(residents);
 	}
 
 	@Override

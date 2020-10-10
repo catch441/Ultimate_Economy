@@ -128,7 +128,8 @@ public class TownCommandExecutorImpl implements CommandExecutor {
 			throws GeneralEconomyException, TownSystemException, EconomyPlayerException {
 		if (args.length == 2) {
 			Town town = townworldManager.getTownByName(args[1]);
-			town.expandTown(player.getLocation().getChunk(), ecoPlayer, true);
+			town.expandTown(player.getLocation().getChunk(), ecoPlayer);
+			player.sendMessage(messageWrapper.getString("town_expand"));
 		} else {
 			player.sendMessage("/" + label + " expand <town>");
 		}
@@ -150,7 +151,9 @@ public class TownCommandExecutorImpl implements CommandExecutor {
 			throws GeneralEconomyException, TownSystemException, EconomyPlayerException {
 		if (args.length == 2) {
 			Town town = townworldManager.getTownByName(args[1]);
-			town.changeTownSpawn(player.getLocation(), ecoPlayer, true);
+			town.changeTownSpawn(player.getLocation(), ecoPlayer);
+			player.sendMessage(messageWrapper.getString("town_setTownSpawn", (int) player.getLocation().getX(),
+					(int) player.getLocation().getY(), (int) player.getLocation().getZ()));
 		} else {
 			player.sendMessage("/" + label + " setTownSpawn <town>");
 		}

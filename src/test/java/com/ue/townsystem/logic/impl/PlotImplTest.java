@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -404,7 +405,7 @@ public class PlotImplTest {
 		assertDoesNotThrow(() -> plot.addResident(newResident));
 		reset(townsystemDao);
 		plot.removeResident(newResident);
-		verify(validationHandler).checkForPlayerIsResidentOfPlot(new ArrayList<>(), newResident);
+		verify(validationHandler).checkForPlayerIsResidentOfPlot(anyList(), eq(newResident));
 		assertEquals(0, plot.getResidents().size());
 		verify(townsystemDao).savePlotResidents("mytown", "1/2", new ArrayList<>());
 	}

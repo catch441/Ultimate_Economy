@@ -177,13 +177,11 @@ public interface Town {
      * @param chunk
      * @param player
      *            the player who want to use this method
-     * @param sendMessage
-     *            when true a message is send to the receiver and this player
      * @throws TownSystemException
      * @throws EconomyPlayerException
      * @throws GeneralEconomyException 
      */
-    public void expandTown(Chunk chunk, EconomyPlayer player, boolean sendMessage)
+    public void expandTown(Chunk chunk, EconomyPlayer player)
 	    throws TownSystemException, EconomyPlayerException, GeneralEconomyException;
 
     /**
@@ -207,9 +205,8 @@ public interface Town {
      * @param player
      *            the player who wants to join the town
      * @throws EconomyPlayerException
-     * @throws TownSystemException
      */
-    public void joinTown(EconomyPlayer player) throws EconomyPlayerException, TownSystemException;
+    public void joinTown(EconomyPlayer player) throws EconomyPlayerException;
 
     /**
      * Leaves a player from a town.
@@ -278,12 +275,10 @@ public interface Town {
      * @param townSpawn
      * @param ecoPlayer
      *            the player who wants to change the townspawn
-     * @param sendMessage
-     *            when true a message is send to the receiver and this player
      * @throws TownSystemException
      * @throws EconomyPlayerException
      */
-    public void changeTownSpawn(Location townSpawn, EconomyPlayer ecoPlayer, boolean sendMessage)
+    public void changeTownSpawn(Location townSpawn, EconomyPlayer ecoPlayer)
 	    throws TownSystemException, EconomyPlayerException;
 
     /**
