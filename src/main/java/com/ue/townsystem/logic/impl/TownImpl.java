@@ -158,8 +158,8 @@ public class TownImpl implements Town {
 	}
 
 	@Override
-	public void renameTown(String newName, EconomyPlayer player, boolean sendMessage)
-			throws EconomyPlayerException, GeneralEconomyException, TownSystemException {
+	public void renameTown(String newName, EconomyPlayer player)
+			throws GeneralEconomyException, EconomyPlayerException {
 		List<String> townNameList = townworldManager.getTownNameList();
 		validationHandler.checkForTownDoesNotExist(townNameList, newName);
 		validationHandler.checkForPlayerIsMayor(getMayor(), player);
@@ -171,11 +171,9 @@ public class TownImpl implements Town {
 		}
 		villager.setCustomName(getTownName() + " TownManager");
 		townNameList.remove(oldName);
+		townNameList.add(newName);
 		((TownworldManagerImpl) townworldManager).setTownNameList(townNameList);
-		if (player.isOnline() && sendMessage) {
-			townworldManager.performTownworldLocationCheckAllPlayers();
-			player.getPlayer().sendMessage(messageWrapper.getString("town_rename", oldName, newName));
-		}
+		townsystemDao.saveRenameTown(oldName, newName);
 	}
 
 	@Override

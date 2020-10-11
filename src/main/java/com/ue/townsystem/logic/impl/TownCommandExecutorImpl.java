@@ -140,7 +140,9 @@ public class TownCommandExecutorImpl implements CommandExecutor {
 			throws GeneralEconomyException, TownSystemException, EconomyPlayerException {
 		if (args.length == 3) {
 			Town town = townworldManager.getTownByName(args[1]);
-			town.renameTown(args[2], ecoPlayer, true);
+			town.renameTown(args[2], ecoPlayer);
+			townworldManager.performTownworldLocationCheckAllPlayers();
+			player.sendMessage(messageWrapper.getString("town_rename", args[1], args[2]));
 		} else {
 			player.sendMessage("/" + label + " rename <old name> <new name>");
 		}

@@ -66,7 +66,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performSetExpandPriceCommand(CommandSender sender, String label, String[] args)
-			throws TownSystemException {
+			throws TownSystemException, NumberFormatException, GeneralEconomyException {
 		if (args.length == 3) {
 			townworldManager.getTownWorldByName(args[1]).setExpandPrice(Double.valueOf(args[2]));
 			sender.sendMessage(messageWrapper.getString("townworld_setExpandPrice", args[2],
@@ -78,7 +78,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performSetFoundationPriceCommand(CommandSender sender, String label, String[] args)
-			throws TownSystemException {
+			throws TownSystemException, NumberFormatException, GeneralEconomyException {
 		if (args.length == 3) {
 			townworldManager.getTownWorldByName(args[1]).setFoundationPrice(Double.valueOf(args[2]));
 			sender.sendMessage(messageWrapper.getString("townworld_setFoundationPrice", args[2],

@@ -476,12 +476,14 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(townworldManager.getTownByName("mytown")).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-
+		when(messageWrapper.getString("town_rename", "mytown", "newname")).thenReturn("my message");
+		
 		String[] args = { "rename", "mytown", "newname" };
 		boolean result = executor.onCommand(player, null, "town", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(town).renameTown("newname", ecoPlayer, true));
-		verify(player, never()).sendMessage(anyString());
+		assertDoesNotThrow(() -> verify(town).renameTown("newname", ecoPlayer));
+		assertDoesNotThrow(() -> verify(townworldManager).performTownworldLocationCheckAllPlayers());
+		verify(player).sendMessage("my message");
 	}
 
 	@Test

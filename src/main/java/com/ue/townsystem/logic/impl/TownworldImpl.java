@@ -34,8 +34,8 @@ public class TownworldImpl implements Townworld {
 	private final BankManager bankManager;
 	private final ServerProvider serverProvider;
 	private final Logger logger;
-
 	private final TownsystemDao townsystemDao;
+
 	private double foundationPrice, expandPrice;
 	private final String worldName;
 	private Map<String, Town> towns = new HashMap<>();
@@ -77,13 +77,13 @@ public class TownworldImpl implements Townworld {
 	private void loadExistingTownworld() {
 		foundationPrice = townsystemDao.loadFoundationPrice();
 		expandPrice = townsystemDao.loadExpandPrice();
-		for (String townName : getTownNameList()) {
+		for (String townName : townsystemDao.loadTownworldTownNames()) {
 			try {
 				towns.put(townName, new TownImpl(townName, townworldManager, bankManager, townsystemValidationHandler,
 						messageWrapper, townsystemDao, this, serverProvider, logger));
 			} catch (EconomyPlayerException | TownSystemException | GeneralEconomyException e) {
 				logger.warn("[Ultimate_Economy] Failed to load town " + townName);
-				logger.warn(" [Ultimate_Economy] Caused by: " + e.getMessage());
+				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}
@@ -99,7 +99,6 @@ public class TownworldImpl implements Townworld {
 	@Override
 	public void delete() throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		townsystemDao.deleteSavefile();
-		despawnAllTownVillagers();
 		List<Town> listCopy = new ArrayList<>(getTownList());
 		Iterator<Town> iter = listCopy.iterator();
 		while (iter.hasNext()) {
@@ -156,7 +155,8 @@ public class TownworldImpl implements Townworld {
 	}
 
 	@Override
-	public void setFoundationPrice(double foundationPrice) {
+	public void setFoundationPrice(double foundationPrice) throws GeneralEconomyException {
+		townsystemValidationHandler.checkForPositiveAmount(foundationPrice);
 		this.foundationPrice = foundationPrice;
 		townsystemDao.saveFoundationPrice(foundationPrice);
 	}
@@ -167,7 +167,8 @@ public class TownworldImpl implements Townworld {
 	}
 
 	@Override
-	public void setExpandPrice(double expandPrice) {
+	public void setExpandPrice(double expandPrice) throws GeneralEconomyException {
+		townsystemValidationHandler.checkForPositiveAmount(expandPrice);
 		this.expandPrice = expandPrice;
 		townsystemDao.saveExpandPrice(expandPrice);
 	}

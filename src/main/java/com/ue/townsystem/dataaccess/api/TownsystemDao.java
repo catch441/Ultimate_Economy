@@ -235,7 +235,7 @@ public interface TownsystemDao {
 	 * @throws TownSystemException
 	 */
 	public Location loadTownManagerLocation(String townName) throws TownSystemException;
-
+	
 	/**
 	 * Loads the names of all towns in a townworld.
 	 * 

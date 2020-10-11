@@ -49,7 +49,6 @@ import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
-import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,7 +61,7 @@ public class TownImplTest {
 	@Mock
 	BankManager bankManager;
 	@Mock
-	TownworldManager townworldManager;
+	TownworldManagerImpl townworldManager;
 	@Mock
 	ServerProvider serverProvider;
 	@Mock
@@ -936,7 +935,61 @@ public class TownImplTest {
 	}
 	
 	@Test
+	public void renameTownTestWithAlreadyExists() throws GeneralEconomyException {
+		Town town = createTown();
+		when(townworldManager.getTownNameList()).thenReturn(Arrays.asList("mytown1"));
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForTownDoesNotExist(Arrays.asList("mytown1"),
+				"mytown1");
+		assertThrows(GeneralEconomyException.class, () -> town.renameTown("mytown1", town.getMayor()));
+	}
+	
+	@Test
+	public void renameTownTestWithNotMayor() throws EconomyPlayerException {
+		Town town = createTown();
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		doThrow(EconomyPlayerException.class).when(validationHandler).checkForPlayerIsMayor(town.getMayor(), ecoPlayer);
+		assertThrows(EconomyPlayerException.class, () -> town.renameTown("mytown1", ecoPlayer));
+	}
+	
+	@Test
 	public void renameTownTest() {
-		//TODO
+		Plugin plugin = mock(Plugin.class);
+		EconomyPlayer mayor = mock(EconomyPlayer.class);
+		Location loc = mock(Location.class);
+		Chunk chunk = mock(Chunk.class);
+		World world = mock(World.class);
+		Townworld townworld = mock(Townworld.class);
+		BankAccount account = mock(BankAccount.class);
+		Inventory inv = mock(Inventory.class);
+		Villager villager = mock(Villager.class);
+		ItemStack joinItem = mock(ItemStack.class);
+		ItemStack leaveItem = mock(ItemStack.class);
+		ItemMeta joinItemMeta = mock(ItemMeta.class);
+		ItemMeta leaveItemMeta = mock(ItemMeta.class);
+		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(joinItem.getItemMeta()).thenReturn(joinItemMeta);
+		when(leaveItem.getItemMeta()).thenReturn(leaveItemMeta);
+		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
+		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(leaveItem);
+		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(joinItem);
+		when(serverProvider.createInventory(villager, 9, "mytown TownManager")).thenReturn(inv);
+		when(bankManager.createBankAccount(0)).thenReturn(account);
+		when(chunk.getX()).thenReturn(1);
+		when(chunk.getZ()).thenReturn(2);
+		when(chunk.getWorld()).thenReturn(world);
+		when(world.getHighestBlockYAt(any(Location.class))).thenReturn(60);
+		when(loc.getChunk()).thenReturn(chunk);
+		when(loc.getWorld()).thenReturn(world);
+		Town town = assertDoesNotThrow(() -> new TownImpl(mayor, "mytown", loc, townworldManager, bankManager,
+				validationHandler, messageWrapper, townsystemDao, townworld, serverProvider, logger));
+		
+		assertDoesNotThrow(() -> town.renameTown("newname", mayor));
+		
+		assertEquals("newname", town.getTownName());
+		assertDoesNotThrow(() -> verify(mayor).removeJoinedTown("mytown"));
+		assertDoesNotThrow(() -> verify(mayor).addJoinedTown("newname"));
+		verify(townworldManager).setTownNameList(Arrays.asList("newname"));
+		verify(villager).setCustomName("newname TownManager");
+		verify(townsystemDao).saveRenameTown("mytown", "newname");
 	}
 }

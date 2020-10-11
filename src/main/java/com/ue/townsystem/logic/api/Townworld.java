@@ -81,8 +81,9 @@ public interface Townworld {
 	 * Set the FoundationPrice for a town in this townworld.
 	 * 
 	 * @param foundationPrice
+	 * @throws GeneralEconomyException 
 	 */
-	public void setFoundationPrice(double foundationPrice);
+	public void setFoundationPrice(double foundationPrice) throws GeneralEconomyException;
 
 	/**
 	 * Returns the founding price of this townworld.
@@ -95,8 +96,9 @@ public interface Townworld {
 	 * Set the ExpandPrice for a town in this townworld.
 	 * 
 	 * @param expandPrice
+	 * @throws GeneralEconomyException 
 	 */
-	public void setExpandPrice(double expandPrice);
+	public void setExpandPrice(double expandPrice) throws GeneralEconomyException;
 
 	/**
 	 * Returns the expand price for a town in this townworld.

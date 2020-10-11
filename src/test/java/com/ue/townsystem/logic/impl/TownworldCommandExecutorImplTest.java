@@ -109,7 +109,7 @@ public class TownworldCommandExecutorImplTest {
 		String[] args = { "setExpandPrice", "world", "2" };
 		boolean result = executor.onCommand(player, null, "townworld", args);
 		assertTrue(result);
-		verify(world).setExpandPrice(2.0);
+		assertDoesNotThrow(() -> verify(world).setExpandPrice(2.0));
 		verify(player).sendMessage("my message");
 		verifyNoMoreInteractions(player);
 	}
@@ -154,7 +154,7 @@ public class TownworldCommandExecutorImplTest {
 		String[] args = { "setFoundationPrice", "world", "2" };
 		boolean result = executor.onCommand(player, null, "townworld", args);
 		assertTrue(result);
-		verify(world).setFoundationPrice(2.0);
+		assertDoesNotThrow(() -> verify(world).setFoundationPrice(2.0));
 		verify(player).sendMessage("my message");
 		verifyNoMoreInteractions(player);
 	}

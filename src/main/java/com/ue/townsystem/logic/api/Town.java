@@ -190,14 +190,11 @@ public interface Town {
      * @param newName
      * @param player
      *            the player who want to use this method
-     * @param sendMessage
-     *            when true a message is send to the receiver and this player
-     * @throws TownSystemException
      * @throws EconomyPlayerException
      * @throws GeneralEconomyException 
      */
-    public void renameTown(String newName, EconomyPlayer player, boolean sendMessage)
-	    throws TownSystemException, EconomyPlayerException, GeneralEconomyException;
+    public void renameTown(String newName, EconomyPlayer player)
+	    throws EconomyPlayerException, GeneralEconomyException;
 
     /**
      * Joins a player to a town.
