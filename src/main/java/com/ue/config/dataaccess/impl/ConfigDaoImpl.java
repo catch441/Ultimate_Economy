@@ -260,6 +260,17 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 		config.set("PlayerShopIds", ids);
 		save(config, file);
 	}
+	
+	@Override
+	public void saveTownworldNamesList(List<String> townworlds) {
+		config.set("TownWorlds", townworlds);
+		save(config, file);
+	}
+
+	@Override
+	public List<String> loadTownworldNames() {
+		return config.getStringList("TownWorlds");
+	}
 
 	@Override
 	public List<String> loadAdminshopIds() {

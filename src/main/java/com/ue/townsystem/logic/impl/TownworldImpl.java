@@ -17,7 +17,7 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.townsystem.dataaccess.api.TownsystemDao;
+import com.ue.townsystem.dataaccess.api.TownworldDao;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
@@ -34,7 +34,7 @@ public class TownworldImpl implements Townworld {
 	private final BankManager bankManager;
 	private final ServerProvider serverProvider;
 	private final Logger logger;
-	private final TownsystemDao townsystemDao;
+	private final TownworldDao townworldDao;
 
 	private double foundationPrice, expandPrice;
 	private final String worldName;
@@ -45,7 +45,7 @@ public class TownworldImpl implements Townworld {
 	 * 
 	 * @param world
 	 * @param isNew
-	 * @param townsystemDao
+	 * @param townworldDao
 	 * @param townsystemValidationHandler
 	 * @param ecoPlayerValidationHandler
 	 * @param townworldManager
@@ -54,11 +54,11 @@ public class TownworldImpl implements Townworld {
 	 * @param logger
 	 * @param serverProvider
 	 */
-	public TownworldImpl(String world, boolean isNew, TownsystemDao townsystemDao,
+	public TownworldImpl(String world, boolean isNew, TownworldDao townworldDao,
 			TownsystemValidationHandler townsystemValidationHandler,
 			EconomyPlayerValidationHandler ecoPlayerValidationHandler, TownworldManager townworldManager,
 			MessageWrapper messageWrapper, BankManager bankManager, Logger logger, ServerProvider serverProvider) {
-		this.townsystemDao = townsystemDao;
+		this.townworldDao = townworldDao;
 		this.townsystemValidationHandler = townsystemValidationHandler;
 		this.ecoPlayerValidationHandler = ecoPlayerValidationHandler;
 		this.townworldManager = townworldManager;
@@ -75,12 +75,12 @@ public class TownworldImpl implements Townworld {
 	}
 
 	private void loadExistingTownworld() {
-		foundationPrice = townsystemDao.loadFoundationPrice();
-		expandPrice = townsystemDao.loadExpandPrice();
-		for (String townName : townsystemDao.loadTownworldTownNames()) {
+		foundationPrice = townworldDao.loadFoundationPrice();
+		expandPrice = townworldDao.loadExpandPrice();
+		for (String townName : townworldDao.loadTownworldTownNames()) {
 			try {
 				towns.put(townName, new TownImpl(townName, townworldManager, bankManager, townsystemValidationHandler,
-						messageWrapper, townsystemDao, this, serverProvider, logger));
+						messageWrapper, townworldDao, this, serverProvider, logger));
 			} catch (EconomyPlayerException | TownSystemException | GeneralEconomyException e) {
 				logger.warn("[Ultimate_Economy] Failed to load town " + townName);
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
@@ -91,14 +91,14 @@ public class TownworldImpl implements Townworld {
 	private void setupNewTownworld(String world) {
 		foundationPrice = 0;
 		expandPrice = 0;
-		townsystemDao.saveExpandPrice(0);
-		townsystemDao.saveFoundationPrice(0);
-		townsystemDao.saveWorldName(world);
+		townworldDao.saveExpandPrice(0);
+		townworldDao.saveFoundationPrice(0);
+		townworldDao.saveWorldName(world);
 	}
 
 	@Override
 	public void delete() throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
-		townsystemDao.deleteSavefile();
+		townworldDao.deleteSavefile();
 		List<Town> listCopy = new ArrayList<>(getTownList());
 		Iterator<Town> iter = listCopy.iterator();
 		while (iter.hasNext()) {
@@ -116,7 +116,7 @@ public class TownworldImpl implements Townworld {
 		ecoPlayerValidationHandler.checkForNotReachedMaxJoinedTowns(player.reachedMaxJoinedTowns());
 		ecoPlayerValidationHandler.checkForEnoughMoney(player.getBankAccount(), getFoundationPrice(), true);
 		Town town = new TownImpl(player, townName, location, townworldManager, bankManager, townsystemValidationHandler,
-				messageWrapper, townsystemDao, this, serverProvider, logger);
+				messageWrapper, townworldDao, this, serverProvider, logger);
 		towns.put(town.getTownName(), town);
 		player.decreasePlayerAmount(getFoundationPrice(), true);
 		townNames.add(townName);
@@ -158,7 +158,7 @@ public class TownworldImpl implements Townworld {
 	public void setFoundationPrice(double foundationPrice) throws GeneralEconomyException {
 		townsystemValidationHandler.checkForPositiveAmount(foundationPrice);
 		this.foundationPrice = foundationPrice;
-		townsystemDao.saveFoundationPrice(foundationPrice);
+		townworldDao.saveFoundationPrice(foundationPrice);
 	}
 
 	@Override
@@ -170,7 +170,7 @@ public class TownworldImpl implements Townworld {
 	public void setExpandPrice(double expandPrice) throws GeneralEconomyException {
 		townsystemValidationHandler.checkForPositiveAmount(expandPrice);
 		this.expandPrice = expandPrice;
-		townsystemDao.saveExpandPrice(expandPrice);
+		townworldDao.saveExpandPrice(expandPrice);
 	}
 
 	@Override

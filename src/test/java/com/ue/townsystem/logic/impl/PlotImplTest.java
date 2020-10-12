@@ -41,7 +41,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.townsystem.dataaccess.api.TownsystemDao;
+import com.ue.townsystem.dataaccess.api.TownworldDao;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
@@ -52,7 +52,7 @@ public class PlotImplTest {
 	@Mock
 	TownsystemValidationHandler validationHandler;
 	@Mock
-	TownsystemDao townsystemDao;
+	TownworldDao townworldDao;
 	@Mock
 	ServerProvider serverProvider;
 
@@ -60,7 +60,7 @@ public class PlotImplTest {
 		Town town = mock(Town.class);
 		when(town.getTownName()).thenReturn("mytown");
 		EconomyPlayer owner = mock(EconomyPlayer.class);
-		return new PlotImpl("1/2", validationHandler, townsystemDao, town, owner, serverProvider);
+		return new PlotImpl("1/2", validationHandler, townworldDao, town, owner, serverProvider);
 	}
 
 	private Plot createPlotForSale() {
@@ -93,13 +93,13 @@ public class PlotImplTest {
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
 		when(town.getTownName()).thenReturn("mytown");
-		assertDoesNotThrow(() -> when(townsystemDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
-		when(townsystemDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
-		when(townsystemDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
-		when(townsystemDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
-		assertDoesNotThrow(() -> when(townsystemDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
+		assertDoesNotThrow(() -> when(townworldDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
+		when(townworldDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
+		when(townworldDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
+		when(townworldDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
+		assertDoesNotThrow(() -> when(townworldDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
 		return assertDoesNotThrow(
-				() -> new PlotImpl("1/2", validationHandler, townsystemDao, town, serverProvider));
+				() -> new PlotImpl("1/2", validationHandler, townworldDao, town, serverProvider));
 	}
 
 	@Test
@@ -107,7 +107,7 @@ public class PlotImplTest {
 		Town town = mock(Town.class);
 		when(town.getTownName()).thenReturn("mytown");
 		EconomyPlayer owner = mock(EconomyPlayer.class);
-		Plot plot = new PlotImpl("1/2", validationHandler, townsystemDao, town, owner, serverProvider);
+		Plot plot = new PlotImpl("1/2", validationHandler, townworldDao, town, owner, serverProvider);
 
 		assertEquals(town, plot.getTown());
 		assertEquals("1/2", plot.getChunkCoords());
@@ -116,10 +116,10 @@ public class PlotImplTest {
 		assertEquals(0, plot.getResidents().size());
 		assertEquals(owner, plot.getOwner());
 
-		verify(townsystemDao).savePlotIsForSale("mytown", "1/2", false);
-		verify(townsystemDao).savePlotSalePrice("mytown", "1/2", 0.0);
-		verify(townsystemDao).savePlotOwner("mytown", "1/2", owner);
-		verify(townsystemDao).savePlotResidents("mytown", "1/2", new ArrayList<>());
+		verify(townworldDao).savePlotIsForSale("mytown", "1/2", false);
+		verify(townworldDao).savePlotSalePrice("mytown", "1/2", 0.0);
+		verify(townworldDao).savePlotOwner("mytown", "1/2", owner);
+		verify(townworldDao).savePlotResidents("mytown", "1/2", new ArrayList<>());
 	}
 
 	@Test
@@ -153,13 +153,13 @@ public class PlotImplTest {
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
 		when(town.getTownName()).thenReturn("mytown");
-		assertDoesNotThrow(() -> when(townsystemDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
-		when(townsystemDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
-		when(townsystemDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
-		when(townsystemDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
-		assertDoesNotThrow(() -> when(townsystemDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
+		assertDoesNotThrow(() -> when(townworldDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
+		when(townworldDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
+		when(townworldDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
+		when(townworldDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
+		assertDoesNotThrow(() -> when(townworldDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
 		Plot plot = assertDoesNotThrow(
-				() -> new PlotImpl("1/2", validationHandler, townsystemDao, town, serverProvider));
+				() -> new PlotImpl("1/2", validationHandler, townworldDao, town, serverProvider));
 
 		assertEquals(Arrays.asList(resident), plot.getResidents());
 		assertEquals(town, plot.getTown());
@@ -226,13 +226,13 @@ public class PlotImplTest {
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
 		when(town.getTownName()).thenReturn("mytown");
-		assertDoesNotThrow(() -> when(townsystemDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
-		when(townsystemDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
-		when(townsystemDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
-		when(townsystemDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
-		assertDoesNotThrow(() -> when(townsystemDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
+		assertDoesNotThrow(() -> when(townworldDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
+		when(townworldDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
+		when(townworldDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
+		when(townworldDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
+		assertDoesNotThrow(() -> when(townworldDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
 		Plot plot = assertDoesNotThrow(
-				() -> new PlotImpl("1/2", validationHandler, townsystemDao, town, serverProvider));
+				() -> new PlotImpl("1/2", validationHandler, townworldDao, town, serverProvider));
 
 		plot.despawnSaleVillager();
 		verify(villager).remove();
@@ -282,19 +282,19 @@ public class PlotImplTest {
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
 		when(town.getTownName()).thenReturn("mytown");
-		assertDoesNotThrow(() -> when(townsystemDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
-		when(townsystemDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
-		when(townsystemDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
-		when(townsystemDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
-		assertDoesNotThrow(() -> when(townsystemDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
+		assertDoesNotThrow(() -> when(townworldDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
+		when(townworldDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
+		when(townworldDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
+		when(townworldDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
+		assertDoesNotThrow(() -> when(townworldDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
 		Plot plot = assertDoesNotThrow(
-				() -> new PlotImpl("1/2", validationHandler, townsystemDao, town, serverProvider));
+				() -> new PlotImpl("1/2", validationHandler, townworldDao, town, serverProvider));
 		Location newLoc = mock(Location.class);
 
 		assertDoesNotThrow(() -> plot.moveSaleVillager(newLoc));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlotIsForSale(true));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForLocationInsidePlot("1/2", newLoc));
-		verify(townsystemDao).savePlotVillagerLocation("mytown", "1/2", newLoc);
+		verify(townworldDao).savePlotVillagerLocation("mytown", "1/2", newLoc);
 		verify(villager).teleport(newLoc);
 	}
 
@@ -336,13 +336,13 @@ public class PlotImplTest {
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
 		when(town.getTownName()).thenReturn("mytown");
-		assertDoesNotThrow(() -> when(townsystemDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
-		when(townsystemDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
-		when(townsystemDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
-		when(townsystemDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
-		assertDoesNotThrow(() -> when(townsystemDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
+		assertDoesNotThrow(() -> when(townworldDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
+		when(townworldDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
+		when(townworldDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
+		when(townworldDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
+		assertDoesNotThrow(() -> when(townworldDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
 		Plot plot = assertDoesNotThrow(
-				() -> new PlotImpl("1/2", validationHandler, townsystemDao, town, serverProvider));
+				() -> new PlotImpl("1/2", validationHandler, townworldDao, town, serverProvider));
 
 		Player player = mock(Player.class);
 		assertDoesNotThrow(() -> plot.openSaleVillagerInv(player));
@@ -354,7 +354,7 @@ public class PlotImplTest {
 		Town town = mock(Town.class);
 		when(town.getTownName()).thenReturn("mytown");
 		EconomyPlayer owner = mock(EconomyPlayer.class);
-		Plot plot = new PlotImpl("1/2", validationHandler, townsystemDao, town, owner, serverProvider);
+		Plot plot = new PlotImpl("1/2", validationHandler, townworldDao, town, owner, serverProvider);
 		assertEquals(owner, plot.getOwner());
 	}
 
@@ -363,7 +363,7 @@ public class PlotImplTest {
 		Plot plot = createPlot();
 		EconomyPlayer newOwner = mock(EconomyPlayer.class);
 		plot.setOwner(newOwner);
-		verify(townsystemDao).savePlotOwner("mytown", "1/2", newOwner);
+		verify(townworldDao).savePlotOwner("mytown", "1/2", newOwner);
 		assertEquals(newOwner, plot.getOwner());
 	}
 
@@ -380,11 +380,11 @@ public class PlotImplTest {
 	@Test
 	public void addResidentTest() {
 		Plot plot = createPlot();
-		reset(townsystemDao);
+		reset(townworldDao);
 		EconomyPlayer newResident = mock(EconomyPlayer.class);
 		assertDoesNotThrow(() -> plot.addResident(newResident));
 		assertEquals(Arrays.asList(newResident), plot.getResidents());
-		verify(townsystemDao).savePlotResidents("mytown", "1/2", Arrays.asList(newResident));
+		verify(townworldDao).savePlotResidents("mytown", "1/2", Arrays.asList(newResident));
 	}
 
 	@Test
@@ -403,11 +403,11 @@ public class PlotImplTest {
 		Plot plot = createPlot();
 		EconomyPlayer newResident = mock(EconomyPlayer.class);
 		assertDoesNotThrow(() -> plot.addResident(newResident));
-		reset(townsystemDao);
+		reset(townworldDao);
 		plot.removeResident(newResident);
 		verify(validationHandler).checkForPlayerIsResidentOfPlot(anyList(), eq(newResident));
 		assertEquals(0, plot.getResidents().size());
-		verify(townsystemDao).savePlotResidents("mytown", "1/2", new ArrayList<>());
+		verify(townworldDao).savePlotResidents("mytown", "1/2", new ArrayList<>());
 	}
 
 	@Test
@@ -468,13 +468,13 @@ public class PlotImplTest {
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
 		when(town.getTownName()).thenReturn("mytown");
-		assertDoesNotThrow(() -> when(townsystemDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
-		when(townsystemDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
-		when(townsystemDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
-		when(townsystemDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
-		assertDoesNotThrow(() -> when(townsystemDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
+		assertDoesNotThrow(() -> when(townworldDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
+		when(townworldDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
+		when(townworldDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
+		when(townworldDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
+		assertDoesNotThrow(() -> when(townworldDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
 		Plot plot = assertDoesNotThrow(
-				() -> new PlotImpl("1/2", validationHandler, townsystemDao, town, serverProvider));
+				() -> new PlotImpl("1/2", validationHandler, townworldDao, town, serverProvider));
 		
 		assertDoesNotThrow(() -> plot.removeFromSale(plot.getOwner()));
 		
@@ -483,8 +483,8 @@ public class PlotImplTest {
 		verify(villager).remove();
 		verify(world).save();
 		assertEquals("0.0", String.valueOf(plot.getSalePrice()));
-		verify(townsystemDao).savePlotSalePrice("mytown", "1/2", 0.0);
-		verify(townsystemDao).savePlotIsForSale("mytown", "1/2", false);
+		verify(townworldDao).savePlotSalePrice("mytown", "1/2", 0.0);
+		verify(townworldDao).savePlotIsForSale("mytown", "1/2", false);
 	}
 	
 	@Test
@@ -558,8 +558,8 @@ public class PlotImplTest {
 		assertEquals("1.5", String.valueOf(plot.getSalePrice()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForIsPlotOwner(plot.getOwner(), plot.getOwner()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlotIsNotForSale(false));
-		verify(townsystemDao).savePlotSalePrice("mytown", "1/2", 1.5);
-		verify(townsystemDao).savePlotIsForSale("mytown", "1/2", true);
-		verify(townsystemDao).savePlotVillagerLocation("mytown", "1/2", loc);
+		verify(townworldDao).savePlotSalePrice("mytown", "1/2", 1.5);
+		verify(townworldDao).savePlotIsForSale("mytown", "1/2", true);
+		verify(townworldDao).savePlotVillagerLocation("mytown", "1/2", loc);
 	}
 }

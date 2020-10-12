@@ -28,7 +28,7 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.townsystem.dataaccess.api.TownsystemDao;
+import com.ue.townsystem.dataaccess.api.TownworldDao;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
@@ -45,7 +45,7 @@ public class TownImpl implements Town {
 	private final TownworldManager townworldManager;
 	private final ServerProvider serverProvider;
 	private final Logger logger;
-	private final TownsystemDao townsystemDao;
+	private final TownworldDao townworldDao;
 
 	private String townName;
 	private EconomyPlayer mayor;
@@ -66,7 +66,7 @@ public class TownImpl implements Town {
 	 * @param bankManager
 	 * @param validationHandler
 	 * @param messageWrapper
-	 * @param townsystemDao
+	 * @param townworldDao
 	 * @param townworld
 	 * @param serverProvider
 	 * @param logger
@@ -75,10 +75,10 @@ public class TownImpl implements Town {
 	 * @throws GeneralEconomyException
 	 */
 	public TownImpl(String townName, TownworldManager townworldManager, BankManager bankManager,
-			TownsystemValidationHandler validationHandler, MessageWrapper messageWrapper, TownsystemDao townsystemDao,
+			TownsystemValidationHandler validationHandler, MessageWrapper messageWrapper, TownworldDao townworldDao,
 			Townworld townworld, ServerProvider serverProvider, Logger logger)
 			throws EconomyPlayerException, TownSystemException, GeneralEconomyException {
-		this.townsystemDao = townsystemDao;
+		this.townworldDao = townworldDao;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
 		this.bankManager = bankManager;
@@ -98,7 +98,7 @@ public class TownImpl implements Town {
 	 * @param bankManager
 	 * @param validationHandler
 	 * @param messageWrapper
-	 * @param townsystemDao
+	 * @param townworldDao
 	 * @param townworld
 	 * @param serverProvider
 	 * @param logger
@@ -106,9 +106,9 @@ public class TownImpl implements Town {
 	 */
 	public TownImpl(EconomyPlayer mayor, String townName, Location location, TownworldManager townworldManager,
 			BankManager bankManager, TownsystemValidationHandler validationHandler, MessageWrapper messageWrapper,
-			TownsystemDao townsystemDao, Townworld townworld, ServerProvider serverProvider, Logger logger)
+			TownworldDao townworldDao, Townworld townworld, ServerProvider serverProvider, Logger logger)
 			throws EconomyPlayerException {
-		this.townsystemDao = townsystemDao;
+		this.townworldDao = townworldDao;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
 		this.bankManager = bankManager;
@@ -127,13 +127,13 @@ public class TownImpl implements Town {
 		Chunk startChunk = location.getChunk();
 		String startChunkCoords = startChunk.getX() + "/" + startChunk.getZ();
 		plots.put(startChunkCoords,
-				new PlotImpl(startChunkCoords, validationHandler, townsystemDao, this, mayor, serverProvider));
+				new PlotImpl(startChunkCoords, validationHandler, townworldDao, this, mayor, serverProvider));
 		setupMayor(mayor);
 		setupTownManager(location);
 		bankAccount = bankManager.createBankAccount(0);
 		setupTownSpawn(startChunk);
 		tax = 0.0;
-		townsystemDao.saveTax(getTownName(), tax);
+		townworldDao.saveTax(getTownName(), tax);
 	}
 
 	private void spawnTownManagerVillager(Location location) {
@@ -173,7 +173,7 @@ public class TownImpl implements Town {
 		townNameList.remove(oldName);
 		townNameList.add(newName);
 		((TownworldManagerImpl) townworldManager).setTownNameList(townNameList);
-		townsystemDao.saveRenameTown(oldName, newName);
+		townworldDao.saveRenameTown(oldName, newName);
 	}
 
 	@Override
@@ -183,7 +183,7 @@ public class TownImpl implements Town {
 		validationHandler.checkForPlayerHasDeputyPermission(hasDeputyPermissions(player));
 		validationHandler.checkForChunkIsConnectedToTown(isChunkConnectedToTown(chunk.getX(), chunk.getZ()));
 		decreaseTownBankAmount(getTownworld().getExpandPrice());
-		Plot plot = new PlotImpl(chunk.getX() + "/" + chunk.getZ(), validationHandler, townsystemDao, this, player,
+		Plot plot = new PlotImpl(chunk.getX() + "/" + chunk.getZ(), validationHandler, townworldDao, this, player,
 				serverProvider);
 		plots.put(plot.getChunkCoords(), plot);
 		townworldManager.performTownworldLocationCheckAllPlayers();
@@ -200,7 +200,7 @@ public class TownImpl implements Town {
 		validationHandler.checkForLocationIsInTown(plots, location);
 		validationHandler.checkForPlayerIsMayor(getMayor(), player);
 		villager.teleport(location);
-		townsystemDao.saveTownManagerLocation(getTownName(), location);
+		townworldDao.saveTownManagerLocation(getTownName(), location);
 	}
 
 	@Override
@@ -228,7 +228,7 @@ public class TownImpl implements Town {
 	public void deletePlot(Plot plot) throws TownSystemException {
 		validationHandler.checkForChunkIsClaimedByThisTown(plots, plot.getChunkCoords());
 		plots.remove(plot.getChunkCoords());
-		townsystemDao.saveRemovePlot(getTownName(), plot.getChunkCoords());
+		townworldDao.saveRemovePlot(getTownName(), plot.getChunkCoords());
 	}
 
 	@Override
@@ -246,7 +246,7 @@ public class TownImpl implements Town {
 		validationHandler.checkForPlayerDidNotReachedMaxTowns(ecoPlayer);
 		validationHandler.checkForPlayerIsNotCitizenPersonal(getCitizens(), ecoPlayer);
 		citizens.add(ecoPlayer);
-		townsystemDao.saveCitizens(getTownName(), getCitizens());
+		townworldDao.saveCitizens(getTownName(), getCitizens());
 		ecoPlayer.addJoinedTown(getTownName());
 	}
 
@@ -265,7 +265,7 @@ public class TownImpl implements Town {
 			}
 		}
 		citizens.remove(ecoPlayer);
-		townsystemDao.saveCitizens(getTownName(), getCitizens());
+		townworldDao.saveCitizens(getTownName(), getCitizens());
 		ecoPlayer.removeJoinedTown(getTownName());
 	}
 
@@ -294,7 +294,7 @@ public class TownImpl implements Town {
 		validationHandler.checkForPlayerHasDeputyPermission(hasDeputyPermissions(ecoPlayer));
 		validationHandler.checkForLocationIsInTown(plots, townSpawn);
 		this.townSpawn = townSpawn;
-		townsystemDao.saveTownSpawn(getTownName(), getTownSpawn());
+		townworldDao.saveTownSpawn(getTownName(), getTownSpawn());
 	}
 
 	@Override
@@ -342,14 +342,14 @@ public class TownImpl implements Town {
 			joinTown(player);
 		}
 		deputies.add(player);
-		townsystemDao.saveDeputies(getTownName(), getDeputies());
+		townworldDao.saveDeputies(getTownName(), getDeputies());
 	}
 
 	@Override
 	public void removeDeputy(EconomyPlayer player) throws TownSystemException {
 		validationHandler.checkForPlayerIsDeputy(getDeputies(), player);
 		deputies.remove(player);
-		townsystemDao.saveDeputies(getTownName(), getDeputies());
+		townworldDao.saveDeputies(getTownName(), getDeputies());
 	}
 
 	@Override
@@ -428,7 +428,7 @@ public class TownImpl implements Town {
 	public void setTax(double tax) throws GeneralEconomyException {
 		validationHandler.checkForPositiveAmount(tax);
 		this.tax = tax;
-		townsystemDao.saveTax(getTownName(), tax);
+		townworldDao.saveTax(getTownName(), tax);
 	}
 
 	private void setupTownSpawn(Chunk startChunk) {
@@ -436,7 +436,7 @@ public class TownImpl implements Town {
 				(startChunk.getZ() << 4) + 7);
 		spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn));
 		townSpawn = spawn;
-		townsystemDao.saveTownSpawn(getTownName(), getTownSpawn());
+		townworldDao.saveTownSpawn(getTownName(), getTownSpawn());
 	}
 
 	private void setupTownManagerInventory() {
@@ -456,14 +456,14 @@ public class TownImpl implements Town {
 	private void setupTownManager(Location location) {
 		spawnTownManagerVillager(location);
 		setupTownManagerInventory();
-		townsystemDao.saveTownManagerLocation(getTownName(), location);
+		townworldDao.saveTownManagerLocation(getTownName(), location);
 	}
 
 	private void setupMayor(EconomyPlayer mayor) throws EconomyPlayerException {
 		this.mayor = mayor;
-		townsystemDao.saveMayor(getTownName(), getMayor());
+		townworldDao.saveMayor(getTownName(), getMayor());
 		citizens.add(mayor);
-		townsystemDao.saveCitizens(getTownName(), getCitizens());
+		townworldDao.saveCitizens(getTownName(), getCitizens());
 		mayor.addJoinedTown(getTownName());
 	}
 
@@ -472,19 +472,19 @@ public class TownImpl implements Town {
 		this.townworld = townworld;
 		this.townName = townName;
 		loadTownManagerVillager();
-		deputies = townsystemDao.loadDeputies(getTownName());
-		citizens = townsystemDao.loadCitizens(getTownName());
-		mayor = townsystemDao.loadMayor(getTownName());
-		townSpawn = townsystemDao.loadTownSpawn(getTownName());
-		bankAccount = bankManager.getBankAccountByIban(townsystemDao.loadTownBankIban(getTownName()));
-		tax = townsystemDao.loadTax(getTownName());
+		deputies = townworldDao.loadDeputies(getTownName());
+		citizens = townworldDao.loadCitizens(getTownName());
+		mayor = townworldDao.loadMayor(getTownName());
+		townSpawn = townworldDao.loadTownSpawn(getTownName());
+		bankAccount = bankManager.getBankAccountByIban(townworldDao.loadTownBankIban(getTownName()));
+		tax = townworldDao.loadTax(getTownName());
 		loadPlots();
 	}
 
 	private void loadPlots() {
-		for (String coords : townsystemDao.loadTownPlotCoords(getTownName())) {
+		for (String coords : townworldDao.loadTownPlotCoords(getTownName())) {
 			try {
-				Plot plot = new PlotImpl(coords, validationHandler, townsystemDao, this, serverProvider);
+				Plot plot = new PlotImpl(coords, validationHandler, townworldDao, this, serverProvider);
 				plots.put(coords, plot);
 			} catch (EconomyPlayerException | TownSystemException e) {
 				logger.warn("[Ultimate_Economy] Failed to load plot " + coords + " of town " + getTownName());
@@ -494,7 +494,7 @@ public class TownImpl implements Town {
 	}
 
 	private void loadTownManagerVillager() throws TownSystemException {
-		Location location = townsystemDao.loadTownManagerLocation(getTownName());
+		Location location = townworldDao.loadTownManagerLocation(getTownName());
 		spawnTownManagerVillager(location);
 		setupTownManagerInventory();
 	}

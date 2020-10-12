@@ -23,7 +23,7 @@ import org.bukkit.potion.PotionEffectType;
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.townsystem.dataaccess.api.TownsystemDao;
+import com.ue.townsystem.dataaccess.api.TownworldDao;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
@@ -32,7 +32,7 @@ import com.ue.ultimate_economy.EconomyVillager;
 public class PlotImpl implements Plot {
 
 	private final TownsystemValidationHandler validationHandler;
-	private final TownsystemDao townsystemDao;
+	private final TownworldDao townworldDao;
 	private final ServerProvider serverProvider;
 	private final String chunkCoords;
 	private EconomyPlayer owner;
@@ -48,16 +48,16 @@ public class PlotImpl implements Plot {
 	 * 
 	 * @param chunkCoords       (format "X/Z")
 	 * @param validationHandler
-	 * @param townsystemDao
+	 * @param townworldDao
 	 * @param town
 	 * @param owner
 	 * @param serverProvider
 	 */
 	public PlotImpl(String chunkCoords, TownsystemValidationHandler validationHandler,
-			TownsystemDao townsystemDao, Town town, EconomyPlayer owner, ServerProvider serverProvider) {
+			TownworldDao townworldDao, Town town, EconomyPlayer owner, ServerProvider serverProvider) {
 		this.chunkCoords = chunkCoords;
 		this.town = town;
-		this.townsystemDao = townsystemDao;
+		this.townworldDao = townworldDao;
 		this.validationHandler = validationHandler;
 		this.serverProvider = serverProvider;
 		setupNewPlot(owner);
@@ -68,30 +68,30 @@ public class PlotImpl implements Plot {
 	 * 
 	 * @param chunkCoords       (format "X/Z")
 	 * @param validationHandler
-	 * @param townsystemDao
+	 * @param townworldDao
 	 * @param town
 	 * @param serverProvider
 	 * @throws TownSystemException
 	 * @throws EconomyPlayerException
 	 */
 	public PlotImpl(String chunkCoords, TownsystemValidationHandler validationHandler,
-			TownsystemDao townsystemDao, Town town, ServerProvider serverProvider)
+			TownworldDao townworldDao, Town town, ServerProvider serverProvider)
 			throws EconomyPlayerException, TownSystemException {
 		this.chunkCoords = chunkCoords;
 		this.town = town;
-		this.townsystemDao = townsystemDao;
+		this.townworldDao = townworldDao;
 		this.validationHandler = validationHandler;
 		this.serverProvider = serverProvider;
 		loadExistingPlot();
 	}
 
 	private void loadExistingPlot() throws EconomyPlayerException, TownSystemException {
-		owner = townsystemDao.loadPlotOwner(town.getTownName(), chunkCoords);
-		residents = townsystemDao.loadResidents(town.getTownName(), chunkCoords);
-		salePrice = townsystemDao.loadPlotSalePrice(town.getTownName(), chunkCoords);
-		isForSale = townsystemDao.loadPlotIsForSale(town.getTownName(), chunkCoords);
+		owner = townworldDao.loadPlotOwner(town.getTownName(), chunkCoords);
+		residents = townworldDao.loadResidents(town.getTownName(), chunkCoords);
+		salePrice = townworldDao.loadPlotSalePrice(town.getTownName(), chunkCoords);
+		isForSale = townworldDao.loadPlotIsForSale(town.getTownName(), chunkCoords);
 		if (isForSale) {
-			spawnSaleVillager(townsystemDao.loadPlotVillagerLocation(town.getTownName(), chunkCoords));
+			spawnSaleVillager(townworldDao.loadPlotVillagerLocation(town.getTownName(), chunkCoords));
 		}
 	}
 
@@ -100,9 +100,9 @@ public class PlotImpl implements Plot {
 		isForSale = false;
 		salePrice = 0;
 		residents = new ArrayList<>();
-		townsystemDao.savePlotResidents(town.getTownName(), chunkCoords, residents);
-		townsystemDao.savePlotSalePrice(town.getTownName(), chunkCoords, salePrice);
-		townsystemDao.savePlotIsForSale(town.getTownName(), chunkCoords, isForSale);
+		townworldDao.savePlotResidents(town.getTownName(), chunkCoords, residents);
+		townworldDao.savePlotSalePrice(town.getTownName(), chunkCoords, salePrice);
+		townworldDao.savePlotIsForSale(town.getTownName(), chunkCoords, isForSale);
 	}
 
 	private void spawnSaleVillager(Location location) {
@@ -170,7 +170,7 @@ public class PlotImpl implements Plot {
 		validationHandler.checkForLocationInsidePlot(chunkCoords, newLocation);
 		validationHandler.checkForPlotIsForSale(isForSale());
 		villager.teleport(newLocation);
-		townsystemDao.savePlotVillagerLocation(town.getTownName(), chunkCoords, newLocation);
+		townworldDao.savePlotVillagerLocation(town.getTownName(), chunkCoords, newLocation);
 	}
 
 	@Override
@@ -187,7 +187,7 @@ public class PlotImpl implements Plot {
 	@Override
 	public void setOwner(EconomyPlayer player) {
 		this.owner = player;
-		townsystemDao.savePlotOwner(town.getTownName(), chunkCoords, player);
+		townworldDao.savePlotOwner(town.getTownName(), chunkCoords, player);
 	}
 
 	@Override
@@ -199,14 +199,14 @@ public class PlotImpl implements Plot {
 	public void addResident(EconomyPlayer player) throws TownSystemException {
 		validationHandler.checkForPlayerIsNotResidentOfPlot(getResidents(), player);
 		residents.add(player);
-		townsystemDao.savePlotResidents(town.getTownName(), chunkCoords, residents);
+		townworldDao.savePlotResidents(town.getTownName(), chunkCoords, residents);
 	}
 
 	@Override
 	public void removeResident(EconomyPlayer player) throws TownSystemException {
 		validationHandler.checkForPlayerIsResidentOfPlot(getResidents(), player);
 		residents.remove(player);
-		townsystemDao.savePlotResidents(town.getTownName(), chunkCoords, residents);
+		townworldDao.savePlotResidents(town.getTownName(), chunkCoords, residents);
 	}
 
 	@Override
@@ -248,8 +248,8 @@ public class PlotImpl implements Plot {
 		villager.remove();
 		world.save();
 		salePrice = 0;
-		townsystemDao.savePlotSalePrice(town.getTownName(), chunkCoords, salePrice);
-		townsystemDao.savePlotIsForSale(town.getTownName(), chunkCoords, isForSale);
+		townworldDao.savePlotSalePrice(town.getTownName(), chunkCoords, salePrice);
+		townworldDao.savePlotIsForSale(town.getTownName(), chunkCoords, isForSale);
 	}
 
 	@Override
@@ -260,9 +260,9 @@ public class PlotImpl implements Plot {
 		isForSale = true;
 		this.salePrice = salePrice;
 		spawnSaleVillager(playerLocation);
-		townsystemDao.savePlotSalePrice(town.getTownName(), chunkCoords, salePrice);
-		townsystemDao.savePlotIsForSale(town.getTownName(), chunkCoords, isForSale);
-		townsystemDao.savePlotVillagerLocation(town.getTownName(), chunkCoords, villager.getLocation());
+		townworldDao.savePlotSalePrice(town.getTownName(), chunkCoords, salePrice);
+		townworldDao.savePlotIsForSale(town.getTownName(), chunkCoords, isForSale);
+		townworldDao.savePlotVillagerLocation(town.getTownName(), chunkCoords, villager.getLocation());
 	}
 
 	@Override

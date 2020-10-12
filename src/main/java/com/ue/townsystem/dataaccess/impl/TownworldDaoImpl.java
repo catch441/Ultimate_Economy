@@ -1,14 +1,12 @@
 package com.ue.townsystem.dataaccess.impl;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.slf4j.Logger;
@@ -16,45 +14,50 @@ import org.slf4j.Logger;
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.SaveFileUtils;
+import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.townsystem.dataaccess.api.TownsystemDao;
+import com.ue.townsystem.dataaccess.api.TownworldDao;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
-import com.ue.ultimate_economy.UltimateEconomy;
 
-public class TownsystemDaoImpl extends SaveFileUtils implements TownsystemDao {
+public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 
-	@Inject
-	TownsystemValidationHandler validationHandler;
-	@Inject
-	EconomyPlayerManager ecoPlayerManager;
-	@Inject
-	BankManager bankManager;
-	private final Logger logger;
+	private final TownsystemValidationHandler validationHandler;
+	private final EconomyPlayerManager ecoPlayerManager;
+	private final BankManager bankManager;
+	private final ServerProvider serverProvider;
 
 	/**
-	 * Default constructor.
+	 * Inject constructor.
 	 * 
-	 * @param world
+	 * @param serverProvider
 	 * @param logger
+	 * @param validationHandler
+	 * @param ecoPlayerManager
+	 * @param bankManager
 	 */
-	public TownsystemDaoImpl(String world, Logger logger) {
+	@Inject
+	public TownworldDaoImpl(ServerProvider serverProvider, Logger logger,
+			TownsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
+			BankManager bankManager) {
 		super(logger);
-		this.logger = logger;
-		file = new File(UltimateEconomy.getInstance.getDataFolder(), world + "_TownWorld" + ".yml");
+		this.validationHandler = validationHandler;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.bankManager = bankManager;
+		this.serverProvider = serverProvider;
+	}
+
+	@Override
+	public void setupSavefile(String name) {
+		file = new File(serverProvider.getDataFolderPath(), name + "_TownWorld.yml");
 		if (!file.exists()) {
-			try {
-				file.createNewFile();
-			} catch (IOException e) {
-				Bukkit.getLogger().warning("[Ultimate_Economy] Failed to create savefile");
-				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
-			}
+			createFile(file);
 		}
 		config = YamlConfiguration.loadConfiguration(file);
 	}
-	
+
 	@Override
 	public void deleteSavefile() {
 		file.delete();
@@ -196,7 +199,7 @@ public class TownsystemDaoImpl extends SaveFileUtils implements TownsystemDao {
 		double z = config.getDouble("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.z");
 		String world = config.getString("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.world");
 		validationHandler.checkForWorldExists(world);
-		return new Location(Bukkit.getWorld(world), x, y, z);
+		return new Location(serverProvider.getWorld(world), x, y, z);
 	}
 
 	@Override
@@ -213,7 +216,8 @@ public class TownsystemDaoImpl extends SaveFileUtils implements TownsystemDao {
 			try {
 				ecoPlayers.add(ecoPlayerManager.getEconomyPlayerByName(name));
 			} catch (EconomyPlayerException e) {
-				Bukkit.getLogger().warning(e.getMessage());
+				logger.warn("[Ultimate_Economy] Failed to load resident " + name + " of town " + townName);
+				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 		return ecoPlayers;
@@ -265,7 +269,7 @@ public class TownsystemDaoImpl extends SaveFileUtils implements TownsystemDao {
 		String world = config.getString("World");
 		validationHandler.checkForWorldExists(world);
 		String locationString = config.getString("Towns." + townName + ".townspawn");
-		return new Location(Bukkit.getWorld(world),
+		return new Location(serverProvider.getWorld(world),
 				Double.valueOf(locationString.substring(0, locationString.indexOf("/"))),
 				Double.valueOf(
 						locationString.substring(locationString.indexOf("/") + 1, locationString.lastIndexOf("/"))),
@@ -285,7 +289,7 @@ public class TownsystemDaoImpl extends SaveFileUtils implements TownsystemDao {
 	public Location loadTownManagerLocation(String townName) throws TownSystemException {
 		String world = config.getString("World");
 		validationHandler.checkForWorldExists(config.getString("World"));
-		return new Location(Bukkit.getWorld(world), config.getDouble("Towns." + townName + ".TownManagerVillager.x"),
+		return new Location(serverProvider.getWorld(world), config.getDouble("Towns." + townName + ".TownManagerVillager.x"),
 				config.getDouble("Towns." + townName + ".TownManagerVillager.y"),
 				config.getDouble("Towns." + townName + ".TownManagerVillager.z"));
 	}

@@ -61,11 +61,9 @@ public interface TownworldManager {
 	 * 
 	 * @param world
 	 * @throws TownSystemException
-	 * @throws GeneralEconomyException
-	 * @throws EconomyPlayerException
 	 */
 	public void createTownWorld(String world)
-			throws TownSystemException, EconomyPlayerException, GeneralEconomyException;
+			throws TownSystemException;
 
 	/**
 	 * This method should be used to delete/disable a townworld.

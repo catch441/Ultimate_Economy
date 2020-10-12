@@ -8,7 +8,7 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
-public interface TownsystemDao {
+public interface TownworldDao {
 
 	/**
 	 * Saves the plot villager location.
@@ -290,4 +290,10 @@ public interface TownsystemDao {
 	 * Deletes the savefile.
 	 */
 	public void deleteSavefile();
+
+	/**
+	 * Setup the savefile.
+	 * @param name
+	 */
+	public void setupSavefile(String name);
 }

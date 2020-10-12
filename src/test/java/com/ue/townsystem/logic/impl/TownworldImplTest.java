@@ -39,7 +39,7 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.townsystem.dataaccess.api.TownsystemDao;
+import com.ue.townsystem.dataaccess.api.TownworldDao;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
@@ -64,7 +64,7 @@ public class TownworldImplTest {
 	@Mock
 	Logger logger;
 	@Mock
-	TownsystemDao townsystemDao;
+	TownworldDao townworldDao;
 
 	private void setupMocksForLoadingTown(String townName) {
 		Plugin plugin = mock(Plugin.class);
@@ -81,13 +81,13 @@ public class TownworldImplTest {
 		ItemStack leaveItem = mock(ItemStack.class);
 		ItemMeta joinItemMeta = mock(ItemMeta.class);
 		ItemMeta leaveItemMeta = mock(ItemMeta.class);
-		assertDoesNotThrow(() -> when(townsystemDao.loadTownManagerLocation(townName)).thenReturn(loc));
-		when(townsystemDao.loadTownBankIban(townName)).thenReturn("iban");
-		assertDoesNotThrow(() -> when(townsystemDao.loadTownSpawn(townName)).thenReturn(spawn));
-		assertDoesNotThrow(() -> when(townsystemDao.loadMayor(townName)).thenReturn(mayor));
-		assertDoesNotThrow(() -> when(townsystemDao.loadDeputies(townName)).thenReturn(Arrays.asList(deputy)));
-		assertDoesNotThrow(() -> when(townsystemDao.loadCitizens(townName)).thenReturn(Arrays.asList(mayor)));
-		when(townsystemDao.loadTax(townName)).thenReturn(1.5);
+		assertDoesNotThrow(() -> when(townworldDao.loadTownManagerLocation(townName)).thenReturn(loc));
+		when(townworldDao.loadTownBankIban(townName)).thenReturn("iban");
+		assertDoesNotThrow(() -> when(townworldDao.loadTownSpawn(townName)).thenReturn(spawn));
+		assertDoesNotThrow(() -> when(townworldDao.loadMayor(townName)).thenReturn(mayor));
+		assertDoesNotThrow(() -> when(townworldDao.loadDeputies(townName)).thenReturn(Arrays.asList(deputy)));
+		assertDoesNotThrow(() -> when(townworldDao.loadCitizens(townName)).thenReturn(Arrays.asList(mayor)));
+		when(townworldDao.loadTax(townName)).thenReturn(1.5);
 		when(serverProvider.getPluginInstance()).thenReturn(plugin);
 		when(joinItem.getItemMeta()).thenReturn(joinItemMeta);
 		when(leaveItem.getItemMeta()).thenReturn(leaveItemMeta);
@@ -131,27 +131,27 @@ public class TownworldImplTest {
 
 	@Test
 	public void constructorNewTest() {
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 
 		assertEquals("world", townworld.getWorldName());
 		assertEquals("0.0", String.valueOf(townworld.getExpandPrice()));
 		assertEquals("0.0", String.valueOf(townworld.getFoundationPrice()));
-		verify(townsystemDao).saveExpandPrice(0.0);
-		verify(townsystemDao).saveFoundationPrice(0.0);
-		verify(townsystemDao).saveWorldName("world");
+		verify(townworldDao).saveExpandPrice(0.0);
+		verify(townworldDao).saveFoundationPrice(0.0);
+		verify(townworldDao).saveWorldName("world");
 	}
 
 	@Test
 	public void constructorLoadingTest() throws TownSystemException {
 		TownSystemException e = mock(TownSystemException.class);
 		when(e.getMessage()).thenReturn("my error message");
-		doThrow(e).when(townsystemDao).loadTownManagerLocation("corrupted");
+		doThrow(e).when(townworldDao).loadTownManagerLocation("corrupted");
 		setupMocksForLoadingTown("mytown");
-		when(townsystemDao.loadFoundationPrice()).thenReturn(1.5);
-		when(townsystemDao.loadExpandPrice()).thenReturn(2.5);
-		when(townsystemDao.loadTownworldTownNames()).thenReturn(Arrays.asList("mytown", "corrupted"));
-		Townworld townworld = new TownworldImpl("world", false, townsystemDao, townsystemValidationHandler,
+		when(townworldDao.loadFoundationPrice()).thenReturn(1.5);
+		when(townworldDao.loadExpandPrice()).thenReturn(2.5);
+		when(townworldDao.loadTownworldTownNames()).thenReturn(Arrays.asList("mytown", "corrupted"));
+		Townworld townworld = new TownworldImpl("world", false, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 
 		verify(logger).warn("[Ultimate_Economy] Failed to load town corrupted");
@@ -166,7 +166,7 @@ public class TownworldImplTest {
 
 	@Test
 	public void setFoundationPriceTestWithNegative() throws GeneralEconomyException {
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		doThrow(GeneralEconomyException.class).when(townsystemValidationHandler).checkForPositiveAmount(-1.5);
 		assertThrows(GeneralEconomyException.class, () -> townworld.setFoundationPrice(-1.5));
@@ -175,17 +175,17 @@ public class TownworldImplTest {
 
 	@Test
 	public void setFoundationPriceTest() {
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		assertDoesNotThrow(() -> townworld.setFoundationPrice(1.5));
 		assertDoesNotThrow(() -> verify(townsystemValidationHandler).checkForPositiveAmount(1.5));
-		verify(townsystemDao).saveFoundationPrice(1.5);
+		verify(townworldDao).saveFoundationPrice(1.5);
 		assertEquals("1.5", String.valueOf(townworld.getFoundationPrice()));
 	}
 	
 	@Test
 	public void setExpandPriceTestWithNegative() throws GeneralEconomyException {
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		doThrow(GeneralEconomyException.class).when(townsystemValidationHandler).checkForPositiveAmount(-1.5);
 		assertThrows(GeneralEconomyException.class, () -> townworld.setExpandPrice(-1.5));
@@ -194,17 +194,17 @@ public class TownworldImplTest {
 
 	@Test
 	public void setExpandPriceTest() {
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		assertDoesNotThrow(() -> townworld.setExpandPrice(1.5));
 		assertDoesNotThrow(() -> verify(townsystemValidationHandler).checkForPositiveAmount(1.5));
-		verify(townsystemDao).saveExpandPrice(1.5);
+		verify(townworldDao).saveExpandPrice(1.5);
 		assertEquals("1.5", String.valueOf(townworld.getExpandPrice()));
 	}
 	
 	@Test
 	public void foundTownTestWithAlreadyExists() throws GeneralEconomyException {
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		when(townworldManager.getTownNameList()).thenReturn(Arrays.asList("mytown"));
 		doThrow(GeneralEconomyException.class).when(townsystemValidationHandler).checkForTownDoesNotExist(Arrays.asList("mytown"), "mytown");
@@ -213,7 +213,7 @@ public class TownworldImplTest {
 	
 	@Test
 	public void foundTownTestWithChunkIsOccupied() throws TownSystemException {
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		Location loc = mock(Location.class);
 		doThrow(TownSystemException.class).when(townsystemValidationHandler).checkForChunkIsFree(townworld, loc);
@@ -222,7 +222,7 @@ public class TownworldImplTest {
 	
 	@Test
 	public void foundTownTestReachedMaxJoinedTowns() throws EconomyPlayerException {
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.reachedMaxJoinedTowns()).thenReturn(true);
@@ -232,7 +232,7 @@ public class TownworldImplTest {
 	
 	@Test
 	public void foundTownTestWithNotEnoughMoney() throws EconomyPlayerException, GeneralEconomyException {
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		BankAccount account = mock(BankAccount.class);
@@ -244,7 +244,7 @@ public class TownworldImplTest {
 	@Test
 	public void foundTownTest() {
 		Location loc = setupMocksForNewTown();
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		
@@ -260,7 +260,7 @@ public class TownworldImplTest {
 	@Test
 	public void getTownNameListTest() {
 		Location loc = setupMocksForNewTown();
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		assertDoesNotThrow(() -> townworld.foundTown("mytown", loc, ecoPlayer));
@@ -271,7 +271,7 @@ public class TownworldImplTest {
 	@Test
 	public void getTownByChunkTest() {
 		Location loc = setupMocksForNewTown();
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		assertDoesNotThrow(() -> townworld.foundTown("mytown", loc, ecoPlayer));
@@ -282,7 +282,7 @@ public class TownworldImplTest {
 	
 	@Test
 	public void getTownByChunkTestWithNoTown() {
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		
 		Chunk chunk = mock(Chunk.class);
@@ -297,7 +297,7 @@ public class TownworldImplTest {
 	@Test
 	public void getTownByNameTest() {
 		Location loc = setupMocksForNewTown();
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		assertDoesNotThrow(() -> townworld.foundTown("mytown", loc, ecoPlayer));
@@ -308,7 +308,7 @@ public class TownworldImplTest {
 	
 	@Test
 	public void getTownByNameTestWithNoTown() {
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		
 		try {
@@ -323,7 +323,7 @@ public class TownworldImplTest {
 	@Test
 	public void isChunkFreeTest() {
 		Location loc = setupMocksForNewTown();
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		assertDoesNotThrow(() -> townworld.foundTown("mytown", loc, ecoPlayer));
@@ -360,7 +360,7 @@ public class TownworldImplTest {
 		when(world.getHighestBlockYAt(any(Location.class))).thenReturn(60);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(loc.getWorld()).thenReturn(world);
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		assertDoesNotThrow(() -> townworld.foundTown("mytown", loc, ecoPlayer));
@@ -372,7 +372,7 @@ public class TownworldImplTest {
 	@Test
 	public void dissolveTownTestWithNotMayor() throws EconomyPlayerException {
 		Location loc = setupMocksForNewTown();
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		assertDoesNotThrow(() -> townworld.foundTown("mytown", loc, ecoPlayer));
@@ -384,7 +384,7 @@ public class TownworldImplTest {
 	
 	@Test
 	public void dissolveTownTestWithInvalidTown() throws GeneralEconomyException {
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		Town town = mock(Town.class);
 		when(town.getTownName()).thenReturn("mytown");
@@ -419,7 +419,7 @@ public class TownworldImplTest {
 		when(world.getHighestBlockYAt(any(Location.class))).thenReturn(60);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(loc.getWorld()).thenReturn(world);
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		assertDoesNotThrow(() -> townworld.foundTown("mytown", loc, ecoPlayer));
@@ -461,14 +461,14 @@ public class TownworldImplTest {
 		when(world.getHighestBlockYAt(any(Location.class))).thenReturn(60);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(loc.getWorld()).thenReturn(world);
-		Townworld townworld = new TownworldImpl("world", true, townsystemDao, townsystemValidationHandler,
+		Townworld townworld = new TownworldImpl("world", true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, townworldManager, messageWrapper, bankManager, logger, serverProvider);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		assertDoesNotThrow(() -> townworld.foundTown("mytown", loc, ecoPlayer));
 		
 		assertDoesNotThrow(() -> townworld.delete());
 		
-		verify(townsystemDao).deleteSavefile();
+		verify(townworldDao).deleteSavefile();
 		assertEquals(0, townworld.getTownList().size());
 	}
 }

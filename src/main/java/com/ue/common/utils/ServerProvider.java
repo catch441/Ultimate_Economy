@@ -1,5 +1,6 @@
 package com.ue.common.utils;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -28,6 +29,14 @@ public class ServerProvider {
 	 */
 	public World getWorld(String world) {
 		return Bukkit.getWorld(world);
+	}
+	
+	/**
+	 * Returns a list of all online players.
+	 * @return online players
+	 */
+	public List<Player> getOnlinePlayers() {
+		return new ArrayList<>(Bukkit.getOnlinePlayers());
 	}
 	
 	/**

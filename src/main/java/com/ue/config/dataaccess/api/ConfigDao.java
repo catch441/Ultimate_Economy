@@ -319,6 +319,19 @@ public interface ConfigDao {
 	 * @param ids
 	 */
 	public void saveRentshopIds(List<String> ids);
+	
+	/**
+	 * Saves the townworlds list.
+	 * 
+	 * @param townworlds
+	 */
+	public void saveTownworldNamesList(List<String> townworlds);
+	
+	/**
+	 * Loads the townworld names.
+	 * @return townworld names
+	 */
+	public List<String> loadTownworldNames();
 
 	/**
 	 * Remove deprecated stuff.

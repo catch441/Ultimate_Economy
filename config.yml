@@ -13,6 +13,9 @@ JobList:
 RentShopIds:
 - id1
 - id2
+TownWorlds:
+- world1
+- world2
 MaxJoinedTowns: 6
 MaxPlayershops: 6
 localeCountry: DE

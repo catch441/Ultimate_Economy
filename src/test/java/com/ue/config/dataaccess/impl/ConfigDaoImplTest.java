@@ -398,6 +398,25 @@ public class ConfigDaoImplTest {
 	}
 	
 	@Test
+	public void saveTownworldNamesListTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		File file = new File("src/config.yml");
+		dao.saveTownworldNamesList(Arrays.asList("world"));
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		assertEquals(1, config.getStringList("TownWorlds").size());
+		assertEquals("world", config.getStringList("TownWorlds").get(0));
+	}
+	
+	@Test
+	public void loadTownworldNamesTest() {
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
+		dao.saveTownworldNamesList(Arrays.asList("world1", "world2"));
+		assertEquals(Arrays.asList("world1", "world2"), dao.loadTownworldNames());
+	}
+	
+	@Test
 	public void loadPlayershopIdsTest() {
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);

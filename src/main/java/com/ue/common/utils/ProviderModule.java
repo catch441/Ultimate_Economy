@@ -65,6 +65,8 @@ import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
 import com.ue.shopsystem.logic.impl.RentshopTabCompleterImpl;
 import com.ue.shopsystem.logic.impl.ShopEventHandlerImpl;
 import com.ue.shopsystem.logic.impl.ShopValidationHandlerImpl;
+import com.ue.townsystem.dataaccess.api.TownworldDao;
+import com.ue.townsystem.dataaccess.impl.TownworldDaoImpl;
 import com.ue.townsystem.logic.api.TownsystemEventHandler;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.TownworldManager;
@@ -202,12 +204,13 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	TownworldManager provideTownworldManager(EconomyPlayerValidationHandler ecoPlayerValidationHandler,
-			BankManager bankManager, EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
+	TownworldManager provideTownworldManager(ComponentProvider componentProvider, ConfigDao configDao,
+			EconomyPlayerValidationHandler ecoPlayerValidationHandler, BankManager bankManager,
+			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
 			TownsystemValidationHandler townsystemValidationHandler, ServerProvider serverProvider) {
 		Logger logger = LoggerFactory.getLogger("Townsystem");
-		return new TownworldManagerImpl(ecoPlayerValidationHandler, bankManager, ecoPlayerManager, messageWrapper,
-				townsystemValidationHandler, serverProvider, logger);
+		return new TownworldManagerImpl(componentProvider, configDao, ecoPlayerValidationHandler, bankManager,
+				ecoPlayerManager, messageWrapper, townsystemValidationHandler, serverProvider, logger);
 	}
 
 	@Singleton
@@ -371,6 +374,13 @@ public class ProviderModule {
 		Logger logger = LoggerFactory.getLogger(ShopDaoImpl.class);
 		return new ShopDaoImpl(serverProvider, ecoPlayerManager, validationHandler, townsystemValidationHandler,
 				logger);
+	}
+
+	@Provides
+	TownworldDao provideTownworldDao(ServerProvider serverProvider, TownsystemValidationHandler validationHandler,
+			EconomyPlayerManager ecoPlayerManager, BankManager bankManager) {
+		Logger logger = LoggerFactory.getLogger(TownworldDaoImpl.class);
+		return new TownworldDaoImpl(serverProvider, logger, validationHandler, ecoPlayerManager, bankManager);
 	}
 
 	@Singleton
