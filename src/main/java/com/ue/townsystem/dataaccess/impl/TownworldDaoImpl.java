@@ -163,8 +163,9 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 			if (val instanceof List) {
 				val = new ArrayList<Object>((List<Object>) val);
 			}
-			config.set("Towns." + newName + s, val);
+			config.set("Towns." + newName + "." + s, val);
 		}
+		config.set("Towns." + oldName, null);
 		save(config, file);
 	}
 
