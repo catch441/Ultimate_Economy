@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -93,9 +94,9 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 	public void handleOpenTownmanagerInventory(PlayerInteractEntityEvent event) {
 		event.setCancelled(true);
 		try {
-			Townworld townworld2 = townworldManager.getTownWorldByName(event.getRightClicked().getWorld().getName());
-			Town town2 = townworld2.getTownByChunk(event.getRightClicked().getLocation().getChunk());
-			town2.openTownManagerVillagerInv(event.getPlayer());
+			Townworld townworld = townworldManager.getTownWorldByName(event.getRightClicked().getWorld().getName());
+			Town town = townworld.getTownByChunk(event.getRightClicked().getLocation().getChunk());
+			town.openTownManagerVillagerInv(event.getPlayer());
 		} catch (TownSystemException e) {
 		}
 	}
@@ -116,6 +117,7 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 	@Override
 	public void handleInventoryClick(InventoryClickEvent event) {
 		if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
+			// TODO UE-119 extract messages
 			event.setCancelled(true);
 			try {
 				Townworld townWorld = townworldManager.getTownWorldByName(event.getWhoClicked().getWorld().getName());
@@ -153,7 +155,7 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 				event.getWhoClicked().closeInventory();
 			} catch (TownSystemException | GeneralEconomyException e) {
 			} catch (EconomyPlayerException e) {
-				event.getWhoClicked().sendMessage(ChatColor.RED + e.getMessage());
+				event.getWhoClicked().sendMessage(e.getMessage());
 			}
 		}
 	}
@@ -187,17 +189,16 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 		if (!event.getPlayer().hasPermission("ultimate_economy.towninteract")
 				&& !town.hasBuildPermissions(economyPlayer,
 						town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))
-				|| (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) && isDoorOrGate(event)
-						&& configManager.isExtendedInteraction())) {
+				|| (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)
+						&& isDoorOrGate(event.getClickedBlock().getType()) && configManager.isExtendedInteraction())) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	private boolean isDoorOrGate(PlayerInteractEvent event) {
-		if (event.getClickedBlock().getType().toString().contains("DOOR")
-				|| event.getClickedBlock().getType().toString().contains("GATE")) {
+	private boolean isDoorOrGate(Material material) {
+		if (material.toString().contains("DOOR") || material.toString().contains("GATE")) {
 			return true;
 		} else {
 			return false;
