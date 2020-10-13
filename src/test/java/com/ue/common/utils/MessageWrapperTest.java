@@ -12,8 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-import com.ue.common.utils.MessageWrapper;
-
 @ExtendWith(MockitoExtension.class)
 public class MessageWrapperTest {
 

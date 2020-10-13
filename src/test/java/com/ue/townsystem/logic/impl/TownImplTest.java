@@ -117,6 +117,7 @@ public class TownImplTest {
 		ItemStack leaveItem = mock(ItemStack.class);
 		ItemMeta joinItemMeta = mock(ItemMeta.class);
 		ItemMeta leaveItemMeta = mock(ItemMeta.class);
+		when(account.getIban()).thenReturn("myiban");
 		when(serverProvider.getPluginInstance()).thenReturn(plugin);
 		when(joinItem.getItemMeta()).thenReturn(joinItemMeta);
 		when(leaveItem.getItemMeta()).thenReturn(leaveItemMeta);
@@ -166,6 +167,7 @@ public class TownImplTest {
 		verify(townworldDao).saveCitizens("mytown", Arrays.asList(mayor));
 		verify(townworldDao).saveTownManagerLocation("mytown", loc);
 		verify(townworldDao).saveTownSpawn("mytown", town.getTownSpawn());
+		verify(townworldDao).saveTownBankIban("mytown", "myiban");
 		Plot plot = assertDoesNotThrow(() -> town.getPlotByChunk("1/2"));
 		assertEquals(town, plot.getTown());
 		assertEquals("1/2", plot.getChunkCoords());

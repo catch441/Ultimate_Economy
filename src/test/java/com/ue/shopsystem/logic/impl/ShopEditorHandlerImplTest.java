@@ -28,8 +28,6 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.shopsystem.logic.api.AbstractShop;
 import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.ShopEditorHandler;
-import com.ue.shopsystem.logic.impl.ShopEditorHandlerImpl;
-import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 
 @ExtendWith(MockitoExtension.class)

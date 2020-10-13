@@ -20,11 +20,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 
+import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
+import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +43,8 @@ public class TownworldDaoImplTest {
 	BankManager bankManager;
 	@Mock
 	ServerProvider serverProvider;
+	@Mock
+	Logger logger;
 
 	/**
 	 * Delete savefile.
@@ -311,7 +316,22 @@ public class TownworldDaoImplTest {
 		dao.saveDeputies("town", Arrays.asList(ecoPlayer));
 		assertDoesNotThrow(() -> assertEquals(Arrays.asList(ecoPlayer), dao.loadDeputies("town")));
 	}
-
+	
+	@Test
+	public void loadDeputiesTestWithLoadingError() throws EconomyPlayerException {
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
+		when(e.getMessage()).thenReturn("my error message");
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile("world");
+		when(ecoPlayer.getName()).thenReturn("catch441");
+		dao.saveDeputies("town", Arrays.asList(ecoPlayer));
+		assertEquals(0, dao.loadDeputies("town").size());
+		verify(logger).warn("[Ultimate_Economy] Failed to load deputy catch441 of town town");
+		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+	}
+	
 	@Test
 	public void loadCitizensTest() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
@@ -321,6 +341,47 @@ public class TownworldDaoImplTest {
 		when(ecoPlayer.getName()).thenReturn("catch441");
 		dao.saveCitizens("town", Arrays.asList(ecoPlayer));
 		assertDoesNotThrow(() -> assertEquals(Arrays.asList(ecoPlayer), dao.loadCitizens("town")));
+	}
+	
+	@Test
+	public void loadCitizensTestWithLoadingError() throws EconomyPlayerException {
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
+		when(e.getMessage()).thenReturn("my error message");
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile("world");
+		when(ecoPlayer.getName()).thenReturn("catch441");
+		dao.saveCitizens("town", Arrays.asList(ecoPlayer));
+		assertEquals(0, dao.loadCitizens("town").size());
+		verify(logger).warn("[Ultimate_Economy] Failed to load citizen catch441 of town town");
+		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+	}
+	
+	@Test
+	public void loadResidentsTest() {
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile("world");
+		when(ecoPlayer.getName()).thenReturn("catch441");
+		dao.savePlotResidents("town", "1/2", Arrays.asList(ecoPlayer));
+		assertDoesNotThrow(() -> assertEquals(Arrays.asList(ecoPlayer), dao.loadResidents("town", "1/2")));
+	}
+	
+	@Test
+	public void loadResidentsTestWithLoadingError() throws EconomyPlayerException {
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
+		when(e.getMessage()).thenReturn("my error message");
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile("world");
+		when(ecoPlayer.getName()).thenReturn("catch441");
+		dao.savePlotResidents("town", "1/2", Arrays.asList(ecoPlayer));
+		assertEquals(0, dao.loadResidents("town", "1/2").size());
+		verify(logger).warn("[Ultimate_Economy] Failed to load resident catch441 of town town and plot 1/2");
+		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
 	}
 
 	@Test
@@ -415,5 +476,79 @@ public class TownworldDaoImplTest {
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertFalse(config.isSet("Towns.town.Plots.1/2.coOwners"));
 		assertEquals(Arrays.asList("catch441"), config.getStringList("Towns.newtown.Plots.1/2.coOwners"));
+	}
+	
+	@Test
+	public void saveRemovePlotTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile("world");
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		when(ecoPlayer.getName()).thenReturn("catch441");
+		dao.savePlotOwner("town", "1/2", ecoPlayer);
+		dao.saveRemovePlot("town", "1/2");
+		File file = new File("src/world_TownWorld.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		assertFalse(config.isSet("Towns.town.Plots.1/2"));
+	}
+	
+	@Test
+	public void loadTownPlotCoordsTestWithOldRemove() {
+		File file = new File("src/world_TownWorld.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("Towns.town.chunks.1/2", "stuff");
+		save(file, config);		
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile("world");
+		dao.savePlotIsForSale("town", "1/2", true);
+		assertEquals(Arrays.asList("1/2"), dao.loadTownPlotCoords("town"));
+		File file2 = new File("src/world_TownWorld.yml");
+		YamlConfiguration config2 = YamlConfiguration.loadConfiguration(file2);
+		assertFalse(config2.isSet("Towns.town.chunks"));
+	}
+	
+	@Test
+	public void loadTownworldTownNamesTestWithOldRemove() {
+		File file = new File("src/world_TownWorld.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("TownNames", Arrays.asList("town1", "town2"));
+		save(file, config);		
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile("world");
+		dao.savePlotIsForSale("town", "1/2", true);
+		dao.loadTownworldTownNames();
+		assertEquals(Arrays.asList("town"), dao.loadTownworldTownNames());
+		File file2 = new File("src/world_TownWorld.yml");
+		YamlConfiguration config2 = YamlConfiguration.loadConfiguration(file2);
+		assertFalse(config2.isSet("TownNames"));
+	}
+	
+	@Test
+	public void loadTownBankIbanTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile("world");
+		dao.saveTownBankIban("town", "myiban");
+		assertEquals("myiban", dao.loadTownBankIban("town"));
+	}
+	
+	@Test
+	public void loadTownBankIbanTestWithOldConvert() {
+		BankAccount account = mock(BankAccount.class);
+		when(bankManager.createBankAccount(1.5)).thenReturn(account);
+		when(account.getIban()).thenReturn("myiban");
+		File file = new File("src/world_TownWorld.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("Towns.town.bank", 1.5);
+		save(file, config);
+		
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile("world");
+		assertEquals("myiban", dao.loadTownBankIban("town"));
+		YamlConfiguration config2 = YamlConfiguration.loadConfiguration(file);
+		assertFalse(config2.isSet("Towns.town.bank"));
+		verify(bankManager).createBankAccount(1.5);
+	}
+	
+	private void save(File file, YamlConfiguration config) {
+		assertDoesNotThrow(() -> config.save(file));
 	}
 }

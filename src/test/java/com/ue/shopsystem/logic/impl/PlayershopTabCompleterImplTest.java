@@ -15,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.shopsystem.logic.api.PlayershopManager;
-import com.ue.shopsystem.logic.impl.PlayershopTabCompleterImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class PlayershopTabCompleterImplTest {

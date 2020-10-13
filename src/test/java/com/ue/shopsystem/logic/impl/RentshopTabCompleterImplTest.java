@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
-import com.ue.shopsystem.logic.impl.RentshopTabCompleterImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class RentshopTabCompleterImplTest {

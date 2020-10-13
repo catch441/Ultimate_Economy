@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.shopsystem.logic.api.AdminshopManager;
-import com.ue.shopsystem.logic.impl.AdminshopTabCompleterImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class AdminshopTabCompleterImplTest {

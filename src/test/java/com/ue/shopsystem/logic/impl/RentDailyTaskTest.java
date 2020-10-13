@@ -22,8 +22,6 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
-import com.ue.shopsystem.logic.impl.RentDailyTask;
-import com.ue.shopsystem.logic.impl.ShopSystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class RentDailyTaskTest {

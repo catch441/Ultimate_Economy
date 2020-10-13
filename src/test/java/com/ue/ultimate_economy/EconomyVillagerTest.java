@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import com.ue.ultimate_economy.EconomyVillager;
-
 public class EconomyVillagerTest {
 
 	@Test

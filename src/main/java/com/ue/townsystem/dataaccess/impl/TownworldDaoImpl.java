@@ -39,9 +39,8 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	 * @param bankManager
 	 */
 	@Inject
-	public TownworldDaoImpl(ServerProvider serverProvider, Logger logger,
-			TownsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
-			BankManager bankManager) {
+	public TownworldDaoImpl(ServerProvider serverProvider, Logger logger, TownsystemValidationHandler validationHandler,
+			EconomyPlayerManager ecoPlayerManager, BankManager bankManager) {
 		super(logger);
 		this.validationHandler = validationHandler;
 		this.ecoPlayerManager = ecoPlayerManager;
@@ -150,7 +149,7 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 
 	@Override
 	public void saveRemovePlot(String townName, String chunkCoords) {
-		config.set("Town." + townName + ".Plots." + chunkCoords, null);
+		config.set("Towns." + townName + ".Plots." + chunkCoords, null);
 		save(config, file);
 	}
 
@@ -217,7 +216,8 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 			try {
 				ecoPlayers.add(ecoPlayerManager.getEconomyPlayerByName(name));
 			} catch (EconomyPlayerException e) {
-				logger.warn("[Ultimate_Economy] Failed to load resident " + name + " of town " + townName);
+				logger.warn("[Ultimate_Economy] Failed to load resident " + name + " of town " + townName + " and plot "
+						+ chunkCoords);
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
@@ -252,12 +252,18 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	}
 
 	@Override
-	public List<EconomyPlayer> loadDeputies(String townName) throws EconomyPlayerException {
+	public List<EconomyPlayer> loadDeputies(String townName) {
 		List<EconomyPlayer> deputys = new ArrayList<>();
 		for (String name : config.getStringList("Towns." + townName + ".coOwners")) {
-			deputys.add(ecoPlayerManager.getEconomyPlayerByName(name));
+			try {
+				deputys.add(ecoPlayerManager.getEconomyPlayerByName(name));
+			} catch (EconomyPlayerException e) {
+				logger.warn("[Ultimate_Economy] Failed to load deputy " + name + " of town " + townName);
+				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+			}
 		}
 		return deputys;
+
 	}
 
 	@Override
@@ -278,10 +284,15 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	}
 
 	@Override
-	public List<EconomyPlayer> loadCitizens(String townName) throws EconomyPlayerException {
+	public List<EconomyPlayer> loadCitizens(String townName) {
 		List<EconomyPlayer> citizens = new ArrayList<>();
 		for (String name : config.getStringList("Towns." + townName + ".citizens")) {
-			citizens.add(ecoPlayerManager.getEconomyPlayerByName(name));
+			try {
+				citizens.add(ecoPlayerManager.getEconomyPlayerByName(name));
+			} catch (EconomyPlayerException e) {
+				logger.warn("[Ultimate_Economy] Failed to load citizen " + name + " of town " + townName);
+				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+			}
 		}
 		return citizens;
 	}
@@ -290,7 +301,8 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	public Location loadTownManagerLocation(String townName) throws TownSystemException {
 		String world = config.getString("World");
 		validationHandler.checkForWorldExists(config.getString("World"));
-		return new Location(serverProvider.getWorld(world), config.getDouble("Towns." + townName + ".TownManagerVillager.x"),
+		return new Location(serverProvider.getWorld(world),
+				config.getDouble("Towns." + townName + ".TownManagerVillager.x"),
 				config.getDouble("Towns." + townName + ".TownManagerVillager.y"),
 				config.getDouble("Towns." + townName + ".TownManagerVillager.z"));
 	}
@@ -322,6 +334,7 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	private void convertToBankAccount(String townName) {
 		if (!config.contains("Towns." + townName + ".Iban")) {
 			double startAmount = config.getDouble("Towns." + townName + ".bank");
+			config.set("Towns." + townName + ".bank", null);
 			BankAccount account = bankManager.createBankAccount(startAmount);
 			saveTownBankIban(townName, account.getIban());
 		}

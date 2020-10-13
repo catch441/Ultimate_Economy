@@ -47,7 +47,6 @@ import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
-import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
 import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
 import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
@@ -57,7 +56,6 @@ public class RentshopManagerImplTest {
 
 	@InjectMocks
 	RentshopManagerImpl rentshopManager;
-	// private final MessageWrapper messageWrapper;
 	@Mock
 	ShopValidationHandler validationHandler;
 	@Mock
@@ -68,11 +66,8 @@ public class RentshopManagerImplTest {
 	Logger logger;
 	@Mock
 	CustomSkullService skullService;
-	// private final EconomyPlayerManager ecoPlayerManager;
-	// private final ConfigManager configManager;
 	@Mock
 	ConfigDao configDao;
-	// private final TownworldManager townworldManager;
 	@Mock
 	PlayershopManager playershopManager;
 	

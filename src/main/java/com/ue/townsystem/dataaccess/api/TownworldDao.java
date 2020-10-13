@@ -196,9 +196,8 @@ public interface TownworldDao {
 	 * 
 	 * @param townName
 	 * @return deputies
-	 * @throws EconomyPlayerException
 	 */
-	public List<EconomyPlayer> loadDeputies(String townName) throws EconomyPlayerException;
+	public List<EconomyPlayer> loadDeputies(String townName);
 
 	/**
 	 * Loads the tax of a town.
@@ -223,9 +222,8 @@ public interface TownworldDao {
 	 * 
 	 * @param townName
 	 * @return citizens
-	 * @throws EconomyPlayerException
 	 */
-	public List<EconomyPlayer> loadCitizens(String townName) throws EconomyPlayerException;
+	public List<EconomyPlayer> loadCitizens(String townName);
 
 	/**
 	 * Loads the townmanager location.

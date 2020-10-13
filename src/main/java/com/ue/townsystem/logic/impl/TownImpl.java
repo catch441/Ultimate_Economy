@@ -131,6 +131,7 @@ public class TownImpl implements Town {
 		setupMayor(mayor);
 		setupTownManager(location);
 		bankAccount = bankManager.createBankAccount(0);
+		townworldDao.saveTownBankIban(getTownName(), bankAccount.getIban());
 		setupTownSpawn(startChunk);
 		tax = 0.0;
 		townworldDao.saveTax(getTownName(), tax);
