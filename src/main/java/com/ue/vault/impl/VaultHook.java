@@ -1,4 +1,4 @@
-package com.ue.vault;
+package com.ue.vault.impl;
 
 import javax.inject.Inject;
 

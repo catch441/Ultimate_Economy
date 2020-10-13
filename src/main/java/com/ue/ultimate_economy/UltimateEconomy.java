@@ -52,7 +52,7 @@ import com.ue.shopsystem.logic.api.ShopEventHandler;
 import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.townsystem.logic.api.TownsystemEventHandler;
 import com.ue.townsystem.logic.api.TownworldManager;
-import com.ue.vault.VaultHook;
+import com.ue.vault.impl.VaultHook;
 
 /**
  * @author Lukas Heubach (catch441)

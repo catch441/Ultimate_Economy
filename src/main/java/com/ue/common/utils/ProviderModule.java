@@ -78,8 +78,8 @@ import com.ue.townsystem.logic.impl.TownworldCommandExecutorImpl;
 import com.ue.townsystem.logic.impl.TownworldManagerImpl;
 import com.ue.townsystem.logic.impl.TownworldTabCompleterImpl;
 import com.ue.ultimate_economy.UltimateEconomy;
-import com.ue.vault.UltimateEconomyVault;
-import com.ue.vault.VaultHook;
+import com.ue.vault.impl.UltimateEconomyVaultImpl;
+import com.ue.vault.impl.VaultHook;
 
 import dagger.Lazy;
 import dagger.Module;
@@ -109,9 +109,9 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	Economy provideVaultEconomy(EconomyPlayerManager ecoPlayerManager, BankManager bankManager,
-			ConfigManager configManager) {
-		return new UltimateEconomyVault(ecoPlayerManager, bankManager, configManager);
+	Economy provideVaultEconomy(ServerProvider serverProvider, EconomyPlayerManager ecoPlayerManager,
+			BankManager bankManager, ConfigManager configManager) {
+		return new UltimateEconomyVaultImpl(serverProvider, ecoPlayerManager, bankManager, configManager);
 	}
 
 	@Singleton
