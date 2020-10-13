@@ -48,6 +48,7 @@ import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
+import com.ue.ultimate_economy.GeneralEconomyException;
 
 @ExtendWith(MockitoExtension.class)
 public class JobSystemEventHandlerImplTest {
@@ -70,7 +71,7 @@ public class JobSystemEventHandlerImplTest {
 		Block block = mock(Block.class);
 		BlockPlaceEvent event = new BlockPlaceEvent(block, null, null, null, player, true, null);
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		when(block.getType()).thenReturn(Material.STONE);
 		when(serverProvider.getPluginInstance()).thenReturn(plugin);
 
@@ -109,9 +110,9 @@ public class JobSystemEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(job0.getKillPrice("COW")).thenThrow(JobSystemException.class));
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job0, job));
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		LivingEntity entity = mock(LivingEntity.class);
 		when(entity.getKiller()).thenReturn(player);
@@ -126,9 +127,9 @@ public class JobSystemEventHandlerImplTest {
 	@Test
 	public void handleEntityDeathTestCreative() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		when(player.getGameMode()).thenReturn(GameMode.CREATIVE);
 		LivingEntity entity = mock(LivingEntity.class);
 		when(entity.getKiller()).thenReturn(player);
@@ -142,9 +143,9 @@ public class JobSystemEventHandlerImplTest {
 	public void handleEntityDeathTestEmptyJob() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.getJobList()).thenReturn(new ArrayList<>());
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		LivingEntity entity = mock(LivingEntity.class);
 		when(entity.getKiller()).thenReturn(player);
@@ -152,6 +153,18 @@ public class JobSystemEventHandlerImplTest {
 		EntityDeathEvent event = new EntityDeathEvent(entity, new ArrayList<>());
 		eventHandler.handleEntityDeath(event);
 		assertDoesNotThrow(() -> verify(ecoPlayer, never()).increasePlayerAmount(10.5, false));
+	}
+	
+	@Test
+	public void handleEntityDeathTestWithError() throws EconomyPlayerException {
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
+		Player player = mock(Player.class);
+		when(player.getName()).thenReturn("catch441");
+		LivingEntity entity = mock(LivingEntity.class);
+		when(entity.getKiller()).thenReturn(player);
+
+		EntityDeathEvent event = new EntityDeathEvent(entity, new ArrayList<>());
+		assertDoesNotThrow(() -> eventHandler.handleEntityDeath(event));
 	}
 
 	@Test
@@ -161,11 +174,11 @@ public class JobSystemEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(job.getBlockPrice("STONE")).thenReturn(10.5));
 		assertDoesNotThrow(() -> when(job0.getBlockPrice("STONE")).thenThrow(JobSystemException.class));
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job0, job));
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Block block = mock(Block.class);
 		when(block.getType()).thenReturn(Material.STONE);
 
@@ -181,7 +194,7 @@ public class JobSystemEventHandlerImplTest {
 
 		BlockBreakEvent event = new BlockBreakEvent(block, player);
 		eventHandler.handleBreakBlock(event);
-		assertDoesNotThrow(() -> verify(ecoPlayerManager, never()).getEconomyPlayerByName("kthschnll"));
+		assertDoesNotThrow(() -> verify(ecoPlayerManager, never()).getEconomyPlayerByName("catch441"));
 	}
 
 	@Test
@@ -189,11 +202,11 @@ public class JobSystemEventHandlerImplTest {
 		Job job0 = mock(Job.class);
 		Job job = mock(Job.class);
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job0, job));
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Block block = mock(Block.class);
 		when(block.getType()).thenReturn(Material.STONE);
 		MetadataValue value = mock(MetadataValue.class);
@@ -207,11 +220,11 @@ public class JobSystemEventHandlerImplTest {
 	@Test
 	public void handleBreakBlockTestEmptyJob() {
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.getJobList()).thenReturn(new ArrayList<>());
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Block block = mock(Block.class);
 
 		BlockBreakEvent event = new BlockBreakEvent(block, player);
@@ -226,11 +239,11 @@ public class JobSystemEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(job.getBlockPrice("WHEAT")).thenReturn(10.5));
 		assertDoesNotThrow(() -> when(job0.getBlockPrice("WHEAT")).thenThrow(JobSystemException.class));
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job0, job));
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Block block = mock(Block.class);
 		when(block.getType()).thenReturn(Material.WHEAT);
 		Ageable data = mock(Ageable.class);
@@ -248,11 +261,11 @@ public class JobSystemEventHandlerImplTest {
 		Job job0 = mock(Job.class);
 		Job job = mock(Job.class);
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job0, job));
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Block block = mock(Block.class);
 		when(block.getType()).thenReturn(Material.WHEAT);
 		Ageable data = mock(Ageable.class);
@@ -264,6 +277,17 @@ public class JobSystemEventHandlerImplTest {
 		eventHandler.handleBreakBlock(event);
 		assertDoesNotThrow(() -> verify(ecoPlayer, never()).increasePlayerAmount(10.5, false));
 	}
+	
+	@Test
+	public void handleBreakBlockTestWithError() throws EconomyPlayerException {
+		Player player = mock(Player.class);
+		when(player.getName()).thenReturn("catch441");
+		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
+
+		BlockBreakEvent event = new BlockBreakEvent(null, player);
+		assertDoesNotThrow(() -> eventHandler.handleBreakBlock(event));
+	}
 
 	@Test
 	public void handleFishingTestFish() {
@@ -272,10 +296,10 @@ public class JobSystemEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(job.getFisherPrice("fish")).thenReturn(10.5));
 		assertDoesNotThrow(() -> when(job0.getFisherPrice("fish")).thenThrow(JobSystemException.class));
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job0, job));
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Item caught = mock(Item.class);
 		ItemStack stack = mock(ItemStack.class);
 		when(caught.getItemStack()).thenReturn(stack);
@@ -293,10 +317,10 @@ public class JobSystemEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(job.getFisherPrice("treasure")).thenReturn(10.5));
 		assertDoesNotThrow(() -> when(job0.getFisherPrice("treasure")).thenThrow(JobSystemException.class));
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job0, job));
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Item caught = mock(Item.class);
 		ItemStack stack = mock(ItemStack.class);
 		when(caught.getItemStack()).thenReturn(stack);
@@ -314,10 +338,10 @@ public class JobSystemEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(job.getFisherPrice("junk")).thenReturn(10.5));
 		assertDoesNotThrow(() -> when(job0.getFisherPrice("junk")).thenThrow(JobSystemException.class));
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job0, job));
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Item caught = mock(Item.class);
 		ItemStack stack = mock(ItemStack.class);
 		when(caught.getItemStack()).thenReturn(stack);
@@ -327,13 +351,26 @@ public class JobSystemEventHandlerImplTest {
 		eventHandler.handleFishing(event);
 		assertDoesNotThrow(() -> verify(ecoPlayer).increasePlayerAmount(10.5, false));
 	}
+	
+	@Test
+	public void handleFishingTestEntity() {
+		Job job = mock(Job.class);
+		Player player = mock(Player.class);
+		when(player.getName()).thenReturn("catch441");
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
+
+		PlayerFishEvent event = new PlayerFishEvent(player, player, null, PlayerFishEvent.State.CAUGHT_FISH);
+		assertDoesNotThrow(() -> eventHandler.handleFishing(event));
+	}
 
 	@Test
 	public void handleFishingTestEmptyJob() {
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Item caught = mock(Item.class);
 
 		PlayerFishEvent event = new PlayerFishEvent(player, caught, null, PlayerFishEvent.State.CAUGHT_FISH);
@@ -346,10 +383,10 @@ public class JobSystemEventHandlerImplTest {
 		Job job0 = mock(Job.class);
 		Job job = mock(Job.class);
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job0, job));
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 
 		PlayerFishEvent event = new PlayerFishEvent(player, null, null, PlayerFishEvent.State.CAUGHT_FISH);
 		eventHandler.handleFishing(event);
@@ -359,10 +396,10 @@ public class JobSystemEventHandlerImplTest {
 	@Test
 	public void handleFishingTestNoJobs() {
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.getJobList()).thenReturn(new ArrayList<>());
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 
 		PlayerFishEvent event = new PlayerFishEvent(player, null, null, PlayerFishEvent.State.CAUGHT_FISH);
 		eventHandler.handleFishing(event);
@@ -389,15 +426,26 @@ public class JobSystemEventHandlerImplTest {
 		eventHandler.handleOpenInventory(event);
 		verify(center).openInv(player);
 	}
+	
+	@Test
+	public void handleOpenInventoryTestNoJobcenter() throws GeneralEconomyException {
+		Player player = mock(Player.class);
+		Entity villager = mock(Entity.class);
+		when(villager.getCustomName()).thenReturn("center");
+		when(jobcenterManager.getJobcenterByName("center")).thenThrow(GeneralEconomyException.class);
+
+		PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, villager);
+		assertDoesNotThrow(() -> eventHandler.handleOpenInventory(event));
+	}
 
 	@Test
 	public void handleInventoryClickTestLeftClick() {
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		ItemStack stack = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
 		when(meta.getDisplayName()).thenReturn("myjob");
@@ -419,9 +467,9 @@ public class JobSystemEventHandlerImplTest {
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		ItemStack stack = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
 		when(meta.getDisplayName()).thenReturn("myjob");
@@ -443,9 +491,9 @@ public class JobSystemEventHandlerImplTest {
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		ItemStack stack = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
 		when(meta.getDisplayName()).thenReturn("myjob");
@@ -467,9 +515,9 @@ public class JobSystemEventHandlerImplTest {
 	@Test
 	public void handleInventoryClickTestInfo() {
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		ItemStack stack = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
 		when(meta.getDisplayName()).thenReturn("Info");
@@ -484,5 +532,26 @@ public class JobSystemEventHandlerImplTest {
 		verify(player, never()).sendMessage(anyString());
 		assertDoesNotThrow(() -> verify(ecoPlayer, never()).leaveJob(any(Job.class), eq(true)));
 		assertDoesNotThrow(() -> verify(ecoPlayer, never()).joinJob(any(Job.class), eq(true)));
+	}
+	
+	@Test
+	public void handleInventoryClickTestWithNoJob() throws GeneralEconomyException {
+		when(jobManager.getJobByName("myjob")).thenThrow(GeneralEconomyException.class);
+		Player player = mock(Player.class);
+		when(player.getName()).thenReturn("catch441");
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
+		ItemStack stack = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		when(meta.getDisplayName()).thenReturn("myjob");
+		when(stack.getItemMeta()).thenReturn(meta);
+		InventoryClickEvent event = mock(InventoryClickEvent.class);
+		when(event.getClick()).thenReturn(ClickType.RIGHT);
+		when(event.getCurrentItem()).thenReturn(stack);
+		when(event.getWhoClicked()).thenReturn(player);
+
+		assertDoesNotThrow(() -> eventHandler.handleInventoryClick(event));
+		verify(event).setCancelled(true);
+		verify(player, never()).sendMessage(anyString());
 	}
 }

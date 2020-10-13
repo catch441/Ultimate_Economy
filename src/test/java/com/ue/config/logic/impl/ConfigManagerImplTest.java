@@ -135,7 +135,7 @@ public class ConfigManagerImplTest {
 		assertTrue(manager.isWildernessInteraction());
 		verify(dao).saveWildernessInteraction(true);
 	}
-	
+
 	@Test
 	public void setWildernessInteractionTestWithFalse() {
 		assertFalse(manager.isWildernessInteraction());
@@ -298,7 +298,7 @@ public class ConfigManagerImplTest {
 		verify(dao).saveLanguage("de");
 		verify(dao).saveCountry("DE");
 	}
-	
+
 	@Test
 	public void setLocaleCsCzTest() {
 		assertDoesNotThrow(() -> manager.setLocale("cs", "CZ"));
@@ -307,7 +307,7 @@ public class ConfigManagerImplTest {
 		verify(dao).saveLanguage("cs");
 		verify(dao).saveCountry("CZ");
 	}
-	
+
 	@Test
 	public void setLocaleZhCnTest() {
 		assertDoesNotThrow(() -> manager.setLocale("zh", "CN"));
@@ -316,7 +316,7 @@ public class ConfigManagerImplTest {
 		verify(dao).saveLanguage("zh");
 		verify(dao).saveCountry("CN");
 	}
-	
+
 	@Test
 	public void setLocaleUnsupportedLanguage() {
 		try {
