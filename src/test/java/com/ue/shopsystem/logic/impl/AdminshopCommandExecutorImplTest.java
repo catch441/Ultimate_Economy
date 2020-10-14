@@ -15,6 +15,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -29,7 +31,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.jobsystem.logic.api.Job;
+import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.ultimate_economy.GeneralEconomyException;
@@ -47,10 +53,81 @@ public class AdminshopCommandExecutorImplTest {
 	ServerProvider serverProvider;
 	@Mock
 	Player player;
+	@Mock
+	EconomyPlayerManager ecoPlayerManager;
+	@Mock
+	JobManager jobManager;
 
 	@Test
 	public void unknownCommandTest() {
-		String[] args = { "kthschnll" };
+		String[] args = { "stuff" };
+		boolean result = executor.onCommand(player, null, "dontknow", args);
+		assertFalse(result);
+		verifyNoInteractions(player);
+	}
+
+	@Test
+	public void shopCommandTestMoreArgs() {
+		String[] args = { "stuff", "more" };
+		boolean result = executor.onCommand(player, null, "shop", args);
+		assertFalse(result);
+		verifyNoInteractions(player);
+	}
+
+	@Test
+	public void shopCommandTestOneArgNotJoined() {
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		Job job = mock(Job.class);
+		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
+		when(ecoPlayer.hasJob(job)).thenReturn(false);
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
+		when(messageWrapper.getErrorString("job_not_joined")).thenReturn("my message");
+		String[] args = { "myjob" };
+		boolean result = executor.onCommand(player, null, "shop", args);
+		assertTrue(result);
+		verify(player).sendMessage("my message");
+	}
+	
+	@Test
+	public void shopCommandTestOneArg() {
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		Job job = mock(Job.class);
+		Adminshop adminshop = mock(Adminshop.class);
+		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopByName("myjob")).thenReturn(adminshop));
+		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
+		when(ecoPlayer.hasJob(job)).thenReturn(true);
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
+		String[] args = { "myjob" };
+		boolean result = executor.onCommand(player, null, "shop", args);
+		assertTrue(result);
+		assertDoesNotThrow(() -> verify(adminshop).openShopInventory(player));
+		verify(player, never()).sendMessage(anyString());
+	}
+
+	@Test
+	public void shoplistCommandTestMoreArgs() {
+		String[] args = { "stuff" };
+		boolean result = executor.onCommand(player, null, "shoplist", args);
+		assertFalse(result);
+		verifyNoInteractions(player);
+	}
+
+	@Test
+	public void shoplistCommandTest() {
+		String[] args = {};
+		when(adminshopManager.getAdminshopNameList()).thenReturn(Arrays.asList("myshop"));
+		when(messageWrapper.getString("shoplist_info", "[myshop]")).thenReturn("my message");
+		boolean result = executor.onCommand(player, null, "shoplist", args);
+		assertTrue(result);
+		verify(player).sendMessage("my message");
+		verifyNoMoreInteractions(player);
+	}
+
+	@Test
+	public void unknownArgCommandTest() {
+		String[] args = { "stuff" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
 		assertFalse(result);
 		verifyNoInteractions(player);

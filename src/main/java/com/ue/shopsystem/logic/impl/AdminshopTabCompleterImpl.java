@@ -29,23 +29,45 @@ public class AdminshopTabCompleterImpl extends TabCompleterUtils implements TabC
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		switch (args[0]) {
-		case "delete":
-		case "editShop":
-		case "resize":
-		case "move":
-		case "rename":
-		case "removeSpawner":
-			return handleAdminshopNameTabComplete(args);
-		case "addSpawner":
-			return handlerAddSpawnerTabComplete(args);
-		case "changeProfession":
-			return handleChangeProfessionTabComplete(args);
-		case "":
-			return getAllCommands();
+		switch (command.getLabel()) {
+		case "shop":
+			return handleShopTabComplete(args);
+		case "adminshop":
+			return handleAdminshopTabComplete(args);
 		default:
-			return handleDefaultMatchingTabComplete(args);
+			return new ArrayList<>();
 		}
+	}
+	
+	private List<String> handleShopTabComplete(String[] args) {
+		if (args.length == 1) {
+			return getAdminshopList(args[0]);
+		} else {
+			return new ArrayList<>();
+		}
+	}
+	
+	private List<String> handleAdminshopTabComplete(String[] args) {
+		if(args.length > 0) {
+			switch (args[0]) {
+			case "delete":
+			case "editShop":
+			case "resize":
+			case "move":
+			case "rename":
+			case "removeSpawner":
+				return handleAdminshopNameTabComplete(args);
+			case "addSpawner":
+				return handlerAddSpawnerTabComplete(args);
+			case "changeProfession":
+				return handleChangeProfessionTabComplete(args);
+			case "":
+				return getAllCommands();
+			default:
+				return handleDefaultMatchingTabComplete(args);
+			}
+		}
+		return new ArrayList<>();
 	}
 
 	private List<String> handleChangeProfessionTabComplete(String[] args) {

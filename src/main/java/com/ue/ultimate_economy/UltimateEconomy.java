@@ -14,20 +14,14 @@ import javax.inject.Named;
 
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandMap;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.plugin.java.JavaPluginLoader;
 
 import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.DaggerServiceComponent;
@@ -35,21 +29,16 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
 import com.ue.config.logic.api.ConfigManager;
-import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
-import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemEventHandler;
-import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.shopsystem.logic.api.ShopEventHandler;
-import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.townsystem.logic.api.TownsystemEventHandler;
 import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.vault.impl.VaultHook;
@@ -155,19 +144,6 @@ public class UltimateEconomy extends JavaPlugin {
 		getInstance = this;
 		serviceComponent = DaggerServiceComponent.builder().build();
 		serviceComponent.inject(this);
-	}
-
-	/**
-	 * Constructor for MockBukkit.
-	 * 
-	 * @param loader
-	 * @param description
-	 * @param dataFolder
-	 * @param file
-	 */
-	public UltimateEconomy(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
-		super(loader, description, dataFolder, file);
-		getInstance = this;
 	}
 
 	@Override
@@ -285,9 +261,11 @@ public class UltimateEconomy extends JavaPlugin {
 
 	private void setupTabCompleters() {
 		getCommand("jobcenter").setTabCompleter(jobTabCompleter);
+		getCommand("jobinfo").setTabCompleter(jobTabCompleter);
 		getCommand("town").setTabCompleter(townTabCompleter);
 		getCommand("townworld").setTabCompleter(townworldTabCompleter);
 		getCommand("adminshop").setTabCompleter(adminshopTabCompleter);
+		getCommand("shop").setTabCompleter(adminshopTabCompleter);
 		getCommand("playershop").setTabCompleter(playershopTabCompleter);
 		getCommand("rentshop").setTabCompleter(rentshopTabCompleter);
 		getCommand("ue-config").setTabCompleter(configTabCompleter);
@@ -296,9 +274,13 @@ public class UltimateEconomy extends JavaPlugin {
 
 	private void setupCommandExecutors() {
 		getCommand("jobcenter").setExecutor(jobCommandExecutor);
+		getCommand("jobinfo").setExecutor(jobCommandExecutor);
+		getCommand("joblist").setExecutor(jobCommandExecutor);
 		getCommand("town").setExecutor(townCommandExecutor);
 		getCommand("townworld").setExecutor(townworldCommandExecutor);
 		getCommand("adminshop").setExecutor(adminshopCommandExecutor);
+		getCommand("shoplist").setExecutor(adminshopCommandExecutor);
+		getCommand("shop").setExecutor(adminshopCommandExecutor);
 		getCommand("playershop").setExecutor(playershopCommandExecutor);
 		getCommand("rentshop").setExecutor(rentshopCommandExecutor);
 		getCommand("pay").setExecutor(ecoPlayerCommandExecutor);
@@ -330,133 +312,5 @@ public class UltimateEconomy extends JavaPlugin {
 		configManager.setupConfig();
 		skullService.setup();
 		rentshopManager.setupRentDailyTask();
-	}
-
-	@Override
-	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> list = new ArrayList<>();
-		if (command.getName().equals("shop")) {
-			if (args.length <= 1) {
-				list = getAdminShopList(args[0]);
-			}
-		} else if (command.getName().equals("jobinfo")) {
-			if (args.length <= 1) {
-				list = getJobList(args[0]);
-			}
-		}
-		return list;
-	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player player = (Player) sender;
-			try {
-				EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(player.getName());
-				switch (label) {
-				case "shop":
-					return handleShopCommand(args, player, ecoPlayer);
-				case "shoplist":
-					return handleShopListCommand(player);
-				case "joblist":
-					return handleJobListCommand(player);
-				case "jobinfo":
-					return handleJobInfoCommand(args, player);
-				default:
-					break;
-				}
-			} catch (EconomyPlayerException | JobSystemException | GeneralEconomyException | ShopSystemException e) {
-				player.sendMessage(e.getMessage());
-			}
-		}
-		return true;
-	}
-
-	private boolean handleJobInfoCommand(String[] args, Player player)
-			throws JobSystemException, GeneralEconomyException {
-		if (args.length == 1) {
-			Job job = jobManager.getJobByName(args[0]);
-			player.sendMessage(messageWrapper.getString("jobinfo_info", job.getName()));
-			for (String string : job.getBlockList().keySet()) {
-				player.sendMessage(ChatColor.GOLD + string.toLowerCase() + " " + ChatColor.GREEN
-						+ job.getBlockPrice(string) + configManager.getCurrencyText(job.getBlockPrice(string)));
-			}
-			for (String string : job.getFisherList().keySet()) {
-				player.sendMessage(messageWrapper.getString("jobinfo_fishingprice", string.toLowerCase(),
-						job.getFisherPrice(string), configManager.getCurrencyText(job.getFisherPrice(string))));
-			}
-			for (String string : job.getEntityList().keySet()) {
-				player.sendMessage(messageWrapper.getString("jobinfo_killprice", string.toLowerCase(),
-						job.getKillPrice(string), configManager.getCurrencyText(job.getKillPrice(string))));
-			}
-		} else {
-			return false;
-		}
-		return true;
-	}
-
-	private boolean handleJobListCommand(Player player) {
-		List<String> jobNames = jobManager.getJobNameList();
-		player.sendMessage(messageWrapper.getString("joblist_info", jobNames.toString()));
-		return true;
-	}
-
-	private boolean handleShopListCommand(Player player) {
-		List<String> shopNames = adminshopManager.getAdminshopNameList();
-		player.sendMessage(messageWrapper.getString("shoplist_info", shopNames.toString()));
-		return true;
-	}
-
-	private boolean handleShopCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
-			throws JobSystemException, GeneralEconomyException, ShopSystemException {
-		if (args.length == 1) {
-			if (ecoPlayer.hasJob(jobManager.getJobByName(args[0]))) {
-				adminshopManager.getAdminShopByName(args[0]).openShopInventory(player);
-			} else {
-				player.sendMessage(messageWrapper.getErrorString("job_not_joined"));
-			}
-		} else {
-			return false;
-		}
-		return true;
-	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Methoden
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	private List<String> getJobList(String arg) {
-		List<String> temp = jobManager.getJobNameList();
-		List<String> list = new ArrayList<>();
-		if ("".equals(arg)) {
-			list = temp;
-		} else {
-			for (String jobname : temp) {
-				if (jobname.contains(arg)) {
-					list.add(jobname);
-				}
-			}
-		}
-		return list;
-	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	private List<String> getAdminShopList(String arg) {
-		List<String> temp = getConfig().getStringList("ShopNames");
-		List<String> list = new ArrayList<>();
-		if ("".equals(arg)) {
-			list = temp;
-		} else {
-			for (String shopName : temp) {
-				if (shopName.contains(arg)) {
-					list.add(shopName);
-				}
-			}
-		}
-		return list;
 	}
 }

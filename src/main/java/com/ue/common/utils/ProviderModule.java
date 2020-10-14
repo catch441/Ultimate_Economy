@@ -232,9 +232,9 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	@Named("JobCommandExecutor")
-	CommandExecutor provideJobCommandExecutor(JobcenterManager jobcenterManager, JobManager jobManager,
-			MessageWrapper messageWrapper) {
-		return new JobCommandExecutorImpl(jobcenterManager, jobManager, messageWrapper);
+	CommandExecutor provideJobCommandExecutor(ConfigManager configManager, JobcenterManager jobcenterManager,
+			JobManager jobManager, MessageWrapper messageWrapper) {
+		return new JobCommandExecutorImpl(configManager, jobcenterManager, jobManager, messageWrapper);
 	}
 
 	@Singleton
@@ -248,9 +248,10 @@ public class ProviderModule {
 	@Singleton
 	@Provides
 	@Named("AdminshopCommandExecutor")
-	CommandExecutor provideAdminshopCommandExecutor(AdminshopManager adminshopManager, MessageWrapper messageWrapper,
-			ServerProvider serverProvider) {
-		return new AdminshopCommandExecutorImpl(adminshopManager, messageWrapper, serverProvider);
+	CommandExecutor provideAdminshopCommandExecutor(JobManager jobManager, EconomyPlayerManager ecoPlayerManager,
+			AdminshopManager adminshopManager, MessageWrapper messageWrapper, ServerProvider serverProvider) {
+		return new AdminshopCommandExecutorImpl(jobManager, ecoPlayerManager, adminshopManager, messageWrapper,
+				serverProvider);
 	}
 
 	@Singleton

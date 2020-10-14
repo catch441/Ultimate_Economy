@@ -1,5 +1,7 @@
 package com.ue.shopsystem.logic.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.bukkit.Material;
@@ -14,7 +16,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
+import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.jobsystem.logic.api.JobManager;
+import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
 import com.ue.ultimate_economy.GeneralEconomyException;
@@ -24,20 +30,26 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	private final AdminshopManager adminshopManager;
 	private final MessageWrapper messageWrapper;
 	private final ServerProvider serverProvider;
+	private final EconomyPlayerManager ecoPlayerManager;
+	private final JobManager jobManager;
 
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param jobManager
+	 * @param ecoPlayerManager
 	 * @param adminshopManager
 	 * @param messageWrapper
 	 * @param serverProvider
 	 */
 	@Inject
-	public AdminshopCommandExecutorImpl(AdminshopManager adminshopManager, MessageWrapper messageWrapper,
-			ServerProvider serverProvider) {
+	public AdminshopCommandExecutorImpl(JobManager jobManager, EconomyPlayerManager ecoPlayerManager,
+			AdminshopManager adminshopManager, MessageWrapper messageWrapper, ServerProvider serverProvider) {
 		this.adminshopManager = adminshopManager;
 		this.messageWrapper = messageWrapper;
 		this.serverProvider = serverProvider;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.jobManager = jobManager;
 	}
 
 	@Override
@@ -45,11 +57,9 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 			try {
-				if (args.length != 0) {
-					return performCommand(label, args, player);
-				}
-				return false;
-			} catch (TownSystemException | ShopSystemException | EconomyPlayerException | GeneralEconomyException e) {
+				return handleCommand(label, args, player);
+			} catch (JobSystemException | TownSystemException | ShopSystemException | EconomyPlayerException
+					| GeneralEconomyException e) {
 				player.sendMessage(e.getMessage());
 			} catch (NumberFormatException e) {
 				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", "number"));
@@ -58,7 +68,48 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performCommand(String label, String[] args, Player player)
+	private boolean handleCommand(String label, String[] args, Player player)
+			throws NumberFormatException, GeneralEconomyException, EconomyPlayerException, ShopSystemException,
+			TownSystemException, JobSystemException {
+		switch (label) {
+		case "shoplist":
+			return handleShopListCommand(label, args, player);
+		case "shop":
+			return handleShopCommand(label, args, player);
+		case "adminshop":
+			if (args.length != 0) {
+				return handleAdminshopCommand(label, args, player);
+			}
+			return false;
+		default:
+			return false;
+		}
+	}
+
+	private boolean handleShopCommand(String label, String[] args, Player player)
+			throws EconomyPlayerException, ShopSystemException, GeneralEconomyException {
+		if (args.length == 1) {
+			EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(player.getName());
+			if (ecoPlayer.hasJob(jobManager.getJobByName(args[0]))) {
+				adminshopManager.getAdminShopByName(args[0]).openShopInventory(player);
+			} else {
+				player.sendMessage(messageWrapper.getErrorString("job_not_joined"));
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private boolean handleShopListCommand(String label, String[] args, Player player) {
+		if (args.length == 0) {
+			List<String> shopNames = adminshopManager.getAdminshopNameList();
+			player.sendMessage(messageWrapper.getString("shoplist_info", shopNames.toString()));
+			return true;
+		}
+		return false;
+	}
+
+	private boolean handleAdminshopCommand(String label, String[] args, Player player)
 			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException, TownSystemException {
 		switch (AdminshopCommandEnum.getEnum(args[0])) {
 		case ADDSPAWNER:

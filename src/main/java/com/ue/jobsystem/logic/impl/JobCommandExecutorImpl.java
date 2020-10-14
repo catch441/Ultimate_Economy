@@ -1,5 +1,8 @@
 package com.ue.jobsystem.logic.impl;
 
+import java.util.List;
+import java.util.Map.Entry;
+
 import javax.inject.Inject;
 
 import org.bukkit.ChatColor;
@@ -9,6 +12,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.ue.common.utils.MessageWrapper;
+import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
@@ -21,19 +25,23 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	private final JobManager jobManager;
 	private final MessageWrapper messageWrapper;
 	private final JobcenterManager jobcenterManager;
+	private final ConfigManager configManager;
 
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param configManager
 	 * @param jobcenterManager
 	 * @param jobManager
 	 * @param messageWrapper
 	 */
 	@Inject
-	public JobCommandExecutorImpl(JobcenterManager jobcenterManager, JobManager jobManager, MessageWrapper messageWrapper) {
+	public JobCommandExecutorImpl(ConfigManager configManager, JobcenterManager jobcenterManager, JobManager jobManager,
+			MessageWrapper messageWrapper) {
 		this.jobManager = jobManager;
 		this.messageWrapper = messageWrapper;
 		this.jobcenterManager = jobcenterManager;
+		this.configManager = configManager;
 	}
 
 	@Override
@@ -41,10 +49,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 			try {
-				if (args.length != 0) {
-					return performCommand(label, args, player);
-				}
-				return false;
+				return handleCommand(label, args, player);
 			} catch (JobSystemException | EconomyPlayerException | GeneralEconomyException e) {
 				player.sendMessage(e.getMessage());
 			} catch (NumberFormatException e) {
@@ -54,7 +59,56 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performCommand(String label, String[] args, Player player)
+	private boolean handleCommand(String label, String[] args, Player player)
+			throws NumberFormatException, GeneralEconomyException, JobSystemException, EconomyPlayerException {
+		switch (label) {
+		case "joblist":
+			return handleJobListCommand(args, player);
+		case "jobinfo":
+			return handleJobInfoCommand(args, player);
+		case "jobcenter":
+			if (args.length != 0) {
+				return performJobcenterCommand(label, args, player);
+			}
+			return false;
+		default:
+			return false;
+		}
+	}
+
+	private boolean handleJobListCommand(String[] args, Player player) {
+		if (args.length == 0) {
+			List<String> jobNames = jobManager.getJobNameList();
+			player.sendMessage(messageWrapper.getString("joblist_info", jobNames.toString()));
+			return true;
+		}
+		return false;
+	}
+
+	private boolean handleJobInfoCommand(String[] args, Player player)
+			throws JobSystemException, GeneralEconomyException {
+		if (args.length == 1) {
+			Job job = jobManager.getJobByName(args[0]);
+			player.sendMessage(messageWrapper.getString("jobinfo_info", job.getName()));
+			for (Entry<String, Double> entry : job.getBlockList().entrySet()) {
+				player.sendMessage(ChatColor.GOLD + entry.getKey().toLowerCase() + " " + ChatColor.GREEN
+						+ entry.getValue() + configManager.getCurrencyText(entry.getValue()));
+			}
+			for (Entry<String, Double> entry : job.getFisherList().entrySet()) {
+				player.sendMessage(messageWrapper.getString("jobinfo_fishingprice", entry.getKey().toLowerCase(),
+						entry.getValue(), configManager.getCurrencyText(entry.getValue())));
+			}
+			for (Entry<String, Double> entry : job.getEntityList().entrySet()) {
+				player.sendMessage(messageWrapper.getString("jobinfo_killprice", entry.getKey().toLowerCase(),
+						entry.getValue(), configManager.getCurrencyText(entry.getValue())));
+			}
+		} else {
+			return false;
+		}
+		return true;
+	}
+
+	private boolean performJobcenterCommand(String label, String[] args, Player player)
 			throws NumberFormatException, GeneralEconomyException, JobSystemException, EconomyPlayerException {
 		switch (JobCommandEnum.getEnum(args[0])) {
 		case ADDJOB:

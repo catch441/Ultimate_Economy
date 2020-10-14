@@ -10,6 +10,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 
@@ -22,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.common.utils.MessageWrapper;
+import com.ue.config.logic.api.ConfigManager;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
@@ -39,6 +45,8 @@ public class JobCommandExecutorImplTest {
 	JobcenterManager jobcenterManager;
 	@Mock
 	JobManager jobManager;
+	@Mock
+	ConfigManager configManager;
 
 	@Test
 	public void zeroArgs() {
@@ -56,6 +64,68 @@ public class JobCommandExecutorImplTest {
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
 		assertFalse(result);
 		verifyNoInteractions(player);
+	}
+	
+	@Test
+	public void joblistCommandTest() {
+		Player player = mock(Player.class);
+		String[] args = { };
+		when(jobManager.getJobNameList()).thenReturn(Arrays.asList("myjob"));
+		when(messageWrapper.getString("joblist_info", "[myjob]")).thenReturn("my message");
+		boolean result = executor.onCommand(player, null, "joblist", args);
+		assertTrue(result);
+		verify(player).sendMessage("my message");
+		verifyNoMoreInteractions(player);
+	}
+	
+	@Test
+	public void joblistCommandTestWithMoreArgs() {
+		Player player = mock(Player.class);
+		String[] args = { ""};
+		boolean result = executor.onCommand(player, null, "joblist", args);
+		assertFalse(result);
+	}
+	
+	@Test
+	public void jobinfoCommandTestWithMoreArgs() {
+		Player player = mock(Player.class);
+		String[] args = { "myjob", "foo" };
+		boolean result = executor.onCommand(player, null, "jobinfo", args);
+		assertFalse(result);
+	}
+	
+	@Test
+	public void unknownCommandTestWithMoreArgs() {
+		Player player = mock(Player.class);
+		String[] args = { "myjob", "foo" };
+		boolean result = executor.onCommand(player, null, "foo", args);
+		assertFalse(result);
+	}
+	
+	@Test
+	public void jobinfoCommandTest() {
+		Player player = mock(Player.class);
+		Job job = mock(Job.class);
+		when(job.getName()).thenReturn("myjob");
+		when(messageWrapper.getString("jobinfo_info", "myjob")).thenReturn("my message 1");
+		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
+		when(messageWrapper.getString("jobinfo_fishingprice", "stuff", 1.5, "$")).thenReturn("my message 2");
+		when(messageWrapper.getString("jobinfo_killprice", "stuff", 1.5, "$")).thenReturn("my message 3");
+		Map<String, Double> map = new HashMap<>();
+		map.put("stuff", 1.5);
+		when(job.getBlockList()).thenReturn(map);
+		when(job.getFisherList()).thenReturn(map);
+		when(job.getEntityList()).thenReturn(map);
+		when(configManager.getCurrencyText(1.5)).thenReturn("$");
+		String[] args = { "myjob" };
+		boolean result = executor.onCommand(player, null, "jobinfo", args);
+		assertTrue(result);
+		
+		verify(player).sendMessage("my message 1");
+		verify(player).sendMessage("§6stuff §a1.5$");
+		verify(player).sendMessage("my message 2");
+		verify(player).sendMessage("my message 3");
+		verifyNoMoreInteractions(player);
 	}
 
 	@Test

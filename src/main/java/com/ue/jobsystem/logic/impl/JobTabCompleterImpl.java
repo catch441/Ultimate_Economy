@@ -33,23 +33,45 @@ public class JobTabCompleterImpl implements TabCompleter {
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		switch (args[0]) {
-		case "":
-			return getAllJobcenterCommands();
-		case "delete":
-		case "move":
-			return handleDeleteAndMoveTabComplete(args);
-		case "removeJob":
-			return handleRemoveJobTabComplete(args);
-		case "addJob":
-			return handleAddJobTabComplete(args);
-		case "job":
-			return handleJobTabComplete(args);
-		case "create":
-			return new ArrayList<>();
+		switch(command.getLabel()) {
+		case "jobinfo":
+			return handleJobinfoTabComplete(args);
+		case "jobcenter":
+			return handleJobcenterTabComplete(args);
 		default:
-			return getMatchingJobcenterCommands(args);
+			return new ArrayList<>();
 		}
+	}
+	
+	private List<String> handleJobinfoTabComplete(String[] args) {
+		if (args.length == 1) {
+			return getJobList(args[0]);
+		} else {
+			return new ArrayList<>();
+		}
+	}
+	
+	private List<String> handleJobcenterTabComplete(String[] args) {
+		if(args.length > 0) {
+			switch (args[0]) {
+			case "":
+				return getAllJobcenterCommands();
+			case "delete":
+			case "move":
+				return handleDeleteAndMoveTabComplete(args);
+			case "removeJob":
+				return handleRemoveJobTabComplete(args);
+			case "addJob":
+				return handleAddJobTabComplete(args);
+			case "job":
+				return handleJobTabComplete(args);
+			case "create":
+				return new ArrayList<>();
+			default:
+				return getMatchingJobcenterCommands(args);
+			}
+		}
+		return new ArrayList<>();
 	}
 
 	private List<String> handleJobTabComplete(String[] args) {
