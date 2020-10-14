@@ -48,6 +48,7 @@ public class ConfigDaoImplTest {
 	
 	@Test
 	public void loadJobcenterListTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveJobcenterList(Arrays.asList("center1", "center2"));
@@ -66,6 +67,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxRentedDaysTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxRentedDays(6);
@@ -74,6 +76,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void hasMaxRentedDaysTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxRentedDays(6);
 		assertTrue(dao.hasMaxRentedDays());
@@ -93,6 +96,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadExtendedInteractionTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveExtendedInteraction(false);
@@ -101,6 +105,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void hasExtendedInteractionTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveExtendedInteraction(false);
 		assertTrue(dao.hasExtendedInteraction());
@@ -120,6 +125,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadWildernessInteractionTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveWildernessInteraction(false);
@@ -128,6 +134,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void hasWildernessInteractionTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveWildernessInteraction(false);
 		assertTrue(dao.hasWildernessInteraction());
@@ -147,6 +154,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadCurrencyPlTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveCurrencyPl("coins");
@@ -155,6 +163,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void hasCurrencyPlTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveCurrencyPl("kths");
 		assertTrue(dao.hasCurrencyPl());
@@ -174,6 +183,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadCurrencySgTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveCurrencySg("coin");
@@ -182,6 +192,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void hasCurrencySgTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveCurrencySg("kth");
 		assertTrue(dao.hasCurrencySg());
@@ -201,6 +212,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadHomesFeatureTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveHomesFeature(false);
@@ -209,6 +221,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void hasHomesFeatureTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveHomesFeature(false);
 		assertTrue(dao.hasHomesFeature());
@@ -228,6 +241,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxPlayershopsTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxPlayershops(6);
@@ -236,6 +250,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void hasMaxPlayershopsTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxPlayershops(6);
 		assertTrue(dao.hasMaxPlayershops());
@@ -255,6 +270,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxJoinedTownsTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxJoinedTowns(6);
@@ -263,6 +279,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void hasMaxJoinedTownsTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxJoinedTowns(6);
 		assertTrue(dao.hasMaxJoinedTowns());
@@ -282,6 +299,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxJobsTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxJobs(6);
@@ -290,6 +308,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void hasMaxJobsTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxJobs(6);
 		assertTrue(dao.hasMaxJobs());
@@ -309,6 +328,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadMaxHomesTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxHomes(6);
@@ -317,6 +337,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void hasMaxHomesTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveMaxHomes(6);
 		assertTrue(dao.hasMaxHomes());
@@ -336,6 +357,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadCountryTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveCountry("DE");
@@ -344,6 +366,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void hasCountryTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveCountry("DE");
 		assertTrue(dao.hasCountry());
@@ -363,6 +386,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void loadLanguageTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveLanguage("de");
@@ -371,6 +395,7 @@ public class ConfigDaoImplTest {
 
 	@Test
 	public void hasLanguageTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveLanguage("de");
 		assertTrue(dao.hasLanguage());
@@ -391,6 +416,7 @@ public class ConfigDaoImplTest {
 	
 	@Test
 	public void loadJobListTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveJobList(Arrays.asList("job1", "job2"));
@@ -410,6 +436,7 @@ public class ConfigDaoImplTest {
 	
 	@Test
 	public void loadTownworldNamesTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveTownworldNamesList(Arrays.asList("world1", "world2"));
@@ -418,6 +445,7 @@ public class ConfigDaoImplTest {
 	
 	@Test
 	public void loadPlayershopIdsTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.savePlayershopIds(Arrays.asList("id1", "id2"));
@@ -437,6 +465,7 @@ public class ConfigDaoImplTest {
 	
 	@Test
 	public void loadRentshopIdsTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveRentshopIds(Arrays.asList("id1", "id2"));
@@ -456,6 +485,7 @@ public class ConfigDaoImplTest {
 	
 	@Test
 	public void loadAdminshopIdsTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
 		dao = new ConfigDaoImpl(serverProvider, logger);
 		dao.saveAdminshopIds(Arrays.asList("id1", "id2"));
