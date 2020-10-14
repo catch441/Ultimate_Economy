@@ -3,11 +3,21 @@ package com.ue.config.logic.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
 public class ConfigTabCompleterImpl implements TabCompleter {
+	
+	/**
+	 * Inject constructor.
+	 */
+	@Inject
+	public ConfigTabCompleterImpl() {
+
+	}
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

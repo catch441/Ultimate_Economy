@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import org.bukkit.Location;
 import org.slf4j.Logger;
 
-import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
@@ -27,7 +26,6 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	private List<Adminshop> adminShopList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
 	private final ShopValidationHandler validationHandler;
-	private final ComponentProvider componentProvider;
 	private final ServerProvider serverProvider;
 	private final Logger logger;
 	private final CustomSkullService skullService;
@@ -37,7 +35,6 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	/**
 	 * Inject constructor.
 	 * 
-	 * @param componentProvider
 	 * @param validationHandler
 	 * @param messageWrapper
 	 * @param logger
@@ -47,12 +44,11 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	 * @param configManager
 	 */
 	@Inject
-	public AdminshopManagerImpl(ComponentProvider componentProvider, ShopValidationHandler validationHandler,
+	public AdminshopManagerImpl(ShopValidationHandler validationHandler,
 			MessageWrapper messageWrapper, Logger logger, ServerProvider serverProvider,
 			CustomSkullService skullService, ConfigDao configDao, ConfigManager configManager) {
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
-		this.componentProvider = componentProvider;
 		this.logger = logger;
 		this.serverProvider = serverProvider;
 		this.skullService = skullService;
@@ -122,7 +118,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 		validationHandler.checkForValidShopName(name);
 		validationHandler.checkForValidSize(size);
 		validationHandler.checkForShopNameIsFree(getAdminshopNameList(), name, null);
-		ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+		ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
 		adminShopList.add(new AdminshopImpl(name, generateFreeAdminShopId(), spawnLocation, size, shopDao,
 				serverProvider, skullService, logger, this, validationHandler, messageWrapper, configManager));
 		configDao.saveAdminshopIds(getAdminshopIdList());
@@ -155,7 +151,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	private void loadAllAdminshopsNew() {
 		for (String shopId : configDao.loadAdminshopIds()) {
 			try {
-				ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+				ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
 				adminShopList.add(new AdminshopImpl(null, shopId, shopDao, serverProvider, skullService, logger, this,
 						validationHandler, messageWrapper, configManager));
 			} catch (TownSystemException | ShopSystemException e) {
@@ -169,7 +165,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	private void loadAllAdminshopsOld() {
 		for (String shopName : configDao.loadAdminShopNames()) {
 			try {
-				ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+				ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
 				adminShopList.add(new AdminshopImpl(shopName, generateFreeAdminShopId(), shopDao, serverProvider,
 						skullService, logger, this, validationHandler, messageWrapper, configManager));
 			} catch (TownSystemException | ShopSystemException e) {

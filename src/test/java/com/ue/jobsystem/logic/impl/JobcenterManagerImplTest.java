@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
-import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
@@ -71,8 +70,6 @@ public class JobcenterManagerImplTest {
 	@Mock
 	ConfigDao configDao;
 	@Mock
-	ComponentProvider componentProvider;
-	@Mock
 	Logger logger;
 
 	@Test
@@ -104,7 +101,7 @@ public class JobcenterManagerImplTest {
 		when(world.spawnEntity(location, EntityType.VILLAGER)).thenReturn(villager);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		when(serviceComponent.getJobcenterDao()).thenReturn(mock(JobcenterDao.class));
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		assertDoesNotThrow(() -> manager.createJobcenter(name, location, 9));
 	}
 
@@ -157,7 +154,7 @@ public class JobcenterManagerImplTest {
 		when(world.spawnEntity(location, EntityType.VILLAGER)).thenReturn(villager);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		when(serviceComponent.getJobcenterDao()).thenReturn(mock(JobcenterDao.class));
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		assertDoesNotThrow(() -> manager.createJobcenter("center", location, 9));
 
 		manager.despawnAllVillagers();
@@ -274,7 +271,7 @@ public class JobcenterManagerImplTest {
 		JobcenterDao jobcenterDao = mock(JobcenterDao.class);
 		when(jobcenterDao.loadJobcenterLocation()).thenReturn(location);
 		when(serviceComponent.getJobcenterDao()).thenReturn(jobcenterDao);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		manager.loadAllJobcenters();
 		
 		Jobcenter center = manager.getJobcenterList().get(0);

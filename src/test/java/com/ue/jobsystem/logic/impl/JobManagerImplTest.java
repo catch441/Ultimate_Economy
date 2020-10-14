@@ -23,8 +23,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
 import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
@@ -44,7 +44,7 @@ public class JobManagerImplTest {
 	@InjectMocks
 	JobManagerImpl jobManager;
 	@Mock
-	ComponentProvider componentProvider;
+	ServerProvider serverProvider;
 	@Mock
 	JobcenterManager jobcenterManager;
 	@Mock
@@ -63,7 +63,7 @@ public class JobManagerImplTest {
 		when(configDao.loadJobList()).thenReturn(Arrays.asList("myJob"));
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		JobDao jobDao = mock(JobDao.class);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getJobDao()).thenReturn(jobDao);
 		jobManager.loadAllJobs();
 		Job job = jobManager.getJobList().get(0);
@@ -75,7 +75,7 @@ public class JobManagerImplTest {
 	public void createJobTest() {
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		JobDao jobDao = mock(JobDao.class);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getJobDao()).thenReturn(jobDao);
 		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForJobNameDoesNotExist(anyList(), eq("myJob")));
@@ -124,7 +124,7 @@ public class JobManagerImplTest {
 		JobDao jobDao = mock(JobDao.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(Arrays.asList(ecoPlayer));
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getJobDao()).thenReturn(jobDao);
 		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
 		reset(configDao);
@@ -148,7 +148,7 @@ public class JobManagerImplTest {
 		JobDao jobDao = mock(JobDao.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(Arrays.asList(ecoPlayer));
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getJobDao()).thenReturn(jobDao);
 		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
 		reset(configDao);
@@ -174,7 +174,7 @@ public class JobManagerImplTest {
 	public void getJobListTest() {
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		JobDao jobDao = mock(JobDao.class);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getJobDao()).thenReturn(jobDao);
 		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
 		List<Job> list = jobManager.getJobList();
@@ -186,7 +186,7 @@ public class JobManagerImplTest {
 	public void getJobNameList() {
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		JobDao jobDao = mock(JobDao.class);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getJobDao()).thenReturn(jobDao);
 		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
 		assertDoesNotThrow(() -> jobManager.createJob("myJob2"));
@@ -200,7 +200,7 @@ public class JobManagerImplTest {
 	public void getJobByNameTest() {
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		JobDao jobDao = mock(JobDao.class);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getJobDao()).thenReturn(jobDao);
 		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
 		assertDoesNotThrow(() -> assertEquals("myJob", jobManager.getJobByName("myJob").getName()));

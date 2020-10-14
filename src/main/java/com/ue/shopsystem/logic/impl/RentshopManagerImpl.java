@@ -9,7 +9,6 @@ import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
@@ -33,7 +32,6 @@ public class RentshopManagerImpl implements RentshopManager {
 	private final MessageWrapper messageWrapper;
 	private final ShopValidationHandler validationHandler;
 	private final ServerProvider serverProvider;
-	private final ComponentProvider componentProvider;
 	private final Logger logger;
 	private final CustomSkullService skullService;
 	private final EconomyPlayerManager ecoPlayerManager;
@@ -48,7 +46,6 @@ public class RentshopManagerImpl implements RentshopManager {
 	 * @param serverProvider
 	 * @param validationHandler
 	 * @param messageWrapper
-	 * @param componentProvider
 	 * @param logger
 	 * @param skullService
 	 * @param ecoPlayerManager
@@ -59,13 +56,12 @@ public class RentshopManagerImpl implements RentshopManager {
 	 */
 	@Inject
 	public RentshopManagerImpl(ServerProvider serverProvider, ShopValidationHandler validationHandler,
-			MessageWrapper messageWrapper, ComponentProvider componentProvider, Logger logger,
+			MessageWrapper messageWrapper, Logger logger,
 			CustomSkullService skullService, EconomyPlayerManager ecoPlayerManager, ConfigManager configManager,
 			TownworldManager townworldManager, PlayershopManager playershopManager, ConfigDao configDao) {
 		this.serverProvider = serverProvider;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
-		this.componentProvider = componentProvider;
 		this.logger = logger;
 		this.skullService = skullService;
 		this.ecoPlayerManager = ecoPlayerManager;
@@ -136,7 +132,7 @@ public class RentshopManagerImpl implements RentshopManager {
 	public Rentshop createRentShop(Location spawnLocation, int size, double rentalFee) throws GeneralEconomyException {
 		validationHandler.checkForValidSize(size);
 		validationHandler.checkForPositiveValue(rentalFee);
-		ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+		ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
 		Rentshop shop = new RentshopImpl(spawnLocation, size, generateFreeRentShopId(), rentalFee, shopDao,
 				serverProvider, skullService, logger, validationHandler, ecoPlayerManager, messageWrapper,
 				configManager, townworldManager, playershopManager);
@@ -163,7 +159,7 @@ public class RentshopManagerImpl implements RentshopManager {
 	public void loadAllRentShops() {
 		for (String shopId : configDao.loadRentshopIds()) {
 			try {
-				ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+				ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
 				rentShopList
 						.add(new RentshopImpl(shopId, shopDao, serverProvider, skullService, logger, validationHandler,
 								ecoPlayerManager, messageWrapper, configManager, townworldManager, playershopManager));

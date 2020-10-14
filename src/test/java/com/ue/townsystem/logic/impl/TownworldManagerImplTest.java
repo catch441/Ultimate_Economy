@@ -42,7 +42,6 @@ import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
-import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
@@ -78,8 +77,6 @@ public class TownworldManagerImplTest {
 	EconomyPlayerValidationHandler ecoPlayerValidationHandler;
 	@Mock
 	ConfigDao configDao;
-	@Mock
-	ComponentProvider componentProvider;
 
 	@Test
 	public void createTownWorldTestWithWorldDoesNotExist() throws TownSystemException {
@@ -100,7 +97,7 @@ public class TownworldManagerImplTest {
 	public void createTownTest() {
 		TownworldDao dao = mock(TownworldDao.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
 		verify(configDao).saveTownworldNamesList(Arrays.asList("world"));
@@ -127,7 +124,7 @@ public class TownworldManagerImplTest {
 	public void deleteTownWorldTest() {
 		TownworldDao dao = mock(TownworldDao.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
 		assertDoesNotThrow(() -> townworldManager.deleteTownWorld("world"));
@@ -140,7 +137,7 @@ public class TownworldManagerImplTest {
 	public void loadAllTownWorldsTest() {
 		TownworldDao dao = mock(TownworldDao.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		when(configDao.loadTownworldNames()).thenReturn(Arrays.asList("myworld"));
 		townworldManager.loadAllTownWorlds();
@@ -153,7 +150,7 @@ public class TownworldManagerImplTest {
 	public void isTownWorldTest() {
 		TownworldDao dao = mock(TownworldDao.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
 
@@ -165,7 +162,7 @@ public class TownworldManagerImplTest {
 	public void getTownWorldByNameTest() {
 		TownworldDao dao = mock(TownworldDao.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
 
@@ -234,7 +231,7 @@ public class TownworldManagerImplTest {
 	public void performTownWorldLocationCheckTestWithWilderness() {
 		TownworldDao dao = mock(TownworldDao.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
 		Chunk chunk = mock(Chunk.class);
@@ -252,7 +249,7 @@ public class TownworldManagerImplTest {
 	public void performTownWorldLocationCheckTestWithInTown() {
 		TownworldDao dao = mock(TownworldDao.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
 		BossBar bossbar = mock(BossBar.class);				
@@ -296,7 +293,7 @@ public class TownworldManagerImplTest {
 	public void getTownByNameTest() {
 		TownworldDao dao = mock(TownworldDao.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
 		Plugin plugin = mock(Plugin.class);
@@ -336,7 +333,7 @@ public class TownworldManagerImplTest {
 	public void despawnAllVillagersTest() {
 		TownworldDao dao = mock(TownworldDao.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
 		Plugin plugin = mock(Plugin.class);

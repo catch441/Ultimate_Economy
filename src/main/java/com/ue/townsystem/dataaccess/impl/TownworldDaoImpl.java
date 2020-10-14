@@ -243,7 +243,10 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	@Override
 	public List<String> loadTownworldTownNames() {
 		removeDeprecatedTownNameList();
-		return new ArrayList<>(config.getConfigurationSection("Towns").getKeys(false));
+		if(config.getConfigurationSection("Towns") != null) {
+			return new ArrayList<>(config.getConfigurationSection("Towns").getKeys(false));
+		}
+		return new ArrayList<>();
 	}
 
 	@Override

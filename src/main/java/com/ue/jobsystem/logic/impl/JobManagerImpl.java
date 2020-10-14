@@ -7,8 +7,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
-import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
+import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
@@ -30,13 +30,13 @@ public class JobManagerImpl implements JobManager {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobsystemValidationHandler validationHandler;
 	private final JobcenterManager jobcenterManager;
-	private final ComponentProvider componentProvider;
 	private final ConfigDao configDao;
+	private final ServerProvider serverProvider;
 
 	/**
 	 * Inject constructor.
 	 * 
-	 * @param componentProvider
+	 * @param serverProvider
 	 * @param configDao
 	 * @param jobcenterManager
 	 * @param validationHandler
@@ -45,7 +45,7 @@ public class JobManagerImpl implements JobManager {
 	 * @param logger
 	 */
 	@Inject
-	public JobManagerImpl(ConfigDao configDao, ComponentProvider componentProvider, JobcenterManager jobcenterManager,
+	public JobManagerImpl(ServerProvider serverProvider, ConfigDao configDao, JobcenterManager jobcenterManager,
 			JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper, Logger logger) {
 		this.messageWrapper = messageWrapper;
@@ -54,7 +54,7 @@ public class JobManagerImpl implements JobManager {
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
 		this.jobcenterManager = jobcenterManager;
-		this.componentProvider = componentProvider;
+		this.serverProvider = serverProvider;
 	}
 
 	@Override
@@ -93,7 +93,7 @@ public class JobManagerImpl implements JobManager {
 	@Override
 	public void createJob(String jobName) throws GeneralEconomyException {
 		validationHandler.checkForJobNameDoesNotExist(getJobNameList(), jobName);
-		JobDao jobDao = componentProvider.getServiceComponent().getJobDao();
+		JobDao jobDao = serverProvider.getServiceComponent().getJobDao();
 		jobList.add(new JobImpl(validationHandler, jobDao, jobName, true));
 		configDao.saveJobList(getJobNameList());
 	}
@@ -101,7 +101,7 @@ public class JobManagerImpl implements JobManager {
 	@Override
 	public void loadAllJobs() {
 		for (String jobName : configDao.loadJobList()) {
-			JobDao jobDao = componentProvider.getServiceComponent().getJobDao();
+			JobDao jobDao = serverProvider.getServiceComponent().getJobDao();
 			jobList.add(new JobImpl(validationHandler, jobDao, jobName, false));
 		}
 	}

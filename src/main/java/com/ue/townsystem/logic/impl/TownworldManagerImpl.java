@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ue.bank.logic.api.BankManager;
-import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
@@ -42,7 +41,6 @@ public class TownworldManagerImpl implements TownworldManager {
 	private final BankManager bankManager;
 	private final EconomyPlayerValidationHandler ecoPlayerValidationHandler;
 	private final ConfigDao configDao;
-	private final ComponentProvider componentProvider;
 
 	private Map<String, Townworld> townWorldList = new HashMap<>();
 	private List<String> townNameList = new ArrayList<>();
@@ -50,7 +48,6 @@ public class TownworldManagerImpl implements TownworldManager {
 	/**
 	 * Inject constructor.
 	 * 
-	 * @param componentProvider
 	 * @param configDao
 	 * @param ecoPlayerValidationHandler
 	 * @param bankManager
@@ -61,7 +58,7 @@ public class TownworldManagerImpl implements TownworldManager {
 	 * @param logger
 	 */
 	@Inject
-	public TownworldManagerImpl(ComponentProvider componentProvider, ConfigDao configDao,
+	public TownworldManagerImpl(ConfigDao configDao,
 			EconomyPlayerValidationHandler ecoPlayerValidationHandler, BankManager bankManager,
 			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
 			TownsystemValidationHandler townsystemValidationHandler, ServerProvider serverProvider, Logger logger) {
@@ -72,7 +69,6 @@ public class TownworldManagerImpl implements TownworldManager {
 		this.ecoPlayerValidationHandler = ecoPlayerValidationHandler;
 		this.serverProvider = serverProvider;
 		this.logger = logger;
-		this.componentProvider = componentProvider;
 		this.configDao = configDao;
 	}
 
@@ -168,7 +164,7 @@ public class TownworldManagerImpl implements TownworldManager {
 		townsystemValidationHandler.checkForWorldExists(world);
 		townsystemValidationHandler.checkForTownworldDoesNotExist(townWorldList, world);
 		Logger logger = LoggerFactory.getLogger(Townworld.class);
-		TownworldDao townworldDao = componentProvider.getServiceComponent().getTownworldDao();
+		TownworldDao townworldDao = serverProvider.getServiceComponent().getTownworldDao();
 		townworldDao.setupSavefile(world);
 		townWorldList.put(world, new TownworldImpl(world, true, townworldDao, townsystemValidationHandler,
 				ecoPlayerValidationHandler, this, messageWrapper, bankManager, logger, serverProvider));
@@ -188,7 +184,7 @@ public class TownworldManagerImpl implements TownworldManager {
 	@Override
 	public void loadAllTownWorlds() {
 		for (String townWorldName : configDao.loadTownworldNames()) {
-			TownworldDao townworldDao = componentProvider.getServiceComponent().getTownworldDao();
+			TownworldDao townworldDao = serverProvider.getServiceComponent().getTownworldDao();
 			townworldDao.setupSavefile(townWorldName);
 			Townworld townworld = new TownworldImpl(townWorldName, false, townworldDao, townsystemValidationHandler,
 					ecoPlayerValidationHandler, this, messageWrapper, bankManager, logger, serverProvider);

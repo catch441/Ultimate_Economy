@@ -12,14 +12,12 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -140,21 +138,6 @@ public class UltimateEconomyEventHandler implements Listener {
 			break;
 		default:
 			break;
-		}
-	}
-
-	/**
-	 * Handle entity damabe by entity event.
-	 * 
-	 * @param event
-	 */
-	@EventHandler
-	public void onHitVillagerEvent(EntityDamageByEntityEvent event) {
-		if (event.getDamager() instanceof Player && event.getEntity() instanceof Villager
-				&& event.getEntity().hasMetadata("ue-type")) {
-			Player damager = (Player) event.getDamager();
-			damager.sendMessage(messageWrapper.getErrorString("villager_hitevent"));
-			event.setCancelled(true);
 		}
 	}
 

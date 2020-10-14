@@ -143,7 +143,7 @@ public class TownImplTest {
 		verify(villager).setSilent(true);
 		verify(villager).setInvulnerable(true);
 		verify(villager).setMetadata(eq("ue-type"), any(FixedMetadataValue.class));
-		verify(villager, times(2)).addPotionEffect(any(PotionEffect.class));
+		verify(villager).addPotionEffect(any(PotionEffect.class));
 
 		verify(duplicated).remove();
 		verify(chunk).load();
@@ -246,7 +246,7 @@ public class TownImplTest {
 		verify(villager).setSilent(true);
 		verify(villager).setInvulnerable(true);
 		verify(villager).setMetadata(eq("ue-type"), any(FixedMetadataValue.class));
-		verify(villager, times(2)).addPotionEffect(any(PotionEffect.class));
+		verify(villager).addPotionEffect(any(PotionEffect.class));
 	}
 
 	@Test

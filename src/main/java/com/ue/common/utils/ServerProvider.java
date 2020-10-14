@@ -30,15 +30,16 @@ public class ServerProvider {
 	public World getWorld(String world) {
 		return Bukkit.getWorld(world);
 	}
-	
+
 	/**
 	 * Returns a list of all online players.
+	 * 
 	 * @return online players
 	 */
 	public List<Player> getOnlinePlayers() {
 		return new ArrayList<>(Bukkit.getOnlinePlayers());
 	}
-	
+
 	/**
 	 * Returns a list pf all bukkit worlds.
 	 * 
@@ -83,6 +84,15 @@ public class ServerProvider {
 	 */
 	public Plugin getPluginInstance() {
 		return UltimateEconomy.getInstance;
+	}
+
+	/**
+	 * Returns the service component of the plugin.
+	 * 
+	 * @return service component
+	 */
+	public ServiceComponent getServiceComponent() {
+		return UltimateEconomy.serviceComponent;
 	}
 
 	/**

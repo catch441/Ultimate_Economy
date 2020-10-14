@@ -154,8 +154,8 @@ public class TownImpl implements Town {
 		villager.setProfession(Villager.Profession.NITWIT);
 		villager.setSilent(true);
 		villager.setInvulnerable(true);
+		villager.setCollidable(false);
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
-		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
 	}
 
 	@Override

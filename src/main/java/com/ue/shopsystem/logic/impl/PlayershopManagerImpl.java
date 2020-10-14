@@ -9,7 +9,6 @@ import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
@@ -36,7 +35,6 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	private final ShopValidationHandler validationHandler;
 	private final TownsystemValidationHandler townsystemValidationHandler;
 	private final TownworldManager townworldManager;
-	private final ComponentProvider componentProvider;
 	private final ConfigDao configDao;
 	private final ConfigManager configManager;
 	private final ServerProvider serverProvider;
@@ -50,7 +48,6 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	 * @param townsystemValidationHandler
 	 * @param validationHandler
 	 * @param messageWrapper
-	 * @param componentProvider
 	 * @param logger
 	 * @param serverProvider
 	 * @param customSkullService
@@ -60,14 +57,13 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	 */
 	@Inject
 	public PlayershopManagerImpl(ConfigDao configDao, TownsystemValidationHandler townsystemValidationHandler,
-			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ComponentProvider componentProvider,
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
 			Logger logger, ServerProvider serverProvider, CustomSkullService customSkullService,
 			EconomyPlayerManager ecoPlayerManager, ConfigManager configManager, TownworldManager townworldManager) {
 		this.configDao = configDao;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
 		this.townsystemValidationHandler = townsystemValidationHandler;
-		this.componentProvider = componentProvider;
 		this.logger = logger;
 		this.serverProvider = serverProvider;
 		this.customSkullService = customSkullService;
@@ -141,7 +137,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 		validationHandler.checkForShopNameIsFree(getPlayerShopUniqueNameList(), name, ecoPlayer);
 		validationHandler.checkForValidSize(size);
 		Logger logger = LoggerFactory.getLogger(PlayershopImpl.class);
-		ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+		ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
 		playerShopList.add(new PlayershopImpl(name, ecoPlayer, generateFreePlayerShopId(), spawnLocation, size, shopDao,
 				serverProvider, customSkullService, logger, validationHandler, ecoPlayerManager, messageWrapper,
 				configManager, townworldManager, this));
@@ -176,7 +172,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 		for (String shopId : configDao.loadPlayershopIds()) {
 			try {
 				Logger logger = LoggerFactory.getLogger(PlayershopImpl.class);
-				ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+				ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
 				playerShopList.add(new PlayershopImpl(null, shopId, shopDao, serverProvider, customSkullService, logger,
 						validationHandler, ecoPlayerManager, messageWrapper, configManager, townworldManager, this));
 			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException | ShopSystemException e) {
@@ -192,7 +188,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 			String shopId = generateFreePlayerShopId();
 			try {
 				Logger logger = LoggerFactory.getLogger(PlayershopImpl.class);
-				ShopDao shopDao = componentProvider.getServiceComponent().getShopDao();
+				ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
 				playerShopList.add(new PlayershopImpl(shopName, shopId, shopDao, serverProvider, customSkullService,
 						logger, validationHandler, ecoPlayerManager, messageWrapper, configManager, townworldManager, this));
 			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException | ShopSystemException e) {

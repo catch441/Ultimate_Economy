@@ -11,7 +11,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -185,8 +184,9 @@ public class PlotImplTest {
 		verify(villager).setProfession(Profession.NITWIT);
 		verify(villager).setSilent(true);
 		verify(villager).setInvulnerable(true);
+		verify(villager).setCollidable(false);
 		verify(villager).setMetadata(eq("ue-type"), any(FixedMetadataValue.class));
-		verify(villager, times(2)).addPotionEffect(any(PotionEffect.class));
+		verify(villager).addPotionEffect(any(PotionEffect.class));
 	}
 
 	@Test
@@ -551,8 +551,9 @@ public class PlotImplTest {
 		verify(villager).setProfession(Profession.NITWIT);
 		verify(villager).setSilent(true);
 		verify(villager).setInvulnerable(true);
+		verify(villager).setCollidable(false);
 		verify(villager).setMetadata(eq("ue-type"), any(FixedMetadataValue.class));
-		verify(villager, times(2)).addPotionEffect(any(PotionEffect.class));
+		verify(villager).addPotionEffect(any(PotionEffect.class));
 		
 		assertTrue(plot.isForSale());
 		assertEquals("1.5", String.valueOf(plot.getSalePrice()));

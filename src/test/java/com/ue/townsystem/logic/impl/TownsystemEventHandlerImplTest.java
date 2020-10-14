@@ -264,6 +264,10 @@ public class TownsystemEventHandlerImplTest {
 		ItemMeta currentItemMeta = mock(ItemMeta.class);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		World world = mock(World.class);
+		Inventory inv = mock(Inventory.class);
+		Villager villager = mock(Villager.class);
+		when(inv.getHolder()).thenReturn(villager);
+		when(event.getClickedInventory()).thenReturn(inv);
 		when(world.getName()).thenReturn("world");
 		when(event.getCurrentItem()).thenReturn(currentItem);
 		when(currentItem.getItemMeta()).thenReturn(currentItemMeta);
@@ -438,9 +442,26 @@ public class TownsystemEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 
 		eventHandler.handleInventoryClick(event);
-
+		verify(event).setCancelled(true);
 		assertDoesNotThrow(() -> verify(plot).removeFromSale(ecoPlayer));
 		verify(player).sendMessage(ChatColor.GOLD + "You removed this plot from sale!");
+	}
+	
+	@Test
+	public void handleInventoryClickTestPlayerInv() {
+		Player player = mock(Player.class);
+		ItemStack currentItem = mock(ItemStack.class);
+		ItemMeta currentItemMeta = mock(ItemMeta.class);
+		InventoryClickEvent event = mock(InventoryClickEvent.class);
+		Inventory inv = mock(Inventory.class);
+		when(inv.getHolder()).thenReturn(player);
+		when(event.getCurrentItem()).thenReturn(currentItem);
+		when(currentItem.getItemMeta()).thenReturn(currentItemMeta);
+		when(event.getClickedInventory()).thenReturn(inv);
+
+		eventHandler.handleInventoryClick(event);
+		verify(event).setCancelled(true);
+		verify(player, never()).sendMessage(anyString());
 	}
 	
 	@Test

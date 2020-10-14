@@ -523,6 +523,14 @@ public class TownworldDaoImplTest {
 	}
 	
 	@Test
+	public void loadTownworldTownNamesTestWithNoTowns() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		dao.setupSavefile("world");
+		dao.loadTownworldTownNames();
+		assertEquals(0, dao.loadTownworldTownNames().size());
+	}
+	
+	@Test
 	public void loadTownBankIbanTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		dao.setupSavefile("world");

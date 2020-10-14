@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ue.common.utils.ServerProvider;
-import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
@@ -40,12 +39,10 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	private final Lazy<JobManager> jobManager;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
-	private final ComponentProvider componentProvider;
 
 	/**
 	 * Inject constructor.
 	 * 
-	 * @param componentProvider
 	 * @param configDao
 	 * @param jobManager
 	 * @param serverProvider
@@ -55,7 +52,7 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	 * @param logger
 	 */
 	@Inject
-	public JobcenterManagerImpl(ComponentProvider componentProvider, ConfigDao configDao, Lazy<JobManager> jobManager, ServerProvider serverProvider,
+	public JobcenterManagerImpl(ConfigDao configDao, Lazy<JobManager> jobManager, ServerProvider serverProvider,
 			JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper, Logger logger) {
 		this.logger = logger;
@@ -65,7 +62,6 @@ public class JobcenterManagerImpl implements JobcenterManager {
 		this.serverProvider = serverProvider;
 		this.jobManager = jobManager;
 		this.configDao = configDao;
-		this.componentProvider = componentProvider;
 	}
 
 	@Override
@@ -131,7 +127,7 @@ public class JobcenterManagerImpl implements JobcenterManager {
 			throws JobSystemException, GeneralEconomyException {
 		validationHandler.checkForJobcenterNameDoesNotExist(getJobcenterNameList(), name);
 		validationHandler.checkForValidSize(size);
-		JobcenterDao jobcenterDao = componentProvider.getServiceComponent().getJobcenterDao();
+		JobcenterDao jobcenterDao = serverProvider.getServiceComponent().getJobcenterDao();
 		Logger logger = LoggerFactory.getLogger(JobcenterImpl.class);
 		getJobcenterList().add(new JobcenterImpl(logger, jobcenterDao, jobManager.get(), this, ecoPlayerManager, validationHandler,
 				serverProvider, name, spawnLocation, size));
@@ -141,7 +137,7 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	@Override
 	public void loadAllJobcenters() {
 		for (String jobCenterName : configDao.loadJobcenterList()) {
-			JobcenterDao jobcenterDao = componentProvider.getServiceComponent().getJobcenterDao();
+			JobcenterDao jobcenterDao = serverProvider.getServiceComponent().getJobcenterDao();
 			Logger logger = LoggerFactory.getLogger(JobcenterImpl.class);
 			getJobcenterList().add(new JobcenterImpl(logger, jobcenterDao, jobManager.get(), this, ecoPlayerManager, validationHandler,
 					serverProvider, jobCenterName));

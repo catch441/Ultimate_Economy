@@ -81,18 +81,17 @@ import com.ue.ultimate_economy.UltimateEconomy;
 import com.ue.vault.impl.UltimateEconomyVaultImpl;
 import com.ue.vault.impl.VaultHook;
 
-import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import net.milkbowl.vault.economy.Economy;
 
 @Module
 public class ProviderModule {
-
+	
 	@Singleton
 	@Provides
-	ComponentProvider provideComponentProvider() {
-		return new ComponentProvider();
+	Logger provideUltimateEconomyLogger() {
+		return LoggerFactory.getLogger("UltimateEconomy");
 	}
 
 	@Singleton
@@ -109,9 +108,8 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	Economy provideVaultEconomy(ServerProvider serverProvider, EconomyPlayerManager ecoPlayerManager,
-			BankManager bankManager, ConfigManager configManager) {
-		return new UltimateEconomyVaultImpl(serverProvider, ecoPlayerManager, bankManager, configManager);
+	Economy provideVaultEconomy(UltimateEconomyVaultImpl euVault) {
+		return euVault;
 	}
 
 	@Singleton
@@ -122,334 +120,271 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	MessageWrapper provideMessageWrapper() {
-		Logger logger = LoggerFactory.getLogger(MessageWrapper.class);
+	MessageWrapper provideMessageWrapper(Logger logger) {
 		return new MessageWrapper(logger);
 	}
 
 	@Singleton
 	@Provides
-	ConfigManager provideConfigManager(ConfigDao configDao, MessageWrapper messageWrapper) {
-		return new ConfigManagerImpl(configDao, messageWrapper);
+	ConfigManager provideConfigManager(ConfigManagerImpl configManager) {
+		return configManager;
 	}
 
 	@Singleton
 	@Provides
-	BankManager providesBankManager(MessageWrapper messageWrapper, BankDao bankDao,
-			BankValidationHandler validationHandler) {
-		return new BankManagerImpl(messageWrapper, bankDao, validationHandler);
+	BankManager providesBankManager(BankManagerImpl bankManager) {
+		return bankManager;
 	}
 
 	@Singleton
 	@Provides
-	EconomyPlayerManager provideEcoPlayerManager(EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper,
-			EconomyPlayerValidationHandler validationHandler, BankManager bankManager, ConfigManager configManager,
-			Lazy<JobManager> jobManager, ServerProvider serverProvider) {
-		return new EconomyPlayerManagerImpl(ecoPlayerDao, messageWrapper, validationHandler, bankManager, configManager,
-				jobManager, serverProvider);
+	EconomyPlayerManager provideEcoPlayerManager(EconomyPlayerManagerImpl ecoPlayerManager) {
+		return ecoPlayerManager;
 	}
 
 	@Singleton
 	@Provides
-	JobManager provideJobManager(ConfigDao configDao, ComponentProvider componentProvider,
-			JobcenterManager jobcenterManager, JobsystemValidationHandler validationHandler,
-			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
-		Logger logger = LoggerFactory.getLogger(JobManagerImpl.class);
-		return new JobManagerImpl(configDao, componentProvider, jobcenterManager, validationHandler, ecoPlayerManager,
-				messageWrapper, logger);
+	JobManager provideJobManager(JobManagerImpl jobManager) {
+		return jobManager;
 	}
 
 	@Singleton
 	@Provides
-	JobcenterManager provideJobcenterManager(ComponentProvider componentProvider, ConfigDao configDao,
-			Lazy<JobManager> jobManager, ServerProvider serverProvider, JobsystemValidationHandler validationHandler,
-			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
-		Logger logger = LoggerFactory.getLogger(JobcenterManagerImpl.class);
-		return new JobcenterManagerImpl(componentProvider, configDao, jobManager, serverProvider, validationHandler,
-				ecoPlayerManager, messageWrapper, logger);
+	JobcenterManager provideJobcenterManager(JobcenterManagerImpl jobcenterManager) {
+		return jobcenterManager;
 	}
 
 	@Singleton
 	@Provides
-	AdminshopManager provideAdminshopManager(ComponentProvider componentProvider,
-			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ServerProvider serverProvider,
-			CustomSkullService skullService, ConfigDao configDao, ConfigManager configManager) {
-		Logger logger = LoggerFactory.getLogger(AdminshopManagerImpl.class);
-		return new AdminshopManagerImpl(componentProvider, validationHandler, messageWrapper, logger, serverProvider,
-				skullService, configDao, configManager);
+	AdminshopManager provideAdminshopManager(AdminshopManagerImpl adminshopManager) {
+		return adminshopManager;
 	}
 
 	@Singleton
 	@Provides
-	PlayershopManager providePlayershopManager(ConfigDao configDao, ComponentProvider componentProvider,
-			TownsystemValidationHandler townsystemValidationHandler, ShopValidationHandler validationHandler,
-			MessageWrapper messageWrapper, ServerProvider serverProvider, CustomSkullService skullService,
-			EconomyPlayerManager ecoPlayerManager, ConfigManager configManager, TownworldManager townworldManager) {
-		Logger logger = LoggerFactory.getLogger(PlayershopManagerImpl.class);
-		return new PlayershopManagerImpl(configDao, townsystemValidationHandler, validationHandler, messageWrapper,
-				componentProvider, logger, serverProvider, skullService, ecoPlayerManager, configManager,
-				townworldManager);
+	PlayershopManager providePlayershopManager(PlayershopManagerImpl playershopManager) {
+		return playershopManager;
 	}
 
 	@Singleton
 	@Provides
-	RentshopManager provideRentshopManager(ComponentProvider componentProvider, ServerProvider serverProvider,
-			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, CustomSkullService skullService,
-			EconomyPlayerManager ecoPlayerManager, ConfigManager configManager, TownworldManager townworldManager,
-			PlayershopManager playershopManager, ConfigDao configDao) {
-		Logger logger = LoggerFactory.getLogger(RentshopManagerImpl.class);
-		return new RentshopManagerImpl(serverProvider, validationHandler, messageWrapper, componentProvider, logger,
-				skullService, ecoPlayerManager, configManager, townworldManager, playershopManager, configDao);
+	RentshopManager provideRentshopManager(RentshopManagerImpl rentshopManager) {
+		return rentshopManager;
 	}
 
 	@Singleton
 	@Provides
-	TownworldManager provideTownworldManager(ComponentProvider componentProvider, ConfigDao configDao,
-			EconomyPlayerValidationHandler ecoPlayerValidationHandler, BankManager bankManager,
-			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
-			TownsystemValidationHandler townsystemValidationHandler, ServerProvider serverProvider) {
-		Logger logger = LoggerFactory.getLogger("Townsystem");
-		return new TownworldManagerImpl(componentProvider, configDao, ecoPlayerValidationHandler, bankManager,
-				ecoPlayerManager, messageWrapper, townsystemValidationHandler, serverProvider, logger);
+	TownworldManager provideTownworldManager(TownworldManagerImpl townworldManager) {
+		return townworldManager;
 	}
 
 	@Singleton
 	@Provides
 	@Named("ConfigCommandExecutor")
-	CommandExecutor provideConfigCommandExecutor(EconomyPlayerManager ecoPlayerManager, ConfigManager configManager,
-			MessageWrapper messageWrapper) {
-		return new ConfigCommandExecutorImpl(ecoPlayerManager, configManager, messageWrapper);
+	CommandExecutor provideConfigCommandExecutor(ConfigCommandExecutorImpl configcommandExecutor) {
+		return configcommandExecutor;
 	}
 
 	@Singleton
 	@Provides
 	@Named("EconomyPlayerCommandExecutor")
-	CommandExecutor provideEconomyPlayerCommandExecutor(ConfigManager configManager, MessageWrapper messageWrapper,
-			EconomyPlayerManager ecoPlayerManager, TownworldManager townworldManager) {
-		return new EconomyPlayerCommandExecutorImpl(configManager, messageWrapper, ecoPlayerManager, townworldManager);
+	CommandExecutor provideEconomyPlayerCommandExecutor(EconomyPlayerCommandExecutorImpl ecoPlayerCommandExecutor) {
+		return ecoPlayerCommandExecutor;
 	}
 
 	@Singleton
 	@Provides
 	@Named("JobCommandExecutor")
-	CommandExecutor provideJobCommandExecutor(ConfigManager configManager, JobcenterManager jobcenterManager,
-			JobManager jobManager, MessageWrapper messageWrapper) {
-		return new JobCommandExecutorImpl(configManager, jobcenterManager, jobManager, messageWrapper);
+	CommandExecutor provideJobCommandExecutor(JobCommandExecutorImpl jobCommandExecutor) {
+		return jobCommandExecutor;
 	}
 
 	@Singleton
 	@Provides
 	@Named("PlayershopCommandExecutor")
-	CommandExecutor providePlayershopCommandExecutor(EconomyPlayerManager ecoPlayerManager,
-			PlayershopManager playershopManager, MessageWrapper messageWrapper) {
-		return new PlayershopCommandExecutorImpl(ecoPlayerManager, playershopManager, messageWrapper);
+	CommandExecutor providePlayershopCommandExecutor(PlayershopCommandExecutorImpl playershopCommandExecutor) {
+		return playershopCommandExecutor;
 	}
 
 	@Singleton
 	@Provides
 	@Named("AdminshopCommandExecutor")
-	CommandExecutor provideAdminshopCommandExecutor(JobManager jobManager, EconomyPlayerManager ecoPlayerManager,
-			AdminshopManager adminshopManager, MessageWrapper messageWrapper, ServerProvider serverProvider) {
-		return new AdminshopCommandExecutorImpl(jobManager, ecoPlayerManager, adminshopManager, messageWrapper,
-				serverProvider);
+	CommandExecutor provideAdminshopCommandExecutor(AdminshopCommandExecutorImpl adminsgopCommandExecutor) {
+		return adminsgopCommandExecutor;
 	}
 
 	@Singleton
 	@Provides
 	@Named("RentshopCommandExecutor")
-	CommandExecutor provideRentshopCommandExecutor(RentshopManager rentshopManager, MessageWrapper messageWrapper) {
-		return new RentshopCommandExecutorImpl(rentshopManager, messageWrapper);
+	CommandExecutor provideRentshopCommandExecutor(RentshopCommandExecutorImpl rentshopCommandExecutor) {
+		return rentshopCommandExecutor;
 	}
 
 	@Singleton
 	@Provides
 	@Named("TownCommandExecutor")
-	CommandExecutor provideTownCommandExecutor(ConfigManager configManager, EconomyPlayerManager ecoPlayerManager,
-			TownworldManager townworldManager, MessageWrapper messageWrapper,
-			TownsystemValidationHandler townsystemValidationHandler) {
-		return new TownCommandExecutorImpl(configManager, ecoPlayerManager, townworldManager, messageWrapper,
-				townsystemValidationHandler);
+	CommandExecutor provideTownCommandExecutor(TownCommandExecutorImpl townCommandExecutor) {
+		return townCommandExecutor;
 	}
 
 	@Singleton
 	@Provides
 	@Named("TownworldCommandExecutor")
-	CommandExecutor provideTownworldCommandExecutor(ConfigManager configManager, TownworldManager townworldManager,
-			MessageWrapper messageWrapper) {
-		return new TownworldCommandExecutorImpl(configManager, townworldManager, messageWrapper);
+	CommandExecutor provideTownworldCommandExecutor(TownworldCommandExecutorImpl townworldCommandExecutor) {
+		return townworldCommandExecutor;
 	}
 
 	@Singleton
 	@Provides
 	@Named("EconomyPlayerTabCompleter")
-	TabCompleter provideEcoPlayerTabCompleter(EconomyPlayerManager ecoPlayerManager) {
-		return new EconomyPlayerTabCompleterImpl(ecoPlayerManager);
+	TabCompleter provideEcoPlayerTabCompleter(EconomyPlayerTabCompleterImpl ecoPlayerTabCompleter) {
+		return ecoPlayerTabCompleter;
 	}
 
 	@Singleton
 	@Provides
 	@Named("ConfigTabCompleter")
-	TabCompleter provideConfigTabCompleter() {
-		return new ConfigTabCompleterImpl();
+	TabCompleter provideConfigTabCompleter(ConfigTabCompleterImpl configTabCompleter) {
+		return configTabCompleter;
 	}
 
 	@Singleton
 	@Provides
 	@Named("JobTabCompleter")
-	TabCompleter provideJobTabCompleter(JobManager jobManager, JobcenterManager jobcenterManager) {
-		return new JobTabCompleterImpl(jobManager, jobcenterManager);
+	TabCompleter provideJobTabCompleter(JobTabCompleterImpl jobTabCompleter) {
+		return jobTabCompleter;
 	}
 
 	@Singleton
 	@Provides
 	@Named("PlayershopTabCompleter")
-	TabCompleter providePlayershopTabCompleter(PlayershopManager playershopManager) {
-		return new PlayershopTabCompleterImpl(playershopManager);
+	TabCompleter providePlayershopTabCompleter(PlayershopTabCompleterImpl playershopTabCompleter) {
+		return playershopTabCompleter;
 	}
 
 	@Singleton
 	@Provides
 	@Named("AdminshopTabCompleter")
-	TabCompleter provideAdminshopTabCompleter(AdminshopManager adminshopManager) {
-		return new AdminshopTabCompleterImpl(adminshopManager);
+	TabCompleter provideAdminshopTabCompleter(AdminshopTabCompleterImpl adminshopTabCompleter) {
+		return adminshopTabCompleter;
 	}
 
 	@Singleton
 	@Provides
 	@Named("RentshopTabCompleter")
-	TabCompleter provideRentshopTabCompleter(RentshopManager rentshopManager) {
-		return new RentshopTabCompleterImpl(rentshopManager);
+	TabCompleter provideRentshopTabCompleter(RentshopTabCompleterImpl rentshopTabCompleter) {
+		return rentshopTabCompleter;
 	}
 
 	@Singleton
 	@Provides
 	@Named("TownTabCompleter")
-	TabCompleter provideTownTabCompleter(TownworldManager townworldManager, EconomyPlayerManager ecoPlayerManager) {
-		Logger logger = LoggerFactory.getLogger(TownTabCompleterImpl.class);
-		return new TownTabCompleterImpl(logger, townworldManager, ecoPlayerManager);
+	TabCompleter provideTownTabCompleter(TownTabCompleterImpl townTabCompleter) {
+		return townTabCompleter;
 	}
 
 	@Singleton
 	@Provides
 	@Named("TownworldTabCompleter")
-	TabCompleter provideTownworldTabCompleter(ServerProvider serverProvider, TownworldManager townworldManager) {
-		return new TownworldTabCompleterImpl(serverProvider, townworldManager);
+	TabCompleter provideTownworldTabCompleter(TownworldTabCompleterImpl townworldTabCompleter) {
+		return townworldTabCompleter;
 	}
 
 	@Singleton
 	@Provides
-	ConfigDao provideConfigDao(ServerProvider serverProvider) {
-		Logger logger = LoggerFactory.getLogger(ConfigDaoImpl.class);
-		return new ConfigDaoImpl(serverProvider, logger);
+	ConfigDao provideConfigDao(ConfigDaoImpl configDao) {
+		return configDao;
 	}
 
 	@Singleton
 	@Provides
-	BankDao provideBankDao(ServerProvider serverProvider) {
-		Logger logger = LoggerFactory.getLogger(BankDaoImpl.class);
-		return new BankDaoImpl(serverProvider, logger);
+	BankDao provideBankDao(BankDaoImpl bankDao) {
+		return bankDao;
 	}
 
 	@Singleton
 	@Provides
-	EconomyPlayerDao provideEcoPlayerDao(BankManager bankManager, ServerProvider bukkitServic) {
-		Logger logger = LoggerFactory.getLogger(EconomyPlayerDaoImpl.class);
-		return new EconomyPlayerDaoImpl(bankManager, bukkitServic, logger);
+	EconomyPlayerDao provideEcoPlayerDao(EconomyPlayerDaoImpl ecoPlayerDao) {
+		return ecoPlayerDao;
 	}
 
 	@Provides
-	JobDao provideJobDao(ServerProvider serverProvider) {
-		Logger logger = LoggerFactory.getLogger(JobDaoImpl.class);
-		return new JobDaoImpl(serverProvider, logger);
+	JobDao provideJobDao(JobDaoImpl jobDao) {
+		return jobDao;
 	}
 
 	@Provides
-	JobcenterDao provideJobcenterDao(ServerProvider serverProvider) {
-		Logger logger = LoggerFactory.getLogger(JobcenterDaoImpl.class);
-		return new JobcenterDaoImpl(serverProvider, logger);
+	JobcenterDao provideJobcenterDao(JobcenterDaoImpl jobcenterDao) {
+		return jobcenterDao;
 	}
 
 	@Provides
-	ShopDao provideShopDao(ServerProvider serverProvider, EconomyPlayerManager ecoPlayerManager,
-			ShopValidationHandler validationHandler, TownsystemValidationHandler townsystemValidationHandler) {
-		Logger logger = LoggerFactory.getLogger(ShopDaoImpl.class);
-		return new ShopDaoImpl(serverProvider, ecoPlayerManager, validationHandler, townsystemValidationHandler,
-				logger);
+	ShopDao provideShopDao(ShopDaoImpl shopDao) {
+		return shopDao;
 	}
 
 	@Provides
-	TownworldDao provideTownworldDao(ServerProvider serverProvider, TownsystemValidationHandler validationHandler,
-			EconomyPlayerManager ecoPlayerManager, BankManager bankManager) {
-		Logger logger = LoggerFactory.getLogger(TownworldDaoImpl.class);
-		return new TownworldDaoImpl(serverProvider, logger, validationHandler, ecoPlayerManager, bankManager);
+	TownworldDao provideTownworldDao(TownworldDaoImpl townworldDao) {
+		return townworldDao;
 	}
 
 	@Singleton
 	@Provides
-	BankValidationHandler provideBankValidationHandler(MessageWrapper messageWrapper) {
-		return new BankValidationHandlerImpl();
+	BankValidationHandler provideBankValidationHandler(BankValidationHandlerImpl bankValidator) {
+		return bankValidator;
 	}
 
 	@Singleton
 	@Provides
-	EconomyPlayerValidationHandler provideEcoPlayerValidationHandler(MessageWrapper messageWrapper) {
-		return new EconomyPlayerValidationHandlerImpl(messageWrapper);
+	EconomyPlayerValidationHandler provideEcoPlayerValidationHandler(EconomyPlayerValidationHandlerImpl ecoPlayerValidator) {
+		return ecoPlayerValidator;
 	}
 
 	@Singleton
 	@Provides
-	JobsystemValidationHandler provideJobsystemValidationHandler(MessageWrapper messageWrapper) {
-		return new JobsystemValidationHandlerImpl(messageWrapper);
+	JobsystemValidationHandler provideJobsystemValidationHandler(JobsystemValidationHandlerImpl jobsystemValidator) {
+		return jobsystemValidator;
 	}
 
 	@Singleton
 	@Provides
-	ShopValidationHandler provideShopValidationHandler(TownworldManager townworldManager, ConfigManager configManager,
-			MessageWrapper messageWrapper) {
-		return new ShopValidationHandlerImpl(townworldManager, configManager, messageWrapper);
+	ShopValidationHandler provideShopValidationHandler(ShopValidationHandlerImpl shopValidator) {
+		return shopValidator;
 	}
 
 	@Singleton
 	@Provides
-	TownsystemValidationHandler provideTownsystemValidationHandler(ServerProvider serverProvider,
-			Lazy<TownworldManager> townworldManager, MessageWrapper messageWrapper) {
-		return new TownsystemValidationHandlerImpl(serverProvider, townworldManager, messageWrapper);
+	TownsystemValidationHandler provideTownsystemValidationHandler(TownsystemValidationHandlerImpl townsystemValidator) {
+		return townsystemValidator;
 	}
 
 	@Singleton
 	@Provides
-	TownsystemEventHandler provideTownsystemEventHandler(EconomyPlayerValidationHandler ecoPlayerValidationHandler,
-			EconomyPlayerManager ecoPlayerManager, ConfigManager configManager, TownworldManager townworldManager,
-			MessageWrapper messageWrapper) {
-		return new TownsystemEventHandlerImpl(configManager, townworldManager, ecoPlayerManager, messageWrapper,
-				ecoPlayerValidationHandler);
+	TownsystemEventHandler provideTownsystemEventHandler(TownsystemEventHandlerImpl townsystemEventHandler) {
+		return townsystemEventHandler;
 	}
 
 	@Singleton
 	@Provides
-	EconomyPlayerEventHandler provideEcoPlayerEventHandler(EconomyPlayerManager ecoPlayerManager,
-			ConfigManager configManager) {
-		return new EconomyPlayerEventHandlerImpl(ecoPlayerManager, configManager);
+	EconomyPlayerEventHandler provideEcoPlayerEventHandler(EconomyPlayerEventHandlerImpl ecoPlayerEventHandler) {
+		return ecoPlayerEventHandler;
 	}
 
 	@Singleton
 	@Provides
-	JobsystemEventHandler provideJobsystemEventHandler(ServerProvider serverProvider, JobcenterManager jobcenterManager,
-			JobManager jobManager, EconomyPlayerManager ecoPlayerManager) {
-		return new JobsystemEventHandlerImpl(serverProvider, jobcenterManager, jobManager, ecoPlayerManager);
+	JobsystemEventHandler provideJobsystemEventHandler(JobsystemEventHandlerImpl jobsystemEventHandler) {
+		return jobsystemEventHandler;
 	}
 
 	@Singleton
 	@Provides
-	ShopEventHandler provideShopEventHandler(RentshopManager rentshopManager, AdminshopManager adminshopManager,
-			PlayershopManager playershopManager, EconomyPlayerManager ecoPlayerManager) {
-		return new ShopEventHandlerImpl(rentshopManager, adminshopManager, playershopManager, ecoPlayerManager);
+	ShopEventHandler provideShopEventHandler(ShopEventHandlerImpl shopEventHandler) {
+		return shopEventHandler;
 	}
 
 	@Singleton
 	@Provides
-	CustomSkullService provideCustomSkullService() {
-		Logger logger = LoggerFactory.getLogger(CustomSkullServiceImpl.class);
-		return new CustomSkullServiceImpl(logger);
+	CustomSkullService provideCustomSkullService(CustomSkullServiceImpl customSkullService) {
+		return customSkullService;
 	}
 }

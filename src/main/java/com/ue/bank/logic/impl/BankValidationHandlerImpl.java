@@ -11,8 +11,17 @@ import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
 public class BankValidationHandlerImpl implements BankValidationHandler {
 
+	private final MessageWrapper messageWrapper;
+	
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param messageWrapper
+	 */
 	@Inject
-	MessageWrapper messageWrapper;
+	public BankValidationHandlerImpl(MessageWrapper messageWrapper) {
+		this.messageWrapper = messageWrapper;
+	}
 
 	@Override
 	public void checkForPositiveAmount(double amount) throws GeneralEconomyException {

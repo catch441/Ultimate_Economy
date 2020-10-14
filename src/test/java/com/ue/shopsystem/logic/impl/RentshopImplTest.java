@@ -45,7 +45,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
@@ -74,8 +73,6 @@ public class RentshopImplTest {
 	ShopValidationHandler validationHandler;
 	@Mock
 	TownsystemValidationHandler townsystemValidationHandler;
-	@Mock
-	ComponentProvider componentProvider;
 	@Mock
 	ConfigDao configDao;
 	@Mock

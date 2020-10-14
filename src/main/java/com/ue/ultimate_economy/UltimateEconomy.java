@@ -49,6 +49,7 @@ import com.ue.vault.impl.VaultHook;
 public class UltimateEconomy extends JavaPlugin {
 
 	public static UltimateEconomy getInstance;
+	public static ServiceComponent serviceComponent;
 	@Inject
 	ConfigManager configManager;
 	@Inject
@@ -134,7 +135,7 @@ public class UltimateEconomy extends JavaPlugin {
 	@Named("TownworldTabCompleter")
 	TabCompleter townworldTabCompleter;
 
-	private ServiceComponent serviceComponent;
+	
 
 	/**
 	 * Default constructor.
@@ -304,6 +305,7 @@ public class UltimateEconomy extends JavaPlugin {
 		adminshopManager.loadAllAdminShops();
 		playershopManager.loadAllPlayerShops();
 		rentshopManager.loadAllRentShops();
+		townworldManager.loadAllTownWorlds();
 		loadCommands();
 		loadSpawners();
 	}

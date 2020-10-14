@@ -260,7 +260,6 @@ public class JobcenterImpl implements Jobcenter {
 		villager.setCollidable(false);
 		villager.setInvulnerable(true);
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
-		villager.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 30000000, 30000000));
 	}
 
 	private void loadExistingJobcenter(String name) {

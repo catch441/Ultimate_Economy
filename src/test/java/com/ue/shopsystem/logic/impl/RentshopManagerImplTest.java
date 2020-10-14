@@ -37,7 +37,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
 import com.ue.config.dataaccess.api.ConfigDao;
@@ -60,8 +59,6 @@ public class RentshopManagerImplTest {
 	ShopValidationHandler validationHandler;
 	@Mock
 	ServerProvider serverProvider;
-	@Mock
-	ComponentProvider componentProvider;
 	@Mock
 	Logger logger;
 	@Mock
@@ -105,7 +102,7 @@ public class RentshopManagerImplTest {
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 
 		return assertDoesNotThrow(() -> rentshopManager.createRentShop(loc, 9, 2.5));
@@ -216,7 +213,7 @@ public class RentshopManagerImplTest {
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		Rentshop shop = assertDoesNotThrow(() -> rentshopManager.createRentShop(loc, 9, 2.5));
 		
@@ -264,7 +261,7 @@ public class RentshopManagerImplTest {
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		assertDoesNotThrow(() -> rentshopManager.createRentShop(loc, 9, 2.5));
 		
@@ -302,7 +299,7 @@ public class RentshopManagerImplTest {
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		when(configDao.loadRentshopIds()).thenReturn(Arrays.asList("R0"));
 
@@ -324,7 +321,7 @@ public class RentshopManagerImplTest {
 		when(shopDao.loadShopSize()).thenReturn(9);
 		when(shopDao.loadShopName()).thenReturn("myshop");
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(configDao.loadRentshopIds()).thenReturn(Arrays.asList("R0"));
 		when(shopDao.loadShopLocation()).thenThrow(e);
 		rentshopManager.loadAllRentShops();

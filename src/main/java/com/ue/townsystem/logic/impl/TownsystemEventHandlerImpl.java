@@ -116,48 +116,69 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 
 	@Override
 	public void handleInventoryClick(InventoryClickEvent event) {
-		if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
+		if (event.getCurrentItem() != null
+				&& event.getCurrentItem().getItemMeta() != null) {
 			// TODO UE-119 extract messages
 			event.setCancelled(true);
-			try {
-				Townworld townWorld = townworldManager.getTownWorldByName(event.getWhoClicked().getWorld().getName());
-				Chunk chunk = ((Villager) event.getClickedInventory().getHolder()).getLocation().getChunk();
-				EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getWhoClicked().getName());
-				Town town = townWorld.getTownByChunk(chunk);
-				Plot plot = town.getPlotByChunk(chunk.getX() + "/" + chunk.getZ());
-				switch (event.getCurrentItem().getItemMeta().getDisplayName()) {
-				case "Buy":
-					ecoPlayerValidationHandler.checkForEnoughMoney(ecoPlayer.getBankAccount(), plot.getSalePrice(),
-							true);
-					EconomyPlayer receiver = plot.getOwner();
-					ecoPlayer.payToOtherPlayer(receiver, plot.getSalePrice(), false);
-					town.buyPlot(ecoPlayer, chunk.getX(), chunk.getZ());
-					event.getWhoClicked().sendMessage(ChatColor.GOLD + "Congratulation! You bought this plot!");
-					break;
-				case "Cancel Sale":
-					if (plot.isOwner(ecoPlayer)) {
-						plot.removeFromSale(ecoPlayer);
-						event.getWhoClicked().sendMessage(ChatColor.GOLD + "You removed this plot from sale!");
+			if(event.getClickedInventory().getHolder() instanceof Villager) {
+				try {
+					Townworld townWorld = townworldManager.getTownWorldByName(event.getWhoClicked().getWorld().getName());
+					Chunk chunk = ((Villager) event.getClickedInventory().getHolder()).getLocation().getChunk();
+					EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getWhoClicked().getName());
+					Town town = townWorld.getTownByChunk(chunk);
+					Plot plot = town.getPlotByChunk(chunk.getX() + "/" + chunk.getZ());
+					switch (event.getCurrentItem().getItemMeta().getDisplayName()) {
+					case "Buy":
+						handleBuyClick(event, chunk, ecoPlayer, town, plot);
+						break;
+					case "Cancel Sale":
+						handleCancelSaleClick(event, ecoPlayer, plot);
+						break;
+					case "Join":
+						handleJoinClick(event, ecoPlayer, town);
+						break;
+					case "Leave":
+						handleLeaveClick(event, ecoPlayer, town);
+						break;
+					default:
+						break;
 					}
-					break;
-				case "Join":
-					town.joinTown(ecoPlayer);
-					event.getWhoClicked()
-							.sendMessage(ChatColor.GOLD + "You joined the town " + town.getTownName() + ".");
-					break;
-				case "Leave":
-					town.leaveTown(ecoPlayer);
-					event.getWhoClicked().sendMessage(ChatColor.GOLD + "You left the town " + town.getTownName() + ".");
-					break;
-				default:
-					break;
+					event.getWhoClicked().closeInventory();
+				} catch (TownSystemException | GeneralEconomyException e) {
+				} catch (EconomyPlayerException e) {
+					event.getWhoClicked().sendMessage(e.getMessage());
 				}
-				event.getWhoClicked().closeInventory();
-			} catch (TownSystemException | GeneralEconomyException e) {
-			} catch (EconomyPlayerException e) {
-				event.getWhoClicked().sendMessage(e.getMessage());
 			}
 		}
+	}
+
+	private void handleLeaveClick(InventoryClickEvent event, EconomyPlayer ecoPlayer, Town town)
+			throws TownSystemException, EconomyPlayerException {
+		town.leaveTown(ecoPlayer);
+		event.getWhoClicked().sendMessage(ChatColor.GOLD + "You left the town " + town.getTownName() + ".");
+	}
+
+	private void handleJoinClick(InventoryClickEvent event, EconomyPlayer ecoPlayer, Town town)
+			throws EconomyPlayerException {
+		town.joinTown(ecoPlayer);
+		event.getWhoClicked().sendMessage(ChatColor.GOLD + "You joined the town " + town.getTownName() + ".");
+	}
+
+	private void handleCancelSaleClick(InventoryClickEvent event, EconomyPlayer ecoPlayer, Plot plot)
+			throws EconomyPlayerException {
+		if (plot.isOwner(ecoPlayer)) {
+			plot.removeFromSale(ecoPlayer);
+			event.getWhoClicked().sendMessage(ChatColor.GOLD + "You removed this plot from sale!");
+		}
+	}
+
+	private void handleBuyClick(InventoryClickEvent event, Chunk chunk, EconomyPlayer ecoPlayer, Town town, Plot plot)
+			throws EconomyPlayerException, GeneralEconomyException, TownSystemException {
+		ecoPlayerValidationHandler.checkForEnoughMoney(ecoPlayer.getBankAccount(), plot.getSalePrice(), true);
+		EconomyPlayer receiver = plot.getOwner();
+		ecoPlayer.payToOtherPlayer(receiver, plot.getSalePrice(), false);
+		town.buyPlot(ecoPlayer, chunk.getX(), chunk.getZ());
+		event.getWhoClicked().sendMessage(ChatColor.GOLD + "Congratulation! You bought this plot!");
 	}
 
 	@Override

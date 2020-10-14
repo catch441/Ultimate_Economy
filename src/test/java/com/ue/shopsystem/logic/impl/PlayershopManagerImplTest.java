@@ -38,7 +38,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-import com.ue.common.utils.ComponentProvider;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
@@ -65,8 +64,6 @@ public class PlayershopManagerImplTest {
 	ShopValidationHandler validationHandler;
 	@Mock
 	TownsystemValidationHandler townsystemValidationHandler;
-	@Mock
-	ComponentProvider componentProvider;
 	@Mock
 	ConfigDao configDao;
 	@Mock
@@ -148,7 +145,7 @@ public class PlayershopManagerImplTest {
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		assertDoesNotThrow(() -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
 		
@@ -197,7 +194,7 @@ public class PlayershopManagerImplTest {
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		assertDoesNotThrow(() -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
 	}
@@ -297,7 +294,7 @@ public class PlayershopManagerImplTest {
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		assertDoesNotThrow(() -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
 		reset(configDao);
@@ -334,7 +331,7 @@ public class PlayershopManagerImplTest {
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		when(configDao.hasPlayerShopNames()).thenReturn(false);
 		when(configDao.loadPlayershopIds()).thenReturn(Arrays.asList("P0"));
@@ -358,7 +355,7 @@ public class PlayershopManagerImplTest {
 		when(shopDao.loadShopSize()).thenReturn(9);
 		when(shopDao.loadShopName()).thenReturn("myshop");
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(configDao.hasPlayerShopNames()).thenReturn(false);
 		when(configDao.loadPlayershopIds()).thenReturn(Arrays.asList("P0"));
 		when(shopDao.loadShopLocation()).thenThrow(e);
@@ -396,7 +393,7 @@ public class PlayershopManagerImplTest {
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		when(configDao.hasPlayerShopNames()).thenReturn(true);
 		when(configDao.loadPlayerShopNames()).thenReturn(Arrays.asList("myshop"));
@@ -425,7 +422,7 @@ public class PlayershopManagerImplTest {
 		when(shopDao.loadShopName()).thenReturn("myshop");
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getPluginInstance()).thenReturn(plugin);
-		when(componentProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(configDao.hasPlayerShopNames()).thenReturn(true);
 		when(configDao.loadPlayerShopNames()).thenReturn(Arrays.asList("myshop"));
 		when(shopDao.loadShopLocation()).thenThrow(e);
