@@ -120,11 +120,6 @@ public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {
 		return config;
 	}
 
-	/*
-	 * Deprecated
-	 * 
-	 */
-
 	@Deprecated
 	private void convertOldJobcenterLocation() {
 		if (getConfig().isSet("ShopLocation.World")) {

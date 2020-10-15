@@ -1,25 +1,15 @@
 package com.ue.ultimate_economy;
 
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -39,6 +29,8 @@ import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.shopsystem.logic.api.ShopEventHandler;
+import com.ue.spawnersystem.logic.api.SpawnerManager;
+import com.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
 import com.ue.townsystem.logic.api.TownsystemEventHandler;
 import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.vault.impl.VaultHook;
@@ -50,6 +42,8 @@ public class UltimateEconomy extends JavaPlugin {
 
 	public static UltimateEconomy getInstance;
 	public static ServiceComponent serviceComponent;
+	@Inject
+	SpawnerManager spawnerManager;
 	@Inject
 	ConfigManager configManager;
 	@Inject
@@ -86,6 +80,8 @@ public class UltimateEconomy extends JavaPlugin {
 	EconomyPlayerEventHandler ecoPlayerEventHandler;
 	@Inject
 	TownsystemEventHandler townsystemEventHandler;
+	@Inject
+	SpawnerSystemEventHandler spawnerSystemEventHandler;
 	@Inject
 	@Named("ConfigCommandExecutor")
 	CommandExecutor configCommandExecutor;
@@ -135,8 +131,6 @@ public class UltimateEconomy extends JavaPlugin {
 	@Named("TownworldTabCompleter")
 	TabCompleter townworldTabCompleter;
 
-	
-
 	/**
 	 * Default constructor.
 	 */
@@ -171,35 +165,6 @@ public class UltimateEconomy extends JavaPlugin {
 		if (Bukkit.getServer().getPluginManager().getPlugin("Vault") != null) {
 			vaultHook.unhook();
 		}
-	}
-
-	private void loadSpawners() {
-		File spawner = new File(getDataFolder(), "SpawnerLocations.yml");
-		if (!spawner.exists()) {
-			try {
-				spawner.createNewFile();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		// spawn all spawners
-		List<String> spawnerlist = new ArrayList<>();
-		FileConfiguration spawnerconfig = YamlConfiguration.loadConfiguration(spawner);
-		for (String spawnername : getConfig().getStringList("Spawnerlist")) {
-			spawnerlist.add(spawnername);
-			World world = getServer().getWorld(spawnerconfig.getString(spawnername + ".World"));
-			Location location = new Location(world, spawnerconfig.getDouble(spawnername + ".X"),
-					spawnerconfig.getDouble(spawnername + ".Y"), spawnerconfig.getDouble(spawnername + ".Z"));
-			world.getBlockAt(location).setMetadata("name",
-					new FixedMetadataValue(this, spawnerconfig.getString(spawnername + ".player")));
-			world.getBlockAt(location).setMetadata("entity",
-					new FixedMetadataValue(this, spawnerconfig.getString(spawnername + ".EntityType")));
-		}
-		getConfig().options().copyDefaults(true);
-		saveConfig();
-		// setup eventhandler
-		getServer().getPluginManager().registerEvents(new UltimateEconomyEventHandler(townsystemEventHandler, serverProvider, shopEventHandler,
-				jobsystemEventHandler, ecoPlayerEventHandler, messageWrapper, spawnerlist, spawner), this);
 	}
 
 	private void setupVault() {
@@ -307,7 +272,11 @@ public class UltimateEconomy extends JavaPlugin {
 		rentshopManager.loadAllRentShops();
 		townworldManager.loadAllTownWorlds();
 		loadCommands();
-		loadSpawners();
+		spawnerManager.loadAllSpawners();
+		// setup eventhandler
+		getServer().getPluginManager().registerEvents(new UltimateEconomyEventHandler(spawnerSystemEventHandler,
+				townsystemEventHandler, serverProvider, shopEventHandler, jobsystemEventHandler, ecoPlayerEventHandler),
+				this);
 	}
 
 	private void setupPlugin() {

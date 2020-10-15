@@ -65,6 +65,12 @@ import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
 import com.ue.shopsystem.logic.impl.RentshopTabCompleterImpl;
 import com.ue.shopsystem.logic.impl.ShopEventHandlerImpl;
 import com.ue.shopsystem.logic.impl.ShopValidationHandlerImpl;
+import com.ue.spawnersystem.dataaccess.api.SpawnerSystemDao;
+import com.ue.spawnersystem.dataaccess.impl.SpawnerSystemDaoImpl;
+import com.ue.spawnersystem.logic.api.SpawnerManager;
+import com.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
+import com.ue.spawnersystem.logic.impl.SpawnerManagerImpl;
+import com.ue.spawnersystem.logic.impl.SpawnerSystemEventHandlerImpl;
 import com.ue.townsystem.dataaccess.api.TownworldDao;
 import com.ue.townsystem.dataaccess.impl.TownworldDaoImpl;
 import com.ue.townsystem.logic.api.TownsystemEventHandler;
@@ -122,6 +128,12 @@ public class ProviderModule {
 	@Provides
 	MessageWrapper provideMessageWrapper(Logger logger) {
 		return new MessageWrapper(logger);
+	}
+	
+	@Singleton
+	@Provides
+	SpawnerManager provideSpawnerManager(SpawnerManagerImpl spawnerManager) {
+		return spawnerManager;
 	}
 
 	@Singleton
@@ -307,6 +319,12 @@ public class ProviderModule {
 	EconomyPlayerDao provideEcoPlayerDao(EconomyPlayerDaoImpl ecoPlayerDao) {
 		return ecoPlayerDao;
 	}
+	
+	@Singleton
+	@Provides
+	SpawnerSystemDao provideSpawnerSystemDao(SpawnerSystemDaoImpl spawnerSystemDao) {
+		return spawnerSystemDao;
+	}
 
 	@Provides
 	JobDao provideJobDao(JobDaoImpl jobDao) {
@@ -356,6 +374,12 @@ public class ProviderModule {
 	@Provides
 	TownsystemValidationHandler provideTownsystemValidationHandler(TownsystemValidationHandlerImpl townsystemValidator) {
 		return townsystemValidator;
+	}
+	
+	@Singleton
+	@Provides
+	SpawnerSystemEventHandler provideSpawnerEventHandler(SpawnerSystemEventHandlerImpl spawnerEventHandler) {
+		return spawnerEventHandler;
 	}
 
 	@Singleton
