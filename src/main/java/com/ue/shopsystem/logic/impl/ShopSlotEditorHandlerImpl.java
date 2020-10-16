@@ -15,12 +15,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.logic.api.AbstractShop;
 import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.ShopSlotEditorHandler;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
-import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 

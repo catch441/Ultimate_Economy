@@ -41,14 +41,14 @@ import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
+import com.ue.general.impl.UltimateEconomy;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
-import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 import dagger.Lazy;
 

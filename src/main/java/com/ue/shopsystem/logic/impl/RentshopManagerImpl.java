@@ -15,6 +15,8 @@ import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.PlayershopManager;
@@ -23,8 +25,6 @@ import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
-import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
 public class RentshopManagerImpl implements RentshopManager {
 

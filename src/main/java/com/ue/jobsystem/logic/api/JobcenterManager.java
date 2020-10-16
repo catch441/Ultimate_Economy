@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.bukkit.Location;
 
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsystem.logic.impl.JobSystemException;
-import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface JobcenterManager {
 

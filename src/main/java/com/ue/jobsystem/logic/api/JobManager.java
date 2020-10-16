@@ -2,8 +2,8 @@ package com.ue.jobsystem.logic.api;
 
 import java.util.List;
 
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsystem.logic.impl.JobSystemException;
-import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface JobManager {
 

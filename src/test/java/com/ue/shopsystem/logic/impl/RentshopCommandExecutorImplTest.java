@@ -25,9 +25,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
-import com.ue.ultimate_economy.GeneralEconomyException;
 
 @ExtendWith(MockitoExtension.class)
 public class RentshopCommandExecutorImplTest {

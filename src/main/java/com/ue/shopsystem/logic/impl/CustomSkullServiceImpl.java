@@ -18,8 +18,8 @@ import org.slf4j.Logger;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.ue.general.impl.UltimateEconomy;
 import com.ue.shopsystem.logic.api.CustomSkullService;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 public class CustomSkullServiceImpl implements CustomSkullService {
 

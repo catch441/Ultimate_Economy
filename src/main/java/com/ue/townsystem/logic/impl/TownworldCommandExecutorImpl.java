@@ -9,8 +9,8 @@ import org.bukkit.command.CommandSender;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.townsystem.logic.api.TownworldManager;
-import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class TownworldCommandExecutorImpl implements CommandExecutor {
 

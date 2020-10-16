@@ -13,13 +13,13 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
+import com.ue.general.impl.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
 import com.ue.townsystem.logic.api.TownworldManager;
-import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
 import dagger.Lazy;
 

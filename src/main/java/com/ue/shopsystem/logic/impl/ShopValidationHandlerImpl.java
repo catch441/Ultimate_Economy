@@ -15,6 +15,8 @@ import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
+import com.ue.general.impl.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
@@ -22,8 +24,6 @@ import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.Townworld;
 import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
-import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
 public class ShopValidationHandlerImpl implements ShopValidationHandler {
 

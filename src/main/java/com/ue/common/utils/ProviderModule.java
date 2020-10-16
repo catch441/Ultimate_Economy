@@ -31,6 +31,7 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerEventHandlerImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerTabCompleterImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerValidationHandlerImpl;
+import com.ue.general.impl.UltimateEconomy;
 import com.ue.jobsyste.dataaccess.api.JobDao;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.jobsystem.dataaccess.impl.JobDaoImpl;
@@ -83,7 +84,6 @@ import com.ue.townsystem.logic.impl.TownsystemValidationHandlerImpl;
 import com.ue.townsystem.logic.impl.TownworldCommandExecutorImpl;
 import com.ue.townsystem.logic.impl.TownworldManagerImpl;
 import com.ue.townsystem.logic.impl.TownworldTabCompleterImpl;
-import com.ue.ultimate_economy.UltimateEconomy;
 import com.ue.vault.impl.UltimateEconomyVaultImpl;
 import com.ue.vault.impl.VaultHook;
 
@@ -104,6 +104,12 @@ public class ProviderModule {
 	@Provides
 	Metrics provideMetrics() {
 		return new Metrics(UltimateEconomy.getInstance, 4652);
+	}
+	
+	@Singleton
+	@Provides
+	Updater provideUpdater() {
+		return new Updater();
 	}
 
 	@Singleton

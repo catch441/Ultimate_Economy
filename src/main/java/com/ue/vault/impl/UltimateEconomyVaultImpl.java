@@ -12,7 +12,7 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.ultimate_economy.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyException;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;

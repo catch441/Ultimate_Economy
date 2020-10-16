@@ -23,8 +23,8 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
-import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
+import com.ue.general.impl.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigCommandExecutorImplTest {

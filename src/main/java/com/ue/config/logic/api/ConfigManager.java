@@ -2,7 +2,7 @@ package com.ue.config.logic.api;
 
 import java.util.Locale;
 
-import com.ue.ultimate_economy.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyException;
 
 public interface ConfigManager {
 

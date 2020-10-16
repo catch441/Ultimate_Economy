@@ -12,10 +12,10 @@ import org.bukkit.inventory.Inventory;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
+import com.ue.general.impl.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
-import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
 public class JobsystemValidationHandlerImpl implements JobsystemValidationHandler {
 

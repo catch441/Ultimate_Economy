@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.ue.bank.dataaccess.api.BankDao;
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankValidationHandler;
-import com.ue.ultimate_economy.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyException;
 
 public class BankAccountImpl implements BankAccount {
 

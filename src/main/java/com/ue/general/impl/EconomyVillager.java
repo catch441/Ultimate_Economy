@@ -1,4 +1,4 @@
-package com.ue.ultimate_economy;
+package com.ue.general.impl;
 
 public enum EconomyVillager {
 

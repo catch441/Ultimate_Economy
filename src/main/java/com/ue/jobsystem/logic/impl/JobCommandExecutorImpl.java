@@ -14,11 +14,11 @@ import org.bukkit.entity.Player;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
-import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class JobCommandExecutorImpl implements CommandExecutor {
 

@@ -8,10 +8,10 @@ import org.bukkit.inventory.Inventory;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.impl.TownSystemException;
-import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface ShopValidationHandler {
 

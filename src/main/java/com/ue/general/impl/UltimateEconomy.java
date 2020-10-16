@@ -1,4 +1,4 @@
-package com.ue.ultimate_economy;
+package com.ue.general.impl;
 
 import java.lang.reflect.Field;
 
@@ -12,12 +12,14 @@ import org.bukkit.command.CommandMap;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.DaggerServiceComponent;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
+import com.ue.common.utils.Updater;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
@@ -66,6 +68,10 @@ public class UltimateEconomy extends JavaPlugin {
 	VaultHook vaultHook;
 	@Inject
 	Metrics metrics;
+	@Inject
+	Updater updater;
+	@Inject
+	Logger logger;
 	@Inject
 	MessageWrapper messageWrapper;
 	@Inject
@@ -273,10 +279,12 @@ public class UltimateEconomy extends JavaPlugin {
 		townworldManager.loadAllTownWorlds();
 		loadCommands();
 		spawnerManager.loadAllSpawners();
+		// check for new versions
+		updater.checkForUpdate(serverProvider.getPluginInstance().getDescription().getVersion());
 		// setup eventhandler
-		getServer().getPluginManager().registerEvents(new UltimateEconomyEventHandler(spawnerSystemEventHandler,
-				townsystemEventHandler, serverProvider, shopEventHandler, jobsystemEventHandler, ecoPlayerEventHandler),
-				this);
+		getServer().getPluginManager()
+				.registerEvents(new UltimateEconomyEventHandlerImpl(logger, updater, spawnerSystemEventHandler,
+						townsystemEventHandler, shopEventHandler, jobsystemEventHandler, ecoPlayerEventHandler), this);
 	}
 
 	private void setupPlugin() {

@@ -25,9 +25,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
+import com.ue.general.impl.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsystem.logic.api.Job;
-import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
 
 @ExtendWith(MockitoExtension.class)
 public class JobSystemValidationHandlerTest {

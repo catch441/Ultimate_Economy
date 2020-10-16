@@ -19,9 +19,9 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.townsystem.logic.api.TownworldManager;
-import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 

@@ -3,10 +3,10 @@ package com.ue.jobsystem.logic.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsyste.dataaccess.api.JobDao;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
-import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class JobImpl implements Job {
 

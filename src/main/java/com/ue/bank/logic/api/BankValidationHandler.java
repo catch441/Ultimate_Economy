@@ -2,7 +2,7 @@ package com.ue.bank.logic.api;
 
 import java.util.List;
 
-import com.ue.ultimate_economy.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyException;
 
 public interface BankValidationHandler {
 

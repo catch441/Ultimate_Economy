@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 
-import com.ue.ultimate_economy.UltimateEconomy;
+import com.ue.general.impl.UltimateEconomy;
 
 import net.milkbowl.vault.economy.Economy;
 

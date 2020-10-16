@@ -2,11 +2,11 @@ package com.ue.common.utils;
 
 import javax.inject.Singleton;
 
+import com.ue.general.impl.UltimateEconomy;
 import com.ue.jobsyste.dataaccess.api.JobDao;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.townsystem.dataaccess.api.TownworldDao;
-import com.ue.ultimate_economy.UltimateEconomy;
 
 import dagger.Component;
 

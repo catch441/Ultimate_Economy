@@ -5,9 +5,9 @@ import org.slf4j.Logger;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
-import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class RentDailyTask extends BukkitRunnable {
 

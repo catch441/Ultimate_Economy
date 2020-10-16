@@ -1,6 +1,6 @@
 package com.ue.bank.logic.api;
 
-import com.ue.ultimate_economy.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyException;
 
 public interface BankAccount {
 

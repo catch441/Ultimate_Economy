@@ -26,14 +26,14 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.EconomyVillager;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
-import com.ue.ultimate_economy.EconomyVillager;
-import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class JobcenterImpl implements Jobcenter {
 

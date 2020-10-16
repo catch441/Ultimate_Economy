@@ -1,6 +1,5 @@
-package com.ue.ultimate_economy;
+package com.ue.general.impl;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -20,8 +19,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.InventoryHolder;
+import org.slf4j.Logger;
 
-import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.Updater;
 import com.ue.common.utils.Updater.UpdateResult;
 import com.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
@@ -31,27 +30,29 @@ import com.ue.shopsystem.logic.api.ShopEventHandler;
 import com.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
 import com.ue.townsystem.logic.api.TownsystemEventHandler;
 
-public class UltimateEconomyEventHandler implements Listener {
+public class UltimateEconomyEventHandlerImpl implements Listener {
 
 	private final EconomyPlayerEventHandler ecoPlayerEventHandler;
 	private final JobsystemEventHandler jobsystemEventHandler;
 	private final ShopEventHandler shopEventHandler;
 	private final TownsystemEventHandler townSystemEventHandler;
 	private final SpawnerSystemEventHandler spawnerSystemEventHandler;
-	private UpdateResult updateResult;
+	private final Updater updater;
+	private final Logger logger;
 
 	/**
 	 * Constructor of ultimate economy event handler.
 	 * 
+	 * @param logger
+	 * @param updater
 	 * @param spawnerSystemEventHandler
 	 * @param townSystemEventHandler
-	 * @param serverProvider
 	 * @param shopEventHandler
 	 * @param jobsystemEventHandler
 	 * @param ecoPlayerEventHandler
 	 */
-	public UltimateEconomyEventHandler(SpawnerSystemEventHandler spawnerSystemEventHandler,
-			TownsystemEventHandler townSystemEventHandler, ServerProvider serverProvider,
+	public UltimateEconomyEventHandlerImpl(Logger logger, Updater updater, SpawnerSystemEventHandler spawnerSystemEventHandler,
+			TownsystemEventHandler townSystemEventHandler,
 			ShopEventHandler shopEventHandler, JobsystemEventHandler jobsystemEventHandler,
 			EconomyPlayerEventHandler ecoPlayerEventHandler) {
 		this.ecoPlayerEventHandler = ecoPlayerEventHandler;
@@ -59,8 +60,8 @@ public class UltimateEconomyEventHandler implements Listener {
 		this.jobsystemEventHandler = jobsystemEventHandler;
 		this.townSystemEventHandler = townSystemEventHandler;
 		this.spawnerSystemEventHandler = spawnerSystemEventHandler;
-		// version check
-		updateResult = Updater.checkForUpdate(serverProvider.getPluginInstance().getDescription().getVersion());
+		this.updater = updater;
+		this.logger = logger;
 	}
 
 	/**
@@ -165,7 +166,7 @@ public class UltimateEconomyEventHandler implements Listener {
 			}
 		}
 	}
-	
+
 	/**
 	 * Handles block place event.
 	 * 
@@ -204,10 +205,11 @@ public class UltimateEconomyEventHandler implements Listener {
 			ecoPlayerEventHandler.handleJoin(event);
 			townSystemEventHandler.handlePlayerJoin(event);
 		} catch (EconomyPlayerException e) {
-			Bukkit.getLogger().warning("[Ultimate_Economy] " + e.getMessage());
+			logger.warn("[Ultimate_Economy] " + e.getMessage());
 		}
 		if (event.getPlayer().isOp()) {
-			if (updateResult == UpdateResult.UPDATE_AVAILABLE) {
+			if (updater.getUpdateResult() == UpdateResult.UPDATE_AVAILABLE) {
+				// TODO extract message into language file
 				event.getPlayer().sendMessage(ChatColor.GOLD + "There is a newer version of " + ChatColor.GREEN
 						+ "Ultimate_Economy " + ChatColor.GOLD + "available!");
 			}

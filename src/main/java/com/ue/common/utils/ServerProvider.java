@@ -17,7 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Scoreboard;
 
-import com.ue.ultimate_economy.UltimateEconomy;
+import com.ue.general.impl.UltimateEconomy;
 
 public class ServerProvider {
 

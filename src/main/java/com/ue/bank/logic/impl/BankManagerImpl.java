@@ -10,8 +10,8 @@ import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
 import com.ue.bank.logic.api.BankValidationHandler;
 import com.ue.common.utils.MessageWrapper;
-import com.ue.ultimate_economy.GeneralEconomyException;
-import com.ue.ultimate_economy.GeneralEconomyExceptionMessageEnum;
+import com.ue.general.impl.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 
 public class BankManagerImpl implements BankManager {
 

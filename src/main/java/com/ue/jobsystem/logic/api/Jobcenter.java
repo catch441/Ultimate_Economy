@@ -6,8 +6,8 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsystem.logic.impl.JobSystemException;
-import com.ue.ultimate_economy.GeneralEconomyException;
 
 public interface Jobcenter {
 

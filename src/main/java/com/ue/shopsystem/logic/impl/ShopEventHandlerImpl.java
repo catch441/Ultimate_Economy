@@ -12,6 +12,8 @@ import org.bukkit.inventory.ItemStack;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.EconomyVillager;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.logic.api.AbstractShop;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.Playershop;
@@ -20,8 +22,6 @@ import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.shopsystem.logic.api.ShopEventHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
-import com.ue.ultimate_economy.EconomyVillager;
-import com.ue.ultimate_economy.GeneralEconomyException;
 
 public class ShopEventHandlerImpl implements ShopEventHandler {
 
