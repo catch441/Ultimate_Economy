@@ -29,6 +29,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -93,7 +94,7 @@ public class AdminshopManagerImplTest {
 
 	@Test
 	public void createNewAdminshopTestSuccess() {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
@@ -107,7 +108,7 @@ public class AdminshopManagerImplTest {
 		when(serverProvider.createInventory(eq(villager), anyInt(), anyString())).thenReturn(inv);
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
@@ -127,7 +128,7 @@ public class AdminshopManagerImplTest {
 
 	@Test
 	public void deleteAdminshopTest() {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
@@ -141,7 +142,7 @@ public class AdminshopManagerImplTest {
 		when(serverProvider.createInventory(eq(villager), anyInt(), anyString())).thenReturn(inv);
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
@@ -211,7 +212,7 @@ public class AdminshopManagerImplTest {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void loadAllAdminShopsTest() {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
@@ -228,7 +229,7 @@ public class AdminshopManagerImplTest {
 		when(serverProvider.createInventory(eq(villager), anyInt(), anyString())).thenReturn(inv);
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
@@ -285,6 +286,7 @@ public class AdminshopManagerImplTest {
 	@Test
 	public void loadAllAdminshopsOldTest() {
 		Plugin plugin = mock(Plugin.class);
+		JavaPlugin javaPlugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
@@ -302,6 +304,7 @@ public class AdminshopManagerImplTest {
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
 		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(javaPlugin);
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
@@ -351,7 +354,7 @@ public class AdminshopManagerImplTest {
 	}
 
 	private void createAdminshop() {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
@@ -365,7 +368,7 @@ public class AdminshopManagerImplTest {
 		when(serverProvider.createInventory(eq(villager), anyInt(), anyString())).thenReturn(inv);
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);

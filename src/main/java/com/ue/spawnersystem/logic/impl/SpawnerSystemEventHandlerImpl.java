@@ -111,9 +111,9 @@ public class SpawnerSystemEventHandlerImpl implements SpawnerSystemEventHandler 
 			CreatureSpawner spawner = ((CreatureSpawner) blockState);
 			spawner.setSpawnedType(EntityType.valueOf(string.substring(0, string.lastIndexOf("-"))));
 			blockState.update();
-			event.getBlock().setMetadata("name", new FixedMetadataValue(serverProvider.getPluginInstance(),
+			event.getBlock().setMetadata("name", new FixedMetadataValue(serverProvider.getJavaPluginInstance(),
 					string.substring(string.lastIndexOf("-") + 1)));
-			event.getBlock().setMetadata("entity", new FixedMetadataValue(serverProvider.getPluginInstance(),
+			event.getBlock().setMetadata("entity", new FixedMetadataValue(serverProvider.getJavaPluginInstance(),
 					string.substring(0, string.lastIndexOf("-"))));
 			spawnerManager.addSpawner(string.substring(0, string.lastIndexOf("-")), event.getPlayer(),
 					event.getBlock().getLocation());

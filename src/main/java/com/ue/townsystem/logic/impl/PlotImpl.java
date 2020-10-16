@@ -140,7 +140,7 @@ public class PlotImpl implements Plot {
 		villager.setCustomNameVisible(true);
 		// set the tye of the villager to meta
 		villager.setMetadata("ue-type",
-				new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.PLOTSALE));
+				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.PLOTSALE));
 		villager.setProfession(Profession.NITWIT);
 		villager.setSilent(true);
 		villager.setInvulnerable(true);

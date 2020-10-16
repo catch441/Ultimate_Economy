@@ -49,9 +49,9 @@ public class SpawnerManagerImpl implements SpawnerManager {
 		for (String spawnername : spawnerSystemDao.loadSpawnerNames()) {
 			Location location = spawnerSystemDao.loadSpawnerLocation(spawnername);
 			location.getWorld().getBlockAt(location).setMetadata("name", new FixedMetadataValue(
-					serverProvider.getPluginInstance(), spawnerSystemDao.loadSpawnerOwner(spawnername)));
+					serverProvider.getJavaPluginInstance(), spawnerSystemDao.loadSpawnerOwner(spawnername)));
 			location.getWorld().getBlockAt(location).setMetadata("entity", new FixedMetadataValue(
-					serverProvider.getPluginInstance(), spawnerSystemDao.loadSpawnerEntity(spawnername)));
+					serverProvider.getJavaPluginInstance(), spawnerSystemDao.loadSpawnerEntity(spawnername)));
 		}
 	}
 }

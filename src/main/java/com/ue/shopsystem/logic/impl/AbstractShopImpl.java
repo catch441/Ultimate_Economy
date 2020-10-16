@@ -521,7 +521,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		getShopVillager().setSilent(true);
 		getShopVillager().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
 		getShopVillager().setVillagerLevel(2);
-		getShopVillager().setMetadata("ue-id", new FixedMetadataValue(serverProvider.getPluginInstance(), getShopId()));
+		getShopVillager().setMetadata("ue-id", new FixedMetadataValue(serverProvider.getJavaPluginInstance(), getShopId()));
 		getShopVillager().setCollidable(false);
 		getShopVillager().setInvulnerable(true);
 		getShopVillager().setProfession(Profession.NITWIT);

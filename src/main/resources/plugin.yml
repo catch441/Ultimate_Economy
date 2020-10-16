@@ -1,6 +1,6 @@
 name: Ultimate_Economy
 api: []
-main: com.ue.ultimate_economy.UltimateEconomy
+main: com.ue.general.impl.PluginImpl
 author: catch441
 version: 1.2.6
 

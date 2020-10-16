@@ -150,7 +150,7 @@ public class TownImpl implements Town {
 		villager.setCustomNameVisible(true);
 		// set the tye of the villager
 		villager.setMetadata("ue-type",
-				new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.TOWNMANAGER));
+				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.TOWNMANAGER));
 		villager.setProfession(Villager.Profession.NITWIT);
 		villager.setSilent(true);
 		villager.setInvulnerable(true);

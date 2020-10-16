@@ -3,22 +3,19 @@ package com.ue.general.impl;
 import java.lang.reflect.Field;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.bstats.bukkit.Metrics;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankManager;
-import com.ue.common.utils.DaggerServiceComponent;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
-import com.ue.common.utils.ServiceComponent;
 import com.ue.common.utils.Updater;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
@@ -35,128 +32,177 @@ import com.ue.spawnersystem.logic.api.SpawnerManager;
 import com.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
 import com.ue.townsystem.logic.api.TownsystemEventHandler;
 import com.ue.townsystem.logic.api.TownworldManager;
-import com.ue.vault.impl.VaultHook;
+
+import net.milkbowl.vault.economy.Economy;
 
 /**
  * @author Lukas Heubach (catch441)
  */
-public class UltimateEconomy extends JavaPlugin {
+public class UltimateEconomy {
 
-	public static UltimateEconomy getInstance;
-	public static ServiceComponent serviceComponent;
-	@Inject
-	SpawnerManager spawnerManager;
-	@Inject
-	ConfigManager configManager;
-	@Inject
-	BankManager bankManager;
-	@Inject
-	EconomyPlayerManager ecoPlayerManager;
-	@Inject
-	JobManager jobManager;
-	@Inject
-	JobcenterManager jobcenterManager;
-	@Inject
-	AdminshopManager adminshopManager;
-	@Inject
-	PlayershopManager playershopManager;
-	@Inject
-	RentshopManager rentshopManager;
-	@Inject
-	TownworldManager townworldManager;
-	@Inject
-	VaultHook vaultHook;
-	@Inject
-	Metrics metrics;
-	@Inject
-	Updater updater;
-	@Inject
-	Logger logger;
-	@Inject
-	MessageWrapper messageWrapper;
-	@Inject
-	CustomSkullService skullService;
-	@Inject
-	ServerProvider serverProvider;
-	@Inject
-	ShopEventHandler shopEventHandler;
-	@Inject
-	JobsystemEventHandler jobsystemEventHandler;
-	@Inject
-	EconomyPlayerEventHandler ecoPlayerEventHandler;
-	@Inject
-	TownsystemEventHandler townsystemEventHandler;
-	@Inject
-	SpawnerSystemEventHandler spawnerSystemEventHandler;
-	@Inject
-	@Named("ConfigCommandExecutor")
-	CommandExecutor configCommandExecutor;
-	@Inject
-	@Named("EconomyPlayerCommandExecutor")
-	CommandExecutor ecoPlayerCommandExecutor;
-	@Inject
-	@Named("JobCommandExecutor")
-	CommandExecutor jobCommandExecutor;
-	@Inject
-	@Named("PlayershopCommandExecutor")
-	CommandExecutor playershopCommandExecutor;
-	@Inject
-	@Named("AdminshopCommandExecutor")
-	CommandExecutor adminshopCommandExecutor;
-	@Inject
-	@Named("RentshopCommandExecutor")
-	CommandExecutor rentshopCommandExecutor;
-	@Inject
-	@Named("TownCommandExecutor")
-	CommandExecutor townCommandExecutor;
-	@Inject
-	@Named("TownworldCommandExecutor")
-	CommandExecutor townworldCommandExecutor;
-	@Inject
-	@Named("EconomyPlayerTabCompleter")
-	TabCompleter ecoPlayerTabCompleter;
-	@Inject
-	@Named("ConfigTabCompleter")
-	TabCompleter configTabCompleter;
-	@Inject
-	@Named("JobTabCompleter")
-	TabCompleter jobTabCompleter;
-	@Inject
-	@Named("PlayershopTabCompleter")
-	TabCompleter playershopTabCompleter;
-	@Inject
-	@Named("AdminshopTabCompleter")
-	TabCompleter adminshopTabCompleter;
-	@Inject
-	@Named("RentshopTabCompleter")
-	TabCompleter rentshopTabCompleter;
-	@Inject
-	@Named("TownTabCompleter")
-	TabCompleter townTabCompleter;
-	@Inject
-	@Named("TownworldTabCompleter")
-	TabCompleter townworldTabCompleter;
+	private final Economy vaultEconomy;
+	private final SpawnerManager spawnerManager;
+	private final ConfigManager configManager;
+	private final BankManager bankManager;
+	private final EconomyPlayerManager ecoPlayerManager;
+	private final JobManager jobManager;
+	private final JobcenterManager jobcenterManager;
+	private final AdminshopManager adminshopManager;
+	private final PlayershopManager playershopManager;
+	private final RentshopManager rentshopManager;
+	private final TownworldManager townworldManager;
+	@SuppressWarnings("unused")
+	private final Metrics metrics;
+	private final Updater updater;
+	private final Logger logger;
+	private final MessageWrapper messageWrapper;
+	private final CustomSkullService skullService;
+	private final ServerProvider serverProvider;
+	private final ShopEventHandler shopEventHandler;
+	private final JobsystemEventHandler jobsystemEventHandler;
+	private final EconomyPlayerEventHandler ecoPlayerEventHandler;
+	private final TownsystemEventHandler townsystemEventHandler;
+	private final SpawnerSystemEventHandler spawnerSystemEventHandler;
+	private final CommandExecutor configCommandExecutor;
+	private final CommandExecutor ecoPlayerCommandExecutor;
+	private final CommandExecutor jobCommandExecutor;
+	private final CommandExecutor playershopCommandExecutor;
+	private final CommandExecutor adminshopCommandExecutor;
+	private final CommandExecutor rentshopCommandExecutor;
+	private final CommandExecutor townCommandExecutor;
+	private final CommandExecutor townworldCommandExecutor;
+	private final TabCompleter ecoPlayerTabCompleter;
+	private final TabCompleter configTabCompleter;
+	private final TabCompleter jobTabCompleter;
+	private final TabCompleter playershopTabCompleter;
+	private final TabCompleter adminshopTabCompleter;
+	private final TabCompleter rentshopTabCompleter;
+	private final TabCompleter townTabCompleter;
+	private final TabCompleter townworldTabCompleter;
+	private JavaPlugin plugin;
 
 	/**
-	 * Default constructor.
+	 * Inject constructor.
+	 * 
+	 * @param spawnerManager
+	 * @param configManager
+	 * @param bankManager
+	 * @param ecoPlayerManager
+	 * @param jobManager
+	 * @param jobcenterManager
+	 * @param adminshopManager
+	 * @param playershopManager
+	 * @param rentshopManager
+	 * @param townworldManager
+	 * @param vaultHook
+	 * @param metrics
+	 * @param updater
+	 * @param logger
+	 * @param messageWrapper
+	 * @param skullService
+	 * @param serverProvider
+	 * @param shopEventHandler
+	 * @param jobsystemEventHandler
+	 * @param ecoPlayerEventHandler
+	 * @param townsystemEventHandler
+	 * @param spawnerSystemEventHandler
+	 * @param configCommandExecutor
+	 * @param ecoPlayerCommandExecutor
+	 * @param jobCommandExecutor
+	 * @param playershopCommandExecutor
+	 * @param adminshopCommandExecutor
+	 * @param rentshopCommandExecutor
+	 * @param townCommandExecutor
+	 * @param townworldCommandExecutor
+	 * @param ecoPlayerTabCompleter
+	 * @param configTabCompleter
+	 * @param jobTabCompleter
+	 * @param playershopTabCompleter
+	 * @param adminshopTabCompleter
+	 * @param rentshopTabCompleter
+	 * @param townTabCompleter
+	 * @param townworldTabCompleter
 	 */
-	public UltimateEconomy() {
-		super();
-		getInstance = this;
-		serviceComponent = DaggerServiceComponent.builder().build();
-		serviceComponent.inject(this);
+	@Inject
+	public UltimateEconomy(Economy vaultEconomy, SpawnerManager spawnerManager, ConfigManager configManager,
+			BankManager bankManager, EconomyPlayerManager ecoPlayerManager, JobManager jobManager,
+			JobcenterManager jobcenterManager, AdminshopManager adminshopManager, PlayershopManager playershopManager,
+			RentshopManager rentshopManager, TownworldManager townworldManager, Metrics metrics, Updater updater,
+			Logger logger, MessageWrapper messageWrapper, CustomSkullService skullService,
+			ServerProvider serverProvider, ShopEventHandler shopEventHandler,
+			JobsystemEventHandler jobsystemEventHandler, EconomyPlayerEventHandler ecoPlayerEventHandler,
+			TownsystemEventHandler townsystemEventHandler, SpawnerSystemEventHandler spawnerSystemEventHandler,
+			CommandExecutor configCommandExecutor,
+			CommandExecutor ecoPlayerCommandExecutor,
+			CommandExecutor jobCommandExecutor,
+			CommandExecutor playershopCommandExecutor,
+			CommandExecutor adminshopCommandExecutor,
+			CommandExecutor rentshopCommandExecutor,
+			CommandExecutor townCommandExecutor,
+			CommandExecutor townworldCommandExecutor,
+			TabCompleter ecoPlayerTabCompleter,
+			TabCompleter configTabCompleter,
+			TabCompleter jobTabCompleter,
+			TabCompleter playershopTabCompleter,
+			TabCompleter adminshopTabCompleter,
+			TabCompleter rentshopTabCompleter,
+			TabCompleter townTabCompleter,
+			TabCompleter townworldTabCompleter) {
+		this.spawnerManager = spawnerManager;
+		this.configManager = configManager;
+		this.bankManager = bankManager;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.jobManager = jobManager;
+		this.jobcenterManager = jobcenterManager;
+		this.adminshopManager = adminshopManager;
+		this.playershopManager = playershopManager;
+		this.rentshopManager = rentshopManager;
+		this.townworldManager = townworldManager;
+		this.metrics = metrics;
+		this.updater = updater;
+		this.logger = logger;
+		this.messageWrapper = messageWrapper;
+		this.skullService = skullService;
+		this.serverProvider = serverProvider;
+		this.shopEventHandler = shopEventHandler;
+		this.jobsystemEventHandler = jobsystemEventHandler;
+		this.ecoPlayerEventHandler = ecoPlayerEventHandler;
+		this.townsystemEventHandler = townsystemEventHandler;
+		this.spawnerSystemEventHandler = spawnerSystemEventHandler;
+		this.configCommandExecutor = configCommandExecutor;
+		this.ecoPlayerCommandExecutor = ecoPlayerCommandExecutor;
+		this.jobCommandExecutor = jobCommandExecutor;
+		this.playershopCommandExecutor = playershopCommandExecutor;
+		this.adminshopCommandExecutor = adminshopCommandExecutor;
+		this.rentshopCommandExecutor = rentshopCommandExecutor;
+		this.townCommandExecutor = townCommandExecutor;
+		this.townworldCommandExecutor = townworldCommandExecutor;
+		this.ecoPlayerTabCompleter = ecoPlayerTabCompleter;
+		this.configTabCompleter = configTabCompleter;
+		this.jobTabCompleter = jobTabCompleter;
+		this.playershopTabCompleter = playershopTabCompleter;
+		this.adminshopTabCompleter = adminshopTabCompleter;
+		this.rentshopTabCompleter = rentshopTabCompleter;
+		this.townTabCompleter = townTabCompleter;
+		this.townworldTabCompleter = townworldTabCompleter;
+		this.vaultEconomy = vaultEconomy;
 	}
 
-	@Override
+	/**
+	 * Enables the entire plugin.
+	 */
 	public void onEnable() {
+		plugin = serverProvider.getJavaPluginInstance();
 		loadPlugin();
 		setupVault();
 	}
 
-	@Override
+	/**
+	 * Disables the entire plugin.
+	 */
 	public void onDisable() {
+		plugin = serverProvider.getJavaPluginInstance();
 		disablePlugin();
-		disableVault();
 	}
 
 	private void disablePlugin() {
@@ -165,17 +211,14 @@ public class UltimateEconomy extends JavaPlugin {
 		adminshopManager.despawnAllVillagers();
 		playershopManager.despawnAllVillagers();
 		rentshopManager.despawnAllVillagers();
-	}
-
-	private void disableVault() {
-		if (Bukkit.getServer().getPluginManager().getPlugin("Vault") != null) {
-			vaultHook.unhook();
+		if (serverProvider.getServer().getPluginManager().getPlugin("Vault") != null) {
+			serverProvider.getServicesManager().unregister(Economy.class, vaultEconomy);
 		}
 	}
 
 	private void setupVault() {
-		if (Bukkit.getServer().getPluginManager().getPlugin("Vault") != null) {
-			vaultHook.hook();
+		if (serverProvider.getServer().getPluginManager().getPlugin("Vault") != null) {
+			serverProvider.getServicesManager().register(Economy.class, vaultEconomy, plugin, ServicePriority.Normal);
 		}
 	}
 
@@ -186,19 +229,19 @@ public class UltimateEconomy extends JavaPlugin {
 			try {
 				Field commandMapField = SimplePluginManager.class.getDeclaredField("commandMap");
 				commandMapField.setAccessible(true);
-				CommandMap map = (CommandMap) commandMapField.get(Bukkit.getServer().getPluginManager());
+				CommandMap map = serverProvider.getCommandMap(commandMapField);
 				setupHomeCommand(map);
 				setupSetHomeCommand(map);
 				setupDeleteHomeCommand(map);
 			} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-				Bukkit.getLogger().warning("[Ultimate_Economy] Error on enable homes feature.");
-				Bukkit.getLogger().warning("[Ultimate_Economy] Caused by: " + e.getMessage());
+				logger.warn("[Ultimate_Economy] Error on enable homes feature.");
+				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}
 
 	private void setupSetHomeCommand(CommandMap map) {
-		UltimateEconomyCommand setHome = new UltimateEconomyCommand("sethome", this);
+		UltimateEconomyCommand setHome = serverProvider.createUltimateEconomyCommand("sethome");
 		setHome.setDescription("Sets a homepoint.");
 		setHome.setPermission("ultimate_economy.home");
 		setHome.setLabel("sethome");
@@ -209,7 +252,7 @@ public class UltimateEconomy extends JavaPlugin {
 	}
 
 	private void setupDeleteHomeCommand(CommandMap map) {
-		UltimateEconomyCommand delHome = new UltimateEconomyCommand("delhome", this);
+		UltimateEconomyCommand delHome = serverProvider.createUltimateEconomyCommand("delhome");
 		delHome.setDescription("Remove a homepoint.");
 		delHome.setPermission("ultimate_economy.home");
 		delHome.setLabel("delhome");
@@ -221,7 +264,7 @@ public class UltimateEconomy extends JavaPlugin {
 	}
 
 	private void setupHomeCommand(CommandMap map) {
-		UltimateEconomyCommand home = new UltimateEconomyCommand("home", this);
+		UltimateEconomyCommand home = serverProvider.createUltimateEconomyCommand("home");
 		home.setDescription("Teleports you to a homepoint.");
 		home.setPermission("ultimate_economy.home");
 		home.setLabel("home");
@@ -232,42 +275,44 @@ public class UltimateEconomy extends JavaPlugin {
 	}
 
 	private void setupTabCompleters() {
-		getCommand("jobcenter").setTabCompleter(jobTabCompleter);
-		getCommand("jobinfo").setTabCompleter(jobTabCompleter);
-		getCommand("town").setTabCompleter(townTabCompleter);
-		getCommand("townworld").setTabCompleter(townworldTabCompleter);
-		getCommand("adminshop").setTabCompleter(adminshopTabCompleter);
-		getCommand("shop").setTabCompleter(adminshopTabCompleter);
-		getCommand("playershop").setTabCompleter(playershopTabCompleter);
-		getCommand("rentshop").setTabCompleter(rentshopTabCompleter);
-		getCommand("ue-config").setTabCompleter(configTabCompleter);
-		getCommand("bank").setTabCompleter(ecoPlayerTabCompleter);
+		plugin.getCommand("jobcenter").setTabCompleter(jobTabCompleter);
+		plugin.getCommand("jobinfo").setTabCompleter(jobTabCompleter);
+		plugin.getCommand("town").setTabCompleter(townTabCompleter);
+		plugin.getCommand("townworld").setTabCompleter(townworldTabCompleter);
+		plugin.getCommand("adminshop").setTabCompleter(adminshopTabCompleter);
+		plugin.getCommand("shop").setTabCompleter(adminshopTabCompleter);
+		plugin.getCommand("playershop").setTabCompleter(playershopTabCompleter);
+		plugin.getCommand("rentshop").setTabCompleter(rentshopTabCompleter);
+		plugin.getCommand("ue-config").setTabCompleter(configTabCompleter);
+		plugin.getCommand("bank").setTabCompleter(ecoPlayerTabCompleter);
 	}
 
 	private void setupCommandExecutors() {
-		getCommand("jobcenter").setExecutor(jobCommandExecutor);
-		getCommand("jobinfo").setExecutor(jobCommandExecutor);
-		getCommand("joblist").setExecutor(jobCommandExecutor);
-		getCommand("town").setExecutor(townCommandExecutor);
-		getCommand("townworld").setExecutor(townworldCommandExecutor);
-		getCommand("adminshop").setExecutor(adminshopCommandExecutor);
-		getCommand("shoplist").setExecutor(adminshopCommandExecutor);
-		getCommand("shop").setExecutor(adminshopCommandExecutor);
-		getCommand("playershop").setExecutor(playershopCommandExecutor);
-		getCommand("rentshop").setExecutor(rentshopCommandExecutor);
-		getCommand("pay").setExecutor(ecoPlayerCommandExecutor);
-		getCommand("givemoney").setExecutor(ecoPlayerCommandExecutor);
-		getCommand("money").setExecutor(ecoPlayerCommandExecutor);
-		getCommand("myjobs").setExecutor(ecoPlayerCommandExecutor);
-		getCommand("bank").setExecutor(ecoPlayerCommandExecutor);
-		getCommand("ue-config").setExecutor(configCommandExecutor);
+		plugin.getCommand("jobcenter").setExecutor(jobCommandExecutor);
+		plugin.getCommand("jobinfo").setExecutor(jobCommandExecutor);
+		plugin.getCommand("joblist").setExecutor(jobCommandExecutor);
+		plugin.getCommand("town").setExecutor(townCommandExecutor);
+		plugin.getCommand("townworld").setExecutor(townworldCommandExecutor);
+		plugin.getCommand("adminshop").setExecutor(adminshopCommandExecutor);
+		plugin.getCommand("shoplist").setExecutor(adminshopCommandExecutor);
+		plugin.getCommand("shop").setExecutor(adminshopCommandExecutor);
+		plugin.getCommand("playershop").setExecutor(playershopCommandExecutor);
+		plugin.getCommand("rentshop").setExecutor(rentshopCommandExecutor);
+		plugin.getCommand("pay").setExecutor(ecoPlayerCommandExecutor);
+		plugin.getCommand("givemoney").setExecutor(ecoPlayerCommandExecutor);
+		plugin.getCommand("money").setExecutor(ecoPlayerCommandExecutor);
+		plugin.getCommand("myjobs").setExecutor(ecoPlayerCommandExecutor);
+		plugin.getCommand("bank").setExecutor(ecoPlayerCommandExecutor);
+		plugin.getCommand("ue-config").setExecutor(configCommandExecutor);
 	}
 
 	private void loadPlugin() {
-		if (!getDataFolder().exists()) {
-			getDataFolder().mkdirs();
+		if (!serverProvider.getPluginInstance().getDataFolder().exists()) {
+			serverProvider.getPluginInstance().getDataFolder().mkdirs();
 		}
-		setupPlugin();
+		configManager.setupConfig();
+		skullService.setup();
+		rentshopManager.setupRentDailyTask();
 		messageWrapper.loadLanguage(configManager.getLocale());
 		bankManager.loadBankAccounts();
 		jobManager.loadAllJobs();
@@ -280,16 +325,12 @@ public class UltimateEconomy extends JavaPlugin {
 		loadCommands();
 		spawnerManager.loadAllSpawners();
 		// check for new versions
-		updater.checkForUpdate(serverProvider.getPluginInstance().getDescription().getVersion());
+		updater.checkForUpdate(plugin.getDescription().getVersion());
 		// setup eventhandler
-		getServer().getPluginManager()
-				.registerEvents(new UltimateEconomyEventHandlerImpl(logger, updater, spawnerSystemEventHandler,
-						townsystemEventHandler, shopEventHandler, jobsystemEventHandler, ecoPlayerEventHandler), this);
-	}
-
-	private void setupPlugin() {
-		configManager.setupConfig();
-		skullService.setup();
-		rentshopManager.setupRentDailyTask();
+		serverProvider.getServer().getPluginManager()
+				.registerEvents(
+						new UltimateEconomyEventHandlerImpl(logger, updater, spawnerSystemEventHandler,
+								townsystemEventHandler, shopEventHandler, jobsystemEventHandler, ecoPlayerEventHandler),
+						plugin);
 	}
 }

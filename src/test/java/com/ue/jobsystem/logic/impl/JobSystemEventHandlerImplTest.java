@@ -33,7 +33,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -66,14 +66,14 @@ public class JobSystemEventHandlerImplTest {
 
 	@Test
 	public void handleSetBlockTestSurvival() {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Player player = mock(Player.class);
 		Block block = mock(Block.class);
 		BlockPlaceEvent event = new BlockPlaceEvent(block, null, null, null, player, true, null);
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		when(player.getName()).thenReturn("catch441");
 		when(block.getType()).thenReturn(Material.STONE);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 
 		eventHandler.handleSetBlock(event);
 		verify(block).setMetadata(eq("placedBy"), any(FixedMetadataValue.class));

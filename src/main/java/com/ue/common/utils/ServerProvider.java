@@ -1,23 +1,29 @@
 package com.ue.common.utils;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
+import org.bukkit.command.CommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.ServicesManager;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 
-import com.ue.general.impl.UltimateEconomy;
+import com.ue.general.impl.PluginImpl;
+import com.ue.general.impl.UltimateEconomyCommand;
 
 public class ServerProvider {
 
@@ -74,7 +80,16 @@ public class ServerProvider {
 	 * @return path
 	 */
 	public String getDataFolderPath() {
-		return UltimateEconomy.getInstance.getDataFolder().getPath();
+		return PluginImpl.getInstance.getDataFolder().getPath();
+	}
+
+	/**
+	 * Returns the java plugin instance.
+	 * 
+	 * @return ultimate economy plugin
+	 */
+	public JavaPlugin getJavaPluginInstance() {
+		return PluginImpl.getInstance;
 	}
 
 	/**
@@ -83,7 +98,7 @@ public class ServerProvider {
 	 * @return ultimate economy plugin
 	 */
 	public Plugin getPluginInstance() {
-		return UltimateEconomy.getInstance;
+		return PluginImpl.getInstance;
 	}
 
 	/**
@@ -92,7 +107,7 @@ public class ServerProvider {
 	 * @return service component
 	 */
 	public ServiceComponent getServiceComponent() {
-		return UltimateEconomy.serviceComponent;
+		return PluginImpl.serviceComponent;
 	}
 
 	/**
@@ -136,5 +151,43 @@ public class ServerProvider {
 	 */
 	public ItemStack createItemStack(Material material, int amount) {
 		return new ItemStack(material, amount);
+	}
+
+	/**
+	 * Returns the bukkit server.
+	 * 
+	 * @return server
+	 */
+	public Server getServer() {
+		return Bukkit.getServer();
+	}
+
+	/**
+	 * Returns the bukkit services manager.
+	 * 
+	 * @return services manager
+	 */
+	public ServicesManager getServicesManager() {
+		return Bukkit.getServicesManager();
+	}
+
+	/**
+	 * Returns the comamnd map of the plugin.
+	 * 
+	 * @return command map
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 */
+	public CommandMap getCommandMap(Field commandMapField) throws IllegalArgumentException, IllegalAccessException {
+		return (CommandMap) commandMapField.get(getServer().getPluginManager());
+	}
+	
+	/**
+	 * Returns a new command associated with the plugin.
+	 * @param name
+	 * @return command
+	 */
+	public UltimateEconomyCommand createUltimateEconomyCommand(String name) {
+		return new UltimateEconomyCommand(name, getPluginInstance());
 	}
 }

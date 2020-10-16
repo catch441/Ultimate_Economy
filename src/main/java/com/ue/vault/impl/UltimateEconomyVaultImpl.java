@@ -184,7 +184,7 @@ public class UltimateEconomyVaultImpl implements Economy {
 
 	@Override
 	public boolean isEnabled() {
-		if (serverProvider.getPluginInstance() == null) {
+		if (serverProvider.getJavaPluginInstance() == null) {
 			return false;
 		} else {
 			return true;

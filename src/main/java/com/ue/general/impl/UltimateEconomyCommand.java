@@ -19,7 +19,12 @@ public class UltimateEconomyCommand extends Command implements PluginIdentifiabl
 	private CommandExecutor executor;
 	private TabCompleter completer;
 
-	protected UltimateEconomyCommand(String name, Plugin plugin) {
+	/**
+	 * Creates a new ue command.
+	 * @param name
+	 * @param plugin
+	 */
+	public UltimateEconomyCommand(String name, Plugin plugin) {
 		super(name);
 		this.executor = plugin;
 		this.owningPlugin = plugin;

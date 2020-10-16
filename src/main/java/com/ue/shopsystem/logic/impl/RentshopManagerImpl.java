@@ -174,7 +174,7 @@ public class RentshopManagerImpl implements RentshopManager {
 	public void setupRentDailyTask() {
 		Logger logger = LoggerFactory.getLogger(RentDailyTask.class.getName());
 		new RentDailyTask(logger, serverProvider, this, messageWrapper)
-				.runTaskTimerAsynchronously(serverProvider.getPluginInstance(), 1, 1000);
+				.runTaskTimerAsynchronously(serverProvider.getJavaPluginInstance(), 1, 1000);
 	}
 
 	private List<String> getRentShopIdList() {

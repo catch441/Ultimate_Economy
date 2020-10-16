@@ -31,6 +31,7 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerEventHandlerImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerTabCompleterImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerValidationHandlerImpl;
+import com.ue.general.impl.PluginImpl;
 import com.ue.general.impl.UltimateEconomy;
 import com.ue.jobsyste.dataaccess.api.JobDao;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
@@ -85,7 +86,6 @@ import com.ue.townsystem.logic.impl.TownworldCommandExecutorImpl;
 import com.ue.townsystem.logic.impl.TownworldManagerImpl;
 import com.ue.townsystem.logic.impl.TownworldTabCompleterImpl;
 import com.ue.vault.impl.UltimateEconomyVaultImpl;
-import com.ue.vault.impl.VaultHook;
 
 import dagger.Module;
 import dagger.Provides;
@@ -93,7 +93,7 @@ import net.milkbowl.vault.economy.Economy;
 
 @Module
 public class ProviderModule {
-	
+
 	@Singleton
 	@Provides
 	Logger provideUltimateEconomyLogger() {
@@ -102,10 +102,46 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	Metrics provideMetrics() {
-		return new Metrics(UltimateEconomy.getInstance, 4652);
+	UltimateEconomy provideUltimateEconomy(Economy vaultEconomy, SpawnerManager spawnerManager, ConfigManager configManager,
+			BankManager bankManager, EconomyPlayerManager ecoPlayerManager, JobManager jobManager,
+			JobcenterManager jobcenterManager, AdminshopManager adminshopManager, PlayershopManager playershopManager,
+			RentshopManager rentshopManager, TownworldManager townworldManager, Metrics metrics,
+			Updater updater, Logger logger, MessageWrapper messageWrapper, CustomSkullService skullService,
+			ServerProvider serverProvider, ShopEventHandler shopEventHandler,
+			JobsystemEventHandler jobsystemEventHandler, EconomyPlayerEventHandler ecoPlayerEventHandler,
+			TownsystemEventHandler townsystemEventHandler, SpawnerSystemEventHandler spawnerSystemEventHandler,
+			@Named("ConfigCommandExecutor") CommandExecutor configCommandExecutor,
+			@Named("EconomyPlayerCommandExecutor") CommandExecutor ecoPlayerCommandExecutor,
+			@Named("JobCommandExecutor") CommandExecutor jobCommandExecutor,
+			@Named("PlayershopCommandExecutor") CommandExecutor playershopCommandExecutor,
+			@Named("AdminshopCommandExecutor") CommandExecutor adminshopCommandExecutor,
+			@Named("RentshopCommandExecutor") CommandExecutor rentshopCommandExecutor,
+			@Named("TownCommandExecutor") CommandExecutor townCommandExecutor,
+			@Named("TownworldCommandExecutor") CommandExecutor townworldCommandExecutor,
+			@Named("EconomyPlayerTabCompleter") TabCompleter ecoPlayerTabCompleter,
+			@Named("ConfigTabCompleter") TabCompleter configTabCompleter,
+			@Named("JobTabCompleter") TabCompleter jobTabCompleter,
+			@Named("PlayershopTabCompleter") TabCompleter playershopTabCompleter,
+			@Named("AdminshopTabCompleter") TabCompleter adminshopTabCompleter,
+			@Named("RentshopTabCompleter") TabCompleter rentshopTabCompleter,
+			@Named("TownTabCompleter") TabCompleter townTabCompleter,
+			@Named("TownworldTabCompleter") TabCompleter townworldTabCompleter) {
+		return new UltimateEconomy(vaultEconomy, spawnerManager, configManager, bankManager, ecoPlayerManager, jobManager,
+				jobcenterManager, adminshopManager, playershopManager, rentshopManager, townworldManager,
+				metrics, updater, logger, messageWrapper, skullService, serverProvider, shopEventHandler,
+				jobsystemEventHandler, ecoPlayerEventHandler, townsystemEventHandler, spawnerSystemEventHandler,
+				configCommandExecutor, ecoPlayerCommandExecutor, jobCommandExecutor, playershopCommandExecutor,
+				adminshopCommandExecutor, rentshopCommandExecutor, townCommandExecutor, townworldCommandExecutor,
+				ecoPlayerTabCompleter, configTabCompleter, jobTabCompleter, playershopTabCompleter,
+				adminshopTabCompleter, rentshopTabCompleter, townTabCompleter, townworldTabCompleter);
 	}
-	
+
+	@Singleton
+	@Provides
+	Metrics provideMetrics() {
+		return new Metrics(PluginImpl.getInstance, 4652);
+	}
+
 	@Singleton
 	@Provides
 	Updater provideUpdater() {
@@ -123,19 +159,13 @@ public class ProviderModule {
 	Economy provideVaultEconomy(UltimateEconomyVaultImpl euVault) {
 		return euVault;
 	}
-
-	@Singleton
-	@Provides
-	VaultHook provideVaultHook(Economy vaultEconomy) {
-		return new VaultHook(vaultEconomy);
-	}
-
+	
 	@Singleton
 	@Provides
 	MessageWrapper provideMessageWrapper(Logger logger) {
 		return new MessageWrapper(logger);
 	}
-	
+
 	@Singleton
 	@Provides
 	SpawnerManager provideSpawnerManager(SpawnerManagerImpl spawnerManager) {
@@ -325,7 +355,7 @@ public class ProviderModule {
 	EconomyPlayerDao provideEcoPlayerDao(EconomyPlayerDaoImpl ecoPlayerDao) {
 		return ecoPlayerDao;
 	}
-	
+
 	@Singleton
 	@Provides
 	SpawnerSystemDao provideSpawnerSystemDao(SpawnerSystemDaoImpl spawnerSystemDao) {
@@ -360,7 +390,8 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	EconomyPlayerValidationHandler provideEcoPlayerValidationHandler(EconomyPlayerValidationHandlerImpl ecoPlayerValidator) {
+	EconomyPlayerValidationHandler provideEcoPlayerValidationHandler(
+			EconomyPlayerValidationHandlerImpl ecoPlayerValidator) {
 		return ecoPlayerValidator;
 	}
 
@@ -378,10 +409,11 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	TownsystemValidationHandler provideTownsystemValidationHandler(TownsystemValidationHandlerImpl townsystemValidator) {
+	TownsystemValidationHandler provideTownsystemValidationHandler(
+			TownsystemValidationHandlerImpl townsystemValidator) {
 		return townsystemValidator;
 	}
-	
+
 	@Singleton
 	@Provides
 	SpawnerSystemEventHandler provideSpawnerEventHandler(SpawnerSystemEventHandlerImpl spawnerEventHandler) {

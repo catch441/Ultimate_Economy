@@ -29,7 +29,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -83,7 +83,7 @@ public class RentshopManagerImplTest {
 	}
 
 	private Rentshop createRentshop() {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
@@ -97,7 +97,7 @@ public class RentshopManagerImplTest {
 		when(serverProvider.createInventory(eq(villager), anyInt(), anyString())).thenReturn(inv);
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
@@ -194,7 +194,7 @@ public class RentshopManagerImplTest {
 
 	@Test
 	public void deleteRentshopTest() {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
@@ -208,7 +208,7 @@ public class RentshopManagerImplTest {
 		when(serverProvider.createInventory(eq(villager), anyInt(), anyString())).thenReturn(inv);
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
@@ -242,7 +242,7 @@ public class RentshopManagerImplTest {
 
 	@Test
 	public void createRentshopTest() {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
@@ -256,7 +256,7 @@ public class RentshopManagerImplTest {
 		when(serverProvider.createInventory(eq(villager), anyInt(), anyString())).thenReturn(inv);
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
@@ -277,7 +277,7 @@ public class RentshopManagerImplTest {
 
 	@Test
 	public void loadAllRentshopsTest() {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
@@ -294,7 +294,7 @@ public class RentshopManagerImplTest {
 		when(serverProvider.createInventory(eq(villager), anyInt(), anyString())).thenReturn(inv);
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);

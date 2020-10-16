@@ -253,7 +253,7 @@ public class JobcenterImpl implements Jobcenter {
 		villager = (Villager) getJobcenterLocation().getWorld().spawnEntity(location, EntityType.VILLAGER);
 		villager.setCustomName(name);
 		villager.setMetadata("ue-type",
-				new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.JOBCENTER));
+				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.JOBCENTER));
 		villager.setCustomNameVisible(true);
 		villager.setProfession(Profession.NITWIT);
 		villager.setSilent(true);

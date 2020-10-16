@@ -395,7 +395,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
 	private void setupEconomyVillagerType() {
 		getShopVillager().setMetadata("ue-type",
-				new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.PLAYERSHOP));
+				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.PLAYERSHOP));
 	}
 
 	private void setupShopInvDefaultStockItem() {

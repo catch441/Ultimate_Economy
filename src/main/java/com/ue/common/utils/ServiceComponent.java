@@ -2,7 +2,7 @@ package com.ue.common.utils;
 
 import javax.inject.Singleton;
 
-import com.ue.general.impl.UltimateEconomy;
+import com.ue.general.impl.PluginImpl;
 import com.ue.jobsyste.dataaccess.api.JobDao;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
@@ -15,11 +15,11 @@ import dagger.Component;
 public interface ServiceComponent {
 
 	/**
-	 * Injects UltimateEconomy.
+	 * Injects the plugin.
 	 * 
 	 * @param plugin
 	 */
-	void inject(UltimateEconomy plugin);
+	void inject(PluginImpl plugin);
 
 	/**
 	 * Provides a jobcenter data access object.

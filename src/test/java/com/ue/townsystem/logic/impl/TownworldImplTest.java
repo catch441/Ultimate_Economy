@@ -25,7 +25,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -67,7 +67,7 @@ public class TownworldImplTest {
 	TownworldDao townworldDao;
 
 	private void setupMocksForLoadingTown(String townName) {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		EconomyPlayer mayor = mock(EconomyPlayer.class);
 		EconomyPlayer deputy = mock(EconomyPlayer.class);
 		Location loc = mock(Location.class);
@@ -88,7 +88,7 @@ public class TownworldImplTest {
 		assertDoesNotThrow(() -> when(townworldDao.loadDeputies(townName)).thenReturn(Arrays.asList(deputy)));
 		assertDoesNotThrow(() -> when(townworldDao.loadCitizens(townName)).thenReturn(Arrays.asList(mayor)));
 		when(townworldDao.loadTax(townName)).thenReturn(1.5);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(joinItem.getItemMeta()).thenReturn(joinItemMeta);
 		when(leaveItem.getItemMeta()).thenReturn(leaveItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
@@ -101,7 +101,7 @@ public class TownworldImplTest {
 	}
 	
 	private Location setupMocksForNewTown() {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
 		World world = mock(World.class);
@@ -112,7 +112,7 @@ public class TownworldImplTest {
 		ItemStack leaveItem = mock(ItemStack.class);
 		ItemMeta joinItemMeta = mock(ItemMeta.class);
 		ItemMeta leaveItemMeta = mock(ItemMeta.class);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(joinItem.getItemMeta()).thenReturn(joinItemMeta);
 		when(leaveItem.getItemMeta()).thenReturn(leaveItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
@@ -335,7 +335,7 @@ public class TownworldImplTest {
 	
 	@Test
 	public void despawnAllTownVillagersTest() {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
 		World world = mock(World.class);
@@ -346,7 +346,7 @@ public class TownworldImplTest {
 		ItemStack leaveItem = mock(ItemStack.class);
 		ItemMeta joinItemMeta = mock(ItemMeta.class);
 		ItemMeta leaveItemMeta = mock(ItemMeta.class);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(joinItem.getItemMeta()).thenReturn(joinItemMeta);
 		when(leaveItem.getItemMeta()).thenReturn(leaveItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
@@ -394,7 +394,7 @@ public class TownworldImplTest {
 	
 	@Test
 	public void dissolveTownTest() {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
 		World world = mock(World.class);
@@ -405,7 +405,7 @@ public class TownworldImplTest {
 		ItemStack leaveItem = mock(ItemStack.class);
 		ItemMeta joinItemMeta = mock(ItemMeta.class);
 		ItemMeta leaveItemMeta = mock(ItemMeta.class);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(joinItem.getItemMeta()).thenReturn(joinItemMeta);
 		when(leaveItem.getItemMeta()).thenReturn(leaveItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
@@ -436,7 +436,7 @@ public class TownworldImplTest {
 	
 	@Test
 	public void deleteTest() {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
 		World world = mock(World.class);
@@ -447,7 +447,7 @@ public class TownworldImplTest {
 		ItemStack leaveItem = mock(ItemStack.class);
 		ItemMeta joinItemMeta = mock(ItemMeta.class);
 		ItemMeta leaveItemMeta = mock(ItemMeta.class);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(joinItem.getItemMeta()).thenReturn(joinItemMeta);
 		when(leaveItem.getItemMeta()).thenReturn(leaveItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);

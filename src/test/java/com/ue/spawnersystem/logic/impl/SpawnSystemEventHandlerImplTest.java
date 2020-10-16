@@ -32,6 +32,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -166,7 +167,7 @@ public class SpawnSystemEventHandlerImplTest {
 	
 	@Test
 	public void handleSetBlockEventTest() {
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Player player = mock(Player.class);
 		Block block = mock(Block.class);
 		BlockData data = mock(BlockData.class);
@@ -183,7 +184,7 @@ public class SpawnSystemEventHandlerImplTest {
 		when(block.getLocation()).thenReturn(loc);
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		when(player.getName()).thenReturn("catch441");
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		eventHandler.handleSetBlockEvent(event);
 		verify(block).setMetadata(eq("name"), any(FixedMetadataValue.class));
 		verify(blockState).setSpawnedType(EntityType.COW);

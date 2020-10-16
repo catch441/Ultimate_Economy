@@ -69,7 +69,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 	public void handleSetBlock(BlockPlaceEvent event) {
 		if (event.getPlayer().getGameMode() == GameMode.SURVIVAL && !(event.getBlock().getType() == Material.SPAWNER)) {
 			event.getBlock().setMetadata("placedBy",
-					new FixedMetadataValue(serverProvider.getPluginInstance(), event.getPlayer().getName()));
+					new FixedMetadataValue(serverProvider.getJavaPluginInstance(), event.getPlayer().getName()));
 		}
 	}
 

@@ -51,7 +51,7 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 				messageWrapper, configManager);
 		this.adminshopManager = adminshopManager;
 		getShopVillager().setMetadata("ue-type",
-				new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.ADMINSHOP));
+				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.ADMINSHOP));
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 				configManager);
 		this.adminshopManager = adminshopManager;
 		getShopVillager().setMetadata("ue-type",
-				new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.ADMINSHOP));
+				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.ADMINSHOP));
 	}
 
 	@Override

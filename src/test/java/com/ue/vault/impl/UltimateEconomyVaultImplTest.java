@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -222,7 +222,7 @@ public class UltimateEconomyVaultImplTest {
 	@Test
 	public void isEnabledTest() {
 		assertFalse(vault.isEnabled());
-		when(serverProvider.getPluginInstance()).thenReturn(mock(Plugin.class));
+		when(serverProvider.getJavaPluginInstance()).thenReturn(mock(JavaPlugin.class));
 		assertTrue(vault.isEnabled());
 	}
 

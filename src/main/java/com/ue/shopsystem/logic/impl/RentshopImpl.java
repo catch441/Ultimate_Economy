@@ -361,7 +361,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
 	private void setupEconomyVillagerType() {
 		getShopVillager().setMetadata("ue-type",
-				new FixedMetadataValue(serverProvider.getPluginInstance(), EconomyVillager.PLAYERSHOP_RENTABLE));
+				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.PLAYERSHOP_RENTABLE));
 	}
 
 	private void setupVillagerName() {

@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import com.ue.general.impl.UltimateEconomy;
+import com.ue.common.utils.ServerProvider;
 import com.ue.shopsystem.logic.api.CustomSkullService;
 
 public class CustomSkullServiceImpl implements CustomSkullService {
@@ -49,17 +49,20 @@ public class CustomSkullServiceImpl implements CustomSkullService {
 	public final String slotempty = "http://textures.minecraft.net/texture/"
 			+ "b55d5019c8d55bcb9dc3494ccc3419757f89c3384cf3c9abec3f18831f35b0";
 	private final Logger logger;
+	private final ServerProvider serverProvider;
 
 	private Map<String, ItemStack> customSkullMap = new HashMap<>();
 	
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param serverProvider
 	 * @param logger
 	 */
 	@Inject
-	public CustomSkullServiceImpl(Logger logger) {
+	public CustomSkullServiceImpl(ServerProvider serverProvider, Logger logger) {
 		this.logger = logger;
+		this.serverProvider= serverProvider;
 	}
 
 	@Override
@@ -95,7 +98,7 @@ public class CustomSkullServiceImpl implements CustomSkullService {
 		}
 		SkullMeta headMeta = (SkullMeta) head.getItemMeta();
 		// for testing
-		NamespacedKey key = new NamespacedKey(UltimateEconomy.getInstance, "ue-texture");
+		NamespacedKey key = new NamespacedKey(serverProvider.getJavaPluginInstance(), "ue-texture");
 		headMeta.getPersistentDataContainer().set(key, PersistentDataType.STRING, url);
 		GameProfile profile = new GameProfile(UUID.randomUUID(), null);
 		byte[] encodedData = Base64.getEncoder()

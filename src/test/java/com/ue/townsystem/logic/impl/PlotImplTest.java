@@ -30,7 +30,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,7 +71,7 @@ public class PlotImplTest {
 		World world = mock(World.class);
 		Villager duplicated = mock(Villager.class);
 		Villager villager = mock(Villager.class);
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Inventory inv = mock(Inventory.class);
 		ItemStack buyItem = mock(ItemStack.class);
 		ItemStack cancelItem = mock(ItemStack.class);
@@ -83,7 +83,7 @@ public class PlotImplTest {
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(cancelItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(buyItem);
 		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(duplicated.getName()).thenReturn("Plot 1/2 For Sale!");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
@@ -131,7 +131,7 @@ public class PlotImplTest {
 		World world = mock(World.class);
 		Villager duplicated = mock(Villager.class);
 		Villager villager = mock(Villager.class);
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Inventory inv = mock(Inventory.class);
 		ItemStack buyItem = mock(ItemStack.class);
 		ItemStack cancelItem = mock(ItemStack.class);
@@ -143,7 +143,7 @@ public class PlotImplTest {
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(cancelItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(buyItem);
 		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(duplicated.getName()).thenReturn("Plot 1/2 For Sale!");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
@@ -205,7 +205,7 @@ public class PlotImplTest {
 		World world = mock(World.class);
 		Villager duplicated = mock(Villager.class);
 		Villager villager = mock(Villager.class);
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Inventory inv = mock(Inventory.class);
 		ItemStack buyItem = mock(ItemStack.class);
 		ItemStack cancelItem = mock(ItemStack.class);
@@ -217,7 +217,7 @@ public class PlotImplTest {
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(cancelItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(buyItem);
 		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(duplicated.getName()).thenReturn("Plot 1/2 For Sale!");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
@@ -262,7 +262,7 @@ public class PlotImplTest {
 		Chunk chunk = mock(Chunk.class);
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Inventory inv = mock(Inventory.class);
 		ItemStack buyItem = mock(ItemStack.class);
 		ItemStack cancelItem = mock(ItemStack.class);
@@ -274,7 +274,7 @@ public class PlotImplTest {
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(cancelItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(buyItem);
 		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(new ArrayList<>());
 		when(loc.getWorld()).thenReturn(world);
@@ -315,7 +315,7 @@ public class PlotImplTest {
 		World world = mock(World.class);
 		Villager duplicated = mock(Villager.class);
 		Villager villager = mock(Villager.class);
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Inventory inv = mock(Inventory.class);
 		ItemStack buyItem = mock(ItemStack.class);
 		ItemStack cancelItem = mock(ItemStack.class);
@@ -327,7 +327,7 @@ public class PlotImplTest {
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(cancelItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(buyItem);
 		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(duplicated.getName()).thenReturn("Plot 1/2 For Sale!");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
@@ -446,7 +446,7 @@ public class PlotImplTest {
 		World world = mock(World.class);
 		Villager duplicated = mock(Villager.class);
 		Villager villager = mock(Villager.class);
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Inventory inv = mock(Inventory.class);
 		ItemStack buyItem = mock(ItemStack.class);
 		ItemStack cancelItem = mock(ItemStack.class);
@@ -459,7 +459,7 @@ public class PlotImplTest {
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(cancelItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(buyItem);
 		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(duplicated.getName()).thenReturn("Plot 1/2 For Sale!");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
@@ -510,7 +510,7 @@ public class PlotImplTest {
 		World world = mock(World.class);
 		Villager duplicated = mock(Villager.class);
 		Villager villager = mock(Villager.class);
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Inventory inv = mock(Inventory.class);
 		ItemStack buyItem = mock(ItemStack.class);
 		ItemStack cancelItem = mock(ItemStack.class);
@@ -522,7 +522,7 @@ public class PlotImplTest {
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(cancelItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(buyItem);
 		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(duplicated.getName()).thenReturn("Plot 1/2 For Sale!");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));

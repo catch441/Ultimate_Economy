@@ -32,7 +32,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -253,7 +253,7 @@ public class TownworldManagerImplTest {
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
 		BossBar bossbar = mock(BossBar.class);				
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
 		World world = mock(World.class);
@@ -264,7 +264,7 @@ public class TownworldManagerImplTest {
 		ItemStack leaveItem = mock(ItemStack.class);
 		ItemMeta joinItemMeta = mock(ItemMeta.class);
 		ItemMeta leaveItemMeta = mock(ItemMeta.class);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(joinItem.getItemMeta()).thenReturn(joinItemMeta);
 		when(leaveItem.getItemMeta()).thenReturn(leaveItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
@@ -296,7 +296,7 @@ public class TownworldManagerImplTest {
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
 		World world = mock(World.class);
@@ -307,7 +307,7 @@ public class TownworldManagerImplTest {
 		ItemStack leaveItem = mock(ItemStack.class);
 		ItemMeta joinItemMeta = mock(ItemMeta.class);
 		ItemMeta leaveItemMeta = mock(ItemMeta.class);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(joinItem.getItemMeta()).thenReturn(joinItemMeta);
 		when(leaveItem.getItemMeta()).thenReturn(leaveItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
@@ -336,7 +336,7 @@ public class TownworldManagerImplTest {
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
-		Plugin plugin = mock(Plugin.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
 		World world = mock(World.class);
@@ -347,7 +347,7 @@ public class TownworldManagerImplTest {
 		ItemStack leaveItem = mock(ItemStack.class);
 		ItemMeta joinItemMeta = mock(ItemMeta.class);
 		ItemMeta leaveItemMeta = mock(ItemMeta.class);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(joinItem.getItemMeta()).thenReturn(joinItemMeta);
 		when(leaveItem.getItemMeta()).thenReturn(leaveItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
