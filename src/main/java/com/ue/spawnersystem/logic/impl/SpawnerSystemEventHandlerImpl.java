@@ -71,8 +71,8 @@ public class SpawnerSystemEventHandlerImpl implements SpawnerSystemEventHandler 
 				event.getPlayer().sendMessage(messageWrapper.getErrorString("inventory_full"));
 			} else if (event.getPlayer().getName().equals(blockname)) {
 				if (!event.getBlock().getMetadata("entity").isEmpty()) {
-					spawnerManager.removeSpawner(event.getBlock().getLocation());
-					ItemStack stack = new ItemStack(Material.SPAWNER, 1);
+					//spawnerManager.removeSpawner(event.getBlock().getLocation());
+					ItemStack stack = serverProvider.createItemStack(Material.SPAWNER, 1);
 					ItemMeta meta = stack.getItemMeta();
 					meta.setDisplayName(event.getBlock().getMetadata("entity").get(0).asString() + "-"
 							+ event.getPlayer().getName());

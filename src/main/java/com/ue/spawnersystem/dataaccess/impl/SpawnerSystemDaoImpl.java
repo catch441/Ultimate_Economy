@@ -31,6 +31,10 @@ public class SpawnerSystemDaoImpl extends SaveFileUtils implements SpawnerSystem
 	public SpawnerSystemDaoImpl(Logger logger, ServerProvider serverProvider) {
 		super(logger);
 		this.serverProvider = serverProvider;
+	}
+	
+	@Override
+	public void setupSavefile() {
 		file = new File(serverProvider.getDataFolderPath(), "SpawnerLocations.yml");
 		if (!file.exists()) {
 			createFile(file);
@@ -74,7 +78,7 @@ public class SpawnerSystemDaoImpl extends SaveFileUtils implements SpawnerSystem
 	
 	@Override
 	public List<String> loadSpawnerNames() {
-		return new ArrayList<>(config.getDefaultSection().getKeys(false));
+		return new ArrayList<>(config.getConfigurationSection("").getKeys(false));
 	}
 	
 	// TODO remove Spawnerlist from real config

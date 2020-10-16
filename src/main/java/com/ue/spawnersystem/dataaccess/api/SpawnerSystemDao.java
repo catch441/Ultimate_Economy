@@ -40,7 +40,8 @@ public interface SpawnerSystemDao {
 	public String loadSpawnerOwner(String spawnerName);
 
 	/**
-	 * Returns the spawner entity.
+	 * Retur@Override
+	ns the spawner entity.
 	 * 
 	 * @param spawnerName
 	 * @return entity
@@ -53,5 +54,10 @@ public interface SpawnerSystemDao {
 	 * @param spawnerName
 	 */
 	public void saveRemoveSpawner(String spawnerName);
+
+	/**
+	 * Setup the savefile.
+	 */
+	public void setupSavefile();
 
 }
