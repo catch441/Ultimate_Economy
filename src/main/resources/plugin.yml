@@ -184,7 +184,7 @@ commands:
         permission: ultimate_economy.fastshop
         permission-message: You don't have the permission.
         description: Opens a specific shop.
-        usage: /<command>
+        usage: /<command> <shop>
 
     playershop:
         permission: ultimate_economy.playershop
