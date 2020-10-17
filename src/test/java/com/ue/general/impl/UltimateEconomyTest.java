@@ -23,7 +23,6 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -145,11 +144,6 @@ public class UltimateEconomyTest {
 	@Mock
 	@Named("TownworldTabCompleter")
 	TabCompleter townworldTabCompleter;
-
-	@BeforeAll
-	public static void setup() {
-		// System.setProperty("bstats.relocatecheck", "false");
-	}
 
 	@Test
 	public void onDisableTest() {
