@@ -165,6 +165,7 @@ public class TownworldManagerImplTest {
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
+		assertDoesNotThrow(() -> townworldManager.createTownWorld("other"));
 
 		Townworld townworld = assertDoesNotThrow(() -> townworldManager.getTownWorldByName("world"));
 		assertEquals("world", townworld.getWorldName());
@@ -314,6 +315,8 @@ public class TownworldManagerImplTest {
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(leaveItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(joinItem);
 		when(serverProvider.createInventory(villager, 9, "mytown TownManager")).thenReturn(inv);
+		when(serverProvider.createInventory(villager, 9, "other TownManager")).thenReturn(inv);
+		when(serverProvider.createInventory(villager, 9, "some TownManager")).thenReturn(inv);
 		when(bankManager.createBankAccount(0)).thenReturn(account);
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
@@ -323,7 +326,9 @@ public class TownworldManagerImplTest {
 		when(loc.getWorld()).thenReturn(world);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Townworld townworld = assertDoesNotThrow(() -> townworldManager.getTownWorldByName("world"));
+		assertDoesNotThrow(() -> townworld.foundTown("other", loc, ecoPlayer));
 		assertDoesNotThrow(() -> townworld.foundTown("mytown", loc, ecoPlayer));
+		assertDoesNotThrow(() -> townworld.foundTown("some", loc, ecoPlayer));
 
 		Town town = assertDoesNotThrow(() -> townworldManager.getTownByName("mytown"));
 		assertEquals("mytown", town.getTownName());

@@ -118,6 +118,15 @@ public class AdminshopTabCompleterImplTest {
 		assertEquals(1, list.size());
 		assertEquals("myshop1", list.get(0));
 	}
+	
+	@Test
+	public void adminshopTestWithNoArgs() {
+		Command command = mock(Command.class);
+		when(command.getLabel()).thenReturn("adminshop");
+		String[] args = { };
+		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
+		assertEquals(0, list.size());
+	}
 
 	@Test
 	public void deleteTestWithMoreArgs() {

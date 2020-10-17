@@ -97,7 +97,6 @@ public class CustomSkullServiceImpl implements CustomSkullService {
 			return head;
 		}
 		SkullMeta headMeta = (SkullMeta) head.getItemMeta();
-		// for testing
 		NamespacedKey key = new NamespacedKey(serverProvider.getJavaPluginInstance(), "ue-texture");
 		headMeta.getPersistentDataContainer().set(key, PersistentDataType.STRING, url);
 		GameProfile profile = new GameProfile(UUID.randomUUID(), null);
