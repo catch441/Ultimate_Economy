@@ -82,7 +82,7 @@ public class JobsystemValidationHandlerImpl implements JobsystemValidationHandle
 	@Override
 	public void checkForDoesExist(Map<String, Double> list, String value) throws GeneralEconomyException {
 		if (!list.containsKey(value)) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,
 					value);
 		}
 	}

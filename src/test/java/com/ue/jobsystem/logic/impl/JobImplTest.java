@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.entity.EntityType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -53,6 +54,9 @@ public class JobImplTest {
 		Map<String, Double> fisher = new HashMap<>();
 		fisher.put("fish", 2.0);
 		when(jobDao.loadFisherList()).thenReturn(fisher);
+		Map<String, Double> breeder = new HashMap<>();
+		breeder.put("COW", 1.5);
+		when(jobDao.loadBreedableList()).thenReturn(breeder);
 		Job job = new JobImpl(validationHandler, jobDao, "myJob", false);
 		verify(jobDao).setupSavefile("myJob");
 		assertEquals("myJob", job.getName());
@@ -62,6 +66,8 @@ public class JobImplTest {
 		assertTrue(job.getFisherList().containsValue(2.0));
 		assertTrue(job.getEntityList().containsKey("COW"));
 		assertTrue(job.getEntityList().containsValue(3.0));
+		assertTrue(job.getBreedableList().containsKey("COW"));
+		assertTrue(job.getBreedableList().containsValue(1.5));
 	}
 
 	@Test
@@ -107,7 +113,7 @@ public class JobImplTest {
 		assertDoesNotThrow(() -> job.addFisherLootType("fish", 1.5));
 		assertEquals("1.5", String.valueOf(assertDoesNotThrow(() -> job.getFisherPrice("fish"))));
 	}
-
+	
 	@Test
 	public void getBlockPriceTest() {
 		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
@@ -116,9 +122,60 @@ public class JobImplTest {
 	}
 
 	@Test
+	public void getBreedPriceTest() {
+		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		assertDoesNotThrow(() -> job.addBreedable(EntityType.COW, 1.5));
+		assertDoesNotThrow(() -> assertEquals("1.5", String.valueOf(job.getBreedPrice(EntityType.COW))));
+	}
+
+	@Test
 	public void getNameTest() {
 		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
 		assertEquals("myJob", job.getName());
+	}
+	
+	@Test
+	public void addBreedableTestWithInvalidBreedable() throws GeneralEconomyException {
+		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidBreedableEntity(EntityType.COD);;
+		assertThrows(GeneralEconomyException.class, () -> job.addBreedable(EntityType.COD, 1.5));
+		verify(jobDao, never()).saveBlockList(anyMap());
+		assertEquals(0, job.getBlockList().size());
+	}
+
+	@Test
+	public void addBreedableTestWithInvalidPrice() throws GeneralEconomyException {
+		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForPositivValue(-1.0);
+		assertThrows(GeneralEconomyException.class, () -> job.addBreedable(EntityType.COW, -1.0));
+		verify(jobDao, never()).saveBreedableList(anyMap());
+		assertEquals(0, job.getBreedableList().size());
+	}
+
+	@Test
+	public void addBreedableTestWithAlreadyInJob() throws GeneralEconomyException {
+		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForDoesNotExist(anyMap(), eq("COW"));
+		assertThrows(GeneralEconomyException.class, () -> job.addBreedable(EntityType.COW, 1.5));
+		verify(jobDao, never()).saveBreedableList(anyMap());
+		assertEquals(0, job.getBreedableList().size());
+	}
+
+	@Test
+	public void addBreedableTest() {
+		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		assertDoesNotThrow(() -> job.addBreedable(EntityType.COW, 1.5));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidBreedableEntity(EntityType.COW));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForPositivValue(1.5));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForDoesNotExist(anyMap(), eq("COW")));
+		verify(jobDao).saveBreedableList(anyMap());
+		assertEquals(1, job.getBreedableList().size());
+		assertTrue(job.getBreedableList().containsKey("COW"));
+		assertTrue(job.getBreedableList().containsValue(1.5));
+		Map<String, Double> list = job.getBreedableList();
+		assertEquals(1, list.size());
+		assertTrue(list.containsKey("COW"));
+		assertTrue(list.containsValue(1.5));
 	}
 
 	@Test
@@ -243,6 +300,41 @@ public class JobImplTest {
 		assertEquals(1, job.getFisherList().size());
 		assertTrue(job.getFisherList().containsKey("fish"));
 		assertTrue(job.getFisherList().containsValue(1.0));
+	}
+	
+	@Test
+	public void deleteBreedableTestWithInvalidBreedable() throws GeneralEconomyException {
+		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		assertDoesNotThrow(() -> job.addBreedable(EntityType.COD, 1.5));
+		reset(jobDao);
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidBreedableEntity(EntityType.COD);
+		assertThrows(GeneralEconomyException.class, () -> job.deleteBreedable(EntityType.COD));
+		verify(jobDao, never()).saveBreedableList(anyMap());
+		assertEquals(1, job.getBreedableList().size());
+	}
+
+	@Test
+	public void deleteBreedableTestWithNotInJob() throws GeneralEconomyException {
+		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		assertDoesNotThrow(() -> job.addBreedable(EntityType.COW, 1.5));
+		reset(jobDao);
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForDoesExist(anyMap(), eq("SHEEP"));
+		assertThrows(GeneralEconomyException.class, () -> job.deleteBreedable(EntityType.SHEEP));
+		verify(jobDao, never()).saveBreedableList(anyMap());
+		assertEquals(1, job.getBreedableList().size());
+	}
+
+	@Test
+	public void deleteBreedableTest() {
+		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		assertDoesNotThrow(() -> job.addBreedable(EntityType.COW, 1.5));
+		reset(validationHandler);
+		reset(jobDao);
+		assertDoesNotThrow(() -> job.deleteBreedable(EntityType.COW));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidBreedableEntity(EntityType.COW));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForDoesExist(anyMap(), eq("COW")));
+		verify(jobDao).saveBreedableList(anyMap());
+		assertEquals(0, job.getBreedableList().size());
 	}
 
 	@Test

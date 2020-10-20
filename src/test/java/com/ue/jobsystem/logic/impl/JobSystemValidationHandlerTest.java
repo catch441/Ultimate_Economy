@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Test;
@@ -236,6 +237,23 @@ public class JobSystemValidationHandlerTest {
 	@Test
 	public void checkForValidSlotTestValid() {
 		assertDoesNotThrow(() -> validationHandler.checkForValidSlot(5, 9));
+	}
+	
+	@Test
+	public void checkForValidBreedableEntityTest() {
+		try {
+			validationHandler.checkForValidBreedableEntity(EntityType.COD);
+			fail();
+		} catch (GeneralEconomyException e) {
+			assertEquals(1, e.getParams().length);
+			assertEquals("cod", e.getParams()[0]);
+			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
+		}
+	}
+
+	@Test
+	public void checkForValidBreedableEntityTestValid() {
+		assertDoesNotThrow(() -> validationHandler.checkForValidBreedableEntity(EntityType.COW));
 	}
 
 	@Test
