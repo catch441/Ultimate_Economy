@@ -16,6 +16,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
+import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
@@ -32,6 +33,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	private final ServerProvider serverProvider;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobManager jobManager;
+	private final ConfigManager configManager;
 
 	/**
 	 * Inject constructor.
@@ -41,15 +43,18 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	 * @param adminshopManager
 	 * @param messageWrapper
 	 * @param serverProvider
+	 * @param configManager
 	 */
 	@Inject
 	public AdminshopCommandExecutorImpl(JobManager jobManager, EconomyPlayerManager ecoPlayerManager,
-			AdminshopManager adminshopManager, MessageWrapper messageWrapper, ServerProvider serverProvider) {
+			AdminshopManager adminshopManager, MessageWrapper messageWrapper, ServerProvider serverProvider,
+			ConfigManager configManager) {
 		this.adminshopManager = adminshopManager;
 		this.messageWrapper = messageWrapper;
 		this.serverProvider = serverProvider;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.jobManager = jobManager;
+		this.configManager = configManager;
 	}
 
 	@Override
@@ -90,7 +95,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 			throws EconomyPlayerException, ShopSystemException, GeneralEconomyException {
 		if (args.length == 1) {
 			EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(player.getName());
-			if (ecoPlayer.hasJob(jobManager.getJobByName(args[0]))) {
+			if (configManager.isAllowQuickshop() || ecoPlayer.hasJob(jobManager.getJobByName(args[0]))) {
 				adminshopManager.getAdminShopByName(args[0]).openShopInventory(player);
 			} else {
 				player.sendMessage(messageWrapper.getErrorString("job_not_joined"));

@@ -41,6 +41,7 @@ public class ConfigManagerImplTest {
 		assertEquals(1, manager.getMaxJoinedTowns());
 		assertEquals(3, manager.getMaxPlayershops());
 		assertTrue(manager.isHomeSystem());
+		assertFalse(manager.isAllowQuickshop());
 		assertFalse(manager.isWildernessInteraction());
 		assertFalse(manager.isExtendedInteraction());
 		assertEquals("$", manager.getCurrencyPl());
@@ -55,6 +56,7 @@ public class ConfigManagerImplTest {
 		verify(dao).saveMaxJoinedTowns(1);
 		verify(dao).saveMaxPlayershops(3);
 		verify(dao).saveHomesFeature(true);
+		verify(dao).saveAllowQuickshop(false);
 		verify(dao).saveWildernessInteraction(false);
 		verify(dao).saveExtendedInteraction(false);
 		verify(dao).saveCurrencyPl("$");
@@ -80,9 +82,11 @@ public class ConfigManagerImplTest {
 		when(dao.hasWildernessInteraction()).thenReturn(true);
 		when(dao.hasCountry()).thenReturn(true);
 		when(dao.hasStartAmount()).thenReturn(true);
+		when(dao.hasAllowQuickshop()).thenReturn(true);
 
 		when(dao.loadCurrencyPl()).thenReturn("$");
 		when(dao.loadCurrencySg()).thenReturn("$");
+		when(dao.loadAllowQuickshop()).thenReturn(false);
 		when(dao.loadExtendedInteraction()).thenReturn(false);
 		when(dao.loadHomesFeature()).thenReturn(true);
 		when(dao.loadMaxHomes()).thenReturn(3);
@@ -100,6 +104,7 @@ public class ConfigManagerImplTest {
 		assertEquals(1, manager.getMaxJoinedTowns());
 		assertEquals(3, manager.getMaxPlayershops());
 		assertTrue(manager.isHomeSystem());
+		assertFalse(manager.isAllowQuickshop());
 		assertFalse(manager.isWildernessInteraction());
 		assertFalse(manager.isExtendedInteraction());
 		assertEquals("$", manager.getCurrencyPl());
@@ -123,6 +128,7 @@ public class ConfigManagerImplTest {
 		verify(dao, never()).saveLanguage(Mockito.anyString());
 		verify(dao, never()).saveCountry(Mockito.anyString());
 		verify(dao, never()).saveStartAmount(Mockito.anyDouble());
+		verify(dao, never()).saveAllowQuickshop(Mockito.anyBoolean());
 	}
 
 	@Test
@@ -148,6 +154,14 @@ public class ConfigManagerImplTest {
 		manager.setWildernessInteraction(false);
 		assertFalse(manager.isWildernessInteraction());
 		verify(dao).saveWildernessInteraction(false);
+	}
+	
+	@Test
+	public void setAllowQuickshopTest() {
+		assertFalse(manager.isAllowQuickshop());
+		manager.setAllowQuickshop(true);
+		assertTrue(manager.isAllowQuickshop());
+		verify(dao).saveAllowQuickshop(true);
 	}
 	
 	@Test

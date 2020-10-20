@@ -29,6 +29,22 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 		}
 		config = YamlConfiguration.loadConfiguration(file);
 	}
+	
+	@Override
+	public void saveAllowQuickshop(boolean allow) {
+		config.set("AllowQuickshop", allow);
+		save(config, file);
+	}
+	
+	@Override
+	public boolean loadAllowQuickshop() {
+		return config.getBoolean("AllowQuickshop");
+	}
+	
+	@Override
+	public boolean hasAllowQuickshop() {
+		return config.isSet("AllowQuickshop");
+	}
 
 	@Override
 	public int loadMaxRentedDays() {

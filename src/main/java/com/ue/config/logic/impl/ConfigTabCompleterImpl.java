@@ -24,6 +24,7 @@ public class ConfigTabCompleterImpl implements TabCompleter {
 		switch (args[0]) {
 		case "homes":
 		case "extendedInteraction":
+		case "allowQuickshop":
 		case "wildernessInteraction":
 			return handleHomesAndWildernessInteractionTabComplete(args);
 		case "language":
@@ -146,6 +147,7 @@ public class ConfigTabCompleterImpl implements TabCompleter {
 		addIfContains(list, "wildernessInteraction", args[0]);
 		addIfContains(list, "currency", args[0]);
 		addIfContains(list, "startAmount", args[0]);
+		addIfContains(list, "allowQuickshop", args[0]);
 		return list;
 	}
 
@@ -168,6 +170,7 @@ public class ConfigTabCompleterImpl implements TabCompleter {
 		list.add("wildernessInteraction");
 		list.add("currency");
 		list.add("startAmount");
+		list.add("allowQuickshop");
 		return list;
 	}
 }

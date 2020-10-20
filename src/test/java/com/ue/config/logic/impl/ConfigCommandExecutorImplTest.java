@@ -441,6 +441,43 @@ public class ConfigCommandExecutorImplTest {
 		verify(player).sendMessage("§cThe parameter §4abc§c is invalid!");
 		verifyNoMoreInteractions(player);
 	}
+	
+	@Test
+	public void allowQuickshopCommandTestWithAll() {
+		Player player = mock(Player.class);
+		when(messageWrapper.getString("config_change", "false"))
+				.thenReturn("§6The configuration was changed to §afalse§6.");
+
+		String[] args = { "allowQuickshop", "false" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		verify(player).sendMessage("§6The configuration was changed to §afalse§6.");
+		verifyNoMoreInteractions(player);
+		verify(configManager).setAllowQuickshop(false);;
+	}
+
+	@Test
+	public void allowQuickshopCommandTestWithInvalidArgumentNumber() {
+		Player player = mock(Player.class);
+		String[] args = { "allowQuickshop" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		verify(player).sendMessage("/ue-config allowQuickshop <true/false>");
+		verifyNoMoreInteractions(player);
+	}
+
+	@Test
+	public void allowQuickshopCommandTestWithInvalidInteger() {
+		Player player = mock(Player.class);
+		when(messageWrapper.getErrorString("invalid_parameter", "abc"))
+				.thenReturn("§cThe parameter §4abc§c is invalid!");
+
+		String[] args = { "allowQuickshop", "abc" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		verify(player).sendMessage("§cThe parameter §4abc§c is invalid!");
+		verifyNoMoreInteractions(player);
+	}
 
 	@Test
 	public void wildernessInteractionCommandTestWithAll() {

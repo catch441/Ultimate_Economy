@@ -18,7 +18,7 @@ public class ConfigTabCompleterImplTest {
 	public void zeroArgsTest() {
 		String[] args = { "" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-		assertEquals(11, result.size());
+		assertEquals(12, result.size());
 		assertEquals("language", result.get(0));
 		assertEquals("maxHomes", result.get(1));
 		assertEquals("homes", result.get(2));
@@ -30,6 +30,7 @@ public class ConfigTabCompleterImplTest {
 		assertEquals("wildernessInteraction", result.get(8));
 		assertEquals("currency", result.get(9));
 		assertEquals("startAmount", result.get(10));
+		assertEquals("allowQuickshop", result.get(11));
 	}
 
 	@Test
@@ -103,6 +104,13 @@ public class ConfigTabCompleterImplTest {
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(0, result.size());
 	}
+	
+	@Test
+	public void allowQuickshopArgTestWithOneArg() {
+		String[] args = { "allowQuickshop" };
+		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+		assertEquals(0, result.size());
+	}
 
 	@Test
 	public void extendedInteractionArgTestWithOneArg() {
@@ -130,6 +138,15 @@ public class ConfigTabCompleterImplTest {
 	@Test
 	public void extendedInteractionArgTest() {
 		String[] args = { "extendedInteraction", "" };
+		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+		assertEquals(2, result.size());
+		assertEquals("true", result.get(0));
+		assertEquals("false", result.get(1));
+	}
+	
+	@Test
+	public void allowQuickshopArgTest() {
+		String[] args = { "allowQuickshop", "" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(2, result.size());
 		assertEquals("true", result.get(0));

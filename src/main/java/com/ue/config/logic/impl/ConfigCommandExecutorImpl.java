@@ -75,9 +75,23 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 			return performWildernessInteractionCommand(label, args, sender);
 		case STARTAMOUNT:
 			return performStartAmountCommand(label, args, sender);
+		case ALLOWQUICKSHOP:
+			return performAllowQuickshopCommand(label, args, sender);
 		default:
 			return false;
 		}
+	}
+	
+	private boolean performAllowQuickshopCommand(String label, String[] args, CommandSender sender)
+			throws NumberFormatException, GeneralEconomyException {
+		if (args.length == 2) {
+			boolean input = stringToBoolean(args[1]);
+			configManager.setAllowQuickshop(input);
+			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
+		} else {
+			sender.sendMessage("/" + label + " allowQuickshop <true/false>");
+		}
+		return true;
 	}
 
 	private boolean performStartAmountCommand(String label, String[] args, CommandSender sender)

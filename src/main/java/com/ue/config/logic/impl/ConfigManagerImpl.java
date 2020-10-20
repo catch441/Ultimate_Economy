@@ -25,6 +25,7 @@ public class ConfigManagerImpl implements ConfigManager {
 	private int maxRentedDays;
 	private boolean extendedInteraction;
 	private boolean wildernessInteraction;
+	private boolean allowQuickShop;
 	private Locale locale;
 	private double startAmount;
 
@@ -56,8 +57,17 @@ public class ConfigManagerImpl implements ConfigManager {
 			setupCurrencySg();
 			setupLocale();
 			setupStartAmount();
+			setupAllowQuickshop();
 			configDao.removeDeprecatedTownNames();
 		} catch (GeneralEconomyException e) {
+		}
+	}
+	
+	private void setupAllowQuickshop() {
+		if (!configDao.hasAllowQuickshop()) {
+			setAllowQuickshop(false);
+		} else {
+			allowQuickShop = configDao.loadAllowQuickshop();
 		}
 	}
 	
@@ -155,6 +165,17 @@ public class ConfigManagerImpl implements ConfigManager {
 		} else {
 			maxHomes = configDao.loadMaxHomes();
 		}
+	}
+	
+	@Override
+	public void setAllowQuickshop(boolean value) {
+		allowQuickShop = value;
+		configDao.saveAllowQuickshop(allowQuickShop);
+	}
+	
+	@Override
+	public boolean isAllowQuickshop() {
+		return allowQuickShop;
 	}
 	
 	@Override

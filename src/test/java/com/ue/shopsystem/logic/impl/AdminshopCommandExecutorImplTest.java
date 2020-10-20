@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
+import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
@@ -57,6 +58,8 @@ public class AdminshopCommandExecutorImplTest {
 	EconomyPlayerManager ecoPlayerManager;
 	@Mock
 	JobManager jobManager;
+	@Mock
+	ConfigManager configManager;
 
 	@Test
 	public void unknownCommandTest() {
@@ -100,6 +103,21 @@ public class AdminshopCommandExecutorImplTest {
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		String[] args = { "myjob" };
+		boolean result = executor.onCommand(player, null, "shop", args);
+		assertTrue(result);
+		assertDoesNotThrow(() -> verify(adminshop).openShopInventory(player));
+		verify(player, never()).sendMessage(anyString());
+	}
+	
+	@Test
+	public void shopCommandTestOneArgAllowQuickshopTrue() {
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		Adminshop adminshop = mock(Adminshop.class);
+		when(configManager.isAllowQuickshop()).thenReturn(true);
+		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopByName("myshop")).thenReturn(adminshop));
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
+		String[] args = { "myshop" };
 		boolean result = executor.onCommand(player, null, "shop", args);
 		assertTrue(result);
 		assertDoesNotThrow(() -> verify(adminshop).openShopInventory(player));

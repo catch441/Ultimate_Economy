@@ -12,6 +12,20 @@ public interface ConfigManager {
 	public void setupConfig();
 
 	/**
+	 * Sets the allow quickshop value.
+	 * 
+	 * @param value
+	 */
+	public void setAllowQuickshop(boolean value);
+
+	/**
+	 * Returns the allow quickshop value.
+	 * 
+	 * @return value
+	 */
+	public boolean isAllowQuickshop();
+
+	/**
 	 * Sets the start amount value.
 	 * 
 	 * @param amount

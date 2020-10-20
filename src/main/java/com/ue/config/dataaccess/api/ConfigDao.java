@@ -3,6 +3,25 @@ package com.ue.config.dataaccess.api;
 import java.util.List;
 
 public interface ConfigDao {
+	
+	/**
+	 * Retrns tru, if the value exists.
+	 * @return boolean
+	 */
+	public boolean hasAllowQuickshop();
+
+	/**
+	 * Saves the allow quickshop value.
+	 * 
+	 * @param allow
+	 */
+	public void saveAllowQuickshop(boolean allow);
+	
+	/**
+	 * Loads the allow quickshop value.
+	 * @return allow
+	 */
+	public boolean loadAllowQuickshop();
 
 	/**
 	 * Loads the max rented days value.
@@ -269,89 +288,98 @@ public interface ConfigDao {
 	 * @return jobcenter names
 	 */
 	public List<String> loadJobcenterList();
-	
+
 	/**
 	 * Saves the job list.
 	 * 
 	 * @param jobs
 	 */
 	public void saveJobList(List<String> jobs);
-	
+
 	/**
 	 * Loads the job list.
 	 * 
 	 * @return job names
 	 */
 	public List<String> loadJobList();
-	
+
 	/**
 	 * Loads the playershop ids.
+	 * 
 	 * @return id list
 	 */
 	public List<String> loadPlayershopIds();
-	
+
 	/**
-	 * Saves the play@Override
-	ershop ids.
+	 * Saves the play@Override ershop ids.
+	 * 
 	 * @param ids
 	 */
 	public void savePlayershopIds(List<String> ids);
-	
+
 	/**
 	 * Loads the adminshop ids.
+	 * 
 	 * @return id list
 	 */
 	public List<String> loadAdminshopIds();
-	
+
 	/**
 	 * Saves the adminshop ids.
+	 * 
 	 * @param ids
 	 */
 	public void saveAdminshopIds(List<String> ids);
-	
+
 	/**
 	 * Loads the rentshop ids.
+	 * 
 	 * @return ids
 	 */
 	public List<String> loadRentshopIds();
-	
+
 	/**
 	 * Saves the rentshop ids.
+	 * 
 	 * @param ids
 	 */
 	public void saveRentshopIds(List<String> ids);
-	
+
 	/**
 	 * Saves the townworlds list.
 	 * 
 	 * @param townworlds
 	 */
 	public void saveTownworldNamesList(List<String> townworlds);
-	
+
 	/**
 	 * Loads the townworld names.
+	 * 
 	 * @return townworld names
 	 */
 	public List<String> loadTownworldNames();
-	
+
 	/**
 	 * Saves the start amount.
+	 * 
 	 * @param amount
 	 */
 	public void saveStartAmount(double amount);
-	
+
 	/**
 	 * Returns the start amount.
+	 * 
 	 * @return amount
 	 */
 	public double loadStartAmount();
-	
+
 	/**
 	 * Returns true, if the value is set.
+	 * 
 	 * @return boolean
 	 */
 	public boolean hasStartAmount();
-	
+
 	/**
 	 * Remove deprecated stuff.
 	 * 

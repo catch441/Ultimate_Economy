@@ -169,6 +169,34 @@ public class ConfigDaoImplTest {
 		dao.saveWildernessInteraction(null);
 		assertFalse(dao.hasWildernessInteraction());
 	}
+	
+	@Test
+	public void saveAllowQuickshopTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		File file = new File("src/config.yml");
+		dao.saveAllowQuickshop(true);;
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		assertTrue(config.getBoolean("AllowQuickshop"));
+	}
+
+	@Test
+	public void loadAllowQuickshopTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
+		dao.saveAllowQuickshop(false);
+		assertFalse(dao.loadAllowQuickshop());
+	}
+
+	@Test
+	public void hasAllowQuickshopTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		assertFalse(dao.hasAllowQuickshop());
+		dao.saveAllowQuickshop(true);
+		assertTrue(dao.hasAllowQuickshop());
+	}
 
 	@Test
 	public void saveCurrencyPlTest() {
