@@ -1,7 +1,7 @@
 package com.ue.shopsystem.dataaccess.impl;
 
 import java.io.File;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -122,12 +122,6 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	}
 
 	@Override
-	public void saveItemNames(List<String> itemList) {
-		getConfig().set("ShopItemList", itemList);
-		save(getConfig(), getSavefile());
-	}
-
-	@Override
 	public void saveProfession(Profession profession) {
 		getConfig().set("Profession", profession.name());
 		save(getConfig(), getSavefile());
@@ -224,8 +218,11 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 
 	@Override
 	public List<String> loadItemNameList() {
-		removeDefaultItemFromItemList();
-		return getConfig().getStringList("ShopItemList");
+		removeShopItemList();
+		if (config.getConfigurationSection("ShopItems") != null) {
+			return new ArrayList<>(config.getConfigurationSection("ShopItems").getKeys(false));
+		}
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -289,15 +286,19 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	 * @deprecated can be removed later
 	 */
 	@Deprecated
-	private void removeDefaultItemFromItemList() {
-		List<String> list = getConfig().getStringList("ShopItemList");
-		Iterator<String> iterator = list.iterator();
-		while (iterator.hasNext()) {
-			String element = iterator.next();
-			if ("ANVIL_0".equals(element) || "CRAFTING_TABLE_0".equals(element)) {
-				iterator.remove();
-			}
+	private void removeShopItemList() {
+		getConfig().set("ShopItemList", null);
+		save(getConfig(), getSavefile());
+	}
+
+	@Override
+	@Deprecated
+	public boolean removeIfCorrupted(String itemString) {
+		if(!getConfig().isSet("ShopItems." + itemString + ".Name")) {
+			getConfig().set("ShopItems." + itemString, null);
+			save(getConfig(), getSavefile());
+			return true;
 		}
-		saveItemNames(list);
+		return false;
 	}
 }

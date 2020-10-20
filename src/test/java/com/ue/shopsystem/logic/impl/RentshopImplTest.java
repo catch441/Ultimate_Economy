@@ -131,7 +131,6 @@ public class RentshopImplTest {
 				validationHandler, null, messageWrapper, configManager, townworldManager, playershopManager);
 
 		verify(shopDao).setupSavefile("R0");
-		verify(shopDao).saveItemNames(new ArrayList<>());
 		verify(shopDao).saveShopLocation(loc);
 		verify(shopDao).saveShopName("RentShop#R0");
 		verify(shopDao, never()).saveOwner(any(EconomyPlayer.class));
@@ -562,7 +561,6 @@ public class RentshopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 4, stack));
-		verify(shopDao).saveItemNames(Arrays.asList("item string"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string"), anyList()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsEmpty(0, shop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("1.0"));

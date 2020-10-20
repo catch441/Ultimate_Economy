@@ -202,21 +202,6 @@ public class ShopDaoImplTest {
 	}
 
 	@Test
-	public void saveItemNamesTest() {
-		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		shopDao.setupSavefile("A1");
-		List<String> list = new ArrayList<>();
-		list.add("kth1");
-		list.add("kth2");
-		shopDao.saveItemNames(list);
-		File file = new File("src/A1.yml");
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		assertEquals(2, config.getStringList("ShopItemList").size());
-		assertEquals("kth1", config.getStringList("ShopItemList").get(0));
-		assertEquals("kth2", config.getStringList("ShopItemList").get(1));
-	}
-
-	@Test
 	public void saveStockTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		shopDao.setupSavefile("A1");
@@ -422,16 +407,26 @@ public class ShopDaoImplTest {
 
 	@Test
 	public void loadItemNameListTest() {
+		ItemStack stack = mock(ItemStack.class);
+		ShopItem item = mock(ShopItem.class);
+		when(item.getItemStack()).thenReturn(stack);
+		Map<String, Object> map = new HashMap<>();
+		map.put("==", "org.bukkit.inventory.ItemStack");
+		map.put("v", 1976);
+		map.put("type", "STONE");
+		when(stack.serialize()).thenReturn(map);
+		when(item.getItemString()).thenReturn("ItemStack{STONE x 1}");
+		when(item.getSlot()).thenReturn(4);
+		when(item.getAmount()).thenReturn(1);
+		when(item.getSellPrice()).thenReturn(2.0);
+		when(item.getBuyPrice()).thenReturn(3.0);
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		shopDao.setupSavefile("A1");
-		List<String> list = new ArrayList<>();
-		list.add("kth1");
-		list.add("kth2");
-		shopDao.saveItemNames(list);
+		assertEquals(0, shopDao.loadItemNameList().size());
+		shopDao.saveShopItem(item, false);
 		List<String> result = shopDao.loadItemNameList();
-		assertEquals(2, result.size());
-		assertEquals("kth1", result.get(0));
-		assertEquals("kth2", result.get(1));
+		assertEquals(1, result.size());
+		assertEquals("ItemStack{STONE x 1}", result.get(0));
 	}
 
 	@Test
@@ -546,10 +541,36 @@ public class ShopDaoImplTest {
 		list.add("kth2");
 		list.add("ANVIL_0");
 		list.add("CRAFTING_TABLE_0");
-		shopDao.saveItemNames(list);
+		File file = new File("src/A1.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("ShopItemList", list);
+		assertDoesNotThrow(() -> config.save(file));
+		shopDao.setupSavefile("A1");
 		List<String> result = shopDao.loadItemNameList();
-		assertEquals(2, result.size());
-		assertEquals("kth1", result.get(0));
-		assertEquals("kth2", result.get(1));
+		assertEquals(0, result.size());
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Test
+	public void removeIfCorruptedTestFalse() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		File file = new File("src/A1.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("ShopItems.catch.Name", "value");
+		assertDoesNotThrow(() -> config.save(file));
+		shopDao.setupSavefile("A1");
+		assertFalse(shopDao.removeIfCorrupted("catch"));
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Test
+	public void removeIfCorruptedTestTrue() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		shopDao.setupSavefile("A1");
+		assertTrue(shopDao.removeIfCorrupted("catch"));
+		File file = new File("src/A1.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config = YamlConfiguration.loadConfiguration(file);
+		assertFalse(config.isSet("ShopItems.catch.Name"));
 	}
 }

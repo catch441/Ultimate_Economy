@@ -67,13 +67,6 @@ public interface ShopDao {
 	public void saveShopLocation(Location location);
 	
 	/**
-	 * Saves the item name list.
-	 * 
-	 * @param itemList
-	 */
-	public void saveItemNames(List<String> itemList);
-	
-	/**
 	 * Saves the shop villager profession.
 	 * 
 	 * @param profession
@@ -217,4 +210,14 @@ public interface ShopDao {
 	 * @param shopId
 	 */
 	public void setupSavefile(String shopId);
+	
+	/**
+	 * @since 1.2.6
+	 * @param itemString
+	 * @return true, if corrupted found and removed
+	 * @deprecated removed items, that are corrupted. The newer savefile system
+	 *             cannot handle old corrupted items, that are ignored before.
+	 */
+	@Deprecated
+	public boolean removeIfCorrupted(String itemString);
 }

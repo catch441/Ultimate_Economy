@@ -210,7 +210,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		validationHandler.checkForItemDoesNotExist(itemString, getItemList());
 		shopItems.put(slot, shopItem);
 		getEditorHandler().setOccupied(true, slot);
-		getShopDao().saveItemNames(getUniqueItemStringList());
 		getShopDao().saveShopItem(shopItem, false);
 		addShopItemToInv(itemStack.clone(), shopItem.getAmount(), slot, sellPrice, buyPrice);
 	}
@@ -257,7 +256,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		ShopItem shopItem = getShopItem(slot);
 		getShopInventory().clear(slot);
 		shopItems.remove(slot);
-		getShopDao().saveItemNames(getUniqueItemStringList());
 		getEditorHandler().setOccupied(false, slot);
 		getShopDao().saveShopItem(shopItem, true);
 	}
@@ -482,7 +480,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 */
 
 	private void setupNewShop(String name, String shopId, Location spawnLocation, int size) {
-		getShopDao().saveItemNames(new ArrayList<>());
 		setShopId(shopId);
 		setupShopLocation(spawnLocation);
 		setupShopName(name);
@@ -568,11 +565,14 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	protected void loadShopItem(String itemString) {
-		ShopItem shopItem = getShopDao().loadItem(itemString);
-		shopItems.put(shopItem.getSlot(), shopItem);
-		addShopItemToInv(shopItem.getItemStack(), shopItem.getAmount(), shopItem.getSlot(), shopItem.getSellPrice(),
-				shopItem.getBuyPrice());
+		if(!getShopDao().removeIfCorrupted(itemString)) {
+			ShopItem shopItem = getShopDao().loadItem(itemString);
+			shopItems.put(shopItem.getSlot(), shopItem);
+			addShopItemToInv(shopItem.getItemStack(), shopItem.getAmount(), shopItem.getSlot(), shopItem.getSellPrice(),
+					shopItem.getBuyPrice());
+		}
 	}
 
 	/*

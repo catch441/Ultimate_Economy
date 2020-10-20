@@ -259,7 +259,6 @@ public class AdminshopImplTest {
 				adminshopManager, validationHandler, messageWrapper, configManager);
 
 		verify(shopDao).setupSavefile("A0");
-		verify(shopDao).saveItemNames(new ArrayList<>());
 		verify(shopDao).saveShopLocation(loc);
 		verify(shopDao).saveShopName("myshop");
 		verify(shop.getShopVillager()).setCustomName("myshop");
@@ -687,7 +686,6 @@ public class AdminshopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 4, stack));
-		verify(shopDao).saveItemNames(Arrays.asList("item string"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string"), anyList()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsEmpty(0, shop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("1.0"));
@@ -723,7 +721,6 @@ public class AdminshopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> shop.addShopItem(0, 0, 4, stack));
-		verify(shopDao).saveItemNames(Arrays.asList("item string"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string"), anyList()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsEmpty(0, shop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("0.0"));
@@ -759,7 +756,6 @@ public class AdminshopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 0, stack));
-		verify(shopDao).saveItemNames(Arrays.asList("item string"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string"), anyList()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsEmpty(0, shop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("1.0"));

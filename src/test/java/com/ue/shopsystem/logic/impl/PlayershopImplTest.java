@@ -132,7 +132,6 @@ public class PlayershopImplTest {
 				playershopManager);
 
 		verify(shopDao).setupSavefile("P0");
-		verify(shopDao).saveItemNames(new ArrayList<>());
 		verify(shopDao).saveShopLocation(loc);
 		verify(shopDao).saveShopName("myshop");
 		verify(shopDao).saveOwner(ecoPlayer);
@@ -1136,7 +1135,6 @@ public class PlayershopImplTest {
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 4, stack));
 		verify(shopDao).saveStock("item string", 0);
-		verify(shopDao).saveItemNames(Arrays.asList("item string"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string"), anyList()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsEmpty(0, shop.getShopInventory(), 2));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("1.0"));
