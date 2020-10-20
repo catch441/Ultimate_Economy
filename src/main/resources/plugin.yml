@@ -118,7 +118,7 @@ commands:
         permission: ultimate_economy.config
         permission-message: You don't have the permission
         description: Handles the configuration of the plugin.
-        usage: /<command> [language/maxHomes/homes/maxRentedDays/maxJobs/maxJoinedTowns/maxPlayershops/extendedInteraction]
+        usage: /<command> [language/maxHomes/homes/maxRentedDays/maxJobs/maxJoinedTowns/maxPlayershops/extendedInteraction/allowQuickshop/startAmount]
 
     townworld:
         permission: ultimate_economy.townworld
@@ -136,7 +136,7 @@ commands:
         permission: ultimate_economy.adminshop
         permission-message: You don't have the permission.
         description: Manage adminshops.
-        usage: /<command> [create/delete/move/rename/resize/editShop/changeProfession/addItem/addEnchantedItem/addPotion/editItem/removeItem/addSpawner/removeSpawner]
+        usage: /<command> [create/delete/move/rename/resize/editShop/changeProfession/addSpawner/removeSpawner]
 
     givemoney:
         permission: ultimate_economy.adminpay

@@ -158,7 +158,7 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	 */
 	@Deprecated
 	private void convertToIban(String playerName) {
-		if (getConfig().isSet(playerName + ".account amount")) {
+		if (!getConfig().isSet(playerName + ".Iban")) {
 			// old loading, convert to new
 			double amount = getConfig().getDouble(playerName + ".account amount");
 			BankAccount bankAccount = bankManager.createBankAccount(amount);
