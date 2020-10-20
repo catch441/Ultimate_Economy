@@ -70,6 +70,15 @@ public class JobDaoImpl extends SaveFileUtils implements JobDao {
 		}
 		save(getConfig(), getSavefile());
 	}
+	
+	@Override
+	public void saveBreedableList(Map<String, Double> breedableList) {
+		getConfig().set("BreedableList", null);
+		for (String key : breedableList.keySet()) {
+			getConfig().set("BreedableList." + key, breedableList.get(key));
+		}
+		save(getConfig(), getSavefile());
+	}
 
 	@Override
 	public String loadJobName() {
@@ -83,6 +92,17 @@ public class JobDaoImpl extends SaveFileUtils implements JobDao {
 		if (getConfig().contains("BlockList")) {
 			for (String key : getConfig().getConfigurationSection("BlockList").getKeys(false)) {
 				list.put(key, getConfig().getDouble("BlockList." + key));
+			}
+		}
+		return list;
+	}
+	
+	@Override
+	public Map<String, Double> loadBreedableList() {
+		Map<String, Double> list = new HashMap<>();
+		if (getConfig().contains("BreedableList")) {
+			for (String key : getConfig().getConfigurationSection("BreedableList").getKeys(false)) {
+				list.put(key, getConfig().getDouble("BreedableList." + key));
 			}
 		}
 		return list;
