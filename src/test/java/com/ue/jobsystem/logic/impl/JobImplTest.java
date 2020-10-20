@@ -140,10 +140,10 @@ public class JobImplTest {
 	}
 
 	@Test
-	public void addBlockTestWithAlreadyInJob() throws JobSystemException {
+	public void addBlockTestWithAlreadyInJob() throws GeneralEconomyException {
 		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
-		doThrow(JobSystemException.class).when(validationHandler).checkForBlockNotInJob(anyMap(), eq("STONE"));
-		assertThrows(JobSystemException.class, () -> job.addBlock("stone", 1.0));
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForDoesNotExist(anyMap(), eq("STONE"));
+		assertThrows(GeneralEconomyException.class, () -> job.addBlock("stone", 1.0));
 		verify(jobDao, never()).saveBlockList(anyMap());
 		assertEquals(0, job.getBlockList().size());
 	}
@@ -154,7 +154,7 @@ public class JobImplTest {
 		assertDoesNotThrow(() -> job.addBlock("stone", 1.0));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidMaterial("STONE"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPositivValue(1.0));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForBlockNotInJob(anyMap(), eq("STONE")));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForDoesNotExist(anyMap(), eq("STONE")));
 		verify(jobDao).saveBlockList(anyMap());
 		assertEquals(1, job.getBlockList().size());
 		assertTrue(job.getBlockList().containsKey("STONE"));
@@ -184,10 +184,10 @@ public class JobImplTest {
 	}
 
 	@Test
-	public void addMobTestWithAlreadyInJob() throws JobSystemException {
+	public void addMobTestWithAlreadyInJob() throws GeneralEconomyException {
 		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
-		doThrow(JobSystemException.class).when(validationHandler).checkForEntityNotInJob(anyMap(), eq("COW"));
-		assertThrows(JobSystemException.class, () -> job.addMob("cow", 1.0));
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForDoesNotExist(anyMap(), eq("COW"));
+		assertThrows(GeneralEconomyException.class, () -> job.addMob("cow", 1.0));
 		verify(jobDao, never()).saveEntityList(anyMap());
 		assertEquals(0, job.getEntityList().size());
 	}
@@ -197,7 +197,7 @@ public class JobImplTest {
 		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
 		assertDoesNotThrow(() -> job.addMob("cow", 1.0));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidEntityType("COW"));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForEntityNotInJob(anyMap(), eq("COW")));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForDoesNotExist(anyMap(), eq("COW")));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPositivValue(1.0));
 		verify(jobDao).saveEntityList(anyMap());
 		assertEquals(1, job.getEntityList().size());
@@ -224,10 +224,10 @@ public class JobImplTest {
 	}
 
 	@Test
-	public void addFisherLootTypeTestWithAlreadyInJob() throws JobSystemException {
+	public void addFisherLootTypeTestWithAlreadyInJob() throws GeneralEconomyException {
 		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
-		doThrow(JobSystemException.class).when(validationHandler).checkForLoottypeNotInJob(anyMap(), eq("fish"));
-		assertThrows(JobSystemException.class, () -> job.addFisherLootType("fish", 1.0));
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForDoesNotExist(anyMap(), eq("fish"));
+		assertThrows(GeneralEconomyException.class, () -> job.addFisherLootType("fish", 1.0));
 		verify(jobDao, never()).saveFisherList(anyMap());
 		assertEquals(0, job.getFisherList().size());
 	}
@@ -238,7 +238,7 @@ public class JobImplTest {
 		assertDoesNotThrow(() -> job.addFisherLootType("fish", 1.0));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidFisherLootType("fish"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPositivValue(1.0));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForLoottypeNotInJob(anyMap(), eq("fish")));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForDoesNotExist(anyMap(), eq("fish")));
 		verify(jobDao).saveFisherList(anyMap());
 		assertEquals(1, job.getFisherList().size());
 		assertTrue(job.getFisherList().containsKey("fish"));
@@ -257,12 +257,12 @@ public class JobImplTest {
 	}
 
 	@Test
-	public void deleteBlockTestWithNotInJob() throws JobSystemException {
+	public void deleteBlockTestWithNotInJob() throws GeneralEconomyException {
 		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
 		assertDoesNotThrow(() -> job.addBlock("stone", 1.5));
 		reset(jobDao);
-		doThrow(JobSystemException.class).when(validationHandler).checkForBlockInJob(anyMap(), eq("STONE"));
-		assertThrows(JobSystemException.class, () -> job.deleteBlock("stone"));
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForDoesExist(anyMap(), eq("STONE"));
+		assertThrows(GeneralEconomyException.class, () -> job.deleteBlock("stone"));
 		verify(jobDao, never()).saveBlockList(anyMap());
 		assertEquals(1, job.getBlockList().size());
 	}
@@ -275,7 +275,7 @@ public class JobImplTest {
 		reset(jobDao);
 		assertDoesNotThrow(() -> job.deleteBlock("stone"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidMaterial("STONE"));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForBlockInJob(anyMap(), eq("STONE")));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForDoesExist(anyMap(), eq("STONE")));
 		verify(jobDao).saveBlockList(anyMap());
 		assertEquals(0, job.getBlockList().size());
 	}
@@ -292,12 +292,12 @@ public class JobImplTest {
 	}
 
 	@Test
-	public void deleteMobTestWithNotInJob() throws JobSystemException {
+	public void deleteMobTestWithNotInJob() throws GeneralEconomyException {
 		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
 		assertDoesNotThrow(() -> job.addMob("cow", 1.5));
 		reset(jobDao);
-		doThrow(JobSystemException.class).when(validationHandler).checkForEntityInJob(anyMap(), eq("COW"));
-		assertThrows(JobSystemException.class, () -> job.deleteMob("COW"));
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForDoesExist(anyMap(), eq("COW"));
+		assertThrows(GeneralEconomyException.class, () -> job.deleteMob("COW"));
 		verify(jobDao, never()).saveEntityList(anyMap());
 		assertEquals(1, job.getEntityList().size());
 	}
@@ -310,7 +310,7 @@ public class JobImplTest {
 		reset(jobDao);
 		assertDoesNotThrow(() -> job.deleteMob("cow"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidEntityType("COW"));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForEntityInJob(anyMap(), eq("COW")));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForDoesExist(anyMap(), eq("COW")));
 		verify(jobDao).saveEntityList(anyMap());
 		assertEquals(0, job.getEntityList().size());
 	}
@@ -321,18 +321,18 @@ public class JobImplTest {
 		assertDoesNotThrow(() -> job.addFisherLootType("DDADA", 1.5));
 		reset(jobDao);
 		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidFisherLootType("DDADA");
-		assertThrows(GeneralEconomyException.class, () -> job.delFisherLootType("DDADA"));
+		assertThrows(GeneralEconomyException.class, () -> job.removeFisherLootType("DDADA"));
 		verify(jobDao, never()).saveFisherList(anyMap());
 		assertEquals(1, job.getFisherList().size());
 	}
 
 	@Test
-	public void delFisherLootTypeTestWithNotInJob() throws JobSystemException {
+	public void delFisherLootTypeTestWithNotInJob() throws GeneralEconomyException {
 		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
 		assertDoesNotThrow(() -> job.addFisherLootType("DDADA", 1.5));
 		reset(jobDao);
-		doThrow(JobSystemException.class).when(validationHandler).checkForLoottypeInJob(anyMap(), eq("DDADA"));
-		assertThrows(JobSystemException.class, () -> job.delFisherLootType("DDADA"));
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForDoesExist(anyMap(), eq("DDADA"));
+		assertThrows(GeneralEconomyException.class, () -> job.removeFisherLootType("DDADA"));
 		verify(jobDao, never()).saveFisherList(anyMap());
 		assertEquals(1, job.getFisherList().size());
 	}
@@ -343,9 +343,9 @@ public class JobImplTest {
 		assertDoesNotThrow(() -> job.addFisherLootType("fish", 1.0));
 		reset(validationHandler);
 		reset(jobDao);
-		assertDoesNotThrow(() -> job.delFisherLootType("fish"));
+		assertDoesNotThrow(() -> job.removeFisherLootType("fish"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidFisherLootType("fish"));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForLoottypeInJob(anyMap(), eq("fish")));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForDoesExist(anyMap(), eq("fish")));
 		verify(jobDao).saveFisherList(anyMap());
 		assertEquals(0, job.getFisherList().size());
 	}

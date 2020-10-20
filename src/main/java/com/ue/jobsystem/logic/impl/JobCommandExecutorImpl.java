@@ -224,7 +224,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 			throws GeneralEconomyException, JobSystemException {
 		if (args.length == 4) {
 			Job job = jobManager.getJobByName(args[2]);
-			job.delFisherLootType(args[3]);
+			job.removeFisherLootType(args[3]);
 			player.sendMessage(messageWrapper.getString("jobcenter_removeFisher", args[3]));
 		} else {
 			player.sendMessage("/jobcenter job removeFisher <jobname> <fish/treasure/junk>");

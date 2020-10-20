@@ -93,7 +93,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 				double d = job.getKillPrice(entity.getType().toString());
 				ecoPlayer.increasePlayerAmount(d, false);
 				break;
-			} catch (JobSystemException | GeneralEconomyException e) {
+			} catch (GeneralEconomyException e) {
 			}
 		}
 	}
@@ -158,7 +158,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 				Double price = job.getFisherPrice(lootType);
 				ecoPlayer.increasePlayerAmount(price, false);
 				break;
-			} catch (JobSystemException | GeneralEconomyException e) {
+			} catch (GeneralEconomyException e) {
 			}
 		}
 	}

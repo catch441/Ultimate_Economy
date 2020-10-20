@@ -18,11 +18,11 @@ public class JobSystemExceptionTest {
 
 	@Test
 	public void constructorTest() {
-		when(messageWrapper.getErrorString("entity_already_exists", "param1", 2)).thenReturn("my error message");
-		JobSystemException e = new JobSystemException(messageWrapper, JobExceptionMessageEnum.ENTITY_ALREADY_EXISTS,
+		when(messageWrapper.getErrorString("job_not_exist_in_jobcenter", "param1", 2)).thenReturn("my error message");
+		JobSystemException e = new JobSystemException(messageWrapper, JobExceptionMessageEnum.JOB_NOT_EXIST_IN_JOBCENTER,
 				"param1", 2);
 		
-		assertEquals(JobExceptionMessageEnum.ENTITY_ALREADY_EXISTS, e.getKey());
+		assertEquals(JobExceptionMessageEnum.JOB_NOT_EXIST_IN_JOBCENTER, e.getKey());
 		assertEquals(2, e.getParams().length);
 		assertEquals("param1", e.getParams()[0]);
 		assertEquals(2, e.getParams()[1]);

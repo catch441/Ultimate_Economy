@@ -2,7 +2,6 @@ package com.ue.jobsystem.logic.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -112,29 +111,31 @@ public class JobSystemValidationHandlerTest {
 		try {
 			Map<String, Double> blockList = new HashMap<>();
 			blockList.put("dirt", 10.0);
-			validationHandler.checkForBlockNotInJob(blockList, "dirt");
+			validationHandler.checkForDoesNotExist(blockList, "dirt");
 			fail();
-		} catch (JobSystemException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(JobExceptionMessageEnum.BLOCK_ALREADY_EXISTS, e.getKey());
+		} catch (GeneralEconomyException e) {
+			assertEquals(1, e.getParams().length);
+			assertEquals("dirt", e.getParams()[0]);
+			assertEquals(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, e.getKey());
 		}
 	}
 
 	@Test
 	public void checkForBlockNotInJobTestValid() {
 		Map<String, Double> blockList = new HashMap<>();
-		assertDoesNotThrow(() -> validationHandler.checkForBlockNotInJob(blockList, "dirt"));
+		assertDoesNotThrow(() -> validationHandler.checkForDoesNotExist(blockList, "dirt"));
 	}
 
 	@Test
-	public void checkForBlockInJobTest() {
+	public void checkForDoesExistTest() {
 		try {
 			Map<String, Double> blockList = new HashMap<>();
-			validationHandler.checkForBlockInJob(blockList, "dirt");
+			validationHandler.checkForDoesExist(blockList, "dirt");
 			fail();
-		} catch (JobSystemException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(JobExceptionMessageEnum.BLOCK_DOES_NOT_EXIST, e.getKey());
+		} catch (GeneralEconomyException e) {
+			assertEquals(1, e.getParams().length);
+			assertEquals("dirt", e.getParams()[0]);
+			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
 		}
 	}
 
@@ -142,76 +143,7 @@ public class JobSystemValidationHandlerTest {
 	public void checkForBlockInJobTestValid() {
 		Map<String, Double> blockList = new HashMap<>();
 		blockList.put("dirt", 10.0);
-		assertDoesNotThrow(() -> validationHandler.checkForBlockInJob(blockList, "dirt"));
-	}
-
-	@Test
-	public void checkForLoottypeNotInJobTest() {
-		try {
-			Map<String, Double> fisherList = new HashMap<>();
-			fisherList.put("treasure", 10.0);
-			validationHandler.checkForLoottypeNotInJob(fisherList, "treasure");
-			fail();
-		} catch (JobSystemException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(JobExceptionMessageEnum.LOOTTYPE_ALREADY_EXISTS, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForLoottypeNotInJobTestValid() {
-		Map<String, Double> fisherList = new HashMap<>();
-		assertDoesNotThrow(() -> validationHandler.checkForLoottypeNotInJob(fisherList, "treasure"));
-	}
-
-	@Test
-	public void checkForLoottypeInJobTest() {
-		try {
-			Map<String, Double> fisherList = new HashMap<>();
-			validationHandler.checkForLoottypeInJob(fisherList, "treasure");
-			assertTrue(false);
-		} catch (JobSystemException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(JobExceptionMessageEnum.LOOTTYPE_DOES_NOT_EXIST, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForLoottypeInJobTestValid() {
-		Map<String, Double> fisherList = new HashMap<>();
-		fisherList.put("treasure", 10.0);
-		assertDoesNotThrow(() -> validationHandler.checkForLoottypeInJob(fisherList, "treasure"));
-	}
-
-	@Test
-	public void checkForEntityNotInJobTest() {
-		try {
-			Map<String, Double> entityList = new HashMap<>();
-			entityList.put("COW", 10.0);
-			validationHandler.checkForEntityNotInJob(entityList, "COW");
-			fail();
-		} catch (JobSystemException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(JobExceptionMessageEnum.ENTITY_ALREADY_EXISTS, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForEntityNotInJobTestValid() {
-		Map<String, Double> entityList = new HashMap<>();
-		assertDoesNotThrow(() -> validationHandler.checkForEntityNotInJob(entityList, "COW"));
-	}
-
-	@Test
-	public void checkForEntityInJobTest() {
-		try {
-			Map<String, Double> entityList = new HashMap<>();
-			validationHandler.checkForEntityInJob(entityList, "COW");
-			fail();
-		} catch (JobSystemException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(JobExceptionMessageEnum.ENTITY_DOES_NOT_EXIST, e.getKey());
-		}
+		assertDoesNotThrow(() -> validationHandler.checkForDoesExist(blockList, "dirt"));
 	}
 
 	@Test
@@ -275,13 +207,6 @@ public class JobSystemValidationHandlerTest {
 			assertEquals("center", e.getParams()[0]);
 			assertEquals(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, e.getKey());
 		}
-	}
-
-	@Test
-	public void checkForEntityInJobTestValid() {
-		Map<String, Double> entityList = new HashMap<>();
-		entityList.put("COW", 10.0);
-		assertDoesNotThrow(() -> validationHandler.checkForEntityInJob(entityList, "COW"));
 	}
 
 	@Test

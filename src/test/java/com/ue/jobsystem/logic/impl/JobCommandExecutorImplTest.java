@@ -663,7 +663,7 @@ public class JobCommandExecutorImplTest {
 		String[] args = { "job", "removeFisher", "myjob", "fish" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(job).delFisherLootType("fish"));
+		assertDoesNotThrow(() -> verify(job).removeFisherLootType("fish"));
 		verify(player).sendMessage("My message.");
 		verifyNoMoreInteractions(player);
 	}
@@ -684,7 +684,7 @@ public class JobCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		GeneralEconomyException exception = mock(GeneralEconomyException.class);
 		when(exception.getMessage()).thenReturn("My exception.");
-		doThrow(exception).when(job).delFisherLootType("test");
+		doThrow(exception).when(job).removeFisherLootType("test");
 
 		Player player = mock(Player.class);
 		String[] args = { "job", "removeFisher", "myjob", "test" };

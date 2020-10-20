@@ -1,5 +1,6 @@
 package com.ue.jobsystem.logic.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,11 @@ import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 public class JobsystemValidationHandlerImpl implements JobsystemValidationHandler {
 
 	private final MessageWrapper messageWrapper;
+	private final List<EntityType> breedableMobs = Arrays.asList(EntityType.BEE, EntityType.COW, EntityType.HOGLIN,
+			EntityType.MUSHROOM_COW, EntityType.PIG, EntityType.SHEEP, EntityType.WOLF, EntityType.CAT,
+			EntityType.DONKEY, EntityType.HORSE, EntityType.OCELOT, EntityType.POLAR_BEAR, EntityType.TURTLE,
+			EntityType.CHICKEN, EntityType.FOX, EntityType.LLAMA, EntityType.PANDA, EntityType.RABBIT,
+			EntityType.VILLAGER);
 
 	/**
 	 * Inject constructor.
@@ -64,46 +70,20 @@ public class JobsystemValidationHandlerImpl implements JobsystemValidationHandle
 					lootType);
 		}
 	}
-
+	
 	@Override
-	public void checkForBlockNotInJob(Map<String, Double> blockList, String material) throws JobSystemException {
-		if (blockList.containsKey(material)) {
-			throw new JobSystemException(messageWrapper, JobExceptionMessageEnum.BLOCK_ALREADY_EXISTS);
+	public void checkForDoesNotExist(Map<String, Double> list, String value) throws GeneralEconomyException {
+		if (list.containsKey(value)) {
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
+					value);
 		}
 	}
-
+	
 	@Override
-	public void checkForBlockInJob(Map<String, Double> blockList, String material) throws JobSystemException {
-		if (!blockList.containsKey(material)) {
-			throw new JobSystemException(messageWrapper, JobExceptionMessageEnum.BLOCK_DOES_NOT_EXIST);
-		}
-	}
-
-	@Override
-	public void checkForLoottypeNotInJob(Map<String, Double> fisherList, String lootType) throws JobSystemException {
-		if (fisherList.containsKey(lootType)) {
-			throw new JobSystemException(messageWrapper, JobExceptionMessageEnum.LOOTTYPE_ALREADY_EXISTS);
-		}
-	}
-
-	@Override
-	public void checkForLoottypeInJob(Map<String, Double> fisherList, String lootType) throws JobSystemException {
-		if (!fisherList.containsKey(lootType)) {
-			throw new JobSystemException(messageWrapper, JobExceptionMessageEnum.LOOTTYPE_DOES_NOT_EXIST);
-		}
-	}
-
-	@Override
-	public void checkForEntityNotInJob(Map<String, Double> entityList, String entity) throws JobSystemException {
-		if (entityList.containsKey(entity)) {
-			throw new JobSystemException(messageWrapper, JobExceptionMessageEnum.ENTITY_ALREADY_EXISTS);
-		}
-	}
-
-	@Override
-	public void checkForEntityInJob(Map<String, Double> entityList, String entityName) throws JobSystemException {
-		if (!entityList.containsKey(entityName)) {
-			throw new JobSystemException(messageWrapper, JobExceptionMessageEnum.ENTITY_DOES_NOT_EXIST);
+	public void checkForDoesExist(Map<String, Double> list, String value) throws GeneralEconomyException {
+		if (!list.containsKey(value)) {
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
+					value);
 		}
 	}
 
@@ -158,6 +138,14 @@ public class JobsystemValidationHandlerImpl implements JobsystemValidationHandle
 			throws GeneralEconomyException {
 		if (jobcenterList.contains(name)) {
 			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, name);
+		}
+	}
+
+	@Override
+	public void checkForValidBreedableEntity(EntityType breedable) throws GeneralEconomyException {
+		if(!breedableMobs.contains(breedable)) {
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
+					breedable.toString().toLowerCase());
 		}
 	}
 

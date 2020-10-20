@@ -3,6 +3,7 @@ package com.ue.jobsystem.logic.api;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.Inventory;
 
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
@@ -10,6 +11,32 @@ import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsystem.logic.impl.JobSystemException;
 
 public interface JobsystemValidationHandler {
+
+	/**
+	 * Check for value does exist in the list.
+	 * 
+	 * @param list
+	 * @param value
+	 * @throws GeneralEconomyException
+	 */
+	public void checkForDoesExist(Map<String, Double> list, String value) throws GeneralEconomyException;
+
+	/**
+	 * Check for value is not in the list.
+	 * 
+	 * @param list
+	 * @param value
+	 * @throws GeneralEconomyException
+	 */
+	public void checkForDoesNotExist(Map<String, Double> list, String value) throws GeneralEconomyException;
+
+	/**
+	 * Checks for a valid breedable entity.
+	 * 
+	 * @param breedable
+	 * @throws GeneralEconomyException
+	 */
+	public void checkForValidBreedableEntity(EntityType breedable) throws GeneralEconomyException;
 
 	/**
 	 * Check for a valid material name.
@@ -42,60 +69,6 @@ public interface JobsystemValidationHandler {
 	 * @throws GeneralEconomyException
 	 */
 	public void checkForValidFisherLootType(String lootType) throws GeneralEconomyException;
-
-	/**
-	 * Check for block is not in the job.
-	 * 
-	 * @param blockList
-	 * @param material
-	 * @throws JobSystemException
-	 */
-	public void checkForBlockNotInJob(Map<String, Double> blockList, String material) throws JobSystemException;
-
-	/**
-	 * Check for block is in the job.
-	 * 
-	 * @param blockList
-	 * @param material
-	 * @throws JobSystemException
-	 */
-	public void checkForBlockInJob(Map<String, Double> blockList, String material) throws JobSystemException;
-
-	/**
-	 * Check for loot type is not in the job.
-	 * 
-	 * @param fisherList
-	 * @param lootType
-	 * @throws JobSystemException
-	 */
-	public void checkForLoottypeNotInJob(Map<String, Double> fisherList, String lootType) throws JobSystemException;
-
-	/**
-	 * Check for loot type is in the job.
-	 * 
-	 * @param fisherList
-	 * @param lootType
-	 * @throws JobSystemException
-	 */
-	public void checkForLoottypeInJob(Map<String, Double> fisherList, String lootType) throws JobSystemException;
-
-	/**
-	 * Check for entity is not the the job.
-	 * 
-	 * @param entityList
-	 * @param entity
-	 * @throws JobSystemException
-	 */
-	public void checkForEntityNotInJob(Map<String, Double> entityList, String entity) throws JobSystemException;
-
-	/**
-	 * Check for entity is in the job.
-	 * 
-	 * @param entityList
-	 * @param entityName
-	 * @throws JobSystemException
-	 */
-	public void checkForEntityInJob(Map<String, Double> entityList, String entityName) throws JobSystemException;
 
 	/**
 	 * Check for a valid slot.
@@ -154,6 +127,7 @@ public interface JobsystemValidationHandler {
 
 	/**
 	 * Check for valid size.
+	 * 
 	 * @param size
 	 * @throws GeneralEconomyException
 	 */
