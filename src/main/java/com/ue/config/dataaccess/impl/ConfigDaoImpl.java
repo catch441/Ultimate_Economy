@@ -297,6 +297,22 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	public List<String> loadJobList() {
 		return config.getStringList("JobList");
 	}
+	
+	@Override
+	public void saveStartAmount(double amount) {
+		config.set("StartAmount", amount);
+		save(config, file);
+	}
+	
+	@Override
+	public boolean hasStartAmount() {
+		return config.isSet("StartAmount");
+	}
+
+	@Override
+	public double loadStartAmount() {
+		return config.getDouble("StartAmount");
+	}
 
 	@Deprecated
 	@Override

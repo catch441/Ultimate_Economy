@@ -204,7 +204,7 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 		try {
 			ecoPlayerEventHandler.handleJoin(event);
 			townSystemEventHandler.handlePlayerJoin(event);
-		} catch (EconomyPlayerException e) {
+		} catch (EconomyPlayerException | GeneralEconomyException e) {
 			logger.warn("[Ultimate_Economy] " + e.getMessage());
 		}
 		if (event.getPlayer().isOp()) {

@@ -49,6 +49,7 @@ public class ConfigManagerImplTest {
 		assertEquals(3, manager.getMaxHomes());
 		assertEquals("US", manager.getLocale().getCountry());
 		assertEquals("en", manager.getLocale().getLanguage());
+		assertEquals("0.0", String.valueOf(manager.getStartAmount()));
 
 		verify(dao).saveMaxJobs(2);
 		verify(dao).saveMaxJoinedTowns(1);
@@ -62,6 +63,7 @@ public class ConfigManagerImplTest {
 		verify(dao).saveMaxHomes(3);
 		verify(dao).saveLanguage("en");
 		verify(dao).saveCountry("US");
+		verify(dao).saveStartAmount(0.0);
 	}
 
 	@Test
@@ -77,6 +79,7 @@ public class ConfigManagerImplTest {
 		when(dao.hasMaxRentedDays()).thenReturn(true);
 		when(dao.hasWildernessInteraction()).thenReturn(true);
 		when(dao.hasCountry()).thenReturn(true);
+		when(dao.hasStartAmount()).thenReturn(true);
 
 		when(dao.loadCurrencyPl()).thenReturn("$");
 		when(dao.loadCurrencySg()).thenReturn("$");
@@ -90,6 +93,7 @@ public class ConfigManagerImplTest {
 		when(dao.loadWildernessInteraction()).thenReturn(false);
 		when(dao.loadLanguage()).thenReturn("en");
 		when(dao.loadCountry()).thenReturn("US");
+		when(dao.loadStartAmount()).thenReturn(1.5);
 
 		manager.setupConfig();
 		assertEquals(2, manager.getMaxJobs());
@@ -104,6 +108,7 @@ public class ConfigManagerImplTest {
 		assertEquals(3, manager.getMaxHomes());
 		assertEquals("US", manager.getLocale().getCountry());
 		assertEquals("en", manager.getLocale().getLanguage());
+		assertEquals("1.5", String.valueOf(manager.getStartAmount()));
 
 		verify(dao, never()).saveMaxJobs(Mockito.anyInt());
 		verify(dao, never()).saveMaxJoinedTowns(Mockito.anyInt());
@@ -117,6 +122,7 @@ public class ConfigManagerImplTest {
 		verify(dao, never()).saveMaxHomes(Mockito.anyInt());
 		verify(dao, never()).saveLanguage(Mockito.anyString());
 		verify(dao, never()).saveCountry(Mockito.anyString());
+		verify(dao, never()).saveStartAmount(Mockito.anyDouble());
 	}
 
 	@Test
@@ -143,6 +149,15 @@ public class ConfigManagerImplTest {
 		assertFalse(manager.isWildernessInteraction());
 		verify(dao).saveWildernessInteraction(false);
 	}
+	
+	@Test
+	public void setStartAmountTest() {
+		manager.setupConfig();
+		assertEquals("0.0", String.valueOf(manager.getStartAmount()));
+		assertDoesNotThrow(() -> manager.setStartAmount(1.5));
+		assertEquals("1.5", String.valueOf(manager.getStartAmount()));
+		verify(dao).saveStartAmount(1.5);
+	}
 
 	@Test
 	public void setMaxRentedDaysTest() {
@@ -161,7 +176,7 @@ public class ConfigManagerImplTest {
 		} catch (GeneralEconomyException e) {
 			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
 			assertEquals(1, e.getParams().length);
-			assertEquals(-7, e.getParams()[0]);
+			assertEquals(-7.0, e.getParams()[0]);
 		}
 	}
 
@@ -182,7 +197,7 @@ public class ConfigManagerImplTest {
 		} catch (GeneralEconomyException e) {
 			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
 			assertEquals(1, e.getParams().length);
-			assertEquals(-1, e.getParams()[0]);
+			assertEquals(-1.0, e.getParams()[0]);
 		}
 	}
 
@@ -203,7 +218,7 @@ public class ConfigManagerImplTest {
 		} catch (GeneralEconomyException e) {
 			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
 			assertEquals(1, e.getParams().length);
-			assertEquals(-1, e.getParams()[0]);
+			assertEquals(-1.0, e.getParams()[0]);
 		}
 	}
 
@@ -224,7 +239,7 @@ public class ConfigManagerImplTest {
 		} catch (GeneralEconomyException e) {
 			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
 			assertEquals(1, e.getParams().length);
-			assertEquals(-1, e.getParams()[0]);
+			assertEquals(-1.0, e.getParams()[0]);
 		}
 	}
 
@@ -245,7 +260,7 @@ public class ConfigManagerImplTest {
 		} catch (GeneralEconomyException e) {
 			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
 			assertEquals(1, e.getParams().length);
-			assertEquals(-3, e.getParams()[0]);
+			assertEquals(-3.0, e.getParams()[0]);
 		}
 	}
 

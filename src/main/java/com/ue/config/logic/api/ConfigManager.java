@@ -12,6 +12,21 @@ public interface ConfigManager {
 	public void setupConfig();
 
 	/**
+	 * Sets the start amount value.
+	 * 
+	 * @param amount
+	 * @throws GeneralEconomyException
+	 */
+	public void setStartAmount(double amount) throws GeneralEconomyException;
+
+	/**
+	 * Returns the start amount.
+	 * 
+	 * @return amount
+	 */
+	public double getStartAmount();
+
+	/**
 	 * This method sets the extended town interaction configuration.
 	 * 
 	 * @param value
@@ -149,7 +164,6 @@ public interface ConfigManager {
 	 */
 	public String getCurrencySg();
 
-
 	/**
 	 * Set the currency text singular.
 	 * 
@@ -167,15 +181,17 @@ public interface ConfigManager {
 
 	/**
 	 * Returns the actual locale.
+	 * 
 	 * @return locale
 	 */
 	public Locale getLocale();
 
 	/**
 	 * Sets the current locale.
+	 * 
 	 * @param language
 	 * @param country
-	 * @throws GeneralEconomyException 
+	 * @throws GeneralEconomyException
 	 */
 	public void setLocale(String language, String country) throws GeneralEconomyException;
 }

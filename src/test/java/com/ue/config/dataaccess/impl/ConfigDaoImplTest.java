@@ -37,6 +37,34 @@ public class ConfigDaoImplTest {
 	}
 	
 	@Test
+	public void saveStartAmountTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		File file = new File("src/config.yml");
+		dao.saveStartAmount(1.5);
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		assertEquals("1.5", config.getString("StartAmount"));
+	}
+	
+	@Test
+	public void loadStartAmountTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		dao = new ConfigDaoImpl(serverProvider, logger);
+		dao.saveStartAmount(1.5);
+		assertEquals("1.5", String.valueOf(dao.loadStartAmount()));
+	}
+	
+	@Test
+	public void hasStartAmountTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);
+		assertFalse(dao.hasStartAmount());
+		dao.saveStartAmount(1.5);
+		assertTrue(dao.hasStartAmount());
+	}
+	
+	@Test
 	public void saveJobcenterListTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ConfigDao dao = new ConfigDaoImpl(serverProvider, logger);

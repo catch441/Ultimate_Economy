@@ -149,7 +149,7 @@ public class ConfigCommandExecutorImplTest {
 		verify(player).sendMessage("§cMy error message!");
 		verifyNoMoreInteractions(player);
 	}
-
+	
 	@Test
 	public void maxRentedDaysCommandTestWithAll() {
 		Player player = mock(Player.class);
@@ -183,6 +183,42 @@ public class ConfigCommandExecutorImplTest {
 		boolean result = executor.onCommand(player, null, "ue-config", args);
 		assertTrue(result);
 		verify(player).sendMessage("§c§cThe parameter §4kth§c is invalid!");
+		verifyNoMoreInteractions(player);
+	}
+
+	@Test
+	public void startAmountCommandTestWithAll() {
+		Player player = mock(Player.class);
+		when(messageWrapper.getString("config_change", "1.5")).thenReturn("§6The configuration was changed to §a1.5§6.");
+
+		String[] args = { "startAmount", "1.5" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		verify(player).sendMessage("§6The configuration was changed to §a1.5§6.");
+		verifyNoMoreInteractions(player);
+		assertDoesNotThrow(() -> verify(configManager).setStartAmount(1.5));
+	}
+
+	@Test
+	public void startAmountCommandTestWithInvalidArgumentNumber() {
+		Player player = mock(Player.class);
+		String[] args = { "startAmount" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		verify(player).sendMessage("/ue-config startAmount <amount>");
+		verifyNoMoreInteractions(player);
+	}
+
+	@Test
+	public void startAmountCommandTestWithInvalidInteger() {
+		Player player = mock(Player.class);
+		when(messageWrapper.getErrorString("invalid_parameter", "stuff"))
+				.thenReturn("§c§cThe parameter §4stuff§c is invalid!");
+
+		String[] args = { "startAmount", "stuff" };
+		boolean result = executor.onCommand(player, null, "ue-config", args);
+		assertTrue(result);
+		verify(player).sendMessage("§c§cThe parameter §4stuff§c is invalid!");
 		verifyNoMoreInteractions(player);
 	}
 

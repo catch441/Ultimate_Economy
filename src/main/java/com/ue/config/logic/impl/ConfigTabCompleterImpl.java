@@ -35,6 +35,7 @@ public class ConfigTabCompleterImpl implements TabCompleter {
 		case "maxJobs":
 		case "maxJoinedTowns":
 		case "maxPlayershops":
+		case "startAmount":
 		case "currency":
 			return new ArrayList<>();
 		default:
@@ -144,6 +145,7 @@ public class ConfigTabCompleterImpl implements TabCompleter {
 		addIfContains(list, "extendedInteraction", args[0]);
 		addIfContains(list, "wildernessInteraction", args[0]);
 		addIfContains(list, "currency", args[0]);
+		addIfContains(list, "startAmount", args[0]);
 		return list;
 	}
 
@@ -165,6 +167,7 @@ public class ConfigTabCompleterImpl implements TabCompleter {
 		list.add("maxPlayershops");
 		list.add("wildernessInteraction");
 		list.add("currency");
+		list.add("startAmount");
 		return list;
 	}
 }

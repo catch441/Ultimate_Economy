@@ -73,9 +73,22 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 			return performMaxRentedDaysCommand(label, args, sender);
 		case WILDERNESSINTERACTION:
 			return performWildernessInteractionCommand(label, args, sender);
+		case STARTAMOUNT:
+			return performStartAmountCommand(label, args, sender);
 		default:
 			return false;
 		}
+	}
+
+	private boolean performStartAmountCommand(String label, String[] args, CommandSender sender)
+			throws NumberFormatException, GeneralEconomyException {
+		if (args.length == 2) {
+			configManager.setStartAmount(Double.valueOf(args[1]));
+			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
+		} else {
+			sender.sendMessage("/" + label + " startAmount <amount>");
+		}
+		return true;
 	}
 
 	private boolean performLanguageCommand(String label, String[] args, CommandSender sender)

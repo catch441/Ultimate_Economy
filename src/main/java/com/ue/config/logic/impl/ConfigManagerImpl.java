@@ -26,6 +26,7 @@ public class ConfigManagerImpl implements ConfigManager {
 	private boolean extendedInteraction;
 	private boolean wildernessInteraction;
 	private Locale locale;
+	private double startAmount;
 
 	/**
 	 * Inject constructor.
@@ -54,8 +55,17 @@ public class ConfigManagerImpl implements ConfigManager {
 			setupCurrencyPl();
 			setupCurrencySg();
 			setupLocale();
+			setupStartAmount();
 			configDao.removeDeprecatedTownNames();
 		} catch (GeneralEconomyException e) {
+		}
+	}
+	
+	private void setupStartAmount() throws GeneralEconomyException {
+		if(!configDao.hasStartAmount()) {
+			setStartAmount(0.0);
+		} else {
+			startAmount = configDao.loadStartAmount();
 		}
 	}
 
@@ -146,7 +156,19 @@ public class ConfigManagerImpl implements ConfigManager {
 			maxHomes = configDao.loadMaxHomes();
 		}
 	}
+	
+	@Override
+	public void setStartAmount(double amount) throws GeneralEconomyException {
+		checkForNonZeroNumer(amount);
+		startAmount = amount;
+		configDao.saveStartAmount(amount);
+	}
 
+	@Override
+	public double getStartAmount() {
+		return startAmount;
+	}
+	
 	@Override
 	public void setExtendedInteraction(boolean value) {
 		extendedInteraction = value;
@@ -176,13 +198,9 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Override
 	public void setMaxRentedDays(int days) throws GeneralEconomyException {
-		if (days < 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					days);
-		} else {
-			maxRentedDays = days;
-			configDao.saveMaxRentedDays(maxRentedDays);
-		}
+		checkForNonZeroNumer(days);
+		maxRentedDays = days;
+		configDao.saveMaxRentedDays(maxRentedDays);
 	}
 
 	@Override
@@ -207,13 +225,9 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Override
 	public void setMaxPlayershops(int value) throws GeneralEconomyException {
-		if (value < 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					value);
-		} else {
-			maxPlayershops = value;
-			configDao.saveMaxPlayershops(maxPlayershops);
-		}
+		checkForNonZeroNumer(value);
+		maxPlayershops = value;
+		configDao.saveMaxPlayershops(maxPlayershops);
 	}
 
 	@Override
@@ -223,13 +237,9 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Override
 	public void setMaxHomes(int value) throws GeneralEconomyException {
-		if (value < 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					value);
-		} else {
-			maxHomes = value;
-			configDao.saveMaxHomes(maxHomes);
-		}
+		checkForNonZeroNumer(value);
+		maxHomes = value;
+		configDao.saveMaxHomes(maxHomes);
 	}
 
 	@Override
@@ -239,13 +249,9 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Override
 	public void setMaxJobs(int value) throws GeneralEconomyException {
-		if (value < 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					value);
-		} else {
-			maxJobs = value;
-			configDao.saveMaxJobs(maxJobs);
-		}
+		checkForNonZeroNumer(value);
+		maxJobs = value;
+		configDao.saveMaxJobs(maxJobs);
 	}
 
 	@Override
@@ -255,13 +261,9 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Override
 	public void setMaxJoinedTowns(int value) throws GeneralEconomyException {
-		if (value < 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					value);
-		} else {
-			maxJoinedTowns = value;
-			configDao.saveMaxJoinedTowns(maxJoinedTowns);
-		}
+		checkForNonZeroNumer(value);
+		maxJoinedTowns = value;
+		configDao.saveMaxJoinedTowns(maxJoinedTowns);
 	}
 
 	@Override
@@ -308,6 +310,13 @@ public class ConfigManagerImpl implements ConfigManager {
 			return getCurrencySg();
 		} else {
 			return getCurrencyPl();
+		}
+	}
+	
+	private void checkForNonZeroNumer(double value) throws GeneralEconomyException {
+		if (value < 0) {
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
+					value);
 		}
 	}
 

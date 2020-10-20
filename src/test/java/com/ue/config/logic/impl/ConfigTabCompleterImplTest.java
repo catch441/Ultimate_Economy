@@ -18,7 +18,7 @@ public class ConfigTabCompleterImplTest {
 	public void zeroArgsTest() {
 		String[] args = { "" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-		assertEquals(10, result.size());
+		assertEquals(11, result.size());
 		assertEquals("language", result.get(0));
 		assertEquals("maxHomes", result.get(1));
 		assertEquals("homes", result.get(2));
@@ -29,6 +29,7 @@ public class ConfigTabCompleterImplTest {
 		assertEquals("maxPlayershops", result.get(7));
 		assertEquals("wildernessInteraction", result.get(8));
 		assertEquals("currency", result.get(9));
+		assertEquals("startAmount", result.get(10));
 	}
 
 	@Test
@@ -64,6 +65,13 @@ public class ConfigTabCompleterImplTest {
 	@Test
 	public void maxRentedDaysArgTest() {
 		String[] args = { "maxRentedDays" };
+		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+		assertEquals(0, result.size());
+	}
+	
+	@Test
+	public void startAmountArgTest() {
+		String[] args = { "startAmount" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(0, result.size());
 	}

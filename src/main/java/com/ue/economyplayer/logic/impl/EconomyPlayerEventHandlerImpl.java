@@ -8,6 +8,7 @@ import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
+import com.ue.general.impl.GeneralEconomyException;
 
 public class EconomyPlayerEventHandlerImpl implements EconomyPlayerEventHandler {
 
@@ -27,10 +28,12 @@ public class EconomyPlayerEventHandlerImpl implements EconomyPlayerEventHandler 
 	}
 
 	@Override
-	public void handleJoin(PlayerJoinEvent event) throws EconomyPlayerException {
+	public void handleJoin(PlayerJoinEvent event) throws EconomyPlayerException, GeneralEconomyException {
 		String playername = event.getPlayer().getName();
 		if (!ecoPlayerManager.getEconomyPlayerNameList().contains(playername)) {
 			ecoPlayerManager.createEconomyPlayer(playername);
+			EconomyPlayer economyPlayer = ecoPlayerManager.getEconomyPlayerByName(playername);
+			economyPlayer.increasePlayerAmount(configManager.getStartAmount(), false);
 		}
 		EconomyPlayer economyPlayer = ecoPlayerManager.getEconomyPlayerByName(playername);
 		economyPlayer.setPlayer(event.getPlayer());

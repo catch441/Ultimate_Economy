@@ -291,7 +291,8 @@ public interface ConfigDao {
 	public List<String> loadPlayershopIds();
 	
 	/**
-	 * Saves the playershop ids.
+	 * Saves the play@Override
+	ershop ids.
 	 * @param ids
 	 */
 	public void savePlayershopIds(List<String> ids);
@@ -332,7 +333,25 @@ public interface ConfigDao {
 	 * @return townworld names
 	 */
 	public List<String> loadTownworldNames();
-
+	
+	/**
+	 * Saves the start amount.
+	 * @param amount
+	 */
+	public void saveStartAmount(double amount);
+	
+	/**
+	 * Returns the start amount.
+	 * @return amount
+	 */
+	public double loadStartAmount();
+	
+	/**
+	 * Returns true, if the value is set.
+	 * @return boolean
+	 */
+	public boolean hasStartAmount();
+	
 	/**
 	 * Remove deprecated stuff.
 	 * 

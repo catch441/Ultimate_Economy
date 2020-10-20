@@ -500,7 +500,7 @@ public class UltimateEconomyEventHandlerImplTest {
 	}
 	
 	@Test
-	public void onJoinEventTestOpNoUpdateAndError() throws EconomyPlayerException {
+	public void onJoinEventTestOpNoUpdateAndError() throws EconomyPlayerException, GeneralEconomyException {
 		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
 				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
 				ecoPlayerEventHandler);

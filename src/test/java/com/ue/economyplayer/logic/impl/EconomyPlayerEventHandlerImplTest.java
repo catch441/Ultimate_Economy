@@ -30,16 +30,18 @@ public class EconomyPlayerEventHandlerImplTest {
 	public void handleJoinTest() {
 		EconomyPlayerEventHandlerImpl eventHandler = new EconomyPlayerEventHandlerImpl(ecoPlayerManager, configManager);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(ecoPlayerManager.getEconomyPlayerNameList()).thenReturn(new ArrayList<>());
 		when(configManager.isWildernessInteraction()).thenReturn(true);
+		when(configManager.getStartAmount()).thenReturn(1.5);
 		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("kthschnll");
+		when(player.getName()).thenReturn("catch441");
 		PlayerJoinEvent event = new PlayerJoinEvent(player, "");
 		
 		assertDoesNotThrow(() -> eventHandler.handleJoin(event));
-		assertDoesNotThrow(() -> verify(ecoPlayerManager).createEconomyPlayer("kthschnll"));
+		assertDoesNotThrow(() -> verify(ecoPlayerManager).createEconomyPlayer("catch441"));
 		verify(ecoPlayer).addWildernessPermission();
 		verify(ecoPlayer).setPlayer(player);
+		assertDoesNotThrow(() -> verify(ecoPlayer).increasePlayerAmount(1.5, false));
 	}
 }
