@@ -4,9 +4,8 @@ public enum EconomyPlayerExceptionMessageEnum {
 
 	NO_PERMISSION("player_has_no_permission"), NO_PERMISSION_SET_SPAWNER("no_permission_set_spawner"),
 	NO_PERMISSION_BREAK_SPAWNER("no_permission_break_spawner"), WILDERNESS("wilderness"),
-	TOWN_NOT_TOWN_OWNER("town_not_town_owner"), NO_PERMISSION_ON_PLOT("no_permission_on_plot"),
-	JOB_ALREADY_JOINED("job_already_joined"), JOB_NOT_JOINED("job_not_joined"),
-	TOWN_ALREADY_JOINED("town_already_joined"), TOWN_NOT_JOINED("town_not_joined"),
+	NO_PERMISSION_ON_PLOT("no_permission_on_plot"), JOB_ALREADY_JOINED("job_already_joined"),
+	JOB_NOT_JOINED("job_not_joined"), TOWN_ALREADY_JOINED("town_already_joined"), TOWN_NOT_JOINED("town_not_joined"),
 	YOU_ARE_NOT_OWNER("you_are_not_owner"), YOU_ARE_THE_OWNER("you_are_the_owner"),
 	OUTSIDE_OF_THE_PLOT("outside_of_the_plot"), YOU_ARE_ALREADY_CITIZEN("you_are_already_citizen"),
 	YOU_ARE_NO_CITIZEN("you_are_no_citizen"), SHOPOWNER_NOT_ENOUGH_MONEY("shopowner_not_enough_money"),
