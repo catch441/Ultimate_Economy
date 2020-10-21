@@ -3,6 +3,8 @@ package com.ue.jobsystem.logic.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.entity.EntityType;
+
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsyste.dataaccess.api.JobDao;
 import com.ue.jobsystem.logic.api.Job;
@@ -15,6 +17,7 @@ public class JobImpl implements Job {
 	private Map<String, Double> entityList = new HashMap<>();
 	private Map<String, Double> blockList = new HashMap<>();
 	private Map<String, Double> fisherList = new HashMap<>();
+	private Map<String, Double> breedableList = new HashMap<>();
 	private String name;
 
 	/**
@@ -32,61 +35,78 @@ public class JobImpl implements Job {
 		if (isNew) {
 			setupJobName(name);
 		} else {
-			loadExistingJob(name);
+			loadExistingJob();
 		}
 	}
 
 	@Override
-	public void addFisherLootType(String lootType, double price) throws JobSystemException, GeneralEconomyException {
+	public void addFisherLootType(String lootType, double price) throws GeneralEconomyException {
 		validationHandler.checkForValidFisherLootType(lootType);
 		validationHandler.checkForPositivValue(price);
-		validationHandler.checkForLoottypeNotInJob(getFisherList(), lootType);
+		validationHandler.checkForDoesNotExist(getFisherList(), lootType);
 		getFisherList().put(lootType, price);
 		jobDao.saveFisherList(getFisherList());
 	}
 
 	@Override
-	public void delFisherLootType(String lootType) throws JobSystemException, GeneralEconomyException {
+	public void removeFisherLootType(String lootType) throws GeneralEconomyException {
 		validationHandler.checkForValidFisherLootType(lootType);
-		validationHandler.checkForLoottypeInJob(getFisherList(), lootType);
+		validationHandler.checkForDoesExist(getFisherList(), lootType);
 		getFisherList().remove(lootType);
 		jobDao.saveFisherList(getFisherList());
 	}
 
 	@Override
-	public void addMob(String entity, double price) throws JobSystemException, GeneralEconomyException {
+	public void addMob(String entity, double price) throws GeneralEconomyException {
 		entity = entity.toUpperCase();
 		validationHandler.checkForValidEntityType(entity);
-		validationHandler.checkForEntityNotInJob(getEntityList(), entity);
+		validationHandler.checkForDoesNotExist(getEntityList(), entity);
 		validationHandler.checkForPositivValue(price);
-		getEntityList().put(entity, price);
+		entityList.put(entity, price);
 		jobDao.saveEntityList(getEntityList());
 	}
 
 	@Override
-	public void deleteMob(String entity) throws JobSystemException, GeneralEconomyException {
+	public void deleteMob(String entity) throws GeneralEconomyException {
 		entity = entity.toUpperCase();
 		validationHandler.checkForValidEntityType(entity);
-		validationHandler.checkForEntityInJob(getEntityList(), entity);
-		getEntityList().remove(entity);
+		validationHandler.checkForDoesExist(getEntityList(), entity);
+		entityList.remove(entity);
 		jobDao.saveEntityList(getEntityList());
 	}
 
 	@Override
-	public void addBlock(String material, double price) throws JobSystemException, GeneralEconomyException {
+	public void addBreedable(EntityType breedable, double price) throws GeneralEconomyException {
+		validationHandler.checkForValidBreedableEntity(breedable);
+		validationHandler.checkForDoesNotExist(getBreedableList(), breedable.toString().toUpperCase());
+		validationHandler.checkForPositivValue(price);
+		breedableList.put(breedable.toString().toUpperCase(), price);
+		jobDao.saveBreedableList(getBreedableList());
+	}
+
+	@Override
+	public void deleteBreedable(EntityType breedable) throws GeneralEconomyException {
+		validationHandler.checkForValidBreedableEntity(breedable);
+		validationHandler.checkForDoesExist(getBreedableList(), breedable.toString().toUpperCase());
+		breedableList.remove(breedable.toString().toUpperCase());
+		jobDao.saveBreedableList(getBreedableList());
+	}
+
+	@Override
+	public void addBlock(String material, double price) throws GeneralEconomyException {
 		material = material.toUpperCase();
 		validationHandler.checkForValidMaterial(material);
 		validationHandler.checkForPositivValue(price);
-		validationHandler.checkForBlockNotInJob(getBlockList(), material);
+		validationHandler.checkForDoesNotExist(getBlockList(), material);
 		getBlockList().put(material, price);
 		jobDao.saveBlockList(getBlockList());
 	}
 
 	@Override
-	public void deleteBlock(String material) throws JobSystemException, GeneralEconomyException {
+	public void deleteBlock(String material) throws GeneralEconomyException {
 		material = material.toUpperCase();
 		validationHandler.checkForValidMaterial(material);
-		validationHandler.checkForBlockInJob(getBlockList(), material);
+		validationHandler.checkForDoesExist(getBlockList(), material);
 		getBlockList().remove(material);
 		jobDao.saveBlockList(getBlockList());
 	}
@@ -97,25 +117,32 @@ public class JobImpl implements Job {
 	}
 
 	@Override
-	public double getBlockPrice(String material) throws JobSystemException, GeneralEconomyException {
+	public double getBreedPrice(EntityType breedable) throws GeneralEconomyException {
+		validationHandler.checkForValidBreedableEntity(breedable);
+		validationHandler.checkForDoesExist(getBreedableList(), breedable.toString().toUpperCase());
+		return getBreedableList().get(breedable.toString().toUpperCase());
+	}
+
+	@Override
+	public double getBlockPrice(String material) throws GeneralEconomyException {
 		material = material.toUpperCase();
 		validationHandler.checkForValidMaterial(material);
-		validationHandler.checkForBlockInJob(getBlockList(), material);
+		validationHandler.checkForDoesExist(getBlockList(), material);
 		return getBlockList().get(material);
 	}
 
 	@Override
-	public double getFisherPrice(String lootType) throws JobSystemException, GeneralEconomyException {
+	public double getFisherPrice(String lootType) throws GeneralEconomyException {
 		validationHandler.checkForValidFisherLootType(lootType);
-		validationHandler.checkForLoottypeInJob(getFisherList(), lootType);
+		validationHandler.checkForDoesExist(getFisherList(), lootType);
 		return getFisherList().get(lootType);
 	}
 
 	@Override
-	public double getKillPrice(String entityName) throws JobSystemException, GeneralEconomyException {
+	public double getKillPrice(String entityName) throws GeneralEconomyException {
 		entityName = entityName.toUpperCase();
 		validationHandler.checkForValidEntityType(entityName);
-		validationHandler.checkForEntityInJob(getEntityList(), entityName);
+		validationHandler.checkForDoesExist(getEntityList(), entityName);
 		return getEntityList().get(entityName);
 	}
 
@@ -135,6 +162,11 @@ public class JobImpl implements Job {
 	}
 
 	@Override
+	public Map<String, Double> getBreedableList() {
+		return breedableList;
+	}
+
+	@Override
 	public Map<String, Double> getFisherList() {
 		return fisherList;
 	}
@@ -144,7 +176,8 @@ public class JobImpl implements Job {
 		jobDao.saveJobName(name);
 	}
 
-	private void loadExistingJob(String name) {
+	private void loadExistingJob() {
+		breedableList = jobDao.loadBreedableList();
 		fisherList = jobDao.loadFisherList();
 		entityList = jobDao.loadEntityList();
 		blockList = jobDao.loadBlockList();
