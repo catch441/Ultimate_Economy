@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
+import com.ue.general.impl.GeneralEconomyException;
 
 public class EconomyPlayerTabCompleterImpl implements TabCompleter {
 
@@ -62,7 +63,7 @@ public class EconomyPlayerTabCompleterImpl implements TabCompleter {
 					}
 				}
 			}
-		} catch (EconomyPlayerException e) {
+		} catch (GeneralEconomyException e) {
 		}
 		return list;
 	}

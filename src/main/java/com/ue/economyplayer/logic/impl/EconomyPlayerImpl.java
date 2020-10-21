@@ -129,7 +129,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	@Override
-	public Location getHome(String homeName) throws EconomyPlayerException {
+	public Location getHome(String homeName) throws GeneralEconomyException {
 		validationHandler.checkForExistingHome(getHomeList(), homeName);
 		return getHomeList().get(homeName);
 	}
@@ -175,24 +175,24 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	@Override
-	public void addHome(String homeName, Location location, boolean sendMessage) throws EconomyPlayerException {
+	public void addHome(String homeName, Location location, boolean sendMessage) throws GeneralEconomyException, EconomyPlayerException {
 		validationHandler.checkForNotExistingHome(getHomeList(), homeName);
 		validationHandler.checkForNotReachedMaxHomes(reachedMaxHomes());
 		homes.put(homeName, location);
 		ecoPlayerDao.saveHome(getName(), homeName, location);
 		if (isOnline() && sendMessage) {
-			getPlayer().sendMessage(messageWrapper.getString("sethome", homeName));
+			getPlayer().sendMessage(messageWrapper.getString("created", homeName));
 		}
 
 	}
 
 	@Override
-	public void removeHome(String homeName, boolean sendMessage) throws EconomyPlayerException {
+	public void removeHome(String homeName, boolean sendMessage) throws GeneralEconomyException {
 		validationHandler.checkForExistingHome(getHomeList(), homeName);
 		getHomeList().remove(homeName);
 		ecoPlayerDao.saveHome(getName(), homeName, null);
 		if (isOnline() && sendMessage) {
-			getPlayer().sendMessage(messageWrapper.getString("delhome", homeName));
+			getPlayer().sendMessage(messageWrapper.getString("deleted", homeName));
 		}
 	}
 

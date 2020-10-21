@@ -5,7 +5,7 @@ import java.util.List;
 import org.bukkit.Location;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
-import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
 public interface TownworldDao {
@@ -143,9 +143,9 @@ public interface TownworldDao {
 	 * @param townName
 	 * @param chunkCoords
 	 * @return economy player
-	 * @throws EconomyPlayerException
+	 * @throws GeneralEconomyException
 	 */
-	public EconomyPlayer loadPlotOwner(String townName, String chunkCoords) throws EconomyPlayerException;
+	public EconomyPlayer loadPlotOwner(String townName, String chunkCoords) throws GeneralEconomyException;
 
 	/**
 	 * Loads the plot sale price.
@@ -187,9 +187,9 @@ public interface TownworldDao {
 	 * 
 	 * @param townName
 	 * @return mayor
-	 * @throws EconomyPlayerException
+	 * @throws GeneralEconomyException
 	 */
-	public EconomyPlayer loadMayor(String townName) throws EconomyPlayerException;
+	public EconomyPlayer loadMayor(String townName) throws GeneralEconomyException;
 
 	/**
 	 * Loads all deputies of a town.

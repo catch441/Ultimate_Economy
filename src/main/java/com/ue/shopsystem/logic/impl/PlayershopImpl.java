@@ -446,7 +446,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		}
 	}
 
-	private void loadOwner(String oldName) throws EconomyPlayerException {
+	private void loadOwner(String oldName) throws GeneralEconomyException {
 		String owner = getShopDao().loadOwner(oldName);
 		if (owner != null && !"".equals(owner)) {
 			setOwner(ecoPlayerManager.getEconomyPlayerByName(owner));

@@ -27,6 +27,8 @@ import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import com.ue.general.impl.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsystem.logic.api.JobManager;
 
 import dagger.Lazy;
@@ -64,10 +66,10 @@ public class EconomyPlayerManagerImplTest {
 	}
 
 	@Test
-	public void createEconomyPlayerTestWithExistingName() throws EconomyPlayerException {
-		doThrow(EconomyPlayerException.class).when(validationHandler).checkForPlayerDoesNotExist(new ArrayList<>(),
+	public void createEconomyPlayerTestWithExistingName() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForPlayerDoesNotExist(new ArrayList<>(),
 				"catch441");
-		assertThrows(EconomyPlayerException.class, () -> ecoPlayerManager.createEconomyPlayer("catch441"));
+		assertThrows(GeneralEconomyException.class, () -> ecoPlayerManager.createEconomyPlayer("catch441"));
 		assertEquals(0, ecoPlayerManager.getAllEconomyPlayers().size());
 	}
 
@@ -100,9 +102,10 @@ public class EconomyPlayerManagerImplTest {
 	public void getEconomyPlayerByNameTestWithNoPlayer() {
 		try {
 			ecoPlayerManager.getEconomyPlayerByName("catch441");
-		} catch (EconomyPlayerException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(EconomyPlayerExceptionMessageEnum.PLAYER_DOES_NOT_EXIST, e.getKey());
+		} catch (GeneralEconomyException e) {
+			assertEquals(1, e.getParams().length);
+			assertEquals("catch441", e.getParams()[0]);
+			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
 		}
 	}
 

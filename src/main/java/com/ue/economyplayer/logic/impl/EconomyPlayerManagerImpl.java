@@ -16,6 +16,8 @@ import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import com.ue.general.impl.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsystem.logic.api.JobManager;
 
 import dagger.Lazy;
@@ -68,13 +70,13 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	}
 
 	@Override
-	public EconomyPlayer getEconomyPlayerByName(String name) throws EconomyPlayerException {
+	public EconomyPlayer getEconomyPlayerByName(String name) throws GeneralEconomyException {
 		for (EconomyPlayer economyPlayer : getAllEconomyPlayers()) {
 			if (economyPlayer.getName().equals(name)) {
 				return economyPlayer;
 			}
 		}
-		throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.PLAYER_DOES_NOT_EXIST);
+		throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
 	}
 
 	@Override
@@ -83,7 +85,7 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	}
 
 	@Override
-	public void createEconomyPlayer(String playerName) throws EconomyPlayerException {
+	public void createEconomyPlayer(String playerName) throws GeneralEconomyException {
 		validationHandler.checkForPlayerDoesNotExist(getEconomyPlayerNameList(), playerName);
 		Logger logger = LoggerFactory.getLogger(EconomyPlayerImpl.class);
 		getAllEconomyPlayers().add(new EconomyPlayerImpl(logger, serverProvider, validationHandler, ecoPlayerDao,

@@ -41,6 +41,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
+import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.spawnersystem.logic.api.SpawnerManager;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +55,7 @@ public class SpawnSystemEventHandlerImplTest {
 	ServerProvider serverProvider;
 	@Mock
 	SpawnerManager spawnerManager;
-	
+
 	@Test
 	public void handleInventoryClickTestAnvilSpawner() {
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
@@ -67,7 +68,7 @@ public class SpawnSystemEventHandlerImplTest {
 		eventHandler.handleInventoryClick(event);
 		verify(event).setCancelled(true);
 	}
-	
+
 	@Test
 	public void handleInventoryClickTestAnvilOther() {
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
@@ -80,7 +81,7 @@ public class SpawnSystemEventHandlerImplTest {
 		eventHandler.handleInventoryClick(event);
 		verify(event, never()).setCancelled(true);
 	}
-	
+
 	@Test
 	public void handleInventoryClickTestChestSpawner() {
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
@@ -92,7 +93,7 @@ public class SpawnSystemEventHandlerImplTest {
 		eventHandler.handleInventoryClick(event);
 		verify(event, never()).setCancelled(true);
 	}
-	
+
 	@Test
 	public void handleInventoryClickTestNoItem() {
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
@@ -100,7 +101,7 @@ public class SpawnSystemEventHandlerImplTest {
 		eventHandler.handleInventoryClick(event);
 		verify(event, never()).setCancelled(true);
 	}
-	
+
 	@Test
 	public void handleSetBlockEventTestCreative() {
 		BlockPlaceEvent event = mock(BlockPlaceEvent.class);
@@ -111,7 +112,7 @@ public class SpawnSystemEventHandlerImplTest {
 		verify(event, never()).setCancelled(true);
 		verifyNoInteractions(spawnerManager);
 	}
-	
+
 	@Test
 	public void handleSetBlockEventTestNotSpawner() {
 		Player player = mock(Player.class);
@@ -125,7 +126,7 @@ public class SpawnSystemEventHandlerImplTest {
 		verifyNoInteractions(spawnerManager);
 		assertFalse(event.isCancelled());
 	}
-	
+
 	@Test
 	public void handleSetBlockEventTestNotPluginSpawner() {
 		Player player = mock(Player.class);
@@ -143,7 +144,7 @@ public class SpawnSystemEventHandlerImplTest {
 		verifyNoInteractions(spawnerManager);
 		assertFalse(event.isCancelled());
 	}
-	
+
 	@Test
 	public void handleSetBlockEventTestNotOwner() {
 		Player player = mock(Player.class);
@@ -158,13 +159,14 @@ public class SpawnSystemEventHandlerImplTest {
 		when(block.getBlockData()).thenReturn(data);
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		when(player.getName()).thenReturn("catch441");
-		when(messageWrapper.getErrorString("no_permission_set_spawner")).thenReturn("my error");
+		when(messageWrapper.getErrorString(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()))
+				.thenReturn("my error");
 		eventHandler.handleSetBlockEvent(event);
 		verifyNoInteractions(spawnerManager);
 		assertTrue(event.isCancelled());
 		verify(player).sendMessage("my error");
 	}
-	
+
 	@Test
 	public void handleSetBlockEventTest() {
 		JavaPlugin plugin = mock(JavaPlugin.class);
@@ -193,7 +195,7 @@ public class SpawnSystemEventHandlerImplTest {
 		verify(blockState).update();
 		verify(spawnerManager).addSpawner("COW", player, loc);
 	}
-	
+
 	@Test
 	public void handleBreakBlockEventTestCreativeNotSpawner() {
 		Player player = mock(Player.class);
@@ -204,7 +206,7 @@ public class SpawnSystemEventHandlerImplTest {
 		eventHandler.handleBreakBlockEvent(event);
 		verifyNoInteractions(spawnerManager);
 	}
-	
+
 	@Test
 	public void handleBreakBlockEventTestCreativeSpawner() {
 		Player player = mock(Player.class);
@@ -217,7 +219,7 @@ public class SpawnSystemEventHandlerImplTest {
 		eventHandler.handleBreakBlockEvent(event);
 		verify(spawnerManager).removeSpawner(loc);
 	}
-	
+
 	@Test
 	public void handleBreakBlockEventTestSurvivalNoSpawner() {
 		Player player = mock(Player.class);
@@ -229,7 +231,7 @@ public class SpawnSystemEventHandlerImplTest {
 		verifyNoInteractions(spawnerManager);
 		assertFalse(event.isCancelled());
 	}
-	
+
 	@Test
 	public void handleBreakBlockEventTestSurvivalInvFull() {
 		Player player = mock(Player.class);
@@ -246,25 +248,27 @@ public class SpawnSystemEventHandlerImplTest {
 		assertTrue(event.isCancelled());
 		verify(player).sendMessage("my error");
 	}
-	
+
 	@Test
 	public void handleBreakBlockEventTestSurvivalNotOwner() {
 		Player player = mock(Player.class);
 		Block block = mock(Block.class);
 		PlayerInventory inv = mock(PlayerInventory.class);
 		BlockBreakEvent event = new BlockBreakEvent(block, player);
-		when(block.getMetadata("name")).thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), "catch441")));
+		when(block.getMetadata("name"))
+				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), "catch441")));
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		when(inv.firstEmpty()).thenReturn(1);
 		when(player.getName()).thenReturn("Wulfgar");
 		when(player.getInventory()).thenReturn(inv);
-		when(messageWrapper.getErrorString("no_permission_break_spawner")).thenReturn("my error");
+		when(messageWrapper.getErrorString(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()))
+				.thenReturn("my error");
 		eventHandler.handleBreakBlockEvent(event);
 		verifyNoInteractions(spawnerManager);
 		assertTrue(event.isCancelled());
 		verify(player).sendMessage("my error");
 	}
-	
+
 	@Test
 	public void handleBreakBlockEventTestSurvival() {
 		Player player = mock(Player.class);
@@ -273,16 +277,19 @@ public class SpawnSystemEventHandlerImplTest {
 		BlockBreakEvent event = new BlockBreakEvent(block, player);
 		ItemStack stack = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
+		Location loc = mock(Location.class);
+		when(block.getLocation()).thenReturn(loc);
 		when(stack.getItemMeta()).thenReturn(meta);
 		when(serverProvider.createItemStack(Material.SPAWNER, 1)).thenReturn(stack);
 		when(block.getMetadata("entity")).thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), "COW")));
-		when(block.getMetadata("name")).thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), "catch441")));
+		when(block.getMetadata("name"))
+				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), "catch441")));
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		when(inv.firstEmpty()).thenReturn(1);
 		when(player.getInventory()).thenReturn(inv);
 		when(player.getName()).thenReturn("catch441");
 		eventHandler.handleBreakBlockEvent(event);
-		verifyNoInteractions(spawnerManager);
+		verify(spawnerManager).removeSpawner(loc);
 		assertFalse(event.isCancelled());
 		verify(meta).setDisplayName("COW-catch441");
 		verify(stack).setItemMeta(meta);

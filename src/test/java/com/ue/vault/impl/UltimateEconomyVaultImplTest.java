@@ -72,7 +72,7 @@ public class UltimateEconomyVaultImplTest {
 	public void getBalanceTestError() {
 		Player player = mock(Player.class);
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441"))
-				.thenThrow(EconomyPlayerException.class));
+				.thenThrow(GeneralEconomyException.class));
 		when(player.getName()).thenReturn("catch441");
 		assertEquals("0.0", String.valueOf(vault.getBalance(player)));
 	}
@@ -185,9 +185,9 @@ public class UltimateEconomyVaultImplTest {
 	}
 
 	@Test
-	public void hasTestWithNoEcoPlayer() throws EconomyPlayerException {
+	public void hasTestWithNoEcoPlayer() throws GeneralEconomyException {
 		Player player = mock(Player.class);
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
 		when(player.getName()).thenReturn("catch441");
 		assertFalse(vault.has(player, 1.5));
 	}
@@ -209,8 +209,8 @@ public class UltimateEconomyVaultImplTest {
 	}
 
 	@Test
-	public void hasTestWithStringNoEcoPlayer() throws EconomyPlayerException {
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
+	public void hasTestWithStringNoEcoPlayer() throws GeneralEconomyException {
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
 		assertFalse(vault.has("catch441", 1.5));
 	}
 
@@ -317,10 +317,10 @@ public class UltimateEconomyVaultImplTest {
 	}
 
 	@Test
-	public void depositPlayerTestError() throws EconomyPlayerException {
+	public void depositPlayerTestError() throws GeneralEconomyException {
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
-		EconomyPlayerException e = mock(EconomyPlayerException.class);
+		GeneralEconomyException e = mock(GeneralEconomyException.class);
 		when(e.getMessage()).thenReturn("error");
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
 		EconomyResponse response = vault.depositPlayer(player, 1.5);
@@ -354,8 +354,8 @@ public class UltimateEconomyVaultImplTest {
 	}
 	
 	@Test
-	public void withdrawPlayerTestError() throws EconomyPlayerException {
-		EconomyPlayerException e = mock(EconomyPlayerException.class);
+	public void withdrawPlayerTestError() throws GeneralEconomyException {
+		GeneralEconomyException e = mock(GeneralEconomyException.class);
 		when(e.getMessage()).thenReturn("error");
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
 		EconomyResponse response = vault.withdrawPlayer("catch441", 1.5);

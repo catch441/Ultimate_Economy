@@ -97,7 +97,7 @@ public class RentshopCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(rentshopManager.createRentShop(loc, 18, 4.0)).thenReturn(shop));
 		when(shop.getName()).thenReturn("RentShop#R0");
 		when(player.getLocation()).thenReturn(loc);
-		when(messageWrapper.getString("shop_create", "RentShop#R0")).thenReturn("my message");
+		when(messageWrapper.getString("created", "RentShop#R0")).thenReturn("my message");
 		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
 		String[] args = { "create", "18", "4" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
@@ -132,7 +132,7 @@ public class RentshopCommandExecutorImplTest {
 	public void deleteCommandTest() {
 		Rentshop shop = mock(Rentshop.class);
 		assertDoesNotThrow(() -> when(rentshopManager.getRentShopByUniqueName("RentShop#R0")).thenReturn(shop));
-		when(messageWrapper.getString("shop_delete", "RentShop#R0")).thenReturn("my message");
+		when(messageWrapper.getString("deleted", "RentShop#R0")).thenReturn("my message");
 		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
 		String[] args = { "delete", "RentShop#R0" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);

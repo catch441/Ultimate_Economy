@@ -152,7 +152,7 @@ public class TownworldManagerImpl implements TownworldManager {
 	}
 
 	@Override
-	public void performTownworldLocationCheckAllPlayers() throws EconomyPlayerException {
+	public void performTownworldLocationCheckAllPlayers() throws GeneralEconomyException {
 		for (Player p : serverProvider.getOnlinePlayers()) {
 			EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(p.getName());
 			performTownWorldLocationCheck(p.getWorld().getName(), p.getLocation().getChunk(), ecoPlayer);

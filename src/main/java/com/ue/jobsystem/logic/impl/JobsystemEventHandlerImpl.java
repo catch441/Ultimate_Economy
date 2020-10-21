@@ -82,7 +82,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 				if (entity.getKiller().getGameMode() == GameMode.SURVIVAL) {
 					payForKillJob(entity, ecoPlayer);
 				}
-			} catch (EconomyPlayerException e) {
+			} catch (GeneralEconomyException e) {
 			}
 		}
 	}
@@ -105,7 +105,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 				EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getPlayer().getName());
 				List<MetadataValue> list = event.getBlock().getMetadata("placedBy");
 				payForBreakJob(ecoPlayer, event.getBlock(), list);
-			} catch (EconomyPlayerException e) {
+			} catch (GeneralEconomyException e) {
 			}
 		}
 	}
@@ -147,7 +147,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 						payForFisherJob(ecoPlayer, jobList, lootType);
 					}
 				}
-			} catch (ClassCastException | EconomyPlayerException e) {
+			} catch (ClassCastException | GeneralEconomyException e) {
 			}
 		}
 	}

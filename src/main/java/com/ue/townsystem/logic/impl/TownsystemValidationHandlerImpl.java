@@ -76,7 +76,7 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 	@Override
 	public void checkForIsPlotOwner(EconomyPlayer owner, EconomyPlayer player) throws EconomyPlayerException {
 		if (!owner.equals(player)) {
-			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
+			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
 		}
 	}
 
@@ -119,7 +119,7 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 	public void checkForPlayerHasDeputyPermission(boolean hasDeputyPermissions)
 			throws EconomyPlayerException {
 		if (!hasDeputyPermissions) {
-			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
+			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
 		}
 	}
 
@@ -156,7 +156,7 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 	public void checkForPlayerIsMayor(EconomyPlayer mayor, EconomyPlayer player)
 			throws EconomyPlayerException {
 		if (!mayor.equals(player)) {
-			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
+			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
 		}
 	}
 
@@ -265,12 +265,12 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 		if (townworldManager.get().isTownWorld(location.getWorld().getName())) {
 			Townworld townworld = townworldManager.get().getTownWorldByName(location.getWorld().getName());
 			if (townworld.isChunkFree(location.getChunk())) {
-				throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
+				throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
 			} else {
 				Town town = townworld.getTownByChunk(location.getChunk());
 				if (!town.hasBuildPermissions(ecoPlayer,
 						town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
-					throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
+					throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
 				}
 			}
 		}

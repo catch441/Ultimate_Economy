@@ -18,7 +18,7 @@ import com.ue.common.utils.SaveFileUtils;
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
-import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.impl.ShopSystemException;
@@ -274,7 +274,7 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 				EconomyPlayer ecoPlayer = ecoPlayerManager
 						.getEconomyPlayerByName(name.substring(name.indexOf("_") + 1));
 				saveOwner(ecoPlayer);
-			} catch (EconomyPlayerException e) {
+			} catch (GeneralEconomyException e) {
 				logger.warn("[Ultimate_Economy] Error on save config to file");
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}

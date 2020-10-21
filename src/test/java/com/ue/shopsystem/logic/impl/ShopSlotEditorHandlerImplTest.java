@@ -531,7 +531,7 @@ public class ShopSlotEditorHandlerImplTest {
 		when(buyPriceItemMeta.getLore()).thenReturn(Arrays.asList(ChatColor.GOLD + "Price: 0.0"));
 		assertDoesNotThrow(() -> when(shop.getItemList()).thenReturn(new ArrayList<>()));
 		when(shop.getShopItem(0)).thenThrow(ShopSystemException.class);
-		when(messageWrapper.getString("shop_addItem", "stone")).thenReturn("my message");
+		when(messageWrapper.getString("added", "stone")).thenReturn("my message");
 
 		handler.handleSlotEditor(event);
 
@@ -732,8 +732,8 @@ public class ShopSlotEditorHandlerImplTest {
 		when(shopItem.getItemStack()).thenReturn(shopItemStack);
 		when(shopItemStack.isSimilar(selectedItem)).thenReturn(false);
 		when(shopItemStack.getType()).thenReturn(Material.STICK);
-		when(messageWrapper.getString("shop_removeItem", "stick")).thenReturn("my message remove");
-		when(messageWrapper.getString("shop_addItem", "stone")).thenReturn("my message add");
+		when(messageWrapper.getString("removed", "stick")).thenReturn("my message remove");
+		when(messageWrapper.getString("added", "stone")).thenReturn("my message add");
 
 		handler.handleSlotEditor(event);
 
@@ -779,8 +779,8 @@ public class ShopSlotEditorHandlerImplTest {
 		when(shopItemStack.getType()).thenReturn(Material.SPAWNER);
 		when(shopItemStack.getItemMeta()).thenReturn(shopItemStackMeta);
 		when(shopItemStackMeta.getDisplayName()).thenReturn("cow");
-		when(messageWrapper.getString("shop_removeSpawner", "cow")).thenReturn("my message remove");
-		when(messageWrapper.getString("shop_addItem", "stone")).thenReturn("my message add");
+		when(messageWrapper.getString("removed", "cow")).thenReturn("my message remove");
+		when(messageWrapper.getString("added", "stone")).thenReturn("my message add");
 
 		handler.handleSlotEditor(event);
 
@@ -811,7 +811,7 @@ public class ShopSlotEditorHandlerImplTest {
 		assertDoesNotThrow(() -> when(shop.getShopItem(0)).thenReturn(shopItem));
 		when(shopItem.getItemStack()).thenReturn(shopItemStack);
 		when(shopItemStack.getType()).thenReturn(Material.STONE);
-		when(messageWrapper.getString("shop_removeItem", "stone")).thenReturn("my message remove");
+		when(messageWrapper.getString("removed", "stone")).thenReturn("my message remove");
 
 		handler.handleSlotEditor(event);
 

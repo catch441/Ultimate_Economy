@@ -156,8 +156,8 @@ public class JobSystemEventHandlerImplTest {
 	}
 	
 	@Test
-	public void handleEntityDeathTestWithError() throws EconomyPlayerException {
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
+	public void handleEntityDeathTestWithError() throws GeneralEconomyException {
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
 		LivingEntity entity = mock(LivingEntity.class);
@@ -279,11 +279,11 @@ public class JobSystemEventHandlerImplTest {
 	}
 	
 	@Test
-	public void handleBreakBlockTestWithError() throws EconomyPlayerException {
+	public void handleBreakBlockTestWithError() throws GeneralEconomyException {
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
 
 		BlockBreakEvent event = new BlockBreakEvent(null, player);
 		assertDoesNotThrow(() -> eventHandler.handleBreakBlock(event));

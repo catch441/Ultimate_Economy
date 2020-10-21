@@ -180,7 +180,7 @@ public class AdminshopCommandExecutorImplTest {
 
 	@Test
 	public void createCommandTest() {
-		when(messageWrapper.getString("shop_create", "myshop")).thenReturn("my message");
+		when(messageWrapper.getString("created", "myshop")).thenReturn("my message");
 		Location location = mock(Location.class);
 		when(player.getLocation()).thenReturn(location);
 		String[] args = { "create", "myshop", "9" };
@@ -213,7 +213,7 @@ public class AdminshopCommandExecutorImplTest {
 
 	@Test
 	public void deleteCommandTest() {
-		when(messageWrapper.getString("shop_delete", "myshop")).thenReturn("my message");
+		when(messageWrapper.getString("deleted", "myshop")).thenReturn("my message");
 		Adminshop shop = mock(Adminshop.class);
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopByName("myshop")).thenReturn(shop));
 		String[] args = { "delete", "myshop" };
@@ -378,7 +378,7 @@ public class AdminshopCommandExecutorImplTest {
 
 	@Test
 	public void addSpawnerCommandTest() {
-		when(messageWrapper.getString("shop_addSpawner", "cow")).thenReturn("my message");
+		when(messageWrapper.getString("added", "cow")).thenReturn("my message");
 		Adminshop shop = mock(Adminshop.class);
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopByName("myshop")).thenReturn(shop));
 		ItemMeta meta = mock(ItemMeta.class);

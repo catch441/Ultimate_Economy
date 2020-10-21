@@ -82,11 +82,11 @@ public class TownsystemEventHandlerImplTest {
 	}
 
 	@Test
-	public void handlePlayerTeleportTestWithError() throws EconomyPlayerException {
+	public void handlePlayerTeleportTestWithError() throws GeneralEconomyException {
 		Player player = mock(Player.class);
 		Location loc = mock(Location.class);
 		when(player.getName()).thenReturn("catch441");
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
 
 		PlayerTeleportEvent event = new PlayerTeleportEvent(player, null, loc);
 		assertDoesNotThrow(() -> eventHandler.handlePlayerTeleport(event));
@@ -112,10 +112,10 @@ public class TownsystemEventHandlerImplTest {
 	}
 
 	@Test
-	public void handlePlayerJoinTestWithError() throws EconomyPlayerException {
+	public void handlePlayerJoinTestWithError() throws GeneralEconomyException {
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
 
 		PlayerJoinEvent event = new PlayerJoinEvent(player, null);
 		assertDoesNotThrow(() -> eventHandler.handlePlayerJoin(event));
@@ -166,7 +166,7 @@ public class TownsystemEventHandlerImplTest {
 	}
 
 	@Test
-	public void handlerPlayerMoveTestError() throws EconomyPlayerException {
+	public void handlerPlayerMoveTestError() throws GeneralEconomyException {
 		Player player = mock(Player.class);
 		Location from = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
@@ -180,7 +180,7 @@ public class TownsystemEventHandlerImplTest {
 		when(chunk.getZ()).thenReturn(1);
 		when(from.getChunk()).thenReturn(chunk);
 		when(player.getName()).thenReturn("catch441");
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
 
 		PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
 		assertDoesNotThrow(() -> eventHandler.handlerPlayerMove(event));

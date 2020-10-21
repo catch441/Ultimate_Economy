@@ -142,7 +142,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, ShopSystemException, GeneralEconomyException {
 		if (args.length == 3) {
 			adminshopManager.createAdminShop(args[1], player.getLocation(), Integer.valueOf(args[2]));
-			player.sendMessage(messageWrapper.getString("shop_create", args[1]));
+			player.sendMessage(messageWrapper.getString("created", args[1]));
 		} else {
 			player.sendMessage("/" + label + " create <shopname> <size> <- size have to be a multible of 9");
 		}
@@ -153,7 +153,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 			throws ShopSystemException, GeneralEconomyException {
 		if (args.length == 2) {
 			adminshopManager.deleteAdminShop(adminshopManager.getAdminShopByName(args[1]));
-			player.sendMessage(messageWrapper.getString("shop_delete", args[1]));
+			player.sendMessage(messageWrapper.getString("deleted", args[1]));
 		} else {
 			player.sendMessage("/" + label + " delete <shopname>");
 		}
@@ -229,7 +229,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 				itemStack.setItemMeta(meta);
 				adminshopManager.getAdminShopByName(args[1]).addShopItem(Integer.valueOf(args[3]) - 1, 0.0,
 						Double.valueOf(args[4]), itemStack);
-				player.sendMessage(messageWrapper.getString("shop_addSpawner", args[2]));
+				player.sendMessage(messageWrapper.getString("added", args[2]));
 			} catch (IllegalArgumentException e) {
 				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[2]));
 			}

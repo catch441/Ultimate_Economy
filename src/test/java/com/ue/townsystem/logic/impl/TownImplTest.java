@@ -178,7 +178,7 @@ public class TownImplTest {
 	}
 
 	@Test
-	public void constructorLoadingTest() throws EconomyPlayerException {
+	public void constructorLoadingTest() throws GeneralEconomyException {
 		JavaPlugin plugin = mock(JavaPlugin.class);
 		EconomyPlayer mayor = mock(EconomyPlayer.class);
 		EconomyPlayer deputy = mock(EconomyPlayer.class);
@@ -211,7 +211,7 @@ public class TownImplTest {
 		assertDoesNotThrow(() -> when(bankManager.getBankAccountByIban("iban"))).thenReturn(account);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(loc.getWorld()).thenReturn(world);
-		EconomyPlayerException e = mock(EconomyPlayerException.class);
+		GeneralEconomyException e = mock(GeneralEconomyException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		doThrow(e).when(townworldDao).loadPlotOwner("mytown", "2/3");
 		when(townworldDao.loadPlotOwner("mytown", "1/2")).thenReturn(null);

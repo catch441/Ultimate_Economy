@@ -133,12 +133,12 @@ public class JobCommandExecutorImplTest {
 		Player player = mock(Player.class);
 		Location location = mock(Location.class);
 		when(player.getLocation()).thenReturn(location);
-		when(messageWrapper.getString("jobcenter_create", "center")).thenReturn("My message.");
+		when(messageWrapper.getString("created", "center")).thenReturn("My message.");
 		String[] args = { "create", "center", "9" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
 		assertTrue(result);
 		assertDoesNotThrow(() -> verify(jobcenterManager).createJobcenter("center", location, 9));
-		verify(messageWrapper).getString("jobcenter_create", "center");
+		verify(messageWrapper).getString("created", "center");
 		verify(player).sendMessage("My message.");
 		verifyNoMoreInteractions(player);
 	}
@@ -171,7 +171,7 @@ public class JobCommandExecutorImplTest {
 		Jobcenter center = mock(Jobcenter.class);
 		assertDoesNotThrow(() -> when(jobcenterManager.getJobcenterByName("center")).thenReturn(center));
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("jobcenter_delete", "center")).thenReturn("My message.");
+		when(messageWrapper.getString("deleted", "center")).thenReturn("My message.");
 		String[] args = { "delete", "center" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
 		assertTrue(result);
@@ -244,6 +244,7 @@ public class JobCommandExecutorImplTest {
 	@Test
 	public void addJobCommandTest() {
 		Jobcenter center = mock(Jobcenter.class);
+		when(messageWrapper.getString("added", "myjob")).thenReturn("my message");
 		assertDoesNotThrow(() -> when(jobcenterManager.getJobcenterByName("center")).thenReturn(center));
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
@@ -252,7 +253,7 @@ public class JobCommandExecutorImplTest {
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
 		assertTrue(result);
 		assertDoesNotThrow(() -> verify(center).addJob(job, "stone", 0));
-		verify(player).sendMessage("§6The job §amyjob§6 was added to the JobCenter §acenter.");
+		verify(player).sendMessage("my message");
 		verifyNoMoreInteractions(player);
 	}
 
@@ -311,7 +312,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void removeJobCommandTest() {
-		when(messageWrapper.getString("jobcenter_removeJob", "myjob")).thenReturn("My message.");
+		when(messageWrapper.getString("removed", "myjob")).thenReturn("My message.");
 		Jobcenter center = mock(Jobcenter.class);
 		assertDoesNotThrow(() -> when(jobcenterManager.getJobcenterByName("center")).thenReturn(center));
 		Job job = mock(Job.class);
@@ -363,7 +364,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void createJobCommandTest() {
-		when(messageWrapper.getString("jobcenter_createJob", "myjob")).thenReturn("My message.");
+		when(messageWrapper.getString("created", "myjob")).thenReturn("My message.");
 		Player player = mock(Player.class);
 		String[] args = { "job", "create", "myjob" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
@@ -385,7 +386,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void deleteJobCommandTest() {
-		when(messageWrapper.getString("jobcenter_delJob", "myjob")).thenReturn("My message.");
+		when(messageWrapper.getString("deleted", "myjob")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
@@ -422,7 +423,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobAddFisherCommandTest() {
-		when(messageWrapper.getString("jobcenter_addFisher", "fish")).thenReturn("My message.");
+		when(messageWrapper.getString("added", "fish")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
@@ -487,7 +488,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobAddItemCommandTest() {
-		when(messageWrapper.getString("jobcenter_addItem", "stone")).thenReturn("My message.");
+		when(messageWrapper.getString("added", "stone")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
@@ -536,7 +537,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobAddMobCommandTest() {
-		when(messageWrapper.getString("jobcenter_addMob", "cow")).thenReturn("My message.");
+		when(messageWrapper.getString("added", "cow")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
@@ -601,7 +602,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobRemoveMobCommandTest() {
-		when(messageWrapper.getString("jobcenter_removeMob", "cow")).thenReturn("My message.");
+		when(messageWrapper.getString("removed", "cow")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
@@ -655,7 +656,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobRemoveFisherCommandTest() {
-		when(messageWrapper.getString("jobcenter_removeFisher", "fish")).thenReturn("My message.");
+		when(messageWrapper.getString("removed", "fish")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 
@@ -710,7 +711,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobRemoveItemCommandTest() {
-		when(messageWrapper.getString("jobcenter_removeItem", "stone")).thenReturn("My message.");
+		when(messageWrapper.getString("removed", "stone")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 
@@ -769,7 +770,7 @@ public class JobCommandExecutorImplTest {
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
 		assertTrue(result);
 		verify(player).sendMessage(
-				"/jobcenter job [create/delete/addItem/removeItem/addMob/removeMob/addFisher/removeFisher]");
+				"/jobcenter job [create/delete/addItem/removeItem/addMob/removeMob/addFisher/removeFisher/addBreedable/removeBreedable]");
 		verifyNoMoreInteractions(player);
 	}
 
@@ -780,7 +781,7 @@ public class JobCommandExecutorImplTest {
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
 		assertTrue(result);
 		verify(player).sendMessage(
-				"/jobcenter job [create/delete/addItem/removeItem/addMob/removeMob/addFisher/removeFisher]");
+				"/jobcenter job [create/delete/addItem/removeItem/addMob/removeMob/addFisher/removeFisher/addBreedable/removeBreedable]");
 		verifyNoMoreInteractions(player);
 	}
 }

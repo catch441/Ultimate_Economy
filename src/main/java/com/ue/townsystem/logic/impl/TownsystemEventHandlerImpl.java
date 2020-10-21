@@ -21,6 +21,7 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.Town;
@@ -62,7 +63,7 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 			EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getPlayer().getName());
 			townworldManager.performTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
 					event.getTo().getChunk(), ecoPlayer);
-		} catch (EconomyPlayerException e) {
+		} catch (GeneralEconomyException e) {
 		}
 	}
 
@@ -72,7 +73,7 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 			EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getPlayer().getName());
 			townworldManager.performTownWorldLocationCheck(event.getPlayer().getWorld().getName(),
 					event.getPlayer().getLocation().getChunk(), ecoPlayer);
-		} catch (EconomyPlayerException e) {
+		} catch (GeneralEconomyException e) {
 		}
 	}
 
@@ -85,7 +86,7 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 				EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getPlayer().getName());
 				townworldManager.performTownWorldLocationCheck(event.getTo().getWorld().getName(),
 						event.getTo().getChunk(), ecoPlayer);
-			} catch (EconomyPlayerException e) {
+			} catch (GeneralEconomyException e) {
 			}
 		}
 	}
@@ -116,13 +117,13 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 
 	@Override
 	public void handleInventoryClick(InventoryClickEvent event) {
-		if (event.getCurrentItem() != null
-				&& event.getCurrentItem().getItemMeta() != null) {
+		if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
 			// TODO UE-119 extract messages
 			event.setCancelled(true);
-			if(event.getClickedInventory().getHolder() instanceof Villager) {
+			if (event.getClickedInventory().getHolder() instanceof Villager) {
 				try {
-					Townworld townWorld = townworldManager.getTownWorldByName(event.getWhoClicked().getWorld().getName());
+					Townworld townWorld = townworldManager
+							.getTownWorldByName(event.getWhoClicked().getWorld().getName());
 					Chunk chunk = ((Villager) event.getClickedInventory().getHolder()).getLocation().getChunk();
 					EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getWhoClicked().getName());
 					Town town = townWorld.getTownByChunk(chunk);
@@ -191,16 +192,18 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 				if (townworld.isChunkFree(location.getChunk())) {
 					if (!event.getPlayer().hasPermission("ultimate_economy.wilderness")) {
 						event.setCancelled(true);
-						event.getPlayer().sendMessage(messageWrapper.getErrorString("wilderness"));
+						event.getPlayer().sendMessage(
+								messageWrapper.getErrorString(EconomyPlayerExceptionMessageEnum.WILDERNESS.getValue()));
 					}
 				} else {
 					Town town = townworld.getTownByChunk(location.getChunk());
 					if (hasNoBuildPermission(event, location, economyPlayer, town)) {
 						event.setCancelled(true);
-						event.getPlayer().sendMessage(messageWrapper.getErrorString("no_permission_on_plot"));
+						event.getPlayer().sendMessage(messageWrapper
+								.getErrorString(EconomyPlayerExceptionMessageEnum.NO_PERMISSION_ON_PLOT.getValue()));
 					}
 				}
-			} catch (TownSystemException | EconomyPlayerException e) {
+			} catch (TownSystemException | GeneralEconomyException e) {
 			}
 		}
 	}

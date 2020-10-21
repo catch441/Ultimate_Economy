@@ -92,7 +92,7 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(townworldManager.getTownByName("mytown")).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		when(messageWrapper.getString("town_addCoOwner", "otherPlayer")).thenReturn("my message");
+		when(messageWrapper.getString("added", "otherPlayer")).thenReturn("my message");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("otherPlayer")).thenReturn(otherPlayer));
 
 		String[] args = { "addDeputy", "mytown", "otherPlayer" };
@@ -357,7 +357,7 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(townworldManager.getTownByName("mytown")).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		when(messageWrapper.getString("town_removeCoOwner", "otherPlayer")).thenReturn("my message");
+		when(messageWrapper.getString("removed", "otherPlayer")).thenReturn("my message");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("otherPlayer")).thenReturn(otherPlayer));
 
 		String[] args = { "removeDeputy", "mytown", "otherPlayer" };

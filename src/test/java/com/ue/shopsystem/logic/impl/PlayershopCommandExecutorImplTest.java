@@ -57,7 +57,7 @@ public class PlayershopCommandExecutorImplTest {
 	public void createCommandTest() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Location loc = mock(Location.class);
-		when(messageWrapper.getString("shop_create", "myshop")).thenReturn("my message");
+		when(messageWrapper.getString("created", "myshop")).thenReturn("my message");
 		when(player.getLocation()).thenReturn(loc);
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(player.getName()).thenReturn("catch441");
@@ -115,7 +115,7 @@ public class PlayershopCommandExecutorImplTest {
 		Playershop shop = mock(Playershop.class);
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(playershopManager.getPlayerShopByUniqueName("myshop_catch441")).thenReturn(shop));
-		when(messageWrapper.getString("shop_delete", "myshop")).thenReturn("my message");
+		when(messageWrapper.getString("deleted", "myshop")).thenReturn("my message");
 		String[] args = { "delete", "myshop" };
 		boolean result = executor.onCommand(player, null, "playershop", args);
 		assertTrue(result);
@@ -393,7 +393,7 @@ public class PlayershopCommandExecutorImplTest {
 	@Test
 	public void deleteOtherCommandTest() {
 		Playershop shop = mock(Playershop.class);
-		when(messageWrapper.getString("shop_delete", "myshop_kthschnll")).thenReturn("my message");
+		when(messageWrapper.getString("deleted", "myshop_kthschnll")).thenReturn("my message");
 		assertDoesNotThrow(() -> when(playershopManager.getPlayerShopByUniqueName("myshop_kthschnll")).thenReturn(shop));
 		when(player.hasPermission("ultimate_economy.adminshop")).thenReturn(true);
 		String[] args = { "deleteOther", "myshop_kthschnll" };

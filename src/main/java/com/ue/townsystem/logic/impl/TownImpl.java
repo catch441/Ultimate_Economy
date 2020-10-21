@@ -487,7 +487,7 @@ public class TownImpl implements Town {
 			try {
 				Plot plot = new PlotImpl(coords, validationHandler, townworldDao, this, serverProvider);
 				plots.put(coords, plot);
-			} catch (EconomyPlayerException | TownSystemException e) {
+			} catch (GeneralEconomyException | TownSystemException e) {
 				logger.warn("[Ultimate_Economy] Failed to load plot " + coords + " of town " + getTownName());
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}

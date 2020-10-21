@@ -80,6 +80,10 @@ public class LanguagePackConsistencyCheck {
 	}
 
 	private void checkKeys() {
+		assertFalse(messageWrapper.getString("deleted", "args1").equals("!deleted!"));
+		assertFalse(messageWrapper.getString("created", "args1").equals("!created!"));
+		assertFalse(messageWrapper.getString("added", "args1").equals("!added!"));
+		assertFalse(messageWrapper.getString("removed", "args1").equals("!removed!"));
 		assertFalse(messageWrapper.getString("job_not_exist_in_jobcenter").equals("!job_not_exist_in_jobcenter!"));
 		assertFalse(messageWrapper.getString("job_already_exists_in_jobcenter").equals("!job_already_exists_in_jobcenter!"));
 		assertFalse(messageWrapper.getString("plot_is_already_for_sale").equals("!plot_is_already_for_sale!"));
@@ -88,13 +92,10 @@ public class LanguagePackConsistencyCheck {
 		assertFalse(messageWrapper.getString("chunk_already_claimed").equals("!chunk_already_claimed!"));
 		assertFalse(messageWrapper.getString("chunk_not_claimed_by_town").equals("!chunk_not_claimed_by_town!"));
 		assertFalse(messageWrapper.getString("chunk_not_claimed").equals("!chunk_not_claimed!"));
-		assertFalse(messageWrapper.getString("player_is_not_mayor").equals("!player_is_not_mayor!"));
-		assertFalse(messageWrapper.getString("player_is_already_owner").equals("!player_is_already_owner!"));
 		assertFalse(messageWrapper.getString("player_is_not_citizen").equals("!player_is_not_citizen!"));
-		assertFalse(messageWrapper.getString("player_is_already_citizen").equals("!player_is_already_citizen!"));
 		assertFalse(messageWrapper.getString("player_is_already_deputy").equals("!player_is_already_deputy!"));
+		assertFalse(messageWrapper.getString("player_is_already_owner").equals("!player_is_already_owner!"));
 		assertFalse(messageWrapper.getString("player_is_no_deputy").equals("!player_is_no_deputy!"));
-		assertFalse(messageWrapper.getString("player_is_already_citizen").equals("!player_is_already_citizen!"));
 		assertFalse(messageWrapper.getString("player_is_already_resident").equals("!player_is_already_resident!"));
 		assertFalse(messageWrapper.getString("player_is_no_resident").equals("!player_is_no_resident!"));
 		assertFalse(messageWrapper.getString("location_not_in_town").equals("!location_not_in_town!"));
@@ -114,10 +115,8 @@ public class LanguagePackConsistencyCheck {
 		assertFalse(messageWrapper.getString("not_rented").equals("!not_rented!"));
 		assertFalse(messageWrapper.getString("error_on_rename").equals("!error_on_rename!"));
 		assertFalse(messageWrapper.getString("resizing_failed").equals("!resizing_failed!"));
-		assertFalse(messageWrapper.getString("player_has_no_permission").equals("!player_has_no_permission!"));
+		assertFalse(messageWrapper.getString("you_have_no_permission").equals("!you_have_no_permission!"));
 		assertFalse(messageWrapper.getString("inventory_full").equals("!inventory_full!"));
-		assertFalse(messageWrapper.getString("no_permission_set_spawner").equals("!no_permission_set_spawner!"));
-		assertFalse(messageWrapper.getString("no_permission_break_spawner").equals("!no_permission_break_spawner!"));
 		assertFalse(messageWrapper.getString("inventory_slot_occupied").equals("!inventory_slot_occupied!"));
 		assertFalse(messageWrapper.getString("wilderness").equals("!wilderness!"));
 		assertFalse(messageWrapper.getString("no_permission_on_plot").equals("!no_permission_on_plot!"));
@@ -133,10 +132,6 @@ public class LanguagePackConsistencyCheck {
 		assertFalse(messageWrapper.getString("not_enough_money_personal").equals("!not_enough_money_personal!"));
 		assertFalse(messageWrapper.getString("not_enough_money_non_personal").equals("!not_enough_money_non_personal!"));
 		assertFalse(messageWrapper.getString("shopowner_not_enough_money").equals("!shopowner_not_enough_money!"));
-		assertFalse(messageWrapper.getString("player_does_not_exist").equals("!player_does_not_exist!"));
-		assertFalse(messageWrapper.getString("player_already_exist").equals("!player_already_exist!"));
-		assertFalse(messageWrapper.getString("home_does_not_exist").equals("!home_does_not_exist!"));
-		assertFalse(messageWrapper.getString("home_already_exist").equals("!home_already_exist!"));
 		assertFalse(messageWrapper.getString("max_reached").equals("!max_reached!"));
 		assertFalse(messageWrapper.getString("not_online").equals("!not_online!"));
 		assertFalse(messageWrapper.getString("invalid_parameter", "arg1").equals("!invalid_parameter!"));
@@ -146,7 +141,6 @@ public class LanguagePackConsistencyCheck {
 		assertFalse(messageWrapper.getString("rent_reminder").equals("!rent_reminder!"));
 		assertFalse(messageWrapper.getString("bank").equals("!bank!"));
 		assertFalse(messageWrapper.getString("restart").equals("!restart!"));
-		assertFalse(messageWrapper.getString("shop_editItem_errorinfo").equals("!shop_editItem_errorinfo!"));
 		assertFalse(messageWrapper.getString("profession_changed").equals("!profession_changed!"));
 		assertFalse(messageWrapper.getString("town_plot_setForSale").equals("!town_plot_setForSale!"));
 		assertFalse(messageWrapper.getString("town_expand").equals("!town_expand!"));
@@ -160,16 +154,12 @@ public class LanguagePackConsistencyCheck {
 		assertFalse(messageWrapper.getString("got_money_with_sender", "arg1", "arg2", "arg3").equals("!got_money_with_sender!"));
 		assertFalse(messageWrapper.getString("gave_money", "arg1", "arg2", "arg3").equals("!gave_money!"));
 		assertFalse(messageWrapper.getString("home_info", "arg1").equals("!home_info!"));
-		assertFalse(messageWrapper.getString("sethome", "arg1").equals("!sethome!"));
-		assertFalse(messageWrapper.getString("delhome", "arg1").equals("!delhome!"));
 		assertFalse(messageWrapper.getString("jobinfo_fishingprice", "arg1", "arg2", "arg3").equals("!jobinfo_fishingprice!"));
 		assertFalse(messageWrapper.getString("jobinfo_killprice", "arg1", "arg2", "arg3").equals("!jobinfo_killprice!"));
 		assertFalse(messageWrapper.getString("town_create", "arg1").equals("!town_create!"));
 		assertFalse(messageWrapper.getString("town_delete", "arg1").equals("!town_delete!"));
 		assertFalse(messageWrapper.getString("town_rename", "arg1", "arg2").equals("!town_rename!"));
 		assertFalse(messageWrapper.getString("town_setTownSpawn", "arg1", "arg2", "arg3").equals("!town_setTownSpawn!"));
-		assertFalse(messageWrapper.getString("town_addCoOwner", "arg1").equals("!town_addCoOwner!"));
-		assertFalse(messageWrapper.getString("town_removeCoOwner", "arg1").equals("!town_removeCoOwner!"));
 		assertFalse(messageWrapper.getString("shop_changeOwner1", "arg1").equals("!shop_changeOwner1!"));
 		assertFalse(messageWrapper.getString("town_pay", "arg1", "arg2", "arg3").equals("!town_pay!"));
 		assertFalse(messageWrapper.getString("town_bank", "arg1", "arg2").equals("!town_bank!"));
@@ -179,27 +169,10 @@ public class LanguagePackConsistencyCheck {
 		assertFalse(messageWrapper.getString("townworld_setExpandPrice", "arg1", "arg2").equals("!townworld_setExpandPrice!"));
 		assertFalse(messageWrapper.getString("shop_resize", "arg1").equals("!shop_resize!"));
 		assertFalse(messageWrapper.getString("shop_rename", "arg1", "arg2").equals("!shop_rename!"));
-		assertFalse(messageWrapper.getString("shop_addItem", "arg1").equals("!shop_addItem!"));
-		assertFalse(messageWrapper.getString("shop_removeItem", "arg1").equals("!shop_removeItem!"));
-		assertFalse(messageWrapper.getString("jobcenter_addItem", "arg1").equals("!jobcenter_addItem!"));
-		assertFalse(messageWrapper.getString("jobcenter_removeItem", "arg1").equals("!jobcenter_removeItem!"));
-		assertFalse(messageWrapper.getString("shop_addSpawner", "arg1").equals("!shop_addSpawner!"));
-		assertFalse(messageWrapper.getString("shop_removeSpawner", "arg1").equals("!shop_removeSpawner!"));
-		assertFalse(messageWrapper.getString("shop_create", "arg1").equals("!shop_create!"));
-		assertFalse(messageWrapper.getString("shop_delete", "arg1").equals("!shop_delete!"));
 		assertFalse(messageWrapper.getString("shop_changeOwner", "arg1", "arg2").equals("!shop_changeOwner!"));
-		assertFalse(messageWrapper.getString("jobcenter_create", "arg1").equals("!jobcenter_create!"));
-		assertFalse(messageWrapper.getString("jobcenter_delete", "arg1").equals("!jobcenter_delete!"));
 		assertFalse(messageWrapper.getString("jobinfo_info", "arg1").equals("!jobinfo_info!"));
-		assertFalse(messageWrapper.getString("jobcenter_removeJob", "arg1").equals("!jobcenter_removeJob!"));
-		assertFalse(messageWrapper.getString("jobcenter_createJob", "arg1").equals("!jobcenter_createJob!"));
-		assertFalse(messageWrapper.getString("jobcenter_delJob", "arg1").equals("!jobcenter_delJob!"));
 		assertFalse(messageWrapper.getString("job_left", "arg1").equals("!job_left!"));
 		assertFalse(messageWrapper.getString("job_join", "arg1").equals("!job_join!"));
-		assertFalse(messageWrapper.getString("jobcenter_addMob", "arg1").equals("!jobcenter_addMob!"));
-		assertFalse(messageWrapper.getString("jobcenter_removeMob", "arg1").equals("!jobcenter_removeMob!"));
-		assertFalse(messageWrapper.getString("jobcenter_addFisher", "arg1").equals("!jobcenter_addFisher!"));
-		assertFalse(messageWrapper.getString("jobcenter_removeFisher", "arg1").equals("!jobcenter_removeFisher!"));
 		assertFalse(messageWrapper.getString("shop_got_item_plural", "arg1").equals("!shop_got_item_plural!"));
 		assertFalse(messageWrapper.getString("shop_got_item_singular", "arg1").equals("!shop_got_item_singular!"));
 		assertFalse(messageWrapper.getString("shop_added_item_plural", "arg1").equals("!shop_added_item_plural!"));

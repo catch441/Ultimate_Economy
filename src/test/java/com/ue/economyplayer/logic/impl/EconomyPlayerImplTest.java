@@ -214,7 +214,7 @@ public class EconomyPlayerImplTest {
 	public void addHomeTest() {
 		Location location = mock(Location.class);
 		when(configManager.getMaxHomes()).thenReturn(3);
-		when(messageWrapper.getString("sethome", "myHome")).thenReturn("My message.");
+		when(messageWrapper.getString("created", "myHome")).thenReturn("My message.");
 
 		EconomyPlayer ecoPlayer = createEcoPlayerMock();
 		assertDoesNotThrow(() -> ecoPlayer.addHome("myHome", location, true));
@@ -228,11 +228,11 @@ public class EconomyPlayerImplTest {
 	}
 
 	@Test
-	public void addHomeTestWithAlredyExists() throws EconomyPlayerException {
-		doThrow(EconomyPlayerException.class).when(validationHandler).checkForNotExistingHome(anyMap(), anyString());
+	public void addHomeTestWithAlredyExists() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForNotExistingHome(anyMap(), anyString());
 
 		EconomyPlayer ecoPlayer = createEcoPlayerMock();
-		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.addHome("myhome", null, false));
+		assertThrows(GeneralEconomyException.class, () -> ecoPlayer.addHome("myhome", null, false));
 		assertEquals(0, ecoPlayer.getHomeList().size());
 		verify(ecoPlayer.getPlayer(), never()).sendMessage(anyString());
 	}
@@ -260,16 +260,16 @@ public class EconomyPlayerImplTest {
 	}
 
 	@Test
-	public void getHomeTestWithNoHomes() throws EconomyPlayerException {
-		doThrow(EconomyPlayerException.class).when(validationHandler).checkForExistingHome(anyMap(), anyString());
+	public void getHomeTestWithNoHomes() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForExistingHome(anyMap(), anyString());
 		EconomyPlayer ecoPlayer = createEcoPlayerMock();
-		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.getHome("myhome"));
+		assertThrows(GeneralEconomyException.class, () -> ecoPlayer.getHome("myhome"));
 	}
 
 	@Test
 	public void removeHomeTest() {
 		Location location = mock(Location.class);
-		when(messageWrapper.getString("delhome", "myhome")).thenReturn("My message.");
+		when(messageWrapper.getString("deleted", "myhome")).thenReturn("My message.");
 		EconomyPlayer ecoPlayer = createEcoPlayerMock();
 		assertDoesNotThrow(() -> ecoPlayer.addHome("myhome", location, false));
 		assertDoesNotThrow(() -> ecoPlayer.removeHome("myhome", true));
@@ -283,10 +283,10 @@ public class EconomyPlayerImplTest {
 	}
 
 	@Test
-	public void removeHomeTestWithNoHomes() throws EconomyPlayerException {
-		doThrow(EconomyPlayerException.class).when(validationHandler).checkForExistingHome(anyMap(), anyString());
+	public void removeHomeTestWithNoHomes() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(validationHandler).checkForExistingHome(anyMap(), anyString());
 		EconomyPlayer ecoPlayer = createEcoPlayerMock();
-		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.removeHome("myhome", true));
+		assertThrows(GeneralEconomyException.class, () -> ecoPlayer.removeHome("myhome", true));
 	}
 
 	@Test

@@ -11,6 +11,7 @@ import com.ue.bank.logic.api.BankAccount;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsystem.logic.api.Job;
 
 public class EconomyPlayerValidationHandlerImpl implements EconomyPlayerValidationHandler {
@@ -42,9 +43,10 @@ public class EconomyPlayerValidationHandlerImpl implements EconomyPlayerValidati
 	}
 
 	@Override
-	public void checkForExistingHome(Map<String, Location> homeList, String homeName) throws EconomyPlayerException {
+	public void checkForExistingHome(Map<String, Location> homeList, String homeName) throws GeneralEconomyException {
 		if (!homeList.containsKey(homeName)) {
-			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.HOME_DOES_NOT_EXIST);
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST,
+					homeName);
 		}
 	}
 
@@ -56,9 +58,11 @@ public class EconomyPlayerValidationHandlerImpl implements EconomyPlayerValidati
 	}
 
 	@Override
-	public void checkForNotExistingHome(Map<String, Location> homeList, String homeName) throws EconomyPlayerException {
+	public void checkForNotExistingHome(Map<String, Location> homeList, String homeName)
+			throws GeneralEconomyException {
 		if (homeList.containsKey(homeName)) {
-			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.HOME_ALREADY_EXIST);
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
+					homeName);
 		}
 	}
 
@@ -106,9 +110,10 @@ public class EconomyPlayerValidationHandlerImpl implements EconomyPlayerValidati
 
 	@Override
 	public void checkForPlayerDoesNotExist(List<String> playerNameList, String playerName)
-			throws EconomyPlayerException {
+			throws GeneralEconomyException {
 		if (playerNameList.contains(playerName)) {
-			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.PLAYER_ALREADY_EXIST);
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
+					playerName);
 		}
 	}
 }

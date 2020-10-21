@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
-import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.impl.ShopSystemException;
 import com.ue.shopsystem.logic.to.ShopItem;
@@ -521,8 +521,8 @@ public class ShopDaoImplTest {
 	}
 
 	@Test
-	public void loadOwnerTestWithInvalidPlayer() throws EconomyPlayerException {
-		EconomyPlayerException e = mock(EconomyPlayerException.class);
+	public void loadOwnerTestWithInvalidPlayer() throws GeneralEconomyException {
+		GeneralEconomyException e = mock(GeneralEconomyException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);

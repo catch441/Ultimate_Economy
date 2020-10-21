@@ -86,7 +86,7 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 3) {
 			playershopManager.createPlayerShop(args[1], player.getLocation(), Integer.valueOf(args[2]),
 					ecoPlayerManager.getEconomyPlayerByName(player.getName()));
-			player.sendMessage(messageWrapper.getString("shop_create", args[1]));
+			player.sendMessage(messageWrapper.getString("created", args[1]));
 		} else {
 			player.sendMessage("/" + label + " create <shop> <size> <- size have to be a multible of 9");
 		}
@@ -97,7 +97,7 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 2) {
 			playershopManager
 					.deletePlayerShop(playershopManager.getPlayerShopByUniqueName(args[1] + "_" + player.getName()));
-			player.sendMessage(messageWrapper.getString("shop_delete", args[1]));
+			player.sendMessage(messageWrapper.getString("deleted", args[1]));
 		} else {
 			player.sendMessage("/" + label + " delete <shop>");
 		}
@@ -109,7 +109,7 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 		if (player.hasPermission("ultimate_economy.adminshop")) {
 			if (args.length == 2) {
 				playershopManager.deletePlayerShop(playershopManager.getPlayerShopByUniqueName(args[1]));
-				player.sendMessage(messageWrapper.getString("shop_delete", args[1]));
+				player.sendMessage(messageWrapper.getString("deleted", args[1]));
 			} else {
 				player.sendMessage("/" + label + " deleteOther <shop>");
 			}

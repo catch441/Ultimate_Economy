@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
-import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.townsystem.logic.api.TownworldManager;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,10 +67,10 @@ public class TownTabCompleterImplTest {
 	}
 	
 	@Test
-	public void twoArgsTestWithPlayerNotFoundError() throws EconomyPlayerException {
+	public void twoArgsTestWithPlayerNotFoundError() throws GeneralEconomyException {
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
-		EconomyPlayerException e = mock(EconomyPlayerException.class);
+		GeneralEconomyException e = mock(GeneralEconomyException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
 		String[] args = { "expand", "" };

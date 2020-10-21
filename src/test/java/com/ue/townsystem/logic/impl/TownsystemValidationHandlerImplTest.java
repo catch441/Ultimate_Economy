@@ -128,7 +128,7 @@ public class TownsystemValidationHandlerImplTest {
 			validationHandler.checkForIsPlotOwner(owner, ecoPlayer);
 			fail();
 		} catch (EconomyPlayerException e) {
-			assertEquals(EconomyPlayerExceptionMessageEnum.NO_PERMISSION, e.getKey());
+			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, e.getKey());
 			assertEquals(0, e.getParams().length);
 		}
 	}
@@ -219,7 +219,7 @@ public class TownsystemValidationHandlerImplTest {
 			validationHandler.checkForPlayerHasDeputyPermission(false);
 			fail();
 		} catch (EconomyPlayerException e) {
-			assertEquals(EconomyPlayerExceptionMessageEnum.NO_PERMISSION, e.getKey());
+			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, e.getKey());
 			assertEquals(0, e.getParams().length);
 		}
 	}
@@ -254,7 +254,7 @@ public class TownsystemValidationHandlerImplTest {
 			validationHandler.checkForPlayerIsMayor(mayor, ecoPlayer);
 			fail();
 		} catch (EconomyPlayerException e) {
-			assertEquals(EconomyPlayerExceptionMessageEnum.NO_PERMISSION, e.getKey());
+			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, e.getKey());
 			assertEquals(0, e.getParams().length);
 		}
 	}
@@ -644,7 +644,7 @@ public class TownsystemValidationHandlerImplTest {
 		} catch (EconomyPlayerException | TownSystemException e) {
 			assertTrue(e instanceof EconomyPlayerException);
 			EconomyPlayerException ex = (EconomyPlayerException) e;
-			assertEquals(EconomyPlayerExceptionMessageEnum.NO_PERMISSION, ex.getKey());
+			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, ex.getKey());
 			assertEquals(0, ex.getParams().length);
 		}
 	}
@@ -700,7 +700,7 @@ public class TownsystemValidationHandlerImplTest {
 		} catch (EconomyPlayerException | TownSystemException e) {
 			assertTrue(e instanceof EconomyPlayerException);
 			EconomyPlayerException ex = (EconomyPlayerException) e;
-			assertEquals(EconomyPlayerExceptionMessageEnum.NO_PERMISSION, ex.getKey());
+			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, ex.getKey());
 			assertEquals(0, ex.getParams().length);
 		}
 	}
@@ -725,7 +725,7 @@ public class TownsystemValidationHandlerImplTest {
 		} catch (EconomyPlayerException | TownSystemException e) {
 			assertTrue(e instanceof EconomyPlayerException);
 			EconomyPlayerException ex = (EconomyPlayerException) e;
-			assertEquals(EconomyPlayerExceptionMessageEnum.NO_PERMISSION, ex.getKey());
+			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, ex.getKey());
 			assertEquals(0, ex.getParams().length);
 		}
 	}

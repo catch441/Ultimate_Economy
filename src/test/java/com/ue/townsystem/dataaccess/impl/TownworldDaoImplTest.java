@@ -27,7 +27,7 @@ import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
-import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 
 @ExtendWith(MockitoExtension.class)
@@ -318,8 +318,8 @@ public class TownworldDaoImplTest {
 	}
 	
 	@Test
-	public void loadDeputiesTestWithLoadingError() throws EconomyPlayerException {
-		EconomyPlayerException e = mock(EconomyPlayerException.class);
+	public void loadDeputiesTestWithLoadingError() throws GeneralEconomyException {
+		GeneralEconomyException e = mock(GeneralEconomyException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
@@ -344,8 +344,8 @@ public class TownworldDaoImplTest {
 	}
 	
 	@Test
-	public void loadCitizensTestWithLoadingError() throws EconomyPlayerException {
-		EconomyPlayerException e = mock(EconomyPlayerException.class);
+	public void loadCitizensTestWithLoadingError() throws GeneralEconomyException {
+		GeneralEconomyException e = mock(GeneralEconomyException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
@@ -370,8 +370,8 @@ public class TownworldDaoImplTest {
 	}
 	
 	@Test
-	public void loadResidentsTestWithLoadingError() throws EconomyPlayerException {
-		EconomyPlayerException e = mock(EconomyPlayerException.class);
+	public void loadResidentsTestWithLoadingError() throws GeneralEconomyException {
+		GeneralEconomyException e = mock(GeneralEconomyException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);

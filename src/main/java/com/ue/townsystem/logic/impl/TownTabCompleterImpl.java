@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 
 import com.ue.common.utils.TabCompleterUtils;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
-import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.townsystem.logic.api.TownworldManager;
 
 public class TownTabCompleterImpl extends TabCompleterUtils implements TabCompleter {
@@ -88,7 +88,7 @@ public class TownTabCompleterImpl extends TabCompleterUtils implements TabComple
 						addIfMatching(list, string, args[1]);
 					}
 				}
-			} catch (EconomyPlayerException e) {
+			} catch (GeneralEconomyException e) {
 				logger.warn("[Ultimate_Economy] " + e.getMessage());
 			}
 		}

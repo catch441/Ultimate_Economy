@@ -83,7 +83,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 			if (args.length == 3) {
 				Rentshop shop = rentshopManager.createRentShop(player.getLocation(), Integer.valueOf(args[1]),
 						Double.valueOf(args[2]));
-				player.sendMessage(messageWrapper.getString("shop_create", shop.getName()));
+				player.sendMessage(messageWrapper.getString("created", shop.getName()));
 
 			} else {
 				player.sendMessage("/" + label + " create <size> <rentalFee per 24h>");
@@ -96,7 +96,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 		if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 			if (args.length == 2) {
 				rentshopManager.deleteRentShop(rentshopManager.getRentShopByUniqueName(args[1]));
-				player.sendMessage(messageWrapper.getString("shop_delete", args[1]));
+				player.sendMessage(messageWrapper.getString("deleted", args[1]));
 			} else {
 				player.sendMessage("/" + label + " delete <shopname>");
 			}

@@ -104,7 +104,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performMoneyCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
-			throws EconomyPlayerException {
+			throws GeneralEconomyException {
 		DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.ROOT);
 		otherSymbols.setDecimalSeparator('.');
 		otherSymbols.setGroupingSeparator(',');
@@ -142,7 +142,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performHomeCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
-			throws EconomyPlayerException {
+			throws GeneralEconomyException {
 		if (args.length == 1) {
 			Location location = ecoPlayer.getHome(args[0]);
 			player.teleport(location);
@@ -157,7 +157,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performSetHomeCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
-			throws EconomyPlayerException {
+			throws EconomyPlayerException, GeneralEconomyException {
 		if (args.length == 1) {
 			ecoPlayer.addHome(args[0], player.getLocation(), true);
 		} else {
@@ -167,7 +167,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performDelHomeCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
-			throws EconomyPlayerException {
+			throws GeneralEconomyException {
 		if (args.length == 1) {
 			ecoPlayer.removeHome(args[0], true);
 		} else {

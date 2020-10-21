@@ -2,7 +2,7 @@ package com.ue.economyplayer.logic.api;
 
 import java.util.List;
 
-import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
 
 public interface EconomyPlayerManager {
 
@@ -18,9 +18,9 @@ public interface EconomyPlayerManager {
 	 * 
 	 * @param name
 	 * @return EconomyPlayer
-	 * @throws EconomyPlayerException
+	 * @throws GeneralEconomyException
 	 */
-	public EconomyPlayer getEconomyPlayerByName(String name) throws EconomyPlayerException;
+	public EconomyPlayer getEconomyPlayerByName(String name) throws GeneralEconomyException;
 	
 	/**
 	 * This method returns all economyPlayers.
@@ -33,9 +33,9 @@ public interface EconomyPlayerManager {
 	 * This method should be used to create a new EconomyPlayer.
 	 * 
 	 * @param playerName
-	 * @throws EconomyPlayerException
+	 * @throws GeneralEconomyException
 	 */
-	public void createEconomyPlayer(String playerName) throws EconomyPlayerException;
+	public void createEconomyPlayer(String playerName) throws GeneralEconomyException;
 	
 	/**
 	 * Deletes an economy player.

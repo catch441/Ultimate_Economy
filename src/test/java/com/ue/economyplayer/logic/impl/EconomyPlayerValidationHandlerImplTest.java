@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.general.impl.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsystem.logic.api.Job;
 
 @ExtendWith(MockitoExtension.class)
@@ -75,9 +76,10 @@ public class EconomyPlayerValidationHandlerImplTest {
 		try {
 			validationHandler.checkForExistingHome(new HashMap<>(), "myhome1");
 			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(EconomyPlayerExceptionMessageEnum.HOME_DOES_NOT_EXIST, e.getKey());
+		} catch (GeneralEconomyException e) {
+			assertEquals(1, e.getParams().length);
+			assertEquals("myhome1", e.getParams()[0]);
+			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
 		}
 	}
 
@@ -117,9 +119,10 @@ public class EconomyPlayerValidationHandlerImplTest {
 			homes.put("myhome1", null);
 			validationHandler.checkForNotExistingHome(homes, "myhome1");
 			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(EconomyPlayerExceptionMessageEnum.HOME_ALREADY_EXIST, e.getKey());
+		} catch (GeneralEconomyException e) {
+			assertEquals(1, e.getParams().length);
+			assertEquals("myhome1", e.getParams()[0]);
+			assertEquals(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, e.getKey());
 		}
 	}
 
@@ -231,17 +234,18 @@ public class EconomyPlayerValidationHandlerImplTest {
 
 	@Test
 	public void checkForPlayerDoesNotExistTestSuccess() {
-		assertDoesNotThrow(() -> validationHandler.checkForPlayerDoesNotExist(new ArrayList<>(), "kthschnll"));
+		assertDoesNotThrow(() -> validationHandler.checkForPlayerDoesNotExist(new ArrayList<>(), "catch441"));
 	}
 
 	@Test
 	public void checkForPlayerDoesNotExistTestFail() {
 		try {
-			validationHandler.checkForPlayerDoesNotExist(Arrays.asList("kthschnll"), "kthschnll");
+			validationHandler.checkForPlayerDoesNotExist(Arrays.asList("catch441"), "catch441");
 			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(EconomyPlayerExceptionMessageEnum.PLAYER_ALREADY_EXIST, e.getKey());
+		} catch (GeneralEconomyException e) {
+			assertEquals(1, e.getParams().length);
+			assertEquals("catch441", e.getParams()[0]);
+			assertEquals(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, e.getKey());
 		}
 	}
 }

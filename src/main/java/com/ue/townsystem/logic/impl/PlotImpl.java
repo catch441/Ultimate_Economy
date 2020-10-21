@@ -24,6 +24,7 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.general.impl.EconomyVillager;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.townsystem.dataaccess.api.TownworldDao;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.Town;
@@ -72,11 +73,11 @@ public class PlotImpl implements Plot {
 	 * @param town
 	 * @param serverProvider
 	 * @throws TownSystemException
-	 * @throws EconomyPlayerException
+	 * @throws GeneralEconomyException
 	 */
 	public PlotImpl(String chunkCoords, TownsystemValidationHandler validationHandler,
 			TownworldDao townworldDao, Town town, ServerProvider serverProvider)
-			throws EconomyPlayerException, TownSystemException {
+			throws GeneralEconomyException, TownSystemException {
 		this.chunkCoords = chunkCoords;
 		this.town = town;
 		this.townworldDao = townworldDao;
@@ -85,7 +86,7 @@ public class PlotImpl implements Plot {
 		loadExistingPlot();
 	}
 
-	private void loadExistingPlot() throws EconomyPlayerException, TownSystemException {
+	private void loadExistingPlot() throws GeneralEconomyException, TownSystemException {
 		owner = townworldDao.loadPlotOwner(town.getTownName(), chunkCoords);
 		residents = townworldDao.loadResidents(town.getTownName(), chunkCoords);
 		salePrice = townworldDao.loadPlotSalePrice(town.getTownName(), chunkCoords);

@@ -17,7 +17,7 @@ import com.ue.common.utils.SaveFileUtils;
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
-import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.impl.GeneralEconomyException;
 import com.ue.townsystem.dataaccess.api.TownworldDao;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
@@ -203,7 +203,7 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	}
 
 	@Override
-	public EconomyPlayer loadPlotOwner(String townName, String chunkCoords) throws EconomyPlayerException {
+	public EconomyPlayer loadPlotOwner(String townName, String chunkCoords) throws GeneralEconomyException {
 		String playerName = config.getString("Towns." + townName + ".Plots." + chunkCoords + ".owner");
 		return ecoPlayerManager.getEconomyPlayerByName(playerName);
 	}
@@ -215,7 +215,7 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 		for (String name : playerNames) {
 			try {
 				ecoPlayers.add(ecoPlayerManager.getEconomyPlayerByName(name));
-			} catch (EconomyPlayerException e) {
+			} catch (GeneralEconomyException e) {
 				logger.warn("[Ultimate_Economy] Failed to load resident " + name + " of town " + townName + " and plot "
 						+ chunkCoords);
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
@@ -250,7 +250,7 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	}
 
 	@Override
-	public EconomyPlayer loadMayor(String townName) throws EconomyPlayerException {
+	public EconomyPlayer loadMayor(String townName) throws GeneralEconomyException {
 		return ecoPlayerManager.getEconomyPlayerByName(config.getString("Towns." + townName + ".owner"));
 	}
 
@@ -260,7 +260,7 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 		for (String name : config.getStringList("Towns." + townName + ".coOwners")) {
 			try {
 				deputys.add(ecoPlayerManager.getEconomyPlayerByName(name));
-			} catch (EconomyPlayerException e) {
+			} catch (GeneralEconomyException e) {
 				logger.warn("[Ultimate_Economy] Failed to load deputy " + name + " of town " + townName);
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
@@ -292,7 +292,7 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 		for (String name : config.getStringList("Towns." + townName + ".citizens")) {
 			try {
 				citizens.add(ecoPlayerManager.getEconomyPlayerByName(name));
-			} catch (EconomyPlayerException e) {
+			} catch (GeneralEconomyException e) {
 				logger.warn("[Ultimate_Economy] Failed to load citizen " + name + " of town " + townName);
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}

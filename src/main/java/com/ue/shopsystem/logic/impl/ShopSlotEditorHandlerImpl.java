@@ -240,7 +240,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 				handleRemoveItem(player);
 				getShop().addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
 				player.sendMessage(
-						messageWrapper.getString("shop_addItem", stackInEditor.getType().toString().toLowerCase()));
+						messageWrapper.getString("added", stackInEditor.getType().toString().toLowerCase()));
 			} else {
 				// edit
 				String amountString = generateChangeAmountString(stackInEditor.getAmount(), shopItem);
@@ -255,7 +255,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 			if (stackInEditor.getType() != Material.BARRIER) {
 				getShop().addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
 				player.sendMessage(
-						messageWrapper.getString("shop_addItem", stackInEditor.getType().toString().toLowerCase()));
+						messageWrapper.getString("added", stackInEditor.getType().toString().toLowerCase()));
 			}
 		}
 	}
@@ -287,9 +287,9 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		getShop().removeShopItem(selectedEditorSlot);
 		if (item.getType() == Material.SPAWNER) {
 			player.sendMessage(
-					messageWrapper.getString("shop_removeSpawner", item.getItemMeta().getDisplayName().toLowerCase()));
+					messageWrapper.getString("removed", item.getItemMeta().getDisplayName().toLowerCase()));
 		} else {
-			player.sendMessage(messageWrapper.getString("shop_removeItem", deletedIem));
+			player.sendMessage(messageWrapper.getString("removed", deletedIem));
 		}
 	}
 

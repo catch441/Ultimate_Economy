@@ -133,7 +133,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, JobSystemException, GeneralEconomyException {
 		if (args.length == 3) {
 			jobcenterManager.createJobcenter(args[1], player.getLocation(), Integer.parseInt(args[2]));
-			player.sendMessage(messageWrapper.getString("jobcenter_create", args[1]));
+			player.sendMessage(messageWrapper.getString("created", args[1]));
 		} else {
 			player.sendMessage("/jobcenter create <jobcenter> <size> <- size have to be a multible of 9");
 		}
@@ -144,7 +144,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 			throws JobSystemException, GeneralEconomyException {
 		if (args.length == 2) {
 			jobcenterManager.deleteJobcenter(jobcenterManager.getJobcenterByName(args[1]));
-			player.sendMessage(messageWrapper.getString("jobcenter_delete", args[1]));
+			player.sendMessage(messageWrapper.getString("deleted", args[1]));
 		} else {
 			player.sendMessage("/jobcenter delete <jobcenter>");
 		}
@@ -167,9 +167,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 			Jobcenter jobcenter = jobcenterManager.getJobcenterByName(args[1]);
 			Job job = jobManager.getJobByName(args[2]);
 			jobcenter.addJob(job, args[3], Integer.valueOf(args[4]) - 1);
-			// TODO aus messages holen
-			player.sendMessage(ChatColor.GOLD + "The job " + ChatColor.GREEN + args[2] + ChatColor.GOLD
-					+ " was added to the JobCenter " + ChatColor.GREEN + args[1] + ".");
+			player.sendMessage(messageWrapper.getString("added", args[2]));
 		} else {
 			player.sendMessage("/jobcenter addJob <jobcenter> <job> <material> <slot>");
 		}
@@ -182,7 +180,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 			Jobcenter jobcenter = jobcenterManager.getJobcenterByName(args[1]);
 			Job job = jobManager.getJobByName(args[2]);
 			jobcenter.removeJob(job);
-			player.sendMessage(messageWrapper.getString("jobcenter_removeJob", args[2]));
+			player.sendMessage(messageWrapper.getString("removed", args[2]));
 		} else {
 			player.sendMessage("/jobcenter removeJob <jobcenter> <job>");
 		}
@@ -192,7 +190,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	private boolean performJobCreateCommand(String label, String[] args, Player player) throws GeneralEconomyException {
 		if (args.length == 3) {
 			jobManager.createJob(args[2]);
-			player.sendMessage(messageWrapper.getString("jobcenter_createJob", args[2]));
+			player.sendMessage(messageWrapper.getString("created", args[2]));
 		} else {
 			player.sendMessage("/jobcenter job create <job>");
 		}
@@ -202,7 +200,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	private boolean performJobDeleteCommand(String label, String[] args, Player player) throws GeneralEconomyException {
 		if (args.length == 3) {
 			jobManager.deleteJob(jobManager.getJobByName(args[2]));
-			player.sendMessage(messageWrapper.getString("jobcenter_delJob", args[2]));
+			player.sendMessage(messageWrapper.getString("deleted", args[2]));
 		} else {
 			player.sendMessage("/jobcenter job delete <job>");
 		}
@@ -214,7 +212,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 5) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.addFisherLootType(args[3], Double.valueOf(args[4]));
-			player.sendMessage(messageWrapper.getString("jobcenter_addFisher", args[3]));
+			player.sendMessage(messageWrapper.getString("added", args[3]));
 		} else {
 			player.sendMessage("/jobcenter job addFisher <job> [fish/treasure/junk] <price>");
 		}
@@ -226,7 +224,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 4) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.removeFisherLootType(args[3]);
-			player.sendMessage(messageWrapper.getString("jobcenter_removeFisher", args[3]));
+			player.sendMessage(messageWrapper.getString("removed", args[3]));
 		} else {
 			player.sendMessage("/jobcenter job removeFisher <jobname> <fish/treasure/junk>");
 		}
@@ -238,7 +236,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 5) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.addBlock(args[3], Double.valueOf(args[4]));
-			player.sendMessage(messageWrapper.getString("jobcenter_addItem", args[3]));
+			player.sendMessage(messageWrapper.getString("added", args[3]));
 		} else {
 			player.sendMessage("/jobcenter job addItem <job> <material> <price>");
 		}
@@ -250,7 +248,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 4) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.deleteBlock(args[3]);
-			player.sendMessage(messageWrapper.getString("jobcenter_removeItem", args[3]));
+			player.sendMessage(messageWrapper.getString("removed", args[3]));
 		} else {
 			player.sendMessage("/jobcenter job removeItem <job> <material>");
 		}
@@ -262,7 +260,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 5) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.addMob(args[3], Double.valueOf(args[4]));
-			player.sendMessage(messageWrapper.getString("jobcenter_addMob", args[3]));
+			player.sendMessage(messageWrapper.getString("added", args[3]));
 		} else {
 			player.sendMessage("/jobcenter job addMob <job> <entity> <price>");
 		}
@@ -274,25 +272,25 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 4) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.deleteMob(args[3]);
-			player.sendMessage(messageWrapper.getString("jobcenter_removeMob", args[3]));
+			player.sendMessage(messageWrapper.getString("removed", args[3]));
 		} else {
 			player.sendMessage("/jobcenter job removeMob <jobname> <entity>");
 		}
 		return true;
 	}
-	
+
 	private boolean performJobAddBreedableCommand(String label, String[] args, Player player)
 			throws GeneralEconomyException, NumberFormatException, JobSystemException {
 		if (args.length == 5) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.addBreedable(EntityType.valueOf(args[3].toUpperCase()), Double.valueOf(args[4]));
-			player.sendMessage(messageWrapper.getString("jobcenter_addMob", args[3]));
+			player.sendMessage(messageWrapper.getString("added", args[3]));
 		} else {
 			player.sendMessage("/jobcenter job addBreedable <job> <entity> <price>");
 		}
 		return true;
 	}
-	
+
 	private boolean performJobRemoveBreedableCommand(String label, String[] args, Player player)
 			throws GeneralEconomyException, JobSystemException {
 		if (args.length == 4) {
@@ -308,8 +306,8 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	private boolean performJobCommand(String label, String[] args, Player player)
 			throws GeneralEconomyException, JobSystemException {
 		if (args.length == 1) {
-			player.sendMessage(
-					"/jobcenter job [create/delete/addItem/removeItem/" + "addMob/removeMob/addFisher/removeFisher]");
+			player.sendMessage("/jobcenter job [create/delete/addItem/removeItem/"
+					+ "addMob/removeMob/addFisher/removeFisher/addBreedable/removeBreedable]");
 		} else {
 			JobCommandEnum commandEnum = JobCommandEnum.getEnum("JOB_" + args[1]);
 			switch (commandEnum) {
@@ -335,7 +333,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 				return performJobRemoveBreedableCommand(label, args, player);
 			default:
 				player.sendMessage("/jobcenter job [create/delete/addItem/removeItem/"
-						+ "addMob/removeMob/addFisher/removeFisher]");
+						+ "addMob/removeMob/addFisher/removeFisher/addBreedable/removeBreedable]");
 				return true;
 			}
 		}

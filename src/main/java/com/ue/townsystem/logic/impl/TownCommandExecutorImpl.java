@@ -168,7 +168,7 @@ public class TownCommandExecutorImpl implements CommandExecutor {
 			Town town = townworldManager.getTownByName(args[1]);
 			townsystemValidationHandler.checkForPlayerIsMayor(town.getMayor(), ecoPlayer);
 			town.addDeputy(ecoPlayerManager.getEconomyPlayerByName(args[2]));
-			player.sendMessage(messageWrapper.getString("town_addCoOwner", args[2]));
+			player.sendMessage(messageWrapper.getString("added", args[2]));
 		} else {
 			player.sendMessage("/" + label + " addDeputy <town> <player>");
 		}
@@ -181,7 +181,7 @@ public class TownCommandExecutorImpl implements CommandExecutor {
 			Town town = townworldManager.getTownByName(args[1]);
 			townsystemValidationHandler.checkForPlayerIsMayor(town.getMayor(), ecoPlayer);
 			town.removeDeputy(ecoPlayerManager.getEconomyPlayerByName(args[2]));
-			player.sendMessage(messageWrapper.getString("town_removeCoOwner", args[2]));
+			player.sendMessage(messageWrapper.getString("removed", args[2]));
 		} else {
 			player.sendMessage("/" + label + " removeDeputy <town> <player>");
 		}

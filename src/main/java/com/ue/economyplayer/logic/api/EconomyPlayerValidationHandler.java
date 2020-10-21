@@ -38,9 +38,9 @@ public interface EconomyPlayerValidationHandler {
 	 * 
 	 * @param homeList
 	 * @param homeName
-	 * @throws EconomyPlayerException
+	 * @throws GeneralEconomyException
 	 */
-	public void checkForNotExistingHome(Map<String, Location> homeList, String homeName) throws EconomyPlayerException;
+	public void checkForNotExistingHome(Map<String, Location> homeList, String homeName) throws GeneralEconomyException;
 	
 	/**
 	 * Check for town not joined.
@@ -82,9 +82,9 @@ public interface EconomyPlayerValidationHandler {
 	 * 
 	 * @param homeList
 	 * @param homeName
-	 * @throws EconomyPlayerException
+	 * @throws GeneralEconomyException
 	 */
-	public void checkForExistingHome(Map<String, Location> homeList, String homeName) throws EconomyPlayerException;
+	public void checkForExistingHome(Map<String, Location> homeList, String homeName) throws GeneralEconomyException;
 	
 	/**
 	 * Check for not reached may joined towns.
@@ -106,7 +106,7 @@ public interface EconomyPlayerValidationHandler {
 	 * Check for player does not exist.
 	 * @param playerNameList
 	 * @param playerName
-	 * @throws EconomyPlayerException
+	 * @throws GeneralEconomyException
 	 */
-	public void checkForPlayerDoesNotExist(List<String> playerNameList, String playerName) throws EconomyPlayerException;
+	public void checkForPlayerDoesNotExist(List<String> playerNameList, String playerName) throws GeneralEconomyException;
 }

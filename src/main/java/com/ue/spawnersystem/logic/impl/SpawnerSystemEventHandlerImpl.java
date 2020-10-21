@@ -20,6 +20,7 @@ import org.bukkit.metadata.MetadataValue;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
+import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.spawnersystem.logic.api.SpawnerManager;
 import com.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
 
@@ -71,7 +72,7 @@ public class SpawnerSystemEventHandlerImpl implements SpawnerSystemEventHandler 
 				event.getPlayer().sendMessage(messageWrapper.getErrorString("inventory_full"));
 			} else if (event.getPlayer().getName().equals(blockname)) {
 				if (!event.getBlock().getMetadata("entity").isEmpty()) {
-					//spawnerManager.removeSpawner(event.getBlock().getLocation());
+					spawnerManager.removeSpawner(event.getBlock().getLocation());
 					ItemStack stack = serverProvider.createItemStack(Material.SPAWNER, 1);
 					ItemMeta meta = stack.getItemMeta();
 					meta.setDisplayName(event.getBlock().getMetadata("entity").get(0).asString() + "-"
@@ -81,7 +82,8 @@ public class SpawnerSystemEventHandlerImpl implements SpawnerSystemEventHandler 
 				}
 			} else {
 				event.setCancelled(true);
-				event.getPlayer().sendMessage(messageWrapper.getErrorString("no_permission_break_spawner"));
+				event.getPlayer().sendMessage(messageWrapper
+						.getErrorString(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()));
 			}
 		}
 	}
@@ -118,7 +120,8 @@ public class SpawnerSystemEventHandlerImpl implements SpawnerSystemEventHandler 
 			spawnerManager.addSpawner(string.substring(0, string.lastIndexOf("-")), event.getPlayer(),
 					event.getBlock().getLocation());
 		} else {
-			event.getPlayer().sendMessage(messageWrapper.getErrorString("no_permission_set_spawner"));
+			event.getPlayer().sendMessage(messageWrapper
+					.getErrorString(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()));
 			event.setCancelled(true);
 		}
 	}

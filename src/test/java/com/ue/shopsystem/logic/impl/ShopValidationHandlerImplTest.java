@@ -482,7 +482,7 @@ public class ShopValidationHandlerImplTest {
 		} catch (EconomyPlayerException | TownSystemException e) {
 			assertTrue(e instanceof EconomyPlayerException);
 			EconomyPlayerException ex = (EconomyPlayerException) e;
-			assertEquals(EconomyPlayerExceptionMessageEnum.NO_PERMISSION, ex.getKey());
+			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, ex.getKey());
 			assertEquals(0, ex.getParams().length);
 		}
 	}
@@ -512,7 +512,7 @@ public class ShopValidationHandlerImplTest {
 		} catch (EconomyPlayerException | TownSystemException e) {
 			assertTrue(e instanceof EconomyPlayerException);
 			EconomyPlayerException ex = (EconomyPlayerException) e;
-			assertEquals(EconomyPlayerExceptionMessageEnum.NO_PERMISSION, ex.getKey());
+			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, ex.getKey());
 			assertEquals(0, ex.getParams().length);
 		}
 	}

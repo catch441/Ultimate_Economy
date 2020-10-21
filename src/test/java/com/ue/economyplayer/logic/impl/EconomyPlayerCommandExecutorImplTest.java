@@ -31,6 +31,8 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
+import com.ue.general.impl.GeneralEconomyException;
+import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.townsystem.logic.api.TownworldManager;
 
@@ -234,12 +236,12 @@ public class EconomyPlayerCommandExecutorImplTest {
 	}
 	
 	@Test
-	public void setHomeCommandTestWithException() throws EconomyPlayerException {
+	public void setHomeCommandTestWithException() throws GeneralEconomyException, EconomyPlayerException {
 		when(player.getName()).thenReturn("kthschnll");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
 		String[] args = { "myhome" };
-		when(messageWrapper.getErrorString("home_already_exist", "myhome")).thenReturn("§cMy error message!");
-		doThrow(new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.HOME_ALREADY_EXIST, "myhome"))
+		when(messageWrapper.getErrorString("already_exists", "myhome")).thenReturn("§cMy error message!");
+		doThrow(new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, "myhome"))
 				.when(ecoPlayer).addHome("myhome", null, true);
 
 		assertEquals(0, ecoPlayer.getHomeList().size());

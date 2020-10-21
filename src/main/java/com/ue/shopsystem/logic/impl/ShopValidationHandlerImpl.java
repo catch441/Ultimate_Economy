@@ -199,12 +199,12 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 			throws EconomyPlayerException, TownSystemException {
 		Townworld townworld = townworldManager.getTownWorldByName(location.getWorld().getName());
 		if (townworld.isChunkFree(location.getChunk())) {
-			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
+			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
 		} else {
 			Town town = townworld.getTownByChunk(location.getChunk());
 			if (!town.hasBuildPermissions(owner,
 					town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
-				throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NO_PERMISSION);
+				throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
 			}
 		}
 	}

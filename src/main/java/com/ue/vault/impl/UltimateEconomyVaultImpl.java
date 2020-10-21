@@ -68,7 +68,7 @@ public class UltimateEconomyVaultImpl implements Economy {
 		try {
 			ecoPlayerManager.getEconomyPlayerByName(owner).increasePlayerAmount(amount, false);
 			return new EconomyResponse(amount, getBalance(owner), ResponseType.SUCCESS, "");
-		} catch (EconomyPlayerException | GeneralEconomyException e) {
+		} catch (GeneralEconomyException e) {
 			return new EconomyResponse(0, 0, ResponseType.FAILURE, e.getMessage());
 		}
 	}
@@ -92,7 +92,7 @@ public class UltimateEconomyVaultImpl implements Economy {
 	public double getBalance(OfflinePlayer player) {
 		try {
 			return ecoPlayerManager.getEconomyPlayerByName(player.getName()).getBankAccount().getAmount();
-		} catch (EconomyPlayerException e) {
+		} catch (GeneralEconomyException e) {
 			return 0;
 		}
 	}
@@ -110,7 +110,7 @@ public class UltimateEconomyVaultImpl implements Economy {
 			} else {
 				return bankManager.getBankAccountByIban(owner).getAmount();
 			}
-		} catch (EconomyPlayerException | GeneralEconomyException e) {
+		} catch (GeneralEconomyException e) {
 			return 0;
 		}
 	}
@@ -139,7 +139,7 @@ public class UltimateEconomyVaultImpl implements Economy {
 	public boolean has(String owner, double amount) {
 		try {
 			return ecoPlayerManager.getEconomyPlayerByName(owner).hasEnoughtMoney(amount);
-		} catch (EconomyPlayerException | GeneralEconomyException e) {
+		} catch (GeneralEconomyException e) {
 			return false;
 		}
 	}

@@ -102,7 +102,7 @@ public interface TownworldManager {
 	/**
 	 * Performs the townworld location check for all online players.
 	 * 
-	 * @throws EconomyPlayerException
+	 * @throws GeneralEconomyException
 	 */
-	public void performTownworldLocationCheckAllPlayers() throws EconomyPlayerException;
+	public void performTownworldLocationCheckAllPlayers() throws GeneralEconomyException;
 }
