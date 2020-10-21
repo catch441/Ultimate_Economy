@@ -91,22 +91,42 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 1) {
 			Job job = jobManager.getJobByName(args[0]);
 			player.sendMessage(messageWrapper.getString("jobinfo_info", job.getName()));
-			for (Entry<String, Double> entry : job.getBlockList().entrySet()) {
-				player.sendMessage(ChatColor.GOLD + entry.getKey().toLowerCase() + " " + ChatColor.GREEN
-						+ entry.getValue() + configManager.getCurrencyText(entry.getValue()));
-			}
-			for (Entry<String, Double> entry : job.getFisherList().entrySet()) {
-				player.sendMessage(messageWrapper.getString("jobinfo_fishingprice", entry.getKey().toLowerCase(),
-						entry.getValue(), configManager.getCurrencyText(entry.getValue())));
-			}
-			for (Entry<String, Double> entry : job.getEntityList().entrySet()) {
-				player.sendMessage(messageWrapper.getString("jobinfo_killprice", entry.getKey().toLowerCase(),
-						entry.getValue(), configManager.getCurrencyText(entry.getValue())));
-			}
+			sendBlockInfo(player, job);
+			sendFisherInfo(player, job);
+			sendEntityInfo(player, job);
+			sendBreedableInfo(player, job);
 		} else {
 			return false;
 		}
 		return true;
+	}
+
+	private void sendBreedableInfo(Player player, Job job) {
+		for (Entry<String, Double> entry : job.getBreedableList().entrySet()) {
+			player.sendMessage(messageWrapper.getString("jobinfo_breedprice", entry.getKey().toLowerCase(),
+					entry.getValue(), configManager.getCurrencyText(entry.getValue())));
+		}
+	}
+
+	private void sendEntityInfo(Player player, Job job) {
+		for (Entry<String, Double> entry : job.getEntityList().entrySet()) {
+			player.sendMessage(messageWrapper.getString("jobinfo_killprice", entry.getKey().toLowerCase(),
+					entry.getValue(), configManager.getCurrencyText(entry.getValue())));
+		}
+	}
+
+	private void sendFisherInfo(Player player, Job job) {
+		for (Entry<String, Double> entry : job.getFisherList().entrySet()) {
+			player.sendMessage(messageWrapper.getString("jobinfo_fishingprice", entry.getKey().toLowerCase(),
+					entry.getValue(), configManager.getCurrencyText(entry.getValue())));
+		}
+	}
+
+	private void sendBlockInfo(Player player, Job job) {
+		for (Entry<String, Double> entry : job.getBlockList().entrySet()) {
+			player.sendMessage(ChatColor.GOLD + entry.getKey().toLowerCase() + " " + ChatColor.GREEN
+					+ entry.getValue() + configManager.getCurrencyText(entry.getValue()));
+		}
 	}
 
 	private boolean performJobcenterCommand(String label, String[] args, Player player)

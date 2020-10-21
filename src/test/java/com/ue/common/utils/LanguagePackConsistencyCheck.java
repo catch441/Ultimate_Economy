@@ -156,6 +156,7 @@ public class LanguagePackConsistencyCheck {
 		assertFalse(messageWrapper.getString("home_info", "arg1").equals("!home_info!"));
 		assertFalse(messageWrapper.getString("jobinfo_fishingprice", "arg1", "arg2", "arg3").equals("!jobinfo_fishingprice!"));
 		assertFalse(messageWrapper.getString("jobinfo_killprice", "arg1", "arg2", "arg3").equals("!jobinfo_killprice!"));
+		assertFalse(messageWrapper.getString("jobinfo_breedprice", "arg1", "arg2", "arg3").equals("!jobinfo_breedprice!"));
 		assertFalse(messageWrapper.getString("town_create", "arg1").equals("!town_create!"));
 		assertFalse(messageWrapper.getString("town_delete", "arg1").equals("!town_delete!"));
 		assertFalse(messageWrapper.getString("town_rename", "arg1", "arg2").equals("!town_rename!"));
