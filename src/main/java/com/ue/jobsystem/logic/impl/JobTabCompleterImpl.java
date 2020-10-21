@@ -1,6 +1,7 @@
 package com.ue.jobsystem.logic.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -88,6 +89,9 @@ public class JobTabCompleterImpl implements TabCompleter {
 			case "addFisher":
 			case "removeFisher":
 				return handleAddRemoveFisherTabComplete(args);
+			case "addBreedable":
+			case "removeBreedable":
+				return handleAddRemoveBreedableTabComlete(args);
 			case "delete":
 				return handleJobDeleteTabComplete(args);
 			case "create":
@@ -99,6 +103,16 @@ public class JobTabCompleterImpl implements TabCompleter {
 			}
 		}
 		return new ArrayList<>();
+	}
+	
+	private List<String> handleAddRemoveBreedableTabComlete(String[] args) {
+		if (args.length == 4) {
+			return getBreedableList(args[3]);
+		} else if (args.length == 3) {
+			return getJobList(args[2]);
+		} else {
+			return new ArrayList<>();
+		}
 	}
 
 	private List<String> handleAddRemoveItemTabComplete(String[] args) {
@@ -210,6 +224,8 @@ public class JobTabCompleterImpl implements TabCompleter {
 		list.add("removeFisher");
 		list.add("addMob");
 		list.add("removeMob");
+		list.add("addBreedable");
+		list.add("removeBreedable");
 		return list;
 	}
 
@@ -251,37 +267,36 @@ public class JobTabCompleterImpl implements TabCompleter {
 		return list;
 	}
 
-	private static List<String> getMaterialList(String arg) {
+	private List<String> getMaterialList(String arg) {
 		Material[] materials = Material.values();
 		List<String> list = new ArrayList<>();
-		if ("".equals(arg)) {
-			for (Material material : materials) {
-				list.add(material.name().toLowerCase());
-			}
-		} else {
-			for (Material material : materials) {
-				if (material.name().toLowerCase().contains(arg)) {
-					list.add(material.name().toLowerCase());
-				}
-			}
+		for (Material material : materials) {
+			addIfMatching(list, material.name().toLowerCase(), arg);
 		}
 		return list;
 	}
+	
+	private List<String> getBreedableList(String arg) {
+		List<String> list = new ArrayList<>();
+		List<EntityType> breedableMobs = Arrays.asList(EntityType.BEE, EntityType.COW, EntityType.HOGLIN,
+				EntityType.MUSHROOM_COW, EntityType.PIG, EntityType.SHEEP, EntityType.WOLF, EntityType.CAT,
+				EntityType.DONKEY, EntityType.HORSE, EntityType.OCELOT, EntityType.POLAR_BEAR, EntityType.TURTLE,
+				EntityType.CHICKEN, EntityType.FOX, EntityType.LLAMA, EntityType.PANDA, EntityType.RABBIT,
+				EntityType.VILLAGER);
+		addMatchingEntities(arg, list, breedableMobs);
+		return list;
+	}
 
-	private static List<String> getEntityList(String arg) {
+	private List<String> getEntityList(String arg) {
 		List<String> list = new ArrayList<>();
 		EntityType[] entityTypes = EntityType.values();
-		if ("".equals(arg)) {
-			for (EntityType entityname : entityTypes) {
-				list.add(entityname.name().toLowerCase());
-			}
-		} else {
-			for (EntityType entityname : entityTypes) {
-				if (entityname.name().toLowerCase().contains(arg)) {
-					list.add(entityname.name().toLowerCase());
-				}
-			}
-		}
+		addMatchingEntities(arg, list, Arrays.asList(entityTypes));
 		return list;
+	}
+
+	private void addMatchingEntities(String arg, List<String> list, List<EntityType> entityTypes) {
+		for (EntityType entityname : entityTypes) {
+			addIfMatching(list, entityname.name().toLowerCase(), arg);
+		}
 	}
 }
