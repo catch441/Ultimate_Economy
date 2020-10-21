@@ -9,6 +9,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import com.ue.common.utils.MessageWrapper;
@@ -279,6 +280,30 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		}
 		return true;
 	}
+	
+	private boolean performJobAddBreedableCommand(String label, String[] args, Player player)
+			throws GeneralEconomyException, NumberFormatException, JobSystemException {
+		if (args.length == 5) {
+			Job job = jobManager.getJobByName(args[2]);
+			job.addBreedable(EntityType.valueOf(args[3].toUpperCase()), Double.valueOf(args[4]));
+			player.sendMessage(messageWrapper.getString("jobcenter_addMob", args[3]));
+		} else {
+			player.sendMessage("/jobcenter job addBreedable <job> <entity> <price>");
+		}
+		return true;
+	}
+	
+	private boolean performJobRemoveBreedableCommand(String label, String[] args, Player player)
+			throws GeneralEconomyException, JobSystemException {
+		if (args.length == 4) {
+			Job job = jobManager.getJobByName(args[2]);
+			job.deleteBreedable(EntityType.valueOf(args[3].toUpperCase()));
+			player.sendMessage(messageWrapper.getString("removed", args[3]));
+		} else {
+			player.sendMessage("/jobcenter job removeBreedable <jobname> <entity>");
+		}
+		return true;
+	}
 
 	private boolean performJobCommand(String label, String[] args, Player player)
 			throws GeneralEconomyException, JobSystemException {
@@ -304,6 +329,10 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 				return performJobRemoveItemCommand(label, args, player);
 			case JOB_REMOVEMOB:
 				return performJobRemoveMobCommand(label, args, player);
+			case JOB_ADDBREEDABLE:
+				return performJobAddBreedableCommand(label, args, player);
+			case JOB_REMOVEBREEDABLE:
+				return performJobRemoveBreedableCommand(label, args, player);
 			default:
 				player.sendMessage("/jobcenter job [create/delete/addItem/removeItem/"
 						+ "addMob/removeMob/addFisher/removeFisher]");
