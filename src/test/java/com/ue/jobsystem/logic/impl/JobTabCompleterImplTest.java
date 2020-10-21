@@ -195,7 +195,7 @@ public class JobTabCompleterImplTest {
 		when(command.getLabel()).thenReturn("jobcenter");
 		String[] args = { "job", "" };
 		List<String> result = tabCompleter.onTabComplete(null, command, null, args);
-		assertEquals(8, result.size());
+		assertEquals(10, result.size());
 		assertEquals("create", result.get(0));
 		assertEquals("delete", result.get(1));
 		assertEquals("addItem", result.get(2));
@@ -204,6 +204,8 @@ public class JobTabCompleterImplTest {
 		assertEquals("removeFisher", result.get(5));
 		assertEquals("addMob", result.get(6));
 		assertEquals("removeMob", result.get(7));
+		assertEquals("addBreedable", result.get(8));
+		assertEquals("removeBreedable", result.get(9));
 	}
 
 	@Test
@@ -212,7 +214,7 @@ public class JobTabCompleterImplTest {
 		when(command.getLabel()).thenReturn("jobcenter");
 		String[] args = { "job", "e" };
 		List<String> result = tabCompleter.onTabComplete(null, command, null, args);
-		assertEquals(7, result.size());
+		assertEquals(9, result.size());
 		assertEquals("create", result.get(0));
 		assertEquals("delete", result.get(1));
 		assertEquals("addItem", result.get(2));
@@ -220,6 +222,8 @@ public class JobTabCompleterImplTest {
 		assertEquals("addFisher", result.get(4));
 		assertEquals("removeFisher", result.get(5));
 		assertEquals("removeMob", result.get(6));
+		assertEquals("addBreedable", result.get(7));
+		assertEquals("removeBreedable", result.get(8));
 	}
 
 	@Test
@@ -704,6 +708,99 @@ public class JobTabCompleterImplTest {
 		Command command = mock(Command.class);
 		when(command.getLabel()).thenReturn("jobcenter");
 		String[] args = { "job", "removeMob", "myjob", "cow", "" };
+		List<String> result = tabCompleter.onTabComplete(null, command, null, args);
+		assertEquals(0, result.size());
+	}
+	
+	@Test
+	public void jobAddBreedableArgTest() {
+		Command command = mock(Command.class);
+		when(command.getLabel()).thenReturn("jobcenter");
+		when(jobManager.getJobNameList()).thenReturn(Arrays.asList("job1", "job2"));
+		String[] args = { "job", "addBreedable", "" };
+		List<String> result = tabCompleter.onTabComplete(null, command, null, args);
+		assertEquals(2, result.size());
+		assertEquals("job1", result.get(0));
+		assertEquals("job2", result.get(1));
+	}
+
+	@Test
+	public void jobAddBreedableArgTestWithMatching() {
+		Command command = mock(Command.class);
+		when(command.getLabel()).thenReturn("jobcenter");
+		when(jobManager.getJobNameList()).thenReturn(Arrays.asList("job1", "job2"));
+		String[] args = { "job", "addBreedable", "1" };
+		List<String> result = tabCompleter.onTabComplete(null, command, null, args);
+		assertEquals(1, result.size());
+		assertEquals("job1", result.get(0));
+	}
+
+	@Test
+	public void jobAddBreedableArgTestWithMobArgMatching() {
+		Command command = mock(Command.class);
+		when(command.getLabel()).thenReturn("jobcenter");
+		String[] args = { "job", "addBreedable", "myjob", "chick" };
+		List<String> result = tabCompleter.onTabComplete(null, command, null, args);
+		assertEquals(1, result.size());
+		assertEquals("chicken", result.get(0));
+	}
+
+	@Test
+	public void jobAddBreedableArgTestWithMobArg() {
+		Command command = mock(Command.class);
+		when(command.getLabel()).thenReturn("jobcenter");
+		String[] args = { "job", "addBreedable", "myjob", "" };
+		List<String> result = tabCompleter.onTabComplete(null, command, null, args);
+		assertEquals(19, result.size());
+	}
+
+	@Test
+	public void jobAddBreedableArgTestWithMoreArgs() {
+		Command command = mock(Command.class);
+		when(command.getLabel()).thenReturn("jobcenter");
+		String[] args = { "job", "addBreedable", "myjob", "cow", "" };
+		List<String> result = tabCompleter.onTabComplete(null, command, null, args);
+		assertEquals(0, result.size());
+	}
+
+	@Test
+	public void jobRemoveBreedableArgTest() {
+		Command command = mock(Command.class);
+		when(command.getLabel()).thenReturn("jobcenter");
+		when(jobManager.getJobNameList()).thenReturn(Arrays.asList("job1", "job2"));
+		String[] args = { "job", "removeBreedable", "" };
+		List<String> result = tabCompleter.onTabComplete(null, command, null, args);
+		assertEquals(2, result.size());
+		assertEquals("job1", result.get(0));
+		assertEquals("job2", result.get(1));
+	}
+
+	@Test
+	public void jobRemoveBreedableArgTestWithMatching() {
+		Command command = mock(Command.class);
+		when(command.getLabel()).thenReturn("jobcenter");
+		when(jobManager.getJobNameList()).thenReturn(Arrays.asList("job1", "job2"));
+		String[] args = { "job", "removeBreedable", "1" };
+		List<String> result = tabCompleter.onTabComplete(null, command, null, args);
+		assertEquals(1, result.size());
+		assertEquals("job1", result.get(0));
+	}
+
+	@Test
+	public void jobRemoveBreedableArgTestWithMobArgMatching() {
+		Command command = mock(Command.class);
+		when(command.getLabel()).thenReturn("jobcenter");
+		String[] args = { "job", "removeBreedable", "myjob", "chick" };
+		List<String> result = tabCompleter.onTabComplete(null, command, null, args);
+		assertEquals(1, result.size());
+		assertEquals("chicken", result.get(0));
+	}
+
+	@Test
+	public void jobRemoveBreedableArgTestWithMoreArgs() {
+		Command command = mock(Command.class);
+		when(command.getLabel()).thenReturn("jobcenter");
+		String[] args = { "job", "removeBreedable", "myjob", "cow", "" };
 		List<String> result = tabCompleter.onTabComplete(null, command, null, args);
 		assertEquals(0, result.size());
 	}
