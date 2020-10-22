@@ -11,11 +11,13 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -64,6 +66,15 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 		this.jobcenterManager = jobcenterManager;
 		this.serverProvider = serverProvider;
 	}
+	
+	@Override
+	public void handleBreedEvent(EntityBreedEvent event) {
+		try {
+			EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getBreeder().getName());
+			payForBreedJob(event.getEntityType(), ecoPlayer);
+		} catch (GeneralEconomyException e) {
+		}	
+	}
 
 	@Override
 	public void handleSetBlock(BlockPlaceEvent event) {
@@ -82,6 +93,17 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 				if (entity.getKiller().getGameMode() == GameMode.SURVIVAL) {
 					payForKillJob(entity, ecoPlayer);
 				}
+			} catch (GeneralEconomyException e) {
+			}
+		}
+	}
+	
+	private void payForBreedJob(EntityType entity, EconomyPlayer ecoPlayer) {
+		for (Job job : ecoPlayer.getJobList()) {
+			try {
+				double d = job.getBreedPrice(entity);
+				ecoPlayer.increasePlayerAmount(d, false);
+				break;
 			} catch (GeneralEconomyException e) {
 			}
 		}

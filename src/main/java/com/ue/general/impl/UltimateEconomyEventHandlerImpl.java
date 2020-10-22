@@ -9,6 +9,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -51,8 +52,8 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 	 * @param jobsystemEventHandler
 	 * @param ecoPlayerEventHandler
 	 */
-	public UltimateEconomyEventHandlerImpl(Logger logger, Updater updater, SpawnerSystemEventHandler spawnerSystemEventHandler,
-			TownsystemEventHandler townSystemEventHandler,
+	public UltimateEconomyEventHandlerImpl(Logger logger, Updater updater,
+			SpawnerSystemEventHandler spawnerSystemEventHandler, TownsystemEventHandler townSystemEventHandler,
 			ShopEventHandler shopEventHandler, JobsystemEventHandler jobsystemEventHandler,
 			EconomyPlayerEventHandler ecoPlayerEventHandler) {
 		this.ecoPlayerEventHandler = ecoPlayerEventHandler;
@@ -62,6 +63,16 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 		this.spawnerSystemEventHandler = spawnerSystemEventHandler;
 		this.updater = updater;
 		this.logger = logger;
+	}
+
+	/**
+	 * Handles entity breed event.
+	 * 
+	 * @param event
+	 */
+	@EventHandler
+	public void onEntityBreed(EntityBreedEvent event) {
+		jobsystemEventHandler.handleBreedEvent(event);
 	}
 
 	/**
