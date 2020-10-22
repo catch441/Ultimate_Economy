@@ -124,8 +124,8 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 
 	private void sendBlockInfo(Player player, Job job) {
 		for (Entry<String, Double> entry : job.getBlockList().entrySet()) {
-			player.sendMessage(ChatColor.GOLD + entry.getKey().toLowerCase() + " " + ChatColor.GREEN
-					+ entry.getValue() + configManager.getCurrencyText(entry.getValue()));
+			player.sendMessage(ChatColor.GOLD + entry.getKey().toLowerCase() + " " + ChatColor.GREEN + entry.getValue()
+					+ configManager.getCurrencyText(entry.getValue()));
 		}
 	}
 
@@ -303,7 +303,14 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 			throws GeneralEconomyException, NumberFormatException, JobSystemException {
 		if (args.length == 5) {
 			Job job = jobManager.getJobByName(args[2]);
-			job.addBreedable(EntityType.valueOf(args[3].toUpperCase()), Double.valueOf(args[4]));
+			EntityType entity = null;
+			try {
+				entity = EntityType.valueOf(args[3].toUpperCase());
+			} catch (IllegalArgumentException e) {
+				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[3]));
+				return true;
+			}
+			job.addBreedable(entity, Double.valueOf(args[4]));
 			player.sendMessage(messageWrapper.getString("added", args[3]));
 		} else {
 			player.sendMessage("/jobcenter job addBreedable <job> <entity> <price>");
@@ -314,9 +321,13 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	private boolean performJobRemoveBreedableCommand(String label, String[] args, Player player)
 			throws GeneralEconomyException, JobSystemException {
 		if (args.length == 4) {
-			Job job = jobManager.getJobByName(args[2]);
-			job.deleteBreedable(EntityType.valueOf(args[3].toUpperCase()));
-			player.sendMessage(messageWrapper.getString("removed", args[3]));
+			try {
+				Job job = jobManager.getJobByName(args[2]);
+				job.deleteBreedable(EntityType.valueOf(args[3].toUpperCase()));
+				player.sendMessage(messageWrapper.getString("removed", args[3]));
+			} catch (IllegalArgumentException e) {
+				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[3]));
+			}
 		} else {
 			player.sendMessage("/jobcenter job removeBreedable <jobname> <entity>");
 		}

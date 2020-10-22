@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 
 import org.bukkit.Location;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -111,11 +112,13 @@ public class JobCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		when(messageWrapper.getString("jobinfo_fishingprice", "stuff", 1.5, "$")).thenReturn("my message 2");
 		when(messageWrapper.getString("jobinfo_killprice", "stuff", 1.5, "$")).thenReturn("my message 3");
+		when(messageWrapper.getString("jobinfo_breedprice", "stuff", 1.5, "$")).thenReturn("my message 4");
 		Map<String, Double> map = new HashMap<>();
 		map.put("stuff", 1.5);
 		when(job.getBlockList()).thenReturn(map);
 		when(job.getFisherList()).thenReturn(map);
 		when(job.getEntityList()).thenReturn(map);
+		when(job.getBreedableList()).thenReturn(map);
 		when(configManager.getCurrencyText(1.5)).thenReturn("$");
 		String[] args = { "myjob" };
 		boolean result = executor.onCommand(player, null, "jobinfo", args);
@@ -125,6 +128,7 @@ public class JobCommandExecutorImplTest {
 		verify(player).sendMessage("§6stuff §a1.5$");
 		verify(player).sendMessage("my message 2");
 		verify(player).sendMessage("my message 3");
+		verify(player).sendMessage("my message 4");
 		verifyNoMoreInteractions(player);
 	}
 
@@ -648,6 +652,121 @@ public class JobCommandExecutorImplTest {
 
 		Player player = mock(Player.class);
 		String[] args = { "job", "removeMob", "myjob", "cow" };
+		boolean result = executor.onCommand(player, null, "jobcenter", args);
+		assertTrue(result);
+		verify(player).sendMessage("My message.");
+		verifyNoMoreInteractions(player);
+	}
+	
+	@Test
+	public void jobAddBreedableCommandTest() {
+		when(messageWrapper.getString("added", "cow")).thenReturn("My message.");
+		Job job = mock(Job.class);
+		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
+		Player player = mock(Player.class);
+		String[] args = { "job", "addBreedable", "myjob", "cow", "1.5" };
+		boolean result = executor.onCommand(player, null, "jobcenter", args);
+		assertTrue(result);
+		assertDoesNotThrow(() -> verify(job).addBreedable(EntityType.COW, 1.5));
+		verify(player).sendMessage("My message.");
+		verifyNoMoreInteractions(player);
+	}
+
+	@Test
+	public void jobAddBreedableCommandTestWithInvalidArgumentNumber() {
+		Player player = mock(Player.class);
+		String[] args = { "job", "addBreedable", "myjob", "cow" };
+		boolean result = executor.onCommand(player, null, "jobcenter", args);
+		assertTrue(result);
+		verify(player).sendMessage("/jobcenter job addBreedable <job> <entity> <price>");
+		verifyNoMoreInteractions(player);
+	}
+
+	@Test
+	public void jobAddBreedableCommandTestWithInvalidDouble() {
+		when(messageWrapper.getErrorString("invalid_parameter", "number")).thenReturn("My exception.");
+		Player player = mock(Player.class);
+		String[] args = { "job", "addBreedable", "myjob", "cow", "a" };
+		boolean result = executor.onCommand(player, null, "jobcenter", args);
+		assertTrue(result);
+		verify(player).sendMessage("My exception.");
+		verifyNoMoreInteractions(player);
+	}
+
+	@Test
+	public void jobAddBreedableCommandTestWithInvalidEntity() throws JobSystemException, GeneralEconomyException {
+		Job job = mock(Job.class);
+		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
+		when(messageWrapper.getErrorString("invalid_parameter", "test")).thenReturn("My exception.");
+
+		Player player = mock(Player.class);
+		String[] args = { "job", "addBreedable", "myjob", "test", "1.5" };
+		boolean result = executor.onCommand(player, null, "jobcenter", args);
+		assertTrue(result);
+		verify(player).sendMessage("My exception.");
+		verifyNoMoreInteractions(player);
+	}
+
+	@Test
+	public void jobAddBreedableCommandTestWithInvalidJob() {
+		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		when(exception.getMessage()).thenReturn("My message.");
+		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenThrow(exception));
+
+		Player player = mock(Player.class);
+		String[] args = { "job", "addBreedable", "myjob", "test", "1.5" };
+		boolean result = executor.onCommand(player, null, "jobcenter", args);
+		assertTrue(result);
+		verify(player).sendMessage("My message.");
+		verifyNoMoreInteractions(player);
+	}
+	
+	@Test
+	public void jobRemoveBreedableCommandTest() {
+		when(messageWrapper.getString("removed", "cow")).thenReturn("My message.");
+		Job job = mock(Job.class);
+		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
+		Player player = mock(Player.class);
+		String[] args = { "job", "removeBreedable", "myjob", "cow" };
+		boolean result = executor.onCommand(player, null, "jobcenter", args);
+		assertTrue(result);
+		assertDoesNotThrow(() -> verify(job).deleteBreedable(EntityType.COW));
+		verify(player).sendMessage("My message.");
+		verifyNoMoreInteractions(player);
+	}
+
+	@Test
+	public void jobRemoveBreedableCommandTestWithInvalidArgumentNumber() {
+		Player player = mock(Player.class);
+		String[] args = { "job", "removeBreedable", "myjob" };
+		boolean result = executor.onCommand(player, null, "jobcenter", args);
+		assertTrue(result);
+		verify(player).sendMessage("/jobcenter job removeBreedable <jobname> <entity>");
+		verifyNoMoreInteractions(player);
+	}
+
+	@Test
+	public void jobRemoveBreedableCommandTestWithInvalidMob() {
+		Job job = mock(Job.class);
+		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
+		when(messageWrapper.getErrorString("invalid_parameter", "test")).thenReturn("My exception.");
+
+		Player player = mock(Player.class);
+		String[] args = { "job", "removeBreedable", "myjob", "test" };
+		boolean result = executor.onCommand(player, null, "jobcenter", args);
+		assertTrue(result);
+		verify(player).sendMessage("My exception.");
+		verifyNoMoreInteractions(player);
+	}
+
+	@Test
+	public void jobRemoveBreedableCommandTestWithInvalidJob() {
+		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		when(exception.getMessage()).thenReturn("My message.");
+		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenThrow(exception));
+
+		Player player = mock(Player.class);
+		String[] args = { "job", "removeBreedable", "myjob", "cow" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
 		assertTrue(result);
 		verify(player).sendMessage("My message.");
