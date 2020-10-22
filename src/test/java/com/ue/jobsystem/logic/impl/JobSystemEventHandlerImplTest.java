@@ -24,6 +24,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -63,6 +64,48 @@ public class JobSystemEventHandlerImplTest {
 	JobcenterManager jobcenterManager;
 	@Mock
 	ServerProvider serverProvider;
+	
+	@Test
+	public void handleBreedEventTest() {
+		Player player = mock(Player.class);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		Job job = mock(Job.class);
+		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		EntityBreedEvent event = mock(EntityBreedEvent.class);
+		when(event.getBreeder()).thenReturn(player);
+		when(event.getEntityType()).thenReturn(EntityType.COW);
+		assertDoesNotThrow(() -> when(job.getBreedPrice(EntityType.COW)).thenReturn(1.5));
+		eventHandler.handleBreedEvent(event);
+		assertDoesNotThrow(() -> verify(ecoPlayer).increasePlayerAmount(1.5, false));
+	}
+	
+	@Test
+	public void handleBreedEventTestWithEmptyJob() throws GeneralEconomyException {
+		Player player = mock(Player.class);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		Job job = mock(Job.class);
+		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		EntityBreedEvent event = mock(EntityBreedEvent.class);
+		when(event.getBreeder()).thenReturn(player);
+		when(event.getEntityType()).thenReturn(EntityType.COW);
+		when(job.getBreedPrice(EntityType.COW)).thenThrow(GeneralEconomyException.class);
+		eventHandler.handleBreedEvent(event);
+		assertDoesNotThrow(() -> verify(ecoPlayer, never()).increasePlayerAmount(1.5, false));
+	}
+	
+	@Test
+	public void handleBreedEventTestWithNoEcoPlayer() throws GeneralEconomyException {
+		Player player = mock(Player.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
+		when(player.getName()).thenReturn("catch441");
+		EntityBreedEvent event = mock(EntityBreedEvent.class);
+		when(event.getBreeder()).thenReturn(player);
+		eventHandler.handleBreedEvent(event);
+	}
 
 	@Test
 	public void handleSetBlockTestSurvival() {

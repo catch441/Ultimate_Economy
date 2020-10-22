@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -63,6 +64,16 @@ public class UltimateEconomyEventHandlerImplTest {
 	Updater updater;
 	@Mock
 	Logger logger;
+	
+	@Test
+	public void onEntityBreedTest() {
+		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
+				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
+				ecoPlayerEventHandler);
+		EntityBreedEvent event = mock(EntityBreedEvent.class);
+		handler.onEntityBreed(event);
+		verify(jobsystemEventHandler).handleBreedEvent(event);
+	}
 
 	@Test
 	public void onPlayerTeleportTest() {
