@@ -258,6 +258,7 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 			adminshopManager.loadAllAdminShops();
 			playershopManager.loadAllPlayerShops();
 			rentshopManager.loadAllRentShops();
+			firstJoin = false;
 		}
 	}
 
