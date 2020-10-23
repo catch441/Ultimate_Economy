@@ -94,7 +94,7 @@ public class UltimateEconomy {
 	 * @param playershopManager
 	 * @param rentshopManager
 	 * @param townworldManager
-	 * @param vaultHook
+	 * @param vaultEconomy
 	 * @param metrics
 	 * @param updater
 	 * @param logger
@@ -132,22 +132,13 @@ public class UltimateEconomy {
 			ServerProvider serverProvider, ShopEventHandler shopEventHandler,
 			JobsystemEventHandler jobsystemEventHandler, EconomyPlayerEventHandler ecoPlayerEventHandler,
 			TownsystemEventHandler townsystemEventHandler, SpawnerSystemEventHandler spawnerSystemEventHandler,
-			CommandExecutor configCommandExecutor,
-			CommandExecutor ecoPlayerCommandExecutor,
-			CommandExecutor jobCommandExecutor,
-			CommandExecutor playershopCommandExecutor,
-			CommandExecutor adminshopCommandExecutor,
-			CommandExecutor rentshopCommandExecutor,
-			CommandExecutor townCommandExecutor,
-			CommandExecutor townworldCommandExecutor,
-			TabCompleter ecoPlayerTabCompleter,
-			TabCompleter configTabCompleter,
-			TabCompleter jobTabCompleter,
-			TabCompleter playershopTabCompleter,
-			TabCompleter adminshopTabCompleter,
-			TabCompleter rentshopTabCompleter,
-			TabCompleter townTabCompleter,
-			TabCompleter townworldTabCompleter) {
+			CommandExecutor configCommandExecutor, CommandExecutor ecoPlayerCommandExecutor,
+			CommandExecutor jobCommandExecutor, CommandExecutor playershopCommandExecutor,
+			CommandExecutor adminshopCommandExecutor, CommandExecutor rentshopCommandExecutor,
+			CommandExecutor townCommandExecutor, CommandExecutor townworldCommandExecutor,
+			TabCompleter ecoPlayerTabCompleter, TabCompleter configTabCompleter, TabCompleter jobTabCompleter,
+			TabCompleter playershopTabCompleter, TabCompleter adminshopTabCompleter, TabCompleter rentshopTabCompleter,
+			TabCompleter townTabCompleter, TabCompleter townworldTabCompleter) {
 		this.spawnerManager = spawnerManager;
 		this.configManager = configManager;
 		this.bankManager = bankManager;
@@ -316,11 +307,19 @@ public class UltimateEconomy {
 		messageWrapper.loadLanguage(configManager.getLocale());
 		bankManager.loadBankAccounts();
 		jobManager.loadAllJobs();
-		jobcenterManager.loadAllJobcenters();
+
+		/*
+		 * TODO: Only commented out to fix a cluser of issues. When spawning the villagers at
+		 * startup without any player, then no changes to these villagers are visible
+		 * ingame (rename, move ...). In spigot it works, but in paper it doesn't. This
+		 * is just a quickfix and not a solution.
+		 * [UE-139,UE-140]
+		 */
+		// jobcenterManager.loadAllJobcenters();
 		ecoPlayerManager.loadAllEconomyPlayers();
-		adminshopManager.loadAllAdminShops();
-		playershopManager.loadAllPlayerShops();
-		rentshopManager.loadAllRentShops();
+		// adminshopManager.loadAllAdminShops();
+		// playershopManager.loadAllPlayerShops();
+		// rentshopManager.loadAllRentShops();
 		townworldManager.loadAllTownWorlds();
 		loadCommands();
 		spawnerManager.loadAllSpawners();
@@ -328,9 +327,9 @@ public class UltimateEconomy {
 		updater.checkForUpdate(plugin.getDescription().getVersion());
 		// setup eventhandler
 		serverProvider.getServer().getPluginManager()
-				.registerEvents(
-						new UltimateEconomyEventHandlerImpl(logger, updater, spawnerSystemEventHandler,
-								townsystemEventHandler, shopEventHandler, jobsystemEventHandler, ecoPlayerEventHandler),
+				.registerEvents(new UltimateEconomyEventHandlerImpl(jobcenterManager, rentshopManager,
+						playershopManager, adminshopManager, logger, updater, spawnerSystemEventHandler,
+						townsystemEventHandler, shopEventHandler, jobsystemEventHandler, ecoPlayerEventHandler),
 						plugin);
 	}
 }

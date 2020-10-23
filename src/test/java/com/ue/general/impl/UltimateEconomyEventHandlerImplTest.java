@@ -42,7 +42,11 @@ import com.ue.common.utils.Updater;
 import com.ue.common.utils.Updater.UpdateResult;
 import com.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemEventHandler;
+import com.ue.shopsystem.logic.api.AdminshopManager;
+import com.ue.shopsystem.logic.api.PlayershopManager;
+import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.shopsystem.logic.api.ShopEventHandler;
 import com.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
 import com.ue.townsystem.logic.api.TownsystemEventHandler;
@@ -64,12 +68,22 @@ public class UltimateEconomyEventHandlerImplTest {
 	Updater updater;
 	@Mock
 	Logger logger;
-	
+	@Mock
+	JobcenterManager jobcenterManager;
+	@Mock
+	AdminshopManager adminshopManager;
+	@Mock
+	RentshopManager rentshopManager;
+	@Mock
+	PlayershopManager playershopManager;
+
+	private UltimateEconomyEventHandlerImpl getHandler() {
+		return new UltimateEconomyEventHandlerImpl(jobcenterManager, rentshopManager, playershopManager, adminshopManager, logger, updater, spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler, ecoPlayerEventHandler);
+	}
+
 	@Test
 	public void onEntityBreedTest() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		EntityBreedEvent event = mock(EntityBreedEvent.class);
 		handler.onEntityBreed(event);
 		verify(jobsystemEventHandler).handleBreedEvent(event);
@@ -77,9 +91,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void onPlayerTeleportTest() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		PlayerTeleportEvent event = mock(PlayerTeleportEvent.class);
 		handler.onPlayerTeleport(event);
 		verify(townSystemEventHandler).handlePlayerTeleport(event);
@@ -87,9 +99,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void onPlayerInteractTest() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		PlayerInteractEvent event = mock(PlayerInteractEvent.class);
 		handler.onPlayerInteract(event);
 		verify(townSystemEventHandler).handlePlayerInteract(event);
@@ -97,9 +107,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void onEntityDeathTest() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		EntityDeathEvent event = mock(EntityDeathEvent.class);
 		handler.onEntityDeath(event);
 		verify(jobsystemEventHandler).handleEntityDeath(event);
@@ -107,9 +115,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void setBlockEventTest() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		BlockPlaceEvent event = mock(BlockPlaceEvent.class);
 		handler.setBlockEvent(event);
 		verify(spawnerSystemEventHandler).handleSetBlockEvent(event);
@@ -118,9 +124,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void onFishingEventTest() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		PlayerFishEvent event = mock(PlayerFishEvent.class);
 		handler.onFishingEvent(event);
 		verify(jobsystemEventHandler).handleFishing(event);
@@ -128,9 +132,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void onPlayerMoveEventTest() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		PlayerMoveEvent event = mock(PlayerMoveEvent.class);
 		handler.onPlayerMoveEvent(event);
 		verify(townSystemEventHandler).handlerPlayerMove(event);
@@ -138,9 +140,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void onEntityTransformTestNotVillager() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Entity entity = mock(Entity.class);
 		EntityTransformEvent event = mock(EntityTransformEvent.class);
 		when(event.getEntity()).thenReturn(entity);
@@ -151,9 +151,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void onEntityTransformTestVillagerNoMeta() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		EntityTransformEvent event = mock(EntityTransformEvent.class);
 		when(event.getEntity()).thenReturn(entity);
@@ -164,9 +162,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void onEntityTransformTestVillager() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		EntityTransformEvent event = mock(EntityTransformEvent.class);
 		when(event.getEntity()).thenReturn(entity);
@@ -178,9 +174,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void breakBlockEventTestAlreadyCancelled() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		BlockBreakEvent event = mock(BlockBreakEvent.class);
 		when(event.isCancelled()).thenReturn(true);
 		handler.breakBlockEvent(event);
@@ -190,9 +184,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void breakBlockEventTestNotSpawner() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Block block = mock(Block.class);
 		BlockData blockData = mock(BlockData.class);
 		BlockBreakEvent event = new BlockBreakEvent(block, null);
@@ -205,9 +197,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void breakBlockEventTestSpawner() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Block block = mock(Block.class);
 		BlockData blockData = mock(BlockData.class);
 		BlockBreakEvent event = new BlockBreakEvent(block, null);
@@ -221,9 +211,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void onNPCOpenInvTestNotVillager() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Entity entity = mock(Entity.class);
 		PlayerInteractEntityEvent event = mock(PlayerInteractEntityEvent.class);
 		when(event.getRightClicked()).thenReturn(entity);
@@ -235,9 +223,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void onNPCOpenInvTestVillagerNotFromPlugin() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		PlayerInteractEntityEvent event = mock(PlayerInteractEntityEvent.class);
 		when(event.getRightClicked()).thenReturn(entity);
@@ -249,9 +235,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void onNPCOpenInvTestVillagerJobcenter() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		PlayerInteractEntityEvent event = mock(PlayerInteractEntityEvent.class);
 		when(event.getRightClicked()).thenReturn(entity);
@@ -263,12 +247,10 @@ public class UltimateEconomyEventHandlerImplTest {
 		verify(jobsystemEventHandler).handleOpenInventory(event);
 		verifyNoInteractions(townSystemEventHandler);
 	}
-	
+
 	@Test
 	public void onNPCOpenInvTestVillagerAdminshop() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		PlayerInteractEntityEvent event = mock(PlayerInteractEntityEvent.class);
 		when(event.getRightClicked()).thenReturn(entity);
@@ -280,12 +262,10 @@ public class UltimateEconomyEventHandlerImplTest {
 		verify(shopEventHandler).handleOpenInventory(event);
 		verifyNoInteractions(townSystemEventHandler);
 	}
-	
+
 	@Test
 	public void onNPCOpenInvTestVillagerPlayershop() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		PlayerInteractEntityEvent event = mock(PlayerInteractEntityEvent.class);
 		when(event.getRightClicked()).thenReturn(entity);
@@ -297,29 +277,25 @@ public class UltimateEconomyEventHandlerImplTest {
 		verify(shopEventHandler).handleOpenInventory(event);
 		verifyNoInteractions(townSystemEventHandler);
 	}
-	
+
 	@Test
 	public void onNPCOpenInvTestVillagerRentshop() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		PlayerInteractEntityEvent event = mock(PlayerInteractEntityEvent.class);
 		when(event.getRightClicked()).thenReturn(entity);
 		when(entity.hasMetadata("ue-type")).thenReturn(true);
-		when(entity.getMetadata("ue-type"))
-				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.PLAYERSHOP_RENTABLE)));
+		when(entity.getMetadata("ue-type")).thenReturn(
+				Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.PLAYERSHOP_RENTABLE)));
 		handler.onNPCOpenInv(event);
 		verifyNoInteractions(jobsystemEventHandler);
 		verify(shopEventHandler).handleOpenInventory(event);
 		verifyNoInteractions(townSystemEventHandler);
 	}
-	
+
 	@Test
 	public void onNPCOpenInvTestVillagerPlotSale() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		PlayerInteractEntityEvent event = mock(PlayerInteractEntityEvent.class);
 		when(event.getRightClicked()).thenReturn(entity);
@@ -331,12 +307,10 @@ public class UltimateEconomyEventHandlerImplTest {
 		verifyNoInteractions(shopEventHandler);
 		verify(townSystemEventHandler).handleOpenPlotSaleInventory(event);
 	}
-	
+
 	@Test
 	public void onNPCOpenInvTestVillagerTownmanager() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		PlayerInteractEntityEvent event = mock(PlayerInteractEntityEvent.class);
 		when(event.getRightClicked()).thenReturn(entity);
@@ -348,12 +322,10 @@ public class UltimateEconomyEventHandlerImplTest {
 		verifyNoInteractions(shopEventHandler);
 		verify(townSystemEventHandler).handleOpenTownmanagerInventory(event);
 	}
-	
+
 	@Test
 	public void onInvClickEventTestNotVillager() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		InventoryHolder entity = mock(InventoryHolder.class);
 		Inventory inv = mock(Inventory.class);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
@@ -367,9 +339,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void onInvClickEventTestVillagerNotFromPlugin() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		Inventory inv = mock(Inventory.class);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
@@ -383,9 +353,7 @@ public class UltimateEconomyEventHandlerImplTest {
 
 	@Test
 	public void onInvClickEventTestVillagerJobcenter() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		Inventory inv = mock(Inventory.class);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
@@ -399,12 +367,10 @@ public class UltimateEconomyEventHandlerImplTest {
 		verify(jobsystemEventHandler).handleInventoryClick(event);
 		verifyNoInteractions(townSystemEventHandler);
 	}
-	
+
 	@Test
 	public void onInvClickEventTestVillagerAdminshop() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		Inventory inv = mock(Inventory.class);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
@@ -418,12 +384,10 @@ public class UltimateEconomyEventHandlerImplTest {
 		verify(shopEventHandler).handleInventoryClick(event);
 		verifyNoInteractions(townSystemEventHandler);
 	}
-	
+
 	@Test
 	public void onInvClickEventTestVillagerPlayershop() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		Inventory inv = mock(Inventory.class);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
@@ -437,31 +401,27 @@ public class UltimateEconomyEventHandlerImplTest {
 		verify(shopEventHandler).handleInventoryClick(event);
 		verifyNoInteractions(townSystemEventHandler);
 	}
-	
+
 	@Test
 	public void onInvClickEventTestVillagerRentshop() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		Inventory inv = mock(Inventory.class);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		when(event.getInventory()).thenReturn(inv);
 		when(inv.getHolder()).thenReturn(entity);
 		when(entity.hasMetadata("ue-type")).thenReturn(true);
-		when(entity.getMetadata("ue-type"))
-				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.PLAYERSHOP_RENTABLE)));
+		when(entity.getMetadata("ue-type")).thenReturn(
+				Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.PLAYERSHOP_RENTABLE)));
 		handler.onInvClickEvent(event);
 		verifyNoInteractions(jobsystemEventHandler);
 		verify(shopEventHandler).handleInventoryClick(event);
 		verifyNoInteractions(townSystemEventHandler);
 	}
-	
+
 	@Test
 	public void onInvClickEventTestVillagerPlotSale() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		Inventory inv = mock(Inventory.class);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
@@ -475,12 +435,10 @@ public class UltimateEconomyEventHandlerImplTest {
 		verifyNoInteractions(shopEventHandler);
 		verify(townSystemEventHandler).handleInventoryClick(event);
 	}
-	
+
 	@Test
 	public void onInvClickEventTestVillagerTownmanager() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Villager entity = mock(Villager.class);
 		Inventory inv = mock(Inventory.class);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
@@ -494,12 +452,10 @@ public class UltimateEconomyEventHandlerImplTest {
 		verifyNoInteractions(shopEventHandler);
 		verify(townSystemEventHandler).handleInventoryClick(event);
 	}
-	
+
 	@Test
 	public void onJoinEventTestOpNewUpdate() {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Player player = mock(Player.class);
 		PlayerJoinEvent event = new PlayerJoinEvent(player, null);
 		when(updater.getUpdateResult()).thenReturn(UpdateResult.UPDATE_AVAILABLE);
@@ -509,12 +465,10 @@ public class UltimateEconomyEventHandlerImplTest {
 		verify(townSystemEventHandler).handlePlayerJoin(event);
 		verify(player).sendMessage("§6There is a newer version of §aUltimate_Economy §6available!");
 	}
-	
+
 	@Test
 	public void onJoinEventTestOpNoUpdateAndError() throws EconomyPlayerException, GeneralEconomyException {
-		UltimateEconomyEventHandlerImpl handler = new UltimateEconomyEventHandlerImpl(logger, updater,
-				spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler,
-				ecoPlayerEventHandler);
+		UltimateEconomyEventHandlerImpl handler = getHandler();
 		Player player = mock(Player.class);
 		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		PlayerJoinEvent event = new PlayerJoinEvent(player, null);

@@ -252,11 +252,20 @@ public class UltimateEconomyTest {
 		verify(messageWrapper).loadLanguage(configManager.getLocale());
 		verify(bankManager).loadBankAccounts();
 		verify(jobManager).loadAllJobs();
-		verify(jobcenterManager).loadAllJobcenters();
+		
+		/*
+		 * TODO: Only commented out to fix a cluser of issues. When spawning the villagers at
+		 * startup without any player, then no changes to these villagers are visible
+		 * ingame (rename, move ...). In spigot it works, but in paper it doesn't. This
+		 * is just a quickfix and not a solution.
+		 * [UE-139,UE-140]
+		 */
+		
+		//verify(jobcenterManager).loadAllJobcenters();
 		verify(ecoPlayerManager).loadAllEconomyPlayers();
-		verify(adminshopManager).loadAllAdminShops();
-		verify(playershopManager).loadAllPlayerShops();
-		verify(rentshopManager).loadAllRentShops();
+		//verify(adminshopManager).loadAllAdminShops();
+		//verify(playershopManager).loadAllPlayerShops();
+		//verify(rentshopManager).loadAllRentShops();
 		verify(townworldManager).loadAllTownWorlds();
 		verify(spawnerManager).loadAllSpawners();
 		verify(updater).checkForUpdate("1.2.6");
@@ -380,11 +389,20 @@ public class UltimateEconomyTest {
 		verify(messageWrapper).loadLanguage(configManager.getLocale());
 		verify(bankManager).loadBankAccounts();
 		verify(jobManager).loadAllJobs();
-		verify(jobcenterManager).loadAllJobcenters();
+		
+		/*
+		 * TODO: Only commented out to fix a cluser of issues. When spawning the villagers at
+		 * startup without any player, then no changes to these villagers are visible
+		 * ingame (rename, move ...). In spigot it works, but in paper it doesn't. This
+		 * is just a quickfix and not a solution.
+		 * [UE-139,UE-140]
+		 */
+		
+		//verify(jobcenterManager).loadAllJobcenters();
 		verify(ecoPlayerManager).loadAllEconomyPlayers();
-		verify(adminshopManager).loadAllAdminShops();
-		verify(playershopManager).loadAllPlayerShops();
-		verify(rentshopManager).loadAllRentShops();
+		//verify(adminshopManager).loadAllAdminShops();
+		//verify(playershopManager).loadAllPlayerShops();
+		//verify(rentshopManager).loadAllRentShops();
 		verify(townworldManager).loadAllTownWorlds();
 		verify(spawnerManager).loadAllSpawners();
 		verify(updater).checkForUpdate("1.2.6");

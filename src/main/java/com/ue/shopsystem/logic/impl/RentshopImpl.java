@@ -324,7 +324,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		changeInventoryNames("RentShop#" + getShopId());
 		getShopVillager().setCustomName("RentShop#" + getShopId());
 		setupStockpile();		
-		
+				
 		rentable = true;
 		getShopDao().saveRentable(true);
 	}

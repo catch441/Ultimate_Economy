@@ -555,8 +555,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 				skullService, this);
 		loadShopItems();
 		editorHandler = new ShopEditorHandlerImpl(serverProvider, skullService, this);
-		
-		
 	}
 
 	private void loadShopItems() {

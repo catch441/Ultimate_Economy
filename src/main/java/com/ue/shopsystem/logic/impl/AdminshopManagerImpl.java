@@ -58,7 +58,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 
 	@Override
 	public Adminshop getAdminShopByName(String name) throws GeneralEconomyException {
-		for (Adminshop shop : getAdminshopList()) {
+		for (Adminshop shop :adminShopList) {
 			if (shop.getName().equals(name)) {
 				return shop;
 			}
@@ -68,7 +68,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 
 	@Override
 	public Adminshop getAdminShopById(String id) throws GeneralEconomyException {
-		for (Adminshop shop : getAdminshopList()) {
+		for (Adminshop shop : adminShopList) {
 			if (shop.getShopId().equals(id)) {
 				return shop;
 			}
@@ -79,7 +79,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	@Override
 	public List<String> getAdminshopIdList() {
 		List<String> list = new ArrayList<>();
-		for (Adminshop shop : getAdminshopList()) {
+		for (Adminshop shop : adminShopList) {
 			list.add(shop.getShopId());
 		}
 		return list;
@@ -88,7 +88,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	@Override
 	public List<String> getAdminshopNameList() {
 		List<String> list = new ArrayList<>();
-		for (Adminshop shop : getAdminshopList()) {
+		for (Adminshop shop : adminShopList) {
 			list.add(shop.getName());
 		}
 		return list;
@@ -133,7 +133,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 
 	@Override
 	public void despawnAllVillagers() {
-		for (Adminshop shop : getAdminshopList()) {
+		for (Adminshop shop : adminShopList) {
 			shop.despawnVillager();
 		}
 	}
@@ -152,8 +152,9 @@ public class AdminshopManagerImpl implements AdminshopManager {
 		for (String shopId : configDao.loadAdminshopIds()) {
 			try {
 				ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
-				adminShopList.add(new AdminshopImpl(null, shopId, shopDao, serverProvider, skullService, logger, this,
-						validationHandler, messageWrapper, configManager));
+				Adminshop shop = new AdminshopImpl(null, shopId, shopDao, serverProvider, skullService, logger, this,
+						validationHandler, messageWrapper, configManager);
+				adminShopList.add(shop);
 			} catch (TownSystemException | ShopSystemException e) {
 				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
