@@ -25,6 +25,13 @@ jobs:
       
     # Runs code climate test coverage
     - name: Code Climate Coverage Action
-      uses: paambaati/codeclimate-action@v2.5.5
-      with:
-        reporter-id:  e9a6854987df94ca96b39bca2e9426927eb5ee08ba9ebf629c156d5f56d31cfc
+      run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        chmod +x ./cc-test-reporter
+        ./cc-test-reporter before-build
+        mvn verify
+        ./cc-test-reporter format-coverage target/site/jacoco/jacoco.xml -t jacoco
+        ./cc-test-reporter upload-coverage
+      env:
+        CC_TEST_REPORTER_ID: e9a6854987df94ca96b39bca2e9426927eb5ee08ba9ebf629c156d5f56d31cfc
+        JACOCO_SOURCE_PATH:  src/main/java
