@@ -206,7 +206,9 @@ public class UltimateEconomyTest {
 		PluginCommand myjobs = mock(PluginCommand.class);
 		PluginCommand bank = mock(PluginCommand.class);
 		PluginCommand ueConfig = mock(PluginCommand.class);
+		PluginCommand removemoney = mock(PluginCommand.class);
 
+		when(javaPlugin.getCommand("removemoney")).thenReturn(removemoney);
 		when(javaPlugin.getCommand("jobcenter")).thenReturn(jobcenter);
 		when(javaPlugin.getCommand("jobinfo")).thenReturn(jobinfo);
 		when(javaPlugin.getCommand("joblist")).thenReturn(joblist);
@@ -285,6 +287,7 @@ public class UltimateEconomyTest {
 		verify(rentshop).setExecutor(rentshopCommandExecutor);
 		verify(pay).setExecutor(ecoPlayerCommandExecutor);
 		verify(givemoney).setExecutor(ecoPlayerCommandExecutor);
+		verify(removemoney).setExecutor(ecoPlayerCommandExecutor);
 		verify(money).setExecutor(ecoPlayerCommandExecutor);
 		verify(myjobs).setExecutor(ecoPlayerCommandExecutor);
 		verify(bank).setExecutor(ecoPlayerCommandExecutor);
@@ -335,7 +338,9 @@ public class UltimateEconomyTest {
 		PluginCommand myjobs = mock(PluginCommand.class);
 		PluginCommand bank = mock(PluginCommand.class);
 		PluginCommand ueConfig = mock(PluginCommand.class);
+		PluginCommand removemoney = mock(PluginCommand.class);
 
+		when(javaPlugin.getCommand("removemoney")).thenReturn(removemoney);
 		when(javaPlugin.getCommand("jobcenter")).thenReturn(jobcenter);
 		when(javaPlugin.getCommand("jobinfo")).thenReturn(jobinfo);
 		when(javaPlugin.getCommand("joblist")).thenReturn(joblist);
@@ -444,6 +449,7 @@ public class UltimateEconomyTest {
 		verify(rentshop).setExecutor(rentshopCommandExecutor);
 		verify(pay).setExecutor(ecoPlayerCommandExecutor);
 		verify(givemoney).setExecutor(ecoPlayerCommandExecutor);
+		verify(removemoney).setExecutor(ecoPlayerCommandExecutor);
 		verify(money).setExecutor(ecoPlayerCommandExecutor);
 		verify(myjobs).setExecutor(ecoPlayerCommandExecutor);
 		verify(bank).setExecutor(ecoPlayerCommandExecutor);

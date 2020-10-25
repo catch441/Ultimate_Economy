@@ -19,6 +19,7 @@ import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.EconomyVillager;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
@@ -57,14 +58,15 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 * @param configManager
 	 * @param townworldManager
 	 * @param playershopManager
+	 * @param generalValidator
 	 */
 	public PlayershopImpl(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size,
 			ShopDao shopDao, ServerProvider serverProvider, CustomSkullService customSkullService, Logger logger,
 			ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,
-			PlayershopManager playershopManager) {
+			PlayershopManager playershopManager, GeneralEconomyValidationHandler generalValidator) {
 		super(name, shopId, spawnLocation, size, shopDao, serverProvider, customSkullService, logger, validationHandler,
-				messageWrapper, configManager);
+				messageWrapper, configManager, generalValidator);
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.townworldManager = townworldManager;
 		this.playershopManager = playershopManager;
@@ -87,6 +89,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 * @param configManager
 	 * @param townworldManager
 	 * @param playershopManager
+	 * @param generalValidator
 	 * @throws TownSystemException
 	 * @throws EconomyPlayerException
 	 * @throws ShopSystemException
@@ -95,10 +98,11 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	public PlayershopImpl(String name, String shopId, ShopDao shopDao, ServerProvider serverProvider,
 			CustomSkullService customSkullService, Logger logger, ShopValidationHandler validationHandler,
 			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper, ConfigManager configManager,
-			TownworldManager townworldManager, PlayershopManager playershopManager)
+			TownworldManager townworldManager, PlayershopManager playershopManager,
+			GeneralEconomyValidationHandler generalValidator)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException, ShopSystemException {
 		super(name, shopId, shopDao, serverProvider, customSkullService, logger, validationHandler, messageWrapper,
-				configManager);
+				configManager, generalValidator);
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.townworldManager = townworldManager;
 		this.playershopManager = playershopManager;
@@ -109,13 +113,13 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	public void openStockpile(Player player) throws ShopSystemException {
 		player.openInventory(getStockpileInventory());
 	}
-	
+
 	/**
 	 * Overridden, because of reserved slots. {@inheritDoc}
 	 */
 	@Override
 	public void openSlotEditor(Player player, int slot) throws ShopSystemException, GeneralEconomyException {
-		validationHandler.checkForValidSlot(slot, getSize(), 2);
+		generalValidator.checkForValidSlot(slot, getSize() - 2);
 		getSlotEditorHandler().setSelectedSlot(slot);
 		player.openInventory(getSlotEditorHandler().getSlotEditorInventory());
 	}
@@ -126,7 +130,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	@Override
 	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
 			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
-		validationHandler.checkForValidSlot(slot, getSize(), 2);
+		generalValidator.checkForValidSlot(slot, getSize() - 2);
 		validationHandler.checkForPlayerIsOnline(ecoPlayer);
 		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 2);
 		validationHandler.checkForPlayerInventoryNotFull(ecoPlayer.getPlayer().getInventory());
@@ -172,7 +176,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	@Override
 	public void sellShopItem(int slot, int amount, EconomyPlayer ecoPlayer, boolean sendMessage)
 			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
-		validationHandler.checkForValidSlot(slot, getSize(), 2);
+		generalValidator.checkForValidSlot(slot, getSize() - 2);
 		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 2);
 		validationHandler.checkForPlayerIsOnline(ecoPlayer);
 		ShopItem shopItem = getShopItem(slot);
@@ -199,7 +203,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	@Override
 	public void changeShopSize(int newSize)
 			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
-		validationHandler.checkForValidSize(newSize);
+		generalValidator.checkForValidSize(newSize);
 		validationHandler.checkForResizePossible(getShopInventory(), getSize(), newSize, 2);
 		setSize(newSize);
 		getShopDao().saveShopSize(newSize);
@@ -228,13 +232,12 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 */
 	@Override
 	public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
-		validationHandler.checkForShopNameIsFree(playershopManager.getPlayerShopUniqueNameList(), name,
-				getOwner());
+		validationHandler.checkForShopNameIsFree(playershopManager.getPlayerShopUniqueNameList(), name, getOwner());
 		validationHandler.checkForValidShopName(name);
 		setupShopName(name);
 		getShopVillager().setCustomName(name + "_" + getOwner().getName());
 		changeInventoryNames(name);
-		
+
 		setupStockpile();
 	}
 
@@ -261,7 +264,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 */
 	@Override
 	public void removeShopItem(int slot) throws ShopSystemException, GeneralEconomyException {
-		validationHandler.checkForValidSlot(slot, getSize(), 2);
+		generalValidator.checkForValidSlot(slot, getSize() - 2);
 		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 2);
 		super.removeShopItem(slot);
 		updateItemInStockpile(slot);
@@ -269,7 +272,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
 	@Override
 	public boolean isAvailable(int slot) throws ShopSystemException, GeneralEconomyException {
-		validationHandler.checkForValidSlot(slot, getSize(), 2);
+		generalValidator.checkForValidSlot(slot, getSize() - 2);
 		ShopItem item = getShopItem(slot);
 		if (item.getStock() >= item.getAmount()) {
 			return true;
@@ -296,8 +299,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
 	@Override
 	public void decreaseStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException {
-		validationHandler.checkForPositiveValue(stock);
-		validationHandler.checkForValidSlot(slot, getSize(), 2);
+		generalValidator.checkForPositiveValue(stock);
+		generalValidator.checkForValidSlot(slot, getSize() - 2);
 		ShopItem item = getShopItem(slot);
 		int entireStock = item.getStock();
 		validationHandler.checkForValidStockDecrease(entireStock, stock);
@@ -308,8 +311,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
 	@Override
 	public void increaseStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException {
-		validationHandler.checkForPositiveValue(stock);
-		validationHandler.checkForValidSlot(slot, getSize(), 2);
+		generalValidator.checkForPositiveValue(stock);
+		generalValidator.checkForValidSlot(slot, getSize() - 2);
 		ShopItem item = getShopItem(slot);
 		int entireStock = item.getStock();
 		item.setStock(entireStock + stock);

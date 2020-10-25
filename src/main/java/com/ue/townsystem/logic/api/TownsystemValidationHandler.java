@@ -8,7 +8,6 @@ import org.bukkit.Location;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
-import com.ue.general.impl.GeneralEconomyException;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
 public interface TownsystemValidationHandler {
@@ -151,15 +150,6 @@ public interface TownsystemValidationHandler {
 			throws EconomyPlayerException;
 
 	/**
-	 * Check for town does not exist.
-	 * 
-	 * @param townNames
-	 * @param newName
-	 * @throws GeneralEconomyException
-	 */
-	public void checkForTownDoesNotExist(List<String> townNames, String newName) throws GeneralEconomyException;
-
-	/**
 	 * Check for chunk is not claimed by the town.
 	 * 
 	 * @param chunkList
@@ -234,14 +224,6 @@ public interface TownsystemValidationHandler {
 	public void checkForChunkIsConnectedToTown(boolean isChunkConnectedToTown) throws TownSystemException;
 
 	/**
-	 * Check for positive amount.
-	 * 
-	 * @param amount
-	 * @throws GeneralEconomyException
-	 */
-	public void checkForPositiveAmount(double amount) throws GeneralEconomyException;
-
-	/**
 	 * Check for townworld does not exist.
 	 * 
 	 * @param townworlds
@@ -268,15 +250,6 @@ public interface TownsystemValidationHandler {
 	 * @throws TownSystemException
 	 */
 	public void checkForChunkIsFree(Townworld townworld, Location location) throws TownSystemException;
-
-	/**
-	 * Check for townworld has town.
-	 * 
-	 * @param townNames
-	 * @param town
-	 * @throws GeneralEconomyException
-	 */
-	public void checkForTownworldHasTown(List<String> townNames, String town) throws GeneralEconomyException;
 
 	/**
 	 * Check for player has permissions on a plot.

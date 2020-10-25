@@ -30,6 +30,7 @@ import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsyste.dataaccess.api.JobDao;
@@ -57,6 +58,8 @@ public class JobManagerImplTest {
 	ConfigDao configDao;
 	@Mock
 	Logger logger;
+	@Mock
+	GeneralEconomyValidationHandler generalValidator;
 
 	@Test
 	public void loadAllJobsTest() {
@@ -78,7 +81,7 @@ public class JobManagerImplTest {
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getJobDao()).thenReturn(jobDao);
 		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForJobNameDoesNotExist(anyList(), eq("myJob")));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValueNotInList(anyList(), eq("myJob")));
 		verify(configDao).saveJobList(anyList());
 		assertEquals(1, jobManager.getJobList().size());
 		assertEquals("myJob", jobManager.getJobList().get(0).getName());
@@ -86,7 +89,7 @@ public class JobManagerImplTest {
 
 	@Test
 	public void createJobTestWithSameName() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForJobNameDoesNotExist(anyList(),
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueNotInList(anyList(),
 				eq("myJob"));
 		assertThrows(GeneralEconomyException.class, () -> jobManager.createJob("myJob"));
 		verify(configDao, never()).saveJobList(anyList());

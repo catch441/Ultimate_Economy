@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.config.logic.api.ConfigManager;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 
@@ -14,6 +15,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	private final ConfigDao configDao;
 	private final MessageWrapper messageWrapper;
+	private final GeneralEconomyValidationHandler generalValidator;
 
 	private int maxHomes;
 	private int maxJobs;
@@ -32,13 +34,16 @@ public class ConfigManagerImpl implements ConfigManager {
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param generalValidator
 	 * @param configDao
 	 * @param messageWrapper
 	 */
 	@Inject
-	public ConfigManagerImpl(ConfigDao configDao, MessageWrapper messageWrapper) {
+	public ConfigManagerImpl(GeneralEconomyValidationHandler generalValidator, ConfigDao configDao,
+			MessageWrapper messageWrapper) {
 		this.configDao = configDao;
 		this.messageWrapper = messageWrapper;
+		this.generalValidator = generalValidator;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -62,7 +67,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		} catch (GeneralEconomyException e) {
 		}
 	}
-	
+
 	private void setupAllowQuickshop() {
 		if (!configDao.hasAllowQuickshop()) {
 			setAllowQuickshop(false);
@@ -70,9 +75,9 @@ public class ConfigManagerImpl implements ConfigManager {
 			allowQuickShop = configDao.loadAllowQuickshop();
 		}
 	}
-	
+
 	private void setupStartAmount() throws GeneralEconomyException {
-		if(!configDao.hasStartAmount()) {
+		if (!configDao.hasStartAmount()) {
 			setStartAmount(0.0);
 		} else {
 			startAmount = configDao.loadStartAmount();
@@ -166,21 +171,21 @@ public class ConfigManagerImpl implements ConfigManager {
 			maxHomes = configDao.loadMaxHomes();
 		}
 	}
-	
+
 	@Override
 	public void setAllowQuickshop(boolean value) {
 		allowQuickShop = value;
 		configDao.saveAllowQuickshop(allowQuickShop);
 	}
-	
+
 	@Override
 	public boolean isAllowQuickshop() {
 		return allowQuickShop;
 	}
-	
+
 	@Override
 	public void setStartAmount(double amount) throws GeneralEconomyException {
-		checkForNonZeroNumer(amount);
+		generalValidator.checkForPositiveValue(amount);
 		startAmount = amount;
 		configDao.saveStartAmount(amount);
 	}
@@ -189,7 +194,7 @@ public class ConfigManagerImpl implements ConfigManager {
 	public double getStartAmount() {
 		return startAmount;
 	}
-	
+
 	@Override
 	public void setExtendedInteraction(boolean value) {
 		extendedInteraction = value;
@@ -219,7 +224,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Override
 	public void setMaxRentedDays(int days) throws GeneralEconomyException {
-		checkForNonZeroNumer(days);
+		generalValidator.checkForPositiveValue(days);
 		maxRentedDays = days;
 		configDao.saveMaxRentedDays(maxRentedDays);
 	}
@@ -246,7 +251,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Override
 	public void setMaxPlayershops(int value) throws GeneralEconomyException {
-		checkForNonZeroNumer(value);
+		generalValidator.checkForPositiveValue(value);
 		maxPlayershops = value;
 		configDao.saveMaxPlayershops(maxPlayershops);
 	}
@@ -258,7 +263,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Override
 	public void setMaxHomes(int value) throws GeneralEconomyException {
-		checkForNonZeroNumer(value);
+		generalValidator.checkForPositiveValue(value);
 		maxHomes = value;
 		configDao.saveMaxHomes(maxHomes);
 	}
@@ -270,7 +275,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Override
 	public void setMaxJobs(int value) throws GeneralEconomyException {
-		checkForNonZeroNumer(value);
+		generalValidator.checkForPositiveValue(value);
 		maxJobs = value;
 		configDao.saveMaxJobs(maxJobs);
 	}
@@ -282,7 +287,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Override
 	public void setMaxJoinedTowns(int value) throws GeneralEconomyException {
-		checkForNonZeroNumer(value);
+		generalValidator.checkForPositiveValue(value);
 		maxJoinedTowns = value;
 		configDao.saveMaxJoinedTowns(maxJoinedTowns);
 	}
@@ -331,13 +336,6 @@ public class ConfigManagerImpl implements ConfigManager {
 			return getCurrencySg();
 		} else {
 			return getCurrencyPl();
-		}
-	}
-	
-	private void checkForNonZeroNumer(double value) throws GeneralEconomyException {
-		if (value < 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					value);
 		}
 	}
 

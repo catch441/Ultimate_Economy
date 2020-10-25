@@ -10,6 +10,7 @@ import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
 import com.ue.bank.logic.api.BankValidationHandler;
 import com.ue.common.utils.MessageWrapper;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 
@@ -18,25 +19,29 @@ public class BankManagerImpl implements BankManager {
 	private final MessageWrapper messageWrapper;
 	private final BankDao bankDao;
 	private final BankValidationHandler validationHandler;
+	private final GeneralEconomyValidationHandler generalValidator;
 	private List<BankAccount> accounts = new ArrayList<>();
 
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param generalValidator
 	 * @param messageWrapper
 	 * @param bankDao
 	 * @param validationHandler
 	 */
 	@Inject
-	public BankManagerImpl(MessageWrapper messageWrapper, BankDao bankDao, BankValidationHandler validationHandler) {
+	public BankManagerImpl(GeneralEconomyValidationHandler generalValidator, MessageWrapper messageWrapper,
+			BankDao bankDao, BankValidationHandler validationHandler) {
 		this.messageWrapper = messageWrapper;
 		this.bankDao = bankDao;
 		this.validationHandler = validationHandler;
+		this.generalValidator = generalValidator;
 	}
 
 	@Override
 	public BankAccount createBankAccount(double startAmount) {
-		BankAccount account = new BankAccountImpl(bankDao, validationHandler, startAmount);
+		BankAccount account = new BankAccountImpl(generalValidator, bankDao, validationHandler, startAmount);
 		getBankAccounts().add(account);
 		bankDao.saveIbanList(getIbanList());
 		return account;
@@ -45,8 +50,9 @@ public class BankManagerImpl implements BankManager {
 	@Override
 	public BankAccount createExternalBankAccount(double startAmount, String externalIban)
 			throws GeneralEconomyException {
-		validationHandler.checkForIbanIsFree(getIbanList(), externalIban);
-		BankAccount account = new BankAccountImpl(bankDao, validationHandler, startAmount, externalIban);
+		generalValidator.checkForValueNotInList(getIbanList(), externalIban);
+		BankAccount account = new BankAccountImpl(generalValidator, bankDao, validationHandler, startAmount,
+				externalIban);
 		getBankAccounts().add(account);
 		bankDao.saveIbanList(getIbanList());
 		return account;
@@ -63,7 +69,7 @@ public class BankManagerImpl implements BankManager {
 	public void loadBankAccounts() {
 		bankDao.setupSavefile();
 		for (String iban : bankDao.loadIbanList()) {
-			getBankAccounts().add(new BankAccountImpl(bankDao, validationHandler, iban));
+			getBankAccounts().add(new BankAccountImpl(generalValidator, bankDao, validationHandler, iban));
 		}
 	}
 

@@ -45,6 +45,7 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.jobsystem.logic.api.Job;
@@ -72,6 +73,8 @@ public class JobcenterImplTest {
 	MessageWrapper messageWrapper;
 	@Mock
 	Logger logger;
+	@Mock
+	GeneralEconomyValidationHandler generalValidator;
 
 	@Test
 	public void constructorNewTest() throws JobSystemException {
@@ -95,7 +98,7 @@ public class JobcenterImplTest {
 		when(world.getNearbyEntities(location, 10, 10, 10)).thenReturn(Arrays.asList(entity));
 		when(entity.getCustomName()).thenReturn("center");
 		Jobcenter center = new JobcenterImpl(logger, jobcenterDao, jobManager, jobcenterManager, ecoPlayerManager,
-				jobsystemValidationHandler, serverProvider, "center", location, 9);
+				jobsystemValidationHandler, serverProvider, "center", location, 9, generalValidator);
 		verify(jobcenterDao).setupSavefile("center");
 		verify(jobcenterDao).saveJobcenterName("center");
 		verify(jobcenterDao).saveJobcenterSize(9);
@@ -146,7 +149,7 @@ public class JobcenterImplTest {
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myJob")).thenReturn(job));
 
 		Jobcenter center = new JobcenterImpl(logger, jobcenterDao, jobManager, jobcenterManager, ecoPlayerManager,
-				jobsystemValidationHandler, serverProvider, "center");
+				jobsystemValidationHandler, serverProvider, "center", generalValidator);
 		verify(jobcenterDao).setupSavefile("center");
 		verify(villager).setCustomName("center");
 		verify(villager).setMetadata(eq("ue-type"), any());
@@ -195,7 +198,7 @@ public class JobcenterImplTest {
 		when(jobcenterDao.loadJobNameList()).thenReturn(Arrays.asList("myJob"));
 		assertThrows(GeneralEconomyException.class, () -> jobManager.getJobByName("myJob"));
 		Jobcenter center = new JobcenterImpl(logger, jobcenterDao, jobManager, jobcenterManager, ecoPlayerManager,
-				jobsystemValidationHandler, serverProvider, "center");
+				jobsystemValidationHandler, serverProvider, "center", generalValidator);
 		verify(jobcenterDao).setupSavefile("center");
 		verify(villager).setCustomName("center");
 		verify(villager).setMetadata(eq("ue-type"), any());
@@ -413,7 +416,7 @@ public class JobcenterImplTest {
 		when(serverProvider.createItemStack(Material.STONE, 1)).thenReturn(stack);
 		when(stack.getItemMeta()).thenReturn(meta);
 		assertDoesNotThrow(() -> center.addJob(job, "stone", 4));
-		assertDoesNotThrow(() -> verify(jobsystemValidationHandler).checkForValidSlot(4, 9));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(4, 8));
 		assertDoesNotThrow(() -> verify(jobsystemValidationHandler).checkForFreeSlot(inventory, 4));
 		assertDoesNotThrow(
 				() -> verify(jobsystemValidationHandler).checkForJobDoesNotExistInJobcenter(anyList(), eq(job)));
@@ -441,7 +444,7 @@ public class JobcenterImplTest {
 		when(serverProvider.createInventory(villager, 9, "center")).thenReturn(invMock);
 		try {
 			return new JobcenterImpl(logger, jobcenterDao, jobManager, jobcenterManager, ecoPlayerManager,
-					jobsystemValidationHandler, serverProvider, "center", location, 9);
+					jobsystemValidationHandler, serverProvider, "center", location, 9, generalValidator);
 		} catch (JobSystemException e) {
 			fail();
 		}

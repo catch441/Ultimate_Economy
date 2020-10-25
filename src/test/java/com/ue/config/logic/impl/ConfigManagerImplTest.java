@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 
@@ -33,6 +36,8 @@ public class ConfigManagerImplTest {
 	ConfigDao dao;
 	@Mock
 	EconomyPlayerManager ecoPlayerManager;
+	@Mock
+	GeneralEconomyValidationHandler generalValidator;
 
 	@Test
 	public void setupConfigInitTest() {
@@ -155,7 +160,7 @@ public class ConfigManagerImplTest {
 		assertFalse(manager.isWildernessInteraction());
 		verify(dao).saveWildernessInteraction(false);
 	}
-	
+
 	@Test
 	public void setAllowQuickshopTest() {
 		assertFalse(manager.isAllowQuickshop());
@@ -163,7 +168,7 @@ public class ConfigManagerImplTest {
 		assertTrue(manager.isAllowQuickshop());
 		verify(dao).saveAllowQuickshop(true);
 	}
-	
+
 	@Test
 	public void setStartAmountTest() {
 		manager.setupConfig();
@@ -183,15 +188,9 @@ public class ConfigManagerImplTest {
 	}
 
 	@Test
-	public void setMaxRentedDaysExceptionTest() {
-		try {
-			manager.setMaxRentedDays(-7);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals(-7.0, e.getParams()[0]);
-		}
+	public void setMaxRentedDaysExceptionTest() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForPositiveValue(-7);
+		assertThrows(GeneralEconomyException.class, () -> manager.setMaxRentedDays(-7));
 	}
 
 	@Test
@@ -204,15 +203,9 @@ public class ConfigManagerImplTest {
 	}
 
 	@Test
-	public void setMaxPlayershopsExceptionTest() {
-		try {
-			manager.setMaxPlayershops(-1);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals(-1.0, e.getParams()[0]);
-		}
+	public void setMaxPlayershopsExceptionTest() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForPositiveValue(-1);
+		assertThrows(GeneralEconomyException.class, () -> manager.setMaxPlayershops(-1));
 	}
 
 	@Test
@@ -225,15 +218,9 @@ public class ConfigManagerImplTest {
 	}
 
 	@Test
-	public void setMaxHomesExceptionTest() {
-		try {
-			manager.setMaxHomes(-1);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals(-1.0, e.getParams()[0]);
-		}
+	public void setMaxHomesExceptionTest() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForPositiveValue(-1);
+		assertThrows(GeneralEconomyException.class, () -> manager.setMaxHomes(-1));
 	}
 
 	@Test
@@ -246,15 +233,9 @@ public class ConfigManagerImplTest {
 	}
 
 	@Test
-	public void setMaxJobsExceptionTest() {
-		try {
-			manager.setMaxJobs(-1);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals(-1.0, e.getParams()[0]);
-		}
+	public void setMaxJobsExceptionTest() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForPositiveValue(-1);
+		assertThrows(GeneralEconomyException.class, () -> manager.setMaxJobs(-1));
 	}
 
 	@Test
@@ -267,15 +248,9 @@ public class ConfigManagerImplTest {
 	}
 
 	@Test
-	public void setMaxJoinedTownesExceptionTest() {
-		try {
-			manager.setMaxJoinedTowns(-3);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals(-3.0, e.getParams()[0]);
-		}
+	public void setMaxJoinedTownesExceptionTest() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForPositiveValue(-3);
+		assertThrows(GeneralEconomyException.class, () -> manager.setMaxJoinedTowns(-3));
 	}
 
 	@Test

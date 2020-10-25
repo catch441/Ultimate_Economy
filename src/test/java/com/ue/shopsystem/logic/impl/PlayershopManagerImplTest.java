@@ -45,6 +45,7 @@ import com.ue.common.utils.ServiceComponent;
 import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
@@ -73,12 +74,14 @@ public class PlayershopManagerImplTest {
 	ServerProvider serverProvider;
 	@Mock
 	CustomSkullService customSkullService;
+	@Mock
+	GeneralEconomyValidationHandler generalValidator;
 
 	@Test
 	public void createNewPlayershopTestWithInvalidSize() throws GeneralEconomyException {
 		Location loc = mock(Location.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidSize(5);
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValidSize(5);
 		assertThrows(GeneralEconomyException.class, () -> playershopManager.createPlayerShop("myshop", loc, 5, ecoPlayer));
 		assertEquals(0, playershopManager.getPlayerShops().size());
 		verify(configDao, never()).savePlayershopIds(anyList());
@@ -153,7 +156,7 @@ public class PlayershopManagerImplTest {
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidShopName("myshop"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForMaxPlayershopsForPlayer(anyList(), eq(ecoPlayer)));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForShopNameIsFree(anyList(), eq("myshop"), eq(ecoPlayer)));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(9));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSize(9));
 		assertDoesNotThrow(() -> verify(townsystemValidationHandler).checkForTownworldPlotPermission(loc, ecoPlayer));
 		assertEquals(1, playershopManager.getPlayerShops().size());
 		Playershop shop = playershopManager.getPlayerShops().get(0);

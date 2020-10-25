@@ -50,11 +50,16 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		try {
-			if ("givemoney".equals(label)) {
+			switch(label) {
+			case "givemoney":
 				return performGiveMoneyCommand(args);
-			} else if (sender instanceof Player) {
-				EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(sender.getName());
-				return performCommand(label, args, (Player) sender, ecoPlayer);
+			case "removemoney":
+				break;
+			default:
+				if (sender instanceof Player) {
+					EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(sender.getName());
+					return performCommand(label, args, (Player) sender, ecoPlayer);
+				}
 			}
 		} catch (EconomyPlayerException | GeneralEconomyException e) {
 			sender.sendMessage(e.getMessage());

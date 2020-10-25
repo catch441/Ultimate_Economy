@@ -22,6 +22,7 @@ import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
@@ -36,6 +37,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerDao ecoPlayerDao;
 	private final EconomyPlayerValidationHandler validationHandler;
+	private final GeneralEconomyValidationHandler generalValidator;
 	private Map<String, Location> homes = new HashMap<>();
 	private BankAccount bankAccount;
 	private Player player;
@@ -48,6 +50,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	/**
 	 * Constructor for creating a new economyPlayer/loading an existing player.
 	 * 
+	 * @param generalValidator
 	 * @param logger
 	 * @param serverProvider
 	 * @param validationHandler
@@ -60,10 +63,11 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	 * @param name
 	 * @param isNew
 	 */
-	public EconomyPlayerImpl(Logger logger, ServerProvider serverProvider,
-			EconomyPlayerValidationHandler validationHandler, EconomyPlayerDao ecoPlayerDao,
-			MessageWrapper messageWrapper, ConfigManager configManager, BankManager bankManager, JobManager jobManager,
-			Player player, String name, boolean isNew) {
+	public EconomyPlayerImpl(GeneralEconomyValidationHandler generalValidator, Logger logger,
+			ServerProvider serverProvider, EconomyPlayerValidationHandler validationHandler,
+			EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper, ConfigManager configManager,
+			BankManager bankManager, JobManager jobManager, Player player, String name, boolean isNew) {
+		this.generalValidator = generalValidator;
 		this.configManager = configManager;
 		this.bankManager = bankManager;
 		this.logger = logger;
@@ -130,7 +134,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	@Override
 	public Location getHome(String homeName) throws GeneralEconomyException {
-		validationHandler.checkForExistingHome(getHomeList(), homeName);
+		generalValidator.checkForValueInList(new ArrayList<>(getHomeList().keySet()), homeName);
 		return getHomeList().get(homeName);
 	}
 
@@ -175,8 +179,9 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	@Override
-	public void addHome(String homeName, Location location, boolean sendMessage) throws GeneralEconomyException, EconomyPlayerException {
-		validationHandler.checkForNotExistingHome(getHomeList(), homeName);
+	public void addHome(String homeName, Location location, boolean sendMessage)
+			throws GeneralEconomyException, EconomyPlayerException {
+		generalValidator.checkForValueNotInList(new ArrayList<>(getHomeList().keySet()), homeName);
 		validationHandler.checkForNotReachedMaxHomes(reachedMaxHomes());
 		homes.put(homeName, location);
 		ecoPlayerDao.saveHome(getName(), homeName, location);
@@ -188,7 +193,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	@Override
 	public void removeHome(String homeName, boolean sendMessage) throws GeneralEconomyException {
-		validationHandler.checkForExistingHome(getHomeList(), homeName);
+		generalValidator.checkForValueInList(new ArrayList<>(getHomeList().keySet()), homeName);
 		getHomeList().remove(homeName);
 		ecoPlayerDao.saveHome(getName(), homeName, null);
 		if (isOnline() && sendMessage) {
@@ -279,14 +284,16 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	@Override
 	public void addWildernessPermission() {
 		if (isOnline()) {
-			getPlayer().addAttachment(serverProvider.getJavaPluginInstance()).setPermission("ultimate_economy.wilderness", true);
+			getPlayer().addAttachment(serverProvider.getJavaPluginInstance())
+					.setPermission("ultimate_economy.wilderness", true);
 		}
 	}
 
 	@Override
 	public void denyWildernessPermission() {
 		if (isOnline()) {
-			getPlayer().addAttachment(serverProvider.getJavaPluginInstance()).setPermission("ultimate_economy.wilderness", false);
+			getPlayer().addAttachment(serverProvider.getJavaPluginInstance())
+					.setPermission("ultimate_economy.wilderness", false);
 		}
 	}
 
@@ -345,8 +352,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			try {
 				getJobList().add(jobManager.getJobByName(jobName));
 			} catch (GeneralEconomyException e) {
-				logger.warn(
-						"[Ultimate_Economy] Caused by: " + e.getMessage());
+				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}

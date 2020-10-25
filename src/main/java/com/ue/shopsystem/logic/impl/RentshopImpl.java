@@ -13,6 +13,7 @@ import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.EconomyVillager;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
@@ -50,15 +51,16 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * @param configManager
 	 * @param townworldManager
 	 * @param playershopManager
+	 * @param generalValidator
 	 */
 	public RentshopImpl(Location spawnLocation, int size, String shopId, double rentalFee, ShopDao shopDao,
 			ServerProvider serverProvider, CustomSkullService skullService, Logger logger,
 			ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,
-			PlayershopManager playershopManager) {
+			PlayershopManager playershopManager, GeneralEconomyValidationHandler generalValidator) {
 		super("RentShop#" + shopId, null, shopId, spawnLocation, size, shopDao, serverProvider, skullService, logger,
-				validationHandler, ecoPlayerManager, messageWrapper, configManager, townworldManager,
-				playershopManager);
+				validationHandler, ecoPlayerManager, messageWrapper, configManager, townworldManager, playershopManager,
+				generalValidator);
 		setupNewRentshop(rentalFee);
 	}
 
@@ -77,6 +79,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * @param configManager
 	 * @param townworldManager
 	 * @param playershopManager
+	 * @param generalValidator
 	 * @throws TownSystemException
 	 * @throws EconomyPlayerException
 	 * @throws ShopSystemException
@@ -84,10 +87,11 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 */
 	public RentshopImpl(String shopId, ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
 			Logger logger, ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
-			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager, PlayershopManager playershopManager)
+			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,
+			PlayershopManager playershopManager, GeneralEconomyValidationHandler generalValidator)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException, ShopSystemException {
 		super(null, shopId, shopDao, serverProvider, skullService, logger, validationHandler, ecoPlayerManager,
-				messageWrapper, configManager, townworldManager, playershopManager);
+				messageWrapper, configManager, townworldManager, playershopManager, generalValidator);
 		loadExistingRentshop();
 	}
 
@@ -252,8 +256,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	}
 
 	/**
-	 * Overridden, because check for rentable
-	 * is needed. {@inheritDoc}
+	 * Overridden, because check for rentable is needed. {@inheritDoc}
 	 */
 	@Override
 	public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
@@ -266,7 +269,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 		validationHandler.checkForIsRentable(isRentable());
 		// minus 1 because the validator can then prevent, that the duration is 0
-		validationHandler.checkForPositiveValue(duration - 1);
+		generalValidator.checkForPositiveValue(duration - 1);
 		// throws a playerexception, if the player has not enough money.
 		player.decreasePlayerAmount(duration * getRentalFee(), true);
 		changeOwner(player);
@@ -279,7 +282,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
 	@Override
 	public void changeRentalFee(double fee) throws GeneralEconomyException {
-		validationHandler.checkForPositiveValue(fee);
+		generalValidator.checkForPositiveValue(fee);
 		rentalFee = fee;
 		getShopDao().saveRentalFee(fee);
 	}
@@ -319,12 +322,12 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		getShopDao().saveOwner(null);
 		getShopDao().saveRentUntil(0L);
 		changeProfession(Profession.NITWIT);
-		
+
 		setupShopName("RentShop#" + getShopId());
 		changeInventoryNames("RentShop#" + getShopId());
 		getShopVillager().setCustomName("RentShop#" + getShopId());
-		setupStockpile();		
-				
+		setupStockpile();
+
 		rentable = true;
 		getShopDao().saveRentable(true);
 	}

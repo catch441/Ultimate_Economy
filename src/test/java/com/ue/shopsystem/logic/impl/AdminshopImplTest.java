@@ -51,6 +51,7 @@ import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Adminshop;
@@ -80,6 +81,8 @@ public class AdminshopImplTest {
 	ConfigManager configManager;
 	@Mock
 	AdminshopManager adminshopManager;
+	@Mock
+	GeneralEconomyValidationHandler generalValidator;
 
 	private Adminshop createAdminshop() {
 		JavaPlugin plugin = mock(JavaPlugin.class);
@@ -103,13 +106,13 @@ public class AdminshopImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		return new AdminshopImpl("myshop", "A0", loc, 9, shopDao, serverProvider, skullService, logger,
-				adminshopManager, validationHandler, messageWrapper, configManager);
+				adminshopManager, validationHandler, messageWrapper, configManager, generalValidator);
 	}
 
 	@Test
 	public void sellShopItemTestWithInvalidSlot() throws GeneralEconomyException {
 		Adminshop shop = createAdminshop();
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidSlot(-1, 9, 1);
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValidSlot(-1, 8);
 		assertThrows(GeneralEconomyException.class, () -> shop.sellShopItem(-1, 1, null, true));
 	}
 
@@ -152,7 +155,7 @@ public class AdminshopImplTest {
 
 		assertDoesNotThrow(() -> shop.sellShopItem(3, 10, ecoPlayer, true));
 
-		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSlot(3, 9, 1));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(3, 8));
 		assertDoesNotThrow(
 				() -> verify(validationHandler, times(2)).checkForSlotIsNotEmpty(3, shop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerIsOnline(ecoPlayer));
@@ -192,7 +195,7 @@ public class AdminshopImplTest {
 
 		assertDoesNotThrow(() -> shop.sellShopItem(3, 1, ecoPlayer, true));
 
-		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSlot(3, 9, 1));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(3, 8));
 		assertDoesNotThrow(
 				() -> verify(validationHandler, times(2)).checkForSlotIsNotEmpty(3, shop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerIsOnline(ecoPlayer));
@@ -217,7 +220,7 @@ public class AdminshopImplTest {
 
 		assertDoesNotThrow(() -> shop.sellShopItem(3, 1, ecoPlayer, true));
 
-		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSlot(3, 9, 1));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(3, 8));
 		assertDoesNotThrow(
 				() -> verify(validationHandler, times(2)).checkForSlotIsNotEmpty(3, shop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerIsOnline(ecoPlayer));
@@ -256,7 +259,7 @@ public class AdminshopImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(skullInfoItem);
 		Adminshop shop = new AdminshopImpl("myshop", "A0", loc, 9, shopDao, serverProvider, skullService, logger,
-				adminshopManager, validationHandler, messageWrapper, configManager);
+				adminshopManager, validationHandler, messageWrapper, configManager, generalValidator);
 
 		verify(shopDao).setupSavefile("A0");
 		verify(shopDao).saveShopLocation(loc);
@@ -339,7 +342,7 @@ public class AdminshopImplTest {
 		when(inv.getItem(0)).thenReturn(shopItemStack);
 		
 		Adminshop shop = assertDoesNotThrow(() -> new AdminshopImpl(null, "A0", shopDao, serverProvider, skullService,
-				logger, adminshopManager, validationHandler, messageWrapper, configManager));
+				logger, adminshopManager, validationHandler, messageWrapper, configManager, generalValidator));
 
 		verify(editor).setItem(0, filledItem);
 		verify(editor, times(7)).setItem(anyInt(), eq(emptyItem));
@@ -381,7 +384,7 @@ public class AdminshopImplTest {
 		doThrow(e).when(shopDao).changeSavefileName(dataFolder, "A0");
 
 		assertThrows(ShopSystemException.class, () -> new AdminshopImpl("myshop", "A0", shopDao, serverProvider,
-				skullService, logger, adminshopManager, validationHandler, messageWrapper, configManager));
+				skullService, logger, adminshopManager, validationHandler, messageWrapper, configManager, generalValidator));
 
 		verify(logger).warn("[Ultimate_Economy] Failed to change savefile name to new save system");
 		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
@@ -440,7 +443,7 @@ public class AdminshopImplTest {
 		when(plugin.getDataFolder()).thenReturn(dataFolder);
 
 		Adminshop shop = assertDoesNotThrow(() -> new AdminshopImpl("myshop", "A0", shopDao, serverProvider,
-				skullService, logger, adminshopManager, validationHandler, messageWrapper, configManager));
+				skullService, logger, adminshopManager, validationHandler, messageWrapper, configManager, generalValidator));
 
 		verifyNoInteractions(logger);
 		assertDoesNotThrow(() -> verify(shopDao).changeSavefileName(dataFolder, "A0"));
@@ -489,7 +492,7 @@ public class AdminshopImplTest {
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
 		assertDoesNotThrow(() -> shop.addShopItem(0, 1, 2, stack));
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidSlot(9, 9, 1);
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValidSlot(9, 8);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		assertThrows(GeneralEconomyException.class, () -> shop.buyShopItem(9, ecoPlayer, true));
 
@@ -552,7 +555,7 @@ public class AdminshopImplTest {
 
 		assertDoesNotThrow(() -> shop.buyShopItem(3, ecoPlayer, false));
 
-		assertDoesNotThrow(() -> verify(validationHandler, times(1)).checkForValidSlot(3, 9, 1));
+		assertDoesNotThrow(() -> verify(generalValidator, times(1)).checkForValidSlot(3, 8));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerIsOnline(ecoPlayer));
 		assertDoesNotThrow(
 				() -> verify(validationHandler, times(2)).checkForSlotIsNotEmpty(3, shop.getShopInventory(), 1));
@@ -586,7 +589,7 @@ public class AdminshopImplTest {
 
 		assertDoesNotThrow(() -> shop.buyShopItem(3, ecoPlayer, true));
 
-		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSlot(3, 9, 1));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(3, 8));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerIsOnline(ecoPlayer));
 		assertDoesNotThrow(
 				() -> verify(validationHandler, times(2)).checkForSlotIsNotEmpty(3, shop.getShopInventory(), 1));
@@ -620,7 +623,7 @@ public class AdminshopImplTest {
 
 		assertDoesNotThrow(() -> shop.buyShopItem(3, ecoPlayer, true));
 
-		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSlot(3, 9, 1));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(3, 8));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerIsOnline(ecoPlayer));
 		assertDoesNotThrow(
 				() -> verify(validationHandler, times(2)).checkForSlotIsNotEmpty(3, shop.getShopInventory(), 1));
@@ -659,7 +662,7 @@ public class AdminshopImplTest {
 
 		assertDoesNotThrow(() -> shop.buyShopItem(3, ecoPlayer, true));
 
-		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSlot(3, 9, 1));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(3, 8));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerIsOnline(ecoPlayer));
 		assertDoesNotThrow(
 				() -> verify(validationHandler, times(2)).checkForSlotIsNotEmpty(3, shop.getShopInventory(), 1));
@@ -982,7 +985,7 @@ public class AdminshopImplTest {
 		assertDoesNotThrow(() -> shop.removeShopItem(3));
 
 		assertDoesNotThrow(() -> verify(validationHandler).checkForItemCanBeDeleted(3, 9));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSlot(3, 9, 1));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(3, 8));
 		assertDoesNotThrow(
 				() -> verify(validationHandler, times(2)).checkForSlotIsNotEmpty(3, shop.getShopInventory(), 1));
 		verify(shop.getShopInventory()).clear(3);
@@ -1010,7 +1013,7 @@ public class AdminshopImplTest {
 	@Test
 	public void removeItemTestWithInvalidSlot() throws GeneralEconomyException {
 		Adminshop shop = createAdminshop();
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidSlot(-3, 9, 1);
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValidSlot(-3, 8);
 		assertThrows(GeneralEconomyException.class, () -> shop.removeShopItem(-3));
 		verify(shop.getShopInventory(), never()).clear(anyInt());
 	}
@@ -1075,7 +1078,7 @@ public class AdminshopImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		Adminshop shop = new AdminshopImpl("myshop", "A0", loc, 9, shopDao, serverProvider, skullService, logger,
-				adminshopManager, validationHandler, messageWrapper, configManager);
+				adminshopManager, validationHandler, messageWrapper, configManager, generalValidator);
 
 		Inventory invNew = mock(Inventory.class);
 		Inventory editorNew = mock(Inventory.class);
@@ -1110,8 +1113,8 @@ public class AdminshopImplTest {
 	public void changeShopNameTestWithExistingName() throws GeneralEconomyException {
 		Adminshop shop = createAdminshop();
 		when(adminshopManager.getAdminshopNameList()).thenReturn(new ArrayList<>());
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForShopNameIsFree(new ArrayList<>(),
-				"newShop", null);
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueNotInList(new ArrayList<>(),
+				"newShop");
 		assertThrows(GeneralEconomyException.class, () -> shop.changeShopName("newShop"));
 		assertEquals("myshop", shop.getName());
 		verify(shopDao, never()).saveShopName("newShop");
@@ -1155,7 +1158,7 @@ public class AdminshopImplTest {
 		when(serverProvider.createInventory(shop.getShopVillager(), 18, "myshop")).thenReturn(inv);
 		assertDoesNotThrow(() -> shop.changeShopSize(18));
 		verify(shopDao).saveShopSize(18);
-		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(18));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSize(18));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForResizePossible(oldInv, 9, 18, 1));
 		assertEquals(18, shop.getSize());
 		
@@ -1178,7 +1181,7 @@ public class AdminshopImplTest {
 	@Test
 	public void changeShopSizeTestWithInvalidSize() throws GeneralEconomyException {
 		Adminshop shop = createAdminshop();
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidSize(18);
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValidSize(18);
 		assertThrows(GeneralEconomyException.class, () -> shop.changeShopSize(18));
 		assertEquals(9, shop.getSize());
 	}
@@ -1302,12 +1305,12 @@ public class AdminshopImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		AdminshopImpl shop = new AdminshopImpl("myshop", "A0", loc, 9, shopDao, serverProvider, skullService, logger,
-				adminshopManager, validationHandler, messageWrapper, configManager);
+				adminshopManager, validationHandler, messageWrapper, configManager, generalValidator);
 		assertDoesNotThrow(() -> when(validationHandler.isSlotEmpty(0, shop.getShopInventory(), 1)).thenReturn(true));
 
 		assertDoesNotThrow(() -> shop.openSlotEditor(player, 0));
 
-		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSlot(0, 9, 1));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(0, 8));
 		verify(player).openInventory(slotEditor);
 		// verify that the selected slot method is executed
 		assertDoesNotThrow(() -> verify(validationHandler, times(2)).isSlotEmpty(0, shop.getShopInventory(), 1));
@@ -1317,7 +1320,7 @@ public class AdminshopImplTest {
 	public void openSlotEditorTestWithInvalidSlot() throws GeneralEconomyException {
 		Adminshop shop = createAdminshop();
 		Player player = mock(Player.class);
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidSlot(0, 9, 1);
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValidSlot(0, 8);
 		assertThrows(GeneralEconomyException.class, () -> shop.openSlotEditor(player, 0));
 		verify(player, never()).openInventory(any(Inventory.class));
 	}
@@ -1354,7 +1357,7 @@ public class AdminshopImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		Adminshop shop = new AdminshopImpl("myshop", "A0", loc, 9, shopDao, serverProvider, skullService, logger,
-				adminshopManager, validationHandler, messageWrapper, configManager);
+				adminshopManager, validationHandler, messageWrapper, configManager, generalValidator);
 		Player player = mock(Player.class);
 
 		assertDoesNotThrow(() -> shop.openEditor(player));
@@ -1397,7 +1400,7 @@ public class AdminshopImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		Adminshop shop = new AdminshopImpl("myshop", "A0", loc, 9, shopDao, serverProvider, skullService, logger,
-				adminshopManager, validationHandler, messageWrapper, configManager);
+				adminshopManager, validationHandler, messageWrapper, configManager, generalValidator);
 
 		assertEquals(loc, shop.getShopLocation());
 	}

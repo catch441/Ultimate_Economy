@@ -13,8 +13,6 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
-import com.ue.general.impl.GeneralEconomyException;
-import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
@@ -169,14 +167,6 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 	}
 
 	@Override
-	public void checkForTownDoesNotExist(List<String> townNames, String newName) throws GeneralEconomyException {
-		if (townNames.contains(newName)) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
-					newName);
-		}
-	}
-
-	@Override
 	public void checkForChunkIsNotClaimedByThisTown(Map<String, Plot> chunkList, String chunkCoords)
 			throws TownSystemException {
 		if (chunkList.containsKey(chunkCoords)) {
@@ -189,14 +179,6 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 			throws TownSystemException {
 		if (!chunkList.containsKey(chunkCoords)) {
 			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.CHUNK_NOT_CLAIMED_BY_TOWN);
-		}
-	}
-
-	@Override
-	public void checkForPositiveAmount(double amount) throws GeneralEconomyException {
-		if (amount < 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					amount);
 		}
 	}
 
@@ -249,13 +231,6 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 	public void checkForChunkIsFree(Townworld townworld, Location location) throws TownSystemException {
 		if (!townworld.isChunkFree(location.getChunk())) {
 			throw new TownSystemException(messageWrapper, TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED);
-		}
-	}
-
-	@Override
-	public void checkForTownworldHasTown(List<String> townNames, String town) throws GeneralEconomyException {
-		if (!townNames.contains(town)) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, town);
 		}
 	}
 

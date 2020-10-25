@@ -15,6 +15,7 @@ import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.shopsystem.logic.api.Playershop;
@@ -30,20 +31,23 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 	private final MessageWrapper messageWrapper;
 	private final ConfigManager configManager;
 	private final TownworldManager townworldManager;
+	private final GeneralEconomyValidationHandler generalValiator;
 
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param generalValiator
 	 * @param townworldManager
 	 * @param configManager
 	 * @param messageWrapper
 	 */
 	@Inject
-	public ShopValidationHandlerImpl(TownworldManager townworldManager, ConfigManager configManager,
-			MessageWrapper messageWrapper) {
+	public ShopValidationHandlerImpl(GeneralEconomyValidationHandler generalValiator, TownworldManager townworldManager,
+			ConfigManager configManager, MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
 		this.configManager = configManager;
 		this.townworldManager = townworldManager;
+		this.generalValiator = generalValiator;
 	}
 
 	@Override
@@ -79,7 +83,7 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 
 	@Override
 	public boolean isSlotEmpty(int slot, Inventory inventory, int reservedSlots) throws GeneralEconomyException {
-		checkForValidSlot(slot, inventory.getSize(), reservedSlots);
+		generalValiator.checkForValidSlot(slot, inventory.getSize() - reservedSlots);
 		boolean isEmpty = false;
 		if (inventory.getItem(slot) == null || inventory.getItem(slot).getType() == Material.AIR) {
 			isEmpty = true;
@@ -104,27 +108,10 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 	}
 
 	@Override
-	public void checkForValidSize(int size) throws GeneralEconomyException {
-		if (size % 9 != 0 || size > 54) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					size);
-		}
-	}
-
-	@Override
-	public void checkForValidSlot(int slot, int size, int reservedSlots) throws GeneralEconomyException {
-		if (slot > (size - 1 - reservedSlots) || slot < 0) {
-			// +1 for player readable style
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					slot + 1);
-		}
-	}
-
-	@Override
 	public void checkForResizePossible(Inventory inventory, int oldSize, int newSize, int reservedSlots)
 			throws ShopSystemException, GeneralEconomyException {
 		int diff = oldSize - newSize;
-		checkForValidSize(newSize);
+		generalValiator.checkForValidSize(newSize);
 		if (oldSize > newSize) {
 			for (int i = 1; i <= diff; i++) {
 				ItemStack stack = inventory.getItem(oldSize - i - reservedSlots);
@@ -148,14 +135,6 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 	public void checkForItemCanBeDeleted(int slot, int size) throws ShopSystemException {
 		if ((slot + 1) == size) {
 			throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.ITEM_CANNOT_BE_DELETED);
-		}
-	}
-
-	@Override
-	public void checkForPositiveValue(double value) throws GeneralEconomyException {
-		if (value < 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					value);
 		}
 	}
 
@@ -204,7 +183,8 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 			Town town = townworld.getTownByChunk(location.getChunk());
 			if (!town.hasBuildPermissions(owner,
 					town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
-				throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
+				throw new EconomyPlayerException(messageWrapper,
+						EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
 			}
 		}
 	}

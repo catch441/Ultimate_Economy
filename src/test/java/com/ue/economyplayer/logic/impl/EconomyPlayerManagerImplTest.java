@@ -27,6 +27,7 @@ import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsystem.logic.api.JobManager;
@@ -52,6 +53,8 @@ public class EconomyPlayerManagerImplTest {
 	Lazy<JobManager> jobManager;
 	@Mock
 	ServerProvider serverProvider;
+	@Mock
+	GeneralEconomyValidationHandler generalValidator;
 
 	@Test
 	public void createEconomyPlayerTest() {
@@ -62,12 +65,12 @@ public class EconomyPlayerManagerImplTest {
 		assertDoesNotThrow(() -> ecoPlayerManager.createEconomyPlayer("catch441"));
 		assertEquals(1, ecoPlayerManager.getAllEconomyPlayers().size());
 		assertEquals("catch441", ecoPlayerManager.getAllEconomyPlayers().get(0).getName());
-		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerDoesNotExist(new ArrayList<>(), "catch441"));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValueNotInList(new ArrayList<>(), "catch441"));
 	}
 
 	@Test
 	public void createEconomyPlayerTestWithExistingName() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForPlayerDoesNotExist(new ArrayList<>(),
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueNotInList(new ArrayList<>(),
 				"catch441");
 		assertThrows(GeneralEconomyException.class, () -> ecoPlayerManager.createEconomyPlayer("catch441"));
 		assertEquals(0, ecoPlayerManager.getAllEconomyPlayers().size());

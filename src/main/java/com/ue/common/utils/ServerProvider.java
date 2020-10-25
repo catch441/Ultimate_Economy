@@ -2,7 +2,6 @@ package com.ue.common.utils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -117,7 +116,7 @@ public class ServerProvider {
 	 * @return time in ms
 	 */
 	public long getActualTime() {
-		return Calendar.getInstance().getTimeInMillis();
+		return System.currentTimeMillis();
 	}
 
 	/**

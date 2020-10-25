@@ -15,6 +15,7 @@ import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
@@ -33,6 +34,7 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobsystemValidationHandler validationHandler;
+	private final GeneralEconomyValidationHandler generalValidator;
 	// lazy because of circulating dependency, cannot resolved with refactoring
 	// the object will never be created, thats just fine, because it is only used
 	// during load jobcenter jobs and not during runtime
@@ -50,11 +52,12 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	 * @param ecoPlayerManager
 	 * @param messageWrapper
 	 * @param logger
+	 * @param generalValidator
 	 */
 	@Inject
 	public JobcenterManagerImpl(ConfigDao configDao, Lazy<JobManager> jobManager, ServerProvider serverProvider,
 			JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
-			MessageWrapper messageWrapper, Logger logger) {
+			MessageWrapper messageWrapper, Logger logger, GeneralEconomyValidationHandler generalValidator) {
 		this.logger = logger;
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerManager = ecoPlayerManager;
@@ -62,6 +65,7 @@ public class JobcenterManagerImpl implements JobcenterManager {
 		this.serverProvider = serverProvider;
 		this.jobManager = jobManager;
 		this.configDao = configDao;
+		this.generalValidator = generalValidator;
 	}
 
 	@Override
@@ -125,12 +129,12 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	@Override
 	public void createJobcenter(String name, Location spawnLocation, int size)
 			throws JobSystemException, GeneralEconomyException {
-		validationHandler.checkForJobcenterNameDoesNotExist(getJobcenterNameList(), name);
-		validationHandler.checkForValidSize(size);
+		generalValidator.checkForValueNotInList(getJobcenterNameList(), name);
+		generalValidator.checkForValidSize(size);
 		JobcenterDao jobcenterDao = serverProvider.getServiceComponent().getJobcenterDao();
 		Logger logger = LoggerFactory.getLogger(JobcenterImpl.class);
-		getJobcenterList().add(new JobcenterImpl(logger, jobcenterDao, jobManager.get(), this, ecoPlayerManager, validationHandler,
-				serverProvider, name, spawnLocation, size));
+		getJobcenterList().add(new JobcenterImpl(logger, jobcenterDao, jobManager.get(), this, ecoPlayerManager,
+				validationHandler, serverProvider, name, spawnLocation, size, generalValidator));
 		configDao.saveJobcenterList(getJobcenterNameList());
 	}
 
@@ -139,8 +143,8 @@ public class JobcenterManagerImpl implements JobcenterManager {
 		for (String jobCenterName : configDao.loadJobcenterList()) {
 			JobcenterDao jobcenterDao = serverProvider.getServiceComponent().getJobcenterDao();
 			Logger logger = LoggerFactory.getLogger(JobcenterImpl.class);
-			getJobcenterList().add(new JobcenterImpl(logger, jobcenterDao, jobManager.get(), this, ecoPlayerManager, validationHandler,
-					serverProvider, jobCenterName));
+			getJobcenterList().add(new JobcenterImpl(logger, jobcenterDao, jobManager.get(), this, ecoPlayerManager,
+					validationHandler, serverProvider, jobCenterName, generalValidator));
 		}
 	}
 

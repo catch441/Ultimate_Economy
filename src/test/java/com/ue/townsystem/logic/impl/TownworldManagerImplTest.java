@@ -49,6 +49,7 @@ import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.townsystem.dataaccess.api.TownworldDao;
@@ -77,6 +78,8 @@ public class TownworldManagerImplTest {
 	EconomyPlayerValidationHandler ecoPlayerValidationHandler;
 	@Mock
 	ConfigDao configDao;
+	@Mock
+	GeneralEconomyValidationHandler generalValidator;
 
 	@Test
 	public void createTownWorldTestWithWorldDoesNotExist() throws TownSystemException {

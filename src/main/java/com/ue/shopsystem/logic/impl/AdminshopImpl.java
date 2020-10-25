@@ -12,6 +12,7 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.EconomyVillager;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
@@ -42,13 +43,14 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 * @param validationHandler
 	 * @param messageWrapper
 	 * @param configManager
+	 * @param generalValidator
 	 */
 	public AdminshopImpl(String name, String shopId, Location spawnLocation, int size, ShopDao shopDao,
 			ServerProvider serverProvider, CustomSkullService skullService, Logger logger,
 			AdminshopManager adminshopManager, ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
-			ConfigManager configManager) {
+			ConfigManager configManager, GeneralEconomyValidationHandler generalValidator) {
 		super(name, shopId, spawnLocation, size, shopDao, serverProvider, skullService, logger, validationHandler,
-				messageWrapper, configManager);
+				messageWrapper, configManager, generalValidator);
 		this.adminshopManager = adminshopManager;
 		getShopVillager().setMetadata("ue-type",
 				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.ADMINSHOP));
@@ -68,15 +70,16 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 * @param validationHandler
 	 * @param messageWrapper
 	 * @param configManager
+	 * @param generalValidator
 	 * @throws TownSystemException
-	 * @throws ShopSystemException 
+	 * @throws ShopSystemException
 	 */
 	public AdminshopImpl(String name, String shopId, ShopDao shopDao, ServerProvider serverProvider,
 			CustomSkullService skullService, Logger logger, AdminshopManager adminshopManager,
-			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ConfigManager configManager)
-			throws TownSystemException, ShopSystemException {
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ConfigManager configManager,
+			GeneralEconomyValidationHandler generalValidator) throws TownSystemException, ShopSystemException {
 		super(name, shopId, shopDao, serverProvider, skullService, logger, validationHandler, messageWrapper,
-				configManager);
+				configManager, generalValidator);
 		this.adminshopManager = adminshopManager;
 		getShopVillager().setMetadata("ue-type",
 				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.ADMINSHOP));
@@ -84,7 +87,7 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 
 	@Override
 	public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
-		validationHandler.checkForShopNameIsFree(adminshopManager.getAdminshopNameList(), name, null);
+		generalValidator.checkForValueNotInList(adminshopManager.getAdminshopNameList(), name);
 		validationHandler.checkForValidShopName(name);
 		setName(name);
 		getShopDao().saveShopName(name);
@@ -98,7 +101,7 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	@Override
 	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
 			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
-		validationHandler.checkForValidSlot(slot, getSize(), 1);
+		generalValidator.checkForValidSlot(slot, getSize() - 1);
 		validationHandler.checkForPlayerIsOnline(ecoPlayer);
 		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
 		validationHandler.checkForPlayerInventoryNotFull(ecoPlayer.getPlayer().getInventory());

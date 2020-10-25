@@ -16,6 +16,7 @@ import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsystem.logic.api.JobManager;
@@ -27,6 +28,7 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	private final EconomyPlayerDao ecoPlayerDao;
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerValidationHandler validationHandler;
+	private final GeneralEconomyValidationHandler generalValidator;
 	private final BankManager bankManager;
 	private final ConfigManager configManager;
 	// lazy because of circulating dependency, cannot resolved with refactoring
@@ -39,6 +41,7 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param generalValidator
 	 * @param ecoPlayerDao
 	 * @param messageWrapper
 	 * @param validationHandler
@@ -48,9 +51,9 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	 * @param serverProvider
 	 */
 	@Inject
-	public EconomyPlayerManagerImpl(EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper,
-			EconomyPlayerValidationHandler validationHandler, BankManager bankManager, ConfigManager configManager,
-			Lazy<JobManager> jobManager, ServerProvider serverProvider) {
+	public EconomyPlayerManagerImpl(GeneralEconomyValidationHandler generalValidator, EconomyPlayerDao ecoPlayerDao,
+			MessageWrapper messageWrapper, EconomyPlayerValidationHandler validationHandler, BankManager bankManager,
+			ConfigManager configManager, Lazy<JobManager> jobManager, ServerProvider serverProvider) {
 		this.ecoPlayerDao = ecoPlayerDao;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
@@ -58,6 +61,7 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 		this.configManager = configManager;
 		this.jobManager = jobManager;
 		this.serverProvider = serverProvider;
+		this.generalValidator = generalValidator;
 	}
 
 	@Override
@@ -86,11 +90,11 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 
 	@Override
 	public void createEconomyPlayer(String playerName) throws GeneralEconomyException {
-		validationHandler.checkForPlayerDoesNotExist(getEconomyPlayerNameList(), playerName);
+		generalValidator.checkForValueNotInList(getEconomyPlayerNameList(), playerName);
 		Logger logger = LoggerFactory.getLogger(EconomyPlayerImpl.class);
-		getAllEconomyPlayers().add(new EconomyPlayerImpl(logger, serverProvider, validationHandler, ecoPlayerDao,
-				messageWrapper, configManager, bankManager, jobManager.get(), serverProvider.getPlayer(playerName),
-				playerName, true));
+		getAllEconomyPlayers().add(new EconomyPlayerImpl(generalValidator, logger, serverProvider, validationHandler,
+				ecoPlayerDao, messageWrapper, configManager, bankManager, jobManager.get(),
+				serverProvider.getPlayer(playerName), playerName, true));
 	}
 
 	@Override
@@ -106,9 +110,9 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 		List<String> playerList = ecoPlayerDao.loadPlayerList();
 		for (String player : playerList) {
 			Logger logger = LoggerFactory.getLogger(EconomyPlayerImpl.class);
-			getAllEconomyPlayers().add(new EconomyPlayerImpl(logger, serverProvider, validationHandler, ecoPlayerDao,
-					messageWrapper, configManager, bankManager, jobManager.get(), serverProvider.getPlayer(player),
-					player, false));
+			getAllEconomyPlayers().add(new EconomyPlayerImpl(generalValidator, logger, serverProvider,
+					validationHandler, ecoPlayerDao, messageWrapper, configManager, bankManager, jobManager.get(),
+					serverProvider.getPlayer(player), player, false));
 		}
 	}
 }

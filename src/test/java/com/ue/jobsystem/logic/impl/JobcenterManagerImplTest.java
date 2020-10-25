@@ -42,6 +42,7 @@ import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
@@ -71,6 +72,8 @@ public class JobcenterManagerImplTest {
 	ConfigDao configDao;
 	@Mock
 	Logger logger;
+	@Mock
+	GeneralEconomyValidationHandler generalValidator;
 
 	@Test
 	public void getJobcenterByNameTest() {
@@ -223,8 +226,7 @@ public class JobcenterManagerImplTest {
 
 	@Test
 	public void createJobcenterTestWithAlreadyExists() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(validationHandler)
-				.checkForJobcenterNameDoesNotExist(new ArrayList<>(), "center");
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueNotInList(new ArrayList<>(), "center");
 		assertThrows(GeneralEconomyException.class, () -> manager.createJobcenter("center", null, 9));
 		assertEquals(0, manager.getJobcenterList().size());
 		verify(configDao, never()).saveJobcenterList(anyList());
@@ -232,7 +234,7 @@ public class JobcenterManagerImplTest {
 
 	@Test
 	public void createJobcenterTestWithInvalidSize() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidSize(9);
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValidSize(9);
 		assertThrows(GeneralEconomyException.class, () -> manager.createJobcenter("center", null, 9));
 		assertEquals(0, manager.getJobcenterList().size());
 		verify(configDao, never()).saveJobcenterList(anyList());
@@ -242,8 +244,8 @@ public class JobcenterManagerImplTest {
 	public void createJobcenterTest() {
 		createJobcenter("center");
 		assertDoesNotThrow(
-				() -> verify(validationHandler).checkForJobcenterNameDoesNotExist(new ArrayList<>(), "center"));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(9));
+				() -> verify(generalValidator).checkForValueNotInList(new ArrayList<>(), "center"));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSize(9));
 		verify(configDao).saveJobcenterList(Arrays.asList("center"));
 		Jobcenter center = manager.getJobcenterList().get(0);
 		assertEquals("center", center.getName());

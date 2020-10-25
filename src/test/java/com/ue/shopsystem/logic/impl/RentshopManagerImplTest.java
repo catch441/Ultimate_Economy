@@ -41,6 +41,7 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
 import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
@@ -67,6 +68,8 @@ public class RentshopManagerImplTest {
 	ConfigDao configDao;
 	@Mock
 	PlayershopManager playershopManager;
+	@Mock
+	GeneralEconomyValidationHandler generalValidator;
 	
 	@Test
 	public void setupRentDailyTaskTest() {
@@ -226,7 +229,7 @@ public class RentshopManagerImplTest {
 
 	@Test
 	public void createRentshopTestWithInvalidSize() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidSize(5);
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValidSize(5);
 		assertThrows(GeneralEconomyException.class, () -> rentshopManager.createRentShop(null, 5, 2.5));
 		assertEquals(0, rentshopManager.getRentShops().size());
 		verifyNoInteractions(configDao);
@@ -234,7 +237,7 @@ public class RentshopManagerImplTest {
 
 	@Test
 	public void createRentshopTestWithInvalidRentalFee() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForPositiveValue(-2.5);
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForPositiveValue(-2.5);
 		assertThrows(GeneralEconomyException.class, () -> rentshopManager.createRentShop(null, 9, -2.5));
 		assertEquals(0, rentshopManager.getRentShops().size());
 		verifyNoInteractions(configDao);
@@ -265,8 +268,8 @@ public class RentshopManagerImplTest {
 		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		assertDoesNotThrow(() -> rentshopManager.createRentShop(loc, 9, 2.5));
 		
-		assertDoesNotThrow(() -> verify(validationHandler).checkForPositiveValue(2.5));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(9));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForPositiveValue(2.5));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSize(9));
 		verify(configDao).saveRentshopIds(anyList());
 		assertEquals(1, rentshopManager.getRentShops().size());
 		Rentshop shop = rentshopManager.getRentShops().get(0);

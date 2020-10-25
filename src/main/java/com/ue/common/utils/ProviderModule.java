@@ -31,6 +31,8 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerEventHandlerImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerTabCompleterImpl;
 import com.ue.economyplayer.logic.impl.EconomyPlayerValidationHandlerImpl;
+import com.ue.general.api.GeneralEconomyValidationHandler;
+import com.ue.general.impl.GeneralEconomyValidationHandlerImpl;
 import com.ue.general.impl.PluginImpl;
 import com.ue.general.impl.UltimateEconomy;
 import com.ue.jobsyste.dataaccess.api.JobDao;
@@ -386,6 +388,12 @@ public class ProviderModule {
 	@Provides
 	BankValidationHandler provideBankValidationHandler(BankValidationHandlerImpl bankValidator) {
 		return bankValidator;
+	}
+	
+	@Singleton
+	@Provides
+	GeneralEconomyValidationHandler provideEconomyValidationHandler(GeneralEconomyValidationHandlerImpl validator) {
+		return validator;
 	}
 
 	@Singleton

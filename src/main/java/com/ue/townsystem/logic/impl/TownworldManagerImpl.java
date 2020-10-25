@@ -23,6 +23,7 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.townsystem.dataaccess.api.TownworldDao;
@@ -37,6 +38,7 @@ public class TownworldManagerImpl implements TownworldManager {
 	private final MessageWrapper messageWrapper;
 	private final ServerProvider serverProvider;
 	private final TownsystemValidationHandler townsystemValidationHandler;
+	private final GeneralEconomyValidationHandler generalValidator;
 	private final Logger logger;
 	private final BankManager bankManager;
 	private final EconomyPlayerValidationHandler ecoPlayerValidationHandler;
@@ -56,12 +58,13 @@ public class TownworldManagerImpl implements TownworldManager {
 	 * @param townsystemValidationHandler
 	 * @param serverProvider
 	 * @param logger
+	 * @param generalValidator
 	 */
 	@Inject
-	public TownworldManagerImpl(ConfigDao configDao,
-			EconomyPlayerValidationHandler ecoPlayerValidationHandler, BankManager bankManager,
-			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
-			TownsystemValidationHandler townsystemValidationHandler, ServerProvider serverProvider, Logger logger) {
+	public TownworldManagerImpl(ConfigDao configDao, EconomyPlayerValidationHandler ecoPlayerValidationHandler,
+			BankManager bankManager, EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
+			TownsystemValidationHandler townsystemValidationHandler, ServerProvider serverProvider, Logger logger,
+			GeneralEconomyValidationHandler generalValidator) {
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.townsystemValidationHandler = townsystemValidationHandler;
 		this.messageWrapper = messageWrapper;
@@ -70,6 +73,7 @@ public class TownworldManagerImpl implements TownworldManager {
 		this.serverProvider = serverProvider;
 		this.logger = logger;
 		this.configDao = configDao;
+		this.generalValidator = generalValidator;
 	}
 
 	protected void setTownNameList(List<String> townNameList) {
@@ -166,8 +170,9 @@ public class TownworldManagerImpl implements TownworldManager {
 		Logger logger = LoggerFactory.getLogger(Townworld.class);
 		TownworldDao townworldDao = serverProvider.getServiceComponent().getTownworldDao();
 		townworldDao.setupSavefile(world);
-		townWorldList.put(world, new TownworldImpl(world, true, townworldDao, townsystemValidationHandler,
-				ecoPlayerValidationHandler, this, messageWrapper, bankManager, logger, serverProvider));
+		townWorldList.put(world,
+				new TownworldImpl(world, true, townworldDao, townsystemValidationHandler, ecoPlayerValidationHandler,
+						this, messageWrapper, bankManager, logger, serverProvider, generalValidator));
 		configDao.saveTownworldNamesList(getTownWorldNameList());
 	}
 
@@ -187,7 +192,8 @@ public class TownworldManagerImpl implements TownworldManager {
 			TownworldDao townworldDao = serverProvider.getServiceComponent().getTownworldDao();
 			townworldDao.setupSavefile(townWorldName);
 			Townworld townworld = new TownworldImpl(townWorldName, false, townworldDao, townsystemValidationHandler,
-					ecoPlayerValidationHandler, this, messageWrapper, bankManager, logger, serverProvider);
+					ecoPlayerValidationHandler, this, messageWrapper, bankManager, logger, serverProvider,
+					generalValidator);
 			townNameList.addAll(townworld.getTownNameList());
 			townWorldList.put(townWorldName, townworld);
 		}

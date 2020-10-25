@@ -9,11 +9,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.bukkit.Location;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.general.impl.GeneralEconomyException;
-import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsystem.logic.api.Job;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,25 +68,6 @@ public class EconomyPlayerValidationHandlerImplTest {
 	}
 
 	@Test
-	public void checkForExistingHomeTestFail() {
-		try {
-			validationHandler.checkForExistingHome(new HashMap<>(), "myhome1");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals("myhome1", e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForExistingHomeTestSuccess() {
-		Map<String, Location> homes = new HashMap<>();
-		homes.put("myhome2", null);
-		assertDoesNotThrow(() -> validationHandler.checkForExistingHome(homes, "myhome2"));
-	}
-
-	@Test
 	public void checkForNotReachedMaxHomesTestSuccess() {
 		assertDoesNotThrow(() -> validationHandler.checkForNotReachedMaxHomes(false));
 	}
@@ -103,26 +80,6 @@ public class EconomyPlayerValidationHandlerImplTest {
 		} catch (EconomyPlayerException e) {
 			assertEquals(0, e.getParams().length);
 			assertEquals(EconomyPlayerExceptionMessageEnum.MAX_REACHED, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForNotExistingHomeTestSuccess() {
-		Map<String, Location> homes = new HashMap<>();
-		assertDoesNotThrow(() -> validationHandler.checkForNotExistingHome(homes, "myhome1"));
-	}
-
-	@Test
-	public void checkForNotExistingHomeTestFail() {
-		try {
-			Map<String, Location> homes = new HashMap<>();
-			homes.put("myhome1", null);
-			validationHandler.checkForNotExistingHome(homes, "myhome1");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals("myhome1", e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, e.getKey());
 		}
 	}
 
@@ -229,23 +186,6 @@ public class EconomyPlayerValidationHandlerImplTest {
 		} catch (EconomyPlayerException e) {
 			assertEquals(0, e.getParams().length);
 			assertEquals(EconomyPlayerExceptionMessageEnum.MAX_REACHED, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForPlayerDoesNotExistTestSuccess() {
-		assertDoesNotThrow(() -> validationHandler.checkForPlayerDoesNotExist(new ArrayList<>(), "catch441"));
-	}
-
-	@Test
-	public void checkForPlayerDoesNotExistTestFail() {
-		try {
-			validationHandler.checkForPlayerDoesNotExist(Arrays.asList("catch441"), "catch441");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals("catch441", e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, e.getKey());
 		}
 	}
 }

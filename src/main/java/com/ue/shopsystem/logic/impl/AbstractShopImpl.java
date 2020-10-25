@@ -28,6 +28,7 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.AbstractShop;
@@ -45,6 +46,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	protected final MessageWrapper messageWrapper;
 	protected final ConfigManager configManager;
 	protected final ShopValidationHandler validationHandler;
+	protected final GeneralEconomyValidationHandler generalValidator;
 	private Villager villager;
 	private Location location;
 	private Inventory shopInventory;
@@ -71,10 +73,12 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 * @param validationHandler
 	 * @param messageWrapper
 	 * @param configManager
+	 * @param generalValidator
 	 */
 	public AbstractShopImpl(String name, String shopId, Location spawnLocation, int size, ShopDao shopDao,
 			ServerProvider serverProvider, CustomSkullService skullService, Logger logger,
-			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ConfigManager configManager) {
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ConfigManager configManager,
+			GeneralEconomyValidationHandler generalValidator) {
 		this.shopDao = shopDao;
 		this.serverProvider = serverProvider;
 		this.skullService = skullService;
@@ -82,6 +86,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		this.validationHandler = validationHandler;
 		this.messageWrapper = messageWrapper;
 		this.configManager = configManager;
+		this.generalValidator = generalValidator;
 		shopDao.setupSavefile(shopId);
 		setupNewShop(name, shopId, spawnLocation, size);
 		slotEditorHandler = new ShopSlotEditorHandlerImpl(serverProvider, messageWrapper, validationHandler,
@@ -103,12 +108,14 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 * @param validationHandler
 	 * @param messageWrapper
 	 * @param configManager
+	 * @param generalValidator
 	 * @throws TownSystemException
-	 * @throws ShopSystemException 
+	 * @throws ShopSystemException
 	 */
 	public AbstractShopImpl(String name, String shopId, ShopDao shopDao, ServerProvider serverProvider,
 			CustomSkullService skullService, Logger logger, ShopValidationHandler validationHandler,
-			MessageWrapper messageWrapper, ConfigManager configManager) throws TownSystemException, ShopSystemException {
+			MessageWrapper messageWrapper, ConfigManager configManager,
+			GeneralEconomyValidationHandler generalValidator) throws TownSystemException, ShopSystemException {
 		this.shopDao = shopDao;
 		this.serverProvider = serverProvider;
 		this.skullService = skullService;
@@ -116,6 +123,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		this.validationHandler = validationHandler;
 		this.messageWrapper = messageWrapper;
 		this.configManager = configManager;
+		this.generalValidator = generalValidator;
 		shopDao.setupSavefile(shopId);
 		if (name != null) {
 			loadExistingShopOld(name, shopId);
@@ -189,7 +197,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	@Override
 	public void changeShopSize(int newSize)
 			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
-		validationHandler.checkForValidSize(newSize);
+		generalValidator.checkForValidSize(newSize);
 		validationHandler.checkForResizePossible(getShopInventory(), getSize(), newSize, 1);
 		setSize(newSize);
 		getShopDao().saveShopSize(newSize);
@@ -251,7 +259,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	@Override
 	public void removeShopItem(int slot) throws ShopSystemException, GeneralEconomyException {
 		validationHandler.checkForItemCanBeDeleted(slot, getSize());
-		validationHandler.checkForValidSlot(slot, getSize(), 1);
+		generalValidator.checkForValidSlot(slot, getSize() - 1);
 		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
 		ShopItem shopItem = getShopItem(slot);
 		getShopInventory().clear(slot);
@@ -267,7 +275,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	@Override
 	public void sellShopItem(int slot, int amount, EconomyPlayer ecoPlayer, boolean sendMessage)
 			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
-		validationHandler.checkForValidSlot(slot, getSize(), 1);
+		generalValidator.checkForValidSlot(slot, getSize() - 1);
 		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
 		validationHandler.checkForPlayerIsOnline(ecoPlayer);
 		ShopItem shopItem = getShopItem(slot);
@@ -288,7 +296,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	@Override
 	public void openSlotEditor(Player player, int slot) throws ShopSystemException, GeneralEconomyException {
-		validationHandler.checkForValidSlot(slot, getSize(), 1);
+		generalValidator.checkForValidSlot(slot, getSize() - 1);
 		getSlotEditorHandler().setSelectedSlot(slot);
 		player.openInventory(getSlotEditorHandler().getSlotEditorInventory());
 	}
@@ -518,7 +526,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		getShopVillager().setSilent(true);
 		getShopVillager().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
 		getShopVillager().setVillagerLevel(2);
-		getShopVillager().setMetadata("ue-id", new FixedMetadataValue(serverProvider.getJavaPluginInstance(), getShopId()));
+		getShopVillager().setMetadata("ue-id",
+				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), getShopId()));
 		getShopVillager().setCollidable(false);
 		getShopVillager().setInvulnerable(true);
 		getShopVillager().setProfession(Profession.NITWIT);
@@ -565,7 +574,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	@SuppressWarnings("deprecation")
 	protected void loadShopItem(String itemString) {
-		if(!getShopDao().removeIfCorrupted(itemString)) {
+		if (!getShopDao().removeIfCorrupted(itemString)) {
 			ShopItem shopItem = getShopDao().loadItem(itemString);
 			shopItems.put(shopItem.getSlot(), shopItem);
 			addShopItemToInv(shopItem.getItemStack(), shopItem.getAmount(), shopItem.getSlot(), shopItem.getSellPrice(),

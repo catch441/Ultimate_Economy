@@ -86,24 +86,6 @@ public interface ShopValidationHandler {
 	public void checkForValidPrice(String price) throws GeneralEconomyException;
 	
 	/**
-	 * Check for a valid inventory size.
-	 * 
-	 * @param size
-	 * @throws GeneralEconomyException
-	 */
-	public void checkForValidSize(int size) throws GeneralEconomyException;
-	
-	/**
-	 * Check for a valid slot.
-	 * 
-	 * @param slot
-	 * @param size
-	 * @param reservedSlots
-	 * @throws GeneralEconomyException
-	 */
-	public void checkForValidSlot(int slot, int size, int reservedSlots) throws GeneralEconomyException;
-	
-	/**
 	 * Check for resize is possible.
 	 * 
 	 * @param inventory
@@ -133,14 +115,6 @@ public interface ShopValidationHandler {
 	 * @throws ShopSystemException
 	 */
 	public void checkForItemCanBeDeleted(int slot, int size) throws ShopSystemException;
-	
-	/**
-	 * Check for positive value.
-	 * 
-	 * @param value
-	 * @throws GeneralEconomyException
-	 */
-	public void checkForPositiveValue(double value) throws GeneralEconomyException;
 	
 	/**
 	 * Check for valid stock decrease.

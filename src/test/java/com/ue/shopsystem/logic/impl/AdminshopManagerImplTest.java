@@ -41,6 +41,7 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
 import com.ue.config.dataaccess.api.ConfigDao;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
@@ -66,10 +67,12 @@ public class AdminshopManagerImplTest {
 	CustomSkullService skullService;
 	@Mock
 	ConfigDao configDao;
+	@Mock
+	GeneralEconomyValidationHandler generalValidator;
 
 	@Test
 	public void createNewAdminshopTestWithInvalidSize() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForValidSize(5);
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValidSize(5);
 		assertThrows(GeneralEconomyException.class, () -> adminshopManager.createAdminShop("myshop", null, 5));
 		assertEquals(0, adminshopManager.getAdminshopList().size());
 		verifyNoInteractions(configDao);
@@ -77,8 +80,7 @@ public class AdminshopManagerImplTest {
 
 	@Test
 	public void createNewAdminshopTestWithExistingName() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForShopNameIsFree(anyList(), eq("my_shop"),
-				eq(null));
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueNotInList(anyList(), eq("my_shop"));
 		assertThrows(GeneralEconomyException.class, () -> adminshopManager.createAdminShop("my_shop", null, 5));
 		assertEquals(0, adminshopManager.getAdminshopList().size());
 		verifyNoInteractions(configDao);
@@ -117,8 +119,8 @@ public class AdminshopManagerImplTest {
 		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
 		assertDoesNotThrow(() -> adminshopManager.createAdminShop("myshop", loc, 9));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidShopName("myshop"));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(9));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForShopNameIsFree(anyList(), eq("myshop"), eq(null)));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSize(9));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValueNotInList(anyList(), eq("myshop")));
 		verify(configDao).saveAdminshopIds(anyList());
 		assertEquals(1, adminshopManager.getAdminshopList().size());
 		Adminshop shop = adminshopManager.getAdminshopList().get(0);

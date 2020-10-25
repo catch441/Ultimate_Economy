@@ -1,9 +1,6 @@
 package com.ue.economyplayer.logic.api;
 
 import java.util.List;
-import java.util.Map;
-
-import org.bukkit.Location;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
@@ -32,15 +29,6 @@ public interface EconomyPlayerValidationHandler {
 	 * @throws EconomyPlayerException
 	 */
 	public void checkForJoinedTown(List<String> joinedTowns, String townName) throws EconomyPlayerException;
-	
-	/**
-	 * Check for homes does not exist.
-	 * 
-	 * @param homeList
-	 * @param homeName
-	 * @throws GeneralEconomyException
-	 */
-	public void checkForNotExistingHome(Map<String, Location> homeList, String homeName) throws GeneralEconomyException;
 	
 	/**
 	 * Check for town not joined.
@@ -78,15 +66,6 @@ public interface EconomyPlayerValidationHandler {
 	public void checkForNotReachedMaxHomes(boolean reachedMaxHomes) throws EconomyPlayerException;
 	
 	/**
-	 * Check for home exists.
-	 * 
-	 * @param homeList
-	 * @param homeName
-	 * @throws GeneralEconomyException
-	 */
-	public void checkForExistingHome(Map<String, Location> homeList, String homeName) throws GeneralEconomyException;
-	
-	/**
 	 * Check for not reached may joined towns.
 	 * 
 	 * @param reachedMaxJoinedTowns
@@ -101,12 +80,4 @@ public interface EconomyPlayerValidationHandler {
 	 * @throws EconomyPlayerException
 	 */
 	public void checkForNotReachedMaxJoinedJobs(boolean reachedMaxJoinedJobs) throws EconomyPlayerException;
-	
-	/**
-	 * Check for player does not exist.
-	 * @param playerNameList
-	 * @param playerName
-	 * @throws GeneralEconomyException
-	 */
-	public void checkForPlayerDoesNotExist(List<String> playerNameList, String playerName) throws GeneralEconomyException;
 }

@@ -26,6 +26,7 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.EconomyVillager;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsyste.dataaccess.api.JobcenterDao;
@@ -42,6 +43,7 @@ public class JobcenterImpl implements Jobcenter {
 	private final JobcenterManager jobcenterManager;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobsystemValidationHandler validationHandler;
+	private final GeneralEconomyValidationHandler generalValidator;
 	private final JobcenterDao jobcenterDao;
 	private final ServerProvider serverProvider;
 	private Villager villager;
@@ -64,12 +66,14 @@ public class JobcenterImpl implements Jobcenter {
 	 * @param name
 	 * @param spawnLocation
 	 * @param size
+	 * @param generalValidator
 	 * @throws JobSystemException
 	 */
 	public JobcenterImpl(Logger logger, JobcenterDao jobcenterDao, JobManager jobManager,
 			JobcenterManager jobcenterManager, EconomyPlayerManager ecoPlayerManager,
 			JobsystemValidationHandler validationHandler, ServerProvider serverProvider, String name,
-			Location spawnLocation, int size) throws JobSystemException {
+			Location spawnLocation, int size, GeneralEconomyValidationHandler generalValidator)
+			throws JobSystemException {
 		this.jobManager = jobManager;
 		this.logger = logger;
 		this.jobcenterManager = jobcenterManager;
@@ -77,6 +81,7 @@ public class JobcenterImpl implements Jobcenter {
 		this.validationHandler = validationHandler;
 		this.serverProvider = serverProvider;
 		this.jobcenterDao = jobcenterDao;
+		this.generalValidator = generalValidator;
 		jobcenterDao.setupSavefile(name);
 		setupNewJobcenter(name, spawnLocation, size);
 	}
@@ -92,10 +97,12 @@ public class JobcenterImpl implements Jobcenter {
 	 * @param validationHandler
 	 * @param serverProvider
 	 * @param name
+	 * @param generalValidator
 	 */
 	public JobcenterImpl(Logger logger, JobcenterDao jobcenterDao, JobManager jobManager,
 			JobcenterManager jobcenterManager, EconomyPlayerManager ecoPlayerManager,
-			JobsystemValidationHandler validationHandler, ServerProvider serverProvider, String name) {
+			JobsystemValidationHandler validationHandler, ServerProvider serverProvider, String name,
+			GeneralEconomyValidationHandler generalValidator) {
 		this.jobManager = jobManager;
 		this.logger = logger;
 		this.jobcenterManager = jobcenterManager;
@@ -103,6 +110,7 @@ public class JobcenterImpl implements Jobcenter {
 		this.validationHandler = validationHandler;
 		this.serverProvider = serverProvider;
 		this.jobcenterDao = jobcenterDao;
+		this.generalValidator = generalValidator;
 		jobcenterDao.setupSavefile(name);
 		loadExistingJobcenter(name);
 	}
@@ -110,7 +118,8 @@ public class JobcenterImpl implements Jobcenter {
 	@Override
 	public void addJob(Job job, String itemMaterial, int slot)
 			throws EconomyPlayerException, GeneralEconomyException, JobSystemException {
-		validationHandler.checkForValidSlot(slot, size);
+		// -1 because of reserved slots
+		generalValidator.checkForValidSlot(slot, size - 1);
 		validationHandler.checkForFreeSlot(inventory, slot);
 		validationHandler.checkForJobDoesNotExistInJobcenter(getJobList(), job);
 		itemMaterial = itemMaterial.toUpperCase();

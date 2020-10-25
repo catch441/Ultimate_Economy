@@ -27,8 +27,6 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
-import com.ue.general.impl.GeneralEconomyException;
-import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.townsystem.logic.api.Plot;
 import com.ue.townsystem.logic.api.Town;
 import com.ue.townsystem.logic.api.Townworld;
@@ -405,45 +403,6 @@ public class TownsystemValidationHandlerImplTest {
 	}
 
 	@Test
-	public void checkForTownDoesNotExistTestValid() {
-		assertDoesNotThrow(() -> validationHandler.checkForTownDoesNotExist(new ArrayList<>(), "mytown"));
-	}
-
-	@Test
-	public void checkForTownDoesNotExistTestInvalid() {
-		try {
-			validationHandler.checkForTownDoesNotExist(Arrays.asList("mytown"), "mytown");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals("mytown", e.getParams()[0]);
-		}
-	}
-
-	@Test
-	public void checkForPositiveAmountTestValid() {
-		assertDoesNotThrow(() -> validationHandler.checkForPositiveAmount(0));
-	}
-
-	@Test
-	public void checkForPositiveAmountTestValid2() {
-		assertDoesNotThrow(() -> validationHandler.checkForPositiveAmount(1));
-	}
-
-	@Test
-	public void checkForPositiveAmountTestInvalid() {
-		try {
-			validationHandler.checkForPositiveAmount(-1);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals(-1.0, e.getParams()[0]);
-		}
-	}
-
-	@Test
 	public void checkForPlayerDidNotReachedMaxTownsTestValid() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.reachedMaxJoinedTowns()).thenReturn(false);
@@ -476,23 +435,6 @@ public class TownsystemValidationHandlerImplTest {
 		} catch (TownSystemException e) {
 			assertEquals(TownExceptionMessageEnum.CHUNK_IS_NOT_CONNECTED_WITH_TOWN, e.getKey());
 			assertEquals(0, e.getParams().length);
-		}
-	}
-
-	@Test
-	public void checkForTownworldHasTownTestValid() {
-		assertDoesNotThrow(() -> validationHandler.checkForTownworldHasTown(Arrays.asList("town"), "town"));
-	}
-
-	@Test
-	public void checkForTownworldHasTownTestFail() {
-		try {
-			validationHandler.checkForTownworldHasTown(new ArrayList<>(), "town");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals("town", e.getParams()[0]);
 		}
 	}
 

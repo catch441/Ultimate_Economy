@@ -7,10 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -72,23 +69,6 @@ public class JobSystemValidationHandlerTest {
 	}
 
 	@Test
-	public void checkForPositivValueTest() {
-		try {
-			validationHandler.checkForPositivValue(-10);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals(-10.0, e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForPositivValueTestValid() {
-		assertDoesNotThrow(() -> validationHandler.checkForPositivValue(10));
-	}
-
-	@Test
 	public void checkForValidFisherLootTypeTest() {
 		try {
 			validationHandler.checkForValidFisherLootType("invalid");
@@ -105,138 +85,6 @@ public class JobSystemValidationHandlerTest {
 		assertDoesNotThrow(() -> validationHandler.checkForValidFisherLootType("junk"));
 		assertDoesNotThrow(() -> validationHandler.checkForValidFisherLootType("treasure"));
 		assertDoesNotThrow(() -> validationHandler.checkForValidFisherLootType("fish"));
-	}
-
-	@Test
-	public void checkForBlockNotInJobTest() {
-		try {
-			Map<String, Double> blockList = new HashMap<>();
-			blockList.put("dirt", 10.0);
-			validationHandler.checkForDoesNotExist(blockList, "dirt");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals("dirt", e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForBlockNotInJobTestValid() {
-		Map<String, Double> blockList = new HashMap<>();
-		assertDoesNotThrow(() -> validationHandler.checkForDoesNotExist(blockList, "dirt"));
-	}
-
-	@Test
-	public void checkForDoesExistTest() {
-		try {
-			Map<String, Double> blockList = new HashMap<>();
-			validationHandler.checkForDoesExist(blockList, "dirt");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals("dirt", e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForBlockInJobTestValid() {
-		Map<String, Double> blockList = new HashMap<>();
-		blockList.put("dirt", 10.0);
-		assertDoesNotThrow(() -> validationHandler.checkForDoesExist(blockList, "dirt"));
-	}
-
-	@Test
-	public void checkForValidSizeTestValid() {
-		assertDoesNotThrow(() -> validationHandler.checkForValidSize(18));
-	}
-
-	@Test
-	public void checkForValidSizeTest() {
-		try {
-			validationHandler.checkForValidSize(14);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals(14, e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-		}
-	}
-	
-	@Test
-	public void checkForValidSizeTestGreater() {
-		try {
-			validationHandler.checkForValidSize(63);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals(63, e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForJobNameDoesNotExistTestValid() {
-		assertDoesNotThrow(() -> validationHandler.checkForJobNameDoesNotExist(new ArrayList<>(), "myJob"));
-	}
-
-	@Test
-	public void checkForJobNameDoesNotExistTest() {
-		try {
-			validationHandler.checkForJobNameDoesNotExist(Arrays.asList("myJob"), "myJob");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals("myJob", e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, e.getKey());
-		}
-	}
-	
-	@Test
-	public void checkForJobcenterNameDoesNotExistTestValid() {
-		assertDoesNotThrow(() -> validationHandler.checkForJobcenterNameDoesNotExist(new ArrayList<>(), "center"));
-	}
-
-	@Test
-	public void checkForJobcenterNameDoesNotExistTest() {
-		try {
-			validationHandler.checkForJobcenterNameDoesNotExist(Arrays.asList("center"), "center");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals("center", e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForValidSlotTest1() {
-		try {
-			validationHandler.checkForValidSlot(9, 9);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals(9, e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForValidSlotTest2() {
-		try {
-			validationHandler.checkForValidSlot(-9, 9);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals(-9, e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForValidSlotTestValid() {
-		assertDoesNotThrow(() -> validationHandler.checkForValidSlot(5, 9));
 	}
 	
 	@Test

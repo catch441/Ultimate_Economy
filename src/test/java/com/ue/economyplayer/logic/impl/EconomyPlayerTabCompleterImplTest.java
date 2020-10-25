@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
+import com.ue.general.impl.GeneralEconomyException;
 
 @ExtendWith(MockitoExtension.class)
 public class EconomyPlayerTabCompleterImplTest {
@@ -104,8 +105,8 @@ public class EconomyPlayerTabCompleterImplTest {
 		Map<String, Location> homes = new HashMap<>();
 		homes.put("myhome1", null);
 		homes.put("myhome2", null);
-		when(player.getName()).thenReturn("kthschnll");
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(ecoPlayer.getHomeList()).thenReturn(homes);
 		
 		
@@ -113,6 +114,20 @@ public class EconomyPlayerTabCompleterImplTest {
 		assertEquals(2, result.size());
 		assertEquals("myhome2", result.get(0));
 		assertEquals("myhome1", result.get(1));
+	}
+	
+	@Test
+	public void homeCommandWithNoEcoPlayer() throws GeneralEconomyException {
+		Command command = mock(Command.class);
+		when(command.getName()).thenReturn("home");
+		
+		String[] args = { "" };
+		Player player = mock(Player.class);
+		when(player.getName()).thenReturn("catch441");
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
+		
+		List<String> result = tabCompleter.onTabComplete(player, command, null, args);
+		assertEquals(0, result.size());
 	}
 
 	@Test
@@ -125,8 +140,8 @@ public class EconomyPlayerTabCompleterImplTest {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Map<String, Location> homes = new HashMap<>();
 		homes.put("myhome2", null);
-		when(player.getName()).thenReturn("kthschnll");
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(ecoPlayer.getHomeList()).thenReturn(homes);
 
 		List<String> result = tabCompleter.onTabComplete(player, command, null, args);

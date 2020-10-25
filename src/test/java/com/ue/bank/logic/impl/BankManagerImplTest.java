@@ -21,6 +21,7 @@ import com.ue.bank.dataaccess.api.BankDao;
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankValidationHandler;
 import com.ue.common.utils.MessageWrapper;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +35,8 @@ public class BankManagerImplTest {
 	BankDao bankDao;
 	@Mock
 	BankValidationHandler validationHandler;
+	@Mock
+	GeneralEconomyValidationHandler generalValidator;
 
 	@AfterEach
 	private void cleanUp() {
@@ -63,7 +66,7 @@ public class BankManagerImplTest {
 			List<String> ibans = new ArrayList<>();
 			ibans.add("myiban");
 			verify(bankDao).saveIbanList(ibans);
-			verify(validationHandler).checkForIbanIsFree(new ArrayList<>(), "myiban");
+			verify(generalValidator).checkForValueNotInList(new ArrayList<>(), "myiban");
 		} catch (GeneralEconomyException e) {
 			fail();
 		}
@@ -75,7 +78,7 @@ public class BankManagerImplTest {
 			List<String> ibans = new ArrayList<>();
 			ibans.add("myiban");
 			bankManager.createExternalBankAccount(10.0, "myiban");
-			doThrow(GeneralEconomyException.class).when(validationHandler).checkForIbanIsFree(ibans, "myiban");
+			doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueNotInList(ibans, "myiban");
 			bankManager.createExternalBankAccount(10.0, "myiban");
 			fail();
 		} catch (GeneralEconomyException e) {

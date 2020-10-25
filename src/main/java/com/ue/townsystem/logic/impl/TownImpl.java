@@ -28,6 +28,7 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.EconomyVillager;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.townsystem.dataaccess.api.TownworldDao;
@@ -41,6 +42,7 @@ public class TownImpl implements Town {
 
 	private final MessageWrapper messageWrapper;
 	private final TownsystemValidationHandler validationHandler;
+	private final GeneralEconomyValidationHandler generalValidator;
 	private final BankManager bankManager;
 	private final TownworldManager townworldManager;
 	private final ServerProvider serverProvider;
@@ -70,13 +72,15 @@ public class TownImpl implements Town {
 	 * @param townworld
 	 * @param serverProvider
 	 * @param logger
+	 * @param generalValidator
 	 * @throws EconomyPlayerException
 	 * @throws TownSystemException
 	 * @throws GeneralEconomyException
 	 */
 	public TownImpl(String townName, TownworldManager townworldManager, BankManager bankManager,
 			TownsystemValidationHandler validationHandler, MessageWrapper messageWrapper, TownworldDao townworldDao,
-			Townworld townworld, ServerProvider serverProvider, Logger logger)
+			Townworld townworld, ServerProvider serverProvider, Logger logger,
+			GeneralEconomyValidationHandler generalValidator)
 			throws EconomyPlayerException, TownSystemException, GeneralEconomyException {
 		this.townworldDao = townworldDao;
 		this.messageWrapper = messageWrapper;
@@ -85,6 +89,7 @@ public class TownImpl implements Town {
 		this.townworldManager = townworldManager;
 		this.serverProvider = serverProvider;
 		this.logger = logger;
+		this.generalValidator = generalValidator;
 		loadExistingTown(townworld, townName);
 	}
 
@@ -102,12 +107,13 @@ public class TownImpl implements Town {
 	 * @param townworld
 	 * @param serverProvider
 	 * @param logger
+	 * @param generalValidator
 	 * @throws EconomyPlayerException
 	 */
 	public TownImpl(EconomyPlayer mayor, String townName, Location location, TownworldManager townworldManager,
 			BankManager bankManager, TownsystemValidationHandler validationHandler, MessageWrapper messageWrapper,
-			TownworldDao townworldDao, Townworld townworld, ServerProvider serverProvider, Logger logger)
-			throws EconomyPlayerException {
+			TownworldDao townworldDao, Townworld townworld, ServerProvider serverProvider, Logger logger,
+			GeneralEconomyValidationHandler generalValidator) throws EconomyPlayerException {
 		this.townworldDao = townworldDao;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
@@ -115,6 +121,7 @@ public class TownImpl implements Town {
 		this.townworldManager = townworldManager;
 		this.serverProvider = serverProvider;
 		this.logger = logger;
+		this.generalValidator = generalValidator;
 		setupNewTown(townworld, mayor, townName, location);
 	}
 
@@ -162,7 +169,7 @@ public class TownImpl implements Town {
 	public void renameTown(String newName, EconomyPlayer player)
 			throws GeneralEconomyException, EconomyPlayerException {
 		List<String> townNameList = townworldManager.getTownNameList();
-		validationHandler.checkForTownDoesNotExist(townNameList, newName);
+		generalValidator.checkForValueNotInList(townNameList, newName);
 		validationHandler.checkForPlayerIsMayor(getMayor(), player);
 		String oldName = getTownName();
 		townName = newName;
@@ -427,7 +434,7 @@ public class TownImpl implements Town {
 
 	@Override
 	public void setTax(double tax) throws GeneralEconomyException {
-		validationHandler.checkForPositiveAmount(tax);
+		generalValidator.checkForPositiveValue(tax);
 		this.tax = tax;
 		townworldDao.saveTax(getTownName(), tax);
 	}

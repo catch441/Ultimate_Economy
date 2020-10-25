@@ -291,6 +291,7 @@ public class UltimateEconomy {
 		plugin.getCommand("rentshop").setExecutor(rentshopCommandExecutor);
 		plugin.getCommand("pay").setExecutor(ecoPlayerCommandExecutor);
 		plugin.getCommand("givemoney").setExecutor(ecoPlayerCommandExecutor);
+		plugin.getCommand("removemoney").setExecutor(ecoPlayerCommandExecutor);
 		plugin.getCommand("money").setExecutor(ecoPlayerCommandExecutor);
 		plugin.getCommand("myjobs").setExecutor(ecoPlayerCommandExecutor);
 		plugin.getCommand("bank").setExecutor(ecoPlayerCommandExecutor);

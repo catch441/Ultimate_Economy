@@ -29,6 +29,7 @@ import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.shopsystem.logic.api.Playershop;
@@ -50,6 +51,8 @@ public class ShopValidationHandlerImplTest {
 	ConfigManager configManager;
 	@Mock
 	TownworldManager townworldManager;
+	@Mock
+	GeneralEconomyValidationHandler generalValidator;
 
 	@Test
 	public void checkForOnePriceGreaterThenZeroIfBothAvailableTest() {
@@ -224,59 +227,6 @@ public class ShopValidationHandlerImplTest {
 	}
 
 	@Test
-	public void checkForValidSizeTest1() {
-		try {
-			validationHandler.checkForValidSize(90);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals(90, e.getParams()[0]);
-		}
-	}
-
-	@Test
-	public void checkForValidSizeTest2() {
-		try {
-			validationHandler.checkForValidSize(5);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals(5, e.getParams()[0]);
-		}
-	}
-
-	@Test
-	public void checkForValidSizeTestValid() {
-		assertDoesNotThrow(() -> validationHandler.checkForValidSize(18));
-	}
-
-	@Test
-	public void checkForValidSlotTest1() {
-		try {
-			validationHandler.checkForValidSlot(17, 9, 2);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals(18, e.getParams()[0]);
-		}
-	}
-
-	@Test
-	public void checkForValidSlotTest2() {
-		try {
-			validationHandler.checkForValidSlot(-17, 9, 2);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals(-16, e.getParams()[0]);
-		}
-	}
-
-	@Test
 	public void checkForItemCanBeDeletedTest() {
 		try {
 			validationHandler.checkForItemCanBeDeleted(8, 9);
@@ -290,23 +240,6 @@ public class ShopValidationHandlerImplTest {
 	@Test
 	public void checkForItemCanBeDeletedTestValid() {
 		assertDoesNotThrow(() -> validationHandler.checkForItemCanBeDeleted(5, 9));
-	}
-
-	@Test
-	public void checkForPositiveValueTest() {
-		try {
-			validationHandler.checkForPositiveValue(-9);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals(-9.0, e.getParams()[0]);
-		}
-	}
-
-	@Test
-	public void checkForPositiveValueTestValid() {
-		assertDoesNotThrow(() -> validationHandler.checkForPositiveValue(9));
 	}
 
 	@Test

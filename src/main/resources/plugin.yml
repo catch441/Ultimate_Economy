@@ -144,6 +144,12 @@ commands:
         description: Gives a player money without taking it from other players.
         usage: /<command> <player> <amount>
 
+    removemoney:
+        permission: ultimate_economy.adminpay
+        permission-message: You don't have the permission.
+        description: Removes money from a player without giving it to a other player.
+        usage: /<command> <player> <amount>
+
     shoplist:
         permission: ultimate_economy.info.shoplist
         permission-message: You don't have the permission.

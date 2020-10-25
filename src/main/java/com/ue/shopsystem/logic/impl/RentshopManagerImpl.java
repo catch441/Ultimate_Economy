@@ -15,6 +15,7 @@ import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
@@ -31,6 +32,7 @@ public class RentshopManagerImpl implements RentshopManager {
 	private List<Rentshop> rentShopList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
 	private final ShopValidationHandler validationHandler;
+	private final GeneralEconomyValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final Logger logger;
 	private final CustomSkullService skullService;
@@ -53,12 +55,14 @@ public class RentshopManagerImpl implements RentshopManager {
 	 * @param townworldManager
 	 * @param playershopManager
 	 * @param configDao
+	 * @param generalValidator
 	 */
 	@Inject
 	public RentshopManagerImpl(ServerProvider serverProvider, ShopValidationHandler validationHandler,
-			MessageWrapper messageWrapper, Logger logger,
-			CustomSkullService skullService, EconomyPlayerManager ecoPlayerManager, ConfigManager configManager,
-			TownworldManager townworldManager, PlayershopManager playershopManager, ConfigDao configDao) {
+			MessageWrapper messageWrapper, Logger logger, CustomSkullService skullService,
+			EconomyPlayerManager ecoPlayerManager, ConfigManager configManager, TownworldManager townworldManager,
+			PlayershopManager playershopManager, ConfigDao configDao,
+			GeneralEconomyValidationHandler generalValidator) {
 		this.serverProvider = serverProvider;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
@@ -69,6 +73,7 @@ public class RentshopManagerImpl implements RentshopManager {
 		this.townworldManager = townworldManager;
 		this.playershopManager = playershopManager;
 		this.configDao = configDao;
+		this.generalValidator = generalValidator;
 	}
 
 	@Override
@@ -130,12 +135,12 @@ public class RentshopManagerImpl implements RentshopManager {
 
 	@Override
 	public Rentshop createRentShop(Location spawnLocation, int size, double rentalFee) throws GeneralEconomyException {
-		validationHandler.checkForValidSize(size);
-		validationHandler.checkForPositiveValue(rentalFee);
+		generalValidator.checkForValidSize(size);
+		generalValidator.checkForPositiveValue(rentalFee);
 		ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
 		Rentshop shop = new RentshopImpl(spawnLocation, size, generateFreeRentShopId(), rentalFee, shopDao,
 				serverProvider, skullService, logger, validationHandler, ecoPlayerManager, messageWrapper,
-				configManager, townworldManager, playershopManager);
+				configManager, townworldManager, playershopManager, generalValidator);
 		rentShopList.add(shop);
 		configDao.saveRentshopIds(getRentShopIdList());
 		return shop;
@@ -160,9 +165,9 @@ public class RentshopManagerImpl implements RentshopManager {
 		for (String shopId : configDao.loadRentshopIds()) {
 			try {
 				ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
-				rentShopList
-						.add(new RentshopImpl(shopId, shopDao, serverProvider, skullService, logger, validationHandler,
-								ecoPlayerManager, messageWrapper, configManager, townworldManager, playershopManager));
+				rentShopList.add(new RentshopImpl(shopId, shopDao, serverProvider, skullService, logger,
+						validationHandler, ecoPlayerManager, messageWrapper, configManager, townworldManager,
+						playershopManager, generalValidator));
 			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException | ShopSystemException e) {
 				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
