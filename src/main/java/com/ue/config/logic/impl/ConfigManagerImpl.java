@@ -224,7 +224,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Override
 	public void setMaxRentedDays(int days) throws GeneralEconomyException {
-		generalValidator.checkForPositiveValue(days);
+		generalValidator.checkForValueGreaterZero(days);
 		maxRentedDays = days;
 		configDao.saveMaxRentedDays(maxRentedDays);
 	}
