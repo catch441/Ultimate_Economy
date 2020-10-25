@@ -136,7 +136,7 @@ commands:
         permission: ultimate_economy.adminshop
         permission-message: You don't have the permission.
         description: Manage adminshops.
-        usage: /<command> [create/delete/move/rename/resize/editShop/changeProfession/addSpawner/removeSpawner]
+        usage: /<command> [create/delete/move/rename/resize/editShop/changeProfession/addSpawner]
 
     givemoney:
         permission: ultimate_economy.adminpay
@@ -160,7 +160,7 @@ commands:
         permission: ultimate_economy.jobcenter
         permission-message: You don't have the permission.
         description: Manage jobcenter.
-        usage: /<command> [create/delete/move/job/addjob]
+        usage: /<command> [create/delete/move/job/addjob/removeJob]
 
     joblist:
         permission: ultimate_economy.info.joblist
@@ -196,7 +196,7 @@ commands:
         permission: ultimate_economy.playershop
         permission-message: You don't have the permission.
         description: Manage playershops.
-        usage: /playershop [create/delete/move/rename/resize/editShop]
+        usage: /playershop [create/delete/move/rename/resize/editShop/changeProfession]
 
     rentshop:
         permission: ultimate_economy.rentshop.player
