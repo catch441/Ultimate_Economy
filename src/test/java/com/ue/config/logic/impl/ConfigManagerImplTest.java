@@ -189,7 +189,7 @@ public class ConfigManagerImplTest {
 
 	@Test
 	public void setMaxRentedDaysExceptionTest() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForPositiveValue(-7);
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueGreaterZero(-7);
 		assertThrows(GeneralEconomyException.class, () -> manager.setMaxRentedDays(-7));
 	}
 
