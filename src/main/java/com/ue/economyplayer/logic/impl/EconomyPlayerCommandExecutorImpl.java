@@ -19,6 +19,7 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.townsystem.logic.api.TownworldManager;
@@ -29,32 +30,36 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final TownworldManager townworldManager;
+	private final GeneralEconomyValidationHandler generalValidator;
 
 	/**
 	 * Inject constructor.
 	 * 
+	 * @param generalValidator
 	 * @param configManager
 	 * @param messageWrapper
 	 * @param ecoPlayerManager
 	 * @param townworldManager
 	 */
 	@Inject
-	public EconomyPlayerCommandExecutorImpl(ConfigManager configManager, MessageWrapper messageWrapper,
-			EconomyPlayerManager ecoPlayerManager, TownworldManager townworldManager) {
+	public EconomyPlayerCommandExecutorImpl(GeneralEconomyValidationHandler generalValidator,
+			ConfigManager configManager, MessageWrapper messageWrapper, EconomyPlayerManager ecoPlayerManager,
+			TownworldManager townworldManager) {
 		this.configManager = configManager;
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.townworldManager = townworldManager;
+		this.generalValidator = generalValidator;
 	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		try {
-			switch(label) {
+			switch (label) {
 			case "givemoney":
 				return performGiveMoneyCommand(args);
 			case "removemoney":
-				break;
+				return performRemoveMoneyCommand(args);
 			default:
 				if (sender instanceof Player) {
 					EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(sender.getName());
@@ -195,12 +200,22 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 			throws EconomyPlayerException, GeneralEconomyException, NumberFormatException {
 		if (args.length == 2) {
 			double amount = Double.valueOf(args[1]);
+			generalValidator.checkForPositiveValue(amount);
 			EconomyPlayer receiver = ecoPlayerManager.getEconomyPlayerByName(args[0]);
-			if (amount < 0) {
-				receiver.decreasePlayerAmount(-amount, false);
-			} else {
-				receiver.increasePlayerAmount(amount, true);
-			}
+			receiver.increasePlayerAmount(amount, true);
+		} else {
+			return false;
+		}
+		return true;
+	}
+
+	private boolean performRemoveMoneyCommand(String[] args)
+			throws EconomyPlayerException, GeneralEconomyException, NumberFormatException {
+		if (args.length == 2) {
+			double amount = Double.valueOf(args[1]);
+			generalValidator.checkForPositiveValue(amount);
+			EconomyPlayer receiver = ecoPlayerManager.getEconomyPlayerByName(args[0]);
+			receiver.decreasePlayerAmount(amount, false);
 		} else {
 			return false;
 		}

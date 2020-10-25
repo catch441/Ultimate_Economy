@@ -31,6 +31,7 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
+import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsystem.logic.api.Job;
@@ -53,11 +54,13 @@ public class EconomyPlayerCommandExecutorImplTest {
 	Player player;
 	@Mock
 	EconomyPlayer ecoPlayer;
+	@Mock
+	GeneralEconomyValidationHandler generalValidator;
 
 	@Test
 	public void invalidCommandTest() {
 		String[] args = {};
-		boolean result = executor.onCommand(player, null, "kth", args);
+		boolean result = executor.onCommand(player, null, "stuff", args);
 		verify(player).getName();
 		verifyNoMoreInteractions(player);
 		assertFalse(result);
@@ -74,7 +77,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void bankCommandTestInvalidArg() {
-		String[] args = { "kth" };
+		String[] args = { "stuff" };
 		boolean result = executor.onCommand(player, null, "bank", args);
 		verify(player).getName();
 		verifyNoMoreInteractions(player);
@@ -83,8 +86,8 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void bankCommandTestOn() {
-		when(player.getName()).thenReturn("kthschnll");
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		String[] args = { "on" };
 		boolean result = executor.onCommand(player, null, "bank", args);
 		verify(player).getName();
@@ -95,8 +98,8 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void bankCommandTestOff() {
-		when(player.getName()).thenReturn("kthschnll");
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		String[] args = { "off" };
 		boolean result = executor.onCommand(player, null, "bank", args);
 		verify(player).getName();
@@ -107,8 +110,8 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void moneyCommandTestZeroArgs() {
-		when(player.getName()).thenReturn("kthschnll");
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		BankAccount account = mock(BankAccount.class);
 		when(ecoPlayer.getBankAccount()).thenReturn(account);
 		when(account.getAmount()).thenReturn(21.12);
@@ -127,7 +130,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 	@Test
 	public void moneyCommandTestMoreArgs() {
 		when(player.hasPermission("Ultimate_Economy.adminpay")).thenReturn(false);
-		String[] args = { "kth", "kth" };
+		String[] args = { "stuff", "stuff" };
 		boolean result = executor.onCommand(player, null, "money", args);
 		verify(player).getName();
 		verifyNoMoreInteractions(player);
@@ -137,7 +140,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 	@Test
 	public void moneyCommandTestAdminMoreArgs() {
 		when(player.hasPermission("Ultimate_Economy.adminpay")).thenReturn(true);
-		String[] args = { "kth", "kth" };
+		String[] args = { "stuff", "stuff" };
 		boolean result = executor.onCommand(player, null, "money", args);
 		verify(player).sendMessage("/money or /money <player>");
 		verify(player).getName();
@@ -179,8 +182,8 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void myJobsCommandTestZeroArgs() {
-		when(player.getName()).thenReturn("kthschnll");
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
 		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job));
@@ -196,7 +199,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void myJobsCommandTestMoreArgs() {
-		String[] args = { "kth" };
+		String[] args = { "stuff" };
 		boolean result = executor.onCommand(player, null, "myjobs", args);
 		verify(player).getName();
 		verifyNoMoreInteractions(player);
@@ -214,7 +217,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void setHomeCommandTestMoreArgs() {
-		String[] args = { "kth", "kth" };
+		String[] args = { "stuff", "stuff" };
 		boolean result = executor.onCommand(player, null, "sethome", args);
 		verify(player).getName();
 		verifyNoMoreInteractions(player);
@@ -223,8 +226,8 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void setHomeCommandTestOneArg() {
-		when(player.getName()).thenReturn("kthschnll");
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		String[] args = { "myhome" };
 		Location location = mock(Location.class);
 		when(player.getLocation()).thenReturn(location);
@@ -237,8 +240,8 @@ public class EconomyPlayerCommandExecutorImplTest {
 	
 	@Test
 	public void setHomeCommandTestWithException() throws GeneralEconomyException, EconomyPlayerException {
-		when(player.getName()).thenReturn("kthschnll");
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		String[] args = { "myhome" };
 		when(messageWrapper.getErrorString("already_exists", "myhome")).thenReturn("§cMy error message!");
 		doThrow(new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, "myhome"))
@@ -261,7 +264,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void delHomeCommandTestMoreArgs() {
-		String[] args = { "kth", "kth" };
+		String[] args = { "stuff", "stuff" };
 		boolean result = executor.onCommand(player, null, "delhome", args);
 		verify(player).getName();
 		verifyNoMoreInteractions(player);
@@ -270,8 +273,8 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void delHomeCommandTestOneArg() {
-		when(player.getName()).thenReturn("kthschnll");
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		String[] args = { "myhome" };
 		boolean result = executor.onCommand(player, null, "delhome", args);
 		assertDoesNotThrow(() -> verify(ecoPlayer).removeHome("myhome", true));
@@ -289,7 +292,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void payCommandTestOneArgs() {
-		String[] args = { "kthschnll" };
+		String[] args = { "catch441" };
 		boolean result = executor.onCommand(player, null, "pay", args);
 		verify(player).getName();
 		verifyNoMoreInteractions(player);
@@ -298,7 +301,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void payCommandTestMoreArgs() {
-		String[] args = { "kthschnll", "10", "kth" };
+		String[] args = { "catch441", "10", "stuff" };
 		boolean result = executor.onCommand(player, null, "pay", args);
 		verify(player).getName();
 		verifyNoMoreInteractions(player);
@@ -307,13 +310,13 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void payCommandTestInvalidInteger() {
-		when(messageWrapper.getErrorString("invalid_parameter", "kth")).thenReturn("My error message!");
-		when(messageWrapper.getErrorString("invalid_parameter", "kth"))
-				.thenReturn("§c§cThe parameter §4kth§c is invalid!");
+		when(messageWrapper.getErrorString("invalid_parameter", "stuff")).thenReturn("My error message!");
+		when(messageWrapper.getErrorString("invalid_parameter", "stuff"))
+				.thenReturn("§c§cThe parameter §4stuff§c is invalid!");
 
-		String[] args = { "kthschnll", "kth" };
+		String[] args = { "catch441", "stuff" };
 		boolean result = executor.onCommand(player, null, "pay", args);
-		verify(player).sendMessage("§c§cThe parameter §4kth§c is invalid!");
+		verify(player).sendMessage("§c§cThe parameter §4stuff§c is invalid!");
 		verify(player).getName();
 		verifyNoMoreInteractions(player);
 		assertTrue(result);
@@ -321,12 +324,12 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void payCommandTestTwoArgs() {
-		when(player.getName()).thenReturn("kthschnll");
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		EconomyPlayer reciever = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(reciever));
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("Wulfgar")).thenReturn(reciever));
 
-		String[] args = { "catch441", "10" };
+		String[] args = { "Wulfgar", "10" };
 		boolean result = executor.onCommand(player, null, "pay", args);
 		assertDoesNotThrow(() -> verify(ecoPlayer).payToOtherPlayer(reciever, 10.0, true));
 		verifyNoMoreInteractions(player);
@@ -344,7 +347,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void givemoneyCommandTestMoreArgs() {
-		String[] args = { "kth", "kth", "kth" };
+		String[] args = { "stuff", "stuff", "stuff" };
 		boolean result = executor.onCommand(player, null, "givemoney", args);
 		verifyNoInteractions(player);
 		assertFalse(result);
@@ -363,34 +366,34 @@ public class EconomyPlayerCommandExecutorImplTest {
 	}
 
 	@Test
-	public void givemoneyCommandTestTwoArgsNegative() {
-		EconomyPlayer receiver = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(receiver));
-
+	public void givemoneyCommandTestTwoArgsNegative() throws GeneralEconomyException {
+		GeneralEconomyException e = mock(GeneralEconomyException.class);
+		when(e.getMessage()).thenReturn("my error message");
+		doThrow(e).when(generalValidator).checkForPositiveValue(-10.0);
+		
 		String[] args = { "catch441", "-10" };
 		boolean result = executor.onCommand(player, null, "givemoney", args);
-		assertDoesNotThrow(() -> verify(receiver).decreasePlayerAmount(10, false));
-		verifyNoInteractions(player);
+		verify(player).sendMessage("my error message");
 		assertTrue(result);
 	}
 
 	@Test
 	public void givemoneyCommandTestInvalidInteger() {
-		when(messageWrapper.getErrorString("invalid_parameter", "kth")).thenReturn("My error message!");
-		when(messageWrapper.getErrorString("invalid_parameter", "kth"))
-				.thenReturn("§c§cThe parameter §4kth§c is invalid!");
+		when(messageWrapper.getErrorString("invalid_parameter", "stuff")).thenReturn("My error message!");
+		when(messageWrapper.getErrorString("invalid_parameter", "stuff"))
+				.thenReturn("§c§cThe parameter §4stuff§c is invalid!");
 
-		String[] args = { "catch441", "kth" };
+		String[] args = { "catch441", "stuff" };
 		boolean result = executor.onCommand(player, null, "givemoney", args);
-		verify(player).sendMessage("§c§cThe parameter §4kth§c is invalid!");
+		verify(player).sendMessage("§c§cThe parameter §4stuff§c is invalid!");
 		verifyNoMoreInteractions(player);
 		assertTrue(result);
 	}
 
 	@Test
 	public void homeCommandTestZeroArgs() {
-		when(player.getName()).thenReturn("kthschnll");
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Map<String, Location> homes = new HashMap<>();
 		homes.put("myhome1", null);
 		homes.put("myhome2", null);
@@ -406,7 +409,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void homeCommandTestMoreArgs() {
-		String[] args = { "kth", "kth" };
+		String[] args = { "stuff", "stuff" };
 		boolean result = executor.onCommand(player, null, "home", args);
 		verify(player).getName();
 		verifyNoMoreInteractions(player);
@@ -415,8 +418,8 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void homeCommandTestOneArgs() {
-		when(player.getName()).thenReturn("kthschnll");
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("kthschnll")).thenReturn(ecoPlayer));
+		when(player.getName()).thenReturn("catch441");
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Location location = mock(Location.class);
 		World world = mock(World.class);
 		Chunk chunk = mock(Chunk.class);
@@ -430,6 +433,59 @@ public class EconomyPlayerCommandExecutorImplTest {
 		boolean result = executor.onCommand(player, null, "home", args);
 		verify(player).teleport(location);
 		verify(townworldManager).performTownWorldLocationCheck("World", chunk, ecoPlayer);
+		verifyNoMoreInteractions(player);
+		assertTrue(result);
+	}
+	
+	@Test
+	public void removemoneyCommandTestZeroArgs() {
+		String[] args = {};
+		boolean result = executor.onCommand(player, null, "removemoney", args);
+		verifyNoInteractions(player);
+		assertFalse(result);
+	}
+
+	@Test
+	public void removemoneyCommandTestMoreArgs() {
+		String[] args = { "stuff", "stuff", "stuff" };
+		boolean result = executor.onCommand(player, null, "givemoney", args);
+		verifyNoInteractions(player);
+		assertFalse(result);
+	}
+
+	@Test
+	public void removemoneyCommandTestTwoArgsPositive() {
+		EconomyPlayer receiver = mock(EconomyPlayer.class);
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(receiver));
+
+		String[] args = { "catch441", "10" };
+		boolean result = executor.onCommand(player, null, "removemoney", args);
+		assertDoesNotThrow(() -> verify(receiver).decreasePlayerAmount(10, false));
+		verifyNoInteractions(player);
+		assertTrue(result);
+	}
+
+	@Test
+	public void removemoneyCommandTestTwoArgsNegative() throws GeneralEconomyException {
+		GeneralEconomyException e = mock(GeneralEconomyException.class);
+		when(e.getMessage()).thenReturn("my error message");
+		doThrow(e).when(generalValidator).checkForPositiveValue(-10.0);
+		
+		String[] args = { "catch441", "-10" };
+		boolean result = executor.onCommand(player, null, "removemoney", args);
+		verify(player).sendMessage("my error message");
+		assertTrue(result);
+	}
+
+	@Test
+	public void removemoneyCommandTestInvalidInteger() {
+		when(messageWrapper.getErrorString("invalid_parameter", "stuff")).thenReturn("My error message!");
+		when(messageWrapper.getErrorString("invalid_parameter", "stuff"))
+				.thenReturn("§c§cThe parameter §4stuff§c is invalid!");
+
+		String[] args = { "catch441", "stuff" };
+		boolean result = executor.onCommand(player, null, "removemoney", args);
+		verify(player).sendMessage("§c§cThe parameter §4stuff§c is invalid!");
 		verifyNoMoreInteractions(player);
 		assertTrue(result);
 	}
