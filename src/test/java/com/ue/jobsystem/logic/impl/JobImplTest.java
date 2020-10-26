@@ -13,6 +13,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -109,6 +110,7 @@ public class JobImplTest {
 		Job job = new JobImpl(generalValidator, validationHandler, jobDao, "myJob", true);
 		assertDoesNotThrow(() -> job.addMob("cow", 1.5));
 		assertEquals("1.5", assertDoesNotThrow(() -> String.valueOf(job.getKillPrice("cow"))));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValueInList(Arrays.asList("COW"), "COW"));
 	}
 
 	@Test
@@ -116,6 +118,7 @@ public class JobImplTest {
 		Job job = new JobImpl(generalValidator, validationHandler, jobDao, "myJob", true);
 		assertDoesNotThrow(() -> job.addFisherLootType("fish", 1.5));
 		assertEquals("1.5", String.valueOf(assertDoesNotThrow(() -> job.getFisherPrice("fish"))));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValueInList(Arrays.asList("fish"), "fish"));
 	}
 	
 	@Test
@@ -123,6 +126,7 @@ public class JobImplTest {
 		Job job = new JobImpl(generalValidator, validationHandler, jobDao, "myJob", true);
 		assertDoesNotThrow(() -> job.addBlock("stone", 1.5));
 		assertDoesNotThrow(() -> assertEquals("1.5", String.valueOf(job.getBlockPrice("stone"))));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValueInList(Arrays.asList("STONE"), "STONE"));
 	}
 
 	@Test
@@ -130,6 +134,7 @@ public class JobImplTest {
 		Job job = new JobImpl(generalValidator, validationHandler, jobDao, "myJob", true);
 		assertDoesNotThrow(() -> job.addBreedable(EntityType.COW, 1.5));
 		assertDoesNotThrow(() -> assertEquals("1.5", String.valueOf(job.getBreedPrice(EntityType.COW))));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValueInList(Arrays.asList("COW"), "COW"));
 	}
 
 	@Test
