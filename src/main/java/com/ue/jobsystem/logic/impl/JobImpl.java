@@ -127,7 +127,7 @@ public class JobImpl implements Job {
 	@Override
 	public double getBreedPrice(EntityType breedable) throws GeneralEconomyException {
 		validationHandler.checkForValidBreedableEntity(breedable);
-		generalValidator.checkForValueNotInList(new ArrayList<>(getBreedableList().keySet()),
+		generalValidator.checkForValueInList(new ArrayList<>(getBreedableList().keySet()),
 				breedable.toString().toUpperCase());
 		return getBreedableList().get(breedable.toString().toUpperCase());
 	}
@@ -136,14 +136,14 @@ public class JobImpl implements Job {
 	public double getBlockPrice(String material) throws GeneralEconomyException {
 		material = material.toUpperCase();
 		validationHandler.checkForValidMaterial(material);
-		generalValidator.checkForValueNotInList(new ArrayList<>(getBlockList().keySet()), material);
+		generalValidator.checkForValueInList(new ArrayList<>(getBlockList().keySet()), material);
 		return getBlockList().get(material);
 	}
 
 	@Override
 	public double getFisherPrice(String lootType) throws GeneralEconomyException {
 		validationHandler.checkForValidFisherLootType(lootType);
-		generalValidator.checkForValueNotInList(new ArrayList<>(getFisherList().keySet()), lootType);
+		generalValidator.checkForValueInList(new ArrayList<>(getFisherList().keySet()), lootType);
 		return getFisherList().get(lootType);
 	}
 
@@ -151,7 +151,7 @@ public class JobImpl implements Job {
 	public double getKillPrice(String entityName) throws GeneralEconomyException {
 		entityName = entityName.toUpperCase();
 		validationHandler.checkForValidEntityType(entityName);
-		generalValidator.checkForValueNotInList(new ArrayList<>(getEntityList().keySet()), entityName);
+		generalValidator.checkForValueInList(new ArrayList<>(getEntityList().keySet()), entityName);
 		return getEntityList().get(entityName);
 	}
 
