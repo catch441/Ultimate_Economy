@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ue.common.api.CustomSkullService;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
@@ -19,7 +20,6 @@ import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;

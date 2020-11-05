@@ -23,6 +23,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.slf4j.Logger;
 
+import com.ue.common.api.CustomSkullService;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.logic.api.ConfigManager;
@@ -32,7 +33,6 @@ import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.AbstractShop;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.ShopEditorHandler;
 import com.ue.shopsystem.logic.api.ShopSlotEditorHandler;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;

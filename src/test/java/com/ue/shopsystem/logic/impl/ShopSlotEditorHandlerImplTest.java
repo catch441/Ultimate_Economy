@@ -30,11 +30,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.ue.common.api.CustomSkullService;
+import com.ue.common.api.SkullTextureEnum;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.logic.api.AbstractShop;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
 
@@ -63,7 +64,7 @@ public class ShopSlotEditorHandlerImplTest {
 		ItemMeta saveMeta = mock(ItemMeta.class);
 		ItemMeta exitMeta = mock(ItemMeta.class);
 		ItemMeta removeMeta = mock(ItemMeta.class);
-		when(skullService.getSkullWithName("K_OFF", "factor off")).thenReturn(k_off);
+		when(skullService.getSkullWithName(SkullTextureEnum.K_OFF, "factor off")).thenReturn(k_off);
 		when(shop.getName()).thenReturn("myshop");
 		when(shop.getShopVillager()).thenReturn(villager);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(save);
@@ -95,7 +96,7 @@ public class ShopSlotEditorHandlerImplTest {
 		ItemMeta saveMeta = mock(ItemMeta.class);
 		ItemMeta exitMeta = mock(ItemMeta.class);
 		ItemMeta removeMeta = mock(ItemMeta.class);
-		when(skullService.getSkullWithName("K_OFF", "factor off")).thenReturn(k_off);
+		when(skullService.getSkullWithName(SkullTextureEnum.K_OFF, "factor off")).thenReturn(k_off);
 		when(shop.getName()).thenReturn("myshop");
 		when(shop.getShopVillager()).thenReturn(villager);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(save);
@@ -140,12 +141,12 @@ public class ShopSlotEditorHandlerImplTest {
 		ItemMeta sellMeta = mock(ItemMeta.class);
 		ItemMeta buyMeta = mock(ItemMeta.class);
 		ItemMeta emptyMeta = mock(ItemMeta.class);
-		when(skullService.getSkullWithName("PLUS", "plus")).thenReturn(plus);
-		when(skullService.getSkullWithName("TWENTY", "twenty")).thenReturn(twenty);
-		when(skullService.getSkullWithName("TEN", "ten")).thenReturn(ten);
-		when(skullService.getSkullWithName("ONE", "one")).thenReturn(one);
-		when(skullService.getSkullWithName("SELL", "sellprice")).thenReturn(sell);
-		when(skullService.getSkullWithName("BUY", "buyprice")).thenReturn(buy);
+		when(skullService.getSkullWithName(SkullTextureEnum.PLUS, "plus")).thenReturn(plus);
+		when(skullService.getSkullWithName(SkullTextureEnum.TWENTY, "twenty")).thenReturn(twenty);
+		when(skullService.getSkullWithName(SkullTextureEnum.TEN, "ten")).thenReturn(ten);
+		when(skullService.getSkullWithName(SkullTextureEnum.ONE, "one")).thenReturn(one);
+		when(skullService.getSkullWithName(SkullTextureEnum.SELL, "sellprice")).thenReturn(sell);
+		when(skullService.getSkullWithName(SkullTextureEnum.BUY, "buyprice")).thenReturn(buy);
 		when(serverProvider.createItemStack(Material.BARRIER, 1)).thenReturn(empty);
 		when(plus.getItemMeta()).thenReturn(plusMeta);
 		when(twenty.getItemMeta()).thenReturn(twentyMeta);
@@ -213,12 +214,12 @@ public class ShopSlotEditorHandlerImplTest {
 		ItemMeta oneMeta = mock(ItemMeta.class);
 		ItemMeta sellMeta = mock(ItemMeta.class);
 		ItemMeta buyMeta = mock(ItemMeta.class);
-		when(skullService.getSkullWithName("PLUS", "plus")).thenReturn(plus);
-		when(skullService.getSkullWithName("TWENTY", "twenty")).thenReturn(twenty);
-		when(skullService.getSkullWithName("TEN", "ten")).thenReturn(ten);
-		when(skullService.getSkullWithName("ONE", "one")).thenReturn(one);
-		when(skullService.getSkullWithName("SELL", "sellprice")).thenReturn(sell);
-		when(skullService.getSkullWithName("BUY", "buyprice")).thenReturn(buy);
+		when(skullService.getSkullWithName(SkullTextureEnum.PLUS, "plus")).thenReturn(plus);
+		when(skullService.getSkullWithName(SkullTextureEnum.TWENTY, "twenty")).thenReturn(twenty);
+		when(skullService.getSkullWithName(SkullTextureEnum.TEN, "ten")).thenReturn(ten);
+		when(skullService.getSkullWithName(SkullTextureEnum.ONE, "one")).thenReturn(one);
+		when(skullService.getSkullWithName(SkullTextureEnum.SELL, "sellprice")).thenReturn(sell);
+		when(skullService.getSkullWithName(SkullTextureEnum.BUY, "buyprice")).thenReturn(buy);
 		when(plus.getItemMeta()).thenReturn(plusMeta);
 		when(twenty.getItemMeta()).thenReturn(twentyMeta);
 		when(ten.getItemMeta()).thenReturn(tenMeta);
@@ -283,52 +284,52 @@ public class ShopSlotEditorHandlerImplTest {
 
 	@Test
 	public void handleSlotEditorTestPlusAmountSwitchClick() {
-		testPlusMinusSwitch(2, "plus", "minus");
+		testPlusMinusSwitch(2, "plus", "minus", SkullTextureEnum.MINUS);
 	}
 
 	@Test
 	public void handleSlotEditorTestPlusBuyPriceSwitchClick() {
-		testPlusMinusSwitch(20, "plus", "minus");
+		testPlusMinusSwitch(20, "plus", "minus", SkullTextureEnum.MINUS);
 	}
 
 	@Test
 	public void handleSlotEditorTestPlusSellPriceSwitchClick() {
-		testPlusMinusSwitch(11, "plus", "minus");
+		testPlusMinusSwitch(11, "plus", "minus", SkullTextureEnum.MINUS);
 	}
 
 	@Test
 	public void handleSlotEditorTestMinusPlusAmountSwitchClick() {
-		testPlusMinusSwitch(2, "minus", "plus");
+		testPlusMinusSwitch(2, "minus", "plus", SkullTextureEnum.PLUS);
 	}
 
 	@Test
 	public void handleSlotEditorTestMinusSellPriceSwitchClick() {
-		testPlusMinusSwitch(11, "minus", "plus");
+		testPlusMinusSwitch(11, "minus", "plus", SkullTextureEnum.PLUS);
 	}
 
 	@Test
 	public void handleSlotEditorTestMinusBuyPriceSwitchClick() {
-		testPlusMinusSwitch(20, "minus", "plus");
+		testPlusMinusSwitch(20, "minus", "plus", SkullTextureEnum.PLUS);
 	}
 
 	@Test
 	public void handleSlotEditorTestFactorOffSellPriceSwitchClick() {
-		testFactorSwitch(12, "factor off", "factor on", "K_ON");
+		testFactorSwitch(12, "factor off", "factor on", SkullTextureEnum.K_ON);
 	}
 
 	@Test
 	public void handleSlotEditorTestFactorOffBuyPriceSwitchClick() {
-		testFactorSwitch(21, "factor off", "factor on", "K_ON");
+		testFactorSwitch(21, "factor off", "factor on", SkullTextureEnum.K_ON);
 	}
 
 	@Test
 	public void handleSlotEditorTestFactorOnSellPriceSwitchClick() {
-		testFactorSwitch(12, "factor on", "factor off", "K_OFF");
+		testFactorSwitch(12, "factor on", "factor off", SkullTextureEnum.K_OFF);
 	}
 
 	@Test
 	public void handleSlotEditorTestFactorOnBuyPriceSwitchClick() {
-		testFactorSwitch(21, "factor on", "factor off", "K_OFF");
+		testFactorSwitch(21, "factor on", "factor off", SkullTextureEnum.K_OFF);
 	}
 
 	@Test
@@ -1034,7 +1035,7 @@ public class ShopSlotEditorHandlerImplTest {
 		verify(event).setCancelled(true);
 	}
 
-	private void testPlusMinusSwitch(int slot, String before, String after) {
+	private void testPlusMinusSwitch(int slot, String before, String after, SkullTextureEnum skullTypeAfter) {
 		ShopSlotEditorHandlerImpl handler = createSlotEditorHandler();
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		ItemStack currentItem = mock(ItemStack.class);
@@ -1048,7 +1049,7 @@ public class ShopSlotEditorHandlerImplTest {
 		when(event.getSlot()).thenReturn(slot);
 		when(currentItem.getItemMeta()).thenReturn(currentItemMeta);
 		when(currentItemMeta.getDisplayName()).thenReturn(before);
-		when(skullService.getSkullWithName(after.toUpperCase(), after)).thenReturn(skull);
+		when(skullService.getSkullWithName(skullTypeAfter, after)).thenReturn(skull);
 
 		handler.handleSlotEditor(event);
 
@@ -1058,7 +1059,7 @@ public class ShopSlotEditorHandlerImplTest {
 		verify(event).setCancelled(true);
 	}
 
-	private void testFactorSwitch(int slot, String before, String after, String skullType) {
+	private void testFactorSwitch(int slot, String before, String after, SkullTextureEnum skullType) {
 		ShopSlotEditorHandlerImpl handler = createSlotEditorHandler();
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		ItemStack currentItem = mock(ItemStack.class);

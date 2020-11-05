@@ -5,10 +5,11 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.ue.common.api.CustomSkullService;
+import com.ue.common.api.SkullTextureEnum;
 import com.ue.common.utils.ServerProvider;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.logic.api.AbstractShop;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.ShopEditorHandler;
 
 public class ShopEditorHandlerImpl implements ShopEditorHandler {
@@ -74,9 +75,9 @@ public class ShopEditorHandlerImpl implements ShopEditorHandler {
 	public void setOccupied(boolean occupied, int slot) {
 		// +1 for player readable
 		if (occupied) {
-			getEditorInventory().setItem(slot, skullService.getSkullWithName("SLOTFILLED", "Slot " + (slot + 1)));
+			getEditorInventory().setItem(slot, skullService.getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot " + (slot + 1)));
 		} else {
-			getEditorInventory().setItem(slot, skullService.getSkullWithName("SLOTEMPTY", "Slot " + (slot + 1)));
+			getEditorInventory().setItem(slot, skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot " + (slot + 1)));
 		}
 	}
 

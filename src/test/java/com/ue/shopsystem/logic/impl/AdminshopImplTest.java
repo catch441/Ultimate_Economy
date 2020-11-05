@@ -45,6 +45,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
+import com.ue.common.api.CustomSkullService;
+import com.ue.common.api.SkullTextureEnum;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
@@ -56,7 +58,6 @@ import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.api.AdminshopManager;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
 
@@ -104,7 +105,7 @@ public class AdminshopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		return new AdminshopImpl("myshop", "A0", loc, 9, shopDao, serverProvider, skullService, logger,
 				adminshopManager, validationHandler, messageWrapper, configManager, generalValidator);
 	}
@@ -257,7 +258,7 @@ public class AdminshopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(infoItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(skullInfoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(skullInfoItem);
 		Adminshop shop = new AdminshopImpl("myshop", "A0", loc, 9, shopDao, serverProvider, skullService, logger,
 				adminshopManager, validationHandler, messageWrapper, configManager, generalValidator);
 
@@ -324,9 +325,9 @@ public class AdminshopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(infoItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName("SLOTFILLED", "Slot 1")).thenReturn(filledItem);
-		when(skullService.getSkullWithName(eq("SLOTEMPTY"), anyString())).thenReturn(emptyItem);
-		when(skullService.getSkullWithName(eq("K_OFF"), anyString())).thenReturn(skullInfoItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1")).thenReturn(filledItem);
+		when(skullService.getSkullWithName(eq(SkullTextureEnum.SLOTEMPTY), anyString())).thenReturn(emptyItem);
+		when(skullService.getSkullWithName(eq(SkullTextureEnum.K_OFF), anyString())).thenReturn(skullInfoItem);
 
 		when(shopDao.loadShopName()).thenReturn("myshop");
 		when(shopDao.loadShopSize()).thenReturn(9);
@@ -425,7 +426,7 @@ public class AdminshopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(infoItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(skullInfoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(skullInfoItem);
 
 		when(shopDao.loadShopName()).thenReturn("myshop");
 		when(shopDao.loadShopSize()).thenReturn(9);
@@ -704,7 +705,7 @@ public class AdminshopImplTest {
 		assertEquals("item string", shopItem.getItemString());
 		assertEquals(stackCloneClone, shopItem.getItemStack());
 		// verify that the set occupied method of the editor is called
-		verify(skullService).getSkullWithName("SLOTFILLED", "Slot 1");
+		verify(skullService).getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1");
 		verify(shop.getShopInventory()).setItem(0, stackClone);
 		verify(stackClone).setAmount(2);
 		verify(stackMetaClone).setLore(Arrays.asList("§62 buy for §a4.0 $", "§62 sell for §a1.0 $"));
@@ -739,7 +740,7 @@ public class AdminshopImplTest {
 		assertEquals("item string", shopItem.getItemString());
 		assertEquals(stackCloneClone, shopItem.getItemStack());
 		// verify that the set occupied method of the editor is called
-		verify(skullService).getSkullWithName("SLOTFILLED", "Slot 1");
+		verify(skullService).getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1");
 		verify(shop.getShopInventory()).setItem(0, stackClone);
 		verify(stackClone).setAmount(2);
 		verify(stackMetaClone).setLore(Arrays.asList("§62 buy for §a4.0 $"));
@@ -774,7 +775,7 @@ public class AdminshopImplTest {
 		assertEquals("item string", shopItem.getItemString());
 		assertEquals(stackCloneClone, shopItem.getItemStack());
 		// verify that the set occupied method of the editor is called
-		verify(skullService).getSkullWithName("SLOTFILLED", "Slot 1");
+		verify(skullService).getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1");
 		verify(shop.getShopInventory()).setItem(0, stackClone);
 		verify(stackClone).setAmount(2);
 		verify(stackMetaClone).setLore(Arrays.asList("§62 sell for §a1.0 $"));
@@ -1076,7 +1077,7 @@ public class AdminshopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		Adminshop shop = new AdminshopImpl("myshop", "A0", loc, 9, shopDao, serverProvider, skullService, logger,
 				adminshopManager, validationHandler, messageWrapper, configManager, generalValidator);
 
@@ -1152,8 +1153,8 @@ public class AdminshopImplTest {
 		when(infoItemMeta.getDisplayName()).thenReturn("Info");
 		when(infoItem.getItemMeta()).thenReturn(infoItemMeta);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(infoItem);
-		when(skullService.getSkullWithName(eq("SLOTFILLED"), anyString())).thenReturn(filled);
-		when(skullService.getSkullWithName(eq("SLOTEMPTY"), anyString())).thenReturn(empty);
+		when(skullService.getSkullWithName(eq(SkullTextureEnum.SLOTFILLED), anyString())).thenReturn(filled);
+		when(skullService.getSkullWithName(eq(SkullTextureEnum.SLOTEMPTY), anyString())).thenReturn(empty);
 		when(serverProvider.createInventory(shop.getShopVillager(), 18, "myshop-Editor")).thenReturn(editorStuff);
 		when(serverProvider.createInventory(shop.getShopVillager(), 18, "myshop")).thenReturn(inv);
 		assertDoesNotThrow(() -> shop.changeShopSize(18));
@@ -1303,7 +1304,7 @@ public class AdminshopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		AdminshopImpl shop = new AdminshopImpl("myshop", "A0", loc, 9, shopDao, serverProvider, skullService, logger,
 				adminshopManager, validationHandler, messageWrapper, configManager, generalValidator);
 		assertDoesNotThrow(() -> when(validationHandler.isSlotEmpty(0, shop.getShopInventory(), 1)).thenReturn(true));
@@ -1355,7 +1356,7 @@ public class AdminshopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		Adminshop shop = new AdminshopImpl("myshop", "A0", loc, 9, shopDao, serverProvider, skullService, logger,
 				adminshopManager, validationHandler, messageWrapper, configManager, generalValidator);
 		Player player = mock(Player.class);
@@ -1398,7 +1399,7 @@ public class AdminshopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		Adminshop shop = new AdminshopImpl("myshop", "A0", loc, 9, shopDao, serverProvider, skullService, logger,
 				adminshopManager, validationHandler, messageWrapper, configManager, generalValidator);
 

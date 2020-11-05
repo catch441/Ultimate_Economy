@@ -10,13 +10,14 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.ue.common.api.CustomSkullService;
+import com.ue.common.api.SkullTextureEnum;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.logic.api.ConfigManager;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.general.impl.GeneralEconomyException;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopRentGuiHandler;
 
@@ -70,14 +71,14 @@ public class RentshopRentGuiHandlerImpl implements RentshopRentGuiHandler {
 		meta.setDisplayName(ChatColor.YELLOW + "Duration");
 		itemStack.setItemMeta(meta);
 		getRentGui().setItem(1, itemStack);
-		itemStack = skullService.getSkullWithName("PLUS", "plus");
+		itemStack = skullService.getSkullWithName(SkullTextureEnum.PLUS, "plus");
 		getRentGui().setItem(3, itemStack);
-		itemStack = skullService.getSkullWithName("ONE", "one");
+		itemStack = skullService.getSkullWithName(SkullTextureEnum.ONE, "one");
 		meta = itemStack.getItemMeta();
 		meta.setLore(loreList);
 		itemStack.setItemMeta(meta);
 		getRentGui().setItem(4, itemStack);
-		itemStack = skullService.getSkullWithName("SEVEN", "seven");
+		itemStack = skullService.getSkullWithName(SkullTextureEnum.SEVEN, "seven");
 		meta = itemStack.getItemMeta();
 		meta.setLore(loreList);
 		itemStack.setItemMeta(meta);
@@ -189,10 +190,10 @@ public class RentshopRentGuiHandlerImpl implements RentshopRentGuiHandler {
 
 	private void switchPlusMinusRentGUI(String state) {
 		if ("plus".equals(state)) {
-			ItemStack item = skullService.getSkullWithName("MINUS", "minus");
+			ItemStack item = skullService.getSkullWithName(SkullTextureEnum.MINUS, "minus");
 			getRentGui().setItem(3, item);
 		} else {
-			ItemStack item = skullService.getSkullWithName("PLUS", "plus");
+			ItemStack item = skullService.getSkullWithName(SkullTextureEnum.PLUS, "plus");
 			getRentGui().setItem(3, item);
 		}
 	}

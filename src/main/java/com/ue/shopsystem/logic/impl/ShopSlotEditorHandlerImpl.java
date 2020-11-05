@@ -12,12 +12,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.ue.common.api.CustomSkullService;
+import com.ue.common.api.SkullTextureEnum;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.logic.api.AbstractShop;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.ShopSlotEditorHandler;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
@@ -41,8 +42,8 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	 * @param skullService
 	 * @param shop
 	 */
-	public ShopSlotEditorHandlerImpl(ServerProvider serverProvider, MessageWrapper messageWrapper, ShopValidationHandler validationHandler,
-			CustomSkullService skullService, AbstractShop shop) {
+	public ShopSlotEditorHandlerImpl(ServerProvider serverProvider, MessageWrapper messageWrapper,
+			ShopValidationHandler validationHandler, CustomSkullService skullService, AbstractShop shop) {
 		this.shop = shop;
 		this.skullService = skullService;
 		this.validationHandler = validationHandler;
@@ -53,7 +54,8 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	}
 
 	private void setupSlotEditor() {
-		slotEditorInv = serverProvider.createInventory(getShop().getShopVillager(), 27, getShop().getName() + "-SlotEditor");
+		slotEditorInv = serverProvider.createInventory(getShop().getShopVillager(), 27,
+				getShop().getName() + "-SlotEditor");
 		setupFactorItem();
 		setupDefaultItem(Material.GREEN_WOOL, ChatColor.YELLOW + "save changes", 8);
 		setupDefaultItem(Material.RED_WOOL, ChatColor.RED + "exit without save", 7);
@@ -61,11 +63,11 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	}
 
 	private void setupFactorItem() {
-		ItemStack item = skullService.getSkullWithName("K_OFF", "factor off");
+		ItemStack item = skullService.getSkullWithName(SkullTextureEnum.K_OFF, "factor off");
 		getSlotEditorInventory().setItem(12, item);
 		getSlotEditorInventory().setItem(21, item);
 	}
-	
+
 	private void setupDefaultItem(Material material, String displayName, int slot) {
 		ItemStack item = serverProvider.createItemStack(material, 1);
 		ItemMeta meta = item.getItemMeta();
@@ -81,7 +83,8 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 
 	@Override
 	public void changeInventoryName(String newName) {
-		Inventory slotEditorNew = serverProvider.createInventory(getShop().getShopVillager(), 27, newName + "-SlotEditor");
+		Inventory slotEditorNew = serverProvider.createInventory(getShop().getShopVillager(), 27,
+				newName + "-SlotEditor");
 		slotEditorNew.setContents(getSlotEditorInventory().getContents());
 		slotEditorInv = slotEditorNew;
 	}
@@ -108,12 +111,12 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		List<String> listSell = new ArrayList<String>();
 		listBuy.add(ChatColor.GOLD + "Price: " + buyPrice);
 		listSell.add(ChatColor.GOLD + "Price: " + sellPrice);
-		setupItemsInSlotEditor(Arrays.asList(2, 11, 20), "plus", listBuy, listSell);
-		setupItemsInSlotEditor(Arrays.asList(6, 15, 24), "twenty", listBuy, listSell);
-		setupItemsInSlotEditor(Arrays.asList(5, 14, 23), "ten", listBuy, listSell);
-		setupItemsInSlotEditor(Arrays.asList(4, 13, 22), "one", listBuy, listSell);
-		addSkullToSlotEditor("sellprice", 18, listSell, "SELL");
-		addSkullToSlotEditor("buyprice", 9, listBuy, "BUY");
+		setupItemsInSlotEditor(Arrays.asList(2, 11, 20), SkullTextureEnum.PLUS, "plus", listBuy, listSell);
+		setupItemsInSlotEditor(Arrays.asList(6, 15, 24), SkullTextureEnum.TWENTY, "twenty", listBuy, listSell);
+		setupItemsInSlotEditor(Arrays.asList(5, 14, 23), SkullTextureEnum.TEN, "ten", listBuy, listSell);
+		setupItemsInSlotEditor(Arrays.asList(4, 13, 22), SkullTextureEnum.ONE, "one", listBuy, listSell);
+		addSkullToSlotEditor("sellprice", 18, listSell, SkullTextureEnum.SELL);
+		addSkullToSlotEditor("buyprice", 9, listBuy, SkullTextureEnum.BUY);
 		setupSlotItemInSlotEditor(slot);
 	}
 
@@ -132,7 +135,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		}
 	}
 
-	private void addSkullToSlotEditor(String displayName, int slot, List<String> loreList, String skull) {
+	private void addSkullToSlotEditor(String displayName, int slot, List<String> loreList, SkullTextureEnum skull) {
 		ItemStack item = skullService.getSkullWithName(skull, displayName);
 		ItemMeta meta = item.getItemMeta();
 		meta.setLore(loreList);
@@ -140,9 +143,9 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		getSlotEditorInventory().setItem(slot, item);
 	}
 
-	private void setupItemsInSlotEditor(List<Integer> slots, String skullName, List<String> listBuy,
-			List<String> listSell) {
-		ItemStack item = skullService.getSkullWithName(skullName.toUpperCase(), skullName.toLowerCase());
+	private void setupItemsInSlotEditor(List<Integer> slots, SkullTextureEnum skullType, String skullName,
+			List<String> listBuy, List<String> listSell) {
+		ItemStack item = skullService.getSkullWithName(skullType, skullName);
 		getSlotEditorInventory().setItem(slots.get(0), item);
 		ItemMeta meta = item.getItemMeta();
 		meta.setLore(listBuy);
@@ -165,7 +168,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 				double price = getPriceForHandleSlotEditor(event, slot);
 				ItemStack editorItemStack = slotEditorInv.getItem(0);
 				// to exclude any interactio with the selected item
-				if(editorItemStack != event.getCurrentItem()) {
+				if (editorItemStack != event.getCurrentItem()) {
 					String command = "";
 					if (event.getCurrentItem().getItemMeta() != null) {
 						command = event.getCurrentItem().getItemMeta().getDisplayName();
@@ -239,43 +242,41 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 				// remove and add
 				handleRemoveItem(player);
 				getShop().addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
-				player.sendMessage(
-						messageWrapper.getString("added", stackInEditor.getType().toString().toLowerCase()));
+				player.sendMessage(messageWrapper.getString("added", stackInEditor.getType().toString().toLowerCase()));
 			} else {
 				// edit
 				String amountString = generateChangeAmountString(stackInEditor.getAmount(), shopItem);
 				String sellPriceString = generateChangeSellPriceString(sellPrice, shopItem);
 				String buyPriceString = generateChangeBuyPriceString(buyPrice, shopItem);
-				player.sendMessage(getShop().editShopItem(selectedEditorSlot, amountString,
-						sellPriceString, buyPriceString));
+				player.sendMessage(
+						getShop().editShopItem(selectedEditorSlot, amountString, sellPriceString, buyPriceString));
 			}
 		} catch (GeneralEconomyException | ShopSystemException e) {
 			// item is new
 			validationHandler.checkForItemDoesNotExist(stackInEditor.toString(), getShop().getItemList());
 			if (stackInEditor.getType() != Material.BARRIER) {
 				getShop().addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
-				player.sendMessage(
-						messageWrapper.getString("added", stackInEditor.getType().toString().toLowerCase()));
+				player.sendMessage(messageWrapper.getString("added", stackInEditor.getType().toString().toLowerCase()));
 			}
 		}
 	}
-	
+
 	private String generateChangeAmountString(int value, ShopItem shopItem) {
-		if(shopItem.getAmount() == value) {
+		if (shopItem.getAmount() == value) {
 			return "none";
 		}
 		return String.valueOf(value);
 	}
-	
+
 	private String generateChangeSellPriceString(double value, ShopItem shopItem) {
-		if(shopItem.getSellPrice() == value) {
+		if (shopItem.getSellPrice() == value) {
 			return "none";
 		}
 		return String.valueOf(value);
 	}
-	
+
 	private String generateChangeBuyPriceString(double value, ShopItem shopItem) {
-		if(shopItem.getBuyPrice() == value) {
+		if (shopItem.getBuyPrice() == value) {
 			return "none";
 		}
 		return String.valueOf(value);
@@ -286,8 +287,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		String deletedIem = item.getType().toString().toLowerCase();
 		getShop().removeShopItem(selectedEditorSlot);
 		if (item.getType() == Material.SPAWNER) {
-			player.sendMessage(
-					messageWrapper.getString("removed", item.getItemMeta().getDisplayName().toLowerCase()));
+			player.sendMessage(messageWrapper.getString("removed", item.getItemMeta().getDisplayName().toLowerCase()));
 		} else {
 			player.sendMessage(messageWrapper.getString("removed", deletedIem));
 		}
@@ -295,20 +295,20 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 
 	private void handleSwitchFactor(int slot, String state) {
 		if ("factor off".equals(state)) {
-			ItemStack item = skullService.getSkullWithName("K_ON", "factor on");
+			ItemStack item = skullService.getSkullWithName(SkullTextureEnum.K_ON, "factor on");
 			getSlotEditorInventory().setItem(slot, item);
 		} else {
-			ItemStack item = skullService.getSkullWithName("K_OFF", "factor off");
+			ItemStack item = skullService.getSkullWithName(SkullTextureEnum.K_OFF, "factor off");
 			getSlotEditorInventory().setItem(slot, item);
 		}
 	}
 
 	private void handleSwitchPlusMinus(int slot, String state) {
 		if ("plus".equals(state)) {
-			ItemStack item = skullService.getSkullWithName("MINUS", "minus");
+			ItemStack item = skullService.getSkullWithName(SkullTextureEnum.MINUS, "minus");
 			getSlotEditorInventory().setItem(slot, item);
 		} else {
-			ItemStack item = skullService.getSkullWithName("PLUS", "plus");
+			ItemStack item = skullService.getSkullWithName(SkullTextureEnum.PLUS, "plus");
 			getSlotEditorInventory().setItem(slot, item);
 		}
 	}

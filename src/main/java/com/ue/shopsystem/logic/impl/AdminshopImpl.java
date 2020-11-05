@@ -7,6 +7,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.slf4j.Logger;
 
+import com.ue.common.api.CustomSkullService;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.logic.api.ConfigManager;
@@ -18,7 +19,6 @@ import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.api.AdminshopManager;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.impl.TownSystemException;

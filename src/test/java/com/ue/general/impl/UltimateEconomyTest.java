@@ -30,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankManager;
+import com.ue.common.api.CustomSkullService;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.Updater;
@@ -40,7 +41,6 @@ import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemEventHandler;
 import com.ue.shopsystem.logic.api.AdminshopManager;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.shopsystem.logic.api.ShopEventHandler;

@@ -1,4 +1,4 @@
-package com.ue.shopsystem.logic.api;
+package com.ue.common.api;
 
 import org.bukkit.inventory.ItemStack;
 
@@ -12,9 +12,9 @@ public interface CustomSkullService {
 	/**
 	 * Returns a custom skull with a custom name.
 	 * 
-	 * @param skull
+	 * @param skullTexture
 	 * @param name
 	 * @return skull
 	 */
-	public ItemStack getSkullWithName(String skull, String name);
+	public ItemStack getSkullWithName(SkullTextureEnum skullTexture, String name);
 }

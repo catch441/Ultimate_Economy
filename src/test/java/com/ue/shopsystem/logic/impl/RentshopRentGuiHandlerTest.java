@@ -23,6 +23,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.ue.common.api.CustomSkullService;
+import com.ue.common.api.SkullTextureEnum;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.logic.api.ConfigManager;
@@ -30,7 +32,6 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.general.impl.GeneralEconomyException;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.Rentshop;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,9 +66,9 @@ public class RentshopRentGuiHandlerTest {
 		when(oneItem.getItemMeta()).thenReturn(oneItemMeta);
 		when(clockItem.getItemMeta()).thenReturn(clockItemMeta);
 		when(rentItem.getItemMeta()).thenReturn(rentItemMeta);
-		when(skullService.getSkullWithName("PLUS", "plus")).thenReturn(plusItem);
-		when(skullService.getSkullWithName("ONE", "one")).thenReturn(oneItem);
-		when(skullService.getSkullWithName("SEVEN", "seven")).thenReturn(sevenItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.PLUS, "plus")).thenReturn(plusItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.ONE, "one")).thenReturn(oneItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.SEVEN, "seven")).thenReturn(sevenItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(rentItem);
 		when(serverProvider.createItemStack(Material.CLOCK, 1)).thenReturn(clockItem);
 		when(shop.getShopVillager()).thenReturn(villager);
@@ -95,9 +96,9 @@ public class RentshopRentGuiHandlerTest {
 		when(oneItem.getItemMeta()).thenReturn(oneItemMeta);
 		when(clockItem.getItemMeta()).thenReturn(clockItemMeta);
 		when(rentItem.getItemMeta()).thenReturn(rentItemMeta);
-		when(skullService.getSkullWithName("PLUS", "plus")).thenReturn(plusItem);
-		when(skullService.getSkullWithName("ONE", "one")).thenReturn(oneItem);
-		when(skullService.getSkullWithName("SEVEN", "seven")).thenReturn(sevenItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.PLUS, "plus")).thenReturn(plusItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.ONE, "one")).thenReturn(oneItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.SEVEN, "seven")).thenReturn(sevenItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(rentItem);
 		when(serverProvider.createItemStack(Material.CLOCK, 1)).thenReturn(clockItem);
 		when(shop.getShopVillager()).thenReturn(villager);
@@ -156,7 +157,7 @@ public class RentshopRentGuiHandlerTest {
 		when(event.getInventory()).thenReturn(handler.getRentGui());
 		
 		ItemStack minusItem = mock(ItemStack.class);
-		when(skullService.getSkullWithName("MINUS", "minus")).thenReturn(minusItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.MINUS, "minus")).thenReturn(minusItem);
 		
 		handler.handleRentShopGUIClick(event);
 		
@@ -192,7 +193,7 @@ public class RentshopRentGuiHandlerTest {
 		when(event.getInventory()).thenReturn(handler.getRentGui());
 		
 		ItemStack plusItem = mock(ItemStack.class);
-		when(skullService.getSkullWithName("PLUS", "plus")).thenReturn(plusItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.PLUS, "plus")).thenReturn(plusItem);
 		
 		handler.handleRentShopGUIClick(event);
 		
@@ -308,9 +309,9 @@ public class RentshopRentGuiHandlerTest {
 		when(oneItem.getItemMeta()).thenReturn(oneItemMeta);
 		when(clockItem.getItemMeta()).thenReturn(clockItemMeta);
 		when(rentItem.getItemMeta()).thenReturn(rentItemMeta);
-		when(skullService.getSkullWithName("PLUS", "plus")).thenReturn(plusItem);
-		when(skullService.getSkullWithName("ONE", "one")).thenReturn(oneItem);
-		when(skullService.getSkullWithName("SEVEN", "seven")).thenReturn(sevenItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.PLUS, "plus")).thenReturn(plusItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.ONE, "one")).thenReturn(oneItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.SEVEN, "seven")).thenReturn(sevenItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(rentItem);
 		when(serverProvider.createItemStack(Material.CLOCK, 1)).thenReturn(clockItem);
 		when(shop.getShopVillager()).thenReturn(villager);
@@ -377,9 +378,9 @@ public class RentshopRentGuiHandlerTest {
 		when(oneItem.getItemMeta()).thenReturn(oneItemMeta);
 		when(clockItem.getItemMeta()).thenReturn(clockItemMeta);
 		when(rentItem.getItemMeta()).thenReturn(rentItemMeta);
-		when(skullService.getSkullWithName("PLUS", "plus")).thenReturn(plusItem);
-		when(skullService.getSkullWithName("ONE", "one")).thenReturn(oneItem);
-		when(skullService.getSkullWithName("SEVEN", "seven")).thenReturn(sevenItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.PLUS, "plus")).thenReturn(plusItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.ONE, "one")).thenReturn(oneItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.SEVEN, "seven")).thenReturn(sevenItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(rentItem);
 		when(serverProvider.createItemStack(Material.CLOCK, 1)).thenReturn(clockItem);
 		when(shop.getShopVillager()).thenReturn(villager);

@@ -39,6 +39,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
+import com.ue.common.api.CustomSkullService;
+import com.ue.common.api.SkullTextureEnum;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
@@ -49,7 +51,6 @@ import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
@@ -150,7 +151,7 @@ public class PlayershopManagerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(customSkullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		assertDoesNotThrow(() -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
 		
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidShopName("myshop"));
@@ -199,7 +200,7 @@ public class PlayershopManagerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(customSkullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		assertDoesNotThrow(() -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
 	}
 
@@ -299,7 +300,7 @@ public class PlayershopManagerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(customSkullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		assertDoesNotThrow(() -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
 		reset(configDao);
 		Playershop shop = playershopManager.getPlayerShops().get(0);
@@ -336,7 +337,7 @@ public class PlayershopManagerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(customSkullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		when(configDao.hasPlayerShopNames()).thenReturn(false);
 		when(configDao.loadPlayershopIds()).thenReturn(Arrays.asList("P0"));
 		playershopManager.loadAllPlayerShops();
@@ -400,7 +401,7 @@ public class PlayershopManagerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(customSkullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		when(configDao.hasPlayerShopNames()).thenReturn(true);
 		when(configDao.loadPlayerShopNames()).thenReturn(Arrays.asList("myshop"));
 		playershopManager.loadAllPlayerShops();

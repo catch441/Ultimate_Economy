@@ -37,6 +37,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
+import com.ue.common.api.CustomSkullService;
+import com.ue.common.api.SkullTextureEnum;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
@@ -46,7 +48,6 @@ import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Adminshop;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
@@ -116,7 +117,7 @@ public class AdminshopManagerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		assertDoesNotThrow(() -> adminshopManager.createAdminShop("myshop", loc, 9));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidShopName("myshop"));
 		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSize(9));
@@ -150,7 +151,7 @@ public class AdminshopManagerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		assertDoesNotThrow(() -> adminshopManager.createAdminShop("myshop", loc, 9));
 		Adminshop shop = adminshopManager.getAdminshopList().get(0);
 		adminshopManager.deleteAdminShop(shop);
@@ -237,7 +238,7 @@ public class AdminshopManagerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		when(configDao.hasAdminShopNames()).thenReturn(false);
 		when(configDao.loadAdminshopIds()).thenReturn(Arrays.asList("A0"));
 
@@ -312,7 +313,7 @@ public class AdminshopManagerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		when(configDao.hasAdminShopNames()).thenReturn(true);
 		when(configDao.loadAdminShopNames()).thenReturn(Arrays.asList("myshop"));
 		adminshopManager.loadAllAdminShops();
@@ -376,7 +377,7 @@ public class AdminshopManagerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		assertDoesNotThrow(() -> adminshopManager.createAdminShop("myshop", loc, 9));
 	}
 }

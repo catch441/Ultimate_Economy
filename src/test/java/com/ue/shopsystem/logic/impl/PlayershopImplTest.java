@@ -43,6 +43,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
+import com.ue.common.api.CustomSkullService;
+import com.ue.common.api.SkullTextureEnum;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
@@ -53,7 +55,6 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
@@ -129,7 +130,7 @@ public class PlayershopImplTest {
 		when(stockInfoItem.getItemMeta()).thenReturn(stockInfoItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(stockInfoItem);
+		when(customSkullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(stockInfoItem);
 		Playershop shop = new PlayershopImpl("myshop", ecoPlayer, "P0", loc, 9, shopDao, serverProvider,
 				customSkullService, logger, validationHandler, null, messageWrapper, configManager, townworldManager,
 				playershopManager, generalValidator);
@@ -217,7 +218,7 @@ public class PlayershopImplTest {
 		when(stockInfoItem.getItemMeta()).thenReturn(stockInfoItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(stockInfoItem);
+		when(customSkullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(stockInfoItem);
 		
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(shopDao.loadShopName()).thenReturn("myshop");
@@ -313,7 +314,7 @@ public class PlayershopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(customSkullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		return new PlayershopImpl("myshop", ecoPlayer, "P0", loc, 9, shopDao, serverProvider, customSkullService,
 				logger, validationHandler, null, messageWrapper, configManager, townworldManager, playershopManager, generalValidator);
 	}
@@ -344,7 +345,7 @@ public class PlayershopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(customSkullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		Playershop shop = new PlayershopImpl("myshop", ecoPlayer, "P0", loc, 9, shopDao, serverProvider, customSkullService,
 				logger, validationHandler, null, messageWrapper, configManager, townworldManager, playershopManager, generalValidator);
 		assertDoesNotThrow(() -> when(validationHandler.isSlotEmpty(0, shop.getShopInventory(), 1)).thenReturn(true));
@@ -1154,7 +1155,7 @@ public class PlayershopImplTest {
 		assertEquals("item string", shopItem.getItemString());
 		assertEquals(stackCloneClone, shopItem.getItemStack());
 		// verify that the set occupied method of the editor is called
-		verify(customSkullService).getSkullWithName("SLOTFILLED", "Slot 1");
+		verify(customSkullService).getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1");
 		verify(shop.getShopInventory()).setItem(0, stackClone);
 		verify(stackClone).setAmount(2);
 		verify(stackMetaClone).setLore(Arrays.asList("§62 buy for §a4.0 $", "§62 sell for §a1.0 $"));
@@ -1287,7 +1288,7 @@ public class PlayershopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(customSkullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(customSkullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		Playershop shop = new PlayershopImpl("myshop", ecoPlayer, "P0", loc, 9, shopDao, serverProvider,
 				customSkullService, logger, validationHandler, null, messageWrapper, configManager, townworldManager,
 				playershopManager, generalValidator);

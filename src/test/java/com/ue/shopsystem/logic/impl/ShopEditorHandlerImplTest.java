@@ -24,10 +24,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.ue.common.api.CustomSkullService;
+import com.ue.common.api.SkullTextureEnum;
 import com.ue.common.utils.ServerProvider;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.logic.api.AbstractShop;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.ShopEditorHandler;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,12 +53,12 @@ public class ShopEditorHandlerImplTest {
 		when(shop.getName()).thenReturn("myshop");
 		when(shop.getShopVillager()).thenReturn(villager);
 		when(serverProvider.createInventory(villager, 9, "myshop-Editor")).thenReturn(inv);
-		when(skullService.getSkullWithName("SLOTEMPTY", "Slot 1")).thenReturn(stack);
-		when(skullService.getSkullWithName("SLOTEMPTY", "Slot 2")).thenReturn(stack);
-		when(skullService.getSkullWithName("SLOTEMPTY", "Slot 3")).thenReturn(stack);
-		when(skullService.getSkullWithName("SLOTEMPTY", "Slot 4")).thenReturn(stack);
-		when(skullService.getSkullWithName("SLOTEMPTY", "Slot 5")).thenReturn(stack);
-		when(skullService.getSkullWithName("SLOTEMPTY", "Slot 6")).thenReturn(stack);
+		when(skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot 1")).thenReturn(stack);
+		when(skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot 2")).thenReturn(stack);
+		when(skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot 3")).thenReturn(stack);
+		when(skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot 4")).thenReturn(stack);
+		when(skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot 5")).thenReturn(stack);
+		when(skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot 6")).thenReturn(stack);
 		when(shopInv.getItem(0)).thenReturn(null);
 		when(shopInv.getItem(1)).thenReturn(null);
 		when(shopInv.getItem(2)).thenReturn(null);
@@ -66,8 +67,8 @@ public class ShopEditorHandlerImplTest {
 		when(shopInv.getItem(5)).thenReturn(null);
 		when(shopInv.getItem(6)).thenReturn(stackFilled);
 		when(shopInv.getItem(7)).thenReturn(stackFilled);
-		when(skullService.getSkullWithName("SLOTFILLED", "Slot 7")).thenReturn(stackFilled);
-		when(skullService.getSkullWithName("SLOTFILLED", "Slot 8")).thenReturn(stackFilled);
+		when(skullService.getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 7")).thenReturn(stackFilled);
+		when(skullService.getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 8")).thenReturn(stackFilled);
 		new ShopEditorHandlerImpl(serverProvider, skullService, shop);
 		verify(inv).setItem(0, stack);
 		verify(inv).setItem(1, stack);
@@ -92,7 +93,7 @@ public class ShopEditorHandlerImplTest {
 		when(shop.getShopVillager()).thenReturn(villager);
 		when(serverProvider.createInventory(villager, 9, "myshop-Editor")).thenReturn(inv);
 		ShopEditorHandler handler = new ShopEditorHandlerImpl(serverProvider, skullService, shop);
-		when(skullService.getSkullWithName("SLOTFILLED", "Slot 1")).thenReturn(stack);
+		when(skullService.getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1")).thenReturn(stack);
 		handler.setOccupied(true, 0);
 		verify(inv).setItem(0, stack);
 	}
@@ -110,7 +111,7 @@ public class ShopEditorHandlerImplTest {
 		when(serverProvider.createInventory(villager, 9, "myshop-Editor")).thenReturn(inv);
 		ShopEditorHandler handler = new ShopEditorHandlerImpl(serverProvider, skullService, shop);
 		handler.setOccupied(true, 0);
-		when(skullService.getSkullWithName("SLOTEMPTY", "Slot 1")).thenReturn(stack);
+		when(skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot 1")).thenReturn(stack);
 		handler.setOccupied(false, 0);
 		verify(inv).setItem(0, stack);
 	}

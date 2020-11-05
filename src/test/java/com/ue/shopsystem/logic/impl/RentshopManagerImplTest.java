@@ -37,6 +37,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
+import com.ue.common.api.CustomSkullService;
+import com.ue.common.api.SkullTextureEnum;
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
 import com.ue.config.dataaccess.api.ConfigDao;
@@ -45,7 +47,6 @@ import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
-import com.ue.shopsystem.logic.api.CustomSkullService;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
@@ -106,7 +107,7 @@ public class RentshopManagerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 
 		return assertDoesNotThrow(() -> rentshopManager.createRentShop(loc, 9, 2.5));
 	}
@@ -217,7 +218,7 @@ public class RentshopManagerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		Rentshop shop = assertDoesNotThrow(() -> rentshopManager.createRentShop(loc, 9, 2.5));
 		
 		rentshopManager.deleteRentShop(shop);
@@ -265,7 +266,7 @@ public class RentshopManagerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		assertDoesNotThrow(() -> rentshopManager.createRentShop(loc, 9, 2.5));
 		
 		assertDoesNotThrow(() -> verify(generalValidator).checkForPositiveValue(2.5));
@@ -303,7 +304,7 @@ public class RentshopManagerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(serviceComponent.getShopDao()).thenReturn(shopDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(skullService.getSkullWithName(anyString(), anyString())).thenReturn(infoItem);
+		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		when(configDao.loadRentshopIds()).thenReturn(Arrays.asList("R0"));
 
 		rentshopManager.loadAllRentShops();
