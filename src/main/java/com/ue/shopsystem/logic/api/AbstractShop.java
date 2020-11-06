@@ -20,6 +20,30 @@ import com.ue.townsystem.logic.impl.TownSystemException;
 public abstract interface AbstractShop {
 
 	/**
+	 * Setup a new shop. Only Adminshop.
+	 * 
+	 * @param name
+	 * @param shopId
+	 * @param spawnLocation
+	 * @param size
+	 */
+	public void setupNew(String name, String shopId, Location spawnLocation, int size);
+
+	/**
+	 * Setup an existing shop. If name != null then use old loading otherwise use
+	 * new loading. If you choose old loading, the savefile gets converted to the
+	 * new save system.
+	 * 
+	 * @param name
+	 * @param shopId
+	 * @throws TownSystemException
+	 * @throws ShopSystemException
+	 * @throws GeneralEconomyException
+	 */
+	public void setupExisting(String name, String shopId)
+			throws TownSystemException, ShopSystemException, GeneralEconomyException;
+
+	/**
 	 * Returns the name of this shop.
 	 * 
 	 * @return name
@@ -71,7 +95,7 @@ public abstract interface AbstractShop {
 	 * @throws GeneralEconomyException
 	 */
 	public ShopItem getShopItem(int slot) throws GeneralEconomyException, ShopSystemException;
-	
+
 	/**
 	 * Returns a shop item.
 	 * 

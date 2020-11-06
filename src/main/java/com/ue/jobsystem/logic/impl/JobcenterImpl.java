@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -54,7 +56,7 @@ public class JobcenterImpl implements Jobcenter {
 	private Inventory inventory;
 
 	/**
-	 * Constructor for creating a new jobcenter.
+	 * Inject constructor.
 	 * 
 	 * @param logger
 	 * @param jobcenterDao
@@ -63,45 +65,13 @@ public class JobcenterImpl implements Jobcenter {
 	 * @param ecoPlayerManager
 	 * @param validationHandler
 	 * @param serverProvider
-	 * @param name
-	 * @param spawnLocation
-	 * @param size
 	 * @param generalValidator
 	 * @throws JobSystemException
 	 */
+	@Inject
 	public JobcenterImpl(Logger logger, JobcenterDao jobcenterDao, JobManager jobManager,
 			JobcenterManager jobcenterManager, EconomyPlayerManager ecoPlayerManager,
-			JobsystemValidationHandler validationHandler, ServerProvider serverProvider, String name,
-			Location spawnLocation, int size, GeneralEconomyValidationHandler generalValidator)
-			throws JobSystemException {
-		this.jobManager = jobManager;
-		this.logger = logger;
-		this.jobcenterManager = jobcenterManager;
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.validationHandler = validationHandler;
-		this.serverProvider = serverProvider;
-		this.jobcenterDao = jobcenterDao;
-		this.generalValidator = generalValidator;
-		jobcenterDao.setupSavefile(name);
-		setupNewJobcenter(name, spawnLocation, size);
-	}
-
-	/**
-	 * Constructor for loading an existing jobcenter.
-	 * 
-	 * @param logger
-	 * @param jobcenterDao
-	 * @param jobManager
-	 * @param jobcenterManager
-	 * @param ecoPlayerManager
-	 * @param validationHandler
-	 * @param serverProvider
-	 * @param name
-	 * @param generalValidator
-	 */
-	public JobcenterImpl(Logger logger, JobcenterDao jobcenterDao, JobManager jobManager,
-			JobcenterManager jobcenterManager, EconomyPlayerManager ecoPlayerManager,
-			JobsystemValidationHandler validationHandler, ServerProvider serverProvider, String name,
+			JobsystemValidationHandler validationHandler, ServerProvider serverProvider,
 			GeneralEconomyValidationHandler generalValidator) {
 		this.jobManager = jobManager;
 		this.logger = logger;
@@ -111,8 +81,32 @@ public class JobcenterImpl implements Jobcenter {
 		this.serverProvider = serverProvider;
 		this.jobcenterDao = jobcenterDao;
 		this.generalValidator = generalValidator;
+	}
+
+	@Override
+	public void setupNew(String name, Location spawnLocation, int size) {
 		jobcenterDao.setupSavefile(name);
-		loadExistingJobcenter(name);
+		this.name = name;
+		this.size = size;
+		location = spawnLocation;
+		jobcenterDao.saveJobcenterName(name);
+		jobcenterDao.saveJobcenterSize(size);
+		jobcenterDao.saveJobcenterLocation(location);
+		setupVillager();
+		inventory = serverProvider.createInventory(villager, size, getName());
+		setupDefaultJobcenterInventory();
+	}
+	
+	@Override
+	public void setupExisting(String name) {
+		jobcenterDao.setupSavefile(name);
+		this.name = name;
+		location = jobcenterDao.loadJobcenterLocation();
+		size = jobcenterDao.loadJobcenterSize();
+		setupVillager();
+		inventory = serverProvider.createInventory(villager, size, getName());
+		setupDefaultJobcenterInventory();
+		loadJobs();
 	}
 
 	@Override
@@ -225,18 +219,6 @@ public class JobcenterImpl implements Jobcenter {
 		return false;
 	}
 
-	private void setupNewJobcenter(String name, Location spawnLocation, int size) {
-		this.name = name;
-		this.size = size;
-		location = spawnLocation;
-		jobcenterDao.saveJobcenterName(name);
-		jobcenterDao.saveJobcenterSize(size);
-		jobcenterDao.saveJobcenterLocation(location);
-		setupVillager();
-		inventory = serverProvider.createInventory(villager, size, getName());
-		setupDefaultJobcenterInventory();
-	}
-
 	private void setupDefaultJobcenterInventory() {
 		int slot = inventory.getSize() - 1;
 		ItemStack info = serverProvider.createItemStack(Material.ANVIL, 1);
@@ -269,16 +251,6 @@ public class JobcenterImpl implements Jobcenter {
 		villager.setCollidable(false);
 		villager.setInvulnerable(true);
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
-	}
-
-	private void loadExistingJobcenter(String name) {
-		this.name = name;
-		location = jobcenterDao.loadJobcenterLocation();
-		size = jobcenterDao.loadJobcenterSize();
-		setupVillager();
-		inventory = serverProvider.createInventory(villager, size, getName());
-		setupDefaultJobcenterInventory();
-		loadJobs();
 	}
 
 	private void loadJobs() {

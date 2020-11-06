@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -36,6 +35,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
@@ -57,6 +57,8 @@ import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 @ExtendWith(MockitoExtension.class)
 public class JobcenterImplTest {
 
+	@InjectMocks
+	JobcenterImpl jobcenter;
 	@Mock
 	JobManager jobManager;
 	@Mock
@@ -77,7 +79,7 @@ public class JobcenterImplTest {
 	GeneralEconomyValidationHandler generalValidator;
 
 	@Test
-	public void constructorNewTest() throws JobSystemException {
+	public void setupNewTest() throws JobSystemException {
 		Inventory inventory = mock(Inventory.class);
 		Villager villager = mock(Villager.class);
 		Location location = mock(Location.class);
@@ -97,8 +99,7 @@ public class JobcenterImplTest {
 		when(inventory.getSize()).thenReturn(9);
 		when(world.getNearbyEntities(location, 10, 10, 10)).thenReturn(Arrays.asList(entity));
 		when(entity.getCustomName()).thenReturn("center");
-		Jobcenter center = new JobcenterImpl(logger, jobcenterDao, jobManager, jobcenterManager, ecoPlayerManager,
-				jobsystemValidationHandler, serverProvider, "center", location, 9, generalValidator);
+		jobcenter.setupNew("center", location, 9);
 		verify(jobcenterDao).setupSavefile("center");
 		verify(jobcenterDao).saveJobcenterName("center");
 		verify(jobcenterDao).saveJobcenterSize(9);
@@ -116,12 +117,12 @@ public class JobcenterImplTest {
 		verify(meta).setDisplayName("Info");
 		verify(inventory).setItem(eq(8), eq(stack));
 		verify(entity).remove();
-		assertEquals("center", center.getName());
-		assertEquals(location, center.getJobcenterLocation());
+		assertEquals("center", jobcenter.getName());
+		assertEquals(location, jobcenter.getJobcenterLocation());
 	}
 
 	@Test
-	public void constructorLoadTest() {
+	public void setupExistingTest() {
 		Inventory inventory = mock(Inventory.class);
 		Villager villager = mock(Villager.class);
 		Location location = mock(Location.class);
@@ -147,9 +148,7 @@ public class JobcenterImplTest {
 		when(jobcenterDao.loadJobSlot(job)).thenReturn(1);
 		when(job.getName()).thenReturn("myJob");
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myJob")).thenReturn(job));
-
-		Jobcenter center = new JobcenterImpl(logger, jobcenterDao, jobManager, jobcenterManager, ecoPlayerManager,
-				jobsystemValidationHandler, serverProvider, "center", generalValidator);
+		jobcenter.setupExisting("center");
 		verify(jobcenterDao).setupSavefile("center");
 		verify(villager).setCustomName("center");
 		verify(villager).setMetadata(eq("ue-type"), any());
@@ -165,15 +164,15 @@ public class JobcenterImplTest {
 		verify(meta).setDisplayName("myJob");
 		verify(inventory).setItem(eq(8), eq(stack));
 		verify(inventory).setItem(eq(1), eq(stack));
-		assertEquals("center", center.getName());
+		assertEquals("center", jobcenter.getName());
 
-		assertEquals(location, center.getJobcenterLocation());
-		assertEquals(1, center.getJobList().size());
-		assertEquals(job, center.getJobList().get(0));
+		assertEquals(location, jobcenter.getJobcenterLocation());
+		assertEquals(1, jobcenter.getJobList().size());
+		assertEquals(job, jobcenter.getJobList().get(0));
 	}
-	
+
 	@Test
-	public void constructorLoadTestWithFailedToLoadJob() throws GeneralEconomyException {
+	public void setupExistingTestWithFailedToLoadJob() throws GeneralEconomyException {
 		Inventory inventory = mock(Inventory.class);
 		Villager villager = mock(Villager.class);
 		Location location = mock(Location.class);
@@ -197,8 +196,7 @@ public class JobcenterImplTest {
 		when(inventory.getSize()).thenReturn(9);
 		when(jobcenterDao.loadJobNameList()).thenReturn(Arrays.asList("myJob"));
 		assertThrows(GeneralEconomyException.class, () -> jobManager.getJobByName("myJob"));
-		Jobcenter center = new JobcenterImpl(logger, jobcenterDao, jobManager, jobcenterManager, ecoPlayerManager,
-				jobsystemValidationHandler, serverProvider, "center", generalValidator);
+		jobcenter.setupExisting("center");
 		verify(jobcenterDao).setupSavefile("center");
 		verify(villager).setCustomName("center");
 		verify(villager).setMetadata(eq("ue-type"), any());
@@ -212,9 +210,9 @@ public class JobcenterImplTest {
 		verify(meta).setDisplayName("Info");
 		// jobitem
 		verify(inventory).setItem(eq(8), eq(stack));
-		assertEquals("center", center.getName());
-		assertEquals(location, center.getJobcenterLocation());
-		assertEquals(0, center.getJobList().size());
+		assertEquals("center", jobcenter.getName());
+		assertEquals(location, jobcenter.getJobcenterLocation());
+		assertEquals(0, jobcenter.getJobList().size());
 		verify(logger).warn("[Ultimate_Economy] Failed to load the job myJob for the jobcenter center");
 		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
 	}
@@ -227,8 +225,8 @@ public class JobcenterImplTest {
 		ItemMeta meta = mock(ItemMeta.class);
 		when(stack.getItemMeta()).thenReturn(meta);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
-		Jobcenter center = createJobcenter(null, villager, inventory);
-		assertEquals("center", center.getName());
+		setupNewJobcenter(null, villager, inventory);
+		assertEquals("center", jobcenter.getName());
 	}
 
 	@Test
@@ -242,10 +240,10 @@ public class JobcenterImplTest {
 		when(stack.getItemMeta()).thenReturn(meta);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
 		when(serverProvider.createItemStack(Material.STONE, 1)).thenReturn(stack);
-		Jobcenter center = createJobcenter(null, villager, inventory);
-		assertDoesNotThrow(() -> center.addJob(job, "stone", 1));
-		assertTrue(center.hasJob(job));
-		assertFalse(center.hasJob(job2));
+		setupNewJobcenter(null, villager, inventory);
+		assertDoesNotThrow(() -> jobcenter.addJob(job, "stone", 1));
+		assertTrue(jobcenter.hasJob(job));
+		assertFalse(jobcenter.hasJob(job2));
 	}
 
 	@Test
@@ -258,10 +256,10 @@ public class JobcenterImplTest {
 		when(stack.getItemMeta()).thenReturn(meta);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
 		when(serverProvider.createItemStack(Material.STONE, 1)).thenReturn(stack);
-		Jobcenter center = createJobcenter(null, villager, inventory);
-		assertDoesNotThrow(() -> center.addJob(job, "stone", 1));
-		assertEquals(1, center.getJobList().size());
-		assertEquals(job, center.getJobList().get(0));
+		setupNewJobcenter(null, villager, inventory);
+		assertDoesNotThrow(() -> jobcenter.addJob(job, "stone", 1));
+		assertEquals(1, jobcenter.getJobList().size());
+		assertEquals(job, jobcenter.getJobList().get(0));
 	}
 
 	@Test
@@ -272,8 +270,8 @@ public class JobcenterImplTest {
 		ItemMeta meta = mock(ItemMeta.class);
 		when(stack.getItemMeta()).thenReturn(meta);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
-		Jobcenter center = createJobcenter(null, villager, inventory);
-		center.despawnVillager();
+		setupNewJobcenter(null, villager, inventory);
+		jobcenter.despawnVillager();
 		verify(villager).remove();
 	}
 
@@ -286,11 +284,11 @@ public class JobcenterImplTest {
 		ItemMeta meta = mock(ItemMeta.class);
 		when(stack.getItemMeta()).thenReturn(meta);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
-		Jobcenter center = createJobcenter(null, villager, inventory);
-		center.moveJobcenter(location);
+		setupNewJobcenter(null, villager, inventory);
+		jobcenter.moveJobcenter(location);
 		verify(jobcenterDao).saveJobcenterLocation(location);
 		verify(villager).teleport(location);
-		assertEquals(location, center.getJobcenterLocation());
+		assertEquals(location, jobcenter.getJobcenterLocation());
 	}
 
 	@Test
@@ -301,8 +299,8 @@ public class JobcenterImplTest {
 		ItemMeta meta = mock(ItemMeta.class);
 		when(stack.getItemMeta()).thenReturn(meta);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
-		Jobcenter center = createJobcenter(null, mock(Villager.class), inventory);
-		center.openInv(player);
+		setupNewJobcenter(null, mock(Villager.class), inventory);
+		jobcenter.openInv(player);
 		verify(player).openInventory(inventory);
 	}
 
@@ -313,8 +311,8 @@ public class JobcenterImplTest {
 		ItemMeta meta = mock(ItemMeta.class);
 		when(stack.getItemMeta()).thenReturn(meta);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
-		Jobcenter center = createJobcenter(null, villager, mock(Inventory.class));
-		center.deleteJobcenter();
+		setupNewJobcenter(null, villager, mock(Inventory.class));
+		jobcenter.deleteJobcenter();
 		verify(jobcenterDao).deleteSavefile();
 		verify(villager).remove();
 	}
@@ -335,9 +333,9 @@ public class JobcenterImplTest {
 		when(stack.getItemMeta()).thenReturn(meta);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
 		when(serverProvider.createItemStack(Material.STONE, 1)).thenReturn(stack);
-		Jobcenter center = createJobcenter(null, mock(Villager.class), inventory);
-		assertDoesNotThrow(() -> center.addJob(job, "stone", 4));
-		assertDoesNotThrow(() -> center.removeJob(job));
+		setupNewJobcenter(null, mock(Villager.class), inventory);
+		assertDoesNotThrow(() -> jobcenter.addJob(job, "stone", 4));
+		assertDoesNotThrow(() -> jobcenter.removeJob(job));
 
 		assertDoesNotThrow(() -> verify(jobsystemValidationHandler).checkForJobExistsInJobcenter(anyList(), eq(job)));
 		verify(jobcenterDao).saveJob(job, null, 0);
@@ -346,7 +344,7 @@ public class JobcenterImplTest {
 		assertDoesNotThrow(() -> verify(ecoPlayer).leaveJob(job, false));
 		verifyNoMoreInteractions(ecoPlayer2);
 
-		assertEquals(0, center.getJobList().size());
+		assertEquals(0, jobcenter.getJobList().size());
 	}
 
 	@Test
@@ -366,15 +364,15 @@ public class JobcenterImplTest {
 		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		doThrow(e).when(ecoPlayer).leaveJob(job, false);
-		Jobcenter center = createJobcenter(null, mock(Villager.class), inventory);
-		assertDoesNotThrow(() -> center.addJob(job, "stone", 4));
-		assertDoesNotThrow(() -> center.removeJob(job));
+		setupNewJobcenter(null, mock(Villager.class), inventory);
+		assertDoesNotThrow(() -> jobcenter.addJob(job, "stone", 4));
+		assertDoesNotThrow(() -> jobcenter.removeJob(job));
 		assertDoesNotThrow(() -> verify(jobsystemValidationHandler).checkForJobExistsInJobcenter(anyList(), eq(job)));
 		verify(jobcenterDao).saveJob(job, null, 0);
 		verify(jobcenterDao).saveJobNameList(new ArrayList<>());
 		verify(inventory).clear(4);
 		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.leaveJob(job, false));
-		assertEquals(0, center.getJobList().size());
+		assertEquals(0, jobcenter.getJobList().size());
 		verify(logger).warn("[Ultimate_Economy] Failed to leave the job myJob");
 		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
 	}
@@ -387,20 +385,20 @@ public class JobcenterImplTest {
 		when(stack.getItemMeta()).thenReturn(meta);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
 		when(serverProvider.createItemStack(Material.STONE, 1)).thenReturn(stack);
-		Jobcenter center = createJobcenter(null, mock(Villager.class), inventory);
-		Jobcenter center2 = createJobcenter(null, mock(Villager.class), inventory);
+		setupNewJobcenter(null, mock(Villager.class), inventory);
+		Jobcenter center2 = mock(Jobcenter.class);
 		Job job = mock(Job.class);
-		when(jobcenterManager.getJobcenterList()).thenReturn(Arrays.asList(center, center2));
+		when(jobcenterManager.getJobcenterList()).thenReturn(Arrays.asList(center2));
 		when(jobcenterDao.loadJobSlot(job)).thenReturn(4);
-		assertDoesNotThrow(() -> center.addJob(job, "stone", 4));
-		assertDoesNotThrow(() -> center2.addJob(job, "stone", 4));
-		assertDoesNotThrow(() -> center.removeJob(job));
+		assertDoesNotThrow(() -> jobcenter.addJob(job, "stone", 4));
+		when(center2.hasJob(job)).thenReturn(true);
+		assertDoesNotThrow(() -> jobcenter.removeJob(job));
 		verifyNoInteractions(ecoPlayerManager);
 		assertDoesNotThrow(() -> verify(jobsystemValidationHandler).checkForJobExistsInJobcenter(anyList(), eq(job)));
 		verify(jobcenterDao).saveJob(job, null, 0);
 		verify(jobcenterDao).saveJobNameList(new ArrayList<>());
 		verify(inventory).clear(4);
-		assertEquals(0, center.getJobList().size());
+		assertEquals(0, jobcenter.getJobList().size());
 	}
 
 	@Test
@@ -412,10 +410,10 @@ public class JobcenterImplTest {
 		when(job.getName()).thenReturn("myJob");
 		when(stack.getItemMeta()).thenReturn(meta);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
-		Jobcenter center = createJobcenter(null, mock(Villager.class), inventory);
+		setupNewJobcenter(null, mock(Villager.class), inventory);
 		when(serverProvider.createItemStack(Material.STONE, 1)).thenReturn(stack);
 		when(stack.getItemMeta()).thenReturn(meta);
-		assertDoesNotThrow(() -> center.addJob(job, "stone", 4));
+		assertDoesNotThrow(() -> jobcenter.addJob(job, "stone", 4));
 		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(4, 8));
 		assertDoesNotThrow(() -> verify(jobsystemValidationHandler).checkForFreeSlot(inventory, 4));
 		assertDoesNotThrow(
@@ -426,11 +424,11 @@ public class JobcenterImplTest {
 		verify(meta).setDisplayName("myJob");
 		verify(meta).addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 		verify(inventory).setItem(eq(4), eq(stack));
-		assertEquals(1, center.getJobList().size());
-		assertEquals(job, center.getJobList().get(0));
+		assertEquals(1, jobcenter.getJobList().size());
+		assertEquals(job, jobcenter.getJobList().get(0));
 	}
 
-	private Jobcenter createJobcenter(Location location, Villager villager, Inventory invMock) {
+	private void setupNewJobcenter(Location location, Villager villager, Inventory invMock) {
 		if (location == null) {
 			location = mock(Location.class);
 		}
@@ -442,12 +440,6 @@ public class JobcenterImplTest {
 		when(location.getWorld()).thenReturn(world);
 		when(world.spawnEntity(location, EntityType.VILLAGER)).thenReturn(villager);
 		when(serverProvider.createInventory(villager, 9, "center")).thenReturn(invMock);
-		try {
-			return new JobcenterImpl(logger, jobcenterDao, jobManager, jobcenterManager, ecoPlayerManager,
-					jobsystemValidationHandler, serverProvider, "center", location, 9, generalValidator);
-		} catch (JobSystemException e) {
-			fail();
-		}
-		return null;
+		jobcenter.setupNew("center", location, 9);
 	}
 }

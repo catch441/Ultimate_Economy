@@ -16,7 +16,9 @@ import com.ue.bank.logic.api.BankValidationHandler;
 import com.ue.bank.logic.impl.BankManagerImpl;
 import com.ue.bank.logic.impl.BankValidationHandlerImpl;
 import com.ue.common.api.CustomSkullService;
+import com.ue.common.api.InventoryGui;
 import com.ue.common.impl.CustomSkullServiceImpl;
+import com.ue.common.impl.InventoryGuiImpl;
 import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.config.dataaccess.impl.ConfigDaoImpl;
 import com.ue.config.logic.api.ConfigManager;
@@ -42,29 +44,37 @@ import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.jobsystem.dataaccess.impl.JobDaoImpl;
 import com.ue.jobsystem.dataaccess.impl.JobcenterDaoImpl;
 import com.ue.jobsystem.logic.api.JobManager;
+import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemEventHandler;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 import com.ue.jobsystem.logic.impl.JobCommandExecutorImpl;
 import com.ue.jobsystem.logic.impl.JobManagerImpl;
 import com.ue.jobsystem.logic.impl.JobTabCompleterImpl;
+import com.ue.jobsystem.logic.impl.JobcenterImpl;
 import com.ue.jobsystem.logic.impl.JobcenterManagerImpl;
 import com.ue.jobsystem.logic.impl.JobsystemEventHandlerImpl;
 import com.ue.jobsystem.logic.impl.JobsystemValidationHandlerImpl;
 import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.dataaccess.impl.ShopDaoImpl;
+import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.api.AdminshopManager;
+import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.PlayershopManager;
+import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.shopsystem.logic.api.ShopEventHandler;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.impl.AdminshopCommandExecutorImpl;
+import com.ue.shopsystem.logic.impl.AdminshopImpl;
 import com.ue.shopsystem.logic.impl.AdminshopManagerImpl;
 import com.ue.shopsystem.logic.impl.AdminshopTabCompleterImpl;
 import com.ue.shopsystem.logic.impl.PlayershopCommandExecutorImpl;
+import com.ue.shopsystem.logic.impl.PlayershopImpl;
 import com.ue.shopsystem.logic.impl.PlayershopManagerImpl;
 import com.ue.shopsystem.logic.impl.PlayershopTabCompleterImpl;
 import com.ue.shopsystem.logic.impl.RentshopCommandExecutorImpl;
+import com.ue.shopsystem.logic.impl.RentshopImpl;
 import com.ue.shopsystem.logic.impl.RentshopManagerImpl;
 import com.ue.shopsystem.logic.impl.RentshopTabCompleterImpl;
 import com.ue.shopsystem.logic.impl.ShopEventHandlerImpl;
@@ -166,6 +176,31 @@ public class ProviderModule {
 	@Provides
 	MessageWrapper provideMessageWrapper(Logger logger) {
 		return new MessageWrapper(logger);
+	}
+	
+	@Provides
+	InventoryGui provideInventoryGui(InventoryGuiImpl gui) {
+		return gui;
+	}
+	
+	@Provides
+	Jobcenter provideJobcenter(JobcenterImpl jobcenter) {
+		return jobcenter;
+	}
+	
+	@Provides
+	Adminshop provideAdminshop(AdminshopImpl shop) {
+		return shop;
+	}
+	
+	@Provides
+	Playershop providePlayershop(PlayershopImpl shop) {
+		return shop;
+	}
+	
+	@Provides
+	Rentshop provideRentshop(RentshopImpl shop) {
+		return shop;
 	}
 
 	@Singleton

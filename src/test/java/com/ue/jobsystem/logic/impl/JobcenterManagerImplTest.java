@@ -9,25 +9,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyInt;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Villager;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,13 +33,8 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
-import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.jobsystem.logic.api.Job;
-import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
-import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
-
-import dagger.Lazy;
 
 @ExtendWith(MockitoExtension.class)
 public class JobcenterManagerImplTest {
@@ -63,11 +46,7 @@ public class JobcenterManagerImplTest {
 	@Mock
 	EconomyPlayerManager ecoPlayerManager;
 	@Mock
-	JobsystemValidationHandler validationHandler;
-	@Mock
 	ServerProvider serverProvider;
-	@Mock
-	Lazy<JobManager> jobManager;
 	@Mock
 	ConfigDao configDao;
 	@Mock
@@ -77,35 +56,22 @@ public class JobcenterManagerImplTest {
 
 	@Test
 	public void getJobcenterByNameTest() {
-		createJobcenter("other");
-		createJobcenter("center");
+		Jobcenter center1 = createJobcenter("other");
+		Jobcenter center2 = createJobcenter("center");
+		when(center1.getName()).thenReturn("other");
+		when(center2.getName()).thenReturn("center");
 		Jobcenter result = assertDoesNotThrow(() -> manager.getJobcenterByName("center"));
-		assertEquals("center", result.getName());
-
-		new File("src/other-JobCenter.yml").delete();
-		new File("src/center-JobCenter.yml").delete();
+		assertEquals(center2, result);
 	}
 
-	private void createJobcenter(String name) {
-		Inventory inventory = mock(Inventory.class);
-		Villager villager = mock(Villager.class);
-		when(serverProvider.createInventory(villager, 9, name)).thenReturn(inventory);
-		ItemStack stack = mock(ItemStack.class);
-		ItemMeta meta = mock(ItemMeta.class);
-		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
-		when(stack.getItemMeta()).thenReturn(meta);
-		JavaPlugin plugin = mock(JavaPlugin.class);
-		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
+	private Jobcenter createJobcenter(String name) {
 		Location location = mock(Location.class);
-		Chunk chunk = mock(Chunk.class);
-		World world = mock(World.class);
-		when(location.getChunk()).thenReturn(chunk);
-		when(location.getWorld()).thenReturn(world);
-		when(world.spawnEntity(location, EntityType.VILLAGER)).thenReturn(villager);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(serviceComponent.getJobcenterDao()).thenReturn(mock(JobcenterDao.class));
+		Jobcenter center = mock(Jobcenter.class);
+		when(serviceComponent.getJobcenter()).thenReturn(center);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		assertDoesNotThrow(() -> manager.createJobcenter(name, location, 9));
+		return center;
 	}
 
 	@Test
@@ -122,47 +88,26 @@ public class JobcenterManagerImplTest {
 
 	@Test
 	public void getJobcenterNameListTest() {
-		createJobcenter("center");
+		Jobcenter center = createJobcenter("center");
+		when(center.getName()).thenReturn("center");
 		List<String> list = manager.getJobcenterNameList();
 		assertEquals(1, list.size());
 		assertEquals("center", list.get(0));
-		new File("src/center-JobCenter.yml").delete();
 	}
 
 	@Test
 	public void getJobcenterListTest() {
-		createJobcenter("center");
+		Jobcenter center = createJobcenter("center");
 		List<Jobcenter> centers = manager.getJobcenterList();
 		assertEquals(1, centers.size());
-		assertEquals("center", centers.get(0).getName());
-		new File("src/center-JobCenter.yml").delete();
+		assertEquals(center, centers.get(0));
 	}
 
 	@Test
 	public void despawnAllVillagersTest() {
-		Inventory inventory = mock(Inventory.class);
-		Villager villager = mock(Villager.class);
-		when(serverProvider.createInventory(villager, 9, "center")).thenReturn(inventory);
-		ItemStack stack = mock(ItemStack.class);
-		ItemMeta meta = mock(ItemMeta.class);
-		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
-		when(stack.getItemMeta()).thenReturn(meta);
-		JavaPlugin plugin = mock(JavaPlugin.class);
-		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
-		Location location = mock(Location.class);
-		Chunk chunk = mock(Chunk.class);
-		World world = mock(World.class);
-		when(location.getChunk()).thenReturn(chunk);
-		when(location.getWorld()).thenReturn(world);
-		when(world.spawnEntity(location, EntityType.VILLAGER)).thenReturn(villager);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(serviceComponent.getJobcenterDao()).thenReturn(mock(JobcenterDao.class));
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		assertDoesNotThrow(() -> manager.createJobcenter("center", location, 9));
-
+		Jobcenter center = createJobcenter("center");
 		manager.despawnAllVillagers();
-		verify(villager).remove();
-		new File("src/center-JobCenter.yml").delete();
+		verify(center).despawnVillager();;
 	}
 
 	@Test
@@ -242,44 +187,32 @@ public class JobcenterManagerImplTest {
 
 	@Test
 	public void createJobcenterTest() {
-		createJobcenter("center");
+		Location location = mock(Location.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		Jobcenter center = mock(Jobcenter.class);
+		when(center.getName()).thenReturn("center");
+		when(serviceComponent.getJobcenter()).thenReturn(center);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		assertDoesNotThrow(() -> manager.createJobcenter("center", location, 9));
 		assertDoesNotThrow(
 				() -> verify(generalValidator).checkForValueNotInList(new ArrayList<>(), "center"));
 		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSize(9));
 		verify(configDao).saveJobcenterList(Arrays.asList("center"));
-		Jobcenter center = manager.getJobcenterList().get(0);
-		assertEquals("center", center.getName());
+		Jobcenter result = manager.getJobcenterList().get(0);
+		assertEquals(center, result);
+		verify(center).setupNew("center", location, 9);
 	}
 
 	@Test
 	public void loadAllJobcenterTest() {
-		Villager villager = mock(Villager.class);
-		Inventory inventory = mock(Inventory.class);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("center"))).thenReturn(inventory);
-		ItemStack stack = mock(ItemStack.class);
-		ItemMeta meta = mock(ItemMeta.class);
-		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
-		when(stack.getItemMeta()).thenReturn(meta);
-		JavaPlugin plugin = mock(JavaPlugin.class);
-		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
-		Location location = mock(Location.class);
-		Chunk chunk = mock(Chunk.class);
-		World world = mock(World.class);
-		when(location.getChunk()).thenReturn(chunk);
-		when(location.getWorld()).thenReturn(world);
-		when(world.spawnEntity(location, EntityType.VILLAGER)).thenReturn(villager);
-		when(configDao.loadJobcenterList()).thenReturn(Arrays.asList("center"));
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		JobcenterDao jobcenterDao = mock(JobcenterDao.class);
-		when(jobcenterDao.loadJobcenterLocation()).thenReturn(location);
-		when(serviceComponent.getJobcenterDao()).thenReturn(jobcenterDao);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(configDao.loadJobcenterList()).thenReturn(Arrays.asList("center"));
+		Jobcenter center = mock(Jobcenter.class);
+		when(serviceComponent.getJobcenter()).thenReturn(center);
 		manager.loadAllJobcenters();
-		
-		Jobcenter center = manager.getJobcenterList().get(0);
-		assertEquals("center", center.getName());
-		verify(jobcenterDao).loadJobcenterSize();
-
-		new File("src/center-JobCenter.yml").delete();
+		Jobcenter result = manager.getJobcenterList().get(0);
+		assertEquals(center, result);
+		verify(center).setupExisting("center");
 	}
 }

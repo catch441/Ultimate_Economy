@@ -60,12 +60,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	private ShopEditorHandler editorHandler;
 
 	/**
-	 * Constructor for creating a new shop. No validation, if the shopId is unique.
+	 * Inject constructor.
 	 * 
-	 * @param name
-	 * @param shopId
-	 * @param spawnLocation
-	 * @param size
 	 * @param shopDao
 	 * @param serverProvider
 	 * @param skullService
@@ -75,10 +71,9 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 * @param configManager
 	 * @param generalValidator
 	 */
-	public AbstractShopImpl(String name, String shopId, Location spawnLocation, int size, ShopDao shopDao,
-			ServerProvider serverProvider, CustomSkullService skullService, Logger logger,
-			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ConfigManager configManager,
-			GeneralEconomyValidationHandler generalValidator) {
+	public AbstractShopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
+			Logger logger, ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
+			ConfigManager configManager, GeneralEconomyValidationHandler generalValidator) {
 		this.shopDao = shopDao;
 		this.serverProvider = serverProvider;
 		this.skullService = skullService;
@@ -87,43 +82,25 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		this.messageWrapper = messageWrapper;
 		this.configManager = configManager;
 		this.generalValidator = generalValidator;
+	}
+
+	@Override
+	public void setupNew(String name, String shopId, Location spawnLocation, int size) {
 		shopDao.setupSavefile(shopId);
-		setupNewShop(name, shopId, spawnLocation, size);
+		setShopId(shopId);
+		setupShopLocation(spawnLocation);
+		setupShopName(name);
+		setupShopSize(size);
+		setupShopVillager();
+		setupShopInventory();
 		slotEditorHandler = new ShopSlotEditorHandlerImpl(serverProvider, messageWrapper, validationHandler,
 				skullService, this);
 		editorHandler = new ShopEditorHandlerImpl(serverProvider, skullService, this);
 	}
 
-	/**
-	 * Constructor for loading an existing shop. No validation, if the shopId is
-	 * unique. If name != null then use old loading otherwise use new loading. If
-	 * you choose old loading, the savefile gets converted to the new save system.
-	 * 
-	 * @param name              deprecated
-	 * @param shopId
-	 * @param shopDao
-	 * @param serverProvider
-	 * @param skullService
-	 * @param logger
-	 * @param validationHandler
-	 * @param messageWrapper
-	 * @param configManager
-	 * @param generalValidator
-	 * @throws TownSystemException
-	 * @throws ShopSystemException
-	 */
-	public AbstractShopImpl(String name, String shopId, ShopDao shopDao, ServerProvider serverProvider,
-			CustomSkullService skullService, Logger logger, ShopValidationHandler validationHandler,
-			MessageWrapper messageWrapper, ConfigManager configManager,
-			GeneralEconomyValidationHandler generalValidator) throws TownSystemException, ShopSystemException {
-		this.shopDao = shopDao;
-		this.serverProvider = serverProvider;
-		this.skullService = skullService;
-		this.logger = logger;
-		this.validationHandler = validationHandler;
-		this.messageWrapper = messageWrapper;
-		this.configManager = configManager;
-		this.generalValidator = generalValidator;
+	@Override
+	public void setupExisting(String name, String shopId)
+			throws ShopSystemException, TownSystemException, GeneralEconomyException {
 		shopDao.setupSavefile(shopId);
 		if (name != null) {
 			loadExistingShopOld(name, shopId);
@@ -131,11 +108,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 			loadExistingShop(shopId);
 		}
 	}
-
-	/*
-	 * API methods
-	 * 
-	 */
 
 	@Override
 	public List<ShopItem> getItemList() throws ShopSystemException {
@@ -480,20 +452,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	private void setShopId(String shopId) {
 		this.shopId = shopId;
-	}
-
-	/*
-	 * Setup methods
-	 * 
-	 */
-
-	private void setupNewShop(String name, String shopId, Location spawnLocation, int size) {
-		setShopId(shopId);
-		setupShopLocation(spawnLocation);
-		setupShopName(name);
-		setupShopSize(size);
-		setupShopVillager();
-		setupShopInventory();
 	}
 
 	protected void setupShopLocation(Location location) {

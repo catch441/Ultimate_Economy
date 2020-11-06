@@ -9,69 +9,40 @@ import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ue.common.api.CustomSkullService;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
-import com.ue.config.logic.api.ConfigManager;
-import com.ue.economyplayer.logic.api.EconomyPlayerManager;
-import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
-import com.ue.shopsystem.dataaccess.api.ShopDao;
-import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
-import com.ue.shopsystem.logic.api.ShopValidationHandler;
-import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
 public class RentshopManagerImpl implements RentshopManager {
 
 	private List<Rentshop> rentShopList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
-	private final ShopValidationHandler validationHandler;
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final Logger logger;
-	private final CustomSkullService skullService;
-	private final EconomyPlayerManager ecoPlayerManager;
-	private final ConfigManager configManager;
 	private final ConfigDao configDao;
-	private final TownworldManager townworldManager;
-	private final PlayershopManager playershopManager;
 
 	/**
 	 * Inject constructor.
 	 * 
 	 * @param serverProvider
-	 * @param validationHandler
 	 * @param messageWrapper
 	 * @param logger
-	 * @param skullService
-	 * @param ecoPlayerManager
-	 * @param configManager
-	 * @param townworldManager
-	 * @param playershopManager
 	 * @param configDao
 	 * @param generalValidator
 	 */
 	@Inject
-	public RentshopManagerImpl(ServerProvider serverProvider, ShopValidationHandler validationHandler,
-			MessageWrapper messageWrapper, Logger logger, CustomSkullService skullService,
-			EconomyPlayerManager ecoPlayerManager, ConfigManager configManager, TownworldManager townworldManager,
-			PlayershopManager playershopManager, ConfigDao configDao,
-			GeneralEconomyValidationHandler generalValidator) {
+	public RentshopManagerImpl(ServerProvider serverProvider, MessageWrapper messageWrapper, Logger logger,
+			ConfigDao configDao, GeneralEconomyValidationHandler generalValidator) {
 		this.serverProvider = serverProvider;
 		this.messageWrapper = messageWrapper;
-		this.validationHandler = validationHandler;
 		this.logger = logger;
-		this.skullService = skullService;
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.configManager = configManager;
-		this.townworldManager = townworldManager;
-		this.playershopManager = playershopManager;
 		this.configDao = configDao;
 		this.generalValidator = generalValidator;
 	}
@@ -107,7 +78,7 @@ public class RentshopManagerImpl implements RentshopManager {
 					return shop;
 				}
 			} else {
-				if ((name).equals(shop.getName() + "_" + shop.getOwner().getName())) {
+				if (name.equals(shop.getName() + "_" + shop.getOwner().getName())) {
 					return shop;
 				}
 			}
@@ -137,10 +108,8 @@ public class RentshopManagerImpl implements RentshopManager {
 	public Rentshop createRentShop(Location spawnLocation, int size, double rentalFee) throws GeneralEconomyException {
 		generalValidator.checkForValidSize(size);
 		generalValidator.checkForPositiveValue(rentalFee);
-		ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
-		Rentshop shop = new RentshopImpl(spawnLocation, size, generateFreeRentShopId(), rentalFee, shopDao,
-				serverProvider, skullService, logger, validationHandler, ecoPlayerManager, messageWrapper,
-				configManager, townworldManager, playershopManager, generalValidator);
+		Rentshop shop = serverProvider.getServiceComponent().getRentshop();
+		shop.setupNew(generateFreeRentShopId(), spawnLocation, size, rentalFee);
 		rentShopList.add(shop);
 		configDao.saveRentshopIds(getRentShopIdList());
 		return shop;
@@ -164,11 +133,10 @@ public class RentshopManagerImpl implements RentshopManager {
 	public void loadAllRentShops() {
 		for (String shopId : configDao.loadRentshopIds()) {
 			try {
-				ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
-				rentShopList.add(new RentshopImpl(shopId, shopDao, serverProvider, skullService, logger,
-						validationHandler, ecoPlayerManager, messageWrapper, configManager, townworldManager,
-						playershopManager, generalValidator));
-			} catch (TownSystemException | EconomyPlayerException | GeneralEconomyException | ShopSystemException e) {
+				Rentshop shop = serverProvider.getServiceComponent().getRentshop();
+				shop.setupExisting(null, shopId);
+				rentShopList.add(shop);
+			} catch (TownSystemException | GeneralEconomyException | ShopSystemException e) {
 				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}

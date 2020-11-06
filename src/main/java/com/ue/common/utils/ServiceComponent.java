@@ -4,8 +4,10 @@ import javax.inject.Singleton;
 
 import com.ue.general.impl.PluginImpl;
 import com.ue.jobsyste.dataaccess.api.JobDao;
-import com.ue.jobsyste.dataaccess.api.JobcenterDao;
-import com.ue.shopsystem.dataaccess.api.ShopDao;
+import com.ue.jobsystem.logic.api.Jobcenter;
+import com.ue.shopsystem.logic.api.Adminshop;
+import com.ue.shopsystem.logic.api.Playershop;
+import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.townsystem.dataaccess.api.TownworldDao;
 
 import dagger.Component;
@@ -22,26 +24,40 @@ public interface ServiceComponent {
 	void inject(PluginImpl plugin);
 
 	/**
-	 * Provides a jobcenter data access object.
+	 * Provides a jobcenter.
 	 * 
-	 * @return jobcenter dao
+	 * @return jobcenter
 	 */
-	JobcenterDao getJobcenterDao();
+	Jobcenter getJobcenter();
+
+	/**
+	 * Provides a adminshop.
+	 * 
+	 * @return adminshop
+	 */
+	Adminshop getAdminshop();
+
+	/**
+	 * Provides a playershop.
+	 * 
+	 * @return playershop
+	 */
+	Playershop getPlayershop();
 	
+	/**
+	 * Provides a rentshop.
+	 * 
+	 * @return rentshop
+	 */
+	Rentshop getRentshop();
+
 	/**
 	 * Provides a job data access object.
 	 * 
 	 * @return job dao
 	 */
 	JobDao getJobDao();
-	
-	/**
-	 * Provides a shop data access object.
-	 * 
-	 * @return shop dao
-	 */
-	ShopDao getShopDao();
-	
+
 	/**
 	 * Provides a townworld data access onject.
 	 * 

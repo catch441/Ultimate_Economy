@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import org.bukkit.Location;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.MessageWrapper;
@@ -18,7 +17,6 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
-import com.ue.jobsyste.dataaccess.api.JobcenterDao;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
@@ -33,12 +31,7 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	private List<Jobcenter> jobCenterList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerManager ecoPlayerManager;
-	private final JobsystemValidationHandler validationHandler;
 	private final GeneralEconomyValidationHandler generalValidator;
-	// lazy because of circulating dependency, cannot resolved with refactoring
-	// the object will never be created, thats just fine, because it is only used
-	// during load jobcenter jobs and not during runtime
-	private final Lazy<JobManager> jobManager;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
 
@@ -61,9 +54,7 @@ public class JobcenterManagerImpl implements JobcenterManager {
 		this.logger = logger;
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerManager = ecoPlayerManager;
-		this.validationHandler = validationHandler;
 		this.serverProvider = serverProvider;
-		this.jobManager = jobManager;
 		this.configDao = configDao;
 		this.generalValidator = generalValidator;
 	}
@@ -131,20 +122,18 @@ public class JobcenterManagerImpl implements JobcenterManager {
 			throws JobSystemException, GeneralEconomyException {
 		generalValidator.checkForValueNotInList(getJobcenterNameList(), name);
 		generalValidator.checkForValidSize(size);
-		JobcenterDao jobcenterDao = serverProvider.getServiceComponent().getJobcenterDao();
-		Logger logger = LoggerFactory.getLogger(JobcenterImpl.class);
-		getJobcenterList().add(new JobcenterImpl(logger, jobcenterDao, jobManager.get(), this, ecoPlayerManager,
-				validationHandler, serverProvider, name, spawnLocation, size, generalValidator));
+		Jobcenter jobcenter = serverProvider.getServiceComponent().getJobcenter();
+		jobcenter.setupNew(name, spawnLocation, size);
+		getJobcenterList().add(jobcenter);
 		configDao.saveJobcenterList(getJobcenterNameList());
 	}
 
 	@Override
 	public void loadAllJobcenters() {
 		for (String jobCenterName : configDao.loadJobcenterList()) {
-			JobcenterDao jobcenterDao = serverProvider.getServiceComponent().getJobcenterDao();
-			Logger logger = LoggerFactory.getLogger(JobcenterImpl.class);
-			getJobcenterList().add(new JobcenterImpl(logger, jobcenterDao, jobManager.get(), this, ecoPlayerManager,
-					validationHandler, serverProvider, jobCenterName, generalValidator));
+			Jobcenter jobcenter = serverProvider.getServiceComponent().getJobcenter();
+			jobcenter.setupExisting(jobCenterName);
+			getJobcenterList().add(jobcenter);
 		}
 	}
 

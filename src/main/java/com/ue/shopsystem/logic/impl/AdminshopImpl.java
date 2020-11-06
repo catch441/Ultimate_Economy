@@ -1,5 +1,7 @@
 package com.ue.shopsystem.logic.impl;
 
+import javax.inject.Inject;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -28,13 +30,8 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	private final AdminshopManager adminshopManager;
 
 	/**
-	 * Constructor for creating a new adminShop. No validation, if the shopId is
-	 * unique.
+	 * Inject constructor.
 	 * 
-	 * @param name
-	 * @param shopId
-	 * @param spawnLocation
-	 * @param size
 	 * @param shopDao
 	 * @param serverProvider
 	 * @param skullService
@@ -45,42 +42,26 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 * @param configManager
 	 * @param generalValidator
 	 */
-	public AdminshopImpl(String name, String shopId, Location spawnLocation, int size, ShopDao shopDao,
-			ServerProvider serverProvider, CustomSkullService skullService, Logger logger,
+	@Inject
+	public AdminshopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService, Logger logger,
 			AdminshopManager adminshopManager, ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
 			ConfigManager configManager, GeneralEconomyValidationHandler generalValidator) {
-		super(name, shopId, spawnLocation, size, shopDao, serverProvider, skullService, logger, validationHandler,
-				messageWrapper, configManager, generalValidator);
+		super(shopDao, serverProvider, skullService, logger, validationHandler, messageWrapper, configManager,
+				generalValidator);
 		this.adminshopManager = adminshopManager;
+	}
+
+	@Override
+	public void setupNew(String name, String shopId, Location spawnLocation, int size) {
+		super.setupNew(name, shopId, spawnLocation, size);
 		getShopVillager().setMetadata("ue-type",
 				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.ADMINSHOP));
 	}
 
-	/**
-	 * Constructor for loading an existing adminShop. No validation, if the shopId
-	 * is unique. If name != null then use old loading otherwise use new loading
-	 * 
-	 * @param name
-	 * @param shopId
-	 * @param shopDao
-	 * @param serverProvider
-	 * @param skullService
-	 * @param logger
-	 * @param adminshopManager
-	 * @param validationHandler
-	 * @param messageWrapper
-	 * @param configManager
-	 * @param generalValidator
-	 * @throws TownSystemException
-	 * @throws ShopSystemException
-	 */
-	public AdminshopImpl(String name, String shopId, ShopDao shopDao, ServerProvider serverProvider,
-			CustomSkullService skullService, Logger logger, AdminshopManager adminshopManager,
-			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ConfigManager configManager,
-			GeneralEconomyValidationHandler generalValidator) throws TownSystemException, ShopSystemException {
-		super(name, shopId, shopDao, serverProvider, skullService, logger, validationHandler, messageWrapper,
-				configManager, generalValidator);
-		this.adminshopManager = adminshopManager;
+	@Override
+	public void setupExisting(String name, String shopId)
+			throws TownSystemException, ShopSystemException, GeneralEconomyException {
+		super.setupExisting(name, shopId);
 		getShopVillager().setMetadata("ue-type",
 				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.ADMINSHOP));
 	}

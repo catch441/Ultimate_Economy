@@ -3,6 +3,8 @@ package com.ue.shopsystem.logic.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -40,14 +42,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	private Inventory stockPile;
 
 	/**
-	 * Constructor for creating a new playershop. No validation, if the shopId is
-	 * unique.
+	 * Inject constructor.
 	 * 
-	 * @param name
-	 * @param owner
-	 * @param shopId
-	 * @param spawnLocation
-	 * @param size
 	 * @param shopDao
 	 * @param serverProvider
 	 * @param customSkullService
@@ -60,53 +56,38 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 * @param playershopManager
 	 * @param generalValidator
 	 */
-	public PlayershopImpl(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size,
-			ShopDao shopDao, ServerProvider serverProvider, CustomSkullService customSkullService, Logger logger,
-			ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
+	@Inject
+	public PlayershopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService customSkullService,
+			Logger logger, ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,
 			PlayershopManager playershopManager, GeneralEconomyValidationHandler generalValidator) {
-		super(name, shopId, spawnLocation, size, shopDao, serverProvider, customSkullService, logger, validationHandler,
-				messageWrapper, configManager, generalValidator);
+		super(shopDao, serverProvider, customSkullService, logger, validationHandler, messageWrapper, configManager,
+				generalValidator);
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.townworldManager = townworldManager;
 		this.playershopManager = playershopManager;
-		setupPlayerShop(owner);
 	}
 
-	/**
-	 * Constructor for loading an existing playershop. No validation, if the shopId
-	 * is unique. If name != null then use old loading otherwise use new loading.
-	 * 
-	 * @param name               deprecated
-	 * @param shopId
-	 * @param shopDao
-	 * @param serverProvider
-	 * @param customSkullService
-	 * @param logger
-	 * @param validationHandler
-	 * @param ecoPlayerManager
-	 * @param messageWrapper
-	 * @param configManager
-	 * @param townworldManager
-	 * @param playershopManager
-	 * @param generalValidator
-	 * @throws TownSystemException
-	 * @throws EconomyPlayerException
-	 * @throws ShopSystemException
-	 * @throws GeneralEconomyException
-	 */
-	public PlayershopImpl(String name, String shopId, ShopDao shopDao, ServerProvider serverProvider,
-			CustomSkullService customSkullService, Logger logger, ShopValidationHandler validationHandler,
-			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper, ConfigManager configManager,
-			TownworldManager townworldManager, PlayershopManager playershopManager,
-			GeneralEconomyValidationHandler generalValidator)
-			throws TownSystemException, EconomyPlayerException, GeneralEconomyException, ShopSystemException {
-		super(name, shopId, shopDao, serverProvider, customSkullService, logger, validationHandler, messageWrapper,
-				configManager, generalValidator);
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.townworldManager = townworldManager;
-		this.playershopManager = playershopManager;
-		loadExistingPlayerShop(name);
+	@Override
+	public void setupNew(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size) {
+		super.setupNew(name, shopId, spawnLocation, size);
+		setupShopInvDefaultStockItem();
+		setupShopOwner(owner);
+		getEditorHandler().setup(2);
+		setupStockpile();
+		setupEconomyVillagerType();
+	}
+
+	@Override
+	public void setupExisting(String name, String shopId)
+			throws TownSystemException, ShopSystemException, GeneralEconomyException {
+		super.setupExisting(name, shopId);
+		setupShopInvDefaultStockItem();
+		getEditorHandler().setup(2);
+		loadStock();
+		loadOwner(name);
+		loadStockpile();
+		setupEconomyVillagerType();
 	}
 
 	@Override
@@ -364,19 +345,6 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		this.owner = owner;
 	}
 
-	/*
-	 * Setup methods
-	 * 
-	 */
-
-	private void setupPlayerShop(EconomyPlayer owner) {
-		setupShopInvDefaultStockItem();
-		setupShopOwner(owner);
-		getEditorHandler().setup(2);
-		setupStockpile();
-		setupEconomyVillagerType();
-	}
-
 	protected void setupStockpile() {
 		stockPile = serverProvider.createInventory(getShopVillager(), getSize(), getName() + "-Stock");
 		ItemStack stockpileSwitchItem = serverProvider.createItemStack(Material.CRAFTING_TABLE, 1);
@@ -415,21 +383,6 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 			getShopDao().saveOwner(owner);
 			getShopVillager().setCustomName(getName() + "_" + owner.getName());
 		}
-	}
-
-	/*
-	 * Loading methods
-	 * 
-	 */
-
-	private void loadExistingPlayerShop(String name)
-			throws EconomyPlayerException, GeneralEconomyException, ShopSystemException {
-		setupShopInvDefaultStockItem();
-		getEditorHandler().setup(2);
-		loadStock();
-		loadOwner(name);
-		loadStockpile();
-		setupEconomyVillagerType();
 	}
 
 	private void loadStock() {

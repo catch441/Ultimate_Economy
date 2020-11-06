@@ -8,15 +8,12 @@ import javax.inject.Inject;
 import org.bukkit.Location;
 import org.slf4j.Logger;
 
-import com.ue.common.api.CustomSkullService;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
-import com.ue.config.logic.api.ConfigManager;
 import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
-import com.ue.shopsystem.dataaccess.api.ShopDao;
 import com.ue.shopsystem.logic.api.Adminshop;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
@@ -30,9 +27,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final Logger logger;
-	private final CustomSkullService skullService;
 	private final ConfigDao configDao;
-	private final ConfigManager configManager;
 
 	/**
 	 * Inject constructor.
@@ -41,22 +36,17 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	 * @param messageWrapper
 	 * @param logger
 	 * @param serverProvider
-	 * @param skullService
 	 * @param configDao
-	 * @param configManager
 	 * @param generalValidator
 	 */
 	@Inject
 	public AdminshopManagerImpl(ShopValidationHandler validationHandler, MessageWrapper messageWrapper, Logger logger,
-			ServerProvider serverProvider, CustomSkullService skullService, ConfigDao configDao,
-			ConfigManager configManager, GeneralEconomyValidationHandler generalValidator) {
+			ServerProvider serverProvider, ConfigDao configDao, GeneralEconomyValidationHandler generalValidator) {
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
 		this.logger = logger;
 		this.serverProvider = serverProvider;
-		this.skullService = skullService;
 		this.configDao = configDao;
-		this.configManager = configManager;
 		this.generalValidator = generalValidator;
 	}
 
@@ -122,9 +112,9 @@ public class AdminshopManagerImpl implements AdminshopManager {
 		validationHandler.checkForValidShopName(name);
 		generalValidator.checkForValidSize(size);
 		generalValidator.checkForValueNotInList(getAdminshopNameList(), name);
-		ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
-		adminShopList.add(new AdminshopImpl(name, generateFreeAdminShopId(), spawnLocation, size, shopDao,
-				serverProvider, skullService, logger, this, validationHandler, messageWrapper, configManager, generalValidator));
+		Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
+		shop.setupNew(name, generateFreeAdminShopId(), spawnLocation, size);
+		adminShopList.add(shop);
 		configDao.saveAdminshopIds(getAdminshopIdList());
 	}
 
@@ -155,11 +145,10 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	private void loadAllAdminshopsNew() {
 		for (String shopId : configDao.loadAdminshopIds()) {
 			try {
-				ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
-				Adminshop shop = new AdminshopImpl(null, shopId, shopDao, serverProvider, skullService, logger, this,
-						validationHandler, messageWrapper, configManager, generalValidator);
+				Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
+				shop.setupExisting(null, shopId);
 				adminShopList.add(shop);
-			} catch (TownSystemException | ShopSystemException e) {
+			} catch (TownSystemException | ShopSystemException | GeneralEconomyException e) {
 				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
@@ -170,10 +159,10 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	private void loadAllAdminshopsOld() {
 		for (String shopName : configDao.loadAdminShopNames()) {
 			try {
-				ShopDao shopDao = serverProvider.getServiceComponent().getShopDao();
-				adminShopList.add(new AdminshopImpl(shopName, generateFreeAdminShopId(), shopDao, serverProvider,
-						skullService, logger, this, validationHandler, messageWrapper, configManager, generalValidator));
-			} catch (TownSystemException | ShopSystemException e) {
+				Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
+				shop.setupExisting(shopName, generateFreeAdminShopId());
+				adminShopList.add(shop);
+			} catch (TownSystemException | ShopSystemException | GeneralEconomyException e) {
 				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopName);
 				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}

@@ -173,6 +173,7 @@ public class ServerProvider {
 	/**
 	 * Returns the comamnd map of the plugin.
 	 * 
+	 * @param commandMapField
 	 * @return command map
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException

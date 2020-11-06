@@ -1,5 +1,7 @@
 package com.ue.shopsystem.logic.impl;
 
+import javax.inject.Inject;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
@@ -34,13 +36,8 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	private RentshopRentGuiHandlerImpl rentGuiHandler;
 
 	/**
-	 * Constructor for creating a new rentShop. No validation, if the shopId is
-	 * unique.
+	 * Inject constructor.
 	 * 
-	 * @param spawnLocation
-	 * @param size
-	 * @param shopId
-	 * @param rentalFee
 	 * @param shopDao
 	 * @param serverProvider
 	 * @param skullService
@@ -53,52 +50,37 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * @param playershopManager
 	 * @param generalValidator
 	 */
-	public RentshopImpl(Location spawnLocation, int size, String shopId, double rentalFee, ShopDao shopDao,
-			ServerProvider serverProvider, CustomSkullService skullService, Logger logger,
+	@Inject
+	public RentshopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService, Logger logger,
 			ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,
 			PlayershopManager playershopManager, GeneralEconomyValidationHandler generalValidator) {
-		super("RentShop#" + shopId, null, shopId, spawnLocation, size, shopDao, serverProvider, skullService, logger,
-				validationHandler, ecoPlayerManager, messageWrapper, configManager, townworldManager, playershopManager,
-				generalValidator);
-		setupNewRentshop(rentalFee);
+		super(shopDao, serverProvider, skullService, logger, validationHandler, ecoPlayerManager, messageWrapper,
+				configManager, townworldManager, playershopManager, generalValidator);
 	}
-
-	/**
-	 * Constructor for loading an existing playershop. No validation, if the shopId
-	 * is unique.
-	 * 
-	 * @param shopId
-	 * @param shopDao
-	 * @param serverProvider
-	 * @param skullService
-	 * @param logger
-	 * @param validationHandler
-	 * @param ecoPlayerManager
-	 * @param messageWrapper
-	 * @param configManager
-	 * @param townworldManager
-	 * @param playershopManager
-	 * @param generalValidator
-	 * @throws TownSystemException
-	 * @throws EconomyPlayerException
-	 * @throws ShopSystemException
-	 * @throws GeneralEconomyException
-	 */
-	public RentshopImpl(String shopId, ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
-			Logger logger, ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
-			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,
-			PlayershopManager playershopManager, GeneralEconomyValidationHandler generalValidator)
-			throws TownSystemException, EconomyPlayerException, GeneralEconomyException, ShopSystemException {
-		super(null, shopId, shopDao, serverProvider, skullService, logger, validationHandler, ecoPlayerManager,
-				messageWrapper, configManager, townworldManager, playershopManager, generalValidator);
-		loadExistingRentshop();
+	
+	@Override
+	public void setupNew(String shopId, Location spawnLocation, int size, double rentalFee) {
+		super.setupNew("RentShop#" + shopId, null, shopId, spawnLocation, size);
+		setupRentalFee(rentalFee);
+		setupRentable();
+		rentGuiHandler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager, skullService, configManager,
+				this, serverProvider);
+		setupEconomyVillagerType();
 	}
-
-	/*
-	 * API methods
-	 * 
-	 */
+	
+	@Override
+	public void setupExisting(String name, String shopId)
+			throws TownSystemException, ShopSystemException, GeneralEconomyException {
+		super.setupExisting(name, shopId);
+		rentalFee = getShopDao().loadRentalFee();
+		rentable = getShopDao().loadRentable();
+		rentUntil = getShopDao().loadRentUntil();
+		rentGuiHandler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager, skullService, configManager,
+				this, serverProvider);
+		setupEconomyVillagerType();
+		setupVillagerName();
+	}
 
 	/**
 	 * Overridden, because of rentable value. {@inheritDoc}
@@ -349,19 +331,6 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		return rentGuiHandler;
 	}
 
-	/*
-	 * Setup methods
-	 * 
-	 */
-
-	private void setupNewRentshop(double rentalFee) {
-		setupRentalFee(rentalFee);
-		setupRentable();
-		rentGuiHandler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager, skullService, configManager,
-				this, serverProvider);
-		setupEconomyVillagerType();
-	}
-
 	private void setupEconomyVillagerType() {
 		getShopVillager().setMetadata("ue-type",
 				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.PLAYERSHOP_RENTABLE));
@@ -381,15 +350,5 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	private void setupRentalFee(double rentalFee) {
 		this.rentalFee = rentalFee;
 		getShopDao().saveRentalFee(rentalFee);
-	}
-
-	private void loadExistingRentshop() {
-		rentalFee = getShopDao().loadRentalFee();
-		rentable = getShopDao().loadRentable();
-		rentUntil = getShopDao().loadRentUntil();
-		rentGuiHandler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager, skullService, configManager,
-				this, serverProvider);
-		setupEconomyVillagerType();
-		setupVillagerName();
 	}
 }
