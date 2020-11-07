@@ -1,8 +1,6 @@
 package com.ue.shopsystem.logic.api;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
@@ -77,20 +75,4 @@ public interface Playershop extends AbstractShop {
 	 * @throws GeneralEconomyException
 	 */
 	public boolean isAvailable(int slot) throws ShopSystemException, GeneralEconomyException;
-
-	/**
-	 * This method opens the stockpile inventory.
-	 * 
-	 * @param player
-	 * @throws ShopSystemException
-	 */
-	public void openStockpile(Player player) throws ShopSystemException;
-
-	/**
-	 * Returns the stockpile inventory.
-	 * 
-	 * @return stockpile inventory
-	 * @throws ShopSystemException
-	 */
-	public Inventory getStockpileInventory() throws ShopSystemException;
 }

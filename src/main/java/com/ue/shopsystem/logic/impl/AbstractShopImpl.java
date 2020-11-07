@@ -21,7 +21,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.slf4j.Logger;
 
 import com.ue.common.api.CustomSkullService;
 import com.ue.common.utils.MessageWrapper;
@@ -54,7 +53,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	private Map<Integer, ShopItem> shopItems = new HashMap<>();
 	private String name;
 	private String shopId;
-	private final Logger logger;
 	private final ShopDao shopDao;
 	private ShopSlotEditorHandler slotEditorHandler;
 	private ShopEditorHandler editorHandler;
@@ -65,19 +63,17 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	 * @param shopDao
 	 * @param serverProvider
 	 * @param skullService
-	 * @param logger
 	 * @param validationHandler
 	 * @param messageWrapper
 	 * @param configManager
 	 * @param generalValidator
 	 */
 	public AbstractShopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
-			Logger logger, ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
 			ConfigManager configManager, GeneralEconomyValidationHandler generalValidator) {
 		this.shopDao = shopDao;
 		this.serverProvider = serverProvider;
 		this.skullService = skullService;
-		this.logger = logger;
 		this.validationHandler = validationHandler;
 		this.messageWrapper = messageWrapper;
 		this.configManager = configManager;
@@ -402,7 +398,11 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	protected void addShopItemToInv(ItemStack itemStack, int amount, int slot, double sellPrice, double buyPrice) {
 		ItemMeta meta = itemStack.getItemMeta();
-		List<String> loreList = createItemLoreList(meta, amount, sellPrice, buyPrice);
+		List<String> loreList = new ArrayList<>();
+		if(meta.hasLore()) {
+			loreList = meta.getLore();
+		}
+		loreList.addAll(createItemLoreList(meta, amount, sellPrice, buyPrice));
 		meta.setLore(loreList);
 		itemStack.setItemMeta(meta);
 		itemStack.setAmount(amount);
@@ -410,7 +410,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	private List<String> createItemLoreList(ItemMeta meta, int amount, double sellPrice, double buyPrice) {
-		if ("Info".equals(meta.getDisplayName()) || "Stock".equals(meta.getDisplayName())) {
+		if ("Info".equals(meta.getDisplayName())) {
 			return createDefaultItemLoreList(meta);
 		} else {
 			return createShopItemLoreList(meta, amount, sellPrice, buyPrice);
@@ -443,9 +443,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 			list.add(ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "sell specified amount");
 			list.add(ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "sell all");
 			list.add(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "buy");
-		} else if ("Stock".equals(meta.getDisplayName())) {
-			list.add(ChatColor.RED + "Only for Shopowner");
-			list.add(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile");
 		}
 		return list;
 	}
@@ -547,13 +544,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	@Deprecated
 	private void loadExistingShopOld(String name, String shopId) throws TownSystemException, ShopSystemException {
-		try {
-			getShopDao().changeSavefileName(serverProvider.getPluginInstance().getDataFolder(), shopId);
-			loadExistingShop(shopId);
-		} catch (ShopSystemException e) {
-			logger.warn("[Ultimate_Economy] Failed to change savefile name to new save system");
-			logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
-			throw e;
-		}
+		getShopDao().changeSavefileName(serverProvider.getPluginInstance().getDataFolder(), shopId);
+		loadExistingShop(shopId);
 	}
 }

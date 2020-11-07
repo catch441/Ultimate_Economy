@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.slf4j.Logger;
 
 import com.ue.common.api.CustomSkullService;
 import com.ue.common.utils.MessageWrapper;
@@ -41,7 +40,6 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * @param shopDao
 	 * @param serverProvider
 	 * @param skullService
-	 * @param logger
 	 * @param validationHandler
 	 * @param ecoPlayerManager
 	 * @param messageWrapper
@@ -51,11 +49,11 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * @param generalValidator
 	 */
 	@Inject
-	public RentshopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService, Logger logger,
+	public RentshopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
 			ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,
 			PlayershopManager playershopManager, GeneralEconomyValidationHandler generalValidator) {
-		super(shopDao, serverProvider, skullService, logger, validationHandler, ecoPlayerManager, messageWrapper,
+		super(shopDao, serverProvider, skullService, validationHandler, ecoPlayerManager, messageWrapper,
 				configManager, townworldManager, playershopManager, generalValidator);
 	}
 	
@@ -163,15 +161,6 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	public void removeShopItem(int slot) throws ShopSystemException, GeneralEconomyException {
 		validationHandler.checkForIsRented(isRentable());
 		super.removeShopItem(slot);
-	}
-
-	/**
-	 * Overridden, because of rentable value. {@inheritDoc}
-	 */
-	@Override
-	public void openStockpile(Player player) throws ShopSystemException {
-		validationHandler.checkForIsRented(isRentable());
-		super.openStockpile(player);
 	}
 
 	/**
@@ -308,7 +297,6 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		setupShopName("RentShop#" + getShopId());
 		changeInventoryNames("RentShop#" + getShopId());
 		getShopVillager().setCustomName("RentShop#" + getShopId());
-		setupStockpile();
 
 		rentable = true;
 		getShopDao().saveRentable(true);

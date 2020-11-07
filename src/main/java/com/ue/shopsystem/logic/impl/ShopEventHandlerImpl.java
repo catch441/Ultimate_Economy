@@ -4,7 +4,6 @@ import javax.inject.Inject;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
@@ -16,7 +15,6 @@ import com.ue.general.impl.EconomyVillager;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.logic.api.AbstractShop;
 import com.ue.shopsystem.logic.api.AdminshopManager;
-import com.ue.shopsystem.logic.api.Playershop;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
@@ -104,10 +102,7 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 		if (economyVillager == EconomyVillager.ADMINSHOP) {
 			reservedSlots = 1;
 		}
-		if (event.getClick() == ClickType.MIDDLE) {
-			String inventoryName = event.getView().getTitle();
-			handleSwitchStockpile(abstractShop, ecoPlayer, economyVillager, inventoryName);
-		} else if (event.getRawSlot() < (abstractShop.getSize() - reservedSlots)
+		if (event.getRawSlot() < (abstractShop.getSize() - reservedSlots)
 				|| event.getRawSlot() >= abstractShop.getSize()) {
 			switch (event.getClick()) {
 			case LEFT:
@@ -121,17 +116,6 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 				break;
 			default:
 				break;
-			}
-		}
-	}
-
-	private void handleSwitchStockpile(AbstractShop abstractShop, EconomyPlayer ecoPlayer,
-			EconomyVillager economyVillager, String inventoryName) throws ShopSystemException {
-		if (economyVillager == EconomyVillager.PLAYERSHOP || economyVillager == EconomyVillager.PLAYERSHOP_RENTABLE) {
-			if ((abstractShop.getName() + "-Stock").equals(inventoryName)) {
-				abstractShop.openShopInventory(ecoPlayer.getPlayer());
-			} else {
-				((Playershop) abstractShop).openStockpile(ecoPlayer.getPlayer());
 			}
 		}
 	}

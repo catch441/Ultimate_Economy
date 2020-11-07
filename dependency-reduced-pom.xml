@@ -4,7 +4,7 @@
   <groupId>Ultimate_Economy</groupId>
   <artifactId>Ultimate_Economy</artifactId>
   <name>Ultimate_Economy</name>
-  <version>1.2.6</version>
+  <version>1.2.6b</version>
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
     <defaultGoal>clean package</defaultGoal>

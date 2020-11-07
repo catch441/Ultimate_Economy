@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -104,25 +103,18 @@ public class RentshopImplTest {
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
 		Chunk chunk = mock(Chunk.class);
-		ItemStack stockInfoItem = mock(ItemStack.class);
 		ItemStack infoItem = mock(ItemStack.class);
 		ItemStack stuff = mock(ItemStack.class);
 		ItemMeta stuffMeta = mock(ItemMeta.class);
 		ItemMeta meta = mock(ItemMeta.class);
-		ItemMeta stockInfoItemMeta = mock(ItemMeta.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory invStock = mock(Inventory.class);
 		Inventory editorStuff = mock(Inventory.class);
 		when(meta.getDisplayName()).thenReturn("Info");
-		when(stockInfoItemMeta.getDisplayName()).thenReturn("Stock");
-		when(stockInfoItem.getItemMeta()).thenReturn(stockInfoItemMeta);
 		when(stuff.getItemMeta()).thenReturn(stuffMeta);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-Editor"))).thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-SlotEditor")))
 				.thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0"))).thenReturn(inv);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-Stock"))).thenReturn(invStock);
-		when(serverProvider.createItemStack(Material.CRAFTING_TABLE, 1)).thenReturn(stockInfoItem);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(infoItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(stuff);
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(stuff);
@@ -161,20 +153,6 @@ public class RentshopImplTest {
 				"§6Leftclick: §abuy"));
 		verify(inv).setItem(8, infoItem);
 
-		verify(stockInfoItemMeta).setDisplayName("Stock");
-		verify(stockInfoItem, times(3)).setItemMeta(stockInfoItemMeta);
-		verify(stockInfoItemMeta).setLore(Arrays.asList(ChatColor.RED + "Only for Shopowner",
-				ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile"));
-		verify(inv).setItem(7, stockInfoItem);
-
-		// stockpile
-		verify(stockInfoItemMeta).setDisplayName("Infos");
-		verify(stockInfoItemMeta)
-				.setLore(Arrays.asList(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "close stockpile",
-						ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "add specified amount",
-						ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "add all",
-						ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "get specified amount"));
-		assertDoesNotThrow(() -> verify(rentshop.getStockpileInventory()).setItem(8, stockInfoItem));
 		// rentshop
 		assertEquals(5.5, rentshop.getRentalFee());
 		verify(shopDao).saveRentalFee(5.5);
@@ -192,14 +170,12 @@ public class RentshopImplTest {
 		ItemStack infoItem = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory invStock = mock(Inventory.class);
 		Inventory editorStuff = mock(Inventory.class);
 		when(meta.getDisplayName()).thenReturn("Info");
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-Editor"))).thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-SlotEditor")))
 				.thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0"))).thenReturn(inv);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-Stock"))).thenReturn(invStock);
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
@@ -224,16 +200,12 @@ public class RentshopImplTest {
 		ItemMeta infoItemMeta = mock(ItemMeta.class);
 		ItemMeta stockInfoItemMeta = mock(ItemMeta.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory invStock = mock(Inventory.class);
 		Inventory editorStuff = mock(Inventory.class);
-		when(stockInfoItemMeta.getDisplayName()).thenReturn("Stock");
 		when(infoItemMeta.getDisplayName()).thenReturn("Info");
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-Editor"))).thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-SlotEditor")))
 				.thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0"))).thenReturn(inv);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("RentShop#R0-Stock"))).thenReturn(invStock);
-		when(serverProvider.createItemStack(Material.CRAFTING_TABLE, 1)).thenReturn(stockInfoItem);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(infoItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(stuff);
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(stuff);
@@ -275,26 +247,12 @@ public class RentshopImplTest {
 		assertNull(rentshop.getOwner());
 		assertEquals("RentShop#R0", rentshop.getName());
 
-		verify(stockInfoItemMeta).setDisplayName("Stock");
-		verify(stockInfoItem, times(5)).setItemMeta(stockInfoItemMeta);
-		verify(stockInfoItemMeta).setLore(Arrays.asList(ChatColor.RED + "Only for Shopowner",
-				ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "open/close stockpile"));
-		verify(inv).setItem(7, stockInfoItem);
-
 		verify(infoItemMeta).setDisplayName("Info");
 		verify(infoItem, times(2)).setItemMeta(infoItemMeta);
 		verify(infoItemMeta).setLore(Arrays.asList("§6Rightclick: §asell specified amount",
 				"§6Shift-Rightclick: §asell all", "§6Leftclick: §abuy"));
 		verify(inv).setItem(8, infoItem);
 
-		// stockpile
-		verify(stockInfoItemMeta).setDisplayName("Infos");
-		verify(stockInfoItemMeta)
-				.setLore(Arrays.asList(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "close stockpile",
-						ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "add specified amount",
-						ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "add all",
-						ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "get specified amount"));
-		assertDoesNotThrow(() -> verify(rentshop.getStockpileInventory()).setItem(8, stockInfoItem));
 		// rentshop
 		assertEquals(5.5, rentshop.getRentalFee());
 		assertTrue(rentshop.isRentable());
@@ -334,7 +292,6 @@ public class RentshopImplTest {
 		createRentshop();
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory invStock = mock(Inventory.class);
 		Inventory editor = mock(Inventory.class);
 		Inventory slotEditor = mock(Inventory.class);
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-Editor")))
@@ -342,21 +299,17 @@ public class RentshopImplTest {
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-SlotEditor")))
 				.thenReturn(slotEditor);
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0"))).thenReturn(inv);
-		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-Stock")))
-				.thenReturn(invStock);
 
 		assertDoesNotThrow(() -> rentshop.rentShop(ecoPlayer, 1));
 
 		Inventory invNew = mock(Inventory.class);
 		Inventory editorNew = mock(Inventory.class);
 		Inventory slotEditorNew = mock(Inventory.class);
-		Inventory stockNew = mock(Inventory.class);
 
 		when(serverProvider.createInventory(rentshop.getShopVillager(), 9, "newName")).thenReturn(invNew);
 		when(serverProvider.createInventory(rentshop.getShopVillager(), 9, "newName-Editor")).thenReturn(editorNew);
 		when(serverProvider.createInventory(rentshop.getShopVillager(), 27, "newName-SlotEditor"))
 				.thenReturn(slotEditorNew);
-		when(serverProvider.createInventory(rentshop.getShopVillager(), 9, "newName-Stock")).thenReturn(stockNew);
 		when(ecoPlayer.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> rentshop.changeShopName("newName"));
 
@@ -375,7 +328,6 @@ public class RentshopImplTest {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 
 		Inventory inv = mock(Inventory.class);
-		Inventory invStock = mock(Inventory.class);
 		Inventory editorStuff = mock(Inventory.class);
 		when(ecoPlayer.getName()).thenReturn("catch441");
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-Editor")))
@@ -383,8 +335,6 @@ public class RentshopImplTest {
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-SlotEditor")))
 				.thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0"))).thenReturn(inv);
-		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-Stock")))
-				.thenReturn(invStock);
 		when(serverProvider.getActualTime()).thenReturn(10L);
 
 		assertDoesNotThrow(() -> rentshop.rentShop(ecoPlayer, 2));
@@ -473,7 +423,6 @@ public class RentshopImplTest {
 		assertEquals(18, rentshop.getSize());
 		verify(shopDao).saveShopSize(18);
 		verify(serverProvider).createInventory(rentshop.getShopVillager(), 18, "RentShop#R0");
-		verify(serverProvider).createInventory(rentshop.getShopVillager(), 18, "RentShop#R0-Stock");
 		verify(serverProvider).createInventory(rentshop.getShopVillager(), 18, "RentShop#R0-Editor");
 	}
 
@@ -497,15 +446,12 @@ public class RentshopImplTest {
 		createRentshop();
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory invStock = mock(Inventory.class);
 		Inventory editorStuff = mock(Inventory.class);
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-Editor")))
 				.thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-SlotEditor")))
 				.thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0"))).thenReturn(inv);
-		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-Stock")))
-				.thenReturn(invStock);
 
 		assertDoesNotThrow(() -> rentshop.rentShop(ecoPlayer, 1));
 		Player player = mock(Player.class);
@@ -702,16 +648,14 @@ public class RentshopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack shopInvStack = mock(ItemStack.class);
-		ItemStack shopInvStackClone = mock(ItemStack.class);
 		ItemMeta shopInvStackMeta = mock(ItemMeta.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
-		when(shopInvStackClone.getItemMeta()).thenReturn(shopInvStackMeta);
+		when(shopInvStack.getItemMeta()).thenReturn(shopInvStackMeta);
 		when(rentshop.getShopInventory().getItem(3)).thenReturn(shopInvStack);
 		when(stack.getAmount()).thenReturn(1);
 		when(stack.toString()).thenReturn("item string");
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
-		when(shopInvStack.clone()).thenReturn(shopInvStackClone);
 		assertDoesNotThrow(() -> rentshop.addShopItem(3, 1, 2, stack));
 		assertDoesNotThrow(() -> rentshop.addShopItem(4, 1, 2, stack));
 
@@ -719,7 +663,7 @@ public class RentshopImplTest {
 
 		assertDoesNotThrow(() -> assertTrue(rentshop.isAvailable(3)));
 		assertDoesNotThrow(() -> assertFalse(rentshop.isAvailable(4)));
-		assertDoesNotThrow(() -> verify(generalValidator, times(2)).checkForValidSlot(3, 7));
+		assertDoesNotThrow(() -> verify(generalValidator, times(2)).checkForValidSlot(3, 8));
 		assertDoesNotThrow(() -> verify(validationHandler, times(13)).checkForIsRented(false));
 	}
 
@@ -753,16 +697,14 @@ public class RentshopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack shopInvStack = mock(ItemStack.class);
-		ItemStack shopInvStackClone = mock(ItemStack.class);
 		ItemMeta shopInvStackMeta = mock(ItemMeta.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
-		when(shopInvStackClone.getItemMeta()).thenReturn(shopInvStackMeta);
+		when(shopInvStack.getItemMeta()).thenReturn(shopInvStackMeta);
 		when(rentshop.getShopInventory().getItem(3)).thenReturn(shopInvStack);
 		when(stack.getAmount()).thenReturn(1);
 		when(stack.toString()).thenReturn("item string");
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
-		when(shopInvStack.clone()).thenReturn(shopInvStackClone);
 		assertDoesNotThrow(() -> rentshop.addShopItem(3, 1, 2, stack));
 
 		assertDoesNotThrow(() -> rentshop.increaseStock(3, 10));
@@ -770,7 +712,7 @@ public class RentshopImplTest {
 
 		assertDoesNotThrow(() -> verify(validationHandler, times(10)).checkForIsRented(false));
 		assertDoesNotThrow(() -> verify(generalValidator).checkForPositiveValue(5));
-		assertDoesNotThrow(() -> verify(generalValidator, times(2)).checkForValidSlot(3, 7));
+		assertDoesNotThrow(() -> verify(generalValidator, times(2)).checkForValidSlot(3, 8));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidStockDecrease(10, 5));
 		verify(shopDao).saveStock("item string", 5);
 		verify(shopInvStackMeta).setLore(Arrays.asList("§a5§6 Items"));
@@ -791,26 +733,23 @@ public class RentshopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack shopInvStack = mock(ItemStack.class);
-		ItemStack shopInvStackClone = mock(ItemStack.class);
 		ItemMeta shopInvStackMeta = mock(ItemMeta.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
-		when(shopInvStackClone.getItemMeta()).thenReturn(shopInvStackMeta);
+		when(shopInvStack.getItemMeta()).thenReturn(shopInvStackMeta);
 		when(rentshop.getShopInventory().getItem(3)).thenReturn(shopInvStack);
 		when(stack.getAmount()).thenReturn(1);
 		when(stack.toString()).thenReturn("item string");
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
-		when(shopInvStack.clone()).thenReturn(shopInvStackClone);
 		assertDoesNotThrow(() -> rentshop.addShopItem(3, 1, 2, stack));
 
 		assertDoesNotThrow(() -> rentshop.increaseStock(3, 1));
 
 		assertDoesNotThrow(() -> verify(validationHandler, times(7)).checkForIsRented(false));
 		assertDoesNotThrow(() -> verify(generalValidator).checkForPositiveValue(1));
-		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(3, 7));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(3, 8));
 		verify(shopDao).saveStock("item string", 1);
 		verify(shopInvStackMeta).setLore(Arrays.asList("§a1§6 Item"));
-		assertDoesNotThrow(() -> verify(rentshop.getStockpileInventory(), times(2)).setItem(3, shopInvStackClone));
 	}
 
 	@Test
@@ -828,9 +767,11 @@ public class RentshopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		ItemMeta stackMeta = mock(ItemMeta.class);
 		when(stack.getAmount()).thenReturn(1);
 		when(stack.toString()).thenReturn("item string");
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.getItemMeta()).thenReturn(stackMeta);
 		when(stack.clone()).thenReturn(stackClone);
 		when(rentshop.getShopInventory().getItem(3)).thenReturn(stack);
 		assertDoesNotThrow(() -> rentshop.addShopItem(3, 1, 2, stack));
@@ -839,44 +780,23 @@ public class RentshopImplTest {
 
 		assertDoesNotThrow(() -> verify(validationHandler, times(6)).checkForIsRented(false));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForItemCanBeDeleted(3, 9));
-		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(3, 7));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsNotEmpty(3, rentshop.getShopInventory(), 2));
+		assertDoesNotThrow(() -> verify(generalValidator, times(2)).checkForValidSlot(3, 8));
+		assertDoesNotThrow(() -> verify(validationHandler, times(5)).checkForSlotIsNotEmpty(3, rentshop.getShopInventory(), 1));
 		verify(rentshop.getShopInventory()).clear(3);
 		verify(shopDao).saveShopItem(any(), eq(true));
 		assertDoesNotThrow(() -> assertEquals(0, rentshop.getItemList().size()));
-		assertDoesNotThrow(() -> verify(rentshop.getStockpileInventory()).clear(3));
-	}
-
-	@Test
-	public void openStockpileTestWithNotRented() throws ShopSystemException {
-		createRentshop();
-		doThrow(ShopSystemException.class).when(validationHandler).checkForIsRented(true);
-		assertThrows(ShopSystemException.class, () -> rentshop.openStockpile(null));
-	}
-
-	@Test
-	public void openStockpileTestWithRented() {
-		createRentshop();
-		rentThisShop(rentshop);
-
-		Player player = mock(Player.class);
-		assertDoesNotThrow(() -> rentshop.openStockpile(player));
-		assertDoesNotThrow(() -> verify(player).openInventory(rentshop.getStockpileInventory()));
 	}
 
 	private void rentThisShop(Rentshop shop) {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 
 		Inventory inv = mock(Inventory.class);
-		Inventory invStock = mock(Inventory.class);
 		Inventory editorStuff = mock(Inventory.class);
 		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-Editor")))
 				.thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-SlotEditor")))
 				.thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0"))).thenReturn(inv);
-		when(serverProvider.createInventory(eq(shop.getShopVillager()), anyInt(), eq("Shop#R0-Stock")))
-				.thenReturn(invStock);
 
 		assertDoesNotThrow(() -> shop.rentShop(ecoPlayer, 1));
 	}
@@ -893,7 +813,6 @@ public class RentshopImplTest {
 		createRentshop();
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory invStock = mock(Inventory.class);
 		Inventory slotEditor = mock(Inventory.class);
 		Inventory editor = mock(Inventory.class);
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-Editor")))
@@ -901,15 +820,13 @@ public class RentshopImplTest {
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-SlotEditor")))
 				.thenReturn(slotEditor);
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0"))).thenReturn(inv);
-		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-Stock")))
-				.thenReturn(invStock);
 		assertDoesNotThrow(() -> rentshop.rentShop(ecoPlayer, 1));
 		assertDoesNotThrow(() -> when(validationHandler.isSlotEmpty(0, rentshop.getShopInventory(), 1)).thenReturn(true));
 
 		Player player = mock(Player.class);
 		assertDoesNotThrow(() -> rentshop.openSlotEditor(player, 0));
 
-		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(0, 7));
+		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(0, 8));
 		verify(player).openInventory(slotEditor);
 		// verify that the selected slot method is executed
 		assertDoesNotThrow(() -> verify(validationHandler, times(2)).isSlotEmpty(0, rentshop.getShopInventory(), 1));
@@ -927,7 +844,6 @@ public class RentshopImplTest {
 		createRentshop();
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory invStock = mock(Inventory.class);
 		Inventory slotEditor = mock(Inventory.class);
 		Inventory editor = mock(Inventory.class);
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-Editor")))
@@ -935,8 +851,6 @@ public class RentshopImplTest {
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-SlotEditor")))
 				.thenReturn(slotEditor);
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0"))).thenReturn(inv);
-		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-Stock")))
-				.thenReturn(invStock);
 		assertDoesNotThrow(() -> rentshop.rentShop(ecoPlayer, 1));
 		Player player = mock(Player.class);
 
@@ -981,9 +895,9 @@ public class RentshopImplTest {
 
 		assertDoesNotThrow(() -> verify(validationHandler, times(9)).checkForIsRented(false));
 		assertDoesNotThrow(() -> verify(validationHandler, times(2)).checkForValidStockDecrease(2, 2));
-		assertDoesNotThrow(() -> verify(generalValidator, times(3)).checkForValidSlot(3, 7));
+		assertDoesNotThrow(() -> verify(generalValidator, times(3)).checkForValidSlot(3, 8));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerIsOnline(ecoPlayer));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsNotEmpty(3, rentshop.getShopInventory(), 2));
+		assertDoesNotThrow(() -> verify(validationHandler, times(5)).checkForSlotIsNotEmpty(3, rentshop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerInventoryNotFull(inv));
 		verify(stackCloneClone).setAmount(2);
 		verify(inv).addItem(stackCloneClone);
@@ -1034,8 +948,8 @@ public class RentshopImplTest {
 		assertDoesNotThrow(() -> rentshop.sellShopItem(3, 1, ecoPlayer, true));
 
 		assertDoesNotThrow(() -> verify(validationHandler, times(7)).checkForIsRented(false));
-		assertDoesNotThrow(() -> verify(generalValidator, times(2)).checkForValidSlot(3, 7));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsNotEmpty(3, rentshop.getShopInventory(), 2));
+		assertDoesNotThrow(() -> verify(generalValidator, times(2)).checkForValidSlot(3, 8));
+		assertDoesNotThrow(() -> verify(validationHandler, times(4)).checkForSlotIsNotEmpty(3, rentshop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerIsOnline(ecoPlayer));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForShopOwnerHasEnoughMoney(rentshop.getOwner(), 1.0));
 		assertDoesNotThrow(() -> verify(ecoPlayer).increasePlayerAmount(1.0, false));

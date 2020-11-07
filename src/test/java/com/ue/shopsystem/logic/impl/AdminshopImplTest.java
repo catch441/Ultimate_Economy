@@ -375,22 +375,6 @@ public class AdminshopImplTest {
 	}
 
 	@Test
-	public void setupExistingOldTestWithError() throws ShopSystemException {
-		Plugin plugin = mock(Plugin.class);
-		File dataFolder = mock(File.class);
-		ShopSystemException e = mock(ShopSystemException.class);
-		when(serverProvider.getPluginInstance()).thenReturn(plugin);
-		when(plugin.getDataFolder()).thenReturn(dataFolder);
-		when(e.getMessage()).thenReturn("my error message");
-		doThrow(e).when(shopDao).changeSavefileName(dataFolder, "A0");
-
-		assertDoesNotThrow(() -> adminshop.setupExisting("myshop", "A0"));
-
-		verify(logger).warn("[Ultimate_Economy] Failed to change savefile name to new save system");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
-	}
-
-	@Test
 	public void setupExistingOldTest() {
 		Plugin plugin = mock(Plugin.class);
 		JavaPlugin javaPlugin = mock(JavaPlugin.class);
@@ -721,6 +705,8 @@ public class AdminshopImplTest {
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
 		when(stackClone.clone()).thenReturn(stackCloneClone);
+		when(stackMetaClone.hasLore()).thenReturn(true);
+		when(stackMetaClone.getLore()).thenReturn(new ArrayList<>());
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> adminshop.addShopItem(0, 0, 4, stack));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string"), anyList()));

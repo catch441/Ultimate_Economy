@@ -1,19 +1,15 @@
 package com.ue.shopsystem.logic.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.slf4j.Logger;
 
 import com.ue.common.api.CustomSkullService;
 import com.ue.common.utils.MessageWrapper;
@@ -39,7 +35,6 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	protected final TownworldManager townworldManager;
 	protected final PlayershopManager playershopManager;
 	private EconomyPlayer owner;
-	private Inventory stockPile;
 
 	/**
 	 * Inject constructor.
@@ -47,7 +42,6 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 * @param shopDao
 	 * @param serverProvider
 	 * @param customSkullService
-	 * @param logger
 	 * @param validationHandler
 	 * @param ecoPlayerManager
 	 * @param messageWrapper
@@ -58,10 +52,10 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 */
 	@Inject
 	public PlayershopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService customSkullService,
-			Logger logger, ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
+			ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,
 			PlayershopManager playershopManager, GeneralEconomyValidationHandler generalValidator) {
-		super(shopDao, serverProvider, customSkullService, logger, validationHandler, messageWrapper, configManager,
+		super(shopDao, serverProvider, customSkullService, validationHandler, messageWrapper, configManager,
 				generalValidator);
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.townworldManager = townworldManager;
@@ -71,10 +65,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	@Override
 	public void setupNew(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size) {
 		super.setupNew(name, shopId, spawnLocation, size);
-		setupShopInvDefaultStockItem();
 		setupShopOwner(owner);
 		getEditorHandler().setup(2);
-		setupStockpile();
 		setupEconomyVillagerType();
 	}
 
@@ -82,17 +74,10 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	public void setupExisting(String name, String shopId)
 			throws TownSystemException, ShopSystemException, GeneralEconomyException {
 		super.setupExisting(name, shopId);
-		setupShopInvDefaultStockItem();
 		getEditorHandler().setup(2);
 		loadStock();
 		loadOwner(name);
-		loadStockpile();
 		setupEconomyVillagerType();
-	}
-
-	@Override
-	public void openStockpile(Player player) throws ShopSystemException {
-		player.openInventory(getStockpileInventory());
 	}
 
 	/**
@@ -100,7 +85,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 */
 	@Override
 	public void openSlotEditor(Player player, int slot) throws ShopSystemException, GeneralEconomyException {
-		generalValidator.checkForValidSlot(slot, getSize() - 2);
+		generalValidator.checkForValidSlot(slot, getSize() - 1);
 		getSlotEditorHandler().setSelectedSlot(slot);
 		player.openInventory(getSlotEditorHandler().getSlotEditorInventory());
 	}
@@ -111,9 +96,9 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	@Override
 	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
 			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
-		generalValidator.checkForValidSlot(slot, getSize() - 2);
+		generalValidator.checkForValidSlot(slot, getSize() - 1);
 		validationHandler.checkForPlayerIsOnline(ecoPlayer);
-		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 2);
+		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
 		validationHandler.checkForPlayerInventoryNotFull(ecoPlayer.getPlayer().getInventory());
 		ShopItem shopItem = getShopItem(slot);
 		int entireStock = shopItem.getStock();
@@ -157,8 +142,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	@Override
 	public void sellShopItem(int slot, int amount, EconomyPlayer ecoPlayer, boolean sendMessage)
 			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
-		generalValidator.checkForValidSlot(slot, getSize() - 2);
-		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 2);
+		generalValidator.checkForValidSlot(slot, getSize() - 1);
+		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
 		validationHandler.checkForPlayerIsOnline(ecoPlayer);
 		ShopItem shopItem = getShopItem(slot);
 		double sellPrice = shopItem.getSellPrice() / shopItem.getAmount() * amount;
@@ -189,10 +174,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		setSize(newSize);
 		getShopDao().saveShopSize(newSize);
 		setupShopInventory();
-		setupShopInvDefaultStockItem();
 		getEditorHandler().setup(2);
 		reloadShopItems();
-		loadStockpile();
 	}
 
 	/**
@@ -218,8 +201,6 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		setupShopName(name);
 		getShopVillager().setCustomName(name + "_" + getOwner().getName());
 		changeInventoryNames(name);
-
-		setupStockpile();
 	}
 
 	@Override
@@ -237,7 +218,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		super.addShopItem(slot, sellPrice, buyPrice, itemStack);
 		ShopItem item = getShopItem(slot);
 		getShopDao().saveStock(item.getItemString(), 0);
-		updateItemInStockpile(slot);
+		updateItemStock(slot);
 	}
 
 	/**
@@ -245,15 +226,14 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 */
 	@Override
 	public void removeShopItem(int slot) throws ShopSystemException, GeneralEconomyException {
-		generalValidator.checkForValidSlot(slot, getSize() - 2);
-		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 2);
+		generalValidator.checkForValidSlot(slot, getSize() - 1);
+		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
 		super.removeShopItem(slot);
-		updateItemInStockpile(slot);
 	}
 
 	@Override
 	public boolean isAvailable(int slot) throws ShopSystemException, GeneralEconomyException {
-		generalValidator.checkForValidSlot(slot, getSize() - 2);
+		generalValidator.checkForValidSlot(slot, getSize() - 1);
 		ShopItem item = getShopItem(slot);
 		if (item.getStock() >= item.getAmount()) {
 			return true;
@@ -281,35 +261,25 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	@Override
 	public void decreaseStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException {
 		generalValidator.checkForPositiveValue(stock);
-		generalValidator.checkForValidSlot(slot, getSize() - 2);
+		generalValidator.checkForValidSlot(slot, getSize() - 1);
 		ShopItem item = getShopItem(slot);
 		int entireStock = item.getStock();
 		validationHandler.checkForValidStockDecrease(entireStock, stock);
 		item.setStock(entireStock - stock);
 		getShopDao().saveStock(item.getItemString(), item.getStock());
-		updateItemInStockpile(slot);
+		updateItemStock(slot);
 	}
 
 	@Override
 	public void increaseStock(int slot, int stock) throws GeneralEconomyException, ShopSystemException {
 		generalValidator.checkForPositiveValue(stock);
-		generalValidator.checkForValidSlot(slot, getSize() - 2);
+		generalValidator.checkForValidSlot(slot, getSize() - 1);
 		ShopItem item = getShopItem(slot);
 		int entireStock = item.getStock();
 		item.setStock(entireStock + stock);
 		getShopDao().saveStock(item.getItemString(), item.getStock());
-		updateItemInStockpile(slot);
+		updateItemStock(slot);
 	}
-
-	@Override
-	public Inventory getStockpileInventory() throws ShopSystemException {
-		return stockPile;
-	}
-
-	/*
-	 * Utility methods
-	 * 
-	 */
 
 	private void sendBuySellOwnerMessage(int amount, String gotAdded) {
 		if (amount > 1) {
@@ -321,13 +291,13 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		}
 	}
 
-	private void updateItemInStockpile(int slot) throws GeneralEconomyException, ShopSystemException {
+	private void updateItemStock(int slot) throws GeneralEconomyException, ShopSystemException {
 		ItemStack original = getShopInventory().getItem(slot);
-		if (original != null && original.getType() != Material.AIR) {
-			ItemStack stack = getShopInventory().getItem(slot).clone();
+		if (original != null) {
+			ItemStack stack = getShopInventory().getItem(slot);
 			int stock = getShopItem(slot).getStock();
 			ItemMeta meta = stack.getItemMeta();
-			List<String> list = removeShopItemPriceLore(meta.getLore());
+			List<String> list = removeStockFromLore(meta.getLore());
 			if (stock != 1) {
 				list.add(ChatColor.GREEN + String.valueOf(stock) + ChatColor.GOLD + " Items");
 			} else {
@@ -335,46 +305,29 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 			}
 			meta.setLore(list);
 			stack.setItemMeta(meta);
-			getStockpileInventory().setItem(slot, stack);
-		} else {
-			getStockpileInventory().clear(slot);
 		}
+	}
+
+	private List<String> removeStockFromLore(List<String> lore) {
+		int stockIndex = -1;
+		for (String element : lore) {
+			if (element.contains("§6 Item")) {
+				stockIndex = lore.indexOf(element);
+			}
+		}
+		if (stockIndex != -1) {
+			lore.remove(stockIndex);
+		}
+		return lore;
 	}
 
 	protected void setOwner(EconomyPlayer owner) {
 		this.owner = owner;
 	}
 
-	protected void setupStockpile() {
-		stockPile = serverProvider.createInventory(getShopVillager(), getSize(), getName() + "-Stock");
-		ItemStack stockpileSwitchItem = serverProvider.createItemStack(Material.CRAFTING_TABLE, 1);
-		ItemMeta meta = stockpileSwitchItem.getItemMeta();
-		List<String> infos = new ArrayList<>();
-		infos.add(ChatColor.GOLD + "Middle Mouse: " + ChatColor.GREEN + "close stockpile");
-		infos.add(ChatColor.GOLD + "Rightclick: " + ChatColor.GREEN + "add specified amount");
-		infos.add(ChatColor.GOLD + "Shift-Rightclick: " + ChatColor.GREEN + "add all");
-		infos.add(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "get specified amount");
-		meta.setLore(infos);
-		meta.setDisplayName("Infos");
-		stockpileSwitchItem.setItemMeta(meta);
-		try {
-			getStockpileInventory().setItem(getSize() - 1, stockpileSwitchItem);
-		} catch (ShopSystemException e) {
-			// only rentshop
-		}
-	}
-
 	private void setupEconomyVillagerType() {
 		getShopVillager().setMetadata("ue-type",
 				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.PLAYERSHOP));
-	}
-
-	private void setupShopInvDefaultStockItem() {
-		ItemStack itemStack = serverProvider.createItemStack(Material.CRAFTING_TABLE, 1);
-		ItemMeta meta = itemStack.getItemMeta();
-		meta.setDisplayName("Stock");
-		itemStack.setItemMeta(meta);
-		addShopItemToInv(itemStack, 1, getSize() - 2, 0.0, 0.0);
 	}
 
 	private void setupShopOwner(EconomyPlayer owner) {
@@ -389,16 +342,10 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		try {
 			for (ShopItem item : getItemList()) {
 				item.setStock(getShopDao().loadStock(item.getItemString()));
+				updateItemStock(item.getSlot());
 			}
-		} catch (ShopSystemException e) {
+		} catch (ShopSystemException | GeneralEconomyException e) {
 			// only rentshop
-		}
-	}
-
-	private void loadStockpile() throws GeneralEconomyException, ShopSystemException {
-		setupStockpile();
-		for (int i = 0; i < (getSize() - 2); i++) {
-			updateItemInStockpile(i);
 		}
 	}
 

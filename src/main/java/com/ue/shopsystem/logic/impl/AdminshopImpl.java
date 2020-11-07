@@ -7,7 +7,6 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.slf4j.Logger;
 
 import com.ue.common.api.CustomSkullService;
 import com.ue.common.utils.MessageWrapper;
@@ -35,7 +34,6 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 * @param shopDao
 	 * @param serverProvider
 	 * @param skullService
-	 * @param logger
 	 * @param adminshopManager
 	 * @param validationHandler
 	 * @param messageWrapper
@@ -43,10 +41,10 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 * @param generalValidator
 	 */
 	@Inject
-	public AdminshopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService, Logger logger,
+	public AdminshopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
 			AdminshopManager adminshopManager, ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
 			ConfigManager configManager, GeneralEconomyValidationHandler generalValidator) {
-		super(shopDao, serverProvider, skullService, logger, validationHandler, messageWrapper, configManager,
+		super(shopDao, serverProvider, skullService, validationHandler, messageWrapper, configManager,
 				generalValidator);
 		this.adminshopManager = adminshopManager;
 	}
