@@ -335,9 +335,9 @@ public class ShopValidationHandlerImplTest {
 	public void checkForItemDoesNotExistTest() {
 		try {
 			ShopItem item = mock(ShopItem.class);
-			when(item.getItemString()).thenReturn("itemstring");
+			when(item.getItemHash()).thenReturn(66344345);
 			List<ShopItem> items = Arrays.asList(item);
-			validationHandler.checkForItemDoesNotExist("itemstring", items);
+			validationHandler.checkForItemDoesNotExist(66344345, items);
 			fail();
 		} catch (ShopSystemException e) {
 			assertEquals(ShopExceptionMessageEnum.ITEM_ALREADY_EXISTS, e.getKey());
@@ -348,9 +348,9 @@ public class ShopValidationHandlerImplTest {
 	@Test
 	public void checkForItemDoesNotExistTestValid() {
 		ShopItem item = mock(ShopItem.class);
-		when(item.getItemString()).thenReturn("itemstring");
+		when(item.getItemHash()).thenReturn(66345);
 		List<ShopItem> items = Arrays.asList(item);
-		assertDoesNotThrow(() -> validationHandler.checkForItemDoesNotExist("otherItemString", items));
+		assertDoesNotThrow(() -> validationHandler.checkForItemDoesNotExist(66344345, items));
 	}
 
 	@Test

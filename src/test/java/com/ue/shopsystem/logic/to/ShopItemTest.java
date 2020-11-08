@@ -28,7 +28,7 @@ public class ShopItemTest {
 		assertEquals(10, item.getAmount());
 		assertEquals("2.0", String.valueOf(item.getSellPrice()));
 		assertEquals("3.0", String.valueOf(item.getBuyPrice()));
-		assertEquals("ItemStack{STONE x 1}", item.getItemString());
+		assertEquals("ItemStack{STONE x 1}".hashCode(), item.getItemHash());
 		verify(stack).setAmount(1);
 		assertEquals(cloneClone, item.getItemStack());
 		assertEquals(0, item.getStock());
@@ -50,7 +50,7 @@ public class ShopItemTest {
 		assertEquals(10, item.getAmount());
 		assertEquals("2.0", String.valueOf(item.getSellPrice()));
 		assertEquals("3.0", String.valueOf(item.getBuyPrice()));
-		assertEquals("SPAWNER_COW", item.getItemString());
+		assertEquals("SPAWNER_COW".hashCode(), item.getItemHash());
 		verify(stack).setAmount(1);
 		assertEquals(cloneClone, item.getItemStack());
 		assertEquals(0, item.getStock());

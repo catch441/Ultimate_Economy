@@ -196,10 +196,10 @@ public class PlayershopImplTest {
 		assertDoesNotThrow(() -> when(shopDao.loadShopLocation()).thenReturn(loc));
 		when(shopDao.loadShopVillagerProfession()).thenReturn(Profession.ARMORER);
 		when(shopDao.loadOwner(null)).thenReturn("catch441");
-		when(shopDao.loadItemNameList()).thenReturn(Arrays.asList("item1"));
-		when(shopDao.loadItem("item1")).thenReturn(shopItem);
-		when(shopDao.loadStock("item string")).thenReturn(7);
-		when(shopItem.getItemString()).thenReturn("item string");
+		when(shopDao.loadItemHashList()).thenReturn(Arrays.asList(5435345));
+		when(shopDao.loadItem(5435345)).thenReturn(shopItem);
+		when(shopDao.loadStock(5435345)).thenReturn(7);
+		when(shopItem.getItemHash()).thenReturn(5435345);
 		when(shopItem.getSlot()).thenReturn(0);
 		when(shopItem.getAmount()).thenReturn(5);
 		when(shopItem.getSellPrice()).thenReturn(2.0);
@@ -413,7 +413,7 @@ public class PlayershopImplTest {
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerInventoryNotFull(inv));
 		verify(stackCloneClone).setAmount(1);
 		verify(inv).addItem(stackCloneClone);
-		verify(shopDao, times(2)).saveStock("item string", 0);
+		verify(shopDao, times(2)).saveStock("item string".hashCode(), 0);
 		verify(player).sendMessage("my message");
 		assertDoesNotThrow(() -> verify(ecoPlayer).decreasePlayerAmount(2.0, true));
 		assertDoesNotThrow(() -> verify(playershop.getOwner()).increasePlayerAmount(2.0, false));
@@ -452,7 +452,7 @@ public class PlayershopImplTest {
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerInventoryNotFull(inv));
 		verify(stackCloneClone).setAmount(2);
 		verify(inv).addItem(stackCloneClone);
-		verify(shopDao, times(2)).saveStock("item string", 0);
+		verify(shopDao, times(2)).saveStock("item string".hashCode(), 0);
 		verify(player).sendMessage("my message");
 		assertDoesNotThrow(() -> verify(ecoPlayer).decreasePlayerAmount(4.0, true));
 		assertDoesNotThrow(() -> verify(playershop.getOwner()).increasePlayerAmount(4.0, false));
@@ -486,7 +486,7 @@ public class PlayershopImplTest {
 				() -> verify(validationHandler, times(4)).checkForSlotIsNotEmpty(3, playershop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerInventoryNotFull(inv));
 		// only at setup
-		verify(shopDao, times(1)).saveStock("item string", 0);
+		verify(shopDao, times(1)).saveStock("item string".hashCode(), 0);
 
 		verify(player, never()).sendMessage(anyString());
 		assertDoesNotThrow(() -> verify(ecoPlayer, never()).decreasePlayerAmount(anyDouble(), eq(true)));
@@ -524,7 +524,7 @@ public class PlayershopImplTest {
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerInventoryNotFull(inv));
 		verify(stackCloneClone).setAmount(1);
 		verify(inv).addItem(stackCloneClone);
-		verify(shopDao, times(2)).saveStock("item string", 0);
+		verify(shopDao, times(2)).saveStock("item string".hashCode(), 0);
 		verify(player).sendMessage("my message");
 		assertDoesNotThrow(() -> verify(playershop.getOwner(), never()).increasePlayerAmount(2.0, false));
 		assertDoesNotThrow(() -> assertEquals(0, playershop.getShopItem(3).getStock()));
@@ -560,7 +560,7 @@ public class PlayershopImplTest {
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerInventoryNotFull(inv));
 		verify(stackCloneClone).setAmount(2);
 		verify(inv).addItem(stackCloneClone);
-		verify(shopDao, times(1)).saveStock("item string", 1);
+		verify(shopDao, times(1)).saveStock("item string".hashCode(), 1);
 		verify(player).sendMessage("my message");
 		assertDoesNotThrow(() -> verify(playershop.getOwner(), never()).increasePlayerAmount(2.0, false));
 		assertDoesNotThrow(() -> assertEquals(1, playershop.getShopItem(3).getStock()));
@@ -596,7 +596,7 @@ public class PlayershopImplTest {
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerInventoryNotFull(inv));
 		verify(stackCloneClone).setAmount(3);
 		verify(inv).addItem(stackCloneClone);
-		verify(shopDao, times(2)).saveStock("item string", 0);
+		verify(shopDao, times(2)).saveStock("item string".hashCode(), 0);
 		verify(player).sendMessage("my message");
 		assertDoesNotThrow(() -> verify(playershop.getOwner(), never()).increasePlayerAmount(2.0, false));
 		assertDoesNotThrow(() -> assertEquals(0, playershop.getShopItem(3).getStock()));
@@ -632,7 +632,7 @@ public class PlayershopImplTest {
 				() -> verify(validationHandler, times(4)).checkForSlotIsNotEmpty(3, playershop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerInventoryNotFull(inv));
 		verify(stackCloneClone, never()).setAmount(anyInt());
-		verify(shopDao, never()).saveStock("item string", 0);
+		verify(shopDao, never()).saveStock("item string".hashCode(), 0);
 		verify(player, never()).sendMessage(anyString());
 		assertDoesNotThrow(() -> verify(playershop.getOwner(), never()).increasePlayerAmount(2.0, false));
 		assertDoesNotThrow(() -> assertEquals(1, playershop.getShopItem(3).getStock()));
@@ -913,7 +913,7 @@ public class PlayershopImplTest {
 
 		assertDoesNotThrow(() -> verify(generalValidator).checkForPositiveValue(1));
 		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(3, 8));
-		verify(shopDao).saveStock("item string", 1);
+		verify(shopDao).saveStock("item string".hashCode(), 1);
 		verify(shopInvStackMeta).setLore(Arrays.asList("§a1§6 Item"));
 	}
 
@@ -936,7 +936,7 @@ public class PlayershopImplTest {
 		doThrow(GeneralEconomyException.class).when(generalValidator).checkForPositiveValue(-10);
 		assertThrows(GeneralEconomyException.class, () -> playershop.increaseStock(3, -10));
 
-		verify(shopDao, never()).saveStock(anyString(), anyInt());
+		verify(shopDao, never()).saveStock(eq("item string".hashCode()), anyInt());
 	}
 
 	@Test
@@ -962,7 +962,7 @@ public class PlayershopImplTest {
 		assertDoesNotThrow(() -> verify(generalValidator).checkForPositiveValue(5));
 		assertDoesNotThrow(() -> verify(generalValidator, times(2)).checkForValidSlot(3, 8));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidStockDecrease(10, 5));
-		verify(shopDao).saveStock("item string", 5);
+		verify(shopDao).saveStock("item string".hashCode(), 5);
 		verify(shopInvStackMeta, times(3)).setLore(Arrays.asList("buy", "sell", "§a5§6 Items"));
 		assertDoesNotThrow(() -> assertEquals(5, playershop.getShopItem(3).getStock()));
 	}
@@ -989,7 +989,7 @@ public class PlayershopImplTest {
 		assertDoesNotThrow(() -> verify(generalValidator).checkForPositiveValue(9));
 		assertDoesNotThrow(() -> verify(generalValidator, times(2)).checkForValidSlot(3, 8));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidStockDecrease(10, 9));
-		verify(shopDao).saveStock("item string", 1);
+		verify(shopDao).saveStock("item string".hashCode(), 1);
 		verify(shopInvStackMeta).setLore(Arrays.asList("§a1§6 Item"));
 		assertDoesNotThrow(() -> assertEquals(1, playershop.getShopItem(3).getStock()));
 	}
@@ -999,7 +999,7 @@ public class PlayershopImplTest {
 		createPlayershop();
 		doThrow(GeneralEconomyException.class).when(generalValidator).checkForPositiveValue(-10);
 		assertThrows(GeneralEconomyException.class, () -> playershop.decreaseStock(0, -10));
-		verify(shopDao, never()).saveStock(anyString(), anyInt());
+		verify(shopDao, never()).saveStock(anyInt(), anyInt());
 	}
 
 	@Test
@@ -1007,7 +1007,7 @@ public class PlayershopImplTest {
 		createPlayershop();
 		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValidSlot(-10, 8);
 		assertThrows(GeneralEconomyException.class, () -> playershop.decreaseStock(-10, 1));
-		verify(shopDao, never()).saveStock(anyString(), anyInt());
+		verify(shopDao, never()).saveStock(anyInt(), anyInt());
 	}
 
 	@Test
@@ -1081,8 +1081,8 @@ public class PlayershopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> playershop.addShopItem(0, 1, 4, stack));
-		verify(shopDao).saveStock("item string", 0);
-		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string"), anyList()));
+		verify(shopDao).saveStock("item string".hashCode(), 0);
+		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string".hashCode()), anyList()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsEmpty(0, playershop.getShopInventory(), 2));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("1.0"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("4.0"));
@@ -1095,7 +1095,7 @@ public class PlayershopImplTest {
 		assertEquals(4.0, shopItem.getBuyPrice());
 		assertEquals(1.0, shopItem.getSellPrice());
 		assertEquals(0, shopItem.getSlot());
-		assertEquals("item string", shopItem.getItemString());
+		assertEquals("item string".hashCode(), shopItem.getItemHash());
 		assertEquals(stackCloneClone, shopItem.getItemStack());
 		// verify that the set occupied method of the editor is called
 		verify(customSkullService).getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1");

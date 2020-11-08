@@ -31,26 +31,26 @@ public interface ShopDao {
 	/**
 	 * Saves a shop item sell price.
 	 * 
-	 * @param itemString
+	 * @param itemHash
 	 * @param sellPrice
 	 */
-	public void saveShopItemSellPrice(String itemString, double sellPrice);
+	public void saveShopItemSellPrice(int itemHash, double sellPrice);
 	
 	/**
 	 * Saves a shop item buy price.
 	 * 
-	 * @param itemString
+	 * @param itemHash
 	 * @param buyPrice
 	 */
-	public void saveShopItemBuyPrice(String itemString, double buyPrice);
+	public void saveShopItemBuyPrice(int itemHash, double buyPrice);
 	
 	/**
 	 * Saves a shop item amount.
 	 * 
-	 * @param itemString
+	 * @param itemHash
 	 * @param amount
 	 */
-	public void saveShopItemAmount(String itemString, int amount);
+	public void saveShopItemAmount(int itemHash, int amount);
 	
 	/**
 	 * Saves the shop size.
@@ -76,10 +76,10 @@ public interface ShopDao {
 	/**
 	 * Saves the stock for a item.
 	 * 
-	 * @param itemString
+	 * @param itemHash
 	 * @param stock
 	 */
-	public void saveStock(String itemString, int stock);
+	public void saveStock(int itemHash, int stock);
 	
 	/**
 	 * Saves the shop owner.
@@ -150,25 +150,25 @@ public interface ShopDao {
 	/**
 	 * Loads a shop item.
 	 * 
-	 * @param itemString
+	 * @param itemHash
 	 * @return shop item
 	 */
-	public ShopItem loadItem(String itemString);
+	public ShopItem loadItem(int itemHash);
 	
 	/**
-	 * Loads the item name list.
+	 * Loads the item hash list.
 	 * 
-	 * @return list of strings
+	 * @return list of integers
 	 */
-	public List<String> loadItemNameList();
+	public List<Integer> loadItemHashList();
 	
 	/**
 	 * Loads the stock of a item.
 	 * 
-	 * @param itemString
+	 * @param itemHash
 	 * @return stock
 	 */
-	public int loadStock(String itemString);
+	public int loadStock(int itemHash);
 	
 	/**
 	 * Loads the shop owner.
@@ -213,11 +213,11 @@ public interface ShopDao {
 	
 	/**
 	 * @since 1.2.6
-	 * @param itemString
+	 * @param itemHash
 	 * @return true, if corrupted found and removed
 	 * @deprecated removed items, that are corrupted. The newer savefile system
 	 *             cannot handle old corrupted items, that are ignored before.
 	 */
 	@Deprecated
-	public boolean removeIfCorrupted(String itemString);
+	public boolean removeIfCorrupted(int itemHash);
 }

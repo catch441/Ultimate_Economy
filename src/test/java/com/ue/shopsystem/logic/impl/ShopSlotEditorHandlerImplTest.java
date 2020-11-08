@@ -536,7 +536,7 @@ public class ShopSlotEditorHandlerImplTest {
 
 		handler.handleSlotEditor(event);
 
-		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist("item string", new ArrayList<>()));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist("item string".hashCode(), new ArrayList<>()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPricesGreaterThenZero(3.0, 0.0));
 		assertDoesNotThrow(() -> verify(shop).openEditor(player));
 		assertDoesNotThrow(() -> verify(shop).addShopItem(0, 3.0, 0.0, selectedItem));
@@ -575,7 +575,7 @@ public class ShopSlotEditorHandlerImplTest {
 
 		handler.handleSlotEditor(event);
 
-		verify(validationHandler).checkForItemDoesNotExist("item string", new ArrayList<>());
+		verify(validationHandler).checkForItemDoesNotExist("item string".hashCode(), new ArrayList<>());
 		verify(validationHandler).checkForPricesGreaterThenZero(3.0, 0.0);
 		assertDoesNotThrow(() -> verify(shop).openEditor(player));
 		assertDoesNotThrow(() -> verify(shop, never()).addShopItem(0, 3.0, 0.0, selectedItem));

@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,7 +111,7 @@ public class ShopDaoImplTest {
 		map.put("v", 1976);
 		map.put("type", "STONE");
 		when(stack.serialize()).thenReturn(map);
-		when(item.getItemString()).thenReturn("ItemStack{STONE x 1}");
+		when(item.getItemHash()).thenReturn(5432423);
 		when(item.getSlot()).thenReturn(4);
 		when(item.getAmount()).thenReturn(1);
 		when(item.getSellPrice()).thenReturn(2.0);
@@ -120,19 +121,22 @@ public class ShopDaoImplTest {
 		shopDao.saveShopItem(item, false);
 		File file = new File("src/A1.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		assertEquals("4", config.getString("ShopItems.ItemStack{STONE x 1}.Slot"));
-		assertEquals("true", config.getString("ShopItems.ItemStack{STONE x 1}.newSaveMethod"));
-		assertEquals("2.0", config.getString("ShopItems.ItemStack{STONE x 1}.sellPrice"));
-		assertEquals("3.0", config.getString("ShopItems.ItemStack{STONE x 1}.buyPrice"));
-		assertEquals("1", config.getString("ShopItems.ItemStack{STONE x 1}.Amount"));
+		assertEquals("4", config.getString("ShopItems.5432423.Slot"));
+		assertEquals("true", config.getString("ShopItems.5432423.newSaveMethod"));
+		assertEquals("2.0", config.getString("ShopItems.5432423.sellPrice"));
+		assertEquals("3.0", config.getString("ShopItems.5432423.buyPrice"));
+		assertEquals("1", config.getString("ShopItems.5432423.Amount"));
 	}
 
 	@Test
 	public void saveShopItemTestWithSpawner() {
 		ItemStack stack = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
 		ShopItem item = mock(ShopItem.class);
+		when(stack.getItemMeta()).thenReturn(meta);
+		when(meta.getDisplayName()).thenReturn("COW");
 		when(item.getItemStack()).thenReturn(stack);
-		when(item.getItemString()).thenReturn("SPAWNER_COW");
+		when(item.getItemHash()).thenReturn(5432423);
 		when(item.getSlot()).thenReturn(4);
 		when(item.getAmount()).thenReturn(1);
 		when(item.getSellPrice()).thenReturn(2.0);
@@ -143,12 +147,12 @@ public class ShopDaoImplTest {
 		shopDao.saveShopItem(item, false);
 		File file = new File("src/A1.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		assertEquals("4", config.getString("ShopItems.SPAWNER_COW.Slot"));
-		assertEquals("true", config.getString("ShopItems.SPAWNER_COW.newSaveMethod"));
-		assertEquals("2.0", config.getString("ShopItems.SPAWNER_COW.sellPrice"));
-		assertEquals("3.0", config.getString("ShopItems.SPAWNER_COW.buyPrice"));
-		assertEquals("1", config.getString("ShopItems.SPAWNER_COW.Amount"));
-		assertEquals("SPAWNER_COW", config.getString("ShopItems.SPAWNER_COW.Name"));
+		assertEquals("4", config.getString("ShopItems.5432423.Slot"));
+		assertEquals("true", config.getString("ShopItems.5432423.newSaveMethod"));
+		assertEquals("2.0", config.getString("ShopItems.5432423.sellPrice"));
+		assertEquals("3.0", config.getString("ShopItems.5432423.buyPrice"));
+		assertEquals("1", config.getString("ShopItems.5432423.Amount"));
+		assertEquals("SPAWNER_COW", config.getString("ShopItems.5432423.Name"));
 
 	}
 
@@ -162,7 +166,7 @@ public class ShopDaoImplTest {
 		map.put("v", 1976);
 		map.put("type", "STONE");
 		when(stack.serialize()).thenReturn(map);
-		when(item.getItemString()).thenReturn("ItemStack{STONE x 1}");
+		when(item.getItemHash()).thenReturn(5432423);
 		when(item.getSlot()).thenReturn(4);
 		when(item.getAmount()).thenReturn(1);
 		when(item.getSellPrice()).thenReturn(2.0);
@@ -173,12 +177,12 @@ public class ShopDaoImplTest {
 		shopDao.saveShopItem(item, true);
 		File file = new File("src/A1.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		assertNull(config.getString("ShopItems." + item.getItemString() + ".Name"));
-		assertNull(config.getString("ShopItems." + item.getItemString() + ".Slot"));
-		assertNull(config.getString("ShopItems." + item.getItemString() + ".newSaveMethod"));
-		assertNull(config.getString("ShopItems." + item.getItemString() + ".sellPrice"));
-		assertNull(config.getString("ShopItems." + item.getItemString() + ".buyPrice"));
-		assertNull(config.getString("ShopItems." + item.getItemString() + ".Amount"));
+		assertNull(config.getString("ShopItems.5432423.Name"));
+		assertNull(config.getString("ShopItems.5432423.Slot"));
+		assertNull(config.getString("ShopItems.5432423.newSaveMethod"));
+		assertNull(config.getString("ShopItems.5432423.sellPrice"));
+		assertNull(config.getString("ShopItems.5432423.buyPrice"));
+		assertNull(config.getString("ShopItems.5432423.Amount"));
 	}
 
 	@Test
@@ -205,10 +209,10 @@ public class ShopDaoImplTest {
 	public void saveStockTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		shopDao.setupSavefile("A1");
-		shopDao.saveStock("kth", 6);
+		shopDao.saveStock(5432423, 6);
 		File file = new File("src/A1.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		assertEquals("6", config.getString("ShopItems.kth.stock"));
+		assertEquals("6", config.getString("ShopItems.5432423.stock"));
 	}
 
 	@Test
@@ -352,7 +356,7 @@ public class ShopDaoImplTest {
 		map.put("v", 1976);
 		map.put("type", "STONE");
 		when(stack.serialize()).thenReturn(map);
-		when(item.getItemString()).thenReturn("ItemStack{STONE x 1}");
+		when(item.getItemHash()).thenReturn(5432423);
 		when(item.getSlot()).thenReturn(4);
 		when(item.getAmount()).thenReturn(1);
 		when(item.getSellPrice()).thenReturn(2.0);
@@ -360,7 +364,7 @@ public class ShopDaoImplTest {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		shopDao.setupSavefile("A1");
 		shopDao.saveShopItem(item, false);
-		ShopItem result = shopDao.loadItem("ItemStack{STONE x 1}");
+		ShopItem result = shopDao.loadItem(5432423);
 		assertEquals(4, result.getSlot());
 		assertEquals("2.0", String.valueOf(result.getSellPrice()));
 		assertEquals("3.0", String.valueOf(result.getBuyPrice()));
@@ -376,7 +380,7 @@ public class ShopDaoImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ShopItem item = mock(ShopItem.class);
 		when(item.getItemStack()).thenReturn(stack);
-		when(item.getItemString()).thenReturn("SPAWNER_PIG");
+		when(item.getItemHash()).thenReturn("SPAWNER_PIG".hashCode());
 		when(item.getSlot()).thenReturn(4);
 		when(item.getAmount()).thenReturn(1);
 		when(item.getSellPrice()).thenReturn(2.0);
@@ -384,20 +388,22 @@ public class ShopDaoImplTest {
 		when(stack.getType()).thenReturn(Material.SPAWNER);
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		shopDao.setupSavefile("A1");
+		ItemMeta meta = mock(ItemMeta.class);
+		when(stack.getItemMeta()).thenReturn(meta);
+		when(meta.getDisplayName()).thenReturn("PIG");
 		shopDao.saveShopItem(item, false);
 		ItemStack stackResult = mock(ItemStack.class);
 		ItemStack stackResultCopy = mock(ItemStack.class);
 		ItemStack stackResultCopyClone = mock(ItemStack.class);
-		ItemMeta meta = mock(ItemMeta.class);
 		when(serverProvider.createItemStack(Material.SPAWNER, 1)).thenReturn(stackResult);
 		when(stackResult.getItemMeta()).thenReturn(meta);
 		when(stackResult.clone()).thenReturn(stackResultCopy);
 		when(stackResultCopy.clone()).thenReturn(stackResultCopyClone);
 		when(stackResult.getType()).thenReturn(Material.SPAWNER);
 		when(meta.getDisplayName()).thenReturn("PIG");
-		ShopItem result = shopDao.loadItem("SPAWNER_PIG");
+		ShopItem result = shopDao.loadItem("SPAWNER_PIG".hashCode());
 		verify(meta).setDisplayName("PIG");
-		assertEquals("SPAWNER_PIG", result.getItemString());
+		assertEquals("SPAWNER_PIG".hashCode(), result.getItemHash());
 		assertEquals(4, result.getSlot());
 		assertEquals("2.0", String.valueOf(result.getSellPrice()));
 		assertEquals("3.0", String.valueOf(result.getBuyPrice()));
@@ -406,7 +412,7 @@ public class ShopDaoImplTest {
 	}
 
 	@Test
-	public void loadItemNameListTest() {
+	public void loadItemHashListTest() {
 		ItemStack stack = mock(ItemStack.class);
 		ShopItem item = mock(ShopItem.class);
 		when(item.getItemStack()).thenReturn(stack);
@@ -415,18 +421,34 @@ public class ShopDaoImplTest {
 		map.put("v", 1976);
 		map.put("type", "STONE");
 		when(stack.serialize()).thenReturn(map);
-		when(item.getItemString()).thenReturn("ItemStack{STONE x 1}");
+		when(item.getItemHash()).thenReturn(46464564);
 		when(item.getSlot()).thenReturn(4);
 		when(item.getAmount()).thenReturn(1);
 		when(item.getSellPrice()).thenReturn(2.0);
 		when(item.getBuyPrice()).thenReturn(3.0);
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		shopDao.setupSavefile("A1");
-		assertEquals(0, shopDao.loadItemNameList().size());
+		assertEquals(0, shopDao.loadItemHashList().size());
 		shopDao.saveShopItem(item, false);
-		List<String> result = shopDao.loadItemNameList();
+		List<Integer> result = shopDao.loadItemHashList();
 		assertEquals(1, result.size());
-		assertEquals("ItemStack{STONE x 1}", result.get(0));
+		assertEquals(46464564, result.get(0));
+	}
+	
+	@Test
+	public void loadItemHashListTestWithConvertToHash() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		
+		File file = new File("src/A1.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("ShopItems.itemString.name", "stuff");
+		config.set("ShopItems.itemString.name.lore", Arrays.asList("lorestuff"));
+		assertDoesNotThrow(() -> config.save(file));
+		
+		shopDao.setupSavefile("A1");
+		List<Integer> result = shopDao.loadItemHashList();
+		assertEquals(1, result.size());
+		assertEquals("itemString".hashCode(), result.get(0));
 	}
 
 	@Test
@@ -469,8 +491,8 @@ public class ShopDaoImplTest {
 	public void loadStockTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		shopDao.setupSavefile("A1");
-		shopDao.saveStock("kth", 6);
-		assertEquals(6, shopDao.loadStock("kth"));
+		shopDao.saveStock(46464564, 6);
+		assertEquals(6, shopDao.loadStock(46464564));
 	}
 
 	@Test
@@ -546,7 +568,7 @@ public class ShopDaoImplTest {
 		config.set("ShopItemList", list);
 		assertDoesNotThrow(() -> config.save(file));
 		shopDao.setupSavefile("A1");
-		List<String> result = shopDao.loadItemNameList();
+		List<Integer> result = shopDao.loadItemHashList();
 		assertEquals(0, result.size());
 	}
 	
@@ -556,10 +578,10 @@ public class ShopDaoImplTest {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		File file = new File("src/A1.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		config.set("ShopItems.catch.Name", "value");
+		config.set("ShopItems.46464564.Name", "value");
 		assertDoesNotThrow(() -> config.save(file));
 		shopDao.setupSavefile("A1");
-		assertFalse(shopDao.removeIfCorrupted("catch"));
+		assertFalse(shopDao.removeIfCorrupted(46464564));
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -567,10 +589,10 @@ public class ShopDaoImplTest {
 	public void removeIfCorruptedTestTrue() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		shopDao.setupSavefile("A1");
-		assertTrue(shopDao.removeIfCorrupted("catch"));
+		assertTrue(shopDao.removeIfCorrupted(46464564));
 		File file = new File("src/A1.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		config = YamlConfiguration.loadConfiguration(file);
-		assertFalse(config.isSet("ShopItems.catch.Name"));
+		assertFalse(config.isSet("ShopItems.46464564.Name"));
 	}
 }

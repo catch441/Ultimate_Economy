@@ -253,7 +253,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 			}
 		} catch (GeneralEconomyException | ShopSystemException e) {
 			// item is new
-			validationHandler.checkForItemDoesNotExist(stackInEditor.toString(), getShop().getItemList());
+			validationHandler.checkForItemDoesNotExist(stackInEditor.toString().hashCode(), getShop().getItemList());
 			if (stackInEditor.getType() != Material.BARRIER) {
 				getShop().addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
 				player.sendMessage(messageWrapper.getString("added", stackInEditor.getType().toString().toLowerCase()));

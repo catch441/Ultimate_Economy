@@ -101,11 +101,11 @@ public interface ShopValidationHandler {
 	/**
 	 * Check for item does not exist.
 	 * 
-	 * @param itemString
+	 * @param itemHash
 	 * @param itemList
 	 * @throws ShopSystemException
 	 */
-	public void checkForItemDoesNotExist(String itemString, List<ShopItem> itemList) throws ShopSystemException;
+	public void checkForItemDoesNotExist(int itemHash, List<ShopItem> itemList) throws ShopSystemException;
 	
 	/**
 	 * Check for item can be deleted.

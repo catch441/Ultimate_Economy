@@ -217,7 +217,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		validationHandler.checkForSlotIsEmpty(slot, getShopInventory(), 2);
 		super.addShopItem(slot, sellPrice, buyPrice, itemStack);
 		ShopItem item = getShopItem(slot);
-		getShopDao().saveStock(item.getItemString(), 0);
+		getShopDao().saveStock(item.getItemHash(), 0);
 		updateItemStock(slot);
 	}
 
@@ -266,7 +266,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		int entireStock = item.getStock();
 		validationHandler.checkForValidStockDecrease(entireStock, stock);
 		item.setStock(entireStock - stock);
-		getShopDao().saveStock(item.getItemString(), item.getStock());
+		getShopDao().saveStock(item.getItemHash(), item.getStock());
 		updateItemStock(slot);
 	}
 
@@ -277,7 +277,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		ShopItem item = getShopItem(slot);
 		int entireStock = item.getStock();
 		item.setStock(entireStock + stock);
-		getShopDao().saveStock(item.getItemString(), item.getStock());
+		getShopDao().saveStock(item.getItemHash(), item.getStock());
 		updateItemStock(slot);
 	}
 
@@ -341,7 +341,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	private void loadStock() {
 		try {
 			for (ShopItem item : getItemList()) {
-				item.setStock(getShopDao().loadStock(item.getItemString()));
+				item.setStock(getShopDao().loadStock(item.getItemHash()));
 				updateItemStock(item.getSlot());
 			}
 		} catch (ShopSystemException | GeneralEconomyException e) {

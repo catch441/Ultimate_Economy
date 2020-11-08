@@ -147,9 +147,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 			original.setItemMeta(itemMeta);
 		}
 		original.setAmount(1);
-		String clickedItemString = original.toString();
 		for (ShopItem item : shopItems.values()) {
-			if (item.getItemString().equals(clickedItemString)) {
+			if (item.getItemHash() == original.toString().hashCode()) {
 				return item;
 			}
 		}
@@ -182,8 +181,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		validationHandler.checkForValidPrice(String.valueOf(buyPrice));
 		validationHandler.checkForPricesGreaterThenZero(sellPrice, buyPrice);
 		ShopItem shopItem = new ShopItem(itemStack, itemStack.getAmount(), sellPrice, buyPrice, slot);
-		String itemString = shopItem.getItemString();
-		validationHandler.checkForItemDoesNotExist(itemString, getItemList());
+		int itemHash = shopItem.getItemHash();
+		validationHandler.checkForItemDoesNotExist(itemHash, getItemList());
 		shopItems.put(slot, shopItem);
 		getEditorHandler().setOccupied(true, slot);
 		getShopDao().saveShopItem(shopItem, false);
@@ -199,21 +198,21 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		validationHandler.checkForValidPrice(newBuyPrice);
 		validationHandler.checkForOnePriceGreaterThenZeroIfBothAvailable(newSellPrice, newBuyPrice);
 		ShopItem shopItem = getShopItem(slot);
-		String itemString = shopItem.getItemString();
+		int itemHash = shopItem.getItemHash();
 		String message = ChatColor.GOLD + "Updated ";
 		if (!"none".equals(newAmount)) {
 			shopItem.setAmount(Integer.valueOf(newAmount));
-			getShopDao().saveShopItemAmount(itemString, shopItem.getAmount());
+			getShopDao().saveShopItemAmount(itemHash, shopItem.getAmount());
 			message = message + ChatColor.GREEN + "amount ";
 		}
 		if (!"none".equals(newSellPrice)) {
 			shopItem.setSellPrice(Double.valueOf(newSellPrice));
-			getShopDao().saveShopItemSellPrice(itemString, shopItem.getSellPrice());
+			getShopDao().saveShopItemSellPrice(itemHash, shopItem.getSellPrice());
 			message = message + ChatColor.GREEN + "sellPrice ";
 		}
 		if (!"none".equals(newBuyPrice)) {
 			shopItem.setBuyPrice(Double.valueOf(newBuyPrice));
-			getShopDao().saveShopItemBuyPrice(itemString, shopItem.getBuyPrice());
+			getShopDao().saveShopItemBuyPrice(itemHash, shopItem.getBuyPrice());
 			message = message + ChatColor.GREEN + "buyPrice ";
 		}
 		addShopItemToInv(shopItem.getItemStack(), shopItem.getAmount(), shopItem.getSlot(), shopItem.getSellPrice(),
@@ -349,11 +348,11 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		return editorHandler;
 	}
 
-	private List<String> getUniqueItemStringList() {
-		List<String> list = new ArrayList<>();
+	private List<Integer> getUniqueItemStringList() {
+		List<Integer> list = new ArrayList<>();
 		try {
 			for (ShopItem item : getItemList()) {
-				list.add(item.getItemString());
+				list.add(item.getItemHash());
 			}
 		} catch (ShopSystemException e) {
 			// only rentshop
@@ -370,7 +369,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	protected void reloadShopItems() throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
-		for (String item : getUniqueItemStringList()) {
+		for (int item : getUniqueItemStringList()) {
 			loadShopItem(item);
 		}
 	}
@@ -522,15 +521,15 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	private void loadShopItems() {
-		for (String item : getShopDao().loadItemNameList()) {
+		for (int item : getShopDao().loadItemHashList()) {
 			loadShopItem(item);
 		}
 	}
 
 	@SuppressWarnings("deprecation")
-	protected void loadShopItem(String itemString) {
-		if (!getShopDao().removeIfCorrupted(itemString)) {
-			ShopItem shopItem = getShopDao().loadItem(itemString);
+	protected void loadShopItem(int itemHash) {
+		if (!getShopDao().removeIfCorrupted(itemHash)) {
+			ShopItem shopItem = getShopDao().loadItem(itemHash);
 			shopItems.put(shopItem.getSlot(), shopItem);
 			addShopItemToInv(shopItem.getItemStack(), shopItem.getAmount(), shopItem.getSlot(), shopItem.getSellPrice(),
 					shopItem.getBuyPrice());

@@ -3,6 +3,9 @@ package com.ue.shopsystem.dataaccess.impl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -71,38 +74,39 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	@Override
 	public void saveShopItem(ShopItem shopItem, boolean delete) {
 		if (delete) {
-			getConfig().set("ShopItems." + shopItem.getItemString(), null);
+			getConfig().set("ShopItems." + shopItem.getItemHash(), null);
 			save(getConfig(), getSavefile());
 		} else {
 			if (shopItem.getItemStack().getType() == Material.SPAWNER) {
-				getConfig().set("ShopItems." + shopItem.getItemString() + ".Name", shopItem.getItemString());
+				String entityType = shopItem.getItemStack().getItemMeta().getDisplayName();
+				getConfig().set("ShopItems." + shopItem.getItemHash() + ".Name", "SPAWNER_" + entityType);
 			} else {
-				getConfig().set("ShopItems." + shopItem.getItemString() + ".Name", shopItem.getItemStack());
+				getConfig().set("ShopItems." + shopItem.getItemHash() + ".Name", shopItem.getItemStack());
 			}
-			getConfig().set("ShopItems." + shopItem.getItemString() + ".Slot", shopItem.getSlot());
-			getConfig().set("ShopItems." + shopItem.getItemString() + ".newSaveMethod", "true");
+			getConfig().set("ShopItems." + shopItem.getItemHash() + ".Slot", shopItem.getSlot());
+			getConfig().set("ShopItems." + shopItem.getItemHash() + ".newSaveMethod", "true");
 			save(getConfig(), getSavefile());
-			saveShopItemSellPrice(shopItem.getItemString(), shopItem.getSellPrice());
-			saveShopItemBuyPrice(shopItem.getItemString(), shopItem.getBuyPrice());
-			saveShopItemAmount(shopItem.getItemString(), shopItem.getAmount());
+			saveShopItemSellPrice(shopItem.getItemHash(), shopItem.getSellPrice());
+			saveShopItemBuyPrice(shopItem.getItemHash(), shopItem.getBuyPrice());
+			saveShopItemAmount(shopItem.getItemHash(), shopItem.getAmount());
 		}
 	}
 
 	@Override
-	public void saveShopItemSellPrice(String itemString, double sellPrice) {
-		getConfig().set("ShopItems." + itemString + ".sellPrice", sellPrice);
+	public void saveShopItemSellPrice(int itemHash, double sellPrice) {
+		getConfig().set("ShopItems." + itemHash + ".sellPrice", sellPrice);
 		save(getConfig(), getSavefile());
 	}
 
 	@Override
-	public void saveShopItemBuyPrice(String itemString, double buyPrice) {
-		getConfig().set("ShopItems." + itemString + ".buyPrice", buyPrice);
+	public void saveShopItemBuyPrice(int itemHash, double buyPrice) {
+		getConfig().set("ShopItems." + itemHash + ".buyPrice", buyPrice);
 		save(getConfig(), getSavefile());
 	}
 
 	@Override
-	public void saveShopItemAmount(String itemString, int amount) {
-		getConfig().set("ShopItems." + itemString + ".Amount", amount);
+	public void saveShopItemAmount(int itemHash, int amount) {
+		getConfig().set("ShopItems." + itemHash + ".Amount", amount);
 		save(getConfig(), getSavefile());
 	}
 
@@ -128,8 +132,8 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	}
 
 	@Override
-	public void saveStock(String itemString, int stock) {
-		getConfig().set("ShopItems." + itemString + ".stock", stock);
+	public void saveStock(int itemHash, int stock) {
+		getConfig().set("ShopItems." + itemHash + ".stock", stock);
 		save(getConfig(), getSavefile());
 	}
 
@@ -198,36 +202,41 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	}
 
 	@Override
-	public ShopItem loadItem(String itemString) {
+	public ShopItem loadItem(int itemHash) {
 		ItemStack stack = null;
-		if (itemString.contains("SPAWNER_")) {
+		if (getConfig().getString("ShopItems." + itemHash + ".Name").contains("SPAWNER_")) {
 			stack = serverProvider.createItemStack(Material.SPAWNER, 1);
 			ItemMeta meta = stack.getItemMeta();
-			String name = getConfig().getString("ShopItems." + itemString + ".Name");
+			String name = getConfig().getString("ShopItems." + itemHash + ".Name");
 			meta.setDisplayName(name.substring(8));
 			stack.setItemMeta(meta);
 		} else {
-			stack = getConfig().getItemStack("ShopItems." + itemString + ".Name");
+			stack = getConfig().getItemStack("ShopItems." + itemHash + ".Name");
 		}
-		int amount = getConfig().getInt("ShopItems." + itemString + ".Amount");
-		double sellPrice = getConfig().getInt("ShopItems." + itemString + ".sellPrice");
-		double buyPrice = getConfig().getInt("ShopItems." + itemString + ".buyPrice");
-		int slot = getConfig().getInt("ShopItems." + itemString + ".Slot");
+		int amount = getConfig().getInt("ShopItems." + itemHash + ".Amount");
+		double sellPrice = getConfig().getInt("ShopItems." + itemHash + ".sellPrice");
+		double buyPrice = getConfig().getInt("ShopItems." + itemHash + ".buyPrice");
+		int slot = getConfig().getInt("ShopItems." + itemHash + ".Slot");
 		return new ShopItem(stack, amount, sellPrice, buyPrice, slot);
 	}
 
 	@Override
-	public List<String> loadItemNameList() {
+	public List<Integer> loadItemHashList() {
 		removeShopItemList();
+		convertToItemHash();
 		if (config.getConfigurationSection("ShopItems") != null) {
-			return new ArrayList<>(config.getConfigurationSection("ShopItems").getKeys(false));
+			Set<String> keySet = config.getConfigurationSection("ShopItems").getKeys(false);
+			Set<Integer> setOfInteger = keySet.stream() 
+                    .map(s -> Integer.parseInt(s)) 
+                    .collect(Collectors.toSet()); 
+			return new ArrayList<Integer>(setOfInteger);
 		}
 		return new ArrayList<>();
 	}
 
 	@Override
-	public int loadStock(String itemString) {
-		return getConfig().getInt("ShopItems." + itemString + ".stock");
+	public int loadStock(int itemHash) {
+		return getConfig().getInt("ShopItems." + itemHash + ".stock");
 	}
 
 	@Override
@@ -293,12 +302,41 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 
 	@Override
 	@Deprecated
-	public boolean removeIfCorrupted(String itemString) {
-		if(!getConfig().isSet("ShopItems." + itemString + ".Name")) {
-			getConfig().set("ShopItems." + itemString, null);
+	public boolean removeIfCorrupted(int itemHash) {
+		if(!getConfig().isSet("ShopItems." + itemHash + ".Name")) {
+			getConfig().set("ShopItems." + itemHash, null);
 			save(getConfig(), getSavefile());
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * @since 1.2.7
+	 * @deprecated can be removed later
+	 */
+	@SuppressWarnings("unchecked")
+	@Deprecated
+	private void convertToItemHash() {
+		if (getConfig().getConfigurationSection("ShopItems") != null) {
+			Set<String> keySet = config.getConfigurationSection("ShopItems").getKeys(false);
+			for(String key: keySet) {
+				try {
+					Integer.valueOf(key);
+				} catch(NumberFormatException e) {
+					// convert to new format
+					Map<String, Object> vals = config.getConfigurationSection("ShopItems." + key).getValues(true);
+					for (String s : vals.keySet()) {
+						Object val = vals.get(s);
+						if (val instanceof List) {
+							val = new ArrayList<Object>((List<Object>) val);
+						}
+						getConfig().set("ShopItems." + key.hashCode() + "." + s, val);
+					}
+					getConfig().set("ShopItems." + key, null);
+					save(getConfig(), getSavefile());
+				}
+			}
+		}
 	}
 }

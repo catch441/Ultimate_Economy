@@ -225,7 +225,7 @@ public class RentshopImplTest {
 		assertDoesNotThrow(() -> when(shopDao.loadShopLocation()).thenReturn(loc));
 		when(shopDao.loadShopVillagerProfession()).thenReturn(Profession.ARMORER);
 		when(shopDao.loadOwner(null)).thenReturn(null);
-		when(shopDao.loadItemNameList()).thenReturn(new ArrayList<>());
+		when(shopDao.loadItemHashList()).thenReturn(new ArrayList<>());
 		when(shopDao.loadRentable()).thenReturn(true);
 		when(shopDao.loadRentalFee()).thenReturn(5.5);
 		when(shopDao.loadRentUntil()).thenReturn(0L);
@@ -512,7 +512,7 @@ public class RentshopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> rentshop.addShopItem(0, 1, 4, stack));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string"), anyList()));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string".hashCode()), anyList()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsEmpty(0, rentshop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("1.0"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("4.0"));
@@ -524,7 +524,7 @@ public class RentshopImplTest {
 		assertEquals(4.0, shopItem.getBuyPrice());
 		assertEquals(1.0, shopItem.getSellPrice());
 		assertEquals(0, shopItem.getSlot());
-		assertEquals("item string", shopItem.getItemString());
+		assertEquals("item string".hashCode(), shopItem.getItemHash());
 		assertEquals(stackCloneClone, shopItem.getItemStack());
 		// verify that the set occupied method of the editor is called
 		verify(customSkullService).getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1");
@@ -564,9 +564,9 @@ public class RentshopImplTest {
 		assertEquals("§6Updated §aamount §asellPrice §abuyPrice §6for item §astone", response);
 
 		assertDoesNotThrow(() -> verify(validationHandler, times(5)).checkForIsRented(false));
-		verify(shopDao).saveShopItemSellPrice("item string", 15.0);
-		verify(shopDao).saveShopItemBuyPrice("item string", 25.0);
-		verify(shopDao).saveShopItemAmount("item string", 5);
+		verify(shopDao).saveShopItemSellPrice("item string".hashCode(), 15.0);
+		verify(shopDao).saveShopItemBuyPrice("item string".hashCode(), 25.0);
+		verify(shopDao).saveShopItemAmount("item string".hashCode(), 5);
 		assertDoesNotThrow(() -> assertEquals(5, rentshop.getShopItem(0).getAmount()));
 		assertDoesNotThrow(() -> assertEquals(15.0, rentshop.getShopItem(0).getSellPrice()));
 		assertDoesNotThrow(() -> assertEquals(25.0, rentshop.getShopItem(0).getBuyPrice()));
@@ -714,7 +714,7 @@ public class RentshopImplTest {
 		assertDoesNotThrow(() -> verify(generalValidator).checkForPositiveValue(5));
 		assertDoesNotThrow(() -> verify(generalValidator, times(2)).checkForValidSlot(3, 8));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidStockDecrease(10, 5));
-		verify(shopDao).saveStock("item string", 5);
+		verify(shopDao).saveStock("item string".hashCode(), 5);
 		verify(shopInvStackMeta).setLore(Arrays.asList("§a5§6 Items"));
 		assertDoesNotThrow(() -> assertEquals(5, rentshop.getShopItem(3).getStock()));
 	}
@@ -748,7 +748,7 @@ public class RentshopImplTest {
 		assertDoesNotThrow(() -> verify(validationHandler, times(7)).checkForIsRented(false));
 		assertDoesNotThrow(() -> verify(generalValidator).checkForPositiveValue(1));
 		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSlot(3, 8));
-		verify(shopDao).saveStock("item string", 1);
+		verify(shopDao).saveStock("item string".hashCode(), 1);
 		verify(shopInvStackMeta).setLore(Arrays.asList("§a1§6 Item"));
 	}
 
@@ -901,7 +901,7 @@ public class RentshopImplTest {
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerInventoryNotFull(inv));
 		verify(stackCloneClone).setAmount(2);
 		verify(inv).addItem(stackCloneClone);
-		verify(shopDao, times(2)).saveStock("item string", 0);
+		verify(shopDao, times(2)).saveStock("item string".hashCode(), 0);
 		verify(player).sendMessage("my message");
 		assertDoesNotThrow(() -> verify(ecoPlayer).decreasePlayerAmount(4.0, true));
 		assertDoesNotThrow(() -> verify(rentshop.getOwner()).increasePlayerAmount(4.0, false));

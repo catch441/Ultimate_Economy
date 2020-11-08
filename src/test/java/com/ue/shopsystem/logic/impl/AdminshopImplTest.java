@@ -334,8 +334,8 @@ public class AdminshopImplTest {
 		when(shopDao.loadShopSize()).thenReturn(9);
 		assertDoesNotThrow(() -> when(shopDao.loadShopLocation()).thenReturn(loc));
 		when(shopDao.loadShopVillagerProfession()).thenReturn(Profession.ARMORER);
-		when(shopDao.loadItemNameList()).thenReturn(Arrays.asList("item1"));
-		when(shopDao.loadItem("item1")).thenReturn(shopItem);
+		when(shopDao.loadItemHashList()).thenReturn(Arrays.asList(543346345));
+		when(shopDao.loadItem(543346345)).thenReturn(shopItem);
 		when(shopItem.getSlot()).thenReturn(0);
 		when(shopItem.getAmount()).thenReturn(5);
 		when(shopItem.getSellPrice()).thenReturn(2.0);
@@ -415,8 +415,8 @@ public class AdminshopImplTest {
 		when(shopDao.loadShopSize()).thenReturn(9);
 		assertDoesNotThrow(() -> when(shopDao.loadShopLocation()).thenReturn(loc));
 		when(shopDao.loadShopVillagerProfession()).thenReturn(Profession.ARMORER);
-		when(shopDao.loadItemNameList()).thenReturn(Arrays.asList("item1"));
-		when(shopDao.loadItem("item1")).thenReturn(shopItem);
+		when(shopDao.loadItemHashList()).thenReturn(Arrays.asList(543346345));
+		when(shopDao.loadItem(543346345)).thenReturn(shopItem);
 		when(shopItem.getSlot()).thenReturn(0);
 		when(shopItem.getAmount()).thenReturn(5);
 		when(shopItem.getSellPrice()).thenReturn(2.0);
@@ -672,7 +672,7 @@ public class AdminshopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> adminshop.addShopItem(0, 1, 4, stack));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string"), anyList()));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string".hashCode()), anyList()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsEmpty(0, adminshop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("1.0"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("4.0"));
@@ -684,7 +684,7 @@ public class AdminshopImplTest {
 		assertEquals(4.0, shopItem.getBuyPrice());
 		assertEquals(1.0, shopItem.getSellPrice());
 		assertEquals(0, shopItem.getSlot());
-		assertEquals("item string", shopItem.getItemString());
+		assertEquals("item string".hashCode(), shopItem.getItemHash());
 		assertEquals(stackCloneClone, shopItem.getItemStack());
 		// verify that the set occupied method of the editor is called
 		verify(skullService).getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1");
@@ -709,7 +709,7 @@ public class AdminshopImplTest {
 		when(stackMetaClone.getLore()).thenReturn(new ArrayList<>());
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> adminshop.addShopItem(0, 0, 4, stack));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string"), anyList()));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string".hashCode()), anyList()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsEmpty(0, adminshop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("0.0"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("4.0"));
@@ -721,7 +721,7 @@ public class AdminshopImplTest {
 		assertEquals(4.0, shopItem.getBuyPrice());
 		assertEquals(0.0, shopItem.getSellPrice());
 		assertEquals(0, shopItem.getSlot());
-		assertEquals("item string", shopItem.getItemString());
+		assertEquals("item string".hashCode(), shopItem.getItemHash());
 		assertEquals(stackCloneClone, shopItem.getItemStack());
 		// verify that the set occupied method of the editor is called
 		verify(skullService).getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1");
@@ -744,7 +744,7 @@ public class AdminshopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> adminshop.addShopItem(0, 1, 0, stack));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string"), anyList()));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist(eq("item string".hashCode()), anyList()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsEmpty(0, adminshop.getShopInventory(), 1));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("1.0"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidPrice("0.0"));
@@ -756,7 +756,7 @@ public class AdminshopImplTest {
 		assertEquals(0.0, shopItem.getBuyPrice());
 		assertEquals(1.0, shopItem.getSellPrice());
 		assertEquals(0, shopItem.getSlot());
-		assertEquals("item string", shopItem.getItemString());
+		assertEquals("item string".hashCode(), shopItem.getItemHash());
 		assertEquals(stackCloneClone, shopItem.getItemStack());
 		// verify that the set occupied method of the editor is called
 		verify(skullService).getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1");
@@ -812,9 +812,9 @@ public class AdminshopImplTest {
 
 		assertEquals("§6Updated §aamount §asellPrice §abuyPrice §6for item §astone", response);
 
-		verify(shopDao).saveShopItemSellPrice("item string", 15.0);
-		verify(shopDao).saveShopItemBuyPrice("item string", 25.0);
-		verify(shopDao).saveShopItemAmount("item string", 5);
+		verify(shopDao).saveShopItemSellPrice("item string".hashCode(), 15.0);
+		verify(shopDao).saveShopItemBuyPrice("item string".hashCode(), 25.0);
+		verify(shopDao).saveShopItemAmount("item string".hashCode(), 5);
 		assertDoesNotThrow(() -> assertEquals(5, adminshop.getShopItem(0).getAmount()));
 		assertDoesNotThrow(() -> assertEquals(15.0, adminshop.getShopItem(0).getSellPrice()));
 		assertDoesNotThrow(() -> assertEquals(25.0, adminshop.getShopItem(0).getBuyPrice()));
@@ -845,7 +845,7 @@ public class AdminshopImplTest {
 
 		assertEquals("§6Updated §aamount §6for item §astone", response);
 
-		verify(shopDao).saveShopItemAmount("item string", 5);
+		verify(shopDao).saveShopItemAmount("item string".hashCode(), 5);
 		assertDoesNotThrow(() -> assertEquals(5, adminshop.getShopItem(0).getAmount()));
 		assertDoesNotThrow(() -> assertEquals(1.0, adminshop.getShopItem(0).getSellPrice()));
 		assertDoesNotThrow(() -> assertEquals(4.0, adminshop.getShopItem(0).getBuyPrice()));
@@ -876,7 +876,7 @@ public class AdminshopImplTest {
 
 		assertEquals("§6Updated §asellPrice §6for item §astone", response);
 
-		verify(shopDao).saveShopItemSellPrice("item string", 15.0);
+		verify(shopDao).saveShopItemSellPrice("item string".hashCode(), 15.0);
 		assertDoesNotThrow(() -> assertEquals(2, adminshop.getShopItem(0).getAmount()));
 		assertDoesNotThrow(() -> assertEquals(15.0, adminshop.getShopItem(0).getSellPrice()));
 		assertDoesNotThrow(() -> assertEquals(4.0, adminshop.getShopItem(0).getBuyPrice()));
@@ -907,7 +907,7 @@ public class AdminshopImplTest {
 
 		assertEquals("§6Updated §abuyPrice §6for item §astone", response);
 
-		verify(shopDao).saveShopItemBuyPrice("item string", 25.0);
+		verify(shopDao).saveShopItemBuyPrice("item string".hashCode(), 25.0);
 		assertDoesNotThrow(() -> assertEquals(2, adminshop.getShopItem(0).getAmount()));
 		assertDoesNotThrow(() -> assertEquals(1.0, adminshop.getShopItem(0).getSellPrice()));
 		assertDoesNotThrow(() -> assertEquals(25.0, adminshop.getShopItem(0).getBuyPrice()));
@@ -1124,7 +1124,7 @@ public class AdminshopImplTest {
 		assertDoesNotThrow(() -> adminshop.addShopItem(0, 1, 4, stack));
 		
 		ShopItem shopItem = assertDoesNotThrow(() -> adminshop.getShopItem(0));
-		when(shopDao.loadItem("item string")).thenReturn(shopItem);
+		when(shopDao.loadItem("item string".hashCode())).thenReturn(shopItem);
 		
 		Inventory oldInv = adminshop.getShopInventory();
 		Inventory inv = mock(Inventory.class);
@@ -1251,7 +1251,6 @@ public class AdminshopImplTest {
 		ItemStack searchStack = mock(ItemStack.class);
 		ItemStack searchStackClone = mock(ItemStack.class);
 		ItemMeta searchStackCloneMeta = mock(ItemMeta.class);
-		when(searchStackClone.toString()).thenReturn("item string");
 		when(searchStackCloneMeta.hasLore()).thenReturn(true);
 		when(searchStackCloneMeta.getLore()).thenReturn(Arrays.asList("some lore"));
 		when(searchStackClone.getItemMeta()).thenReturn(searchStackCloneMeta);

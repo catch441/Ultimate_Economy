@@ -5,7 +5,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class ShopItem {
 
-	private String itemString;
+	private int itemHash; // hashed item string
 	private ItemStack itemStack;
 	private int amount;
 	private double sellPrice;
@@ -110,12 +110,12 @@ public class ShopItem {
 	}
 
 	/**
-	 * Returns the unique item string.
+	 * Returns the unique item hash.
 	 * 
-	 * @return item string
+	 * @return item hash
 	 */
-	public String getItemString() {
-		return itemString;
+	public int getItemHash() {
+		return itemHash;
 	}
 
 	/**
@@ -124,7 +124,7 @@ public class ShopItem {
 	 * @param itemString
 	 */
 	public void setItemString(String itemString) {
-		this.itemString = itemString;
+		this.itemHash = itemString.hashCode();
 	}
 
 	/**

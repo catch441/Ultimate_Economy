@@ -123,9 +123,9 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 	}
 
 	@Override
-	public void checkForItemDoesNotExist(String itemString, List<ShopItem> itemList) throws ShopSystemException {
+	public void checkForItemDoesNotExist(int itemHash, List<ShopItem> itemList) throws ShopSystemException {
 		for (ShopItem item : itemList) {
-			if (item.getItemString().equals(itemString)) {
+			if (item.getItemHash() == itemHash) {
 				throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.ITEM_ALREADY_EXISTS);
 			}
 		}
