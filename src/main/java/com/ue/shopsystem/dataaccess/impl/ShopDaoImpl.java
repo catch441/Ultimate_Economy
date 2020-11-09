@@ -212,7 +212,7 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 			stack.setItemMeta(meta);
 		} else {
 			stack = getConfig().getItemStack("ShopItems." + itemHash + ".Name");
-		}
+		}			
 		int amount = getConfig().getInt("ShopItems." + itemHash + ".Amount");
 		double sellPrice = getConfig().getInt("ShopItems." + itemHash + ".sellPrice");
 		double buyPrice = getConfig().getInt("ShopItems." + itemHash + ".buyPrice");

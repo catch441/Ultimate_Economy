@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
@@ -134,7 +135,8 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 	private void handleSellSpecific(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
 			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 		ShopItem shopItem = abstractShop.getShopItem(event.getCurrentItem());
-		if (ecoPlayer.getPlayer().getInventory().containsAtLeast(shopItem.getItemStack(), shopItem.getAmount())) {
+		int amount = getAmountInInventory(event.getWhoClicked().getInventory(), shopItem);
+		if (amount >= shopItem.getAmount()) {
 			abstractShop.sellShopItem(shopItem.getSlot(), shopItem.getAmount(), ecoPlayer, true);
 		}
 	}
@@ -142,17 +144,30 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 	private void handleSellAll(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
 			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 		ShopItem shopItem = abstractShop.getShopItem(event.getCurrentItem());
-		if (ecoPlayer.getPlayer().getInventory().containsAtLeast(shopItem.getItemStack(), 1)) {
-			int sellAmount = 0;
-			for (ItemStack is : event.getWhoClicked().getInventory().getStorageContents()) {
-				if (is != null) {
-					if (is.isSimilar(shopItem.getItemStack())) {
-						sellAmount = sellAmount + is.getAmount();
-					}
+		int amount = getAmountInInventory(event.getWhoClicked().getInventory(), shopItem);
+		if (amount > 0) {
+			abstractShop.sellShopItem(shopItem.getSlot(), amount, ecoPlayer, true);
+		}
+	}
+
+	private int getAmountInInventory(PlayerInventory inv, ShopItem shopItem) {
+		int amount = 0;
+		for (ItemStack is : inv.getStorageContents()) {
+			if (is != null) {
+				if (stackIsSimilar(is, shopItem.getItemStack())) {
+					amount = amount + is.getAmount();
 				}
 			}
-			abstractShop.sellShopItem(shopItem.getSlot(), sellAmount, ecoPlayer, true);
 		}
+		return amount;
+	}
+
+	private boolean stackIsSimilar(ItemStack a, ItemStack b) {
+		ItemStack aClone = a.clone();
+		ItemStack bClone = b.clone();
+		aClone.setAmount(1);
+		bClone.setAmount(1);
+		return aClone.toString().equals(bClone.toString());
 	}
 
 	@Override

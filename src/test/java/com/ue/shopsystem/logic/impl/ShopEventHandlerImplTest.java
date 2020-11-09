@@ -544,7 +544,9 @@ public class ShopEventHandlerImplTest {
 		ShopItem shopItem = mock(ShopItem.class);
 		InventoryView view = mock(InventoryView.class);
 		ItemStack clickedItem = mock(ItemStack.class);
+		ItemStack clickedItemClone = mock(ItemStack.class);
 		ItemStack shopItemStack = mock(ItemStack.class);
+		ItemStack shopItemStackClone = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
 		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
@@ -563,18 +565,26 @@ public class ShopEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(shop.getShopItem(clickedItem)).thenReturn(shopItem));
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(player.getName()).thenReturn("catch441");
-		when(ecoPlayer.getPlayer()).thenReturn(player);
 		when(shopItem.getAmount()).thenReturn(10);
 		when(shopItem.getItemStack()).thenReturn(shopItemStack);
 		when(shopItem.getSlot()).thenReturn(4);
 		when(shop.getSize()).thenReturn(9);
-		when(playerInv.containsAtLeast(shopItemStack, 10)).thenReturn(true);
+		
+		when(clickedItem.getAmount()).thenReturn(10);
+		
+		ItemStack[] contents = new ItemStack[1];
+		contents[0] = clickedItem;
+		when(playerInv.getStorageContents()).thenReturn(contents);
+		when(clickedItem.clone()).thenReturn(clickedItemClone);
+		when(shopItemStack.clone()).thenReturn(shopItemStackClone);
+		when(clickedItemClone.toString()).thenReturn("itemString");
+		when(shopItemStackClone.toString()).thenReturn("itemString");
+		
 		eventHandler.handleInventoryClick(event);
 		verify(event).setCancelled(true);
 		assertDoesNotThrow(() -> verify(shop).sellShopItem(4, 10, ecoPlayer, true));
 		verify(player, never()).sendMessage(anyString());
-		verify(ecoPlayer).getPlayer();
-		verifyNoMoreInteractions(ecoPlayer);
+		verifyNoInteractions(ecoPlayer);
 	}
 
 	@Test
@@ -589,7 +599,6 @@ public class ShopEventHandlerImplTest {
 		ShopItem shopItem = mock(ShopItem.class);
 		InventoryView view = mock(InventoryView.class);
 		ItemStack clickedItem = mock(ItemStack.class);
-		ItemStack shopItemStack = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
 		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
@@ -608,16 +617,15 @@ public class ShopEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(shop.getShopItem(clickedItem)).thenReturn(shopItem));
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(player.getName()).thenReturn("catch441");
-		when(ecoPlayer.getPlayer()).thenReturn(player);
 		when(shopItem.getAmount()).thenReturn(10);
-		when(shopItem.getItemStack()).thenReturn(shopItemStack);
-		when(playerInv.containsAtLeast(shopItemStack, 10)).thenReturn(false);
+		
+		when(playerInv.getStorageContents()).thenReturn(new ItemStack[1]);
+		
 		eventHandler.handleInventoryClick(event);
 		verify(event).setCancelled(true);
 		assertDoesNotThrow(() -> verify(shop, never()).sellShopItem(anyInt(), anyInt(), eq(ecoPlayer), anyBoolean()));
 		verify(player, never()).sendMessage(anyString());
-		verify(ecoPlayer).getPlayer();
-		verifyNoMoreInteractions(ecoPlayer);
+		verifyNoInteractions(ecoPlayer);
 	}
 
 	@Test
@@ -633,6 +641,7 @@ public class ShopEventHandlerImplTest {
 		InventoryView view = mock(InventoryView.class);
 		ItemStack clickedItem = mock(ItemStack.class);
 		ItemStack shopItemStack = mock(ItemStack.class);
+		ItemStack shopItemStackClone = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
 		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
@@ -651,15 +660,15 @@ public class ShopEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(shop.getShopItem(clickedItem)).thenReturn(shopItem));
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(player.getName()).thenReturn("catch441");
-		when(ecoPlayer.getPlayer()).thenReturn(player);
 		when(shopItem.getItemStack()).thenReturn(shopItemStack);
 		when(shopItem.getSlot()).thenReturn(4);
-		when(playerInv.containsAtLeast(shopItemStack, 1)).thenReturn(true);
 		ArrayList<ItemStack> contents = new ArrayList<>();
 		ItemStack playerStack = mock(ItemStack.class);
 		ItemStack playerStack2 = mock(ItemStack.class);
-		when(playerStack.isSimilar(shopItemStack)).thenReturn(false);
-		when(playerStack.isSimilar(shopItemStack)).thenReturn(true);
+		ItemStack playerStackClone = mock(ItemStack.class);
+		ItemStack playerStack2Clone = mock(ItemStack.class);
+		when(playerStack.clone()).thenReturn(playerStackClone);
+		when(playerStack2.clone()).thenReturn(playerStack2Clone);
 		when(playerStack.getAmount()).thenReturn(3);
 		ItemStack[] array = new ItemStack[4];
 		contents.add(null);
@@ -668,12 +677,17 @@ public class ShopEventHandlerImplTest {
 		contents.add(playerStack);
 		array = contents.toArray(array);
 		when(playerInv.getStorageContents()).thenReturn(array);
+				
+		when(shopItemStack.clone()).thenReturn(shopItemStackClone);
+		when(playerStackClone.toString()).thenReturn("itemString");
+		when(playerStack2Clone.toString()).thenReturn("other");
+		when(shopItemStackClone.toString()).thenReturn("itemString");
+		
 		eventHandler.handleInventoryClick(event);
 		verify(event).setCancelled(true);
 		assertDoesNotThrow(() -> verify(shop).sellShopItem(4, 6, ecoPlayer, true));
 		verify(player, never()).sendMessage(anyString());
-		verify(ecoPlayer).getPlayer();
-		verifyNoMoreInteractions(ecoPlayer);
+		verifyNoInteractions(ecoPlayer);
 	}
 
 	@Test
@@ -688,7 +702,9 @@ public class ShopEventHandlerImplTest {
 		ShopItem shopItem = mock(ShopItem.class);
 		InventoryView view = mock(InventoryView.class);
 		ItemStack clickedItem = mock(ItemStack.class);
+		ItemStack clickedItemClone = mock(ItemStack.class);
 		ItemStack shopItemStack = mock(ItemStack.class);
+		ItemStack shopItemStackClone = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
 		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
@@ -707,16 +723,23 @@ public class ShopEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(shop.getShopItem(clickedItem)).thenReturn(shopItem));
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(player.getName()).thenReturn("catch441");
-		when(ecoPlayer.getPlayer()).thenReturn(player);
 		when(shopItem.getAmount()).thenReturn(10);
 		when(shopItem.getItemStack()).thenReturn(shopItemStack);
 		when(shopItem.getSlot()).thenReturn(4);
-		when(playerInv.containsAtLeast(shopItemStack, 10)).thenReturn(true);
+		when(clickedItem.getAmount()).thenReturn(10);
+		
+		ItemStack[] contents = new ItemStack[1];
+		contents[0] = clickedItem;
+		when(playerInv.getStorageContents()).thenReturn(contents);
+		when(clickedItem.clone()).thenReturn(clickedItemClone);
+		when(shopItemStack.clone()).thenReturn(shopItemStackClone);
+		when(clickedItemClone.toString()).thenReturn("itemString");
+		when(shopItemStackClone.toString()).thenReturn("itemString");
+		
 		eventHandler.handleInventoryClick(event);
 		verify(event).setCancelled(true);
 		assertDoesNotThrow(() -> verify(shop).sellShopItem(4, 10, ecoPlayer, true));
 		verify(player, never()).sendMessage(anyString());
-		verify(ecoPlayer).getPlayer();
-		verifyNoMoreInteractions(ecoPlayer);
+		verifyNoInteractions(ecoPlayer);
 	}
 }

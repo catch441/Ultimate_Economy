@@ -922,6 +922,7 @@ public class RentshopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack stackCloneClone = mock(ItemStack.class);
+		ItemStack stackCloneCloneClone = mock(ItemStack.class);
 		ItemStack contentStack = mock(ItemStack.class);
 		ItemStack contentStackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
@@ -941,7 +942,9 @@ public class RentshopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(contentStack.clone()).thenReturn(contentStackClone);
 		assertDoesNotThrow(() -> rentshop.addShopItem(3, 1, 2, stack));
-		when(stackCloneClone.isSimilar(contentStackClone)).thenReturn(true);
+		when(stackCloneClone.clone()).thenReturn(stackCloneCloneClone);
+		when(contentStackClone.toString()).thenReturn("itemString");
+		when(stackCloneCloneClone.toString()).thenReturn("itemString");
 		when(configManager.getCurrencyText(1.0)).thenReturn("$");
 		when(messageWrapper.getString("shop_sell_singular", "1", 1.0, "$")).thenReturn("my message");
 

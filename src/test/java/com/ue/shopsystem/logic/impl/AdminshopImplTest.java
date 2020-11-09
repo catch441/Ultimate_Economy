@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -132,6 +133,7 @@ public class AdminshopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack stackCloneClone = mock(ItemStack.class);
+		ItemStack stackCloneCloneClone = mock(ItemStack.class);
 		ItemStack contentStack = mock(ItemStack.class);
 		ItemStack contentStackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
@@ -151,7 +153,9 @@ public class AdminshopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(contentStack.clone()).thenReturn(contentStackClone);
 		assertDoesNotThrow(() -> adminshop.addShopItem(3, 1, 2, stack));
-		when(stackCloneClone.isSimilar(contentStackClone)).thenReturn(true);
+		when(stackCloneClone.clone()).thenReturn(stackCloneCloneClone);
+		when(contentStackClone.toString()).thenReturn("itemString");
+		when(stackCloneCloneClone.toString()).thenReturn("itemString");
 		when(configManager.getCurrencyText(10.0)).thenReturn("$");
 		when(messageWrapper.getString("shop_sell_plural", "10", 10.0, "$")).thenReturn("my message");
 
@@ -172,6 +176,7 @@ public class AdminshopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack stackCloneClone = mock(ItemStack.class);
+		ItemStack stackCloneCloneClone = mock(ItemStack.class);
 		ItemStack contentStack = mock(ItemStack.class);
 		ItemStack contentStackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
@@ -191,7 +196,9 @@ public class AdminshopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(contentStack.clone()).thenReturn(contentStackClone);
 		assertDoesNotThrow(() -> adminshop.addShopItem(3, 1, 2, stack));
-		when(stackCloneClone.isSimilar(contentStackClone)).thenReturn(true);
+		when(stackCloneClone.clone()).thenReturn(stackCloneCloneClone);
+		when(contentStackClone.toString()).thenReturn("itemString");
+		when(stackCloneCloneClone.toString()).thenReturn("itemString");
 		when(configManager.getCurrencyText(1.0)).thenReturn("$");
 		when(messageWrapper.getString("shop_sell_singular", "1", 1.0, "$")).thenReturn("my message");
 
@@ -705,7 +712,6 @@ public class AdminshopImplTest {
 		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
 		when(stack.clone()).thenReturn(stackClone);
 		when(stackClone.clone()).thenReturn(stackCloneClone);
-		when(stackMetaClone.hasLore()).thenReturn(true);
 		when(stackMetaClone.getLore()).thenReturn(new ArrayList<>());
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		assertDoesNotThrow(() -> adminshop.addShopItem(0, 0, 4, stack));
@@ -1230,6 +1236,7 @@ public class AdminshopImplTest {
 		lore.add("some lore");
 		lore.add("2 buy for 10");
 		lore.add("2 sell for 5");
+		lore.add(ChatColor.GREEN + "2" + ChatColor.GOLD + "Items");
 		when(searchStackCloneMeta.getLore()).thenReturn(lore);
 		when(searchStackClone.getItemMeta()).thenReturn(searchStackCloneMeta);
 		when(searchStack.clone()).thenReturn(searchStackClone);

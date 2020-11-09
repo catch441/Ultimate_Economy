@@ -696,6 +696,7 @@ public class PlayershopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack stackCloneClone = mock(ItemStack.class);
+		ItemStack stackCloneCloneClone = mock(ItemStack.class);
 		ItemStack contentStack = mock(ItemStack.class);
 		ItemStack contentStackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
@@ -715,7 +716,9 @@ public class PlayershopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(contentStack.clone()).thenReturn(contentStackClone);
 		assertDoesNotThrow(() -> playershop.addShopItem(3, 1, 2, stack));
-		when(stackCloneClone.isSimilar(contentStackClone)).thenReturn(true);
+		when(stackCloneClone.clone()).thenReturn(stackCloneCloneClone);
+		when(contentStackClone.toString()).thenReturn("itemString");
+		when(stackCloneCloneClone.toString()).thenReturn("itemString");
 		when(configManager.getCurrencyText(1.0)).thenReturn("$");
 		when(messageWrapper.getString("shop_sell_singular", "1", 1.0, "$")).thenReturn("my message");
 
@@ -767,6 +770,7 @@ public class PlayershopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack stackCloneClone = mock(ItemStack.class);
+		ItemStack stackCloneCloneClone = mock(ItemStack.class);
 		ItemStack contentStack = mock(ItemStack.class);
 		ItemStack contentStackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
@@ -786,7 +790,9 @@ public class PlayershopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(contentStack.clone()).thenReturn(contentStackClone);
 		assertDoesNotThrow(() -> playershop.addShopItem(3, 1, 2, stack));
-		when(stackCloneClone.isSimilar(contentStackClone)).thenReturn(true);
+		when(stackCloneClone.clone()).thenReturn(stackCloneCloneClone);
+		when(contentStackClone.toString()).thenReturn("itemString");
+		when(stackCloneCloneClone.toString()).thenReturn("itemString");
 		when(configManager.getCurrencyText(10.0)).thenReturn("$");
 		when(messageWrapper.getString("shop_sell_plural", "10", 10.0, "$")).thenReturn("my message");
 
@@ -811,6 +817,7 @@ public class PlayershopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack stackCloneClone = mock(ItemStack.class);
+		ItemStack stackCloneCloneClone = mock(ItemStack.class);
 		ItemStack contentStack = mock(ItemStack.class);
 		ItemStack contentStackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
@@ -829,7 +836,9 @@ public class PlayershopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(contentStack.clone()).thenReturn(contentStackClone);
 		assertDoesNotThrow(() -> playershop.addShopItem(3, 1, 2, stack));
-		when(stackCloneClone.isSimilar(contentStackClone)).thenReturn(true);
+		when(stackCloneClone.clone()).thenReturn(stackCloneCloneClone);
+		when(contentStackClone.toString()).thenReturn("itemString");
+		when(stackCloneCloneClone.toString()).thenReturn("itemString");
 		when(messageWrapper.getString("shop_added_item_singular", "1")).thenReturn("my message");
 
 		assertDoesNotThrow(() -> playershop.sellShopItem(3, 1, playershop.getOwner(), true));
@@ -851,6 +860,7 @@ public class PlayershopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack stackCloneClone = mock(ItemStack.class);
+		ItemStack stackCloneCloneClone = mock(ItemStack.class);
 		ItemStack contentStack = mock(ItemStack.class);
 		ItemStack contentStackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
@@ -869,7 +879,9 @@ public class PlayershopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(contentStack.clone()).thenReturn(contentStackClone);
 		assertDoesNotThrow(() -> playershop.addShopItem(3, 1, 2, stack));
-		when(stackCloneClone.isSimilar(contentStackClone)).thenReturn(true);
+		when(stackCloneClone.clone()).thenReturn(stackCloneCloneClone);
+		when(contentStackClone.toString()).thenReturn("itemString");
+		when(stackCloneCloneClone.toString()).thenReturn("itemString");
 		when(messageWrapper.getString("shop_added_item_plural", "10")).thenReturn("my message");
 
 		assertDoesNotThrow(() -> playershop.sellShopItem(3, 10, playershop.getOwner(), true));

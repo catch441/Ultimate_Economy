@@ -326,7 +326,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		for (ItemStack s : inventory.getStorageContents()) {
 			if (s != null) {
 				ItemStack stack = s.clone();
-				if (item.isSimilar(stack) && removeAmount != 0) {
+				if (stackIsSimilar(item, s) && removeAmount != 0) {
 					if (removeAmount >= stack.getAmount()) {
 						inventory.removeItem(stack);
 						removeAmount -= stack.getAmount();
@@ -338,6 +338,14 @@ public abstract class AbstractShopImpl implements AbstractShop {
 				}
 			}
 		}
+	}
+	
+	private boolean stackIsSimilar(ItemStack a, ItemStack b) {
+		ItemStack aClone = a.clone();
+		ItemStack bClone = b.clone();
+		bClone.setAmount(1);
+		aClone.setAmount(1);
+		return aClone.toString().equals(bClone.toString());
 	}
 
 	protected ShopSlotEditorHandler getSlotEditorHandler() {
@@ -387,21 +395,23 @@ public abstract class AbstractShopImpl implements AbstractShop {
 			Iterator<String> loreIter = loreList.iterator();
 			while (loreIter.hasNext()) {
 				String lore = loreIter.next();
-				if (lore.contains(" buy for ") || lore.contains(" sell for ")) {
-					loreIter.remove();
-				}
+				removeIfContains(lore, " buy for ", loreIter);
+				removeIfContains(lore, " sell for ", loreIter);
+				removeIfContains(lore, ChatColor.GOLD + " Item", loreIter);
 			}
 		}
 		return loreList;
 	}
+	
+	private void removeIfContains(String value, String arg, Iterator<String> list) {
+		if(value.contains(arg)) {
+			list.remove();
+		}
+	}
 
 	protected void addShopItemToInv(ItemStack itemStack, int amount, int slot, double sellPrice, double buyPrice) {
 		ItemMeta meta = itemStack.getItemMeta();
-		List<String> loreList = new ArrayList<>();
-		if(meta.hasLore()) {
-			loreList = meta.getLore();
-		}
-		loreList.addAll(createItemLoreList(meta, amount, sellPrice, buyPrice));
+		List<String> loreList = createItemLoreList(meta, amount, sellPrice, buyPrice);
 		meta.setLore(loreList);
 		itemStack.setItemMeta(meta);
 		itemStack.setAmount(amount);
