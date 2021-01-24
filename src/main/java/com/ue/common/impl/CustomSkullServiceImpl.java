@@ -14,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.slf4j.Logger;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -22,9 +21,11 @@ import com.ue.common.api.CustomSkullService;
 import com.ue.common.api.SkullTextureEnum;
 import com.ue.common.utils.ServerProvider;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class CustomSkullServiceImpl implements CustomSkullService {
 
-	private final Logger logger;
 	private final ServerProvider serverProvider;
 
 	private Map<SkullTextureEnum, ItemStack> customSkullMap = new HashMap<>();
@@ -33,11 +34,9 @@ public class CustomSkullServiceImpl implements CustomSkullService {
 	 * Inject constructor.
 	 * 
 	 * @param serverProvider
-	 * @param logger
 	 */
 	@Inject
-	public CustomSkullServiceImpl(ServerProvider serverProvider, Logger logger) {
-		this.logger = logger;
+	public CustomSkullServiceImpl(ServerProvider serverProvider) {
 		this.serverProvider= serverProvider;
 	}
 
@@ -75,8 +74,8 @@ public class CustomSkullServiceImpl implements CustomSkullService {
 			profileField.setAccessible(true);
 			profileField.set(headMeta, profile);
 		} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-			logger.warn("[Ultimate_Economy] Failed to request skull texture from minecraft.");
-			logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+			log.warn("[Ultimate_Economy] Failed to request skull texture from minecraft.");
+			log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 		}
 		headMeta.setDisplayName(name);
 		head.setItemMeta(headMeta);

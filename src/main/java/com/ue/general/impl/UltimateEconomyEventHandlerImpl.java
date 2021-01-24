@@ -20,7 +20,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.InventoryHolder;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.Updater;
 import com.ue.common.utils.Updater.UpdateResult;
@@ -35,6 +34,9 @@ import com.ue.shopsystem.logic.api.ShopEventHandler;
 import com.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
 import com.ue.townsystem.logic.api.TownsystemEventHandler;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class UltimateEconomyEventHandlerImpl implements Listener {
 
 	private final EconomyPlayerEventHandler ecoPlayerEventHandler;
@@ -43,8 +45,6 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 	private final TownsystemEventHandler townSystemEventHandler;
 	private final SpawnerSystemEventHandler spawnerSystemEventHandler;
 	private final Updater updater;
-	private final Logger logger;
-
 	private final AdminshopManager adminshopManager;
 	private final PlayershopManager playershopManager;
 	private final RentshopManager rentshopManager;
@@ -59,7 +59,6 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 	 * @param rentshopManager
 	 * @param playershopManager
 	 * @param adminshopManager
-	 * @param logger
 	 * @param updater
 	 * @param spawnerSystemEventHandler
 	 * @param townSystemEventHandler
@@ -68,7 +67,7 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 	 * @param ecoPlayerEventHandler
 	 */
 	public UltimateEconomyEventHandlerImpl(JobcenterManager jobcenterManager, RentshopManager rentshopManager,
-			PlayershopManager playershopManager, AdminshopManager adminshopManager, Logger logger, Updater updater,
+			PlayershopManager playershopManager, AdminshopManager adminshopManager, Updater updater,
 			SpawnerSystemEventHandler spawnerSystemEventHandler, TownsystemEventHandler townSystemEventHandler,
 			ShopEventHandler shopEventHandler, JobsystemEventHandler jobsystemEventHandler,
 			EconomyPlayerEventHandler ecoPlayerEventHandler) {
@@ -78,7 +77,6 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 		this.townSystemEventHandler = townSystemEventHandler;
 		this.spawnerSystemEventHandler = spawnerSystemEventHandler;
 		this.updater = updater;
-		this.logger = logger;
 		this.adminshopManager = adminshopManager;
 		this.playershopManager = playershopManager;
 		this.rentshopManager = rentshopManager;
@@ -236,7 +234,7 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 			ecoPlayerEventHandler.handleJoin(event);
 			townSystemEventHandler.handlePlayerJoin(event);
 		} catch (EconomyPlayerException | GeneralEconomyException e) {
-			logger.warn("[Ultimate_Economy] " + e.getMessage());
+			log.warn("[Ultimate_Economy] " + e.getMessage());
 		}
 		if (event.getPlayer().isOp()) {
 			if (updater.getUpdateResult() == UpdateResult.UPDATE_AVAILABLE) {
@@ -247,11 +245,10 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 		}
 
 		/*
-		 * TODO: Only here to fix a cluser of issues. When spawning the villagers at startup
-		 * without any player, then no changes to these villagers are visible ingame
-		 * (rename, move ...). In spigot it works, but in paper it doesn't. This is just
-		 * a quickfix and not a solution.
-		 * [UE-139,UE-140]
+		 * TODO: Only here to fix a cluser of issues. When spawning the villagers at
+		 * startup without any player, then no changes to these villagers are visible
+		 * ingame (rename, move ...). In spigot it works, but in paper it doesn't. This
+		 * is just a quickfix and not a solution. [UE-139,UE-140]
 		 */
 		if (firstJoin) {
 			jobcenterManager.loadAllJobcenters();

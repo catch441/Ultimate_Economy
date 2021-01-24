@@ -6,8 +6,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.bukkit.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
@@ -19,13 +17,15 @@ import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class RentshopManagerImpl implements RentshopManager {
 
 	private List<Rentshop> rentShopList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
-	private final Logger logger;
 	private final ConfigDao configDao;
 
 	/**
@@ -33,16 +33,14 @@ public class RentshopManagerImpl implements RentshopManager {
 	 * 
 	 * @param serverProvider
 	 * @param messageWrapper
-	 * @param logger
 	 * @param configDao
 	 * @param generalValidator
 	 */
 	@Inject
-	public RentshopManagerImpl(ServerProvider serverProvider, MessageWrapper messageWrapper, Logger logger,
+	public RentshopManagerImpl(ServerProvider serverProvider, MessageWrapper messageWrapper,
 			ConfigDao configDao, GeneralEconomyValidationHandler generalValidator) {
 		this.serverProvider = serverProvider;
 		this.messageWrapper = messageWrapper;
-		this.logger = logger;
 		this.configDao = configDao;
 		this.generalValidator = generalValidator;
 	}
@@ -137,16 +135,15 @@ public class RentshopManagerImpl implements RentshopManager {
 				shop.setupExisting(null, shopId);
 				rentShopList.add(shop);
 			} catch (TownSystemException | GeneralEconomyException | ShopSystemException e) {
-				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
-				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+				log.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
+				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}
 
 	@Override
 	public void setupRentDailyTask() {
-		Logger logger = LoggerFactory.getLogger(RentDailyTask.class.getName());
-		new RentDailyTask(logger, serverProvider, this, messageWrapper)
+		new RentDailyTask(serverProvider, this, messageWrapper)
 				.runTaskTimerAsynchronously(serverProvider.getJavaPluginInstance(), 1, 1000);
 	}
 

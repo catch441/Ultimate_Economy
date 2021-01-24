@@ -6,7 +6,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.bukkit.Location;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
@@ -19,6 +18,9 @@ import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class AdminshopManagerImpl implements AdminshopManager {
 
 	private List<Adminshop> adminShopList = new ArrayList<>();
@@ -26,7 +28,6 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	private final ShopValidationHandler validationHandler;
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
-	private final Logger logger;
 	private final ConfigDao configDao;
 
 	/**
@@ -34,17 +35,15 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	 * 
 	 * @param validationHandler
 	 * @param messageWrapper
-	 * @param logger
 	 * @param serverProvider
 	 * @param configDao
 	 * @param generalValidator
 	 */
 	@Inject
-	public AdminshopManagerImpl(ShopValidationHandler validationHandler, MessageWrapper messageWrapper, Logger logger,
+	public AdminshopManagerImpl(ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
 			ServerProvider serverProvider, ConfigDao configDao, GeneralEconomyValidationHandler generalValidator) {
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
-		this.logger = logger;
 		this.serverProvider = serverProvider;
 		this.configDao = configDao;
 		this.generalValidator = generalValidator;
@@ -149,8 +148,8 @@ public class AdminshopManagerImpl implements AdminshopManager {
 				shop.setupExisting(null, shopId);
 				adminShopList.add(shop);
 			} catch (TownSystemException | ShopSystemException | GeneralEconomyException e) {
-				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
-				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+				log.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
+				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}
@@ -163,8 +162,8 @@ public class AdminshopManagerImpl implements AdminshopManager {
 				shop.setupExisting(shopName, generateFreeAdminShopId());
 				adminShopList.add(shop);
 			} catch (TownSystemException | ShopSystemException | GeneralEconomyException e) {
-				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopName);
-				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+				log.warn("[Ultimate_Economy] Failed to load the shop " + shopName);
+				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 		configDao.removeDeprecatedAdminshopNames();

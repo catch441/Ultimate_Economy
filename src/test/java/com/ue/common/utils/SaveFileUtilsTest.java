@@ -12,17 +12,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 @ExtendWith(MockitoExtension.class)
 public class SaveFileUtilsTest {
 
 	@InjectMocks
 	SaveFileUtils utils;
-	@Mock
-	Logger logger;
 	
 	@Test
 	public void saveErrorTest() throws IOException {
@@ -32,8 +28,7 @@ public class SaveFileUtilsTest {
 		when(e.getMessage()).thenReturn("my error");
 		doThrow(e).when(config).save(savefile);
 		utils.save(config, savefile);
-		verify(logger).warn("[Ultimate_Economy] Error on save config to file");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error");
+		verify(e).getMessage();
 	}
 	
 	@Test
@@ -43,7 +38,6 @@ public class SaveFileUtilsTest {
 		when(e.getMessage()).thenReturn("my error");
 		doThrow(e).when(savefile).createNewFile();
 		utils.createFile(savefile);
-		verify(logger).warn("[Ultimate_Economy] Failed to create savefile");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error");
+		verify(e).getMessage();
 	}
 }

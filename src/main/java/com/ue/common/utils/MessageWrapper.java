@@ -7,32 +7,21 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import javax.inject.Inject;
-
 import org.bukkit.ChatColor;
-import org.slf4j.Logger;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class MessageWrapper {
 
 	protected ResourceBundle messages;
-	private final Logger logger;
-	
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param logger
-	 */
-	@Inject
-	public MessageWrapper(Logger logger) {
-		this.logger = logger;
-	}
 
 	/**
 	 * Load the language from the config.
 	 * @param locale
 	 */
 	public void loadLanguage(Locale locale) {
-		logger.info("[Ultimate_Economy] Loading language file: '" + locale.getLanguage() + "' '"
+		log.info("[Ultimate_Economy] Loading language file: '" + locale.getLanguage() + "' '"
 				+ locale.getCountry() + "'");
 		messages = ResourceBundle.getBundle("language.MessagesBundle", locale, new UTF8Control());
 	}

@@ -22,7 +22,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
@@ -38,9 +37,11 @@ import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class JobcenterImpl implements Jobcenter {
 
-	private final Logger logger;
 	private final JobManager jobManager;
 	private final JobcenterManager jobcenterManager;
 	private final EconomyPlayerManager ecoPlayerManager;
@@ -58,7 +59,6 @@ public class JobcenterImpl implements Jobcenter {
 	/**
 	 * Inject constructor.
 	 * 
-	 * @param logger
 	 * @param jobcenterDao
 	 * @param jobManager
 	 * @param jobcenterManager
@@ -69,12 +69,11 @@ public class JobcenterImpl implements Jobcenter {
 	 * @throws JobSystemException
 	 */
 	@Inject
-	public JobcenterImpl(Logger logger, JobcenterDao jobcenterDao, JobManager jobManager,
+	public JobcenterImpl(JobcenterDao jobcenterDao, JobManager jobManager,
 			JobcenterManager jobcenterManager, EconomyPlayerManager ecoPlayerManager,
 			JobsystemValidationHandler validationHandler, ServerProvider serverProvider,
 			GeneralEconomyValidationHandler generalValidator) {
 		this.jobManager = jobManager;
-		this.logger = logger;
 		this.jobcenterManager = jobcenterManager;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
@@ -142,8 +141,8 @@ public class JobcenterImpl implements Jobcenter {
 					try {
 						ecoPlayer.leaveJob(job, false);
 					} catch (EconomyPlayerException e) {
-						logger.warn("[Ultimate_Economy] Failed to leave the job " + job.getName());
-						logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+						log.warn("[Ultimate_Economy] Failed to leave the job " + job.getName());
+						log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 					}
 				}
 			}
@@ -265,8 +264,8 @@ public class JobcenterImpl implements Jobcenter {
 				jobItem.setItemMeta(meta);
 				inventory.setItem(jobcenterDao.loadJobSlot(job), jobItem);
 			} catch (GeneralEconomyException e) {
-				logger.warn("[Ultimate_Economy] Failed to load the job " + jobName + " for the jobcenter " + getName());
-				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+				log.warn("[Ultimate_Economy] Failed to load the job " + jobName + " for the jobcenter " + getName());
+				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}

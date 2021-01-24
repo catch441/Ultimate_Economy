@@ -6,7 +6,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.bukkit.Location;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.MessageWrapper;
@@ -24,10 +23,11 @@ import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 
 import dagger.Lazy;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class JobcenterManagerImpl implements JobcenterManager {
 
-	private final Logger logger;
 	private List<Jobcenter> jobCenterList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerManager ecoPlayerManager;
@@ -44,14 +44,12 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	 * @param validationHandler
 	 * @param ecoPlayerManager
 	 * @param messageWrapper
-	 * @param logger
 	 * @param generalValidator
 	 */
 	@Inject
 	public JobcenterManagerImpl(ConfigDao configDao, Lazy<JobManager> jobManager, ServerProvider serverProvider,
 			JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
-			MessageWrapper messageWrapper, Logger logger, GeneralEconomyValidationHandler generalValidator) {
-		this.logger = logger;
+			MessageWrapper messageWrapper, GeneralEconomyValidationHandler generalValidator) {
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.serverProvider = serverProvider;
@@ -101,8 +99,8 @@ public class JobcenterManagerImpl implements JobcenterManager {
 				try {
 					ecoPlayer.leaveJob(job, false);
 				} catch (EconomyPlayerException e) {
-					logger.warn("[Ultimate_Economy] Failed to leave the job " + job.getName());
-					logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+					log.warn("[Ultimate_Economy] Failed to leave the job " + job.getName());
+					log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 				}
 			}
 		}

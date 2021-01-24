@@ -6,7 +6,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.SaveFileUtils;
@@ -18,11 +17,9 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	 * Config Data Access constructor.
 	 * 
 	 * @param serverProvider
-	 * @param logger
 	 */
 	@Inject
-	public ConfigDaoImpl(ServerProvider serverProvider, Logger logger) {
-		super(logger);
+	public ConfigDaoImpl(ServerProvider serverProvider) {
 		file = new File(serverProvider.getDataFolderPath(), "config.yml");
 		if (!file.exists()) {
 			createFile(file);

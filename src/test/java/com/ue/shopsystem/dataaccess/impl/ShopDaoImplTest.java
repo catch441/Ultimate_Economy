@@ -32,7 +32,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
@@ -57,8 +56,6 @@ public class ShopDaoImplTest {
 	ShopValidationHandler validationHandler;
 	@Mock
 	TownsystemValidationHandler townsystemValidationHandler;
-	@Mock
-	Logger logger;
 
 	/**
 	 * Deletes the savefile.
@@ -550,8 +547,7 @@ public class ShopDaoImplTest {
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
 		shopDao.setupSavefile("A1");
 		shopDao.loadOwner("myshop_catch441");
-		verify(logger).warn("[Ultimate_Economy] Error on save config to file");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+		verify(e).getMessage();
 	}
 
 	@Test

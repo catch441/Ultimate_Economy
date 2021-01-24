@@ -20,7 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
@@ -43,8 +42,6 @@ public class TownworldDaoImplTest {
 	BankManager bankManager;
 	@Mock
 	ServerProvider serverProvider;
-	@Mock
-	Logger logger;
 
 	/**
 	 * Delete savefile.
@@ -328,8 +325,7 @@ public class TownworldDaoImplTest {
 		when(ecoPlayer.getName()).thenReturn("catch441");
 		dao.saveDeputies("town", Arrays.asList(ecoPlayer));
 		assertEquals(0, dao.loadDeputies("town").size());
-		verify(logger).warn("[Ultimate_Economy] Failed to load deputy catch441 of town town");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+		verify(e).getMessage();
 	}
 	
 	@Test
@@ -354,8 +350,7 @@ public class TownworldDaoImplTest {
 		when(ecoPlayer.getName()).thenReturn("catch441");
 		dao.saveCitizens("town", Arrays.asList(ecoPlayer));
 		assertEquals(0, dao.loadCitizens("town").size());
-		verify(logger).warn("[Ultimate_Economy] Failed to load citizen catch441 of town town");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+		verify(e).getMessage();
 	}
 	
 	@Test
@@ -380,8 +375,7 @@ public class TownworldDaoImplTest {
 		when(ecoPlayer.getName()).thenReturn("catch441");
 		dao.savePlotResidents("town", "1/2", Arrays.asList(ecoPlayer));
 		assertEquals(0, dao.loadResidents("town", "1/2").size());
-		verify(logger).warn("[Ultimate_Economy] Failed to load resident catch441 of town town and plot 1/2");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+		verify(e).getMessage();
 	}
 
 	@Test

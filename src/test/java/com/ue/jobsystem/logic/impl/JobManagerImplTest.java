@@ -21,7 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
@@ -56,8 +55,6 @@ public class JobManagerImplTest {
 	MessageWrapper messageWrapper;
 	@Mock
 	ConfigDao configDao;
-	@Mock
-	Logger logger;
 	@Mock
 	GeneralEconomyValidationHandler generalValidator;
 
@@ -117,8 +114,7 @@ public class JobManagerImplTest {
 		when(ecoPlayer.hasJob(job)).thenReturn(true);
 		when(e.getMessage()).thenReturn("my error message");
 		jobManager.removeJobFromAllPlayers(job);
-		verify(logger).warn("[Ultimate_Economy] Failed leave the job myJob");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+		verify(e).getMessage();
 	}
 
 	@Test
@@ -168,8 +164,7 @@ public class JobManagerImplTest {
 		;
 		verify(configDao).saveJobList(anyList());
 		assertDoesNotThrow(() -> verify(ecoPlayer).leaveJob(job, false));
-		verify(logger).warn("[Ultimate_Economy] Failed remove the job myJob");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+		verify(e).getMessage();
 		assertEquals(0, jobManager.getJobList().size());
 	}
 

@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
@@ -65,8 +64,6 @@ public class TownImplTest {
 	TownworldManagerImpl townworldManager;
 	@Mock
 	ServerProvider serverProvider;
-	@Mock
-	Logger logger;
 	@Mock
 	TownworldDao townworldDao;
 	@Mock
@@ -101,7 +98,7 @@ public class TownImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(loc.getWorld()).thenReturn(world);
 		return assertDoesNotThrow(() -> new TownImpl(mayor, "mytown", loc, townworldManager, bankManager,
-				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, logger, generalValidator));
+				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, generalValidator));
 	}
 
 	@Test
@@ -138,7 +135,7 @@ public class TownImplTest {
 		when(duplicated.getName()).thenReturn("mytown TownManager");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
 		Town town = assertDoesNotThrow(() -> new TownImpl(mayor, "mytown", loc, townworldManager, bankManager,
-				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, logger, generalValidator));
+				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, generalValidator));
 
 		verify(villager).setCustomName("mytown TownManager");
 		verify(villager).setCustomNameVisible(true);
@@ -220,7 +217,7 @@ public class TownImplTest {
 		when(townworldDao.loadPlotOwner("mytown", "1/2")).thenReturn(null);
 		when(townworldDao.loadTownPlotCoords("mytown")).thenReturn(Arrays.asList("1/2", "2/3"));
 		Town town = assertDoesNotThrow(() -> new TownImpl("mytown", townworldManager, bankManager, validationHandler,
-				messageWrapper, townworldDao, townworld, serverProvider, logger, generalValidator));
+				messageWrapper, townworldDao, townworld, serverProvider, generalValidator));
 
 		assertEquals("mytown", town.getTownName());
 		assertEquals(townworld, town.getTownworld());
@@ -232,8 +229,8 @@ public class TownImplTest {
 		Plot plot = assertDoesNotThrow(() -> town.getPlotByChunk("1/2"));
 		assertEquals(town, plot.getTown());
 		assertEquals("1/2", plot.getChunkCoords());
-		verify(logger).warn("[Ultimate_Economy] Failed to load plot 2/3 of town mytown");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+		
+		verify(e).getMessage();
 
 		verify(joinItemMeta).setDisplayName("Join");
 		verify(joinItem).setItemMeta(joinItemMeta);
@@ -333,7 +330,7 @@ public class TownImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(loc.getWorld()).thenReturn(world);
 		Town town = assertDoesNotThrow(() -> new TownImpl(mayor, "mytown", loc, townworldManager, bankManager,
-				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, logger, generalValidator));
+				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, generalValidator));
 
 		assertDoesNotThrow(() -> town.increaseTownBankAmount(1.5));
 		assertDoesNotThrow(() -> verify(account).increaseAmount(1.5));
@@ -376,7 +373,7 @@ public class TownImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(loc.getWorld()).thenReturn(world);
 		Town town = assertDoesNotThrow(() -> new TownImpl(mayor, "mytown", loc, townworldManager, bankManager,
-				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, logger, generalValidator));
+				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, generalValidator));
 
 		assertDoesNotThrow(() -> town.decreaseTownBankAmount(1.5));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForTownHasEnoughMoney(0.0, 1.5));
@@ -429,7 +426,7 @@ public class TownImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(loc.getWorld()).thenReturn(world);
 		Town town = assertDoesNotThrow(() -> new TownImpl(mayor, "mytown", loc, townworldManager, bankManager,
-				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, logger, generalValidator));
+				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, generalValidator));
 		when(account.getAmount()).thenReturn(1.0);
 
 		assertTrue(town.hasEnoughMoney(1.0));
@@ -546,7 +543,7 @@ public class TownImplTest {
 		when(loc.getWorld()).thenReturn(world);
 		when(townworld.getExpandPrice()).thenReturn(2.5);
 		Town town = assertDoesNotThrow(() -> new TownImpl(mayor, "mytown", loc, townworldManager, bankManager,
-				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, logger, generalValidator));
+				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, generalValidator));
 
 		Chunk newChunk = mock(Chunk.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
@@ -734,7 +731,7 @@ public class TownImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(loc.getWorld()).thenReturn(world);
 		Town town = assertDoesNotThrow(() -> new TownImpl(mayor, "mytown", loc, townworldManager, bankManager,
-				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, logger, generalValidator));
+				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, generalValidator));
 		Location newLoc = mock(Location.class);
 		assertDoesNotThrow(() -> town.moveTownManagerVillager(newLoc, town.getMayor()));
 
@@ -796,7 +793,7 @@ public class TownImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(loc.getWorld()).thenReturn(world);
 		Town town = assertDoesNotThrow(() -> new TownImpl(mayor, "mytown", loc, townworldManager, bankManager,
-				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, logger, generalValidator));
+				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, generalValidator));
 
 		ItemStack buyItem = mock(ItemStack.class);
 		ItemStack cancelItem = mock(ItemStack.class);
@@ -871,7 +868,7 @@ public class TownImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(loc.getWorld()).thenReturn(world);
 		Town town = assertDoesNotThrow(() -> new TownImpl(mayor, "mytown", loc, townworldManager, bankManager,
-				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, logger, generalValidator));
+				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, generalValidator));
 
 		ItemStack buyItem = mock(ItemStack.class);
 		ItemStack cancelItem = mock(ItemStack.class);
@@ -932,7 +929,7 @@ public class TownImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(loc.getWorld()).thenReturn(world);
 		Town town = assertDoesNotThrow(() -> new TownImpl(mayor, "mytown", loc, townworldManager, bankManager,
-				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, logger, generalValidator));
+				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, generalValidator));
 
 		Player player = mock(Player.class);
 		town.openTownManagerVillagerInv(player);
@@ -986,7 +983,7 @@ public class TownImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(loc.getWorld()).thenReturn(world);
 		Town town = assertDoesNotThrow(() -> new TownImpl(mayor, "mytown", loc, townworldManager, bankManager,
-				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, logger, generalValidator));
+				validationHandler, messageWrapper, townworldDao, townworld, serverProvider, generalValidator));
 
 		assertDoesNotThrow(() -> town.renameTown("newname", mayor));
 

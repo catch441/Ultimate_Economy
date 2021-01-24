@@ -20,7 +20,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
@@ -38,6 +37,9 @@ import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
 import com.ue.townsystem.logic.api.TownworldManager;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class TownImpl implements Town {
 
 	private final MessageWrapper messageWrapper;
@@ -46,7 +48,6 @@ public class TownImpl implements Town {
 	private final BankManager bankManager;
 	private final TownworldManager townworldManager;
 	private final ServerProvider serverProvider;
-	private final Logger logger;
 	private final TownworldDao townworldDao;
 
 	private String townName;
@@ -71,7 +72,6 @@ public class TownImpl implements Town {
 	 * @param townworldDao
 	 * @param townworld
 	 * @param serverProvider
-	 * @param logger
 	 * @param generalValidator
 	 * @throws EconomyPlayerException
 	 * @throws TownSystemException
@@ -79,7 +79,7 @@ public class TownImpl implements Town {
 	 */
 	public TownImpl(String townName, TownworldManager townworldManager, BankManager bankManager,
 			TownsystemValidationHandler validationHandler, MessageWrapper messageWrapper, TownworldDao townworldDao,
-			Townworld townworld, ServerProvider serverProvider, Logger logger,
+			Townworld townworld, ServerProvider serverProvider,
 			GeneralEconomyValidationHandler generalValidator)
 			throws EconomyPlayerException, TownSystemException, GeneralEconomyException {
 		this.townworldDao = townworldDao;
@@ -88,7 +88,6 @@ public class TownImpl implements Town {
 		this.bankManager = bankManager;
 		this.townworldManager = townworldManager;
 		this.serverProvider = serverProvider;
-		this.logger = logger;
 		this.generalValidator = generalValidator;
 		loadExistingTown(townworld, townName);
 	}
@@ -106,13 +105,12 @@ public class TownImpl implements Town {
 	 * @param townworldDao
 	 * @param townworld
 	 * @param serverProvider
-	 * @param logger
 	 * @param generalValidator
 	 * @throws EconomyPlayerException
 	 */
 	public TownImpl(EconomyPlayer mayor, String townName, Location location, TownworldManager townworldManager,
 			BankManager bankManager, TownsystemValidationHandler validationHandler, MessageWrapper messageWrapper,
-			TownworldDao townworldDao, Townworld townworld, ServerProvider serverProvider, Logger logger,
+			TownworldDao townworldDao, Townworld townworld, ServerProvider serverProvider,
 			GeneralEconomyValidationHandler generalValidator) throws EconomyPlayerException {
 		this.townworldDao = townworldDao;
 		this.messageWrapper = messageWrapper;
@@ -120,7 +118,6 @@ public class TownImpl implements Town {
 		this.bankManager = bankManager;
 		this.townworldManager = townworldManager;
 		this.serverProvider = serverProvider;
-		this.logger = logger;
 		this.generalValidator = generalValidator;
 		setupNewTown(townworld, mayor, townName, location);
 	}
@@ -495,8 +492,8 @@ public class TownImpl implements Town {
 				Plot plot = new PlotImpl(coords, validationHandler, townworldDao, this, serverProvider);
 				plots.put(coords, plot);
 			} catch (GeneralEconomyException | TownSystemException e) {
-				logger.warn("[Ultimate_Economy] Failed to load plot " + coords + " of town " + getTownName());
-				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+				log.warn("[Ultimate_Economy] Failed to load plot " + coords + " of town " + getTownName());
+				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}

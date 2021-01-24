@@ -21,7 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.ServiceComponent;
@@ -49,8 +48,6 @@ public class JobcenterManagerImplTest {
 	ServerProvider serverProvider;
 	@Mock
 	ConfigDao configDao;
-	@Mock
-	Logger logger;
 	@Mock
 	GeneralEconomyValidationHandler generalValidator;
 
@@ -146,8 +143,7 @@ public class JobcenterManagerImplTest {
 		assertEquals(0, manager.getJobcenterList().size());
 		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.leaveJob(job, false));
 		verify(configDao).saveJobcenterList(new ArrayList<>());
-		verify(logger).warn("[Ultimate_Economy] Failed to leave the job myJob");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+		verify(e).getMessage();
 	}
 	
 	@Test

@@ -6,8 +6,6 @@ import javax.inject.Singleton;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ue.bank.dataaccess.api.BankDao;
 import com.ue.bank.dataaccess.impl.BankDaoImpl;
@@ -108,17 +106,11 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	Logger provideUltimateEconomyLogger() {
-		return LoggerFactory.getLogger("UltimateEconomy");
-	}
-
-	@Singleton
-	@Provides
 	UltimateEconomy provideUltimateEconomy(Economy vaultEconomy, SpawnerManager spawnerManager, ConfigManager configManager,
 			BankManager bankManager, EconomyPlayerManager ecoPlayerManager, JobManager jobManager,
 			JobcenterManager jobcenterManager, AdminshopManager adminshopManager, PlayershopManager playershopManager,
 			RentshopManager rentshopManager, TownworldManager townworldManager, Metrics metrics,
-			Updater updater, Logger logger, MessageWrapper messageWrapper, CustomSkullService skullService,
+			Updater updater, MessageWrapper messageWrapper, CustomSkullService skullService,
 			ServerProvider serverProvider, ShopEventHandler shopEventHandler,
 			JobsystemEventHandler jobsystemEventHandler, EconomyPlayerEventHandler ecoPlayerEventHandler,
 			TownsystemEventHandler townsystemEventHandler, SpawnerSystemEventHandler spawnerSystemEventHandler,
@@ -140,7 +132,7 @@ public class ProviderModule {
 			@Named("TownworldTabCompleter") TabCompleter townworldTabCompleter) {
 		return new UltimateEconomy(vaultEconomy, spawnerManager, configManager, bankManager, ecoPlayerManager, jobManager,
 				jobcenterManager, adminshopManager, playershopManager, rentshopManager, townworldManager,
-				metrics, updater, logger, messageWrapper, skullService, serverProvider, shopEventHandler,
+				metrics, updater, messageWrapper, skullService, serverProvider, shopEventHandler,
 				jobsystemEventHandler, ecoPlayerEventHandler, townsystemEventHandler, spawnerSystemEventHandler,
 				configCommandExecutor, ecoPlayerCommandExecutor, jobCommandExecutor, playershopCommandExecutor,
 				adminshopCommandExecutor, rentshopCommandExecutor, townCommandExecutor, townworldCommandExecutor,
@@ -174,8 +166,8 @@ public class ProviderModule {
 	
 	@Singleton
 	@Provides
-	MessageWrapper provideMessageWrapper(Logger logger) {
-		return new MessageWrapper(logger);
+	MessageWrapper provideMessageWrapper() {
+		return new MessageWrapper();
 	}
 	
 	@Provides

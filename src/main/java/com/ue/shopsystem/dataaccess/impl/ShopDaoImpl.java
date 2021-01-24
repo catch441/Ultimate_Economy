@@ -15,7 +15,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.common.utils.ServerProvider;
@@ -29,6 +28,9 @@ import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 
 	private final ServerProvider serverProvider;
@@ -43,13 +45,10 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	 * @param ecoPlayerManager
 	 * @param validationHandler
 	 * @param townsystemValidationHandler
-	 * @param logger
 	 */
 	@Inject
 	public ShopDaoImpl(ServerProvider serverProvider, EconomyPlayerManager ecoPlayerManager,
-			ShopValidationHandler validationHandler, TownsystemValidationHandler townsystemValidationHandler,
-			Logger logger) {
-		super(logger);
+			ShopValidationHandler validationHandler, TownsystemValidationHandler townsystemValidationHandler) {
 		this.serverProvider = serverProvider;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
@@ -137,6 +136,53 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 		save(getConfig(), getSavefile());
 	}
 
+	/*@Override
+	/**
+	 * Saves a shopitem player specific. Not possible with spawners.
+	 * 
+	 * @param shopItem
+	 * @param playerName
+	 * @param delete
+	 *
+	public void saveShopItemStockPlayerSpecific(ShopItem shopItem, String playerName, boolean delete) {
+		if(delete) {
+			getConfig().set("Storage." + playerName + shopItem.getItemHash(), null);
+		} else {
+			getConfig().set("Storage." + playerName + shopItem.getItemHash() + ".Name", shopItem.getItemStack());
+			getConfig().set("Storage." + playerName + shopItem.getItemHash() + ".Slot", shopItem.getSlot());
+			getConfig().set("Storage." + playerName + + shopItem.getItemHash() + ".stock", shopItem.getStock());
+			getConfig().set("Storage." + playerName + + shopItem.getItemHash() + ".Amount", shopItem.getAmount());
+			getConfig().set("Storage." + playerName + + shopItem.getItemHash() + ".sellPrice", shopItem.getSellPrice());
+			getConfig().set("Storage." + playerName + + shopItem.getItemHash() + ".buyPrice", shopItem.getBuyPrice());
+		}
+		save(getConfig(), getSavefile());
+	}
+	
+	@Override
+	/**
+	 * . Not possible with spawners.
+	 * @param playerName
+	 * @param itemHash
+	 * @return
+	 *
+	public ShopItem loadItemPlayerSpecific(String playerName, int itemHash) {
+		ItemStack stack = null;
+		if (getConfig().getString("ShopItems." + itemHash + ".Name").contains("SPAWNER_")) {
+			stack = serverProvider.createItemStack(Material.SPAWNER, 1);
+			ItemMeta meta = stack.getItemMeta();
+			String name = getConfig().getString("ShopItems." + itemHash + ".Name");
+			meta.setDisplayName(name.substring(8));
+			stack.setItemMeta(meta);
+		} else {
+			stack = getConfig().getItemStack("ShopItems." + itemHash + ".Name");
+		}
+		int amount = getConfig().getInt("ShopItems." + itemHash + ".Amount");
+		double sellPrice = getConfig().getInt("ShopItems." + itemHash + ".sellPrice");
+		double buyPrice = getConfig().getInt("ShopItems." + itemHash + ".buyPrice");
+		int slot = getConfig().getInt("ShopItems." + itemHash + ".Slot");
+		return new ShopItem(stack, amount, sellPrice, buyPrice, slot);
+	}*/
+
 	@Override
 	public void saveOwner(EconomyPlayer ecoPlayer) {
 		if (ecoPlayer != null) {
@@ -212,7 +258,7 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 			stack.setItemMeta(meta);
 		} else {
 			stack = getConfig().getItemStack("ShopItems." + itemHash + ".Name");
-		}			
+		}
 		int amount = getConfig().getInt("ShopItems." + itemHash + ".Amount");
 		double sellPrice = getConfig().getInt("ShopItems." + itemHash + ".sellPrice");
 		double buyPrice = getConfig().getInt("ShopItems." + itemHash + ".buyPrice");
@@ -226,9 +272,7 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 		convertToItemHash();
 		if (config.getConfigurationSection("ShopItems") != null) {
 			Set<String> keySet = config.getConfigurationSection("ShopItems").getKeys(false);
-			Set<Integer> setOfInteger = keySet.stream() 
-                    .map(s -> Integer.parseInt(s)) 
-                    .collect(Collectors.toSet()); 
+			Set<Integer> setOfInteger = keySet.stream().map(s -> Integer.parseInt(s)).collect(Collectors.toSet());
 			return new ArrayList<Integer>(setOfInteger);
 		}
 		return new ArrayList<>();
@@ -284,8 +328,8 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 						.getEconomyPlayerByName(name.substring(name.indexOf("_") + 1));
 				saveOwner(ecoPlayer);
 			} catch (GeneralEconomyException e) {
-				logger.warn("[Ultimate_Economy] Error on save config to file");
-				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+				log.warn("[Ultimate_Economy] Error on save config to file");
+				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}
@@ -303,14 +347,14 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	@Override
 	@Deprecated
 	public boolean removeIfCorrupted(int itemHash) {
-		if(!getConfig().isSet("ShopItems." + itemHash + ".Name")) {
+		if (!getConfig().isSet("ShopItems." + itemHash + ".Name")) {
 			getConfig().set("ShopItems." + itemHash, null);
 			save(getConfig(), getSavefile());
 			return true;
 		}
 		return false;
 	}
-	
+
 	/**
 	 * @since 1.2.7
 	 * @deprecated can be removed later
@@ -320,10 +364,10 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	private void convertToItemHash() {
 		if (getConfig().getConfigurationSection("ShopItems") != null) {
 			Set<String> keySet = config.getConfigurationSection("ShopItems").getKeys(false);
-			for(String key: keySet) {
+			for (String key : keySet) {
 				try {
 					Integer.valueOf(key);
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					// convert to new format
 					Map<String, Object> vals = config.getConfigurationSection("ShopItems." + key).getValues(true);
 					for (String s : vals.keySet()) {

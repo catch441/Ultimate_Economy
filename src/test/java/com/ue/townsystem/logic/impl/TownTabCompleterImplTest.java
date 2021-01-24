@@ -15,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
@@ -31,8 +30,6 @@ public class TownTabCompleterImplTest {
 	TownworldManager townworldManager;
 	@Mock
 	EconomyPlayerManager ecoPlayerManager;
-	@Mock
-	Logger logger;
 
 	@Test
 	public void zeroArgsTest() {
@@ -76,7 +73,7 @@ public class TownTabCompleterImplTest {
 		String[] args = { "expand", "" };
 		List<String> list = tabCompleter.onTabComplete(player, null, null, args);
 		assertEquals(0, list.size());
-		verify(logger).warn("[Ultimate_Economy] my error message");;
+		verify(e).getMessage();
 	}
 
 	@Test

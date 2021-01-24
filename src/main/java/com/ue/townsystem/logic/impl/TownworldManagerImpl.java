@@ -12,8 +12,6 @@ import org.bukkit.Chunk;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.MessageWrapper;
@@ -39,7 +37,6 @@ public class TownworldManagerImpl implements TownworldManager {
 	private final ServerProvider serverProvider;
 	private final TownsystemValidationHandler townsystemValidationHandler;
 	private final GeneralEconomyValidationHandler generalValidator;
-	private final Logger logger;
 	private final BankManager bankManager;
 	private final EconomyPlayerValidationHandler ecoPlayerValidationHandler;
 	private final ConfigDao configDao;
@@ -57,13 +54,12 @@ public class TownworldManagerImpl implements TownworldManager {
 	 * @param messageWrapper
 	 * @param townsystemValidationHandler
 	 * @param serverProvider
-	 * @param logger
 	 * @param generalValidator
 	 */
 	@Inject
 	public TownworldManagerImpl(ConfigDao configDao, EconomyPlayerValidationHandler ecoPlayerValidationHandler,
 			BankManager bankManager, EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
-			TownsystemValidationHandler townsystemValidationHandler, ServerProvider serverProvider, Logger logger,
+			TownsystemValidationHandler townsystemValidationHandler, ServerProvider serverProvider,
 			GeneralEconomyValidationHandler generalValidator) {
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.townsystemValidationHandler = townsystemValidationHandler;
@@ -71,7 +67,6 @@ public class TownworldManagerImpl implements TownworldManager {
 		this.bankManager = bankManager;
 		this.ecoPlayerValidationHandler = ecoPlayerValidationHandler;
 		this.serverProvider = serverProvider;
-		this.logger = logger;
 		this.configDao = configDao;
 		this.generalValidator = generalValidator;
 	}
@@ -167,12 +162,11 @@ public class TownworldManagerImpl implements TownworldManager {
 	public void createTownWorld(String world) throws TownSystemException {
 		townsystemValidationHandler.checkForWorldExists(world);
 		townsystemValidationHandler.checkForTownworldDoesNotExist(townWorldList, world);
-		Logger logger = LoggerFactory.getLogger(Townworld.class);
 		TownworldDao townworldDao = serverProvider.getServiceComponent().getTownworldDao();
 		townworldDao.setupSavefile(world);
 		townWorldList.put(world,
 				new TownworldImpl(world, true, townworldDao, townsystemValidationHandler, ecoPlayerValidationHandler,
-						this, messageWrapper, bankManager, logger, serverProvider, generalValidator));
+						this, messageWrapper, bankManager, serverProvider, generalValidator));
 		configDao.saveTownworldNamesList(getTownWorldNameList());
 	}
 
@@ -192,7 +186,7 @@ public class TownworldManagerImpl implements TownworldManager {
 			TownworldDao townworldDao = serverProvider.getServiceComponent().getTownworldDao();
 			townworldDao.setupSavefile(townWorldName);
 			Townworld townworld = new TownworldImpl(townWorldName, false, townworldDao, townsystemValidationHandler,
-					ecoPlayerValidationHandler, this, messageWrapper, bankManager, logger, serverProvider,
+					ecoPlayerValidationHandler, this, messageWrapper, bankManager, serverProvider,
 					generalValidator);
 			townNameList.addAll(townworld.getTownNameList());
 			townWorldList.put(townWorldName, townworld);

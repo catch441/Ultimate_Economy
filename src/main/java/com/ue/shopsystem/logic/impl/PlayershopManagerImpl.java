@@ -6,7 +6,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.bukkit.Location;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
@@ -22,10 +21,12 @@ import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class PlayershopManagerImpl implements PlayershopManager {
 
 	private List<Playershop> playerShopList = new ArrayList<>();
-	private final Logger logger;
 	private final MessageWrapper messageWrapper;
 	private final ShopValidationHandler validationHandler;
 	private final TownsystemValidationHandler townsystemValidationHandler;
@@ -40,19 +41,17 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	 * @param townsystemValidationHandler
 	 * @param validationHandler
 	 * @param messageWrapper
-	 * @param logger
 	 * @param serverProvider
 	 * @param generalValidator
 	 */
 	@Inject
 	public PlayershopManagerImpl(ConfigDao configDao, TownsystemValidationHandler townsystemValidationHandler,
-			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, Logger logger,
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
 			ServerProvider serverProvider, GeneralEconomyValidationHandler generalValidator) {
 		this.configDao = configDao;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
 		this.townsystemValidationHandler = townsystemValidationHandler;
-		this.logger = logger;
 		this.serverProvider = serverProvider;
 		this.generalValidator = generalValidator;
 	}
@@ -158,8 +157,8 @@ public class PlayershopManagerImpl implements PlayershopManager {
 				shop.setupExisting(null, shopId);
 				playerShopList.add(shop);
 			} catch (TownSystemException | GeneralEconomyException | ShopSystemException e) {
-				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
-				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+				log.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
+				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}
@@ -173,8 +172,8 @@ public class PlayershopManagerImpl implements PlayershopManager {
 				shop.setupExisting(shopName, shopId);
 				playerShopList.add(shop);
 			} catch (TownSystemException | GeneralEconomyException | ShopSystemException e) {
-				logger.warn("[Ultimate_Economy] Failed to load the shop " + shopName);
-				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+				log.warn("[Ultimate_Economy] Failed to load the shop " + shopName);
+				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 		configDao.removeDeprecatedPlayerShopNames();

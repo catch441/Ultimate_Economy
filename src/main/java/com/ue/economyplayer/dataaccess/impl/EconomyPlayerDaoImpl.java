@@ -10,7 +10,6 @@ import javax.inject.Inject;
 
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
@@ -31,11 +30,9 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	 * 
 	 * @param bankManager
 	 * @param serverProvider
-	 * @param logger
 	 */
 	@Inject
-	public EconomyPlayerDaoImpl(BankManager bankManager, ServerProvider serverProvider, Logger logger) {
-		super(logger);
+	public EconomyPlayerDaoImpl(BankManager bankManager, ServerProvider serverProvider) {
 		this.bankManager = bankManager;
 		this.serverProvider = serverProvider;
 	}

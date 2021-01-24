@@ -2,7 +2,6 @@ package com.ue.general.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankManager;
 import com.ue.common.api.CustomSkullService;
@@ -53,7 +51,7 @@ import net.milkbowl.vault.economy.Economy;
 
 @ExtendWith(MockitoExtension.class)
 public class UltimateEconomyTest {
-
+	
 	@Mock
 	SpawnerManager spawnerManager;
 	@Mock
@@ -78,8 +76,6 @@ public class UltimateEconomyTest {
 	Updater updater;
 	@Mock
 	Economy vaultEconomy;
-	@Mock
-	Logger logger;
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock
@@ -149,7 +145,7 @@ public class UltimateEconomyTest {
 	public void onDisableTest() {
 		UltimateEconomy ue = new UltimateEconomy(vaultEconomy, spawnerManager, configManager, bankManager,
 				ecoPlayerManager, jobManager, jobcenterManager, adminshopManager, playershopManager, rentshopManager,
-				townworldManager, null, updater, logger, messageWrapper, skullService, serverProvider, shopEventHandler,
+				townworldManager, null, updater, messageWrapper, skullService, serverProvider, shopEventHandler,
 				jobsystemEventHandler, ecoPlayerEventHandler, townsystemEventHandler, spawnerSystemEventHandler,
 				configCommandExecutor, ecoPlayerCommandExecutor, jobCommandExecutor, playershopCommandExecutor,
 				adminshopCommandExecutor, rentshopCommandExecutor, townCommandExecutor, townworldCommandExecutor,
@@ -179,7 +175,7 @@ public class UltimateEconomyTest {
 	public void onEnableTestWithHomeEnableError() throws IllegalArgumentException, IllegalAccessException {
 		UltimateEconomy ue = new UltimateEconomy(vaultEconomy, spawnerManager, configManager, bankManager,
 				ecoPlayerManager, jobManager, jobcenterManager, adminshopManager, playershopManager, rentshopManager,
-				townworldManager, null, updater, logger, messageWrapper, skullService, serverProvider, shopEventHandler,
+				townworldManager, null, updater, messageWrapper, skullService, serverProvider, shopEventHandler,
 				jobsystemEventHandler, ecoPlayerEventHandler, townsystemEventHandler, spawnerSystemEventHandler,
 				configCommandExecutor, ecoPlayerCommandExecutor, jobCommandExecutor, playershopCommandExecutor,
 				adminshopCommandExecutor, rentshopCommandExecutor, townCommandExecutor, townworldCommandExecutor,
@@ -272,8 +268,7 @@ public class UltimateEconomyTest {
 		verify(spawnerManager).loadAllSpawners();
 		verify(updater).checkForUpdate("1.2.6");
 		
-		verify(logger).warn("[Ultimate_Economy] Error on enable homes feature.");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error");
+		verify(e).getMessage();
 
 		verify(jobcenter).setExecutor(jobCommandExecutor);
 		verify(jobinfo).setExecutor(jobCommandExecutor);
@@ -311,7 +306,7 @@ public class UltimateEconomyTest {
 	public void onEnableTest() {
 		UltimateEconomy ue = new UltimateEconomy(vaultEconomy, spawnerManager, configManager, bankManager,
 				ecoPlayerManager, jobManager, jobcenterManager, adminshopManager, playershopManager, rentshopManager,
-				townworldManager, null, updater, logger, messageWrapper, skullService, serverProvider, shopEventHandler,
+				townworldManager, null, updater, messageWrapper, skullService, serverProvider, shopEventHandler,
 				jobsystemEventHandler, ecoPlayerEventHandler, townsystemEventHandler, spawnerSystemEventHandler,
 				configCommandExecutor, ecoPlayerCommandExecutor, jobCommandExecutor, playershopCommandExecutor,
 				adminshopCommandExecutor, rentshopCommandExecutor, townCommandExecutor, townworldCommandExecutor,
@@ -387,7 +382,6 @@ public class UltimateEconomyTest {
 
 		verify(dataFolder).mkdirs();
 
-		verifyNoInteractions(logger);
 		verify(configManager).setupConfig();
 		verify(skullService).setup();
 		verify(rentshopManager).setupRentDailyTask();

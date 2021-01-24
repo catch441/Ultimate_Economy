@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.common.utils.ServerProvider;
@@ -24,12 +23,10 @@ public class SpawnerSystemDaoImpl extends SaveFileUtils implements SpawnerSystem
 	/**
 	 * Inject constructor.
 	 * 
-	 * @param logger
 	 * @param serverProvider
 	 */
 	@Inject
-	public SpawnerSystemDaoImpl(Logger logger, ServerProvider serverProvider) {
-		super(logger);
+	public SpawnerSystemDaoImpl(ServerProvider serverProvider) {
 		this.serverProvider = serverProvider;
 	}
 	

@@ -8,32 +8,31 @@ import javax.inject.Inject;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.TabCompleterUtils;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.townsystem.logic.api.TownworldManager;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class TownTabCompleterImpl extends TabCompleterUtils implements TabCompleter {
 
 	private final TownworldManager townworldManager;
 	private final EconomyPlayerManager ecoPlayerManager;
-	private final Logger logger;
 
 	/**
 	 * Inject constructor.
 	 * 
-	 * @param logger
 	 * @param townworldManager
 	 * @param ecoPlayerManager
 	 */
 	@Inject
-	public TownTabCompleterImpl(Logger logger, TownworldManager townworldManager,
+	public TownTabCompleterImpl(TownworldManager townworldManager,
 			EconomyPlayerManager ecoPlayerManager) {
 		this.townworldManager = townworldManager;
 		this.ecoPlayerManager = ecoPlayerManager;
-		this.logger = logger;
 	}
 
 	@Override
@@ -89,7 +88,7 @@ public class TownTabCompleterImpl extends TabCompleterUtils implements TabComple
 					}
 				}
 			} catch (GeneralEconomyException e) {
-				logger.warn("[Ultimate_Economy] " + e.getMessage());
+				log.warn("[Ultimate_Economy] " + e.getMessage());
 			}
 		}
 		return list;

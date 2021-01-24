@@ -7,7 +7,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.slf4j.Logger;
 
 import com.ue.bank.dataaccess.api.BankDao;
 import com.ue.common.utils.ServerProvider;
@@ -21,11 +20,9 @@ public class BankDaoImpl extends SaveFileUtils implements BankDao {
 	 * Inject constructor.
 	 * 
 	 * @param serverProvider
-	 * @param logger
 	 */
 	@Inject
-	public BankDaoImpl(ServerProvider serverProvider, Logger logger) {
-		super(logger);
+	public BankDaoImpl(ServerProvider serverProvider) {
 		this.serverProvider = serverProvider;
 	}
 	

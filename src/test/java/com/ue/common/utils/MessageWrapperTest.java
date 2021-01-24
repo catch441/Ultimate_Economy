@@ -1,24 +1,19 @@
 package com.ue.common.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
 
 import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 @ExtendWith(MockitoExtension.class)
 public class MessageWrapperTest {
 
 	@InjectMocks
 	MessageWrapper messageWrapper;
-	@Mock
-	Logger logger;
 
 	@Test
 	public void loadLanguageTest() {
@@ -26,7 +21,6 @@ public class MessageWrapperTest {
 		assertEquals("language.MessagesBundle", messageWrapper.messages.getBaseBundleName());
 		assertEquals("US", messageWrapper.messages.getLocale().getCountry());
 		assertEquals("en", messageWrapper.messages.getLocale().getLanguage());
-		verify(logger).info("[Ultimate_Economy] Loading language file: 'en' 'US'");;
 	}
 
 	@Test

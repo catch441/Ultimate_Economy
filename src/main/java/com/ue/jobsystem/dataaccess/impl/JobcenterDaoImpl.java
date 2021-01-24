@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.SaveFileUtils;
@@ -26,8 +25,7 @@ public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {
 	 * @param logger
 	 */
 	@Inject
-	public JobcenterDaoImpl(ServerProvider serverProvider, Logger logger) {
-		super(logger);
+	public JobcenterDaoImpl(ServerProvider serverProvider) {
 		this.serverProvider = serverProvider;
 	}
 

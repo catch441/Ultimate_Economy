@@ -38,7 +38,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
@@ -73,8 +72,6 @@ public class JobcenterImplTest {
 	ServerProvider serverProvider;
 	@Mock
 	MessageWrapper messageWrapper;
-	@Mock
-	Logger logger;
 	@Mock
 	GeneralEconomyValidationHandler generalValidator;
 
@@ -213,8 +210,7 @@ public class JobcenterImplTest {
 		assertEquals("center", jobcenter.getName());
 		assertEquals(location, jobcenter.getJobcenterLocation());
 		assertEquals(0, jobcenter.getJobList().size());
-		verify(logger).warn("[Ultimate_Economy] Failed to load the job myJob for the jobcenter center");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+		verify(e).getMessage();
 	}
 
 	@Test
@@ -373,8 +369,7 @@ public class JobcenterImplTest {
 		verify(inventory).clear(4);
 		assertThrows(EconomyPlayerException.class, () -> ecoPlayer.leaveJob(job, false));
 		assertEquals(0, jobcenter.getJobList().size());
-		verify(logger).warn("[Ultimate_Economy] Failed to leave the job myJob");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+		verify(e).getMessage();
 	}
 
 	@Test

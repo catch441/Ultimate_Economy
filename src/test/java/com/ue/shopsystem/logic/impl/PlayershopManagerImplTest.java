@@ -11,8 +11,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -25,7 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
@@ -54,8 +51,6 @@ public class PlayershopManagerImplTest {
 	TownsystemValidationHandler townsystemValidationHandler;
 	@Mock
 	ConfigDao configDao;
-	@Mock
-	Logger logger;
 	@Mock
 	ServerProvider serverProvider;
 	@Mock
@@ -270,7 +265,6 @@ public class PlayershopManagerImplTest {
 		assertEquals(1, playershopManager.getPlayerShops().size());
 		assertEquals(shop, playershopManager.getPlayerShops().get(0));
 		assertDoesNotThrow(() -> verify(shop).setupExisting(null, "P0"));
-		verifyNoInteractions(logger);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -288,9 +282,7 @@ public class PlayershopManagerImplTest {
 		doThrow(e).when(shop).setupExisting(null, "P0");
 		playershopManager.loadAllPlayerShops();
 		assertEquals(0, playershopManager.getPlayerShops().size());
-		verify(logger).warn("[Ultimate_Economy] Failed to load the shop P0");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
-		verifyNoMoreInteractions(logger);
+		verify(e).getMessage();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -308,7 +300,6 @@ public class PlayershopManagerImplTest {
 		assertDoesNotThrow(() -> verify(shop).setupExisting("myshop", "P0"));
 		verify(configDao).removeDeprecatedPlayerShopNames();
 		verify(configDao).savePlayershopIds(anyList());
-		verifyNoInteractions(logger);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -326,9 +317,7 @@ public class PlayershopManagerImplTest {
 		doThrow(e).when(shop).setupExisting("myshop", "P0");
 		playershopManager.loadAllPlayerShops();
 		assertEquals(0, playershopManager.getPlayerShops().size());
-		verify(logger).warn("[Ultimate_Economy] Failed to load the shop myshop");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
-		verifyNoMoreInteractions(logger);
+		verify(e).getMessage();
 		verify(configDao).removeDeprecatedPlayerShopNames();
 		verify(configDao).savePlayershopIds(anyList());
 	}

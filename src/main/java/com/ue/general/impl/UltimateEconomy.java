@@ -11,7 +11,6 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.slf4j.Logger;
 
 import com.ue.bank.logic.api.BankManager;
 import com.ue.common.api.CustomSkullService;
@@ -33,11 +32,13 @@ import com.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
 import com.ue.townsystem.logic.api.TownsystemEventHandler;
 import com.ue.townsystem.logic.api.TownworldManager;
 
+import lombok.extern.slf4j.Slf4j;
 import net.milkbowl.vault.economy.Economy;
 
 /**
  * @author Lukas Heubach (catch441)
  */
+@Slf4j
 public class UltimateEconomy {
 
 	private final Economy vaultEconomy;
@@ -54,7 +55,6 @@ public class UltimateEconomy {
 	@SuppressWarnings("unused")
 	private final Metrics metrics;
 	private final Updater updater;
-	private final Logger logger;
 	private final MessageWrapper messageWrapper;
 	private final CustomSkullService skullService;
 	private final ServerProvider serverProvider;
@@ -128,17 +128,17 @@ public class UltimateEconomy {
 			BankManager bankManager, EconomyPlayerManager ecoPlayerManager, JobManager jobManager,
 			JobcenterManager jobcenterManager, AdminshopManager adminshopManager, PlayershopManager playershopManager,
 			RentshopManager rentshopManager, TownworldManager townworldManager, Metrics metrics, Updater updater,
-			Logger logger, MessageWrapper messageWrapper, CustomSkullService skullService,
-			ServerProvider serverProvider, ShopEventHandler shopEventHandler,
-			JobsystemEventHandler jobsystemEventHandler, EconomyPlayerEventHandler ecoPlayerEventHandler,
-			TownsystemEventHandler townsystemEventHandler, SpawnerSystemEventHandler spawnerSystemEventHandler,
-			CommandExecutor configCommandExecutor, CommandExecutor ecoPlayerCommandExecutor,
-			CommandExecutor jobCommandExecutor, CommandExecutor playershopCommandExecutor,
-			CommandExecutor adminshopCommandExecutor, CommandExecutor rentshopCommandExecutor,
-			CommandExecutor townCommandExecutor, CommandExecutor townworldCommandExecutor,
-			TabCompleter ecoPlayerTabCompleter, TabCompleter configTabCompleter, TabCompleter jobTabCompleter,
-			TabCompleter playershopTabCompleter, TabCompleter adminshopTabCompleter, TabCompleter rentshopTabCompleter,
-			TabCompleter townTabCompleter, TabCompleter townworldTabCompleter) {
+			MessageWrapper messageWrapper, CustomSkullService skullService, ServerProvider serverProvider,
+			ShopEventHandler shopEventHandler, JobsystemEventHandler jobsystemEventHandler,
+			EconomyPlayerEventHandler ecoPlayerEventHandler, TownsystemEventHandler townsystemEventHandler,
+			SpawnerSystemEventHandler spawnerSystemEventHandler, CommandExecutor configCommandExecutor,
+			CommandExecutor ecoPlayerCommandExecutor, CommandExecutor jobCommandExecutor,
+			CommandExecutor playershopCommandExecutor, CommandExecutor adminshopCommandExecutor,
+			CommandExecutor rentshopCommandExecutor, CommandExecutor townCommandExecutor,
+			CommandExecutor townworldCommandExecutor, TabCompleter ecoPlayerTabCompleter,
+			TabCompleter configTabCompleter, TabCompleter jobTabCompleter, TabCompleter playershopTabCompleter,
+			TabCompleter adminshopTabCompleter, TabCompleter rentshopTabCompleter, TabCompleter townTabCompleter,
+			TabCompleter townworldTabCompleter) {
 		this.spawnerManager = spawnerManager;
 		this.configManager = configManager;
 		this.bankManager = bankManager;
@@ -151,7 +151,6 @@ public class UltimateEconomy {
 		this.townworldManager = townworldManager;
 		this.metrics = metrics;
 		this.updater = updater;
-		this.logger = logger;
 		this.messageWrapper = messageWrapper;
 		this.skullService = skullService;
 		this.serverProvider = serverProvider;
@@ -179,6 +178,17 @@ public class UltimateEconomy {
 		this.vaultEconomy = vaultEconomy;
 	}
 
+	public static void main(String[] args) {
+		//HibernateUtil.getSessionFactory().openSession();
+
+		/*
+		 * Enumeration<Driver> drivers = DriverManager.getDrivers();
+		 * while(drivers.hasMoreElements()) { Driver driver = drivers.nextElement();
+		 * System.out.println(driver.getClass()); }
+		 */
+
+	}
+
 	/**
 	 * Enables the entire plugin.
 	 */
@@ -186,6 +196,26 @@ public class UltimateEconomy {
 		plugin = serverProvider.getJavaPluginInstance();
 		loadPlugin();
 		setupVault();
+
+		/*String url = "jdbc:h2:" + serverProvider.getPluginInstance().getDataFolder().getAbsolutePath() + "/data";
+
+		try {
+			Class.forName("org.h2.Driver");
+		} catch (ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			Connection conn = DriverManager.getConnection(url);
+			Statement s = conn.createStatement();
+			s.execute("CREATE TABLE cars(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255), price INT)");
+			s.executeUpdate("INSERT INTO cars(name, price) VALUES('Audi', 52642)");
+			System.out.println("print123");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+
 	}
 
 	/**
@@ -225,8 +255,8 @@ public class UltimateEconomy {
 				setupSetHomeCommand(map);
 				setupDeleteHomeCommand(map);
 			} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-				logger.warn("[Ultimate_Economy] Error on enable homes feature.");
-				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+				log.warn("[Ultimate_Economy] Error on enable homes feature.");
+				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}
@@ -310,11 +340,10 @@ public class UltimateEconomy {
 		jobManager.loadAllJobs();
 
 		/*
-		 * TODO: Only commented out to fix a cluser of issues. When spawning the villagers at
-		 * startup without any player, then no changes to these villagers are visible
-		 * ingame (rename, move ...). In spigot it works, but in paper it doesn't. This
-		 * is just a quickfix and not a solution.
-		 * [UE-139,UE-140]
+		 * TODO: Only commented out to fix a cluser of issues. When spawning the
+		 * villagers at startup without any player, then no changes to these villagers
+		 * are visible ingame (rename, move ...). In spigot it works, but in paper it
+		 * doesn't. This is just a quickfix and not a solution. [UE-139,UE-140]
 		 */
 		// jobcenterManager.loadAllJobcenters();
 		ecoPlayerManager.loadAllEconomyPlayers();
@@ -329,8 +358,7 @@ public class UltimateEconomy {
 		// setup eventhandler
 		serverProvider.getServer().getPluginManager()
 				.registerEvents(new UltimateEconomyEventHandlerImpl(jobcenterManager, rentshopManager,
-						playershopManager, adminshopManager, logger, updater, spawnerSystemEventHandler,
-						townsystemEventHandler, shopEventHandler, jobsystemEventHandler, ecoPlayerEventHandler),
-						plugin);
+						playershopManager, adminshopManager, updater, spawnerSystemEventHandler, townsystemEventHandler,
+						shopEventHandler, jobsystemEventHandler, ecoPlayerEventHandler), plugin);
 	}
 }

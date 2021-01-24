@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
@@ -23,9 +21,11 @@ import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class JobManagerImpl implements JobManager {
 
-	private final Logger logger;
 	private List<Job> jobList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerManager ecoPlayerManager;
@@ -45,15 +45,13 @@ public class JobManagerImpl implements JobManager {
 	 * @param validationHandler
 	 * @param ecoPlayerManager
 	 * @param messageWrapper
-	 * @param logger
 	 */
 	@Inject
 	public JobManagerImpl(GeneralEconomyValidationHandler generalValidator, ServerProvider serverProvider,
 			ConfigDao configDao, JobcenterManager jobcenterManager, JobsystemValidationHandler validationHandler,
-			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper, Logger logger) {
+			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
 		this.configDao = configDao;
-		this.logger = logger;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
 		this.jobcenterManager = jobcenterManager;
@@ -117,8 +115,8 @@ public class JobManagerImpl implements JobManager {
 				try {
 					ecoPlayer.leaveJob(job, false);
 				} catch (EconomyPlayerException e) {
-					logger.warn("[Ultimate_Economy] Failed leave the job " + job.getName());
-					logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+					log.warn("[Ultimate_Economy] Failed leave the job " + job.getName());
+					log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 				}
 			}
 		}
@@ -130,8 +128,8 @@ public class JobManagerImpl implements JobManager {
 				try {
 					jobcenter.removeJob(job);
 				} catch (JobSystemException e) {
-					logger.warn("[Ultimate_Economy] Failed remove the job " + job.getName());
-					logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+					log.warn("[Ultimate_Economy] Failed remove the job " + job.getName());
+					log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 				}
 			}
 		}

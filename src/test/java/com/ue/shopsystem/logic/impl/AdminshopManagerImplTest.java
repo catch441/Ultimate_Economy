@@ -11,7 +11,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
@@ -47,8 +45,6 @@ public class AdminshopManagerImplTest {
 	ShopValidationHandler validationHandler;
 	@Mock
 	ServerProvider serverProvider;
-	@Mock
-	Logger logger;
 	@Mock
 	ConfigDao configDao;
 	@Mock
@@ -176,7 +172,6 @@ public class AdminshopManagerImplTest {
 		assertEquals(shop, adminshopManager.getAdminshopList().get(0));
 		assertEquals(1, adminshopManager.getAdminshopList().size());
 		assertDoesNotThrow(() -> verify(shop).setupExisting(null, "A0"));
-		verifyNoInteractions(logger);
 	}
 
 	@Test
@@ -203,9 +198,7 @@ public class AdminshopManagerImplTest {
 		doThrow(e).when(shop).setupExisting(null, "A0");
 		adminshopManager.loadAllAdminShops();
 		assertEquals(0, adminshopManager.getAdminshopList().size());
-		verify(logger).warn("[Ultimate_Economy] Failed to load the shop A0");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
-		verifyNoMoreInteractions(logger);
+		verify(e).getMessage();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -223,7 +216,6 @@ public class AdminshopManagerImplTest {
 		assertDoesNotThrow(() -> verify(shop).setupExisting("myshop", "A0"));
 		verify(configDao).removeDeprecatedAdminshopNames();
 		verify(configDao).saveAdminshopIds(anyList());
-		verifyNoInteractions(logger);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -242,9 +234,7 @@ public class AdminshopManagerImplTest {
 		doThrow(e).when(shop).setupExisting("myshop", "A0");
 		adminshopManager.loadAllAdminShops();
 		assertEquals(0, adminshopManager.getAdminshopList().size());
-		verify(logger).warn("[Ultimate_Economy] Failed to load the shop myshop");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
-		verifyNoMoreInteractions(logger);
+		verify(e).getMessage();
 		verify(configDao).removeDeprecatedAdminshopNames();
 		verify(configDao).saveAdminshopIds(anyList());
 	}

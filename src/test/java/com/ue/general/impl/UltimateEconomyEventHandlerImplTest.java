@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.Updater;
 import com.ue.common.utils.Updater.UpdateResult;
@@ -67,8 +66,6 @@ public class UltimateEconomyEventHandlerImplTest {
 	@Mock
 	Updater updater;
 	@Mock
-	Logger logger;
-	@Mock
 	JobcenterManager jobcenterManager;
 	@Mock
 	AdminshopManager adminshopManager;
@@ -78,7 +75,9 @@ public class UltimateEconomyEventHandlerImplTest {
 	PlayershopManager playershopManager;
 
 	private UltimateEconomyEventHandlerImpl getHandler() {
-		return new UltimateEconomyEventHandlerImpl(jobcenterManager, rentshopManager, playershopManager, adminshopManager, logger, updater, spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler, jobsystemEventHandler, ecoPlayerEventHandler);
+		return new UltimateEconomyEventHandlerImpl(jobcenterManager, rentshopManager, playershopManager,
+				adminshopManager, updater, spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler,
+				jobsystemEventHandler, ecoPlayerEventHandler);
 	}
 
 	@Test
@@ -478,6 +477,6 @@ public class UltimateEconomyEventHandlerImplTest {
 		when(player.isOp()).thenReturn(true);
 		handler.onJoinEvent(event);
 		assertDoesNotThrow(() -> verify(ecoPlayerEventHandler).handleJoin(event));
-		verify(logger).warn("[Ultimate_Economy] my error");
+		verify(e).getMessage();
 	}
 }

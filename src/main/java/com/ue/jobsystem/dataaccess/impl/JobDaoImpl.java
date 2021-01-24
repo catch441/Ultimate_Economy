@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.SaveFileUtils;
@@ -21,11 +20,9 @@ public class JobDaoImpl extends SaveFileUtils implements JobDao {
 	 * Inject constructor.
 	 * 
 	 * @param serverProvider
-	 * @param logger
 	 */
 	@Inject
-	public JobDaoImpl(ServerProvider serverProvider, Logger logger) {
-		super(logger);
+	public JobDaoImpl(ServerProvider serverProvider) {
 		this.serverProvider = serverProvider;
 	}
 

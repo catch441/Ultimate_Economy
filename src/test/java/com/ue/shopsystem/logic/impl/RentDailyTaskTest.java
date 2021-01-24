@@ -15,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
@@ -28,8 +27,6 @@ public class RentDailyTaskTest {
 	
 	@InjectMocks
 	RentDailyTask task;
-	@Mock
-	Logger logger;
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock
@@ -77,8 +74,7 @@ public class RentDailyTaskTest {
 		when(serverProvider.getActualTime()).thenReturn(20000000L);
 		when(shop.getRentUntil()).thenReturn(10000000L);
 		task.run();
-		verify(logger).warn("[Ultimate_Economy] Error on rent task: reset shop");
-		verify(logger).warn("[Ultimate_Economy] Caused by: my error message");
+		verify(e).getMessage();
 	}
 	
 	@Test
