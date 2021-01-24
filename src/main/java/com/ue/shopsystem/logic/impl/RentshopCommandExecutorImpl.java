@@ -15,22 +15,13 @@ import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class RentshopCommandExecutorImpl implements CommandExecutor {
 
 	private final RentshopManager rentshopManager;
 	private final MessageWrapper messageWrapper;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param rentshopManager
-	 * @param messageWrapper
-	 */
-	@Inject
-	public RentshopCommandExecutorImpl(RentshopManager rentshopManager, MessageWrapper messageWrapper) {
-		this.rentshopManager = rentshopManager;
-		this.messageWrapper = messageWrapper;
-	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

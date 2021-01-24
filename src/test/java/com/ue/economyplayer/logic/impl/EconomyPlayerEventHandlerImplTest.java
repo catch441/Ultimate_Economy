@@ -28,7 +28,7 @@ public class EconomyPlayerEventHandlerImplTest {
 
 	@Test
 	public void handleJoinTest() {
-		EconomyPlayerEventHandlerImpl eventHandler = new EconomyPlayerEventHandlerImpl(ecoPlayerManager, configManager);
+		EconomyPlayerEventHandlerImpl eventHandler = new EconomyPlayerEventHandlerImpl(configManager, ecoPlayerManager);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(ecoPlayerManager.getEconomyPlayerNameList()).thenReturn(new ArrayList<>());

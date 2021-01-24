@@ -18,24 +18,15 @@ import com.ue.common.utils.SaveFileUtils;
 import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import com.ue.jobsystem.logic.api.Job;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayerDao {
 
 	private final BankManager bankManager;
 	private final ServerProvider serverProvider;
 	private File file;
 	private YamlConfiguration config;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param bankManager
-	 * @param serverProvider
-	 */
-	@Inject
-	public EconomyPlayerDaoImpl(BankManager bankManager, ServerProvider serverProvider) {
-		this.bankManager = bankManager;
-		this.serverProvider = serverProvider;
-	}
 
 	@Override
 	public void setupSavefile() {

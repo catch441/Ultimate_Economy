@@ -14,6 +14,9 @@ import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class BankManagerImpl implements BankManager {
 
 	private final MessageWrapper messageWrapper;
@@ -21,23 +24,6 @@ public class BankManagerImpl implements BankManager {
 	private final BankValidationHandler validationHandler;
 	private final GeneralEconomyValidationHandler generalValidator;
 	private List<BankAccount> accounts = new ArrayList<>();
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param generalValidator
-	 * @param messageWrapper
-	 * @param bankDao
-	 * @param validationHandler
-	 */
-	@Inject
-	public BankManagerImpl(GeneralEconomyValidationHandler generalValidator, MessageWrapper messageWrapper,
-			BankDao bankDao, BankValidationHandler validationHandler) {
-		this.messageWrapper = messageWrapper;
-		this.bankDao = bankDao;
-		this.validationHandler = validationHandler;
-		this.generalValidator = generalValidator;
-	}
 
 	@Override
 	public BankAccount createBankAccount(double startAmount) {

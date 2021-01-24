@@ -7,19 +7,12 @@ import javax.inject.Inject;
 import com.ue.common.utils.MessageWrapper;
 import com.ue.general.api.GeneralEconomyValidationHandler;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class GeneralEconomyValidationHandlerImpl implements GeneralEconomyValidationHandler {
 
 	private final MessageWrapper messageWrapper;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param messageWrapper
-	 */
-	@Inject
-	public GeneralEconomyValidationHandlerImpl(MessageWrapper messageWrapper) {
-		this.messageWrapper = messageWrapper;
-	}
 
 	@Override
 	public void checkForPositiveValue(double value) throws GeneralEconomyException {

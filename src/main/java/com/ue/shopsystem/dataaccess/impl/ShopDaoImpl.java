@@ -28,32 +28,17 @@ import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 
 	private final ServerProvider serverProvider;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final ShopValidationHandler validationHandler;
 	private final TownsystemValidationHandler townsystemValidationHandler;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param serverProvider
-	 * @param ecoPlayerManager
-	 * @param validationHandler
-	 * @param townsystemValidationHandler
-	 */
-	@Inject
-	public ShopDaoImpl(ServerProvider serverProvider, EconomyPlayerManager ecoPlayerManager,
-			ShopValidationHandler validationHandler, TownsystemValidationHandler townsystemValidationHandler) {
-		this.serverProvider = serverProvider;
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.validationHandler = validationHandler;
-		this.townsystemValidationHandler = townsystemValidationHandler;
-	}
 
 	@Override
 	public void setupSavefile(String shopId) {

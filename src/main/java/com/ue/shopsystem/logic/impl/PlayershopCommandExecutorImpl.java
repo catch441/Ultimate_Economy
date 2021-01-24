@@ -16,26 +16,14 @@ import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class PlayershopCommandExecutorImpl implements CommandExecutor {
 
 	private final MessageWrapper messageWrapper;
 	private final PlayershopManager playershopManager;
 	private final EconomyPlayerManager ecoPlayerManager;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param ecoPlayerManager
-	 * @param playershopManager
-	 * @param messageWrapper
-	 */
-	@Inject
-	public PlayershopCommandExecutorImpl(EconomyPlayerManager ecoPlayerManager, PlayershopManager playershopManager,
-			MessageWrapper messageWrapper) {
-		this.playershopManager = playershopManager;
-		this.messageWrapper = messageWrapper;
-		this.ecoPlayerManager = ecoPlayerManager;
-	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

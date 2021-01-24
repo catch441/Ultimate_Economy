@@ -12,18 +12,12 @@ import org.bukkit.command.TabCompleter;
 import com.ue.common.utils.TabCompleterUtils;
 import com.ue.shopsystem.logic.api.PlayershopManager;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class PlayershopTabCompleterImpl extends TabCompleterUtils implements TabCompleter {
 	
 	private final PlayershopManager playershopManager;
-	
-	/**
-	 * Inject constructor.
-	 * @param playershopManager
-	 */
-	@Inject
-	public PlayershopTabCompleterImpl(PlayershopManager playershopManager) {
-		this.playershopManager = playershopManager;
-	}
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

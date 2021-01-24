@@ -20,26 +20,14 @@ import com.ue.townsystem.logic.api.Townworld;
 import com.ue.townsystem.logic.api.TownworldManager;
 
 import dagger.Lazy;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class TownsystemValidationHandlerImpl implements TownsystemValidationHandler {
 
 	private final MessageWrapper messageWrapper;
 	private final Lazy<TownworldManager> townworldManager;
 	private final ServerProvider serverProvider;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param serverProvider
-	 * @param townworldManager
-	 * @param messageWrapper
-	 */
-	@Inject
-	public TownsystemValidationHandlerImpl(ServerProvider serverProvider, Lazy<TownworldManager> townworldManager, MessageWrapper messageWrapper) {
-		this.messageWrapper = messageWrapper;
-		this.townworldManager = townworldManager;
-		this.serverProvider = serverProvider;
-	}
 
 	@Override
 	public void checkForWorldExists(String world) throws TownSystemException {

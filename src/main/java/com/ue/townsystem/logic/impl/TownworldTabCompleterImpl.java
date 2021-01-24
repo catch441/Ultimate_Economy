@@ -14,22 +14,13 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.TabCompleterUtils;
 import com.ue.townsystem.logic.api.TownworldManager;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class TownworldTabCompleterImpl extends TabCompleterUtils implements TabCompleter {
 
 	private final ServerProvider serverProvider;
 	private final TownworldManager townworldManager;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param serverProvider
-	 * @param townworldManager
-	 */
-	@Inject
-	public TownworldTabCompleterImpl(ServerProvider serverProvider, TownworldManager townworldManager) {
-		this.serverProvider = serverProvider;
-		this.townworldManager = townworldManager;
-	}
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

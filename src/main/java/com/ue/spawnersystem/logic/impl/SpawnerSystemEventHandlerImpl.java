@@ -24,26 +24,14 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.spawnersystem.logic.api.SpawnerManager;
 import com.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class SpawnerSystemEventHandlerImpl implements SpawnerSystemEventHandler {
 
 	private final MessageWrapper messageWrapper;
 	private final ServerProvider serverProvider;
 	private final SpawnerManager spawnerManager;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param spawnerManager
-	 * @param messageWrapper
-	 * @param serverProvider
-	 */
-	@Inject
-	public SpawnerSystemEventHandlerImpl(SpawnerManager spawnerManager, MessageWrapper messageWrapper,
-			ServerProvider serverProvider) {
-		this.messageWrapper = messageWrapper;
-		this.serverProvider = serverProvider;
-		this.spawnerManager = spawnerManager;
-	}
 
 	@Override
 	public void handleInventoryClick(InventoryClickEvent event) {

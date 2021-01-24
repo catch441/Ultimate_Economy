@@ -1,5 +1,7 @@
 package com.ue.general.impl;
 
+import javax.inject.Inject;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -34,9 +36,11 @@ import com.ue.shopsystem.logic.api.ShopEventHandler;
 import com.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
 import com.ue.townsystem.logic.api.TownsystemEventHandler;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class UltimateEconomyEventHandlerImpl implements Listener {
 
 	private final EconomyPlayerEventHandler ecoPlayerEventHandler;
@@ -51,37 +55,6 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 	private final JobcenterManager jobcenterManager;
 
 	private boolean firstJoin = true;
-
-	/**
-	 * Constructor of ultimate economy event handler.
-	 * 
-	 * @param jobcenterManager
-	 * @param rentshopManager
-	 * @param playershopManager
-	 * @param adminshopManager
-	 * @param updater
-	 * @param spawnerSystemEventHandler
-	 * @param townSystemEventHandler
-	 * @param shopEventHandler
-	 * @param jobsystemEventHandler
-	 * @param ecoPlayerEventHandler
-	 */
-	public UltimateEconomyEventHandlerImpl(JobcenterManager jobcenterManager, RentshopManager rentshopManager,
-			PlayershopManager playershopManager, AdminshopManager adminshopManager, Updater updater,
-			SpawnerSystemEventHandler spawnerSystemEventHandler, TownsystemEventHandler townSystemEventHandler,
-			ShopEventHandler shopEventHandler, JobsystemEventHandler jobsystemEventHandler,
-			EconomyPlayerEventHandler ecoPlayerEventHandler) {
-		this.ecoPlayerEventHandler = ecoPlayerEventHandler;
-		this.shopEventHandler = shopEventHandler;
-		this.jobsystemEventHandler = jobsystemEventHandler;
-		this.townSystemEventHandler = townSystemEventHandler;
-		this.spawnerSystemEventHandler = spawnerSystemEventHandler;
-		this.updater = updater;
-		this.adminshopManager = adminshopManager;
-		this.playershopManager = playershopManager;
-		this.rentshopManager = rentshopManager;
-		this.jobcenterManager = jobcenterManager;
-	}
 
 	/**
 	 * Handles entity breed event.

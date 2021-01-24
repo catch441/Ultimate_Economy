@@ -10,21 +10,15 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ue.bank.dataaccess.api.BankDao;
 import com.ue.common.utils.ServerProvider;
+
+import lombok.RequiredArgsConstructor;
+
 import com.ue.common.utils.SaveFileUtils;
 
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class BankDaoImpl extends SaveFileUtils implements BankDao {
 
 	private final ServerProvider serverProvider;
-	
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param serverProvider
-	 */
-	@Inject
-	public BankDaoImpl(ServerProvider serverProvider) {
-		this.serverProvider = serverProvider;
-	}
 	
 	@Override
 	public void setupSavefile() {

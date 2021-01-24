@@ -13,19 +13,12 @@ import org.bukkit.entity.Villager.Profession;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class RentshopTabCompleterImpl implements TabCompleter {
 
 	private final RentshopManager rentshopManager;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param rentshopManager
-	 */
-	@Inject
-	public RentshopTabCompleterImpl(RentshopManager rentshopManager) {
-		this.rentshopManager = rentshopManager;
-	}
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

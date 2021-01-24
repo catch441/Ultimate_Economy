@@ -1,5 +1,7 @@
 package com.ue.shopsystem.logic.impl;
 
+import javax.inject.Inject;
+
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.ue.common.utils.MessageWrapper;
@@ -8,28 +10,16 @@ import com.ue.general.impl.GeneralEconomyException;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class RentDailyTask extends BukkitRunnable {
 
 	private final MessageWrapper messageWrapper;
 	private final RentshopManager rentshopManager;
 	private final ServerProvider serverProvider;
-
-	/**
-	 * Default constructor.
-	 * 
-	 * @param serverProvider
-	 * @param rentshopManager
-	 * @param messageWrapper
-	 */
-	public RentDailyTask(ServerProvider serverProvider, RentshopManager rentshopManager,
-			MessageWrapper messageWrapper) {
-		this.serverProvider = serverProvider;
-		this.messageWrapper = messageWrapper;
-		this.rentshopManager = rentshopManager;
-	}
 
 	@Override
 	public void run() {

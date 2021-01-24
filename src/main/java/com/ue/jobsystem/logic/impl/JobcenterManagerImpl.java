@@ -17,15 +17,14 @@ import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsystem.logic.api.Job;
-import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
-import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 
-import dagger.Lazy;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class JobcenterManagerImpl implements JobcenterManager {
 
 	private List<Jobcenter> jobCenterList = new ArrayList<>();
@@ -34,28 +33,6 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param configDao
-	 * @param jobManager
-	 * @param serverProvider
-	 * @param validationHandler
-	 * @param ecoPlayerManager
-	 * @param messageWrapper
-	 * @param generalValidator
-	 */
-	@Inject
-	public JobcenterManagerImpl(ConfigDao configDao, Lazy<JobManager> jobManager, ServerProvider serverProvider,
-			JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
-			MessageWrapper messageWrapper, GeneralEconomyValidationHandler generalValidator) {
-		this.messageWrapper = messageWrapper;
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.serverProvider = serverProvider;
-		this.configDao = configDao;
-		this.generalValidator = generalValidator;
-	}
 
 	@Override
 	public Jobcenter getJobcenterByName(String name) throws GeneralEconomyException {

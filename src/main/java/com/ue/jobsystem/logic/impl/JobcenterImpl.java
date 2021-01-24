@@ -37,9 +37,11 @@ import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class JobcenterImpl implements Jobcenter {
 
 	private final JobManager jobManager;
@@ -55,32 +57,6 @@ public class JobcenterImpl implements Jobcenter {
 	private int size;
 	private List<Job> jobs = new ArrayList<>();
 	private Inventory inventory;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param jobcenterDao
-	 * @param jobManager
-	 * @param jobcenterManager
-	 * @param ecoPlayerManager
-	 * @param validationHandler
-	 * @param serverProvider
-	 * @param generalValidator
-	 * @throws JobSystemException
-	 */
-	@Inject
-	public JobcenterImpl(JobcenterDao jobcenterDao, JobManager jobManager,
-			JobcenterManager jobcenterManager, EconomyPlayerManager ecoPlayerManager,
-			JobsystemValidationHandler validationHandler, ServerProvider serverProvider,
-			GeneralEconomyValidationHandler generalValidator) {
-		this.jobManager = jobManager;
-		this.jobcenterManager = jobcenterManager;
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.validationHandler = validationHandler;
-		this.serverProvider = serverProvider;
-		this.jobcenterDao = jobcenterDao;
-		this.generalValidator = generalValidator;
-	}
 
 	@Override
 	public void setupNew(String name, Location spawnLocation, int size) {

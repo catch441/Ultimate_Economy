@@ -21,9 +21,11 @@ import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class PlayershopManagerImpl implements PlayershopManager {
 
 	private List<Playershop> playerShopList = new ArrayList<>();
@@ -33,28 +35,6 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ConfigDao configDao;
 	private final ServerProvider serverProvider;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param configDao
-	 * @param townsystemValidationHandler
-	 * @param validationHandler
-	 * @param messageWrapper
-	 * @param serverProvider
-	 * @param generalValidator
-	 */
-	@Inject
-	public PlayershopManagerImpl(ConfigDao configDao, TownsystemValidationHandler townsystemValidationHandler,
-			ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
-			ServerProvider serverProvider, GeneralEconomyValidationHandler generalValidator) {
-		this.configDao = configDao;
-		this.messageWrapper = messageWrapper;
-		this.validationHandler = validationHandler;
-		this.townsystemValidationHandler = townsystemValidationHandler;
-		this.serverProvider = serverProvider;
-		this.generalValidator = generalValidator;
-	}
 
 	@Override
 	public String generateFreePlayerShopId() {

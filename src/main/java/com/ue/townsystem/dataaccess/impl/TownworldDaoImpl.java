@@ -21,32 +21,17 @@ import com.ue.townsystem.dataaccess.api.TownworldDao;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 
 	private final TownsystemValidationHandler validationHandler;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final BankManager bankManager;
 	private final ServerProvider serverProvider;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param serverProvider
-	 * @param validationHandler
-	 * @param ecoPlayerManager
-	 * @param bankManager
-	 */
-	@Inject
-	public TownworldDaoImpl(ServerProvider serverProvider, TownsystemValidationHandler validationHandler,
-			EconomyPlayerManager ecoPlayerManager, BankManager bankManager) {
-		this.validationHandler = validationHandler;
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.bankManager = bankManager;
-		this.serverProvider = serverProvider;
-	}
 
 	@Override
 	public void setupSavefile(String name) {

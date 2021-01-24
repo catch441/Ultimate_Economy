@@ -14,9 +14,7 @@ import com.ue.bank.logic.api.BankValidationHandler;
 import com.ue.bank.logic.impl.BankManagerImpl;
 import com.ue.bank.logic.impl.BankValidationHandlerImpl;
 import com.ue.common.api.CustomSkullService;
-import com.ue.common.api.InventoryGui;
 import com.ue.common.impl.CustomSkullServiceImpl;
-import com.ue.common.impl.InventoryGuiImpl;
 import com.ue.config.dataaccess.api.ConfigDao;
 import com.ue.config.dataaccess.impl.ConfigDaoImpl;
 import com.ue.config.logic.api.ConfigManager;
@@ -168,11 +166,6 @@ public class ProviderModule {
 	@Provides
 	MessageWrapper provideMessageWrapper() {
 		return new MessageWrapper();
-	}
-	
-	@Provides
-	InventoryGui provideInventoryGui(InventoryGuiImpl gui) {
-		return gui;
 	}
 	
 	@Provides

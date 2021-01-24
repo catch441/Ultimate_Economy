@@ -10,19 +10,12 @@ import com.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsystem.logic.api.Job;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class EconomyPlayerValidationHandlerImpl implements EconomyPlayerValidationHandler {
 
 	private final MessageWrapper messageWrapper;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param messageWrapper
-	 */
-	@Inject
-	public EconomyPlayerValidationHandlerImpl(MessageWrapper messageWrapper) {
-		this.messageWrapper = messageWrapper;
-	}
 
 	@Override
 	public void checkForEnoughMoney(BankAccount account, double amount, boolean personal)

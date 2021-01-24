@@ -11,6 +11,9 @@ import com.ue.general.api.GeneralEconomyValidationHandler;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class ConfigManagerImpl implements ConfigManager {
 
 	private final ConfigDao configDao;
@@ -30,21 +33,6 @@ public class ConfigManagerImpl implements ConfigManager {
 	private boolean allowQuickShop;
 	private Locale locale;
 	private double startAmount;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param generalValidator
-	 * @param configDao
-	 * @param messageWrapper
-	 */
-	@Inject
-	public ConfigManagerImpl(GeneralEconomyValidationHandler generalValidator, ConfigDao configDao,
-			MessageWrapper messageWrapper) {
-		this.configDao = configDao;
-		this.messageWrapper = messageWrapper;
-		this.generalValidator = generalValidator;
-	}
 
 	@SuppressWarnings("deprecation")
 	@Override

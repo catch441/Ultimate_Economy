@@ -14,10 +14,12 @@ import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.general.impl.GeneralEconomyException;
 
+import lombok.RequiredArgsConstructor;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class UltimateEconomyVaultImpl implements Economy {
 
 	private final String name = "Ultimate_Economy";
@@ -25,23 +27,6 @@ public class UltimateEconomyVaultImpl implements Economy {
 	private final BankManager bankManager;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final ServerProvider serverProvider;
-
-	/**
-	 * UE economy implementation of vault economy.
-	 * 
-	 * @param serverProvider
-	 * @param ecoPlayerManager
-	 * @param bankManager
-	 * @param configManager
-	 */
-	@Inject
-	public UltimateEconomyVaultImpl(ServerProvider serverProvider, EconomyPlayerManager ecoPlayerManager, BankManager bankManager,
-			ConfigManager configManager) {
-		this.configManager = configManager;
-		this.bankManager = bankManager;
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.serverProvider = serverProvider;
-	}
 
 	@Override
 	public String currencyNamePlural() {

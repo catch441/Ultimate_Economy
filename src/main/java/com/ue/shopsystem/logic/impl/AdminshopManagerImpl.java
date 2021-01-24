@@ -18,9 +18,11 @@ import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class AdminshopManagerImpl implements AdminshopManager {
 
 	private List<Adminshop> adminShopList = new ArrayList<>();
@@ -29,25 +31,6 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param validationHandler
-	 * @param messageWrapper
-	 * @param serverProvider
-	 * @param configDao
-	 * @param generalValidator
-	 */
-	@Inject
-	public AdminshopManagerImpl(ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
-			ServerProvider serverProvider, ConfigDao configDao, GeneralEconomyValidationHandler generalValidator) {
-		this.messageWrapper = messageWrapper;
-		this.validationHandler = validationHandler;
-		this.serverProvider = serverProvider;
-		this.configDao = configDao;
-		this.generalValidator = generalValidator;
-	}
 
 	@Override
 	public Adminshop getAdminShopByName(String name) throws GeneralEconomyException {

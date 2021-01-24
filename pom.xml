@@ -34,7 +34,7 @@
 	</properties>
 
 	<dependencies>
-		<dependency>
+		<!--dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>1.4.200</version>
@@ -46,7 +46,7 @@
 			<version>5.4.27.Final</version>
 		</dependency>
 
-		<!--dependency>
+		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
 			<version>5.4.27.Final</version>
@@ -198,14 +198,14 @@
 				<version>3.2.4</version>
 				<configuration>
 					<minimizeJar>true</minimizeJar>
-					<filters>
+					<!--filters>
 						<filter>
 							<artifact>com.h2database:h2</artifact>
 							<includes>
 								<include>**</include>
 							</includes>
 						</filter>
-					</filters>
+					</filters-->
 					<relocations>
 						<relocation>
 							<pattern>org.bstats.bukkit</pattern>

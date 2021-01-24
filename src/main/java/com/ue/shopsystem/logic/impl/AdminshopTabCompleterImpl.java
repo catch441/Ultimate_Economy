@@ -13,20 +13,13 @@ import org.bukkit.entity.EntityType;
 import com.ue.common.utils.TabCompleterUtils;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class AdminshopTabCompleterImpl extends TabCompleterUtils implements TabCompleter {
 	
 	private final AdminshopManager adminshopManager;
 	
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param adminshopManager
-	 */
-	@Inject
-	public AdminshopTabCompleterImpl(AdminshopManager adminshopManager) {
-		this.adminshopManager = adminshopManager;
-	}
-
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		switch (command.getLabel()) {

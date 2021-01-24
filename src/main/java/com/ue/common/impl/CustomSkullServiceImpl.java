@@ -21,25 +21,16 @@ import com.ue.common.api.CustomSkullService;
 import com.ue.common.api.SkullTextureEnum;
 import com.ue.common.utils.ServerProvider;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class CustomSkullServiceImpl implements CustomSkullService {
 
 	private final ServerProvider serverProvider;
-
 	private Map<SkullTextureEnum, ItemStack> customSkullMap = new HashMap<>();
 	
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param serverProvider
-	 */
-	@Inject
-	public CustomSkullServiceImpl(ServerProvider serverProvider) {
-		this.serverProvider= serverProvider;
-	}
-
 	@Override
 	public void setup() {
 		for(SkullTextureEnum skull: SkullTextureEnum.values()) {

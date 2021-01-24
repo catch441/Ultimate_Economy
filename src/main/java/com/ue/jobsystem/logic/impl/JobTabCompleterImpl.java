@@ -15,22 +15,13 @@ import org.bukkit.entity.EntityType;
 import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class JobTabCompleterImpl implements TabCompleter {
 
 	private final JobcenterManager jobcenterManager;
 	private final JobManager jobManager;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param jobManager
-	 * @param jobcenterManager
-	 */
-	@Inject
-	public JobTabCompleterImpl(JobManager jobManager, JobcenterManager jobcenterManager) {
-		this.jobcenterManager = jobcenterManager;
-		this.jobManager = jobManager;
-	}
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

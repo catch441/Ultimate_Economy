@@ -17,9 +17,11 @@ import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class RentshopManagerImpl implements RentshopManager {
 
 	private List<Rentshop> rentShopList = new ArrayList<>();
@@ -27,23 +29,6 @@ public class RentshopManagerImpl implements RentshopManager {
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param serverProvider
-	 * @param messageWrapper
-	 * @param configDao
-	 * @param generalValidator
-	 */
-	@Inject
-	public RentshopManagerImpl(ServerProvider serverProvider, MessageWrapper messageWrapper,
-			ConfigDao configDao, GeneralEconomyValidationHandler generalValidator) {
-		this.serverProvider = serverProvider;
-		this.messageWrapper = messageWrapper;
-		this.configDao = configDao;
-		this.generalValidator = generalValidator;
-	}
 
 	@Override
 	public String generateFreeRentShopId() {
@@ -143,7 +128,7 @@ public class RentshopManagerImpl implements RentshopManager {
 
 	@Override
 	public void setupRentDailyTask() {
-		new RentDailyTask(serverProvider, this, messageWrapper)
+		new RentDailyTask(messageWrapper, this, serverProvider)
 				.runTaskTimerAsynchronously(serverProvider.getJavaPluginInstance(), 1, 1000);
 	}
 

@@ -30,6 +30,9 @@ import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
 import com.ue.townsystem.logic.api.TownworldManager;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class TownworldManagerImpl implements TownworldManager {
 
 	private final EconomyPlayerManager ecoPlayerManager;
@@ -43,33 +46,6 @@ public class TownworldManagerImpl implements TownworldManager {
 
 	private Map<String, Townworld> townWorldList = new HashMap<>();
 	private List<String> townNameList = new ArrayList<>();
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param configDao
-	 * @param ecoPlayerValidationHandler
-	 * @param bankManager
-	 * @param ecoPlayerManager
-	 * @param messageWrapper
-	 * @param townsystemValidationHandler
-	 * @param serverProvider
-	 * @param generalValidator
-	 */
-	@Inject
-	public TownworldManagerImpl(ConfigDao configDao, EconomyPlayerValidationHandler ecoPlayerValidationHandler,
-			BankManager bankManager, EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
-			TownsystemValidationHandler townsystemValidationHandler, ServerProvider serverProvider,
-			GeneralEconomyValidationHandler generalValidator) {
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.townsystemValidationHandler = townsystemValidationHandler;
-		this.messageWrapper = messageWrapper;
-		this.bankManager = bankManager;
-		this.ecoPlayerValidationHandler = ecoPlayerValidationHandler;
-		this.serverProvider = serverProvider;
-		this.configDao = configDao;
-		this.generalValidator = generalValidator;
-	}
 
 	protected void setTownNameList(List<String> townNameList) {
 		this.townNameList = townNameList;

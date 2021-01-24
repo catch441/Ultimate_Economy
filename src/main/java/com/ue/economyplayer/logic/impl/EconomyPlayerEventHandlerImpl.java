@@ -10,22 +10,13 @@ import com.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.general.impl.GeneralEconomyException;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class EconomyPlayerEventHandlerImpl implements EconomyPlayerEventHandler {
 
 	private final ConfigManager configManager;
 	private final EconomyPlayerManager ecoPlayerManager;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param ecoPlayerManager
-	 * @param configManager
-	 */
-	@Inject
-	public EconomyPlayerEventHandlerImpl(EconomyPlayerManager ecoPlayerManager, ConfigManager configManager) {
-		this.configManager = configManager;
-		this.ecoPlayerManager = ecoPlayerManager;
-	}
 
 	@Override
 	public void handleJoin(PlayerJoinEvent event) throws EconomyPlayerException, GeneralEconomyException {

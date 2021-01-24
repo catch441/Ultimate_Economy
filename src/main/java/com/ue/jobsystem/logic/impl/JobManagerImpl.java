@@ -21,9 +21,11 @@ import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class JobManagerImpl implements JobManager {
 
 	private List<Job> jobList = new ArrayList<>();
@@ -34,30 +36,6 @@ public class JobManagerImpl implements JobManager {
 	private final JobcenterManager jobcenterManager;
 	private final ConfigDao configDao;
 	private final ServerProvider serverProvider;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param generalValidator
-	 * @param serverProvider
-	 * @param configDao
-	 * @param jobcenterManager
-	 * @param validationHandler
-	 * @param ecoPlayerManager
-	 * @param messageWrapper
-	 */
-	@Inject
-	public JobManagerImpl(GeneralEconomyValidationHandler generalValidator, ServerProvider serverProvider,
-			ConfigDao configDao, JobcenterManager jobcenterManager, JobsystemValidationHandler validationHandler,
-			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
-		this.messageWrapper = messageWrapper;
-		this.configDao = configDao;
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.validationHandler = validationHandler;
-		this.jobcenterManager = jobcenterManager;
-		this.serverProvider = serverProvider;
-		this.generalValidator = generalValidator;
-	}
 
 	@Override
 	public List<Job> getJobList() {

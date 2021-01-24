@@ -19,6 +19,9 @@ import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
 import com.ue.townsystem.logic.api.TownworldManager;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class TownCommandExecutorImpl implements CommandExecutor {
 
 	private final ConfigManager configManager;
@@ -26,26 +29,6 @@ public class TownCommandExecutorImpl implements CommandExecutor {
 	private final TownworldManager townworldManager;
 	private final MessageWrapper messageWrapper;
 	private final TownsystemValidationHandler townsystemValidationHandler;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param configManager
-	 * @param ecoPlayerManager
-	 * @param townworldManager
-	 * @param messageWrapper
-	 * @param townsystemValidationHandler
-	 */
-	@Inject
-	public TownCommandExecutorImpl(ConfigManager configManager, EconomyPlayerManager ecoPlayerManager,
-			TownworldManager townworldManager, MessageWrapper messageWrapper,
-			TownsystemValidationHandler townsystemValidationHandler) {
-		this.configManager = configManager;
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.townsystemValidationHandler = townsystemValidationHandler;
-		this.messageWrapper = messageWrapper;
-		this.townworldManager = townworldManager;
-	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

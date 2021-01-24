@@ -12,26 +12,14 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerException;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.townsystem.logic.api.TownworldManager;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class TownworldCommandExecutorImpl implements CommandExecutor {
 
 	private final ConfigManager configManager;
 	private final TownworldManager townworldManager;
 	private final MessageWrapper messageWrapper;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param configManager
-	 * @param townworldManager
-	 * @param messageWrapper
-	 */
-	@Inject
-	public TownworldCommandExecutorImpl(ConfigManager configManager, TownworldManager townworldManager,
-			MessageWrapper messageWrapper) {
-		this.configManager = configManager;
-		this.messageWrapper = messageWrapper;
-		this.townworldManager = townworldManager;
-	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

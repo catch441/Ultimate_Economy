@@ -29,6 +29,9 @@ import com.ue.townsystem.logic.api.TownsystemEventHandler;
 import com.ue.townsystem.logic.api.Townworld;
 import com.ue.townsystem.logic.api.TownworldManager;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 
 	private final ConfigManager configManager;
@@ -36,26 +39,6 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerValidationHandler ecoPlayerValidationHandler;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param configManager
-	 * @param townworldManager
-	 * @param ecoPlayerManager
-	 * @param messageWrapper
-	 * @param ecoPlayerValidationHandler
-	 */
-	@Inject
-	public TownsystemEventHandlerImpl(ConfigManager configManager, TownworldManager townworldManager,
-			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
-			EconomyPlayerValidationHandler ecoPlayerValidationHandler) {
-		this.configManager = configManager;
-		this.townworldManager = townworldManager;
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.messageWrapper = messageWrapper;
-		this.ecoPlayerValidationHandler = ecoPlayerValidationHandler;
-	}
 
 	@Override
 	public void handlePlayerTeleport(PlayerTeleportEvent event) {

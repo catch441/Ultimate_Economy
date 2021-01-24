@@ -14,26 +14,15 @@ import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.townsystem.logic.api.TownworldManager;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class TownTabCompleterImpl extends TabCompleterUtils implements TabCompleter {
 
 	private final TownworldManager townworldManager;
 	private final EconomyPlayerManager ecoPlayerManager;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param townworldManager
-	 * @param ecoPlayerManager
-	 */
-	@Inject
-	public TownTabCompleterImpl(TownworldManager townworldManager,
-			EconomyPlayerManager ecoPlayerManager) {
-		this.townworldManager = townworldManager;
-		this.ecoPlayerManager = ecoPlayerManager;
-	}
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

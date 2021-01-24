@@ -13,26 +13,14 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.general.impl.GeneralEconomyException;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class ConfigCommandExecutorImpl implements CommandExecutor {
 
 	private final ConfigManager configManager;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final MessageWrapper messageWrapper;
-
-	/**
-	 * Inject constructor.
-	 * 
-	 * @param ecoPlayerManager
-	 * @param configManager
-	 * @param messageWrapper
-	 */
-	@Inject
-	public ConfigCommandExecutorImpl(EconomyPlayerManager ecoPlayerManager, ConfigManager configManager,
-			MessageWrapper messageWrapper) {
-		this.configManager = configManager;
-		this.messageWrapper = messageWrapper;
-		this.ecoPlayerManager = ecoPlayerManager;
-	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
