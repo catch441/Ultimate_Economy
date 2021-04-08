@@ -110,16 +110,6 @@ public class ServerProvider {
 	}
 
 	/**
-	 * Returns the actual time in milliseconds. Its not the servertime, its the real
-	 * life time.
-	 * 
-	 * @return time in ms
-	 */
-	public long getActualTime() {
-		return System.currentTimeMillis();
-	}
-
-	/**
 	 * Returns a new bukkit scoreboard.
 	 * 
 	 * @return scoreboard

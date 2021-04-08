@@ -29,6 +29,8 @@ import com.ue.townsystem.logic.impl.TownSystemException;
 
 public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
+	// 72 minecraft days = one RL day
+	private static final int RENTDAY_LENGTH = 72; 
 	private double rentalFee;
 	private long rentUntil;
 	private boolean rentable;
@@ -246,7 +248,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		changeOwner(player);
 		rentable = false;
 		changeShopName("Shop#" + getShopId());
-		rentUntil = serverProvider.getActualTime() + (86400000 * duration);
+		rentUntil = RENTDAY_LENGTH * duration;
 		getShopDao().saveRentable(isRentable());
 		getShopDao().saveRentUntil(getRentUntil());
 	}
