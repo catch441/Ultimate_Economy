@@ -21,11 +21,11 @@ public interface Rentshop extends Playershop {
 	public void setupNew(String shopId, Location spawnLocation, int size, double rentalFee);
 
 	/**
-	 * Returns the rental until time in milliseconds.
+	 * Returns the expires at time in minecraft ticks.
 	 * 
 	 * @return rentUntil
 	 */
-	public long getRentUntil();
+	public long getExpiresAt();
 
 	/**
 	 * Returns true, if this shop is not rented by a other player.

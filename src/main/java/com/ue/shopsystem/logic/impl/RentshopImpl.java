@@ -32,7 +32,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	// 72 minecraft days = 24000 ticks = one RL day
 	private static final int RENTDAY_LENGTH = 24000; 
 	private double rentalFee;
-	private long rentUntil;
+	private long expiresAt;
 	private boolean rentable;
 	private RentshopRentGuiHandlerImpl rentGuiHandler;
 
@@ -75,7 +75,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		super.setupExisting(name, shopId);
 		rentalFee = getShopDao().loadRentalFee();
 		rentable = getShopDao().loadRentable();
-		rentUntil = getShopDao().loadRentUntil();
+		expiresAt = getShopDao().loadExpiresAt();
 		rentGuiHandler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager, skullService, configManager,
 				this, serverProvider);
 		setupEconomyVillagerType();
@@ -219,8 +219,8 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	}
 
 	@Override
-	public long getRentUntil() {
-		return rentUntil;
+	public long getExpiresAt() {
+		return expiresAt;
 	}
 
 	@Override
@@ -248,9 +248,9 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		changeOwner(player);
 		rentable = false;
 		changeShopName("Shop#" + getShopId());
-		rentUntil = RENTDAY_LENGTH * duration;
+		expiresAt = RENTDAY_LENGTH * duration;
 		getShopDao().saveRentable(isRentable());
-		getShopDao().saveRentUntil(getRentUntil());
+		getShopDao().saveRentUntil(getExpiresAt());
 	}
 
 	@Override
@@ -291,7 +291,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	public void resetShop() throws ShopSystemException, GeneralEconomyException {
 		removeAllItems();
 		setOwner(null);
-		rentUntil = 0L;
+		expiresAt = 0L;
 		getShopDao().saveOwner(null);
 		getShopDao().saveRentUntil(0L);
 		changeProfession(Profession.NITWIT);

@@ -121,6 +121,7 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 		save(getConfig(), getSavefile());
 	}
 
+	// TODO UE-142
 	/*@Override
 	/**
 	 * Saves a shopitem player specific. Not possible with spawners.
@@ -280,8 +281,9 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	}
 
 	@Override
-	public long loadRentUntil() {
-		return getConfig().getLong("RentUntil");
+	public long loadExpiresAt() {
+		convertToIngameTime();
+		return getConfig().getLong("expiresAt");
 	}
 
 	@Override
@@ -300,6 +302,22 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	@Override
 	public void deleteFile() {
 		getSavefile().delete();
+	}
+	
+	/**
+	 * @since 1.2.7
+	 * @param rentUntil
+	 */
+	@Deprecated
+	private void convertToIngameTime() {
+		if (!getConfig().isSet("expiresAt")) {
+			long oldTime = getConfig().getLong("RentUntil");
+			long yet = serverProvider.getSystemTime();
+			long newTime = (long) ((oldTime-yet)*0.02);
+			getConfig().set("RentUntil", null);
+			getConfig().set("expiresAt", newTime);
+			save(getConfig(), getSavefile());
+		}
 	}
 
 	/**

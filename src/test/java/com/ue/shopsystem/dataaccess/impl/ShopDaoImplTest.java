@@ -505,7 +505,7 @@ public class ShopDaoImplTest {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		shopDao.setupSavefile("A1");
 		shopDao.saveRentUntil(10L);
-		assertEquals(10L, shopDao.loadRentUntil());
+		assertEquals(10L, shopDao.loadExpiresAt());
 	}
 
 	@Test

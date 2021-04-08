@@ -46,7 +46,7 @@ public class RentDailyTaskTest {
 		when(rentshopManager.getRentShops()).thenReturn(Arrays.asList(shop));
 		when(shop.isRentable()).thenReturn(false);
 		when(serverProvider.getActualTime()).thenReturn(9999999L);
-		when(shop.getRentUntil()).thenReturn(10000000L);
+		when(shop.getExpiresAt()).thenReturn(10000000L);
 		task.run();
 		assertDoesNotThrow(() -> verify(shop, never()).resetShop());
 		verify(player).sendMessage("my reminder");
@@ -58,7 +58,7 @@ public class RentDailyTaskTest {
 		when(rentshopManager.getRentShops()).thenReturn(Arrays.asList(shop));
 		when(shop.isRentable()).thenReturn(false);
 		when(serverProvider.getActualTime()).thenReturn(20000000L);
-		when(shop.getRentUntil()).thenReturn(10000000L);
+		when(shop.getExpiresAt()).thenReturn(10000000L);
 		task.run();
 		assertDoesNotThrow(() -> verify(shop).resetShop());
 	}
@@ -72,7 +72,7 @@ public class RentDailyTaskTest {
 		when(rentshopManager.getRentShops()).thenReturn(Arrays.asList(shop));
 		when(shop.isRentable()).thenReturn(false);
 		when(serverProvider.getActualTime()).thenReturn(20000000L);
-		when(shop.getRentUntil()).thenReturn(10000000L);
+		when(shop.getExpiresAt()).thenReturn(10000000L);
 		task.run();
 		verify(e).getMessage();
 	}
@@ -83,7 +83,7 @@ public class RentDailyTaskTest {
 		when(rentshopManager.getRentShops()).thenReturn(Arrays.asList(shop));
 		when(shop.isRentable()).thenReturn(false);
 		when(serverProvider.getActualTime()).thenReturn(10000000L);
-		when(shop.getRentUntil()).thenReturn(20000000L);
+		when(shop.getExpiresAt()).thenReturn(20000000L);
 		task.run();
 		verify(shop, never()).getOwner();
 	}
@@ -97,7 +97,7 @@ public class RentDailyTaskTest {
 		when(rentshopManager.getRentShops()).thenReturn(Arrays.asList(shop));
 		when(shop.isRentable()).thenReturn(false);
 		when(serverProvider.getActualTime()).thenReturn(9999999L);
-		when(shop.getRentUntil()).thenReturn(10000000L);
+		when(shop.getExpiresAt()).thenReturn(10000000L);
 		task.run();
 		assertDoesNotThrow(() -> verify(shop, never()).resetShop());
 		verify(owner, never()).getPlayer();

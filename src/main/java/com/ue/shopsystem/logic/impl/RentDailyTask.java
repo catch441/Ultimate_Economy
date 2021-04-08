@@ -26,9 +26,9 @@ public class RentDailyTask extends BukkitRunnable {
 	public void run() {		
 		for (Rentshop shop : rentshopManager.getRentShops()) {
 			if (!shop.isRentable()) {
-				if (serverProvider.getWorldTime() >= shop.getRentUntil()) {
+				if (serverProvider.getWorldTime() >= shop.getExpiresAt()) {
 					resetShop(shop);
-				} else if ((shop.getRentUntil() - serverProvider.getWorldTime()) < TEN_MIN) {
+				} else if ((shop.getExpiresAt() - serverProvider.getWorldTime()) < TEN_MIN) {
 					sendReminder(shop);
 				}
 			}

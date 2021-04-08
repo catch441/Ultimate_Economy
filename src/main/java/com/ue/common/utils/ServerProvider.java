@@ -27,6 +27,14 @@ import com.ue.general.impl.UltimateEconomyCommand;
 public class ServerProvider {
 	
 	/**
+	 * Returns the system time in ms.
+	 * @return time
+	 */
+	public long getSystemTime() {
+		return System.currentTimeMillis();
+	}
+	
+	/**
 	 * Returns the default world game time.
 	 * @return time
 	 */

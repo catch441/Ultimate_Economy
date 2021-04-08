@@ -190,7 +190,7 @@ public interface ShopDao {
 	 * 
 	 * @return rent until
 	 */
-	public long loadRentUntil();
+	public long loadExpiresAt();
 	
 	/**
 	 * Loads the rental fee.

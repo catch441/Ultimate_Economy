@@ -228,7 +228,7 @@ public class RentshopImplTest {
 		when(shopDao.loadItemHashList()).thenReturn(new ArrayList<>());
 		when(shopDao.loadRentable()).thenReturn(true);
 		when(shopDao.loadRentalFee()).thenReturn(5.5);
-		when(shopDao.loadRentUntil()).thenReturn(0L);
+		when(shopDao.loadExpiresAt()).thenReturn(0L);
 		
 		assertDoesNotThrow(() -> rentshop.setupExisting(null, "R0"));
 
@@ -256,7 +256,7 @@ public class RentshopImplTest {
 		// rentshop
 		assertEquals(5.5, rentshop.getRentalFee());
 		assertTrue(rentshop.isRentable());
-		assertEquals(0L, rentshop.getRentUntil());
+		assertEquals(0L, rentshop.getExpiresAt());
 		assertNotNull(rentshop.getEditorHandler());
 	}
 
@@ -344,7 +344,7 @@ public class RentshopImplTest {
 		verify(shopDao).saveRentUntil(172800010L);
 		assertDoesNotThrow(() -> verify(ecoPlayer).decreasePlayerAmount(11.0, true));
 		assertFalse(rentshop.isRentable());
-		assertEquals(172800010L, rentshop.getRentUntil());
+		assertEquals(172800010L, rentshop.getExpiresAt());
 		assertEquals(ecoPlayer, rentshop.getOwner());
 		assertEquals("Shop#R0", rentshop.getName());
 		assertDoesNotThrow(() -> verify(validationHandler, times(2)).checkForIsRentable(true));
@@ -386,7 +386,7 @@ public class RentshopImplTest {
 		verify(shopDao, times(2)).saveRentable(true);
 		verify(shopDao).saveRentUntil(0L);
 		assertNull(rentshop.getOwner());
-		assertEquals(0L, rentshop.getRentUntil());
+		assertEquals(0L, rentshop.getExpiresAt());
 		assertTrue(rentshop.isRentable());
 		verify(rentshop.getShopVillager(), times(2)).setProfession(Profession.NITWIT);
 		assertEquals("RentShop#R0", rentshop.getName());
