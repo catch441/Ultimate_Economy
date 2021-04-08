@@ -41,7 +41,7 @@ public interface EconomyPlayer {
 	 * 
 	 * @return boolean
 	 */
-	public boolean isScoreBoardDisabled();
+	public boolean isScoreBoardObjectiveVisible();
 
 	/**
 	 * This method return true if this player reached the max number of homes.
@@ -235,9 +235,9 @@ public interface EconomyPlayer {
 	public List<String> getJoinedTownList();
 
 	/**
-	 * Set true, if the scoreboard should be disabled.
+	 * Set true, if the scoreboard objective with money should be visible.
 	 * 
-	 * @param scoreBoardDisabled
+	 * @param visible
 	 */
-	public void setScoreBoardDisabled(boolean scoreBoardDisabled);
+	public void setScoreBoardObjectiveVisible(boolean visible);
 }

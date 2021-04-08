@@ -93,7 +93,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 		verify(player).getName();
 		verifyNoMoreInteractions(player);
 		assertTrue(result);
-		verify(ecoPlayer).setScoreBoardDisabled(false);
+		verify(ecoPlayer).setScoreBoardObjectiveVisible(true);
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 		verify(player).getName();
 		verifyNoMoreInteractions(player);
 		assertTrue(result);
-		verify(ecoPlayer).setScoreBoardDisabled(true);
+		verify(ecoPlayer).setScoreBoardObjectiveVisible(false);
 	}
 
 	@Test

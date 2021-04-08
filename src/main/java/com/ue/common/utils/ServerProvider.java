@@ -19,7 +19,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.Scoreboard;
 
 import com.ue.general.impl.PluginImpl;
 import com.ue.general.impl.UltimateEconomyCommand;
@@ -123,15 +122,6 @@ public class ServerProvider {
 	 */
 	public ServiceComponent getServiceComponent() {
 		return PluginImpl.serviceComponent;
-	}
-
-	/**
-	 * Returns a new bukkit scoreboard.
-	 * 
-	 * @return scoreboard
-	 */
-	public Scoreboard createScoreBoard() {
-		return Bukkit.getScoreboardManager().getNewScoreboard();
 	}
 
 	/**

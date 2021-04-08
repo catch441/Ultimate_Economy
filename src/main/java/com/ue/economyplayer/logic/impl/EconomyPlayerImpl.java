@@ -44,7 +44,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	private String name;
 	private List<Job> jobs = new ArrayList<>();
 	private List<String> joinedTowns = new ArrayList<>();
-	private boolean scoreBoardDisabled;
+	private boolean scoreboardObjectiveVisible;
 	private BossBar bossBar;
 
 	/**
@@ -202,20 +202,29 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	@Override
-	public boolean isScoreBoardDisabled() {
-		return scoreBoardDisabled;
+	public boolean isScoreBoardObjectiveVisible() {
+		return scoreboardObjectiveVisible;
 	}
 
 	@Override
-	public void setScoreBoardDisabled(boolean scoreBoardDisabled) {
-		this.scoreBoardDisabled = scoreBoardDisabled;
-		ecoPlayerDao.saveScoreboardDisabled(getName(), isScoreBoardDisabled());
-		if (isScoreBoardDisabled()) {
-			if (isOnline()) {
-				getPlayer().setScoreboard(serverProvider.createScoreBoard());
-			}
+	public void setScoreBoardObjectiveVisible(boolean visible) {
+		scoreboardObjectiveVisible = visible;
+		ecoPlayerDao.saveScoreboardObjectiveVisible(getName(), isScoreBoardObjectiveVisible());
+		if (isScoreBoardObjectiveVisible()) {
+			updateScoreBoardObjective();
 		} else {
-			updateScoreBoard();
+			if (isOnline()) {
+				Objective o = getPlayer().getScoreboard().getObjective(DisplaySlot.SIDEBAR);
+				if(o != null && "bank".equals(o.getName())) {
+					o.unregister();
+				} else {
+					int score = 0;
+					if (getBankAccount() != null) {
+						score = (int) getBankAccount().getAmount();
+					}
+					getPlayer().getScoreboard().resetScores(ChatColor.GOLD + configManager.getCurrencyText(score));
+				}
+			}
 		}
 	}
 
@@ -238,7 +247,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	public void increasePlayerAmount(double amount, boolean sendMessage) throws GeneralEconomyException {
 		getBankAccount().increaseAmount(amount);
 		if (isOnline()) {
-			updateScoreBoard();
+			updateScoreBoardObjective();
 			if (sendMessage) {
 				getPlayer().sendMessage(
 						messageWrapper.getString("got_money", amount, configManager.getCurrencyText(amount)));
@@ -252,7 +261,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		validationHandler.checkForEnoughMoney(getBankAccount(), amount, personal);
 		getBankAccount().decreaseAmount(amount);
 		if (isOnline()) {
-			updateScoreBoard();
+			updateScoreBoardObjective();
 		}
 	}
 
@@ -277,7 +286,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		this.player = player;
 		if (isOnline()) {
 			getBossBar().addPlayer(player);
-			updateScoreBoard();
+			updateScoreBoardObjective();
 		}
 	}
 
@@ -298,16 +307,19 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	private void setScoreboard(int score) {
-		if (!isScoreBoardDisabled()) {
-			Scoreboard board = serverProvider.createScoreBoard();
-			Objective o = board.registerNewObjective("bank", "dummy", messageWrapper.getString("bank"));
-			o.setDisplaySlot(DisplaySlot.SIDEBAR);
+		if (isScoreBoardObjectiveVisible()) {
+			Scoreboard board = getPlayer().getScoreboard();
+			Objective o = board.getObjective(DisplaySlot.SIDEBAR);
+			// null, if no objective on the sidebar exists
+			if(o == null) {
+				o = board.registerNewObjective("bank", "dummy", messageWrapper.getString("bank"));
+				o.setDisplaySlot(DisplaySlot.SIDEBAR);
+			}
 			o.getScore(ChatColor.GOLD + configManager.getCurrencyText(score)).setScore(score);
-			getPlayer().setScoreboard(board);
 		}
 	}
 
-	private void updateScoreBoard() {
+	private void updateScoreBoardObjective() {
 		int score = 0;
 		if (getBankAccount() != null) {
 			score = (int) getBankAccount().getAmount();
@@ -323,19 +335,19 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	private void setupNewPlayer(String name) {
 		setName(name);
-		setScoreBoardDisabled(true);
 		bankAccount = bankManager.createBankAccount(0.0);
 		ecoPlayerDao.saveBankIban(getName(), getBankAccount().getIban());
+		setScoreBoardObjectiveVisible(false);
 	}
 
 	private void loadExistingPlayer(String name) {
 		setName(name);
-		scoreBoardDisabled = ecoPlayerDao.loadScoreboardDisabled(getName());
+		scoreboardObjectiveVisible = ecoPlayerDao.loadScoreboardObjectiveVisible(getName());
 		loadJoinedJobs();
 		joinedTowns = ecoPlayerDao.loadJoinedTowns(getName());
 		homes = ecoPlayerDao.loadHomeList(getName());
 		loadBankAccount();
-		updateScoreBoard();
+		updateScoreBoardObjective();
 	}
 
 	private void loadBankAccount() {

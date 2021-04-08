@@ -64,12 +64,12 @@ public interface EconomyPlayerDao {
 	public void saveJoinedTowns(String playerName, List<String> joinedTowns);
 
 	/**
-	 * Saves the scoreboard disabled value.
+	 * Saves the scoreboard visible value.
 	 * 
 	 * @param playerName
-	 * @param scoreboardDisabled
+	 * @param visible
 	 */
-	public void saveScoreboardDisabled(String playerName, Boolean scoreboardDisabled);
+	public void saveScoreboardObjectiveVisible(String playerName, Boolean visible);
 
 	/**
 	 * Loads the bank iban.
@@ -96,12 +96,12 @@ public interface EconomyPlayerDao {
 	public Map<String, Location> loadHomeList(String playerName);
 
 	/**
-	 * Load the scoreboard disabled value.
+	 * Load the scoreboard visible value.
 	 * 
 	 * @param playerName
 	 * @return boolean
 	 */
-	public boolean loadScoreboardDisabled(String playerName);
+	public boolean loadScoreboardObjectiveVisible(String playerName);
 
 	/**
 	 * Loads the joined towns name list.

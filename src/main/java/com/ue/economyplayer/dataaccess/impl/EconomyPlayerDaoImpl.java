@@ -94,8 +94,8 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	}
 
 	@Override
-	public void saveScoreboardDisabled(String playerName, Boolean scoreboardDisabled) {
-		getConfig().set(playerName + ".scoreboardDisabled", scoreboardDisabled);
+	public void saveScoreboardObjectiveVisible(String playerName, Boolean visible) {
+		getConfig().set(playerName + ".scoreboardDisabled", !visible);
 		save(getConfig(), getSavefile());
 	}
 
@@ -110,9 +110,9 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	}
 
 	@Override
-	public boolean loadScoreboardDisabled(String playerName) {
+	public boolean loadScoreboardObjectiveVisible(String playerName) {
 		convertBankToScoreboardBool(playerName);
-		return getConfig().getBoolean(playerName + ".scoreboardDisabled");
+		return !getConfig().getBoolean(playerName + ".scoreboardDisabled");
 	}
 
 	private Location loadHome(String playerName, String homeName) {

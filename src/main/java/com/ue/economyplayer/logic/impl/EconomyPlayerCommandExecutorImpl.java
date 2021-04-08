@@ -83,9 +83,9 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 1) {
 			if (args[0].equals("on") || args[0].equals("off")) {
 				if (args[0].equals("on")) {
-					ecoPlayer.setScoreBoardDisabled(false);
+					ecoPlayer.setScoreBoardObjectiveVisible(true);
 				} else {
-					ecoPlayer.setScoreBoardDisabled(true);
+					ecoPlayer.setScoreBoardObjectiveVisible(false);
 				}
 			} else {
 				return false;
