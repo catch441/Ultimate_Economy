@@ -248,9 +248,9 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		changeOwner(player);
 		rentable = false;
 		changeShopName("Shop#" + getShopId());
-		expiresAt = RENTDAY_LENGTH * duration;
+		expiresAt = RENTDAY_LENGTH * duration + serverProvider.getWorldTime();
 		getShopDao().saveRentable(isRentable());
-		getShopDao().saveRentUntil(getExpiresAt());
+		getShopDao().saveExpiresAt(getExpiresAt());
 	}
 
 	@Override
@@ -293,7 +293,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		setOwner(null);
 		expiresAt = 0L;
 		getShopDao().saveOwner(null);
-		getShopDao().saveRentUntil(0L);
+		getShopDao().saveExpiresAt(0L);
 		changeProfession(Profession.NITWIT);
 
 		setupShopName("RentShop#" + getShopId());

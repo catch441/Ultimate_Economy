@@ -216,10 +216,10 @@ public class ShopDaoImplTest {
 	public void saveRentUntilTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		shopDao.setupSavefile("A1");
-		shopDao.saveRentUntil(10L);
+		shopDao.saveExpiresAt(10L);
 		File file = new File("src/A1.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		assertEquals("10", config.getString("RentUntil"));
+		assertEquals("10", config.getString("expiresAt"));
 	}
 
 	@Test
@@ -504,7 +504,7 @@ public class ShopDaoImplTest {
 	public void loadRentUntilTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		shopDao.setupSavefile("A1");
-		shopDao.saveRentUntil(10L);
+		shopDao.saveExpiresAt(10L);
 		assertEquals(10L, shopDao.loadExpiresAt());
 	}
 
@@ -590,5 +590,20 @@ public class ShopDaoImplTest {
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		config = YamlConfiguration.loadConfiguration(file);
 		assertFalse(config.isSet("ShopItems.46464564.Name"));
+	}
+	
+	@Test
+	public void convertToIngameTimeTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		when(serverProvider.getSystemTime()).thenReturn(33600000L);
+		when(serverProvider.getWorldTime()).thenReturn(12000L);
+		shopDao.setupSavefile("A1");
+		File file = new File("src/A1.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		config.set("RentUntil", 120000000L);
+		assertDoesNotThrow(() -> config.save(file));
+		shopDao.setupSavefile("A1");
+		assertEquals(1740000L, shopDao.loadExpiresAt());
+		assertFalse(YamlConfiguration.loadConfiguration(file).isSet("RentUntil"));
 	}
 }

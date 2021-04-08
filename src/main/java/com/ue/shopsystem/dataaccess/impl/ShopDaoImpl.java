@@ -180,8 +180,8 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	}
 
 	@Override
-	public void saveRentUntil(long rentUntil) {
-		getConfig().set("RentUntil", rentUntil);
+	public void saveExpiresAt(long rentUntil) {
+		getConfig().set("expiresAt", rentUntil);
 		save(getConfig(), getSavefile());
 	}
 
@@ -312,8 +312,9 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	private void convertToIngameTime() {
 		if (!getConfig().isSet("expiresAt")) {
 			long oldTime = getConfig().getLong("RentUntil");
-			long yet = serverProvider.getSystemTime();
-			long newTime = (long) ((oldTime-yet)*0.02);
+			long yetSystem = serverProvider.getSystemTime();
+			long yetMc = serverProvider.getWorldTime();
+			long newTime = (long) ((oldTime-yetSystem)*0.02)+yetMc;
 			getConfig().set("RentUntil", null);
 			getConfig().set("expiresAt", newTime);
 			save(getConfig(), getSavefile());

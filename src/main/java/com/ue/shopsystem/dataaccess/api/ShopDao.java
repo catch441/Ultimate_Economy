@@ -89,11 +89,11 @@ public interface ShopDao {
 	public void saveOwner(EconomyPlayer ecoPlayer);
 	
 	/**
-	 * Saves the rent until time.
+	 * Saves the expire at time.
 	 * 
-	 * @param rentUntil
+	 * @param expiresAt
 	 */
-	public void saveRentUntil(long rentUntil);
+	public void saveExpiresAt(long expiresAt);
 	
 	/**
 	 * Saves the rental fee.

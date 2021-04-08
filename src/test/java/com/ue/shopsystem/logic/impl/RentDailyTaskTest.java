@@ -45,8 +45,8 @@ public class RentDailyTaskTest {
 		when(owner.isOnline()).thenReturn(true);
 		when(rentshopManager.getRentShops()).thenReturn(Arrays.asList(shop));
 		when(shop.isRentable()).thenReturn(false);
-		when(serverProvider.getActualTime()).thenReturn(9999999L);
-		when(shop.getExpiresAt()).thenReturn(10000000L);
+		when(serverProvider.getWorldTime()).thenReturn(120001L);
+		when(shop.getExpiresAt()).thenReturn(132000L);
 		task.run();
 		assertDoesNotThrow(() -> verify(shop, never()).resetShop());
 		verify(player).sendMessage("my reminder");
@@ -56,9 +56,9 @@ public class RentDailyTaskTest {
 	public void runTaskTestWithReset() {
 		Rentshop shop = mock(Rentshop.class);
 		when(rentshopManager.getRentShops()).thenReturn(Arrays.asList(shop));
-		when(shop.isRentable()).thenReturn(false);
-		when(serverProvider.getActualTime()).thenReturn(20000000L);
-		when(shop.getExpiresAt()).thenReturn(10000000L);
+		when(shop.isRentable()).thenReturn(false);		
+		when(serverProvider.getWorldTime()).thenReturn(120001L);
+		when(shop.getExpiresAt()).thenReturn(120000L);
 		task.run();
 		assertDoesNotThrow(() -> verify(shop).resetShop());
 	}
@@ -71,8 +71,8 @@ public class RentDailyTaskTest {
 		when(e.getMessage()).thenReturn("my error message");
 		when(rentshopManager.getRentShops()).thenReturn(Arrays.asList(shop));
 		when(shop.isRentable()).thenReturn(false);
-		when(serverProvider.getActualTime()).thenReturn(20000000L);
-		when(shop.getExpiresAt()).thenReturn(10000000L);
+		when(serverProvider.getWorldTime()).thenReturn(120001L);
+		when(shop.getExpiresAt()).thenReturn(120000L);
 		task.run();
 		verify(e).getMessage();
 	}
@@ -82,8 +82,8 @@ public class RentDailyTaskTest {
 		Rentshop shop = mock(Rentshop.class);
 		when(rentshopManager.getRentShops()).thenReturn(Arrays.asList(shop));
 		when(shop.isRentable()).thenReturn(false);
-		when(serverProvider.getActualTime()).thenReturn(10000000L);
-		when(shop.getExpiresAt()).thenReturn(20000000L);
+		when(serverProvider.getWorldTime()).thenReturn(120000L);
+		when(shop.getExpiresAt()).thenReturn(120000L);
 		task.run();
 		verify(shop, never()).getOwner();
 	}
@@ -96,8 +96,8 @@ public class RentDailyTaskTest {
 		when(owner.isOnline()).thenReturn(false);
 		when(rentshopManager.getRentShops()).thenReturn(Arrays.asList(shop));
 		when(shop.isRentable()).thenReturn(false);
-		when(serverProvider.getActualTime()).thenReturn(9999999L);
-		when(shop.getExpiresAt()).thenReturn(10000000L);
+		when(serverProvider.getWorldTime()).thenReturn(120001L);
+		when(shop.getExpiresAt()).thenReturn(132000L);
 		task.run();
 		assertDoesNotThrow(() -> verify(shop, never()).resetShop());
 		verify(owner, never()).getPlayer();

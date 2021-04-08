@@ -335,16 +335,16 @@ public class RentshopImplTest {
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0-SlotEditor")))
 				.thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(rentshop.getShopVillager()), anyInt(), eq("Shop#R0"))).thenReturn(inv);
-		when(serverProvider.getActualTime()).thenReturn(10L);
+		when(serverProvider.getWorldTime()).thenReturn(12000L);
 
 		assertDoesNotThrow(() -> rentshop.rentShop(ecoPlayer, 2));
 
 		verify(shopDao).saveOwner(ecoPlayer);
 		verify(shopDao).saveRentable(false);
-		verify(shopDao).saveRentUntil(172800010L);
+		verify(shopDao).saveExpiresAt(60000L);
 		assertDoesNotThrow(() -> verify(ecoPlayer).decreasePlayerAmount(11.0, true));
 		assertFalse(rentshop.isRentable());
-		assertEquals(172800010L, rentshop.getExpiresAt());
+		assertEquals(60000L, rentshop.getExpiresAt());
 		assertEquals(ecoPlayer, rentshop.getOwner());
 		assertEquals("Shop#R0", rentshop.getName());
 		assertDoesNotThrow(() -> verify(validationHandler, times(2)).checkForIsRentable(true));
@@ -384,7 +384,7 @@ public class RentshopImplTest {
 
 		verify(shopDao).saveOwner(null);
 		verify(shopDao, times(2)).saveRentable(true);
-		verify(shopDao).saveRentUntil(0L);
+		verify(shopDao).saveExpiresAt(0L);
 		assertNull(rentshop.getOwner());
 		assertEquals(0L, rentshop.getExpiresAt());
 		assertTrue(rentshop.isRentable());
