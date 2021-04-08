@@ -17,17 +17,18 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class RentDailyTask extends BukkitRunnable {
 
+	private static final int TEN_MIN = 12000;
 	private final MessageWrapper messageWrapper;
 	private final RentshopManager rentshopManager;
 	private final ServerProvider serverProvider;
 
 	@Override
-	public void run() {
+	public void run() {		
 		for (Rentshop shop : rentshopManager.getRentShops()) {
 			if (!shop.isRentable()) {
-				if (serverProvider.getActualTime() >= shop.getRentUntil()) {
+				if (serverProvider.getWorldTime() >= shop.getRentUntil()) {
 					resetShop(shop);
-				} else if ((shop.getRentUntil() - serverProvider.getActualTime()) < 600000) {
+				} else if ((shop.getRentUntil() - serverProvider.getWorldTime()) < TEN_MIN) {
 					sendReminder(shop);
 				}
 			}

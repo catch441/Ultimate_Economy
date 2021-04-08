@@ -4,7 +4,7 @@
   <groupId>Ultimate_Economy</groupId>
   <artifactId>Ultimate_Economy</artifactId>
   <name>Ultimate_Economy</name>
-  <version>1.2.6b</version>
+  <version>1.2.7</version>
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
     <defaultGoal>clean package</defaultGoal>
@@ -12,7 +12,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
+        <version>3.8.1</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -34,7 +34,7 @@
         <version>3.0.0</version>
         <configuration>
           <encoding>UTF-8</encoding>
-          <outputDirectory>D:\Programme\bukkitserver\paper-1.16.3\plugins\</outputDirectory>
+          <outputDirectory>D:\Programme\bukkitserver\paper-1.16.5\plugins\</outputDirectory>
         </configuration>
       </plugin>
       <plugin>
@@ -67,7 +67,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.4</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -98,16 +98,18 @@
       <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
     <repository>
-      <id>spigotImpl</id>
-      <url>https://your-repo.net/</url>
-    </repository>
-    <repository>
       <id>mojang</id>
       <name>Mojang's Repository</name>
       <url>https://libraries.minecraft.net/</url>
     </repository>
   </repositories>
   <dependencies>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.16</version>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
@@ -168,8 +170,8 @@
     </dependency>
     <dependency>
       <groupId>org.spigotmc</groupId>
-      <artifactId>spigot</artifactId>
-      <version>1.16.3</version>
+      <artifactId>spigot-api</artifactId>
+      <version>1.16.5-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -177,40 +179,6 @@
       <artifactId>authlib</artifactId>
       <version>1.5.21</version>
       <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>guava</artifactId>
-          <groupId>com.google.guava</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>commons-lang3</artifactId>
-          <groupId>org.apache.commons</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>log4j-core</artifactId>
-          <groupId>org.apache.logging.log4j</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>commons-codec</artifactId>
-          <groupId>commons-codec</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>log4j-api</artifactId>
-          <groupId>org.apache.logging.log4j</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>gson</artifactId>
-          <groupId>com.google.code.gson</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jsr305</artifactId>
-          <groupId>com.google.code.findbugs</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>commons-io</artifactId>
-          <groupId>commons-io</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
   </dependencies>
   <properties>
@@ -219,4 +187,3 @@
     <junit.jupiter.version>5.5.2</junit.jupiter.version>
   </properties>
 </project>
-

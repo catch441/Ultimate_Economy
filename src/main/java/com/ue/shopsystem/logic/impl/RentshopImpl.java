@@ -29,8 +29,8 @@ import com.ue.townsystem.logic.impl.TownSystemException;
 
 public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
-	// 72 minecraft days = one RL day
-	private static final int RENTDAY_LENGTH = 72; 
+	// 72 minecraft days = 24000 ticks = one RL day
+	private static final int RENTDAY_LENGTH = 24000; 
 	private double rentalFee;
 	private long rentUntil;
 	private boolean rentable;

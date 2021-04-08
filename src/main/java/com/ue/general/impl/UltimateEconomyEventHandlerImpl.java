@@ -55,7 +55,7 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 	private final JobcenterManager jobcenterManager;
 
 	private boolean firstJoin = true;
-
+	
 	/**
 	 * Handles entity breed event.
 	 * 

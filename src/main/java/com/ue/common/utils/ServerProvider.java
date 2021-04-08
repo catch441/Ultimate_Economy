@@ -25,6 +25,14 @@ import com.ue.general.impl.PluginImpl;
 import com.ue.general.impl.UltimateEconomyCommand;
 
 public class ServerProvider {
+	
+	/**
+	 * Returns the default world game time.
+	 * @return time
+	 */
+	public long getWorldTime() {
+		return Bukkit.getWorlds().get(0).getGameTime();
+	}
 
 	/**
 	 * Returns a bukkit world or null, if no world with the given name exists.
