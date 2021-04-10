@@ -58,6 +58,7 @@ public class MessageWrapper {
 				}
 			}
 			String message = "§c" + messages.getString(key);
+			message = message.replace("'", "''");
 			String newMessage = MessageFormat.format(message, colored.toArray());
 			return ChatColor.translateAlternateColorCodes('§', newMessage);
 		} catch (MissingResourceException e) {
@@ -98,6 +99,7 @@ public class MessageWrapper {
 				}
 			}
 			String message = "§6" + messages.getString(key);
+			message = message.replace("'", "''");
 			String newMessage = MessageFormat.format(message, colored.toArray());
 			return ChatColor.translateAlternateColorCodes('§', newMessage);
 		} catch (MissingResourceException e) {

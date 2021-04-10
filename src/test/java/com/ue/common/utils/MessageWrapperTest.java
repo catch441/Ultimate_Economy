@@ -54,8 +54,8 @@ public class MessageWrapperTest {
 	@Test
 	public void getErrorStringTestWithParams() {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
-		String message = messageWrapper.getErrorString("got_money_with_sender", "10", "kth", "kthschnll");
-		assertEquals("§cYou got §410§c §4kth§c from §4kthschnll§c.", message);
+		String message = messageWrapper.getErrorString("got_money_with_sender", "10", "stuff", "catch");
+		assertEquals("§cYou got §410§c §4stuff§c from §4catch§c.", message);
 	}
 
 	@Test
@@ -68,21 +68,21 @@ public class MessageWrapperTest {
 	@Test
 	public void getErrorStringTestWithParamsAndMissingMessage() {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
-		String message = messageWrapper.getErrorString("nothing", "10", "kth", "kthschnll");
+		String message = messageWrapper.getErrorString("nothing", "10", "stuff", "catch");
 		assertEquals("!nothing!", message);
 	}
 
 	@Test
 	public void getStringTestWithParams() {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
-		String message = messageWrapper.getString("got_money_with_sender", "10", "kth", "kthschnll");
-		assertEquals("§6You got §a10§6 §akth§6 from §akthschnll§6.", message);
+		String message = messageWrapper.getString("got_money_with_sender", "10", "stuff", "catch");
+		assertEquals("§6You got §a10§6 §astuff§6 from §acatch§6.", message);
 	}
 
 	@Test
 	public void getStringTestWithParamsAndMissingMessage() {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
-		String message = messageWrapper.getString("nothing", "10", "kth", "kthschnll");
+		String message = messageWrapper.getString("nothing", "10", "stuff", "catch");
 		assertEquals("!nothing!", message);
 	}
 
@@ -91,5 +91,21 @@ public class MessageWrapperTest {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
 		String message = messageWrapper.getString("got_money_with_sender", null, null, null);
 		assertEquals("§6You got §anull§6 §anull§6 from §anull§6.", message);
+	}
+	
+	// test with format symbol replacement ' -> ''
+	
+	@Test
+	public void getErrorStringTestWithParamsFr() {
+		messageWrapper.loadLanguage(new Locale("fr", "FR"));
+		String message = messageWrapper.getErrorString("shop_sell_singular", "10", "12", "$");
+		assertEquals("§c§410§c l'article a été vendu pour §412§c §4$§c.", message);
+	}
+	
+	@Test
+	public void getStringTestWithParamsFr() {
+		messageWrapper.loadLanguage(new Locale("fr", "FR"));
+		String message = messageWrapper.getString("shop_sell_singular", "10", "12", "$");
+		assertEquals("§6§a10§6 l'article a été vendu pour §a12§6 §a$§6.", message);
 	}
 }
