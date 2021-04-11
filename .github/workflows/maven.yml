@@ -21,7 +21,7 @@ jobs:
       with:
         java-version: 15
     - name: Build with Maven
-      run: mvn -B --update-snapshots verify
+      run: mvn -B clean package
       
     # Runs code climate test coverage
     - name: Code Climate Coverage Action
