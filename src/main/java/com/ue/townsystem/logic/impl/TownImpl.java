@@ -20,6 +20,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
@@ -37,11 +39,9 @@ import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
 import com.ue.townsystem.logic.api.TownworldManager;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class TownImpl implements Town {
 
+	private static final Logger log = LoggerFactory.getLogger(TownImpl.class);
 	private final MessageWrapper messageWrapper;
 	private final TownsystemValidationHandler validationHandler;
 	private final GeneralEconomyValidationHandler generalValidator;

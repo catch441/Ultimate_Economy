@@ -44,8 +44,8 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	public AdminshopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
 			AdminshopManager adminshopManager, ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
 			ConfigManager configManager, GeneralEconomyValidationHandler generalValidator) {
-		super(serverProvider, skullService, messageWrapper, configManager, validationHandler, generalValidator,
-				shopDao);
+		super(shopDao, serverProvider, skullService, validationHandler, messageWrapper, configManager,
+				generalValidator);
 		this.adminshopManager = adminshopManager;
 	}
 

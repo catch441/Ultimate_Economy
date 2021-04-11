@@ -38,9 +38,6 @@ import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor
 public abstract class AbstractShopImpl implements AbstractShop {
 
 	protected final ServerProvider serverProvider;
@@ -59,6 +56,18 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	private final ShopDao shopDao;
 	private ShopSlotEditorHandler slotEditorHandler;
 	private ShopEditorHandler editorHandler;
+
+	public AbstractShopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ConfigManager configManager,
+			GeneralEconomyValidationHandler generalValidator) {
+		this.shopDao = shopDao;
+		this.serverProvider = serverProvider;
+		this.skullService = skullService;
+		this.validationHandler = validationHandler;
+		this.messageWrapper = messageWrapper;
+		this.configManager = configManager;
+		this.generalValidator = generalValidator;
+	}
 
 	@Override
 	public void setupNew(String name, String shopId, Location spawnLocation, int size) {
@@ -319,7 +328,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 			}
 		}
 	}
-	
+
 	private boolean stackIsSimilar(ItemStack a, ItemStack b) {
 		ItemStack aClone = a.clone();
 		ItemStack bClone = b.clone();
@@ -382,9 +391,9 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		}
 		return loreList;
 	}
-	
+
 	private void removeIfContains(String value, String arg, Iterator<String> list) {
-		if(value.contains(arg)) {
+		if (value.contains(arg)) {
 			list.remove();
 		}
 	}

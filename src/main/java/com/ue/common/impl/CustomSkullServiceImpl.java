@@ -14,6 +14,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -21,15 +23,16 @@ import com.ue.common.api.CustomSkullService;
 import com.ue.common.api.SkullTextureEnum;
 import com.ue.common.utils.ServerProvider;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class CustomSkullServiceImpl implements CustomSkullService {
 
+	private static final Logger log = LoggerFactory.getLogger(CustomSkullServiceImpl.class);
 	private final ServerProvider serverProvider;
 	private Map<SkullTextureEnum, ItemStack> customSkullMap = new HashMap<>();
+	
+	@Inject
+	public CustomSkullServiceImpl(ServerProvider serverProvider) {
+		this.serverProvider = serverProvider;
+	}
 	
 	@Override
 	public void setup() {

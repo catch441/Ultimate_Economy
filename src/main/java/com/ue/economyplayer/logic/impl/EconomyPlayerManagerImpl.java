@@ -22,9 +22,7 @@ import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsystem.logic.api.JobManager;
 
 import dagger.Lazy;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 
 	private final EconomyPlayerDao ecoPlayerDao;
@@ -39,6 +37,20 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	private final Lazy<JobManager> jobManager;
 	private final ServerProvider serverProvider;
 	private List<EconomyPlayer> economyPlayers = new ArrayList<>();
+	
+	@Inject
+	public EconomyPlayerManagerImpl(GeneralEconomyValidationHandler generalValidator, EconomyPlayerDao ecoPlayerDao,
+			MessageWrapper messageWrapper, EconomyPlayerValidationHandler validationHandler, BankManager bankManager,
+			ConfigManager configManager, Lazy<JobManager> jobManager, ServerProvider serverProvider) {
+		this.ecoPlayerDao = ecoPlayerDao;
+		this.messageWrapper = messageWrapper;
+		this.validationHandler = validationHandler;
+		this.bankManager = bankManager;
+		this.configManager = configManager;
+		this.jobManager = jobManager;
+		this.serverProvider = serverProvider;
+		this.generalValidator = generalValidator;
+	}
 
 	@Override
 	public List<String> getEconomyPlayerNameList() {

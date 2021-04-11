@@ -6,6 +6,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.bukkit.Location;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.MessageWrapper;
@@ -20,19 +22,26 @@ import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class JobcenterManagerImpl implements JobcenterManager {
 
+	private static final Logger log = LoggerFactory.getLogger(JobcenterManagerImpl.class);
 	private List<Jobcenter> jobCenterList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
+
+	@Inject
+	public JobcenterManagerImpl(ConfigDao configDao, ServerProvider serverProvider,
+			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
+			GeneralEconomyValidationHandler generalValidator) {
+		this.messageWrapper = messageWrapper;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.serverProvider = serverProvider;
+		this.configDao = configDao;
+		this.generalValidator = generalValidator;
+	}
 
 	@Override
 	public Jobcenter getJobcenterByName(String name) throws GeneralEconomyException {

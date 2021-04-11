@@ -8,12 +8,12 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.bukkit.ChatColor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class MessageWrapper {
 
+	private static final Logger log = LoggerFactory.getLogger(MessageWrapper.class);
 	protected ResourceBundle messages;
 
 	/**

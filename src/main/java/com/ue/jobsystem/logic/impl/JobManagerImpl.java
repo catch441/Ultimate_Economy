@@ -5,6 +5,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
 import com.ue.config.dataaccess.api.ConfigDao;
@@ -21,14 +24,9 @@ import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class JobManagerImpl implements JobManager {
 
-	private List<Job> jobList = new ArrayList<>();
+	private static final Logger log = LoggerFactory.getLogger(JobManagerImpl.class);
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobsystemValidationHandler validationHandler;
@@ -36,6 +34,20 @@ public class JobManagerImpl implements JobManager {
 	private final JobcenterManager jobcenterManager;
 	private final ConfigDao configDao;
 	private final ServerProvider serverProvider;
+	private List<Job> jobList = new ArrayList<>();
+	
+	@Inject
+	public JobManagerImpl(GeneralEconomyValidationHandler generalValidator, ServerProvider serverProvider,
+			ConfigDao configDao, JobcenterManager jobcenterManager, JobsystemValidationHandler validationHandler,
+			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
+		this.messageWrapper = messageWrapper;
+		this.configDao = configDao;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.validationHandler = validationHandler;
+		this.jobcenterManager = jobcenterManager;
+		this.serverProvider = serverProvider;
+		this.generalValidator = generalValidator;
+	}
 
 	@Override
 	public List<Job> getJobList() {

@@ -10,13 +10,16 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.spawnersystem.dataaccess.api.SpawnerSystemDao;
 import com.ue.spawnersystem.logic.api.SpawnerManager;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class SpawnerManagerImpl implements SpawnerManager {
 
 	private final SpawnerSystemDao spawnerSystemDao;
 	private final ServerProvider serverProvider;
+
+	@Inject
+	public SpawnerManagerImpl(SpawnerSystemDao spawnerSystemDao, ServerProvider serverProvider) {
+		this.spawnerSystemDao = spawnerSystemDao;
+		this.serverProvider = serverProvider;
+	}
 
 	@Override
 	public void removeSpawner(Location location) {

@@ -22,6 +22,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ue.common.utils.ServerProvider;
 import com.ue.economyplayer.logic.api.EconomyPlayer;
@@ -37,13 +39,9 @@ import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class JobcenterImpl implements Jobcenter {
 
+	private static final Logger log = LoggerFactory.getLogger(JobcenterImpl.class);
 	private final JobManager jobManager;
 	private final JobcenterManager jobcenterManager;
 	private final EconomyPlayerManager ecoPlayerManager;
@@ -58,6 +56,19 @@ public class JobcenterImpl implements Jobcenter {
 	private List<Job> jobs = new ArrayList<>();
 	private Inventory inventory;
 
+	@Inject
+	public JobcenterImpl(JobcenterDao jobcenterDao, JobManager jobManager, JobcenterManager jobcenterManager,
+			EconomyPlayerManager ecoPlayerManager, JobsystemValidationHandler validationHandler,
+			ServerProvider serverProvider, GeneralEconomyValidationHandler generalValidator) {
+		this.jobManager = jobManager;
+		this.jobcenterManager = jobcenterManager;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.validationHandler = validationHandler;
+		this.serverProvider = serverProvider;
+		this.jobcenterDao = jobcenterDao;
+		this.generalValidator = generalValidator;
+	}
+
 	@Override
 	public void setupNew(String name, Location spawnLocation, int size) {
 		jobcenterDao.setupSavefile(name);
@@ -71,7 +82,7 @@ public class JobcenterImpl implements Jobcenter {
 		inventory = serverProvider.createInventory(villager, size, getName());
 		setupDefaultJobcenterInventory();
 	}
-	
+
 	@Override
 	public void setupExisting(String name) {
 		jobcenterDao.setupSavefile(name);

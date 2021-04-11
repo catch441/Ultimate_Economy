@@ -4,12 +4,12 @@ import java.io.File;
 import java.io.IOException;
 
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class SaveFileUtils {
 
+	private static final Logger log = LoggerFactory.getLogger(SaveFileUtils.class);
 	protected File file;
 	protected YamlConfiguration config;
 

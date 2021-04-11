@@ -1,6 +1,7 @@
 package com.ue.shopsystem.logic.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -13,12 +14,14 @@ import org.bukkit.entity.Villager.Profession;
 import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class RentshopTabCompleterImpl implements TabCompleter {
 
 	private final RentshopManager rentshopManager;
+
+	@Inject
+	public RentshopTabCompleterImpl(RentshopManager rentshopManager) {
+		this.rentshopManager = rentshopManager;
+	}
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -34,8 +37,6 @@ public class RentshopTabCompleterImpl implements TabCompleter {
 			return handleRenameAndEditShopTabComplete(sender, args);
 		case "changeProfession":
 			return handleChangeProfessionTabComplete(sender, args);
-		case "":
-			return handleAllCommands(sender);
 		default:
 			return handleDefaultMatchingTabComplete(sender, args);
 		}
@@ -105,28 +106,19 @@ public class RentshopTabCompleterImpl implements TabCompleter {
 		}
 	}
 
-	private List<String> handleAllCommands(CommandSender sender) {
-		if (sender.hasPermission("ultimate_economy.rentshop.admin")) {
-			return getAllAdminCommands();
-		} else {
-			return getAllPlayerCommands();
-		}
-	}
-
 	private List<String> getAllMatchingAdminCommands(String[] args) {
 		List<String> list = getAllMatchingPlayerCommands(args);
-		addIfMatching(list, "create", args[0]);
-		addIfMatching(list, "delete", args[0]);
-		addIfMatching(list, "move", args[0]);
-		addIfMatching(list, "resize", args[0]);
+		for(String command: getAllAdminCommands()) {
+			addIfMatching(list, command, args[0]);
+		}
 		return list;
 	}
 
 	private List<String> getAllMatchingPlayerCommands(String[] args) {
 		List<String> list = new ArrayList<>();
-		addIfMatching(list, "rename", args[0]);
-		addIfMatching(list, "editShop", args[0]);
-		addIfMatching(list, "changeProfession", args[0]);
+		for(String command: getAllPlayerCommands()) {
+			addIfMatching(list, command, args[0]);
+		}
 		return list;
 	}
 
@@ -137,20 +129,11 @@ public class RentshopTabCompleterImpl implements TabCompleter {
 	}
 
 	private List<String> getAllAdminCommands() {
-		List<String> list = getAllPlayerCommands();
-		list.add("create");
-		list.add("delete");
-		list.add("move");
-		list.add("resize");
-		return list;
+		return new ArrayList<String>(Arrays.asList("create", "delete", "move", "resize"));
 	}
 
 	private List<String> getAllPlayerCommands() {
-		List<String> list = new ArrayList<>();
-		list.add("rename");
-		list.add("editShop");
-		list.add("changeProfession");
-		return list;
+		return Arrays.asList("rename", "editShop", "changeProfession");
 	}
 
 	private List<String> getRentedShopsForPlayer(String arg, String player) {

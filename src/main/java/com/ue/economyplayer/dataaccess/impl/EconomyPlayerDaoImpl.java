@@ -18,15 +18,18 @@ import com.ue.common.utils.SaveFileUtils;
 import com.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import com.ue.jobsystem.logic.api.Job;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayerDao {
 
 	private final BankManager bankManager;
 	private final ServerProvider serverProvider;
 	private File file;
 	private YamlConfiguration config;
+
+	@Inject
+	public EconomyPlayerDaoImpl(BankManager bankManager, ServerProvider serverProvider) {
+		this.bankManager = bankManager;
+		this.serverProvider = serverProvider;
+	}
 
 	@Override
 	public void setupSavefile() {
@@ -126,7 +129,7 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	public Map<String, Location> loadHomeList(String playerName) {
 		removeDeprecatedHomelist(playerName);
 		Map<String, Location> homes = new HashMap<>();
-		if(getConfig().getConfigurationSection(playerName + ".Home") != null) {
+		if (getConfig().getConfigurationSection(playerName + ".Home") != null) {
 			for (String home : getConfig().getConfigurationSection(playerName + ".Home").getKeys(false)) {
 				homes.put(home, loadHome(playerName, home));
 			}

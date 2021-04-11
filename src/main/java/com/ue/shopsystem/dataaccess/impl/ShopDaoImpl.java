@@ -15,6 +15,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.common.utils.ServerProvider;
@@ -28,17 +30,22 @@ import com.ue.shopsystem.logic.to.ShopItem;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 
+	private static final Logger log = LoggerFactory.getLogger(ShopDaoImpl.class);
 	private final ServerProvider serverProvider;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final ShopValidationHandler validationHandler;
 	private final TownsystemValidationHandler townsystemValidationHandler;
+
+	@Inject
+	public ShopDaoImpl(ServerProvider serverProvider, EconomyPlayerManager ecoPlayerManager,
+			ShopValidationHandler validationHandler, TownsystemValidationHandler townsystemValidationHandler) {
+		this.serverProvider = serverProvider;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.validationHandler = validationHandler;
+		this.townsystemValidationHandler = townsystemValidationHandler;
+	}
 
 	@Override
 	public void setupSavefile(String shopId) {
@@ -122,52 +129,51 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	}
 
 	// TODO UE-142
-	/*@Override
-	/**
-	 * Saves a shopitem player specific. Not possible with spawners.
+	/*
+	 * @Override /** Saves a shopitem player specific. Not possible with spawners.
 	 * 
 	 * @param shopItem
+	 * 
 	 * @param playerName
+	 * 
 	 * @param delete
 	 *
-	public void saveShopItemStockPlayerSpecific(ShopItem shopItem, String playerName, boolean delete) {
-		if(delete) {
-			getConfig().set("Storage." + playerName + shopItem.getItemHash(), null);
-		} else {
-			getConfig().set("Storage." + playerName + shopItem.getItemHash() + ".Name", shopItem.getItemStack());
-			getConfig().set("Storage." + playerName + shopItem.getItemHash() + ".Slot", shopItem.getSlot());
-			getConfig().set("Storage." + playerName + + shopItem.getItemHash() + ".stock", shopItem.getStock());
-			getConfig().set("Storage." + playerName + + shopItem.getItemHash() + ".Amount", shopItem.getAmount());
-			getConfig().set("Storage." + playerName + + shopItem.getItemHash() + ".sellPrice", shopItem.getSellPrice());
-			getConfig().set("Storage." + playerName + + shopItem.getItemHash() + ".buyPrice", shopItem.getBuyPrice());
-		}
-		save(getConfig(), getSavefile());
-	}
-	
-	@Override
-	/**
-	 * . Not possible with spawners.
+	 * public void saveShopItemStockPlayerSpecific(ShopItem shopItem, String
+	 * playerName, boolean delete) { if(delete) { getConfig().set("Storage." +
+	 * playerName + shopItem.getItemHash(), null); } else {
+	 * getConfig().set("Storage." + playerName + shopItem.getItemHash() + ".Name",
+	 * shopItem.getItemStack()); getConfig().set("Storage." + playerName +
+	 * shopItem.getItemHash() + ".Slot", shopItem.getSlot());
+	 * getConfig().set("Storage." + playerName + + shopItem.getItemHash() +
+	 * ".stock", shopItem.getStock()); getConfig().set("Storage." + playerName + +
+	 * shopItem.getItemHash() + ".Amount", shopItem.getAmount());
+	 * getConfig().set("Storage." + playerName + + shopItem.getItemHash() +
+	 * ".sellPrice", shopItem.getSellPrice()); getConfig().set("Storage." +
+	 * playerName + + shopItem.getItemHash() + ".buyPrice", shopItem.getBuyPrice());
+	 * } save(getConfig(), getSavefile()); }
+	 * 
+	 * @Override /** . Not possible with spawners.
+	 * 
 	 * @param playerName
+	 * 
 	 * @param itemHash
+	 * 
 	 * @return
 	 *
-	public ShopItem loadItemPlayerSpecific(String playerName, int itemHash) {
-		ItemStack stack = null;
-		if (getConfig().getString("ShopItems." + itemHash + ".Name").contains("SPAWNER_")) {
-			stack = serverProvider.createItemStack(Material.SPAWNER, 1);
-			ItemMeta meta = stack.getItemMeta();
-			String name = getConfig().getString("ShopItems." + itemHash + ".Name");
-			meta.setDisplayName(name.substring(8));
-			stack.setItemMeta(meta);
-		} else {
-			stack = getConfig().getItemStack("ShopItems." + itemHash + ".Name");
-		}
-		int amount = getConfig().getInt("ShopItems." + itemHash + ".Amount");
-		double sellPrice = getConfig().getInt("ShopItems." + itemHash + ".sellPrice");
-		double buyPrice = getConfig().getInt("ShopItems." + itemHash + ".buyPrice");
-		int slot = getConfig().getInt("ShopItems." + itemHash + ".Slot");
-		return new ShopItem(stack, amount, sellPrice, buyPrice, slot);
-	}*/
+	 * public ShopItem loadItemPlayerSpecific(String playerName, int itemHash) {
+	 * ItemStack stack = null; if (getConfig().getString("ShopItems." + itemHash +
+	 * ".Name").contains("SPAWNER_")) { stack =
+	 * serverProvider.createItemStack(Material.SPAWNER, 1); ItemMeta meta =
+	 * stack.getItemMeta(); String name = getConfig().getString("ShopItems." +
+	 * itemHash + ".Name"); meta.setDisplayName(name.substring(8));
+	 * stack.setItemMeta(meta); } else { stack =
+	 * getConfig().getItemStack("ShopItems." + itemHash + ".Name"); } int amount =
+	 * getConfig().getInt("ShopItems." + itemHash + ".Amount"); double sellPrice =
+	 * getConfig().getInt("ShopItems." + itemHash + ".sellPrice"); double buyPrice =
+	 * getConfig().getInt("ShopItems." + itemHash + ".buyPrice"); int slot =
+	 * getConfig().getInt("ShopItems." + itemHash + ".Slot"); return new
+	 * ShopItem(stack, amount, sellPrice, buyPrice, slot); }
+	 */
 
 	@Override
 	public void saveOwner(EconomyPlayer ecoPlayer) {
@@ -303,7 +309,7 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	public void deleteFile() {
 		getSavefile().delete();
 	}
-	
+
 	/**
 	 * @since 1.2.7
 	 * @param rentUntil
@@ -314,7 +320,7 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 			long oldTime = getConfig().getLong("RentUntil");
 			long yetSystem = serverProvider.getSystemTime();
 			long yetMc = serverProvider.getWorldTime();
-			long newTime = (long) ((oldTime-yetSystem)*0.02)+yetMc;
+			long newTime = (long) ((oldTime - yetSystem) * 0.02) + yetMc;
 			getConfig().set("RentUntil", null);
 			getConfig().set("expiresAt", newTime);
 			save(getConfig(), getSavefile());

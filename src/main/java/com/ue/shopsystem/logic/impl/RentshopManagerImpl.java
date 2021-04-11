@@ -6,6 +6,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.bukkit.Location;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
@@ -17,18 +19,23 @@ import com.ue.shopsystem.logic.api.Rentshop;
 import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class RentshopManagerImpl implements RentshopManager {
 
+	private static final Logger log = LoggerFactory.getLogger(RentshopManagerImpl.class);
 	private List<Rentshop> rentShopList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
+
+	@Inject
+	public RentshopManagerImpl(MessageWrapper messageWrapper, GeneralEconomyValidationHandler generalValidator,
+			ServerProvider serverProvider, ConfigDao configDao) {
+		this.messageWrapper = messageWrapper;
+		this.generalValidator = generalValidator;
+		this.serverProvider = serverProvider;
+		this.configDao = configDao;
+	}
 
 	@Override
 	public String generateFreeRentShopId() {

@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ue.bank.logic.api.BankManager;
 import com.ue.common.utils.MessageWrapper;
@@ -25,11 +27,9 @@ import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
 import com.ue.townsystem.logic.api.TownworldManager;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class TownworldImpl implements Townworld {
 
+	private static final Logger log = LoggerFactory.getLogger(TownworldImpl.class);
 	private final TownsystemValidationHandler townsystemValidationHandler;
 	private final EconomyPlayerValidationHandler ecoPlayerValidationHandler;
 	private final GeneralEconomyValidationHandler generalValidator;

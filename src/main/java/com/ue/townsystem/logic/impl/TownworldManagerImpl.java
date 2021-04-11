@@ -30,9 +30,6 @@ import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.api.Townworld;
 import com.ue.townsystem.logic.api.TownworldManager;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class TownworldManagerImpl implements TownworldManager {
 
 	private final EconomyPlayerManager ecoPlayerManager;
@@ -46,6 +43,21 @@ public class TownworldManagerImpl implements TownworldManager {
 
 	private Map<String, Townworld> townWorldList = new HashMap<>();
 	private List<String> townNameList = new ArrayList<>();
+
+	@Inject
+	public TownworldManagerImpl(ConfigDao configDao, EconomyPlayerValidationHandler ecoPlayerValidationHandler,
+			BankManager bankManager, EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
+			TownsystemValidationHandler townsystemValidationHandler, ServerProvider serverProvider,
+			GeneralEconomyValidationHandler generalValidator) {
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.townsystemValidationHandler = townsystemValidationHandler;
+		this.messageWrapper = messageWrapper;
+		this.bankManager = bankManager;
+		this.ecoPlayerValidationHandler = ecoPlayerValidationHandler;
+		this.serverProvider = serverProvider;
+		this.configDao = configDao;
+		this.generalValidator = generalValidator;
+	}
 
 	protected void setTownNameList(List<String> townNameList) {
 		this.townNameList = townNameList;
@@ -140,9 +152,8 @@ public class TownworldManagerImpl implements TownworldManager {
 		townsystemValidationHandler.checkForTownworldDoesNotExist(townWorldList, world);
 		TownworldDao townworldDao = serverProvider.getServiceComponent().getTownworldDao();
 		townworldDao.setupSavefile(world);
-		townWorldList.put(world,
-				new TownworldImpl(world, true, townworldDao, townsystemValidationHandler, ecoPlayerValidationHandler,
-						this, messageWrapper, bankManager, serverProvider, generalValidator));
+		townWorldList.put(world, new TownworldImpl(world, true, townworldDao, townsystemValidationHandler,
+				ecoPlayerValidationHandler, this, messageWrapper, bankManager, serverProvider, generalValidator));
 		configDao.saveTownworldNamesList(getTownWorldNameList());
 	}
 
@@ -162,8 +173,7 @@ public class TownworldManagerImpl implements TownworldManager {
 			TownworldDao townworldDao = serverProvider.getServiceComponent().getTownworldDao();
 			townworldDao.setupSavefile(townWorldName);
 			Townworld townworld = new TownworldImpl(townWorldName, false, townworldDao, townsystemValidationHandler,
-					ecoPlayerValidationHandler, this, messageWrapper, bankManager, serverProvider,
-					generalValidator);
+					ecoPlayerValidationHandler, this, messageWrapper, bankManager, serverProvider, generalValidator);
 			townNameList.addAll(townworld.getTownNameList());
 			townWorldList.put(townWorldName, townworld);
 		}

@@ -6,6 +6,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.bukkit.Location;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
@@ -21,20 +23,29 @@ import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class PlayershopManagerImpl implements PlayershopManager {
 
-	private List<Playershop> playerShopList = new ArrayList<>();
+	private static final Logger log = LoggerFactory.getLogger(PlayershopManagerImpl.class);
 	private final MessageWrapper messageWrapper;
 	private final ShopValidationHandler validationHandler;
 	private final TownsystemValidationHandler townsystemValidationHandler;
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ConfigDao configDao;
 	private final ServerProvider serverProvider;
+	private List<Playershop> playerShopList = new ArrayList<>();
+	
+	@Inject
+	public PlayershopManagerImpl(ConfigDao configDao, TownsystemValidationHandler townsystemValidationHandler,
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
+			ServerProvider serverProvider,
+			GeneralEconomyValidationHandler generalValidator) {
+		this.configDao = configDao;
+		this.messageWrapper = messageWrapper;
+		this.validationHandler = validationHandler;
+		this.townsystemValidationHandler = townsystemValidationHandler;
+		this.serverProvider = serverProvider;
+		this.generalValidator = generalValidator;
+	}
 
 	@Override
 	public String generateFreePlayerShopId() {

@@ -13,15 +13,14 @@ import com.ue.common.utils.SaveFileUtils;
 import com.ue.common.utils.ServerProvider;
 import com.ue.spawnersystem.dataaccess.api.SpawnerSystemDao;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class SpawnerSystemDaoImpl extends SaveFileUtils implements SpawnerSystemDao {
 	
 	private final ServerProvider serverProvider;
-
-	private File file;
-	private YamlConfiguration config;
+	
+	@Inject
+	public SpawnerSystemDaoImpl(ServerProvider serverProvider) {
+		this.serverProvider = serverProvider;
+	}
 	
 	@Override
 	public void setupSavefile() {

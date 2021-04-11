@@ -1,6 +1,7 @@
 package com.ue.townsystem.logic.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -8,21 +9,25 @@ import javax.inject.Inject;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ue.common.utils.TabCompleterUtils;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.townsystem.logic.api.TownworldManager;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class TownTabCompleterImpl extends TabCompleterUtils implements TabCompleter {
 
+	private static final Logger log = LoggerFactory.getLogger(TownTabCompleterImpl.class);
 	private final TownworldManager townworldManager;
 	private final EconomyPlayerManager ecoPlayerManager;
+
+	@Inject
+	public TownTabCompleterImpl(TownworldManager townworldManager, EconomyPlayerManager ecoPlayerManager) {
+		this.townworldManager = townworldManager;
+		this.ecoPlayerManager = ecoPlayerManager;
+	}
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -106,21 +111,8 @@ public class TownTabCompleterImpl extends TabCompleterUtils implements TabComple
 	}
 
 	private List<String> getListWithAllCommands() {
-		List<String> list = new ArrayList<>();
-		list.add("create");
-		list.add("delete");
-		list.add("expand");
-		list.add("addDeputy");
-		list.add("removeDeputy");
-		list.add("setTownSpawn");
-		list.add("moveTownManager");
-		list.add("plot");
-		list.add("pay");
-		list.add("tp");
-		list.add("bank");
-		list.add("withdraw");
-		list.add("rename");
-		return list;
+		return Arrays.asList("create", "delete", "expand", "addDeputy", "removeDeputy", "setTownSpawn",
+				"moveTownManager", "plot", "pay", "tp", "bank", "withdraw", "rename");
 	}
 
 }

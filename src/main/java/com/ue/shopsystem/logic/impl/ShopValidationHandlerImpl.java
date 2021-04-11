@@ -26,15 +26,21 @@ import com.ue.townsystem.logic.api.Townworld;
 import com.ue.townsystem.logic.api.TownworldManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class ShopValidationHandlerImpl implements ShopValidationHandler {
 
 	private final MessageWrapper messageWrapper;
 	private final ConfigManager configManager;
 	private final TownworldManager townworldManager;
 	private final GeneralEconomyValidationHandler generalValiator;
+
+	@Inject
+	public ShopValidationHandlerImpl(MessageWrapper messageWrapper, ConfigManager configManager,
+			TownworldManager townworldManager, GeneralEconomyValidationHandler generalValiator) {
+		this.messageWrapper = messageWrapper;
+		this.configManager = configManager;
+		this.townworldManager = townworldManager;
+		this.generalValiator = generalValiator;
+	}
 
 	@Override
 	public void checkForOnePriceGreaterThenZeroIfBothAvailable(String sellPrice, String buyPrice)

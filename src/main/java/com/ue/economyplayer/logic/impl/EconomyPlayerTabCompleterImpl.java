@@ -12,12 +12,14 @@ import org.bukkit.command.TabCompleter;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.general.impl.GeneralEconomyException;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class EconomyPlayerTabCompleterImpl implements TabCompleter {
 
 	private final EconomyPlayerManager ecoPlayerManager;
+	
+	@Inject
+	public EconomyPlayerTabCompleterImpl(EconomyPlayerManager ecoPlayerManager) {
+		this.ecoPlayerManager = ecoPlayerManager;
+	}
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

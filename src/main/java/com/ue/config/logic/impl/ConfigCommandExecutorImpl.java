@@ -13,14 +13,19 @@ import com.ue.economyplayer.logic.api.EconomyPlayer;
 import com.ue.economyplayer.logic.api.EconomyPlayerManager;
 import com.ue.general.impl.GeneralEconomyException;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class ConfigCommandExecutorImpl implements CommandExecutor {
 
 	private final ConfigManager configManager;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final MessageWrapper messageWrapper;
+
+	@Inject
+	public ConfigCommandExecutorImpl(ConfigManager configManager, EconomyPlayerManager ecoPlayerManager,
+			MessageWrapper messageWrapper) {
+		this.configManager = configManager;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.messageWrapper = messageWrapper;
+	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -69,7 +74,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 			return false;
 		}
 	}
-	
+
 	private boolean performAllowQuickshopCommand(String label, String[] args, CommandSender sender)
 			throws NumberFormatException, GeneralEconomyException {
 		if (args.length == 2) {

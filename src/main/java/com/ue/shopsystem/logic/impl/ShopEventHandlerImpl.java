@@ -22,15 +22,21 @@ import com.ue.shopsystem.logic.api.RentshopManager;
 import com.ue.shopsystem.logic.api.ShopEventHandler;
 import com.ue.shopsystem.logic.to.ShopItem;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class ShopEventHandlerImpl implements ShopEventHandler {
 
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final AdminshopManager adminshopManager;
 	private final PlayershopManager playershopManager;
 	private final RentshopManager rentshopManager;
+
+	@Inject
+	public ShopEventHandlerImpl(EconomyPlayerManager ecoPlayerManager, AdminshopManager adminshopManager,
+			PlayershopManager playershopManager, RentshopManager rentshopManager) {
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.adminshopManager = adminshopManager;
+		this.playershopManager = playershopManager;
+		this.rentshopManager = rentshopManager;
+	}
 
 	@Override
 	public void handleInventoryClick(InventoryClickEvent event) {

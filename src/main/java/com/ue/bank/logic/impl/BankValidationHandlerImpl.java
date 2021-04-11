@@ -7,12 +7,14 @@ import com.ue.common.utils.MessageWrapper;
 import com.ue.general.impl.GeneralEconomyException;
 import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class BankValidationHandlerImpl implements BankValidationHandler {
 
 	private final MessageWrapper messageWrapper;
+	
+	@Inject
+	public BankValidationHandlerImpl(MessageWrapper messageWrapper) {
+		this.messageWrapper = messageWrapper;
+	}
 
 	@Override
 	public void checkForHasEnoughMoney(double bankAmount, double redAmount) throws GeneralEconomyException {

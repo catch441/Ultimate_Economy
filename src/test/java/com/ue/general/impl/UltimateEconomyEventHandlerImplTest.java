@@ -75,9 +75,9 @@ public class UltimateEconomyEventHandlerImplTest {
 	PlayershopManager playershopManager;
 
 	private UltimateEconomyEventHandlerImpl getHandler() {
-		return new UltimateEconomyEventHandlerImpl(ecoPlayerEventHandler, jobsystemEventHandler, shopEventHandler,
-				townSystemEventHandler, spawnerSystemEventHandler, updater, adminshopManager, playershopManager,
-				rentshopManager, jobcenterManager);
+		return new UltimateEconomyEventHandlerImpl(jobcenterManager, rentshopManager, playershopManager,
+				adminshopManager, updater, spawnerSystemEventHandler, townSystemEventHandler, shopEventHandler,
+				jobsystemEventHandler, ecoPlayerEventHandler);
 	}
 
 	@Test

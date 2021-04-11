@@ -12,12 +12,14 @@ import com.ue.common.utils.ServerProvider;
 import com.ue.common.utils.SaveFileUtils;
 import com.ue.jobsyste.dataaccess.api.JobDao;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class JobDaoImpl extends SaveFileUtils implements JobDao {
 
 	private final ServerProvider serverProvider;
+	
+	@Inject
+	public JobDaoImpl(ServerProvider serverProvider) {
+		this.serverProvider = serverProvider;
+	}
 
 	@Override
 	public void setupSavefile(String name) {

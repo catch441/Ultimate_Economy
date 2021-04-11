@@ -6,6 +6,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.bukkit.Location;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ue.common.utils.MessageWrapper;
 import com.ue.common.utils.ServerProvider;
@@ -18,19 +20,26 @@ import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.shopsystem.logic.api.ShopValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class AdminshopManagerImpl implements AdminshopManager {
 
-	private List<Adminshop> adminShopList = new ArrayList<>();
+	private static final Logger log = LoggerFactory.getLogger(AdminshopManagerImpl.class);
 	private final MessageWrapper messageWrapper;
 	private final ShopValidationHandler validationHandler;
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
+	private List<Adminshop> adminShopList = new ArrayList<>();
+	
+	@Inject
+	public AdminshopManagerImpl(ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
+			ServerProvider serverProvider, ConfigDao configDao,
+			GeneralEconomyValidationHandler generalValidator) {
+		this.messageWrapper = messageWrapper;
+		this.validationHandler = validationHandler;
+		this.serverProvider = serverProvider;
+		this.configDao = configDao;
+		this.generalValidator = generalValidator;
+	}
 
 	@Override
 	public Adminshop getAdminShopByName(String name) throws GeneralEconomyException {

@@ -36,9 +36,6 @@ import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 import com.ue.jobsystem.logic.api.JobsystemEventHandler;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 
 	private final ArrayList<Material> lootTypeFish = new ArrayList<>(
@@ -52,6 +49,15 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 	private final JobManager jobManager;
 	private final JobcenterManager jobcenterManager;
 	private final ServerProvider serverProvider;
+	
+	@Inject
+	public JobsystemEventHandlerImpl(ServerProvider serverProvider, JobcenterManager jobcenterManager,
+			JobManager jobManager, EconomyPlayerManager ecoPlayerManager) {
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.jobManager = jobManager;
+		this.jobcenterManager = jobcenterManager;
+		this.serverProvider = serverProvider;
+	}
 
 	@Override
 	public void handleBreedEvent(EntityBreedEvent event) {

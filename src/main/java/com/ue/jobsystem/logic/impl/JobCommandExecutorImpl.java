@@ -21,15 +21,21 @@ import com.ue.jobsystem.logic.api.JobManager;
 import com.ue.jobsystem.logic.api.Jobcenter;
 import com.ue.jobsystem.logic.api.JobcenterManager;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class JobCommandExecutorImpl implements CommandExecutor {
 
 	private final JobManager jobManager;
 	private final MessageWrapper messageWrapper;
 	private final JobcenterManager jobcenterManager;
 	private final ConfigManager configManager;
+	
+	@Inject
+	public JobCommandExecutorImpl(ConfigManager configManager, JobcenterManager jobcenterManager, JobManager jobManager,
+			MessageWrapper messageWrapper) {
+		this.jobManager = jobManager;
+		this.messageWrapper = messageWrapper;
+		this.jobcenterManager = jobcenterManager;
+		this.configManager = configManager;
+	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

@@ -26,9 +26,6 @@ import com.ue.jobsystem.logic.impl.JobSystemException;
 import com.ue.shopsystem.logic.api.AdminshopManager;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class AdminshopCommandExecutorImpl implements CommandExecutor {
 
 	private final AdminshopManager adminshopManager;
@@ -37,6 +34,18 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobManager jobManager;
 	private final ConfigManager configManager;
+	
+	@Inject
+	public AdminshopCommandExecutorImpl(JobManager jobManager, EconomyPlayerManager ecoPlayerManager,
+			AdminshopManager adminshopManager, MessageWrapper messageWrapper, ServerProvider serverProvider,
+			ConfigManager configManager) {
+		this.adminshopManager = adminshopManager;
+		this.messageWrapper = messageWrapper;
+		this.serverProvider = serverProvider;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.jobManager = jobManager;
+		this.configManager = configManager;
+	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

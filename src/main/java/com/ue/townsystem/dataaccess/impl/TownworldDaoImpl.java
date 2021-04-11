@@ -9,6 +9,8 @@ import javax.inject.Inject;
 
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ue.bank.logic.api.BankAccount;
 import com.ue.bank.logic.api.BankManager;
@@ -21,17 +23,22 @@ import com.ue.townsystem.dataaccess.api.TownworldDao;
 import com.ue.townsystem.logic.api.TownsystemValidationHandler;
 import com.ue.townsystem.logic.impl.TownSystemException;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 
+	private static final Logger log = LoggerFactory.getLogger(TownworldDaoImpl.class);
 	private final TownsystemValidationHandler validationHandler;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final BankManager bankManager;
 	private final ServerProvider serverProvider;
+
+	@Inject
+	public TownworldDaoImpl(TownsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
+			BankManager bankManager, ServerProvider serverProvider) {
+		this.validationHandler = validationHandler;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.bankManager = bankManager;
+		this.serverProvider = serverProvider;
+	}
 
 	@Override
 	public void setupSavefile(String name) {
@@ -228,7 +235,7 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	@Override
 	public List<String> loadTownworldTownNames() {
 		removeDeprecatedTownNameList();
-		if(config.getConfigurationSection("Towns") != null) {
+		if (config.getConfigurationSection("Towns") != null) {
 			return new ArrayList<>(config.getConfigurationSection("Towns").getKeys(false));
 		}
 		return new ArrayList<>();

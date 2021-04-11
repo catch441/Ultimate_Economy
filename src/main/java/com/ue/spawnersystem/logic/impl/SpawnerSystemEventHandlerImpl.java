@@ -24,14 +24,19 @@ import com.ue.economyplayer.logic.impl.EconomyPlayerExceptionMessageEnum;
 import com.ue.spawnersystem.logic.api.SpawnerManager;
 import com.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class SpawnerSystemEventHandlerImpl implements SpawnerSystemEventHandler {
 
 	private final MessageWrapper messageWrapper;
 	private final ServerProvider serverProvider;
 	private final SpawnerManager spawnerManager;
+
+	@Inject
+	public SpawnerSystemEventHandlerImpl(MessageWrapper messageWrapper, ServerProvider serverProvider,
+			SpawnerManager spawnerManager) {
+		this.messageWrapper = messageWrapper;
+		this.serverProvider = serverProvider;
+		this.spawnerManager = spawnerManager;
+	}
 
 	@Override
 	public void handleInventoryClick(InventoryClickEvent event) {
@@ -108,8 +113,8 @@ public class SpawnerSystemEventHandlerImpl implements SpawnerSystemEventHandler 
 			spawnerManager.addSpawner(string.substring(0, string.lastIndexOf("-")), event.getPlayer(),
 					event.getBlock().getLocation());
 		} else {
-			event.getPlayer().sendMessage(messageWrapper
-					.getErrorString(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()));
+			event.getPlayer().sendMessage(
+					messageWrapper.getErrorString(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()));
 			event.setCancelled(true);
 		}
 	}

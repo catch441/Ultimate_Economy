@@ -17,9 +17,6 @@ import com.ue.general.impl.GeneralEconomyExceptionMessageEnum;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.jobsystem.logic.api.JobsystemValidationHandler;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class JobsystemValidationHandlerImpl implements JobsystemValidationHandler {
 
 	private final MessageWrapper messageWrapper;
@@ -28,6 +25,11 @@ public class JobsystemValidationHandlerImpl implements JobsystemValidationHandle
 			EntityType.DONKEY, EntityType.HORSE, EntityType.OCELOT, EntityType.POLAR_BEAR, EntityType.TURTLE,
 			EntityType.CHICKEN, EntityType.FOX, EntityType.LLAMA, EntityType.PANDA, EntityType.RABBIT,
 			EntityType.VILLAGER);
+	
+	@Inject
+	public JobsystemValidationHandlerImpl(MessageWrapper messageWrapper) {
+		this.messageWrapper = messageWrapper;
+	}
 
 	@Override
 	public void checkForValidMaterial(String material) throws GeneralEconomyException {

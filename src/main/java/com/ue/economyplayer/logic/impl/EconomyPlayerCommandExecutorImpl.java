@@ -24,9 +24,6 @@ import com.ue.general.impl.GeneralEconomyException;
 import com.ue.jobsystem.logic.api.Job;
 import com.ue.townsystem.logic.api.TownworldManager;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 
 	private final ConfigManager configManager;
@@ -34,6 +31,17 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final TownworldManager townworldManager;
 	private final GeneralEconomyValidationHandler generalValidator;
+
+	@Inject
+	public EconomyPlayerCommandExecutorImpl(ConfigManager configManager, MessageWrapper messageWrapper,
+			EconomyPlayerManager ecoPlayerManager, TownworldManager townworldManager,
+			GeneralEconomyValidationHandler generalValidator) {
+		this.configManager = configManager;
+		this.messageWrapper = messageWrapper;
+		this.ecoPlayerManager = ecoPlayerManager;
+		this.townworldManager = townworldManager;
+		this.generalValidator = generalValidator;
+	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

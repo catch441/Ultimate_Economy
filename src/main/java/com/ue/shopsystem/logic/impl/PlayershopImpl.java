@@ -55,8 +55,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 			ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,
 			PlayershopManager playershopManager, GeneralEconomyValidationHandler generalValidator) {
-		super(serverProvider, customSkullService, messageWrapper, configManager, validationHandler, generalValidator,
-				shopDao);
+		super(shopDao, serverProvider, customSkullService, validationHandler, messageWrapper, configManager,
+				generalValidator);
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.townworldManager = townworldManager;
 		this.playershopManager = playershopManager;

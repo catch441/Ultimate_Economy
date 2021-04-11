@@ -20,14 +20,20 @@ import com.ue.townsystem.logic.api.Townworld;
 import com.ue.townsystem.logic.api.TownworldManager;
 
 import dagger.Lazy;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class TownsystemValidationHandlerImpl implements TownsystemValidationHandler {
 
 	private final MessageWrapper messageWrapper;
 	private final Lazy<TownworldManager> townworldManager;
 	private final ServerProvider serverProvider;
+
+	@Inject
+	public TownsystemValidationHandlerImpl(MessageWrapper messageWrapper, Lazy<TownworldManager> townworldManager,
+			ServerProvider serverProvider) {
+		this.messageWrapper = messageWrapper;
+		this.townworldManager = townworldManager;
+		this.serverProvider = serverProvider;
+	}
 
 	@Override
 	public void checkForWorldExists(String world) throws TownSystemException {
@@ -102,8 +108,7 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 	}
 
 	@Override
-	public void checkForPlayerHasDeputyPermission(boolean hasDeputyPermissions)
-			throws EconomyPlayerException {
+	public void checkForPlayerHasDeputyPermission(boolean hasDeputyPermissions) throws EconomyPlayerException {
 		if (!hasDeputyPermissions) {
 			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
 		}
@@ -139,16 +144,14 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 	}
 
 	@Override
-	public void checkForPlayerIsMayor(EconomyPlayer mayor, EconomyPlayer player)
-			throws EconomyPlayerException {
+	public void checkForPlayerIsMayor(EconomyPlayer mayor, EconomyPlayer player) throws EconomyPlayerException {
 		if (!mayor.equals(player)) {
 			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
 		}
 	}
 
 	@Override
-	public void checkForPlayerIsNotMayor(EconomyPlayer mayor, EconomyPlayer player)
-			throws EconomyPlayerException {
+	public void checkForPlayerIsNotMayor(EconomyPlayer mayor, EconomyPlayer player) throws EconomyPlayerException {
 		if (mayor.equals(player)) {
 			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_ARE_THE_OWNER);
 		}
@@ -228,12 +231,14 @@ public class TownsystemValidationHandlerImpl implements TownsystemValidationHand
 		if (townworldManager.get().isTownWorld(location.getWorld().getName())) {
 			Townworld townworld = townworldManager.get().getTownWorldByName(location.getWorld().getName());
 			if (townworld.isChunkFree(location.getChunk())) {
-				throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
+				throw new EconomyPlayerException(messageWrapper,
+						EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
 			} else {
 				Town town = townworld.getTownByChunk(location.getChunk());
 				if (!town.hasBuildPermissions(ecoPlayer,
 						town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
-					throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
+					throw new EconomyPlayerException(messageWrapper,
+							EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
 				}
 			}
 		}
