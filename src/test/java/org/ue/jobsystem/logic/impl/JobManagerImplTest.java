@@ -1,6 +1,5 @@
 package org.ue.jobsystem.logic.impl;
 
-import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,14 +22,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.ServiceComponent;
-import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.economyplayer.logic.EconomyPlayerException;
 import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
 import org.ue.jobsystem.dataaccess.api.JobDao;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.Jobcenter;
@@ -51,8 +48,6 @@ public class JobManagerImplTest {
 	JobsystemValidationHandler validationHandler;
 	@Mock
 	EconomyPlayerManager ecoPlayerManager;
-	@Mock
-	MessageWrapper messageWrapper;
 	@Mock
 	ConfigDao configDao;
 	@Mock
@@ -86,8 +81,7 @@ public class JobManagerImplTest {
 
 	@Test
 	public void createJobTestWithSameName() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueNotInList(anyList(),
-				eq("myJob"));
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueNotInList(anyList(), eq("myJob"));
 		assertThrows(GeneralEconomyException.class, () -> jobManager.createJob("myJob"));
 		verify(configDao, never()).saveJobList(anyList());
 		assertEquals(0, jobManager.getJobList().size());
@@ -205,16 +199,8 @@ public class JobManagerImplTest {
 	}
 
 	@Test
-	public void getJobByNameTestWithNoJob() {
-		when(messageWrapper.getErrorString("does_not_exist", "myJob")).thenReturn("my error message");
-		try {
-			assertEquals("myJob", jobManager.getJobByName("myJob").getName());
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
-			assertEquals("my error message", e.getMessage());
-			assertEquals(1, e.getParams().length);
-			assertEquals("myJob", e.getParams()[0]);
-		}
+	public void getJobByNameTestWithNoJob() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueExists(null, "myJob");
+		assertThrows(GeneralEconomyException.class, () -> jobManager.getJobByName("myJob"));
 	}
 }

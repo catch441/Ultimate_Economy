@@ -29,7 +29,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveAllowQuickshop(boolean allow) {
 		config.set("AllowQuickshop", allow);
-		save(config, file);
+		save();
 	}
 	
 	@Override
@@ -55,7 +55,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveMaxRentedDays(Integer maxRentedDays) {
 		config.set("MaxRentedDays", maxRentedDays);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveExtendedInteraction(Boolean extendedInteraction) {
 		config.set("ExtendedInteraction", extendedInteraction);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveWildernessInteraction(Boolean wildernessInteraction) {
 		config.set("WildernessInteraction", wildernessInteraction);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -103,7 +103,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveCurrencyPl(String currencyPl) {
 		config.set("currencyPl", currencyPl);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -119,7 +119,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveCurrencySg(String currencySg) {
 		config.set("currencySg", currencySg);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -135,7 +135,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveHomesFeature(Boolean homesFeature) {
 		config.set("homes", homesFeature);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -151,7 +151,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveMaxPlayershops(Integer maxPlayershops) {
 		config.set("MaxPlayershops", maxPlayershops);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -167,7 +167,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveMaxJoinedTowns(Integer maxJoinedTowns) {
 		config.set("MaxJoinedTowns", maxJoinedTowns);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -183,7 +183,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveMaxJobs(Integer maxJobs) {
 		config.set("MaxJobs", maxJobs);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -199,7 +199,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveMaxHomes(Integer maxHomes) {
 		config.set("MaxHomes", maxHomes);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -215,7 +215,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveCountry(String country) {
 		config.set("localeCountry", country);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -231,13 +231,13 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveLanguage(String language) {
 		config.set("localeLanguage", language);
-		save(config, file);
+		save();
 	}
 
 	@Override
 	public void saveJobcenterList(List<String> jobcenters) {
 		config.set("JobCenterNames", jobcenters);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -248,7 +248,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveJobList(List<String> jobs) {
 		config.set("JobList", jobs);
-		save(config, file);
+		save();
 	}
 	
 	@Override
@@ -259,7 +259,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveRentshopIds(List<String> ids) {
 		config.set("RentShopIds", ids);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -270,13 +270,13 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void savePlayershopIds(List<String> ids) {
 		config.set("PlayerShopIds", ids);
-		save(config, file);
+		save();
 	}
 	
 	@Override
 	public void saveTownworldNamesList(List<String> townworlds) {
 		config.set("TownWorlds", townworlds);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -295,14 +295,14 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 		if (config.contains("AdminshopIds")) {
 			config.set("AdminShopIds", config.get("AdminshopIds"));
 			config.set("AdminshopIds", null);
-			save(config, file);
+			save();
 		}
 	}
 
 	@Override
 	public void saveAdminshopIds(List<String> ids) {
 		config.set("AdminShopIds", ids);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -313,7 +313,7 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void saveStartAmount(double amount) {
 		config.set("StartAmount", amount);
-		save(config, file);
+		save();
 	}
 	
 	@Override
@@ -342,16 +342,15 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void removeDeprecatedTownNames() {
 		config.set("TownNames", null);
-		save(config, file);
+		save();
 	}
 
 	@Deprecated
 	@Override
 	public void removeDeprecatedPlayerShopNames() {
 		config.set("PlayerShopNames", null);
-		save(config, file);
+		save();
 	}
-	
 	
 	@Deprecated
 	@Override
@@ -369,6 +368,6 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	@Override
 	public void removeDeprecatedAdminshopNames() {
 		config.set("ShopNames", null);
-		save(config, file);
+		save();
 	}
 }

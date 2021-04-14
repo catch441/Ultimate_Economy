@@ -59,7 +59,7 @@ public class UltimateEconomyCommandTest {
 		when(plugin.getDescription()).thenReturn(description);
 		when(description.getFullName()).thenReturn("ultimate_economy");
 		UltimateEconomyCommand command = new UltimateEconomyCommand("commandName", plugin);
-		assertEquals("com.ue.general.impl.UltimateEconomyCommand(commandName, ultimate_economy)", command.toString());
+		assertEquals("org.ue.general.impl.UltimateEconomyCommand(commandName, ultimate_economy)", command.toString());
 	}
 
 	@Test

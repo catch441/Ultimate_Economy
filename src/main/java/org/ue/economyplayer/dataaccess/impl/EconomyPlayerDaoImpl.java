@@ -21,8 +21,6 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 
 	private final BankManager bankManager;
 	private final ServerProvider serverProvider;
-	private File file;
-	private YamlConfiguration config;
 
 	@Inject
 	public EconomyPlayerDaoImpl(BankManager bankManager, ServerProvider serverProvider) {
@@ -36,47 +34,39 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 		if (!file.exists()) {
 			createFile(file);
 		}
-		config = YamlConfiguration.loadConfiguration(getSavefile());
+		config = YamlConfiguration.loadConfiguration(file);
 	}
 
 	@Override
 	public List<String> loadPlayerList() {
 		removeDeprecatedPlayerList();
-		return new ArrayList<>(getConfig().getConfigurationSection("").getKeys(false));
+		return new ArrayList<>(config.getConfigurationSection("").getKeys(false));
 	}
 
 	@Override
 	public void deleteEconomyPlayer(String playerName) {
-		getConfig().set(playerName, null);
-		save(getConfig(), getSavefile());
-	}
-
-	private File getSavefile() {
-		return file;
-	}
-
-	private YamlConfiguration getConfig() {
-		return config;
+		config.set(playerName, null);
+		save();
 	}
 
 	@Override
 	public void saveHome(String playerName, String homeName, Location location) {
 		if (location == null) {
-			getConfig().set(playerName + ".Home." + homeName, null);
+			config.set(playerName + ".Home." + homeName, null);
 		} else {
-			getConfig().set(playerName + ".Home." + homeName + ".Name", homeName);
-			getConfig().set(playerName + ".Home." + homeName + ".World", location.getWorld().getName());
-			getConfig().set(playerName + ".Home." + homeName + ".X", location.getX());
-			getConfig().set(playerName + ".Home." + homeName + ".Y", location.getY());
-			getConfig().set(playerName + ".Home." + homeName + ".Z", location.getZ());
+			config.set(playerName + ".Home." + homeName + ".Name", homeName);
+			config.set(playerName + ".Home." + homeName + ".World", location.getWorld().getName());
+			config.set(playerName + ".Home." + homeName + ".X", location.getX());
+			config.set(playerName + ".Home." + homeName + ".Y", location.getY());
+			config.set(playerName + ".Home." + homeName + ".Z", location.getZ());
 		}
-		save(getConfig(), getSavefile());
+		save();
 	}
 
 	@Override
 	public void saveBankIban(String playerName, String iban) {
-		getConfig().set(playerName + ".Iban", iban);
-		save(getConfig(), getSavefile());
+		config.set(playerName + ".Iban", iban);
+		save();
 	}
 
 	@Override
@@ -85,51 +75,51 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 		for (Job job : jobList) {
 			jobs.add(job.getName());
 		}
-		getConfig().set(playerName + ".Jobs", jobs);
-		save(getConfig(), getSavefile());
+		config.set(playerName + ".Jobs", jobs);
+		save();
 	}
 
 	@Override
 	public void saveJoinedTowns(String playerName, List<String> joinedTowns) {
-		getConfig().set(playerName + ".joinedTowns", joinedTowns);
-		save(getConfig(), getSavefile());
+		config.set(playerName + ".joinedTowns", joinedTowns);
+		save();
 	}
 
 	@Override
 	public void saveScoreboardObjectiveVisible(String playerName, Boolean visible) {
-		getConfig().set(playerName + ".scoreboardDisabled", !visible);
-		save(getConfig(), getSavefile());
+		config.set(playerName + ".scoreboardDisabled", !visible);
+		save();
 	}
 
 	@Override
 	public List<String> loadJoinedTowns(String playerName) {
-		return getConfig().getStringList(playerName + ".joinedTowns");
+		return config.getStringList(playerName + ".joinedTowns");
 	}
 
 	@Override
 	public List<String> loadJobsList(String playerName) {
-		return getConfig().getStringList(playerName + ".Jobs");
+		return config.getStringList(playerName + ".Jobs");
 	}
 
 	@Override
 	public boolean loadScoreboardObjectiveVisible(String playerName) {
 		convertBankToScoreboardBool(playerName);
-		return !getConfig().getBoolean(playerName + ".scoreboardDisabled");
+		return !config.getBoolean(playerName + ".scoreboardDisabled");
 	}
 
 	private Location loadHome(String playerName, String homeName) {
-		return new Location(serverProvider.getWorld(getConfig().getString(playerName + ".Home." + homeName + ".World")),
-				getConfig().getDouble(playerName + ".Home." + homeName + ".X"),
-				getConfig().getDouble(playerName + ".Home." + homeName + ".Y"),
-				getConfig().getDouble(playerName + ".Home." + homeName + ".Z"));
+		return new Location(serverProvider.getWorld(config.getString(playerName + ".Home." + homeName + ".World")),
+				config.getDouble(playerName + ".Home." + homeName + ".X"),
+				config.getDouble(playerName + ".Home." + homeName + ".Y"),
+				config.getDouble(playerName + ".Home." + homeName + ".Z"));
 	}
 
 	@Override
 	public Map<String, Location> loadHomeList(String playerName) {
 		removeDeprecatedHomelist(playerName);
 		Map<String, Location> homes = new HashMap<>();
-		if (getConfig().getConfigurationSection(playerName + ".Home") != null) {
-			for (String home : getConfig().getConfigurationSection(playerName + ".Home").getKeys(false)) {
+		if (config.getConfigurationSection(playerName + ".Home") != null) {
+			for (String home : config.getConfigurationSection(playerName + ".Home").getKeys(false)) {
 				homes.put(home, loadHome(playerName, home));
 			}
 		}
@@ -139,7 +129,7 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	@Override
 	public String loadBankIban(String playerName) {
 		convertToIban(playerName);
-		return getConfig().getString(playerName + ".Iban");
+		return config.getString(playerName + ".Iban");
 	}
 
 	/**
@@ -148,13 +138,13 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	 */
 	@Deprecated
 	private void convertToIban(String playerName) {
-		if (!getConfig().isSet(playerName + ".Iban")) {
+		if (!config.isSet(playerName + ".Iban")) {
 			// old loading, convert to new
-			double amount = getConfig().getDouble(playerName + ".account amount");
+			double amount = config.getDouble(playerName + ".account amount");
 			BankAccount bankAccount = bankManager.createBankAccount(amount);
-			getConfig().set(playerName + ".account amount", null);
-			getConfig().set(playerName + ".Iban", bankAccount.getIban());
-			save(getConfig(), getSavefile());
+			config.set(playerName + ".account amount", null);
+			config.set(playerName + ".Iban", bankAccount.getIban());
+			save();
 		}
 	}
 
@@ -164,9 +154,9 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	 */
 	@Deprecated
 	private void removeDeprecatedPlayerList() {
-		if (getConfig().contains("Player")) {
-			getConfig().set("Player", null);
-			save(getConfig(), getSavefile());
+		if (config.contains("Player")) {
+			config.set("Player", null);
+			save();
 		}
 	}
 
@@ -176,9 +166,9 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	 */
 	@Deprecated
 	private void removeDeprecatedHomelist(String playerName) {
-		if (getConfig().contains(playerName + ".Home.Homelist")) {
-			getConfig().set(playerName + ".Home.Homelist", null);
-			save(getConfig(), getSavefile());
+		if (config.contains(playerName + ".Home.Homelist")) {
+			config.set(playerName + ".Home.Homelist", null);
+			save();
 		}
 	}
 
@@ -188,11 +178,11 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	 */
 	@Deprecated
 	private void convertBankToScoreboardBool(String playerName) {
-		if (getConfig().contains(playerName + ".bank")) {
-			boolean isDisabled = getConfig().getBoolean(playerName + ".bank");
-			getConfig().set(playerName + ".bank", null);
-			getConfig().set(playerName + ".scoreboardDisabled", isDisabled);
-			save(getConfig(), getSavefile());
+		if (config.contains(playerName + ".bank")) {
+			boolean isDisabled = config.getBoolean(playerName + ".bank");
+			config.set(playerName + ".bank", null);
+			config.set(playerName + ".scoreboardDisabled", isDisabled);
+			save();
 		}
 	}
 }

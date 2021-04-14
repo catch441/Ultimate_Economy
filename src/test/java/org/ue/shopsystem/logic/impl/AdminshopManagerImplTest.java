@@ -105,7 +105,7 @@ public class AdminshopManagerImplTest {
 	@Test
 	public void getAdminShopByNameFailTest() {
 		try {
-			Adminshop shop = createAdminshop();
+			Adminshop shop = createAdminshop("A0");
 			when(shop.getName()).thenReturn("myshop");
 			adminshopManager.getAdminShopByName("myshop2");
 			fail();
@@ -118,7 +118,7 @@ public class AdminshopManagerImplTest {
 
 	@Test
 	public void getAdminShopByNameTest() {
-		Adminshop shop = createAdminshop();
+		Adminshop shop = createAdminshop("A0");
 		when(shop.getName()).thenReturn("myshop");
 		Adminshop result = assertDoesNotThrow(() -> adminshopManager.getAdminShopByName("myshop"));
 		assertNotNull(result);
@@ -127,32 +127,22 @@ public class AdminshopManagerImplTest {
 
 	@Test
 	public void getAdminshopByIdTest() {
-		Adminshop shop = createAdminshop();
-		when(shop.getShopId()).thenReturn("A0");
+		Adminshop shop = createAdminshop("A0");
 		Adminshop result = assertDoesNotThrow(() -> adminshopManager.getAdminShopById("A0"));
-		assertNotNull(result);
 		assertEquals(result, shop);
 	}
 
 	@Test
-	public void getAdminshopByIdFailTest() {
-		try {
-			Adminshop shop = createAdminshop();
-			when(shop.getShopId()).thenReturn("A0");
-			adminshopManager.getAdminShopById("A1");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals("A1", e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
-		}
+	public void getAdminshopByIdFailTest() throws GeneralEconomyException {
+		createAdminshop("A0");
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueExists(null, "A1");
+		assertThrows(GeneralEconomyException.class, () -> adminshopManager.getAdminShopById("A1"));
 	}
 
 	@Test
 	public void generateFreeAdminShopIdTest() {
 		String id1 = adminshopManager.generateFreeAdminShopId();
-		Adminshop shop = createAdminshop();
-		when(shop.getShopId()).thenReturn("A0");
+		createAdminshop("A0");
 		String id2 = adminshopManager.generateFreeAdminShopId();
 		assertEquals("A0", id1);
 		assertEquals("A1", id2);
@@ -176,8 +166,8 @@ public class AdminshopManagerImplTest {
 
 	@Test
 	public void despawnAllVillagersTest() {
-		Adminshop shop1 = createAdminshop();
-		Adminshop shop2 = createAdminshop();
+		Adminshop shop1 = createAdminshop("A0");
+		Adminshop shop2 = createAdminshop("A1");
 		adminshopManager.despawnAllVillagers();
 		verify(shop1).despawnVillager();
 		verify(shop2).despawnVillager();
@@ -239,10 +229,11 @@ public class AdminshopManagerImplTest {
 		verify(configDao).saveAdminshopIds(anyList());
 	}
 
-	private Adminshop createAdminshop() {
+	private Adminshop createAdminshop(String id) {
 		Location loc = mock(Location.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		Adminshop shop = mock(Adminshop.class);
+		when(shop.getShopId()).thenReturn(id);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getAdminshop()).thenReturn(shop);
 		assertDoesNotThrow(() -> adminshopManager.createAdminShop("myshop", loc, 9));

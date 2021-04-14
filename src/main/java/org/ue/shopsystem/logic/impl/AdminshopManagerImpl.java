@@ -1,7 +1,9 @@
 package org.ue.shopsystem.logic.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -28,7 +30,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
-	private List<Adminshop> adminShopList = new ArrayList<>();
+	private Map<String, Adminshop> adminShopList = new HashMap<>();
 	
 	@Inject
 	public AdminshopManagerImpl(ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
@@ -43,7 +45,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 
 	@Override
 	public Adminshop getAdminShopByName(String name) throws GeneralEconomyException {
-		for (Adminshop shop : adminShopList) {
+		for (Adminshop shop : adminShopList.values()) {
 			if (shop.getName().equals(name)) {
 				return shop;
 			}
@@ -53,27 +55,20 @@ public class AdminshopManagerImpl implements AdminshopManager {
 
 	@Override
 	public Adminshop getAdminShopById(String id) throws GeneralEconomyException {
-		for (Adminshop shop : adminShopList) {
-			if (shop.getShopId().equals(id)) {
-				return shop;
-			}
-		}
-		throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, id);
+		Adminshop shop = adminShopList.get(id);
+		generalValidator.checkForValueExists(shop, id);
+		return shop;
 	}
 
 	@Override
 	public List<String> getAdminshopIdList() {
-		List<String> list = new ArrayList<>();
-		for (Adminshop shop : adminShopList) {
-			list.add(shop.getShopId());
-		}
-		return list;
+		return new ArrayList<>(adminShopList.keySet());
 	}
 
 	@Override
 	public List<String> getAdminshopNameList() {
 		List<String> list = new ArrayList<>();
-		for (Adminshop shop : adminShopList) {
+		for (Adminshop shop : adminShopList.values()) {
 			list.add(shop.getName());
 		}
 		return list;
@@ -81,7 +76,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 
 	@Override
 	public List<Adminshop> getAdminshopList() {
-		return new ArrayList<>(adminShopList);
+		return new ArrayList<>(adminShopList.values());
 	}
 
 	@Override
@@ -105,20 +100,20 @@ public class AdminshopManagerImpl implements AdminshopManager {
 		generalValidator.checkForValueNotInList(getAdminshopNameList(), name);
 		Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
 		shop.setupNew(name, generateFreeAdminShopId(), spawnLocation, size);
-		adminShopList.add(shop);
+		adminShopList.put(shop.getShopId(), shop);
 		configDao.saveAdminshopIds(getAdminshopIdList());
 	}
 
 	@Override
 	public void deleteAdminShop(Adminshop adminshop) {
-		adminShopList.remove(adminshop);
+		adminShopList.remove(adminshop.getShopId());
 		adminshop.deleteShop();
 		configDao.saveAdminshopIds(getAdminshopIdList());
 	}
 
 	@Override
 	public void despawnAllVillagers() {
-		for (Adminshop shop : adminShopList) {
+		for (Adminshop shop : adminShopList.values()) {
 			shop.despawnVillager();
 		}
 	}
@@ -138,7 +133,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 			try {
 				Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
 				shop.setupExisting(null, shopId);
-				adminShopList.add(shop);
+				adminShopList.put(shopId, shop);
 			} catch (TownSystemException | ShopSystemException | GeneralEconomyException e) {
 				log.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
@@ -152,7 +147,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 			try {
 				Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
 				shop.setupExisting(shopName, generateFreeAdminShopId());
-				adminShopList.add(shop);
+				adminShopList.put(shop.getShopId(), shop);
 			} catch (TownSystemException | ShopSystemException | GeneralEconomyException e) {
 				log.warn("[Ultimate_Economy] Failed to load the shop " + shopName);
 				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());

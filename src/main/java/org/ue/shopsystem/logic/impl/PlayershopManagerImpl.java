@@ -1,7 +1,9 @@
 package org.ue.shopsystem.logic.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -32,7 +34,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ConfigDao configDao;
 	private final ServerProvider serverProvider;
-	private List<Playershop> playerShopList = new ArrayList<>();
+	private Map<String, Playershop> playerShopList = new HashMap<>();
 	
 	@Inject
 	public PlayershopManagerImpl(ConfigDao configDao, TownsystemValidationHandler townsystemValidationHandler,
@@ -53,7 +55,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 		boolean free = false;
 		while (!free) {
 			id++;
-			if (!getPlayershopIdList().contains("P" + id)) {
+			if (!playerShopList.containsKey("P" + id)) {
 				free = true;
 			}
 		}
@@ -63,7 +65,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	@Override
 	public List<String> getPlayerShopUniqueNameList() {
 		List<String> list = new ArrayList<>();
-		for (Playershop shop : playerShopList) {
+		for (Playershop shop : playerShopList.values()) {
 			list.add(shop.getName() + "_" + shop.getOwner().getName());
 		}
 		return list;
@@ -71,7 +73,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 
 	@Override
 	public Playershop getPlayerShopByUniqueName(String name) throws GeneralEconomyException {
-		for (Playershop shop : playerShopList) {
+		for (Playershop shop : playerShopList.values()) {
 			if (name.equals(shop.getName() + "_" + shop.getOwner().getName())) {
 				return shop;
 			}
@@ -81,26 +83,19 @@ public class PlayershopManagerImpl implements PlayershopManager {
 
 	@Override
 	public Playershop getPlayerShopById(String id) throws GeneralEconomyException {
-		for (Playershop shop : playerShopList) {
-			if (shop.getShopId().equals(id)) {
-				return shop;
-			}
-		}
-		throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, id);
+		Playershop shop = playerShopList.get(id);
+		generalValidator.checkForValueExists(shop, id);
+		return shop;
 	}
 
 	@Override
 	public List<Playershop> getPlayerShops() {
-		return new ArrayList<>(playerShopList);
+		return new ArrayList<>(playerShopList.values());
 	}
 
 	@Override
 	public List<String> getPlayershopIdList() {
-		List<String> list = new ArrayList<>();
-		for (Playershop shop : playerShopList) {
-			list.add(shop.getShopId());
-		}
-		return list;
+		return new ArrayList<>(playerShopList.keySet());
 	}
 
 	@Override
@@ -113,20 +108,20 @@ public class PlayershopManagerImpl implements PlayershopManager {
 		generalValidator.checkForValidSize(size);
 		Playershop shop = serverProvider.getServiceComponent().getPlayershop();
 		shop.setupNew(name, ecoPlayer, generateFreePlayerShopId(), spawnLocation, size);
-		playerShopList.add(shop);
+		playerShopList.put(shop.getShopId(), shop);
 		configDao.savePlayershopIds(getPlayershopIdList());
 	}
 
 	@Override
 	public void deletePlayerShop(Playershop playershop) {
-		playerShopList.remove(playershop);
+		playerShopList.remove(playershop.getShopId());
 		playershop.deleteShop();
 		configDao.savePlayershopIds(getPlayershopIdList());
 	}
 
 	@Override
 	public void despawnAllVillagers() {
-		for (Playershop shop : playerShopList) {
+		for (Playershop shop : playerShopList.values()) {
 			shop.despawnVillager();
 		}
 	}
@@ -146,7 +141,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 			try {
 				Playershop shop = serverProvider.getServiceComponent().getPlayershop();
 				shop.setupExisting(null, shopId);
-				playerShopList.add(shop);
+				playerShopList.put(shopId, shop);
 			} catch (TownSystemException | GeneralEconomyException | ShopSystemException e) {
 				log.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
@@ -161,7 +156,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 			try {
 				Playershop shop = serverProvider.getServiceComponent().getPlayershop();
 				shop.setupExisting(shopName, shopId);
-				playerShopList.add(shop);
+				playerShopList.put(shopId, shop);
 			} catch (TownSystemException | GeneralEconomyException | ShopSystemException e) {
 				log.warn("[Ultimate_Economy] Failed to load the shop " + shopName);
 				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());

@@ -3,9 +3,11 @@ package org.ue.bank.dataaccess.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,25 +59,10 @@ public class BankDaoImplTest {
 	}
 
 	@Test
-	public void saveIbanListTest() {
-		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		dao.setupSavefile();
-		List<String> list = new ArrayList<>();
-		list.add("myiban");
-		dao.saveIbanList(list);
-		File result = new File("src/BankAccounts.yml");
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(result);
-		assertEquals(1, config.getStringList("Ibans").size());
-		assertEquals("myiban", config.getStringList("Ibans").get(0));
-	}
-
-	@Test
 	public void loadIbanListTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		dao.setupSavefile();
-		List<String> list = new ArrayList<>();
-		list.add("myiban");
-		dao.saveIbanList(list);
+		dao.saveAmount("myiban", 0.0);
 		dao.setupSavefile();
 		assertEquals(1, dao.loadIbanList().size());
 		assertEquals("myiban", dao.loadIbanList().get(0));
@@ -111,5 +98,31 @@ public class BankDaoImplTest {
 		dao.saveAmount("myiban", 12.34);
 		dao.setupSavefile();
 		assertEquals("12.34", String.valueOf(dao.loadAmount("myiban")));
+	}
+	
+	@Test
+	public void removeOldIbanListTest() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		
+		dao.setupSavefile();
+		File file = new File("src/BankAccounts.yml");
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		List<String> list = new ArrayList<>();
+		list.add("myiban");
+		config.set("Ibans", list);
+		save(file,config);
+		
+		config = YamlConfiguration.loadConfiguration(file);
+		assertFalse(config.getConfigurationSection("Ibans") != null);
+		dao.setupSavefile();
+		assertTrue(config.getConfigurationSection("Ibans") == null);
+	}
+
+	private void save(File file, YamlConfiguration config) {
+		try {
+			config.save(file);
+		} catch (IOException e) {
+			fail();
+		}
 	}
 }

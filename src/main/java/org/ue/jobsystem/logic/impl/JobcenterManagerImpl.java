@@ -1,7 +1,9 @@
 package org.ue.jobsystem.logic.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -9,14 +11,12 @@ import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ue.common.utils.ServerProvider;
-import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.economyplayer.logic.EconomyPlayerException;
 import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
 import org.ue.jobsystem.logic.JobSystemException;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.Jobcenter;
@@ -25,18 +25,15 @@ import org.ue.jobsystem.logic.api.JobcenterManager;
 public class JobcenterManagerImpl implements JobcenterManager {
 
 	private static final Logger log = LoggerFactory.getLogger(JobcenterManagerImpl.class);
-	private List<Jobcenter> jobCenterList = new ArrayList<>();
-	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
+	private Map<String, Jobcenter> jobcenterList = new HashMap<>();
 
 	@Inject
 	public JobcenterManagerImpl(ConfigDao configDao, ServerProvider serverProvider,
-			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
-			GeneralEconomyValidationHandler generalValidator) {
-		this.messageWrapper = messageWrapper;
+			EconomyPlayerManager ecoPlayerManager, GeneralEconomyValidationHandler generalValidator) {
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.serverProvider = serverProvider;
 		this.configDao = configDao;
@@ -45,32 +42,25 @@ public class JobcenterManagerImpl implements JobcenterManager {
 
 	@Override
 	public Jobcenter getJobcenterByName(String name) throws GeneralEconomyException {
-		for (Jobcenter jobcenter : getJobcenterList()) {
-			if (jobcenter.getName().equals(name)) {
-				return jobcenter;
-			}
-		}
-		throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
+		Jobcenter jobcenter = jobcenterList.get(name);
+		generalValidator.checkForValueExists(jobcenter, name);
+		return jobcenter;
 	}
 
 	@Override
 	public List<String> getJobcenterNameList() {
-		List<String> jobCenterNames = new ArrayList<>();
-		for (Jobcenter jobcenter : getJobcenterList()) {
-			jobCenterNames.add(jobcenter.getName());
-		}
-		return jobCenterNames;
+		return new ArrayList<>(jobcenterList.keySet());
 	}
 
 	@Override
 	public List<Jobcenter> getJobcenterList() {
-		return jobCenterList;
+		return new ArrayList<>(jobcenterList.values());
 	}
 
 	@Override
 	public void deleteJobcenter(Jobcenter jobcenter) throws JobSystemException {
 		jobcenter.deleteJobcenter();
-		getJobcenterList().remove(jobcenter);
+		jobcenterList.remove(jobcenter.getName());
 		for (Job job : jobcenter.getJobList()) {
 			if (!otherJobcenterHasJob(job)) {
 				removeJobFromAllPlayers(job);
@@ -93,7 +83,7 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	}
 
 	private boolean otherJobcenterHasJob(Job job) throws JobSystemException {
-		for (Jobcenter jobCenter : getJobcenterList()) {
+		for (Jobcenter jobCenter : jobcenterList.values()) {
 			if (jobCenter.hasJob(job)) {
 				return true;
 			}
@@ -108,22 +98,22 @@ public class JobcenterManagerImpl implements JobcenterManager {
 		generalValidator.checkForValidSize(size);
 		Jobcenter jobcenter = serverProvider.getServiceComponent().getJobcenter();
 		jobcenter.setupNew(name, spawnLocation, size);
-		getJobcenterList().add(jobcenter);
+		jobcenterList.put(name, jobcenter);
 		configDao.saveJobcenterList(getJobcenterNameList());
 	}
 
 	@Override
 	public void loadAllJobcenters() {
-		for (String jobCenterName : configDao.loadJobcenterList()) {
+		for (String jobcenterName : configDao.loadJobcenterList()) {
 			Jobcenter jobcenter = serverProvider.getServiceComponent().getJobcenter();
-			jobcenter.setupExisting(jobCenterName);
-			getJobcenterList().add(jobcenter);
+			jobcenter.setupExisting(jobcenterName);
+			jobcenterList.put(jobcenterName, jobcenter);
 		}
 	}
 
 	@Override
 	public void despawnAllVillagers() {
-		for (Jobcenter jobcenter : getJobcenterList()) {
+		for (Jobcenter jobcenter : jobcenterList.values()) {
 			jobcenter.despawnVillager();
 		}
 	}

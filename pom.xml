@@ -8,10 +8,15 @@
 	<name>Ultimate_Economy</name>
 	<repositories>
 		<repository>
+			<id>Ultimare_Economy-API</id>
+			<url>https://raw.githubusercontent.com/catch441/Ultimare_Economy-API/repository/</url>
+		</repository>
+		<!-- bstats repo -->
+		<repository>
 			<id>CodeMC</id>
 			<url>https://repo.codemc.org/repository/maven-public</url>
 		</repository>
-		<!-- This adds the Spigot Maven repository to the build -->
+		<!-- spigot repo -->
 		<repository>
 			<id>spigot-repo</id>
 			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
@@ -20,10 +25,6 @@
 			<id>mojang</id>
 			<name>Mojang's Repository</name>
 			<url>https://libraries.minecraft.net/</url>
-		</repository>
-		<repository>
-			<id>ultimate_economy-api-repo</id>
-			<url>https://raw.githubusercontent.com/catch441/Ultimare_Economy-API/repository/</url>
 		</repository>
 	</repositories>
 
@@ -34,6 +35,8 @@
 		<junit.platform.version>1.5</junit.platform.version>
 		<spigot.api.version>1.16.5-R0.1-SNAPSHOT</spigot.api.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!--output.dir>./target</output.dir -->
+		<output.dir>D:\Programme\bukkitserver\paper-1.16.5\plugins\</output.dir>
 	</properties>
 
 	<dependencies>
@@ -42,7 +45,7 @@
 			<artifactId>Ultimate_Economy-API</artifactId>
 			<version>1.2.7</version>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>org.bstats</groupId>
 			<artifactId>bstats-bukkit</artifactId>
@@ -147,7 +150,7 @@
 				<version>3.0.0</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
-					<outputDirectory>D:\Programme\bukkitserver\paper-1.16.5\plugins\</outputDirectory>
+					<outputDirectory>${output.dir}</outputDirectory>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -188,7 +191,7 @@
 					<relocations>
 						<relocation>
 							<pattern>org.bstats.bukkit</pattern>
-							<shadedPattern>com.ue.common.utils.metrics</shadedPattern>
+							<shadedPattern>org.ue.common.utils.metrics</shadedPattern>
 						</relocation>
 					</relocations>
 				</configuration>

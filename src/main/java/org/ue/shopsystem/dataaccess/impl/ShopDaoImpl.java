@@ -53,30 +53,30 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 		if (!file.exists()) {
 			createFile(file);
 		}
-		config = YamlConfiguration.loadConfiguration(getSavefile());
+		config = YamlConfiguration.loadConfiguration(file);
 	}
 
 	@Override
 	public void saveShopName(String name) {
-		getConfig().set("ShopName", name);
-		save(getConfig(), getSavefile());
+		config.set("ShopName", name);
+		save();
 	}
 
 	@Override
 	public void saveShopItem(ShopItem shopItem, boolean delete) {
 		if (delete) {
-			getConfig().set("ShopItems." + shopItem.getItemHash(), null);
-			save(getConfig(), getSavefile());
+			config.set("ShopItems." + shopItem.getItemHash(), null);
+			save();
 		} else {
 			if (shopItem.getItemStack().getType() == Material.SPAWNER) {
 				String entityType = shopItem.getItemStack().getItemMeta().getDisplayName();
-				getConfig().set("ShopItems." + shopItem.getItemHash() + ".Name", "SPAWNER_" + entityType);
+				config.set("ShopItems." + shopItem.getItemHash() + ".Name", "SPAWNER_" + entityType);
 			} else {
-				getConfig().set("ShopItems." + shopItem.getItemHash() + ".Name", shopItem.getItemStack());
+				config.set("ShopItems." + shopItem.getItemHash() + ".Name", shopItem.getItemStack());
 			}
-			getConfig().set("ShopItems." + shopItem.getItemHash() + ".Slot", shopItem.getSlot());
-			getConfig().set("ShopItems." + shopItem.getItemHash() + ".newSaveMethod", "true");
-			save(getConfig(), getSavefile());
+			config.set("ShopItems." + shopItem.getItemHash() + ".Slot", shopItem.getSlot());
+			config.set("ShopItems." + shopItem.getItemHash() + ".newSaveMethod", "true");
+			save();
 			saveShopItemSellPrice(shopItem.getItemHash(), shopItem.getSellPrice());
 			saveShopItemBuyPrice(shopItem.getItemHash(), shopItem.getBuyPrice());
 			saveShopItemAmount(shopItem.getItemHash(), shopItem.getAmount());
@@ -85,47 +85,47 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 
 	@Override
 	public void saveShopItemSellPrice(int itemHash, double sellPrice) {
-		getConfig().set("ShopItems." + itemHash + ".sellPrice", sellPrice);
-		save(getConfig(), getSavefile());
+		config.set("ShopItems." + itemHash + ".sellPrice", sellPrice);
+		save();
 	}
 
 	@Override
 	public void saveShopItemBuyPrice(int itemHash, double buyPrice) {
-		getConfig().set("ShopItems." + itemHash + ".buyPrice", buyPrice);
-		save(getConfig(), getSavefile());
+		config.set("ShopItems." + itemHash + ".buyPrice", buyPrice);
+		save();
 	}
 
 	@Override
 	public void saveShopItemAmount(int itemHash, int amount) {
-		getConfig().set("ShopItems." + itemHash + ".Amount", amount);
-		save(getConfig(), getSavefile());
+		config.set("ShopItems." + itemHash + ".Amount", amount);
+		save();
 	}
 
 	@Override
 	public void saveShopSize(int size) {
-		getConfig().set("ShopSize", size);
-		save(getConfig(), getSavefile());
+		config.set("ShopSize", size);
+		save();
 	}
 
 	@Override
 	public void saveShopLocation(Location location) {
-		getConfig().set("ShopLocation.x", location.getX());
-		getConfig().set("ShopLocation.y", location.getY());
-		getConfig().set("ShopLocation.z", location.getZ());
-		getConfig().set("ShopLocation.World", location.getWorld().getName());
-		save(getConfig(), getSavefile());
+		config.set("ShopLocation.x", location.getX());
+		config.set("ShopLocation.y", location.getY());
+		config.set("ShopLocation.z", location.getZ());
+		config.set("ShopLocation.World", location.getWorld().getName());
+		save();
 	}
 
 	@Override
 	public void saveProfession(Profession profession) {
-		getConfig().set("Profession", profession.name());
-		save(getConfig(), getSavefile());
+		config.set("Profession", profession.name());
+		save();
 	}
 
 	@Override
 	public void saveStock(int itemHash, int stock) {
-		getConfig().set("ShopItems." + itemHash + ".stock", stock);
-		save(getConfig(), getSavefile());
+		config.set("ShopItems." + itemHash + ".stock", stock);
+		save();
 	}
 
 	// TODO UE-142
@@ -139,18 +139,18 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	 * @param delete
 	 *
 	 * public void saveShopItemStockPlayerSpecific(ShopItem shopItem, String
-	 * playerName, boolean delete) { if(delete) { getConfig().set("Storage." +
+	 * playerName, boolean delete) { if(delete) { config.set("Storage." +
 	 * playerName + shopItem.getItemHash(), null); } else {
-	 * getConfig().set("Storage." + playerName + shopItem.getItemHash() + ".Name",
-	 * shopItem.getItemStack()); getConfig().set("Storage." + playerName +
+	 * config.set("Storage." + playerName + shopItem.getItemHash() + ".Name",
+	 * shopItem.getItemStack()); config.set("Storage." + playerName +
 	 * shopItem.getItemHash() + ".Slot", shopItem.getSlot());
-	 * getConfig().set("Storage." + playerName + + shopItem.getItemHash() +
-	 * ".stock", shopItem.getStock()); getConfig().set("Storage." + playerName + +
+	 * config.set("Storage." + playerName + + shopItem.getItemHash() +
+	 * ".stock", shopItem.getStock()); config.set("Storage." + playerName + +
 	 * shopItem.getItemHash() + ".Amount", shopItem.getAmount());
-	 * getConfig().set("Storage." + playerName + + shopItem.getItemHash() +
-	 * ".sellPrice", shopItem.getSellPrice()); getConfig().set("Storage." +
+	 * config.set("Storage." + playerName + + shopItem.getItemHash() +
+	 * ".sellPrice", shopItem.getSellPrice()); config.set("Storage." +
 	 * playerName + + shopItem.getItemHash() + ".buyPrice", shopItem.getBuyPrice());
-	 * } save(getConfig(), getSavefile()); }
+	 * } save(); }
 	 * 
 	 * @Override /** . Not possible with spawners.
 	 * 
@@ -161,60 +161,60 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	 * @return
 	 *
 	 * public ShopItem loadItemPlayerSpecific(String playerName, int itemHash) {
-	 * ItemStack stack = null; if (getConfig().getString("ShopItems." + itemHash +
+	 * ItemStack stack = null; if (config.getString("ShopItems." + itemHash +
 	 * ".Name").contains("SPAWNER_")) { stack =
 	 * serverProvider.createItemStack(Material.SPAWNER, 1); ItemMeta meta =
-	 * stack.getItemMeta(); String name = getConfig().getString("ShopItems." +
+	 * stack.getItemMeta(); String name = config.getString("ShopItems." +
 	 * itemHash + ".Name"); meta.setDisplayName(name.substring(8));
 	 * stack.setItemMeta(meta); } else { stack =
-	 * getConfig().getItemStack("ShopItems." + itemHash + ".Name"); } int amount =
-	 * getConfig().getInt("ShopItems." + itemHash + ".Amount"); double sellPrice =
-	 * getConfig().getInt("ShopItems." + itemHash + ".sellPrice"); double buyPrice =
-	 * getConfig().getInt("ShopItems." + itemHash + ".buyPrice"); int slot =
-	 * getConfig().getInt("ShopItems." + itemHash + ".Slot"); return new
+	 * config.getItemStack("ShopItems." + itemHash + ".Name"); } int amount =
+	 * config.getInt("ShopItems." + itemHash + ".Amount"); double sellPrice =
+	 * config.getInt("ShopItems." + itemHash + ".sellPrice"); double buyPrice =
+	 * config.getInt("ShopItems." + itemHash + ".buyPrice"); int slot =
+	 * config.getInt("ShopItems." + itemHash + ".Slot"); return new
 	 * ShopItem(stack, amount, sellPrice, buyPrice, slot); }
 	 */
 
 	@Override
 	public void saveOwner(EconomyPlayer ecoPlayer) {
 		if (ecoPlayer != null) {
-			getConfig().set("Owner", ecoPlayer.getName());
+			config.set("Owner", ecoPlayer.getName());
 		} else {
-			getConfig().set("Owner", null);
+			config.set("Owner", null);
 		}
-		save(getConfig(), getSavefile());
+		save();
 	}
 
 	@Override
 	public void saveExpiresAt(long rentUntil) {
-		getConfig().set("expiresAt", rentUntil);
-		save(getConfig(), getSavefile());
+		config.set("expiresAt", rentUntil);
+		save();
 	}
 
 	@Override
 	public void saveRentalFee(double fee) {
-		getConfig().set("RentalFee", fee);
-		save(getConfig(), getSavefile());
+		config.set("RentalFee", fee);
+		save();
 	}
 
 	@Override
 	public void saveRentable(boolean isRentable) {
-		getConfig().set("Rentable", isRentable);
-		save(getConfig(), getSavefile());
+		config.set("Rentable", isRentable);
+		save();
 	}
 
 	@Override
 	public void changeSavefileName(File dataFolder, String newName) throws ShopSystemException {
 		File newFile = new File(dataFolder, newName + ".yml");
 		validationHandler.checkForRenamingSavefileIsPossible(newFile);
-		getSavefile().delete();
+		file.delete();
 		file = newFile;
-		save(getConfig(), getSavefile());
+		save();
 	}
 
 	@Override
 	public Profession loadShopVillagerProfession() {
-		if (getConfig().isSet("Profession")) {
+		if (config.isSet("Profession")) {
 			return Profession.valueOf(config.getString("Profession"));
 		} else {
 			return Profession.NITWIT;
@@ -223,38 +223,38 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 
 	@Override
 	public int loadShopSize() {
-		return getConfig().getInt("ShopSize");
+		return config.getInt("ShopSize");
 	}
 
 	@Override
 	public String loadShopName() {
-		return getConfig().getString("ShopName");
+		return config.getString("ShopName");
 	}
 
 	@Override
 	public Location loadShopLocation() throws TownSystemException {
-		String world = getConfig().getString("ShopLocation.World");
+		String world = config.getString("ShopLocation.World");
 		townsystemValidationHandler.checkForWorldExists(world);
-		return new Location(serverProvider.getWorld(world), getConfig().getDouble("ShopLocation.x"),
-				getConfig().getDouble("ShopLocation.y"), getConfig().getDouble("ShopLocation.z"));
+		return new Location(serverProvider.getWorld(world), config.getDouble("ShopLocation.x"),
+				config.getDouble("ShopLocation.y"), config.getDouble("ShopLocation.z"));
 	}
 
 	@Override
 	public ShopItem loadItem(int itemHash) {
 		ItemStack stack = null;
-		if (getConfig().getString("ShopItems." + itemHash + ".Name").contains("SPAWNER_")) {
+		if (config.getString("ShopItems." + itemHash + ".Name").contains("SPAWNER_")) {
 			stack = serverProvider.createItemStack(Material.SPAWNER, 1);
 			ItemMeta meta = stack.getItemMeta();
-			String name = getConfig().getString("ShopItems." + itemHash + ".Name");
+			String name = config.getString("ShopItems." + itemHash + ".Name");
 			meta.setDisplayName(name.substring(8));
 			stack.setItemMeta(meta);
 		} else {
-			stack = getConfig().getItemStack("ShopItems." + itemHash + ".Name");
+			stack = config.getItemStack("ShopItems." + itemHash + ".Name");
 		}
-		int amount = getConfig().getInt("ShopItems." + itemHash + ".Amount");
-		double sellPrice = getConfig().getInt("ShopItems." + itemHash + ".sellPrice");
-		double buyPrice = getConfig().getInt("ShopItems." + itemHash + ".buyPrice");
-		int slot = getConfig().getInt("ShopItems." + itemHash + ".Slot");
+		int amount = config.getInt("ShopItems." + itemHash + ".Amount");
+		double sellPrice = config.getInt("ShopItems." + itemHash + ".sellPrice");
+		double buyPrice = config.getInt("ShopItems." + itemHash + ".buyPrice");
+		int slot = config.getInt("ShopItems." + itemHash + ".Slot");
 		return new ShopItemImpl(stack, amount, sellPrice, buyPrice, slot);
 	}
 
@@ -272,42 +272,34 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 
 	@Override
 	public int loadStock(int itemHash) {
-		return getConfig().getInt("ShopItems." + itemHash + ".stock");
+		return config.getInt("ShopItems." + itemHash + ".stock");
 	}
 
 	@Override
 	public String loadOwner(String name) {
 		convertToNewOwnerSaving(name);
-		return getConfig().getString("Owner");
+		return config.getString("Owner");
 	}
 
 	@Override
 	public boolean loadRentable() {
-		return getConfig().getBoolean("Rentable");
+		return config.getBoolean("Rentable");
 	}
 
 	@Override
 	public long loadExpiresAt() {
 		convertToIngameTime();
-		return getConfig().getLong("expiresAt");
+		return config.getLong("expiresAt");
 	}
 
 	@Override
 	public double loadRentalFee() {
-		return getConfig().getDouble("RentalFee");
-	}
-
-	private File getSavefile() {
-		return file;
-	}
-
-	private YamlConfiguration getConfig() {
-		return config;
+		return config.getDouble("RentalFee");
 	}
 
 	@Override
 	public void deleteFile() {
-		getSavefile().delete();
+		file.delete();
 	}
 
 	/**
@@ -316,14 +308,14 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	 */
 	@Deprecated
 	private void convertToIngameTime() {
-		if (!getConfig().isSet("expiresAt")) {
-			long oldTime = getConfig().getLong("RentUntil");
+		if (!config.isSet("expiresAt")) {
+			long oldTime = config.getLong("RentUntil");
 			long yetSystem = serverProvider.getSystemTime();
 			long yetMc = serverProvider.getWorldTime();
 			long newTime = (long) ((oldTime - yetSystem) * 0.02) + yetMc;
-			getConfig().set("RentUntil", null);
-			getConfig().set("expiresAt", newTime);
-			save(getConfig(), getSavefile());
+			config.set("RentUntil", null);
+			config.set("expiresAt", newTime);
+			save();
 		}
 	}
 
@@ -350,16 +342,16 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	 */
 	@Deprecated
 	private void removeShopItemList() {
-		getConfig().set("ShopItemList", null);
-		save(getConfig(), getSavefile());
+		config.set("ShopItemList", null);
+		save();
 	}
 
 	@Override
 	@Deprecated
 	public boolean removeIfCorrupted(int itemHash) {
-		if (!getConfig().isSet("ShopItems." + itemHash + ".Name")) {
-			getConfig().set("ShopItems." + itemHash, null);
-			save(getConfig(), getSavefile());
+		if (!config.isSet("ShopItems." + itemHash + ".Name")) {
+			config.set("ShopItems." + itemHash, null);
+			save();
 			return true;
 		}
 		return false;
@@ -372,7 +364,7 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	@SuppressWarnings("unchecked")
 	@Deprecated
 	private void convertToItemHash() {
-		if (getConfig().getConfigurationSection("ShopItems") != null) {
+		if (config.getConfigurationSection("ShopItems") != null) {
 			Set<String> keySet = config.getConfigurationSection("ShopItems").getKeys(false);
 			for (String key : keySet) {
 				try {
@@ -385,10 +377,10 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 						if (val instanceof List) {
 							val = new ArrayList<Object>((List<Object>) val);
 						}
-						getConfig().set("ShopItems." + key.hashCode() + "." + s, val);
+						config.set("ShopItems." + key.hashCode() + "." + s, val);
 					}
-					getConfig().set("ShopItems." + key, null);
-					save(getConfig(), getSavefile());
+					config.set("ShopItems." + key, null);
+					save();
 				}
 			}
 		}

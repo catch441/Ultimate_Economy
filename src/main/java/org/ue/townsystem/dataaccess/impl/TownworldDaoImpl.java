@@ -60,13 +60,13 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 		config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.z", location.getZ());
 		config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.world",
 				location.getWorld().getName());
-		save(config, file);
+		save();
 	}
 
 	@Override
 	public void savePlotOwner(String townName, String chunkCoords, EconomyPlayer player) {
 		config.set("Towns." + townName + ".Plots." + chunkCoords + ".owner", player.getName());
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -76,19 +76,19 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 			list.add(ecoPlayer.getName());
 		}
 		config.set("Towns." + townName + ".Plots." + chunkCoords + ".coOwners", list);
-		save(config, file);
+		save();
 	}
 
 	@Override
 	public void savePlotIsForSale(String townName, String chunkCoords, boolean isForSale) {
 		config.set("Towns." + townName + ".Plots." + chunkCoords + ".isForSale", isForSale);
-		save(config, file);
+		save();
 	}
 
 	@Override
 	public void savePlotSalePrice(String townName, String chunkCoords, double salePrice) {
 		config.set("Towns." + townName + ".Plots." + chunkCoords + ".salePrice", salePrice);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -97,13 +97,13 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 		config.set("Towns." + townName + ".TownManagerVillager.y", location.getY());
 		config.set("Towns." + townName + ".TownManagerVillager.z", location.getZ());
 		config.set("Towns." + townName + ".TownManagerVillager.world", location.getWorld().getName());
-		save(config, file);
+		save();
 	}
 
 	@Override
 	public void saveTownSpawn(String townName, Location location) {
 		config.set("Towns." + townName + ".townspawn", location.getX() + "/" + location.getY() + "/" + location.getZ());
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -113,7 +113,7 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 			list.add(economyPlayer.getName());
 		}
 		config.set("Towns." + townName + ".coOwners", list);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -123,25 +123,25 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 			list.add(economyPlayer.getName());
 		}
 		config.set("Towns." + townName + ".citizens", list);
-		save(config, file);
+		save();
 	}
 
 	@Override
 	public void saveTax(String townName, double tax) {
 		config.set("Towns." + townName + ".tax", tax);
-		save(config, file);
+		save();
 	}
 
 	@Override
 	public void saveMayor(String townName, EconomyPlayer player) {
 		config.set("Towns." + townName + ".owner", player.getName());
-		save(config, file);
+		save();
 	}
 
 	@Override
 	public void saveRemovePlot(String townName, String chunkCoords) {
 		config.set("Towns." + townName + ".Plots." + chunkCoords, null);
-		save(config, file);
+		save();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -156,31 +156,31 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 			config.set("Towns." + newName + "." + s, val);
 		}
 		config.set("Towns." + oldName, null);
-		save(config, file);
+		save();
 	}
 
 	@Override
 	public void saveTownBankIban(String townName, String iban) {
 		config.set("Towns." + townName + ".Iban", iban);
-		save(config, file);
+		save();
 	}
 
 	@Override
 	public void saveFoundationPrice(double foundationPrice) {
 		config.set("Config.foundationPrice", foundationPrice);
-		save(config, file);
+		save();
 	}
 
 	@Override
 	public void saveExpandPrice(double expandPrice) {
 		config.set("Config.expandPrice", expandPrice);
-		save(config, file);
+		save();
 	}
 
 	@Override
 	public void saveWorldName(String world) {
 		config.set("World", world);
-		save(config, file);
+		save();
 	}
 
 	@Override
@@ -344,7 +344,7 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	@Deprecated
 	private void removeDeprecatedChunkCoordList(String townName) {
 		config.set("Towns." + townName + ".chunks", null);
-		save(config, file);
+		save();
 	}
 
 	/**
@@ -357,6 +357,6 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	@Deprecated
 	private void removeDeprecatedTownNameList() {
 		config.set("TownNames", null);
-		save(config, file);
+		save();
 	}
 }

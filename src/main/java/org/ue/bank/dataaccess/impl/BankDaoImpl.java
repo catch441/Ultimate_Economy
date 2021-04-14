@@ -3,6 +3,7 @@ package org.ue.bank.dataaccess.impl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -25,46 +26,44 @@ public class BankDaoImpl extends SaveFileUtils implements BankDao {
 		file = new File(serverProvider.getDataFolderPath(), "BankAccounts.yml");
 		if(!file.exists()) {
 			createFile(file);
-			config = YamlConfiguration.loadConfiguration(getSavefile());
-			saveIbanList(new ArrayList<>());
+			config = YamlConfiguration.loadConfiguration(file);
 		} else {
-			config = YamlConfiguration.loadConfiguration(getSavefile());
+			config = YamlConfiguration.loadConfiguration(file);
 		}
 	}
 	
 	@Override
-	public void saveIbanList(List<String> ibans) {
-		getConfig().set("Ibans", ibans);
-		save(getConfig(), file);
-	}
-	
-	@Override
 	public List<String> loadIbanList() {
-		return getConfig().getStringList("Ibans");
+		removeIbanList();
+		Set<String> keySet = config.getKeys(false);
+		return new ArrayList<String>(keySet);
 	}
 	
 	@Override
 	public void deleteAccount(String iban) {
-		getConfig().set(iban, null);
-		save(getConfig(), file);
-	}
-	
-	private File getSavefile() {
-		return file;
-	}
-	
-	private YamlConfiguration getConfig() {
-		return config;
+		config.set(iban, null);
+		save();
 	}
 	
 	@Override
 	public double loadAmount(String iban) {
-		return getConfig().getDouble(iban + ".amount");
+		return config.getDouble(iban + ".amount");
 	}
 
 	@Override
 	public void saveAmount(String iban, double amount) {
-		getConfig().set(iban + ".amount", amount);
-		save(getConfig(), file);
+		config.set(iban + ".amount", amount);
+		save();
+	}
+	
+	/**
+	 * @since 1.2.7
+	 */
+	@Deprecated
+	private void removeIbanList() {
+		if (config.getConfigurationSection("Ibans") != null) {
+			config.set("Ibans", null);
+			save();
+		}
 	}
 }

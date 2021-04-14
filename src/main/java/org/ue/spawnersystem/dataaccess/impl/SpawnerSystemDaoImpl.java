@@ -38,13 +38,13 @@ public class SpawnerSystemDaoImpl extends SaveFileUtils implements SpawnerSystem
 		config.set(spawnerName + ".World", location.getWorld().getName());
 		config.set(spawnerName + ".player", player);
 		config.set(spawnerName + ".EntityType", entityType.toUpperCase());
-		save(config, file);
+		save();
 	}
 	
 	@Override
 	public void saveRemoveSpawner(String spawnerName) {
 		config.set(spawnerName, null);
-		save(config, file);
+		save();
 	}
 	
 	@Override

@@ -33,40 +33,40 @@ public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {
 
 	@Override
 	public void saveJobcenterSize(int size) {
-		getConfig().set("JobCenterSize", size);
-		save(getConfig(), getSavefile());
+		config.set("JobCenterSize", size);
+		save();
 	}
 
 	@Override
 	public void saveJobcenterName(String name) {
-		getConfig().set("JobCenterName", name);
-		save(getConfig(), getSavefile());
+		config.set("JobCenterName", name);
+		save();
 	}
 
 	@Override
 	public void saveJobcenterLocation(Location location) {
-		getConfig().set("JobcenterLocation.x", location.getX());
-		getConfig().set("JobcenterLocation.y", location.getY());
-		getConfig().set("JobcenterLocation.z", location.getZ());
-		getConfig().set("JobcenterLocation.World", location.getWorld().getName());
-		save(getConfig(), getSavefile());
+		config.set("JobcenterLocation.x", location.getX());
+		config.set("JobcenterLocation.y", location.getY());
+		config.set("JobcenterLocation.z", location.getZ());
+		config.set("JobcenterLocation.World", location.getWorld().getName());
+		save();
 	}
 
 	@Override
 	public void saveJobNameList(List<String> jobNameList) {
-		getConfig().set("Jobnames", jobNameList);
-		save(getConfig(), getSavefile());
+		config.set("Jobnames", jobNameList);
+		save();
 	}
 
 	@Override
 	public void saveJob(Job job, String itemMaterial, int slot) {
 		if (itemMaterial == null) {
-			getConfig().set("Jobs." + job.getName(), null);
+			config.set("Jobs." + job.getName(), null);
 		} else {
-			getConfig().set("Jobs." + job.getName() + ".ItemMaterial", itemMaterial);
-			getConfig().set("Jobs." + job.getName() + ".Slot", slot);
+			config.set("Jobs." + job.getName() + ".ItemMaterial", itemMaterial);
+			config.set("Jobs." + job.getName() + ".Slot", slot);
 		}
-		save(getConfig(), getSavefile());
+		save();
 	}
 
 	@Override
@@ -80,21 +80,21 @@ public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {
 
 	@Override
 	public int loadJobcenterSize() {
-		return getConfig().getInt("JobCenterSize");
+		return config.getInt("JobCenterSize");
 	}
 
 	@Override
 	public Location loadJobcenterLocation() {
 		convertOldJobcenterLocation();
-		return new Location(serverProvider.getWorld(getConfig().getString("JobcenterLocation.World")),
-				getConfig().getDouble("JobcenterLocation.x"), getConfig().getDouble("JobcenterLocation.y"),
-				getConfig().getDouble("JobcenterLocation.z"));
+		return new Location(serverProvider.getWorld(config.getString("JobcenterLocation.World")),
+				config.getDouble("JobcenterLocation.x"), config.getDouble("JobcenterLocation.y"),
+				config.getDouble("JobcenterLocation.z"));
 	}
 
 	@Override
 	public int loadJobSlot(Job job) {
 		convertSlot(job.getName());
-		return getConfig().getInt("Jobs." + job.getName() + ".Slot");
+		return config.getInt("Jobs." + job.getName() + ".Slot");
 	}
 
 	@Override
@@ -107,18 +107,14 @@ public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {
 		return Material.valueOf(config.getString("Jobs." + job.getName() + ".ItemMaterial"));
 	}
 
-	private YamlConfiguration getConfig() {
-		return config;
-	}
-
 	@Deprecated
 	private void convertOldJobcenterLocation() {
-		if (getConfig().isSet("ShopLocation.World")) {
-			Location location = new Location(serverProvider.getWorld(getConfig().getString("ShopLocation.World")),
-					getConfig().getDouble("ShopLocation.x"), getConfig().getDouble("ShopLocation.y"),
-					getConfig().getDouble("ShopLocation.z"));
-			getConfig().set("ShopLocation", null);
-			save(getConfig(), getSavefile());
+		if (config.isSet("ShopLocation.World")) {
+			Location location = new Location(serverProvider.getWorld(config.getString("ShopLocation.World")),
+					config.getDouble("ShopLocation.x"), config.getDouble("ShopLocation.y"),
+					config.getDouble("ShopLocation.z"));
+			config.set("ShopLocation", null);
+			save();
 			saveJobcenterLocation(location);
 		}
 	}
@@ -129,12 +125,12 @@ public class JobcenterDaoImpl extends SaveFileUtils implements JobcenterDao {
 	 */
 	@Deprecated
 	private void convertSlot(String jobName) {
-		if (getConfig().contains("Jobs." + jobName + ".ItemSlot")) {
+		if (config.contains("Jobs." + jobName + ".ItemSlot")) {
 			int slot = config.getInt("Jobs." + jobName + ".ItemSlot");
 			slot--;
-			getConfig().set("Jobs." + jobName + ".ItemSlot", null);
-			getConfig().set("Jobs." + jobName + ".Slot", slot);
-			save(getConfig(), getSavefile());
+			config.set("Jobs." + jobName + ".ItemSlot", null);
+			config.set("Jobs." + jobName + ".Slot", slot);
+			save();
 		}
 	}
 }

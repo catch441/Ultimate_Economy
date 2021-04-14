@@ -1,7 +1,9 @@
 package org.ue.economyplayer.logic.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -17,7 +19,6 @@ import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
 import org.ue.jobsystem.logic.api.JobManager;
 
 import dagger.Lazy;
@@ -35,7 +36,7 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	// during load player jobs and not during runtime
 	private final Lazy<JobManager> jobManager;
 	private final ServerProvider serverProvider;
-	private List<EconomyPlayer> economyPlayers = new ArrayList<>();
+	private Map<String, EconomyPlayer> economyPlayers = new HashMap<>();
 	
 	@Inject
 	public EconomyPlayerManagerImpl(GeneralEconomyValidationHandler generalValidator, EconomyPlayerDao ecoPlayerDao,
@@ -62,31 +63,29 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 
 	@Override
 	public EconomyPlayer getEconomyPlayerByName(String name) throws GeneralEconomyException {
-		for (EconomyPlayer economyPlayer : getAllEconomyPlayers()) {
-			if (economyPlayer.getName().equals(name)) {
-				return economyPlayer;
-			}
-		}
-		throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
+		EconomyPlayer ecoPlayer = economyPlayers.get(name);
+		generalValidator.checkForValueExists(ecoPlayer, name);
+		return ecoPlayer;
 	}
 
 	@Override
 	public List<EconomyPlayer> getAllEconomyPlayers() {
-		return economyPlayers;
+		return new ArrayList<>(economyPlayers.values());
 	}
 
 	@Override
 	public void createEconomyPlayer(String playerName) throws GeneralEconomyException {
 		generalValidator.checkForValueNotInList(getEconomyPlayerNameList(), playerName);
 		Logger logger = LoggerFactory.getLogger(EconomyPlayerImpl.class);
-		getAllEconomyPlayers().add(new EconomyPlayerImpl(generalValidator, logger, serverProvider, validationHandler,
+		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(generalValidator, logger, serverProvider, validationHandler,
 				ecoPlayerDao, messageWrapper, configManager, bankManager, jobManager.get(),
-				serverProvider.getPlayer(playerName), playerName, true));
+				serverProvider.getPlayer(playerName), playerName, true);
+		economyPlayers.put(playerName, ecoPlayer);
 	}
 
 	@Override
 	public void deleteEconomyPlayer(EconomyPlayer player) {
-		getAllEconomyPlayers().remove(player);
+		economyPlayers.remove(player.getName());
 		ecoPlayerDao.deleteEconomyPlayer(player.getName());
 		bankManager.deleteBankAccount(player.getBankAccount());
 	}
@@ -96,10 +95,11 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 		ecoPlayerDao.setupSavefile();
 		List<String> playerList = ecoPlayerDao.loadPlayerList();
 		for (String player : playerList) {
-			Logger logger = LoggerFactory.getLogger(EconomyPlayerImpl.class);
-			getAllEconomyPlayers().add(new EconomyPlayerImpl(generalValidator, logger, serverProvider,
+			Logger logger = LoggerFactory.getLogger(EconomyPlayerImpl.class);			
+			EconomyPlayer ecoPlayer = new EconomyPlayerImpl(generalValidator, logger, serverProvider,
 					validationHandler, ecoPlayerDao, messageWrapper, configManager, bankManager, jobManager.get(),
-					serverProvider.getPlayer(player), player, false));
+					serverProvider.getPlayer(player), player, false);
+			economyPlayers.put(player, ecoPlayer);
 		}
 	}
 }

@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,6 +48,13 @@ public class RentshopManagerImplTest {
 	ConfigDao configDao;
 	@Mock
 	GeneralEconomyValidationHandler generalValidator;
+	
+	@BeforeEach
+	public void cleanUp() {
+		for(Rentshop shop: rentshopManager.getRentShops()) {
+			rentshopManager.deleteRentShop(shop);
+		}
+	}
 
 	@Test
 	public void setupRentDailyTaskTest() {
@@ -56,17 +64,17 @@ public class RentshopManagerImplTest {
 	@Test
 	public void generateFreeRentShopIdTest() {
 		String id1 = rentshopManager.generateFreeRentShopId();
-		Rentshop shop = createRentshop();
-		when(shop.getShopId()).thenReturn("R0");
+		createRentshop("R0");
 		String id2 = rentshopManager.generateFreeRentShopId();
 		assertEquals("R0", id1);
 		assertEquals("R1", id2);
 	}
 
-	private Rentshop createRentshop() {
+	private Rentshop createRentshop(String id) {
 		Rentshop shop = mock(Rentshop.class);
 		Location loc = mock(Location.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		when(shop.getShopId()).thenReturn(id);
 		when(serviceComponent.getRentshop()).thenReturn(shop);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		return assertDoesNotThrow(() -> rentshopManager.createRentShop(loc, 9, 2.5));
@@ -74,33 +82,24 @@ public class RentshopManagerImplTest {
 
 	@Test
 	public void getRentShopByIdTest() {
-		Rentshop shop = createRentshop();
-		when(shop.getShopId()).thenReturn("R0");
+		Rentshop shop = createRentshop("R0");
 		Rentshop result = assertDoesNotThrow(() -> rentshopManager.getRentShopById("R0"));
 		assertNotNull(shop);
 		assertEquals(shop, result);
 	}
 
 	@Test
-	public void getRentShopByIdTestFail() {
-		try {
-			Rentshop shop = createRentshop();
-			when(shop.getShopId()).thenReturn("R0");
-			rentshopManager.getRentShopById("R1");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals("R1", e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
-		}
+	public void getRentShopByIdTestFail() throws GeneralEconomyException {
+		createRentshop("R0");
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueExists(null, "R1");
+		assertThrows(GeneralEconomyException.class, () -> rentshopManager.getRentShopById("R1"));
 	}
 
 	@Test
 	public void getRentShopUniqueNameListTest() {
-		Rentshop shop0 = createRentshop();
-		Rentshop shop = createRentshop();
+		Rentshop shop0 = createRentshop("R0");
+		Rentshop shop = createRentshop("R1");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		when(shop0.getShopId()).thenReturn("R0");
 		when(shop0.isRentable()).thenReturn(true);
 		when(shop.isRentable()).thenReturn(false);
 		when(shop.getOwner()).thenReturn(ecoPlayer);
@@ -114,16 +113,15 @@ public class RentshopManagerImplTest {
 
 	@Test
 	public void getRentShopByUniqueNameTestWithNotRented() {
-		Rentshop shop = createRentshop();
+		Rentshop shop = createRentshop("R0");
 		when(shop.isRentable()).thenReturn(true);
-		when(shop.getShopId()).thenReturn("R0");
 		Rentshop result = assertDoesNotThrow(() -> rentshopManager.getRentShopByUniqueName("RentShop#R0"));
 		assertEquals(shop, result);
 	}
 
 	@Test
 	public void getRentShopByUniqueNameTestWithRented() {
-		Rentshop shop = createRentshop();
+		Rentshop shop = createRentshop("R0");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(shop.isRentable()).thenReturn(false);
 		when(shop.getOwner()).thenReturn(ecoPlayer);
@@ -147,8 +145,8 @@ public class RentshopManagerImplTest {
 
 	@Test
 	public void getRentShopsTest() {
-		Rentshop shop = createRentshop();
-		Rentshop shop2 = createRentshop();
+		Rentshop shop = createRentshop("R0");
+		Rentshop shop2 = createRentshop("R1");
 		List<Rentshop> shops = rentshopManager.getRentShops();
 		assertEquals(shop, shops.get(0));
 		assertEquals(shop2, shops.get(1));
@@ -156,8 +154,8 @@ public class RentshopManagerImplTest {
 
 	@Test
 	public void despawnAllVillagersTest() {
-		Rentshop shop = createRentshop();
-		Rentshop shop2 = createRentshop();
+		Rentshop shop = createRentshop("R0");
+		Rentshop shop2 = createRentshop("R1");
 		rentshopManager.despawnAllVillagers();
 		verify(shop).despawnVillager();
 		verify(shop2).despawnVillager();
@@ -165,7 +163,7 @@ public class RentshopManagerImplTest {
 
 	@Test
 	public void deleteRentshopTest() {
-		Rentshop shop = createRentshop();
+		Rentshop shop = createRentshop("R0");
 		rentshopManager.deleteRentShop(shop);
 		verify(shop).deleteShop();
 		verify(configDao).saveRentshopIds(new ArrayList<>());

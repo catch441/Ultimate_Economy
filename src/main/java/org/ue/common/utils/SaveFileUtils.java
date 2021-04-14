@@ -16,12 +16,10 @@ public class SaveFileUtils {
 	/**
 	 * Saves a configuration into the file.
 	 * 
-	 * @param config
-	 * @param savefile
 	 */
-	public void save(YamlConfiguration config, File savefile) {
+	public void save() {
 		try {
-			config.save(savefile);
+			config.save(file);
 		} catch (IOException e) {
 			log.warn("[Ultimate_Economy] Error on save config to file");
 			log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());

@@ -1,7 +1,9 @@
 package org.ue.shopsystem.logic.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -22,11 +24,11 @@ import org.ue.townsystem.logic.TownSystemException;
 public class RentshopManagerImpl implements RentshopManager {
 
 	private static final Logger log = LoggerFactory.getLogger(RentshopManagerImpl.class);
-	private List<Rentshop> rentShopList = new ArrayList<>();
 	private final MessageWrapper messageWrapper;
 	private final GeneralEconomyValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
+	private Map<String, Rentshop> rentShopList = new HashMap<>();
 
 	@Inject
 	public RentshopManagerImpl(MessageWrapper messageWrapper, GeneralEconomyValidationHandler generalValidator,
@@ -43,7 +45,7 @@ public class RentshopManagerImpl implements RentshopManager {
 		boolean free = false;
 		while (!free) {
 			id++;
-			if (!getRentShopIdList().contains("R" + id)) {
+			if (!rentShopList.containsKey("R" + id)) {
 				free = true;
 			}
 		}
@@ -52,12 +54,9 @@ public class RentshopManagerImpl implements RentshopManager {
 
 	@Override
 	public Rentshop getRentShopById(String id) throws GeneralEconomyException {
-		for (Rentshop shop : getRentShops()) {
-			if (shop.getShopId().equals(id)) {
-				return shop;
-			}
-		}
-		throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, id);
+		Rentshop shop = rentShopList.get(id);
+		generalValidator.checkForValueExists(shop, id);
+		return shop;
 	}
 
 	@Override
@@ -91,7 +90,7 @@ public class RentshopManagerImpl implements RentshopManager {
 
 	@Override
 	public List<Rentshop> getRentShops() {
-		return new ArrayList<>(rentShopList);
+		return new ArrayList<>(rentShopList.values());
 	}
 
 	@Override
@@ -100,21 +99,21 @@ public class RentshopManagerImpl implements RentshopManager {
 		generalValidator.checkForPositiveValue(rentalFee);
 		Rentshop shop = serverProvider.getServiceComponent().getRentshop();
 		shop.setupNew(generateFreeRentShopId(), spawnLocation, size, rentalFee);
-		rentShopList.add(shop);
+		rentShopList.put(shop.getShopId(), shop);
 		configDao.saveRentshopIds(getRentShopIdList());
 		return shop;
 	}
 
 	@Override
 	public void deleteRentShop(Rentshop rentshop) {
-		rentShopList.remove(rentshop);
+		rentShopList.remove(rentshop.getShopId());
 		rentshop.deleteShop();
 		configDao.saveRentshopIds(getRentShopIdList());
 	}
 
 	@Override
 	public void despawnAllVillagers() {
-		for (Rentshop shop : rentShopList) {
+		for (Rentshop shop : rentShopList.values()) {
 			shop.despawnVillager();
 		}
 	}
@@ -125,7 +124,7 @@ public class RentshopManagerImpl implements RentshopManager {
 			try {
 				Rentshop shop = serverProvider.getServiceComponent().getRentshop();
 				shop.setupExisting(null, shopId);
-				rentShopList.add(shop);
+				rentShopList.put(shopId, shop);
 			} catch (TownSystemException | GeneralEconomyException | ShopSystemException e) {
 				log.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
@@ -140,10 +139,6 @@ public class RentshopManagerImpl implements RentshopManager {
 	}
 
 	private List<String> getRentShopIdList() {
-		List<String> list = new ArrayList<>();
-		for (Rentshop shop : getRentShops()) {
-			list.add(shop.getShopId());
-		}
-		return list;
+		return new ArrayList<>(rentShopList.keySet());
 	}
 }

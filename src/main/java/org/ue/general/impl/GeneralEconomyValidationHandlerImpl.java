@@ -47,6 +47,13 @@ public class GeneralEconomyValidationHandlerImpl implements GeneralEconomyValida
 			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, value);
 		}
 	}
+	
+	@Override
+	public void checkForValueExists(Object value, String name) throws GeneralEconomyException {
+		if (value == null) {
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, value);
+		}
+	}
 
 	@Override
 	public void checkForValidSize(int size) throws GeneralEconomyException {

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -140,18 +139,18 @@ public class PlayershopManagerImplTest {
 	@Test
 	public void generateFreePlayerShopIdTest() {
 		String id1 = playershopManager.generateFreePlayerShopId();
-		Playershop shop = createPlayershop();
-		when(shop.getShopId()).thenReturn("P0");
+		createPlayershop("P0");
 		String id2 = playershopManager.generateFreePlayerShopId();
 		assertEquals("P0", id1);
 		assertEquals("P1", id2);
 	}
 
-	private Playershop createPlayershop() {
+	private Playershop createPlayershop(String id) {
 		Location loc = mock(Location.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		Playershop shop = mock(Playershop.class);
+		when(shop.getShopId()).thenReturn(id);
 		when(serviceComponent.getPlayershop()).thenReturn(shop);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		assertDoesNotThrow(() -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
@@ -205,32 +204,23 @@ public class PlayershopManagerImplTest {
 
 	@Test
 	public void getPlayerShopByIdTest() {
-		Playershop shop1 = createPlayershop();
+		Playershop shop1 = createPlayershop("P0");
 		when(shop1.getOwner()).thenReturn(mock(EconomyPlayer.class));
-		Playershop shop2 = createPlayershop();
-		when(shop1.getShopId()).thenReturn("P0");
-		when(shop2.getShopId()).thenReturn("P1");
+		createPlayershop("P1");
 		Playershop shop = assertDoesNotThrow(() -> playershopManager.getPlayerShopById("P1"));
 		assertNotNull(shop);
 		assertEquals("P1", shop.getShopId());
 	}
 
 	@Test
-	public void getPlayerShopByIdTestWithNoShop() {
-		try {
-			playershopManager.getPlayerShopById("P0");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals("P0", e.getParams()[0]);
-		}
+	public void getPlayerShopByIdTestWithNoShop() throws GeneralEconomyException {
+		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueExists(null, "P0");
+		assertThrows(GeneralEconomyException.class, () -> playershopManager.getPlayerShopById("P0"));
 	}
 
 	@Test
 	public void getPlayershopIdListTest() {
-		Playershop shop = createPlayershop();
-		when(shop.getShopId()).thenReturn("P0");
+		createPlayershop("P0");
 		List<String> list = playershopManager.getPlayershopIdList();
 		assertEquals(1, list.size());
 		assertEquals("P0", list.get(0));
@@ -238,14 +228,14 @@ public class PlayershopManagerImplTest {
 
 	@Test
 	public void despawnAllVillagersTest() {
-		Playershop shop = createPlayershop();
+		Playershop shop = createPlayershop("P0");
 		playershopManager.despawnAllVillagers();
 		verify(shop).despawnVillager();
 	}
 
 	@Test
 	public void deletePlayershopTest() {
-		Playershop shop = createPlayershop();
+		Playershop shop = createPlayershop("P0");
 		playershopManager.deletePlayerShop(shop);
 		assertEquals(0, playershopManager.getPlayerShops().size());
 		verify(configDao).savePlayershopIds(new ArrayList<>());

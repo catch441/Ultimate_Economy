@@ -22,12 +22,13 @@ public class SaveFileUtilsTest {
 	
 	@Test
 	public void saveErrorTest() throws IOException {
-		YamlConfiguration config = mock(YamlConfiguration.class);
-		File savefile = mock(File.class);
+		utils.config = mock(YamlConfiguration.class);
+		utils.file = mock(File.class);
+		
 		IOException e = mock(IOException.class);
 		when(e.getMessage()).thenReturn("my error");
-		doThrow(e).when(config).save(savefile);
-		utils.save(config, savefile);
+		doThrow(e).when(utils.config).save(utils.file);
+		utils.save();
 		verify(e).getMessage();
 	}
 	
