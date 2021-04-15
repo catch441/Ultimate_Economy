@@ -4,9 +4,8 @@
 name: Build with Tests
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ dev,master ]
-  pull_request:
     branches: [ dev,master ]
 
 jobs:
@@ -21,15 +20,17 @@ jobs:
       with:
         java-version: 8
     - name: Build with Maven
-      run: mvn -B clean package
-      
+      run: mvn -B clean package -s settings.xml
+      env:
+        USERNAME: ${{ secrets.USERNAME }}
+        TOKEN: ${{ secrets.UE_API_REPO_READ_TOKEN }}
     # Runs code climate test coverage
     - name: Code Climate Coverage Action
       run: |
         curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
         chmod +x ./cc-test-reporter
         ./cc-test-reporter before-build
-        mvn verify
+        mvn verify -s settings.xml
         ./cc-test-reporter format-coverage target/site/jacoco/jacoco.xml -t jacoco
         ./cc-test-reporter upload-coverage
       env:
