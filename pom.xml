@@ -9,7 +9,7 @@
 	<repositories>
 		<repository>
 			<id>github</id>
-			<url>https://maven.pkg.github.com/catch441/Ultimare_Economy-API/</url>
+			<url>https://maven.pkg.github.com/catch441/Ultimate_Economy-API/</url>
 		</repository>
 		<!-- bstats repo -->
 		<repository>
