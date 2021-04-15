@@ -119,6 +119,15 @@ public class AdminshopTabCompleterImplTest {
 	}
 	
 	@Test
+	public void deleteTestWithMoreArgs() {
+		Command command = mock(Command.class);
+		when(command.getLabel()).thenReturn("adminshop");
+		String[] args = { "delete", "myshop1", "" };
+		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
+		assertEquals(0, list.size());
+	}
+	
+	@Test
 	public void adminshopTestWithNoArgs() {
 		Command command = mock(Command.class);
 		when(command.getLabel()).thenReturn("adminshop");
@@ -128,10 +137,10 @@ public class AdminshopTabCompleterImplTest {
 	}
 
 	@Test
-	public void deleteTestWithMoreArgs() {
+	public void createTestWithMoreArgs() {
 		Command command = mock(Command.class);
 		when(command.getLabel()).thenReturn("adminshop");
-		String[] args = { "delete", "myshop1", "" };
+		String[] args = { "create", "myshop1", "" };
 		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
 		assertEquals(0, list.size());
 	}

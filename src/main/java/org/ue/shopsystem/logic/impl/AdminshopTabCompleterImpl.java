@@ -59,7 +59,9 @@ public class AdminshopTabCompleterImpl extends TabCompleterUtils implements TabC
 			case "":
 				return getAllCommands();
 			default:
-				return getMatchingList(getAllCommands(), args[0]);
+				if(args.length == 1) {
+					return getMatchingList(getAllCommands(), args[0]);
+				}
 			}
 		}
 		return new ArrayList<>();
