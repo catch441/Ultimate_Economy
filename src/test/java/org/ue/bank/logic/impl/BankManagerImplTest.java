@@ -141,9 +141,12 @@ public class BankManagerImplTest {
 		assertEquals(0, bankManager.getBankAccounts().size());
 		bankManager.loadBankAccounts();
 		assertEquals(2, bankManager.getBankAccounts().size());
-		assertEquals(account2.getIban(), bankManager.getBankAccounts().get(0).getIban());
+		assertTrue(bankManager.getBankAccounts().get(1).getIban().equals(account2.getIban())
+				|| bankManager.getBankAccounts().get(1).getIban().equals(account1.getIban()));
+		assertTrue(bankManager.getBankAccounts().get(0).getIban().equals(account2.getIban())
+				|| bankManager.getBankAccounts().get(0).getIban().equals(account1.getIban()));
 		assertEquals("10.0", String.valueOf(bankManager.getBankAccounts().get(0).getAmount()));
-		assertEquals(account1.getIban(), bankManager.getBankAccounts().get(1).getIban());
+
 		assertEquals("10.0", String.valueOf(bankManager.getBankAccounts().get(1).getAmount()));
 		verify(bankDao).setupSavefile();
 	}
