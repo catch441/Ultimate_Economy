@@ -22,7 +22,9 @@ jobs:
         java-version: 8
     - name: Build with Maven
       run: mvn -B clean package
-      
+      env:
+        USERNAME: ${{ secrets.USERNAME }}
+        TOKEN: ${{ secrets.UE_API_REPO_READ_TOKEN }}
     # Runs code climate test coverage
     - name: Code Climate Coverage Action
       run: |
