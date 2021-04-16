@@ -17,7 +17,7 @@ public class Updater {
 	public enum UpdateResult {
 		NO_UPDATE, UPDATE_AVAILABLE, NO_UPDATE_INFORMATION
 	}
-	
+
 	/**
 	 * Returns the update result.
 	 * 
@@ -44,17 +44,18 @@ public class Updater {
 			final JSONArray array = (JSONArray) JSONValue.parse(response);
 			if (array.isEmpty()) {
 				updateResult = UpdateResult.NO_UPDATE_INFORMATION;
-			}
-			JSONObject latestUpdate = (JSONObject) array.get(array.size() - 1);
-			String name = (String) latestUpdate.get("name");
-			versionNameAfterCheck = name;
-			downloadLinkAfterCheck = (String) latestUpdate.get("fileUrl");
-			String version = name.substring(name.indexOf(" ") + 1);
-			int result = currentVersion.compareTo(version);
-			if (result >= 0) {
-				updateResult = UpdateResult.NO_UPDATE;
 			} else {
-				updateResult = UpdateResult.UPDATE_AVAILABLE;
+				JSONObject latestUpdate = (JSONObject) array.get(array.size() - 1);
+				String name = (String) latestUpdate.get("name");
+				versionNameAfterCheck = name;
+				downloadLinkAfterCheck = (String) latestUpdate.get("fileUrl");
+				String version = name.substring(name.indexOf(" ") + 1);
+				int result = currentVersion.compareTo(version);
+				if (result >= 0) {
+					updateResult = UpdateResult.NO_UPDATE;
+				} else {
+					updateResult = UpdateResult.UPDATE_AVAILABLE;
+				}
 			}
 		} catch (IOException e) {
 			updateResult = UpdateResult.NO_UPDATE_INFORMATION;
