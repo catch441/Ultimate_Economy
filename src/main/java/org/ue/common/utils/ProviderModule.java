@@ -12,8 +12,10 @@ import org.ue.bank.logic.api.BankManager;
 import org.ue.bank.logic.api.BankValidationHandler;
 import org.ue.bank.logic.impl.BankManagerImpl;
 import org.ue.bank.logic.impl.BankValidationHandlerImpl;
-import org.ue.common.api.CustomSkullService;
-import org.ue.common.impl.CustomSkullServiceImpl;
+import org.ue.common.logic.api.CustomSkullService;
+import org.ue.common.logic.api.GeneralValidationHandler;
+import org.ue.common.logic.impl.CustomSkullServiceImpl;
+import org.ue.common.logic.impl.GeneralValidationHandlerImpl;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.config.dataaccess.impl.ConfigDaoImpl;
@@ -31,8 +33,6 @@ import org.ue.economyplayer.logic.impl.EconomyPlayerEventHandlerImpl;
 import org.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import org.ue.economyplayer.logic.impl.EconomyPlayerTabCompleterImpl;
 import org.ue.economyplayer.logic.impl.EconomyPlayerValidationHandlerImpl;
-import org.ue.general.api.GeneralEconomyValidationHandler;
-import org.ue.general.impl.GeneralEconomyValidationHandlerImpl;
 import org.ue.general.impl.PluginImpl;
 import org.ue.general.impl.UltimateEconomy;
 import org.ue.jobsystem.dataaccess.api.JobDao;
@@ -403,6 +403,12 @@ public class ProviderModule {
 	TownworldDao provideTownworldDao(TownworldDaoImpl townworldDao) {
 		return townworldDao;
 	}
+	
+	@Singleton
+	@Provides
+	GeneralValidationHandler provideGeneralValidationHandler(MessageWrapper messageWrapper) {
+		return new GeneralValidationHandlerImpl(messageWrapper);
+	}
 
 	@Singleton
 	@Provides
@@ -410,12 +416,6 @@ public class ProviderModule {
 		return bankValidator;
 	}
 	
-	@Singleton
-	@Provides
-	GeneralEconomyValidationHandler provideEconomyValidationHandler(GeneralEconomyValidationHandlerImpl validator) {
-		return validator;
-	}
-
 	@Singleton
 	@Provides
 	EconomyPlayerValidationHandler provideEcoPlayerValidationHandler(

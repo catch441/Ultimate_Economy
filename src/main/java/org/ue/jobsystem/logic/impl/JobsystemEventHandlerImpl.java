@@ -35,6 +35,7 @@ import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemEventHandler;
+import org.ue.shopsystem.logic.ShopSystemException;
 
 public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 
@@ -215,8 +216,8 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 	public void handleOpenInventory(PlayerInteractEntityEvent event) {
 		try {
 			event.setCancelled(true);
-			jobcenterManager.getJobcenterByName(event.getRightClicked().getCustomName()).openInv(event.getPlayer());
-		} catch (GeneralEconomyException e) {
+			jobcenterManager.getJobcenterByName(event.getRightClicked().getCustomName()).openInventory(event.getPlayer());
+		} catch (GeneralEconomyException | ShopSystemException e) {
 		}
 	}
 }

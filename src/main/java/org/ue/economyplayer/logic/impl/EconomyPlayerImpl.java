@@ -22,7 +22,6 @@ import org.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import org.ue.economyplayer.logic.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
@@ -37,7 +36,6 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerDao ecoPlayerDao;
 	private final EconomyPlayerValidationHandler validationHandler;
-	private final GeneralEconomyValidationHandler generalValidator;
 	private Map<String, Location> homes = new HashMap<>();
 	private BankAccount bankAccount;
 	private Player player;
@@ -50,7 +48,6 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	/**
 	 * Constructor for creating a new economyPlayer/loading an existing player.
 	 * 
-	 * @param generalValidator
 	 * @param logger
 	 * @param serverProvider
 	 * @param validationHandler
@@ -63,11 +60,10 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	 * @param name
 	 * @param isNew
 	 */
-	public EconomyPlayerImpl(GeneralEconomyValidationHandler generalValidator, Logger logger,
-			ServerProvider serverProvider, EconomyPlayerValidationHandler validationHandler,
-			EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper, ConfigManager configManager,
-			BankManager bankManager, JobManager jobManager, Player player, String name, boolean isNew) {
-		this.generalValidator = generalValidator;
+	public EconomyPlayerImpl(Logger logger, ServerProvider serverProvider,
+			EconomyPlayerValidationHandler validationHandler, EconomyPlayerDao ecoPlayerDao,
+			MessageWrapper messageWrapper, ConfigManager configManager, BankManager bankManager, JobManager jobManager,
+			Player player, String name, boolean isNew) {
 		this.configManager = configManager;
 		this.bankManager = bankManager;
 		this.logger = logger;
@@ -134,7 +130,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	@Override
 	public Location getHome(String homeName) throws GeneralEconomyException {
-		generalValidator.checkForValueInList(new ArrayList<>(getHomeList().keySet()), homeName);
+		validationHandler.checkForValueInList(new ArrayList<>(getHomeList().keySet()), homeName);
 		return getHomeList().get(homeName);
 	}
 
@@ -181,7 +177,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	@Override
 	public void addHome(String homeName, Location location, boolean sendMessage)
 			throws GeneralEconomyException, EconomyPlayerException {
-		generalValidator.checkForValueNotInList(new ArrayList<>(getHomeList().keySet()), homeName);
+		validationHandler.checkForValueNotInList(new ArrayList<>(getHomeList().keySet()), homeName);
 		validationHandler.checkForNotReachedMaxHomes(reachedMaxHomes());
 		homes.put(homeName, location);
 		ecoPlayerDao.saveHome(getName(), homeName, location);
@@ -193,7 +189,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	@Override
 	public void removeHome(String homeName, boolean sendMessage) throws GeneralEconomyException {
-		generalValidator.checkForValueInList(new ArrayList<>(getHomeList().keySet()), homeName);
+		validationHandler.checkForValueInList(new ArrayList<>(getHomeList().keySet()), homeName);
 		getHomeList().remove(homeName);
 		ecoPlayerDao.saveHome(getName(), homeName, null);
 		if (isOnline() && sendMessage) {
@@ -215,7 +211,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		} else {
 			if (isOnline()) {
 				Objective o = getPlayer().getScoreboard().getObjective(DisplaySlot.SIDEBAR);
-				if(o != null && "bank".equals(o.getName())) {
+				if (o != null && "bank".equals(o.getName())) {
 					o.unregister();
 				} else {
 					int score = 0;
@@ -311,7 +307,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			Scoreboard board = getPlayer().getScoreboard();
 			Objective o = board.getObjective(DisplaySlot.SIDEBAR);
 			// null, if no objective on the sidebar exists
-			if(o == null) {
+			if (o == null) {
 				o = board.registerNewObjective("bank", "dummy", messageWrapper.getString("bank"));
 				o.setDisplaySlot(DisplaySlot.SIDEBAR);
 			}

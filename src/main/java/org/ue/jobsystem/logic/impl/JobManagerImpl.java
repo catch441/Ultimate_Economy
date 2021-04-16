@@ -14,7 +14,6 @@ import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.dataaccess.api.JobDao;
 import org.ue.jobsystem.logic.JobSystemException;
@@ -29,22 +28,19 @@ public class JobManagerImpl implements JobManager {
 	private static final Logger log = LoggerFactory.getLogger(JobManagerImpl.class);
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobsystemValidationHandler validationHandler;
-	private final GeneralEconomyValidationHandler generalValidator;
 	private final JobcenterManager jobcenterManager;
 	private final ConfigDao configDao;
 	private final ServerProvider serverProvider;
 	private Map<String, Job> jobList = new HashMap<>();
-	
+
 	@Inject
-	public JobManagerImpl(GeneralEconomyValidationHandler generalValidator, ServerProvider serverProvider,
-			ConfigDao configDao, JobcenterManager jobcenterManager, JobsystemValidationHandler validationHandler,
-			EconomyPlayerManager ecoPlayerManager) {
+	public JobManagerImpl(ServerProvider serverProvider, ConfigDao configDao, JobcenterManager jobcenterManager,
+			JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager) {
 		this.configDao = configDao;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
 		this.jobcenterManager = jobcenterManager;
 		this.serverProvider = serverProvider;
-		this.generalValidator = generalValidator;
 	}
 
 	@Override
@@ -60,7 +56,7 @@ public class JobManagerImpl implements JobManager {
 	@Override
 	public Job getJobByName(String jobName) throws GeneralEconomyException {
 		Job job = jobList.get(jobName);
-		generalValidator.checkForValueExists(job, jobName);
+		validationHandler.checkForValueExists(job, jobName);
 		return job;
 	}
 
@@ -75,9 +71,9 @@ public class JobManagerImpl implements JobManager {
 
 	@Override
 	public void createJob(String jobName) throws GeneralEconomyException {
-		generalValidator.checkForValueNotInList(getJobNameList(), jobName);
+		validationHandler.checkForValueNotInList(getJobNameList(), jobName);
 		JobDao jobDao = serverProvider.getServiceComponent().getJobDao();
-		jobList.put(jobName, new JobImpl(generalValidator, validationHandler, jobDao, jobName, true));
+		jobList.put(jobName, new JobImpl(validationHandler, jobDao, jobName, true));
 		configDao.saveJobList(getJobNameList());
 	}
 
@@ -85,7 +81,7 @@ public class JobManagerImpl implements JobManager {
 	public void loadAllJobs() {
 		for (String jobName : configDao.loadJobList()) {
 			JobDao jobDao = serverProvider.getServiceComponent().getJobDao();
-			jobList.put(jobName, new JobImpl(generalValidator, validationHandler, jobDao, jobName, false));
+			jobList.put(jobName, new JobImpl(validationHandler, jobDao, jobName, false));
 		}
 	}
 

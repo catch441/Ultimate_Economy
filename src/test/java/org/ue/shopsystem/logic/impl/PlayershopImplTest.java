@@ -42,8 +42,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
-import org.ue.common.api.CustomSkullService;
-import org.ue.common.api.SkullTextureEnum;
+import org.ue.common.logic.api.CustomSkullService;
+import org.ue.common.logic.api.GeneralValidationHandler;
+import org.ue.common.logic.api.SkullTextureEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
@@ -51,7 +52,6 @@ import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
 import org.ue.shopsystem.logic.api.PlayershopManager;
@@ -92,7 +92,7 @@ public class PlayershopImplTest {
 	@Mock
 	EconomyPlayerManager ecoPlayerManager;
 	@Mock
-	GeneralEconomyValidationHandler generalValidator;
+	GeneralValidationHandler generalValidator;
 
 	@Test
 	public void setupNewTest() {

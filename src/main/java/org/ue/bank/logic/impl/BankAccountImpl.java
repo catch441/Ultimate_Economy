@@ -5,14 +5,14 @@ import java.util.UUID;
 import org.ue.bank.dataaccess.api.BankDao;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankValidationHandler;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.general.GeneralEconomyException;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 
 public class BankAccountImpl implements BankAccount {
 
 	private final BankDao bankDao;
 	private final BankValidationHandler validationHandler;
-	private final GeneralEconomyValidationHandler generalValidator;
+	private final GeneralValidationHandler generalValidator;
 	private double amount;
 	private final String iban;
 
@@ -24,7 +24,7 @@ public class BankAccountImpl implements BankAccount {
 	 * @param validationHandler
 	 * @param startAmount
 	 */
-	public BankAccountImpl(GeneralEconomyValidationHandler generalValidator, BankDao bankDao,
+	public BankAccountImpl(GeneralValidationHandler generalValidator, BankDao bankDao,
 			BankValidationHandler validationHandler, double startAmount) {
 		this.bankDao = bankDao;
 		this.validationHandler = validationHandler;
@@ -43,7 +43,7 @@ public class BankAccountImpl implements BankAccount {
 	 * @param startAmount
 	 * @param externalIban
 	 */
-	public BankAccountImpl(GeneralEconomyValidationHandler generalValidator, BankDao bankDao,
+	public BankAccountImpl(GeneralValidationHandler generalValidator, BankDao bankDao,
 			BankValidationHandler validationHandler, double startAmount, String externalIban) {
 		this.bankDao = bankDao;
 		this.validationHandler = validationHandler;
@@ -61,7 +61,7 @@ public class BankAccountImpl implements BankAccount {
 	 * @param validationHandler
 	 * @param iban
 	 */
-	public BankAccountImpl(GeneralEconomyValidationHandler generalValidator, BankDao bankDao,
+	public BankAccountImpl(GeneralValidationHandler generalValidator, BankDao bankDao,
 			BankValidationHandler validationHandler, String iban) {
 		this.bankDao = bankDao;
 		this.validationHandler = validationHandler;

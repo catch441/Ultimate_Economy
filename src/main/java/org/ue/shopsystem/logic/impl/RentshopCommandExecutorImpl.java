@@ -73,7 +73,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performCreateCommand(String label, String[] args, Player player)
-			throws NumberFormatException, GeneralEconomyException {
+			throws NumberFormatException, GeneralEconomyException, EconomyPlayerException {
 		if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 			if (args.length == 3) {
 				Rentshop shop = rentshopManager.createRentShop(player.getLocation(), Integer.valueOf(args[1]),
@@ -103,7 +103,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 			if (args.length == 2) {
-				rentshopManager.getRentShopByUniqueName(args[1]).moveShop(player.getLocation());
+				rentshopManager.getRentShopByUniqueName(args[1]).changeLocation(player.getLocation());
 			} else {
 				player.sendMessage("/" + label + " move <shopname>");
 			}
@@ -115,7 +115,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 		if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 			if (args.length == 3) {
-				rentshopManager.getRentShopByUniqueName(args[1]).changeShopSize(Integer.valueOf(args[2]));
+				rentshopManager.getRentShopByUniqueName(args[1]).changeSize(Integer.valueOf(args[2]));
 				player.sendMessage(messageWrapper.getString("shop_resize", args[2]));
 			} else {
 				player.sendMessage("/" + label + " resize <shopname> <new size>");

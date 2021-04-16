@@ -19,10 +19,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.utils.ServerProvider;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.EconomyVillager;
 import org.ue.general.GeneralEconomyException;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
 import org.ue.townsystem.logic.TownSystemException;
@@ -141,7 +141,7 @@ public class PlotImpl implements Plot {
 		villager.setCustomNameVisible(true);
 		// set the tye of the villager to meta
 		villager.setMetadata("ue-type",
-				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.PLOTSALE));
+				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillagerType.PLOTSALE));
 		villager.setProfession(Profession.NITWIT);
 		villager.setSilent(true);
 		villager.setInvulnerable(true);

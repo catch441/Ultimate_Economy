@@ -10,12 +10,12 @@ import javax.inject.Inject;
 import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.general.GeneralEconomyExceptionMessageEnum;
 import org.ue.shopsystem.logic.ShopSystemException;
@@ -31,7 +31,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	private final MessageWrapper messageWrapper;
 	private final ShopValidationHandler validationHandler;
 	private final TownsystemValidationHandler townsystemValidationHandler;
-	private final GeneralEconomyValidationHandler generalValidator;
+	private final GeneralValidationHandler generalValidator;
 	private final ConfigDao configDao;
 	private final ServerProvider serverProvider;
 	private Map<String, Playershop> playerShopList = new HashMap<>();
@@ -40,7 +40,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	public PlayershopManagerImpl(ConfigDao configDao, TownsystemValidationHandler townsystemValidationHandler,
 			ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
 			ServerProvider serverProvider,
-			GeneralEconomyValidationHandler generalValidator) {
+			GeneralValidationHandler generalValidator) {
 		this.configDao = configDao;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
@@ -122,47 +122,21 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	@Override
 	public void despawnAllVillagers() {
 		for (Playershop shop : playerShopList.values()) {
-			shop.despawnVillager();
+			shop.despawn();
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void loadAllPlayerShops() {
-		if (configDao.hasPlayerShopNames()) {
-			playerShopsOldLoadingAll();
-		} else {
-			playerShopsNewLoadingAll();
-		}
-	}
-
-	private void playerShopsNewLoadingAll() {
 		for (String shopId : configDao.loadPlayershopIds()) {
 			try {
 				Playershop shop = serverProvider.getServiceComponent().getPlayershop();
-				shop.setupExisting(null, shopId);
+				shop.setupExisting(shopId);
 				playerShopList.put(shopId, shop);
-			} catch (TownSystemException | GeneralEconomyException | ShopSystemException e) {
+			} catch (TownSystemException | GeneralEconomyException | EconomyPlayerException e) {
 				log.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
-	}
-
-	@Deprecated
-	private void playerShopsOldLoadingAll() {
-		for (String shopName : configDao.loadPlayerShopNames()) {
-			String shopId = generateFreePlayerShopId();
-			try {
-				Playershop shop = serverProvider.getServiceComponent().getPlayershop();
-				shop.setupExisting(shopName, shopId);
-				playerShopList.put(shopId, shop);
-			} catch (TownSystemException | GeneralEconomyException | ShopSystemException e) {
-				log.warn("[Ultimate_Economy] Failed to load the shop " + shopName);
-				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
-			}
-		}
-		configDao.removeDeprecatedPlayerShopNames();
-		configDao.savePlayershopIds(getPlayershopIdList());
 	}
 }

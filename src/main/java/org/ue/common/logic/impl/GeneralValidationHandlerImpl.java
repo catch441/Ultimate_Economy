@@ -1,21 +1,34 @@
-package org.ue.general.impl;
+package org.ue.common.logic.impl;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.general.GeneralEconomyException;
 import org.ue.general.GeneralEconomyExceptionMessageEnum;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 
-public class GeneralEconomyValidationHandlerImpl implements GeneralEconomyValidationHandler {
+public class GeneralValidationHandlerImpl implements GeneralValidationHandler {
 
-	private final MessageWrapper messageWrapper;
+	protected final MessageWrapper messageWrapper;
 
-	@Inject
-	public GeneralEconomyValidationHandlerImpl(MessageWrapper messageWrapper) {
+	public GeneralValidationHandlerImpl(MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
+	}
+
+	@Override
+	public <T extends Enum<T>> void checkForValidEnum(Enum<? extends T>[] enumList, String value)
+			throws GeneralEconomyException {
+		boolean valid = false;
+		value = value.toUpperCase();
+		for (Enum<? extends T> enumValue : enumList) {
+			if (enumValue.name().equals(value)) {
+				valid = true;
+			}
+		}
+		if (!valid) {
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
+					value);
+		}
 	}
 
 	@Override
@@ -35,19 +48,19 @@ public class GeneralEconomyValidationHandlerImpl implements GeneralEconomyValida
 	}
 
 	@Override
-	public void checkForValueNotInList(List<String> list, String value) throws GeneralEconomyException {
+	public <T> void checkForValueNotInList(List<T> list, T value) throws GeneralEconomyException {
 		if (list.contains(value)) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, value);
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, value.toString().toLowerCase());
 		}
 	}
 
 	@Override
-	public void checkForValueInList(List<String> list, String value) throws GeneralEconomyException {
+	public <T> void checkForValueInList(List<T> list, T value) throws GeneralEconomyException {
 		if (!list.contains(value)) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, value);
+			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, value.toString().toLowerCase());
 		}
 	}
-	
+
 	@Override
 	public void checkForValueExists(Object value, String name) throws GeneralEconomyException {
 		if (value == null) {

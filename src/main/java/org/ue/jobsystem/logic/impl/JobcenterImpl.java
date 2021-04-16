@@ -1,7 +1,6 @@
 package org.ue.jobsystem.logic.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -9,27 +8,17 @@ import javax.inject.Inject;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
-import org.bukkit.entity.Villager.Profession;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.ue.common.logic.api.EconomyVillagerType;
+import org.ue.common.logic.impl.EconomyVillagerImpl;
 import org.ue.common.utils.ServerProvider;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.api.GeneralEconomyValidationHandler;
-import org.ue.general.EconomyVillager;
 import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.dataaccess.api.JobcenterDao;
 import org.ue.jobsystem.logic.JobSystemException;
@@ -38,59 +27,46 @@ import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.townsystem.logic.TownSystemException;
 
-public class JobcenterImpl implements Jobcenter {
+public class JobcenterImpl extends EconomyVillagerImpl implements Jobcenter {
 
 	private static final Logger log = LoggerFactory.getLogger(JobcenterImpl.class);
 	private final JobManager jobManager;
 	private final JobcenterManager jobcenterManager;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobsystemValidationHandler validationHandler;
-	private final GeneralEconomyValidationHandler generalValidator;
 	private final JobcenterDao jobcenterDao;
-	private final ServerProvider serverProvider;
-	private Villager villager;
-	private Location location;
 	private String name;
-	private int size;
 	private List<Job> jobs = new ArrayList<>();
-	private Inventory inventory;
 
 	@Inject
 	public JobcenterImpl(JobcenterDao jobcenterDao, JobManager jobManager, JobcenterManager jobcenterManager,
 			EconomyPlayerManager ecoPlayerManager, JobsystemValidationHandler validationHandler,
-			ServerProvider serverProvider, GeneralEconomyValidationHandler generalValidator) {
+			ServerProvider serverProvider) {
+		super(serverProvider, jobcenterDao, validationHandler);
 		this.jobManager = jobManager;
 		this.jobcenterManager = jobcenterManager;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
-		this.serverProvider = serverProvider;
 		this.jobcenterDao = jobcenterDao;
-		this.generalValidator = generalValidator;
 	}
 
 	@Override
-	public void setupNew(String name, Location spawnLocation, int size) {
+	public void setupNew(String name, Location spawnLocation, int size)
+			throws GeneralEconomyException, EconomyPlayerException {
 		jobcenterDao.setupSavefile(name);
 		this.name = name;
-		this.size = size;
-		location = spawnLocation;
 		jobcenterDao.saveJobcenterName(name);
-		jobcenterDao.saveJobcenterSize(size);
-		jobcenterDao.saveJobcenterLocation(location);
-		setupVillager();
-		inventory = serverProvider.createInventory(villager, size, getName());
+		setupNewEconomyVillager(spawnLocation, EconomyVillagerType.JOBCENTER, name, size, 1);
 		setupDefaultJobcenterInventory();
 	}
 
 	@Override
-	public void setupExisting(String name) {
+	public void setupExisting(String name) throws TownSystemException, GeneralEconomyException, EconomyPlayerException {
 		jobcenterDao.setupSavefile(name);
 		this.name = name;
-		location = jobcenterDao.loadJobcenterLocation();
-		size = jobcenterDao.loadJobcenterSize();
-		setupVillager();
-		inventory = serverProvider.createInventory(villager, size, getName());
+		setupExistingEconomyVillager(EconomyVillagerType.JOBCENTER, name, 1);
 		setupDefaultJobcenterInventory();
 		loadJobs();
 	}
@@ -98,27 +74,27 @@ public class JobcenterImpl implements Jobcenter {
 	@Override
 	public void addJob(Job job, String itemMaterial, int slot)
 			throws EconomyPlayerException, GeneralEconomyException, JobSystemException {
-		// -1 because of reserved slots
-		generalValidator.checkForValidSlot(slot, size - 1);
-		validationHandler.checkForFreeSlot(inventory, slot);
 		validationHandler.checkForJobDoesNotExistInJobcenter(getJobList(), job);
 		itemMaterial = itemMaterial.toUpperCase();
-		validationHandler.checkForValidMaterial(itemMaterial);
-		getJobList().add(job);
-		jobcenterDao.saveJobNameList(getJobNameList());
-		jobcenterDao.saveJob(job, itemMaterial, slot);
+		validationHandler.checkForValidEnum(Material.values(), itemMaterial);
+
 		ItemStack jobItem = serverProvider.createItemStack(Material.valueOf(itemMaterial), 1);
 		ItemMeta meta = jobItem.getItemMeta();
 		meta.setDisplayName(job.getName());
 		meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 		jobItem.setItemMeta(meta);
-		inventory.setItem(slot, jobItem);
+		// throws an exception if the slot is occupied
+		addItemStack(jobItem, slot, false, false);
+
+		getJobList().add(job);
+		jobcenterDao.saveJobNameList(getJobNameList());
+		jobcenterDao.saveJob(job, itemMaterial, slot);
 	}
 
 	@Override
 	public void removeJob(Job job) throws JobSystemException {
 		validationHandler.checkForJobExistsInJobcenter(getJobList(), job);
-		inventory.clear(getJobSlot(job));
+		getInventory().clear(getJobSlot(job));
 		getJobList().remove(job);
 		jobcenterDao.saveJob(job, null, 0);
 		jobcenterDao.saveJobNameList(getJobNameList());
@@ -142,33 +118,15 @@ public class JobcenterImpl implements Jobcenter {
 	}
 
 	@Override
-	public void moveJobcenter(Location location) {
-		villager.teleport(location);
-		this.location = location;
-		jobcenterDao.saveJobcenterLocation(getJobcenterLocation());
-	}
-
-	@Override
 	public String getName() {
 		return name;
 	}
 
 	@Override
-	public void despawnVillager() {
-		villager.remove();
-	}
-
-	@Override
 	public void deleteJobcenter() {
 		jobcenterDao.deleteSavefile();
-		World world = getJobcenterLocation().getWorld();
-		despawnVillager();
-		world.save();
-	}
-
-	@Override
-	public void openInv(Player player) {
-		player.openInventory(inventory);
+		despawn();
+		getLocation().getWorld().save();
 	}
 
 	@Override
@@ -177,11 +135,6 @@ public class JobcenterImpl implements Jobcenter {
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	public Location getJobcenterLocation() {
-		return location;
 	}
 
 	private List<String> getJobNameList() {
@@ -205,8 +158,8 @@ public class JobcenterImpl implements Jobcenter {
 		return false;
 	}
 
-	private void setupDefaultJobcenterInventory() {
-		int slot = inventory.getSize() - 1;
+	private void setupDefaultJobcenterInventory() throws GeneralEconomyException, EconomyPlayerException {
+		int slot = getSize() - 1;
 		ItemStack info = serverProvider.createItemStack(Material.ANVIL, 1);
 		ItemMeta meta = info.getItemMeta();
 		meta.setDisplayName("Info");
@@ -215,42 +168,21 @@ public class JobcenterImpl implements Jobcenter {
 		lore.add(ChatColor.GOLD + "Rightclick: " + ChatColor.RED + "Leave");
 		meta.setLore(lore);
 		info.setItemMeta(meta);
-		inventory.setItem(slot, info);
-	}
-
-	private void setupVillager() {
-		getJobcenterLocation().getChunk().load();
-		Collection<Entity> entitys = getJobcenterLocation().getWorld().getNearbyEntities(getJobcenterLocation(), 10, 10,
-				10);
-		for (Entity e : entitys) {
-			if (getName().equals(e.getCustomName())) {
-				e.remove();
-			}
-		}
-		villager = (Villager) getJobcenterLocation().getWorld().spawnEntity(location, EntityType.VILLAGER);
-		villager.setCustomName(name);
-		villager.setMetadata("ue-type",
-				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.JOBCENTER));
-		villager.setCustomNameVisible(true);
-		villager.setProfession(Profession.NITWIT);
-		villager.setSilent(true);
-		villager.setCollidable(false);
-		villager.setInvulnerable(true);
-		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
+		addItemStack(info, slot, true, true);
 	}
 
 	private void loadJobs() {
 		for (String jobName : jobcenterDao.loadJobNameList()) {
 			try {
 				Job job = jobManager.getJobByName(jobName);
-				getJobList().add(job);
 				ItemStack jobItem = serverProvider.createItemStack(jobcenterDao.loadJobItemMaterial(job), 1);
 				ItemMeta meta = jobItem.getItemMeta();
 				meta.setDisplayName(job.getName());
 				meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 				jobItem.setItemMeta(meta);
-				inventory.setItem(jobcenterDao.loadJobSlot(job), jobItem);
-			} catch (GeneralEconomyException e) {
+				addItemStack(jobItem, jobcenterDao.loadJobSlot(job), false, true);
+				getJobList().add(job);
+			} catch (GeneralEconomyException | EconomyPlayerException e) {
 				log.warn("[Ultimate_Economy] Failed to load the job " + jobName + " for the jobcenter " + getName());
 				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}

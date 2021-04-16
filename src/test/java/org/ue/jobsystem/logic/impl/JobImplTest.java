@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ue.general.api.GeneralEconomyValidationHandler;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.dataaccess.api.JobDao;
 import org.ue.jobsystem.logic.api.Job;
@@ -36,7 +36,7 @@ public class JobImplTest {
 	@Mock
 	JobsystemValidationHandler validationHandler;
 	@Mock
-	GeneralEconomyValidationHandler generalValidator;
+	GeneralValidationHandler generalValidator;
 
 	@Test
 	public void constructorNewTest() {

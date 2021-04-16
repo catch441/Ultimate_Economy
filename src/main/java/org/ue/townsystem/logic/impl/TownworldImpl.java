@@ -12,12 +12,12 @@ import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ue.bank.logic.api.BankManager;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.general.GeneralEconomyExceptionMessageEnum;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
@@ -33,7 +33,7 @@ public class TownworldImpl implements Townworld {
 	private static final Logger log = LoggerFactory.getLogger(TownworldImpl.class);
 	private final TownsystemValidationHandler townsystemValidationHandler;
 	private final EconomyPlayerValidationHandler ecoPlayerValidationHandler;
-	private final GeneralEconomyValidationHandler generalValidator;
+	private final GeneralValidationHandler generalValidator;
 	private final TownworldManager townworldManager;
 	private final MessageWrapper messageWrapper;
 	private final BankManager bankManager;
@@ -62,7 +62,7 @@ public class TownworldImpl implements Townworld {
 			TownsystemValidationHandler townsystemValidationHandler,
 			EconomyPlayerValidationHandler ecoPlayerValidationHandler, TownworldManager townworldManager,
 			MessageWrapper messageWrapper, BankManager bankManager, ServerProvider serverProvider,
-			GeneralEconomyValidationHandler generalValidator) {
+			GeneralValidationHandler generalValidator) {
 		this.townworldDao = townworldDao;
 		this.townsystemValidationHandler = townsystemValidationHandler;
 		this.ecoPlayerValidationHandler = ecoPlayerValidationHandler;

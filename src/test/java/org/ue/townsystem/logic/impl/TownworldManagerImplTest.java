@@ -41,6 +41,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankManager;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.ServiceComponent;
 import org.ue.common.utils.api.MessageWrapper;
@@ -48,7 +49,6 @@ import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.general.GeneralEconomyExceptionMessageEnum;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
@@ -80,7 +80,7 @@ public class TownworldManagerImplTest {
 	@Mock
 	ConfigDao configDao;
 	@Mock
-	GeneralEconomyValidationHandler generalValidator;
+	GeneralValidationHandler generalValidator;
 
 	@Test
 	public void createTownWorldTestWithWorldDoesNotExist() throws TownSystemException {

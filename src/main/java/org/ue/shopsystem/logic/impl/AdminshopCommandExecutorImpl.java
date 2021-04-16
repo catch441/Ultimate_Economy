@@ -35,7 +35,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final JobManager jobManager;
 	private final ConfigManager configManager;
-	
+
 	@Inject
 	public AdminshopCommandExecutorImpl(JobManager jobManager, EconomyPlayerManager ecoPlayerManager,
 			AdminshopManager adminshopManager, MessageWrapper messageWrapper, ServerProvider serverProvider,
@@ -87,7 +87,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 1) {
 			EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(player.getName());
 			if (configManager.isAllowQuickshop() || ecoPlayer.hasJob(jobManager.getJobByName(args[0]))) {
-				adminshopManager.getAdminShopByName(args[0]).openShopInventory(player);
+				adminshopManager.getAdminShopByName(args[0]).openInventory(player);
 			} else {
 				player.sendMessage(messageWrapper.getErrorString("job_not_joined"));
 			}
@@ -130,7 +130,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performCreateCommand(String label, String[] args, Player player)
-			throws NumberFormatException, ShopSystemException, GeneralEconomyException {
+			throws NumberFormatException, ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 		if (args.length == 3) {
 			adminshopManager.createAdminShop(args[1], player.getLocation(), Integer.valueOf(args[2]));
 			player.sendMessage(messageWrapper.getString("created", args[1]));
@@ -165,7 +165,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	private boolean performResizeCommand(String label, String[] args, Player player)
 			throws NumberFormatException, ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 		if (args.length == 3) {
-			adminshopManager.getAdminShopByName(args[1]).changeShopSize(Integer.valueOf(args[2]));
+			adminshopManager.getAdminShopByName(args[1]).changeSize(Integer.valueOf(args[2]));
 			player.sendMessage(messageWrapper.getString("shop_resize", args[2]));
 		} else {
 			player.sendMessage("/" + label + " resize <shopname> <new size>");
@@ -176,7 +176,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	private boolean performMoveCommand(String label, String[] args, Player player)
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		if (args.length == 2) {
-			adminshopManager.getAdminShopByName(args[1]).moveShop(player.getLocation());
+			adminshopManager.getAdminShopByName(args[1]).changeLocation(player.getLocation());
 		} else {
 			player.sendMessage("/" + label + " move <shopname>");
 		}

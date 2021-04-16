@@ -3,17 +3,16 @@ package org.ue.bank.logic.impl;
 import javax.inject.Inject;
 
 import org.ue.bank.logic.api.BankValidationHandler;
+import org.ue.common.logic.impl.GeneralValidationHandlerImpl;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.general.GeneralEconomyException;
 import org.ue.general.GeneralEconomyExceptionMessageEnum;
 
-public class BankValidationHandlerImpl implements BankValidationHandler {
+public class BankValidationHandlerImpl extends GeneralValidationHandlerImpl implements BankValidationHandler {
 
-	private final MessageWrapper messageWrapper;
-	
 	@Inject
 	public BankValidationHandlerImpl(MessageWrapper messageWrapper) {
-		this.messageWrapper = messageWrapper;
+		super(messageWrapper);
 	}
 
 	@Override

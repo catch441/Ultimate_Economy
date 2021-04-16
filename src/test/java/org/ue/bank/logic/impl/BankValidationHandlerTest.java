@@ -9,8 +9,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.api.MessageWrapper;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.general.GeneralEconomyExceptionMessageEnum;
 
@@ -22,7 +22,7 @@ public class BankValidationHandlerTest {
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock
-	GeneralEconomyValidationHandler generalHandler;
+	GeneralValidationHandler generalHandler;
 
 	@Test
 	public void checkForHasEnoughMoneyTestFail() {

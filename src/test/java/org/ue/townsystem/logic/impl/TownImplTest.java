@@ -38,11 +38,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankManager;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
 import org.ue.townsystem.logic.api.Plot;
@@ -67,7 +67,7 @@ public class TownImplTest {
 	@Mock
 	TownworldDao townworldDao;
 	@Mock
-	GeneralEconomyValidationHandler generalValidator;
+	GeneralValidationHandler generalValidator;
 
 	private Town createTown() {
 		JavaPlugin plugin = mock(JavaPlugin.class);

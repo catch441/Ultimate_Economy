@@ -46,15 +46,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
-import org.ue.common.api.CustomSkullService;
-import org.ue.common.api.SkullTextureEnum;
+import org.ue.common.logic.api.CustomSkullService;
+import org.ue.common.logic.api.GeneralValidationHandler;
+import org.ue.common.logic.api.SkullTextureEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
 import org.ue.shopsystem.logic.api.AdminshopManager;
@@ -87,7 +87,7 @@ public class AdminshopImplTest {
 	@Mock
 	AdminshopManager adminshopManager;
 	@Mock
-	GeneralEconomyValidationHandler generalValidator;
+	GeneralValidationHandler generalValidator;
 
 	private void createNewAdminshop() {
 		JavaPlugin plugin = mock(JavaPlugin.class);

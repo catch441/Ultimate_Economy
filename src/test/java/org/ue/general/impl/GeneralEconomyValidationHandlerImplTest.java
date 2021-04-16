@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.common.logic.impl.GeneralValidationHandlerImpl;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.general.GeneralEconomyException;
 import org.ue.general.GeneralEconomyExceptionMessageEnum;
@@ -20,7 +21,7 @@ import org.ue.general.GeneralEconomyExceptionMessageEnum;
 public class GeneralEconomyValidationHandlerImplTest {
 
 	@InjectMocks
-	GeneralEconomyValidationHandlerImpl generalValidator;
+	GeneralValidationHandlerImpl generalValidator;
 	@Mock
 	MessageWrapper messageWrapper;
 	

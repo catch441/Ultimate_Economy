@@ -37,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankManager;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
@@ -44,7 +45,6 @@ import org.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
@@ -69,7 +69,7 @@ public class EconomyPlayerImplTest {
 	@Mock
 	Logger logger;
 	@Mock
-	GeneralEconomyValidationHandler generalValidator;;
+	GeneralValidationHandler generalValidator;;
 
 	@Test
 	public void constructorNewTest() {

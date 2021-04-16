@@ -35,8 +35,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
+import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.EconomyVillager;
 import org.ue.general.GeneralEconomyException;
 import org.ue.shopsystem.logic.api.Adminshop;
 import org.ue.shopsystem.logic.api.AdminshopManager;
@@ -68,7 +68,7 @@ public class ShopEventHandlerImplTest {
 		Villager villager = mock(Villager.class);
 		Player player = mock(Player.class);
 		PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, villager);
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.PLAYERSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.PLAYERSHOP);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "P0");
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
@@ -84,7 +84,7 @@ public class ShopEventHandlerImplTest {
 		Villager villager = mock(Villager.class);
 		Player player = mock(Player.class);
 		PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, villager);
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.TOWNMANAGER);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.TOWNMANAGER);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "P0");
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
@@ -101,7 +101,7 @@ public class ShopEventHandlerImplTest {
 		Villager villager = mock(Villager.class);
 		Player player = mock(Player.class);
 		PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, villager);
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.PLAYERSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.PLAYERSHOP);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "P0");
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
@@ -117,7 +117,7 @@ public class ShopEventHandlerImplTest {
 		Villager villager = mock(Villager.class);
 		Player player = mock(Player.class);
 		PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, villager);
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.ADMINSHOP);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
@@ -134,7 +134,7 @@ public class ShopEventHandlerImplTest {
 		Villager villager = mock(Villager.class);
 		Player player = mock(Player.class);
 		PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, villager);
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.PLAYERSHOP_RENTABLE);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.RENTSHOP);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "R0");
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
@@ -152,7 +152,7 @@ public class ShopEventHandlerImplTest {
 		Villager villager = mock(Villager.class);
 		Player player = mock(Player.class);
 		PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, villager);
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.PLAYERSHOP_RENTABLE);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.RENTSHOP);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "R0");
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
@@ -177,7 +177,7 @@ public class ShopEventHandlerImplTest {
 		InventoryView view = mock(InventoryView.class);
 		ItemStack clickedItem = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopById("A0")).thenReturn(shop));
@@ -213,7 +213,7 @@ public class ShopEventHandlerImplTest {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		ItemStack clickedItem = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		doThrow(GeneralEconomyException.class).when(adminshopManager).getAdminShopById("A0");
@@ -239,7 +239,7 @@ public class ShopEventHandlerImplTest {
 		InventoryView view = mock(InventoryView.class);
 		ItemStack clickedItem = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopById("A0")).thenReturn(shop));
@@ -275,7 +275,7 @@ public class ShopEventHandlerImplTest {
 		InventoryView view = mock(InventoryView.class);
 		ItemStack clickedItem = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopById("A0")).thenReturn(shop));
@@ -309,7 +309,7 @@ public class ShopEventHandlerImplTest {
 		InventoryView view = mock(InventoryView.class);
 		ItemStack clickedItem = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopById("A0")).thenReturn(shop));
@@ -345,7 +345,7 @@ public class ShopEventHandlerImplTest {
 		InventoryView view = mock(InventoryView.class);
 		ItemStack clickedItem = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "P0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.PLAYERSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.PLAYERSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		assertDoesNotThrow(() -> when(playershopManager.getPlayerShopById("P0")).thenReturn(shop));
@@ -382,7 +382,7 @@ public class ShopEventHandlerImplTest {
 		InventoryView view = mock(InventoryView.class);
 		ItemStack clickedItem = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "R0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.PLAYERSHOP_RENTABLE);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.RENTSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		assertDoesNotThrow(() -> when(rentshopManager.getRentShopById("R0")).thenReturn(shop));
@@ -419,7 +419,7 @@ public class ShopEventHandlerImplTest {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		ItemStack clickedItem = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "R0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.PLAYERSHOP_RENTABLE);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.RENTSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		assertDoesNotThrow(() -> when(rentshopManager.getRentShopById("R0")).thenReturn(shop));
@@ -456,7 +456,7 @@ public class ShopEventHandlerImplTest {
 		InventoryView view = mock(InventoryView.class);
 		ItemStack clickedItem = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopById("A0")).thenReturn(shop));
@@ -488,7 +488,7 @@ public class ShopEventHandlerImplTest {
 		InventoryView view = mock(InventoryView.class);
 		ItemStack clickedItem = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopById("A0")).thenReturn(shop));
@@ -516,7 +516,7 @@ public class ShopEventHandlerImplTest {
 		Player player = mock(Player.class);
 		ItemStack clickedItem = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.TOWNMANAGER);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.TOWNMANAGER);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
@@ -547,7 +547,7 @@ public class ShopEventHandlerImplTest {
 		ItemStack shopItemStack = mock(ItemStack.class);
 		ItemStack shopItemStackClone = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopById("A0")).thenReturn(shop));
@@ -599,7 +599,7 @@ public class ShopEventHandlerImplTest {
 		InventoryView view = mock(InventoryView.class);
 		ItemStack clickedItem = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopById("A0")).thenReturn(shop));
@@ -642,7 +642,7 @@ public class ShopEventHandlerImplTest {
 		ItemStack shopItemStack = mock(ItemStack.class);
 		ItemStack shopItemStackClone = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopById("A0")).thenReturn(shop));
@@ -705,7 +705,7 @@ public class ShopEventHandlerImplTest {
 		ItemStack shopItemStack = mock(ItemStack.class);
 		ItemStack shopItemStackClone = mock(ItemStack.class);
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "A0");
-		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillager.ADMINSHOP);
+		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopById("A0")).thenReturn(shop));

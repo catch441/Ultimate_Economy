@@ -1,4 +1,4 @@
-package org.ue.common.impl;
+package org.ue.common.logic.impl;
 
 import java.lang.reflect.Field;
 import java.util.Base64;
@@ -16,8 +16,8 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.ue.common.api.CustomSkullService;
-import org.ue.common.api.SkullTextureEnum;
+import org.ue.common.logic.api.CustomSkullService;
+import org.ue.common.logic.api.SkullTextureEnum;
 import org.ue.common.utils.ServerProvider;
 
 import com.mojang.authlib.GameProfile;

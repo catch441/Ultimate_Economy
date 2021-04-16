@@ -22,10 +22,10 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.utils.Updater;
 import org.ue.common.utils.Updater.UpdateResult;
 import org.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
-import org.ue.general.EconomyVillager;
 import org.ue.general.GeneralEconomyException;
 import org.ue.economyplayer.logic.EconomyPlayerException;
 import org.ue.jobsystem.logic.api.JobcenterManager;
@@ -114,7 +114,7 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 	}
 
 	private void handleEconomyVillagerOpenInv(PlayerInteractEntityEvent event, Entity entity) {
-		EconomyVillager economyVillager = EconomyVillager
+		EconomyVillagerType economyVillager = EconomyVillagerType
 				.getEnum(entity.getMetadata("ue-type").get(0).value().toString());
 		switch (economyVillager) {
 		case JOBCENTER:
@@ -122,7 +122,7 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 			break;
 		case ADMINSHOP:
 		case PLAYERSHOP:
-		case PLAYERSHOP_RENTABLE:
+		case RENTSHOP:
 			shopEventHandler.handleOpenInventory(event);
 			break;
 		case PLOTSALE:
@@ -163,14 +163,14 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 
 	private void handleEconomyVillagerInvClick(InventoryClickEvent event, Entity entity) {
 		if (entity.hasMetadata("ue-type")) {
-			EconomyVillager economyVillager = (EconomyVillager) entity.getMetadata("ue-type").get(0).value();
+			EconomyVillagerType economyVillager = (EconomyVillagerType) entity.getMetadata("ue-type").get(0).value();
 			switch (economyVillager) {
 			case JOBCENTER:
 				jobsystemEventHandler.handleInventoryClick(event);
 				break;
 			case ADMINSHOP:
 			case PLAYERSHOP:
-			case PLAYERSHOP_RENTABLE:
+			case RENTSHOP:
 				shopEventHandler.handleInventoryClick(event);
 				break;
 			case PLOTSALE:

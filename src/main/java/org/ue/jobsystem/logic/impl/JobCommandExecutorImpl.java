@@ -21,6 +21,7 @@ import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
+import org.ue.townsystem.logic.TownSystemException;
 
 public class JobCommandExecutorImpl implements CommandExecutor {
 
@@ -28,7 +29,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	private final MessageWrapper messageWrapper;
 	private final JobcenterManager jobcenterManager;
 	private final ConfigManager configManager;
-	
+
 	@Inject
 	public JobCommandExecutorImpl(ConfigManager configManager, JobcenterManager jobcenterManager, JobManager jobManager,
 			MessageWrapper messageWrapper) {
@@ -44,7 +45,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 			Player player = (Player) sender;
 			try {
 				return handleCommand(label, args, player);
-			} catch (JobSystemException | EconomyPlayerException | GeneralEconomyException e) {
+			} catch (JobSystemException | EconomyPlayerException | GeneralEconomyException | TownSystemException e) {
 				player.sendMessage(e.getMessage());
 			} catch (NumberFormatException e) {
 				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", "number"));
@@ -53,8 +54,8 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean handleCommand(String label, String[] args, Player player)
-			throws NumberFormatException, GeneralEconomyException, JobSystemException, EconomyPlayerException {
+	private boolean handleCommand(String label, String[] args, Player player) throws NumberFormatException,
+			GeneralEconomyException, JobSystemException, EconomyPlayerException, TownSystemException {
 		switch (label) {
 		case "joblist":
 			return handleJobListCommand(args, player);
@@ -122,8 +123,8 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		}
 	}
 
-	private boolean performJobcenterCommand(String label, String[] args, Player player)
-			throws NumberFormatException, GeneralEconomyException, JobSystemException, EconomyPlayerException {
+	private boolean performJobcenterCommand(String label, String[] args, Player player) throws NumberFormatException,
+			GeneralEconomyException, JobSystemException, EconomyPlayerException, TownSystemException {
 		switch (JobCommandEnum.getEnum(args[0])) {
 		case ADDJOB:
 			return performAddJobCommand(label, args, player);
@@ -143,7 +144,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performCreateCommand(String label, String[] args, Player player)
-			throws NumberFormatException, JobSystemException, GeneralEconomyException {
+			throws NumberFormatException, JobSystemException, GeneralEconomyException, EconomyPlayerException {
 		if (args.length == 3) {
 			jobcenterManager.createJobcenter(args[1], player.getLocation(), Integer.parseInt(args[2]));
 			player.sendMessage(messageWrapper.getString("created", args[1]));
@@ -164,10 +165,11 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performMoveCommand(String label, String[] args, Player player) throws GeneralEconomyException {
+	private boolean performMoveCommand(String label, String[] args, Player player)
+			throws GeneralEconomyException, EconomyPlayerException, TownSystemException {
 		if (args.length == 2) {
 			Jobcenter jobcenter = jobcenterManager.getJobcenterByName(args[1]);
-			jobcenter.moveJobcenter(player.getLocation());
+			jobcenter.changeLocation(player.getLocation());
 		} else {
 			player.sendMessage("/jobcenter move <jobcenter>");
 		}

@@ -14,13 +14,13 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.EconomyPlayerCommandEnum;
 import org.ue.economyplayer.logic.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.townsystem.logic.api.TownworldManager;
@@ -31,12 +31,12 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final TownworldManager townworldManager;
-	private final GeneralEconomyValidationHandler generalValidator;
+	private final GeneralValidationHandler generalValidator;
 
 	@Inject
 	public EconomyPlayerCommandExecutorImpl(ConfigManager configManager, MessageWrapper messageWrapper,
 			EconomyPlayerManager ecoPlayerManager, TownworldManager townworldManager,
-			GeneralEconomyValidationHandler generalValidator) {
+			GeneralValidationHandler generalValidator) {
 		this.configManager = configManager;
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerManager = ecoPlayerManager;

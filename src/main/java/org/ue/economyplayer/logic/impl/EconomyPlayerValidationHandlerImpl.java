@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.ue.bank.logic.api.BankAccount;
+import org.ue.common.logic.impl.GeneralValidationHandlerImpl;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.EconomyPlayerException;
 import org.ue.economyplayer.logic.EconomyPlayerExceptionMessageEnum;
@@ -12,13 +13,12 @@ import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.logic.api.Job;
 
-public class EconomyPlayerValidationHandlerImpl implements EconomyPlayerValidationHandler {
-
-	private final MessageWrapper messageWrapper;
+public class EconomyPlayerValidationHandlerImpl extends GeneralValidationHandlerImpl
+		implements EconomyPlayerValidationHandler {
 
 	@Inject
 	public EconomyPlayerValidationHandlerImpl(MessageWrapper messageWrapper) {
-		this.messageWrapper = messageWrapper;
+		super(messageWrapper);
 	}
 
 	@Override

@@ -14,7 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ue.bank.logic.api.BankManager;
-import org.ue.common.api.CustomSkullService;
+import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.Updater;
 import org.ue.common.utils.api.MessageWrapper;

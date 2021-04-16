@@ -9,42 +9,23 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.ue.common.utils.SaveFileUtils;
+import org.ue.common.dataaccess.impl.EconomyVillagerDaoImpl;
 import org.ue.common.utils.ServerProvider;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
-import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.general.GeneralEconomyException;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
 import org.ue.shopsystem.logic.api.ShopItem;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
 import org.ue.shopsystem.logic.impl.ShopItemImpl;
-import org.ue.shopsystem.logic.ShopSystemException;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
-import org.ue.townsystem.logic.TownSystemException;
 
-public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
-
-	private static final Logger log = LoggerFactory.getLogger(ShopDaoImpl.class);
-	private final ServerProvider serverProvider;
-	private final EconomyPlayerManager ecoPlayerManager;
-	private final ShopValidationHandler validationHandler;
-	private final TownsystemValidationHandler townsystemValidationHandler;
+public class ShopDaoImpl extends EconomyVillagerDaoImpl implements ShopDao {
 
 	@Inject
-	public ShopDaoImpl(ServerProvider serverProvider, EconomyPlayerManager ecoPlayerManager,
-			ShopValidationHandler validationHandler, TownsystemValidationHandler townsystemValidationHandler) {
-		this.serverProvider = serverProvider;
-		this.ecoPlayerManager = ecoPlayerManager;
-		this.validationHandler = validationHandler;
-		this.townsystemValidationHandler = townsystemValidationHandler;
+	public ShopDaoImpl(ServerProvider serverProvider) {
+		super(serverProvider);
 	}
 
 	@Override
@@ -98,21 +79,6 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	@Override
 	public void saveShopItemAmount(int itemHash, int amount) {
 		config.set("ShopItems." + itemHash + ".Amount", amount);
-		save();
-	}
-
-	@Override
-	public void saveShopSize(int size) {
-		config.set("ShopSize", size);
-		save();
-	}
-
-	@Override
-	public void saveShopLocation(Location location) {
-		config.set("ShopLocation.x", location.getX());
-		config.set("ShopLocation.y", location.getY());
-		config.set("ShopLocation.z", location.getZ());
-		config.set("ShopLocation.World", location.getWorld().getName());
 		save();
 	}
 
@@ -204,39 +170,8 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	}
 
 	@Override
-	public void changeSavefileName(File dataFolder, String newName) throws ShopSystemException {
-		File newFile = new File(dataFolder, newName + ".yml");
-		validationHandler.checkForRenamingSavefileIsPossible(newFile);
-		file.delete();
-		file = newFile;
-		save();
-	}
-
-	@Override
-	public Profession loadShopVillagerProfession() {
-		if (config.isSet("Profession")) {
-			return Profession.valueOf(config.getString("Profession"));
-		} else {
-			return Profession.NITWIT;
-		}
-	}
-
-	@Override
-	public int loadShopSize() {
-		return config.getInt("ShopSize");
-	}
-
-	@Override
 	public String loadShopName() {
 		return config.getString("ShopName");
-	}
-
-	@Override
-	public Location loadShopLocation() throws TownSystemException {
-		String world = config.getString("ShopLocation.World");
-		townsystemValidationHandler.checkForWorldExists(world);
-		return new Location(serverProvider.getWorld(world), config.getDouble("ShopLocation.x"),
-				config.getDouble("ShopLocation.y"), config.getDouble("ShopLocation.z"));
 	}
 
 	@Override
@@ -276,8 +211,7 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 	}
 
 	@Override
-	public String loadOwner(String name) {
-		convertToNewOwnerSaving(name);
+	public String loadOwner() {
 		return config.getString("Owner");
 	}
 
@@ -316,23 +250,6 @@ public class ShopDaoImpl extends SaveFileUtils implements ShopDao {
 			config.set("RentUntil", null);
 			config.set("expiresAt", newTime);
 			save();
-		}
-	}
-
-	/**
-	 * @deprecated can be removed later
-	 */
-	@Deprecated
-	private void convertToNewOwnerSaving(String name) {
-		if (name != null) {
-			try {
-				EconomyPlayer ecoPlayer = ecoPlayerManager
-						.getEconomyPlayerByName(name.substring(name.indexOf("_") + 1));
-				saveOwner(ecoPlayer);
-			} catch (GeneralEconomyException e) {
-				log.warn("[Ultimate_Economy] Error on save config to file");
-				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
-			}
 		}
 	}
 

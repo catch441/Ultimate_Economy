@@ -10,13 +10,13 @@ import javax.inject.Inject;
 import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
-import org.ue.general.api.GeneralEconomyValidationHandler;
+import org.ue.economyplayer.logic.EconomyPlayerException;
 import org.ue.general.GeneralEconomyException;
 import org.ue.general.GeneralEconomyExceptionMessageEnum;
-import org.ue.shopsystem.logic.ShopSystemException;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopManager;
 import org.ue.townsystem.logic.TownSystemException;
@@ -25,13 +25,13 @@ public class RentshopManagerImpl implements RentshopManager {
 
 	private static final Logger log = LoggerFactory.getLogger(RentshopManagerImpl.class);
 	private final MessageWrapper messageWrapper;
-	private final GeneralEconomyValidationHandler generalValidator;
+	private final GeneralValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
 	private Map<String, Rentshop> rentShopList = new HashMap<>();
 
 	@Inject
-	public RentshopManagerImpl(MessageWrapper messageWrapper, GeneralEconomyValidationHandler generalValidator,
+	public RentshopManagerImpl(MessageWrapper messageWrapper, GeneralValidationHandler generalValidator,
 			ServerProvider serverProvider, ConfigDao configDao) {
 		this.messageWrapper = messageWrapper;
 		this.generalValidator = generalValidator;
@@ -94,7 +94,8 @@ public class RentshopManagerImpl implements RentshopManager {
 	}
 
 	@Override
-	public Rentshop createRentShop(Location spawnLocation, int size, double rentalFee) throws GeneralEconomyException {
+	public Rentshop createRentShop(Location spawnLocation, int size, double rentalFee)
+			throws GeneralEconomyException, EconomyPlayerException {
 		generalValidator.checkForValidSize(size);
 		generalValidator.checkForPositiveValue(rentalFee);
 		Rentshop shop = serverProvider.getServiceComponent().getRentshop();
@@ -114,7 +115,7 @@ public class RentshopManagerImpl implements RentshopManager {
 	@Override
 	public void despawnAllVillagers() {
 		for (Rentshop shop : rentShopList.values()) {
-			shop.despawnVillager();
+			shop.despawn();
 		}
 	}
 
@@ -123,9 +124,9 @@ public class RentshopManagerImpl implements RentshopManager {
 		for (String shopId : configDao.loadRentshopIds()) {
 			try {
 				Rentshop shop = serverProvider.getServiceComponent().getRentshop();
-				shop.setupExisting(null, shopId);
+				shop.setupExisting(shopId);
 				rentShopList.put(shopId, shop);
-			} catch (TownSystemException | GeneralEconomyException | ShopSystemException e) {
+			} catch (TownSystemException | GeneralEconomyException | EconomyPlayerException e) {
 				log.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}

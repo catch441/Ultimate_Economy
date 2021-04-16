@@ -10,10 +10,11 @@ import javax.inject.Inject;
 import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
-import org.ue.general.api.GeneralEconomyValidationHandler;
+import org.ue.economyplayer.logic.EconomyPlayerException;
 import org.ue.general.GeneralEconomyException;
 import org.ue.general.GeneralEconomyExceptionMessageEnum;
 import org.ue.shopsystem.logic.ShopSystemException;
@@ -27,15 +28,14 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	private static final Logger log = LoggerFactory.getLogger(AdminshopManagerImpl.class);
 	private final MessageWrapper messageWrapper;
 	private final ShopValidationHandler validationHandler;
-	private final GeneralEconomyValidationHandler generalValidator;
+	private final GeneralValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
 	private Map<String, Adminshop> adminShopList = new HashMap<>();
-	
+
 	@Inject
 	public AdminshopManagerImpl(ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
-			ServerProvider serverProvider, ConfigDao configDao,
-			GeneralEconomyValidationHandler generalValidator) {
+			ServerProvider serverProvider, ConfigDao configDao, GeneralValidationHandler generalValidator) {
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
 		this.serverProvider = serverProvider;
@@ -94,7 +94,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 
 	@Override
 	public void createAdminShop(String name, Location spawnLocation, int size)
-			throws ShopSystemException, GeneralEconomyException {
+			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 		validationHandler.checkForValidShopName(name);
 		generalValidator.checkForValidSize(size);
 		generalValidator.checkForValueNotInList(getAdminshopNameList(), name);
@@ -114,46 +114,21 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	@Override
 	public void despawnAllVillagers() {
 		for (Adminshop shop : adminShopList.values()) {
-			shop.despawnVillager();
+			shop.despawn();
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void loadAllAdminShops() {
-		if (configDao.hasAdminShopNames()) {
-			loadAllAdminshopsOld();
-		} else {
-			loadAllAdminshopsNew();
-		}
-	}
-
-	private void loadAllAdminshopsNew() {
 		for (String shopId : configDao.loadAdminshopIds()) {
 			try {
 				Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
-				shop.setupExisting(null, shopId);
+				shop.setupExisting(shopId);
 				adminShopList.put(shopId, shop);
-			} catch (TownSystemException | ShopSystemException | GeneralEconomyException e) {
+			} catch (TownSystemException | GeneralEconomyException | EconomyPlayerException e) {
 				log.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
-	}
-
-	@Deprecated
-	private void loadAllAdminshopsOld() {
-		for (String shopName : configDao.loadAdminShopNames()) {
-			try {
-				Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
-				shop.setupExisting(shopName, generateFreeAdminShopId());
-				adminShopList.put(shop.getShopId(), shop);
-			} catch (TownSystemException | ShopSystemException | GeneralEconomyException e) {
-				log.warn("[Ultimate_Economy] Failed to load the shop " + shopName);
-				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
-			}
-		}
-		configDao.removeDeprecatedAdminshopNames();
-		configDao.saveAdminshopIds(getAdminshopIdList());
 	}
 }

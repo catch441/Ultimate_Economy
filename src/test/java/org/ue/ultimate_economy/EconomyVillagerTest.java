@@ -3,42 +3,42 @@ package org.ue.ultimate_economy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.ue.general.EconomyVillager;
+import org.ue.common.logic.api.EconomyVillagerType;
 
 public class EconomyVillagerTest {
 
 	@Test
 	public void getEnumAdminshop() {
-		assertEquals(EconomyVillager.ADMINSHOP, EconomyVillager.getEnum("adminshop"));
+		assertEquals(EconomyVillagerType.ADMINSHOP, EconomyVillagerType.getEnum("adminshop"));
 	}
 	
 	@Test
 	public void getEnumPlayershop() {
-		assertEquals(EconomyVillager.PLAYERSHOP, EconomyVillager.getEnum("playershop"));
+		assertEquals(EconomyVillagerType.PLAYERSHOP, EconomyVillagerType.getEnum("playershop"));
 	}
 	
 	@Test
 	public void getEnumRentshop() {
-		assertEquals(EconomyVillager.PLAYERSHOP_RENTABLE, EconomyVillager.getEnum("playershop_Rentable"));
+		assertEquals(EconomyVillagerType.RENTSHOP, EconomyVillagerType.getEnum("playershop_Rentable"));
 	}
 	
 	@Test
 	public void getEnumPlotsale() {
-		assertEquals(EconomyVillager.PLOTSALE, EconomyVillager.getEnum("plotSale"));
+		assertEquals(EconomyVillagerType.PLOTSALE, EconomyVillagerType.getEnum("plotSale"));
 	}
 	
 	@Test
 	public void getEnumTownmanager() {
-		assertEquals(EconomyVillager.TOWNMANAGER, EconomyVillager.getEnum("townManager"));
+		assertEquals(EconomyVillagerType.TOWNMANAGER, EconomyVillagerType.getEnum("townManager"));
 	}
 	
 	@Test
 	public void getEnumJobcenter() {
-		assertEquals(EconomyVillager.JOBCENTER, EconomyVillager.getEnum("jobcenter"));
+		assertEquals(EconomyVillagerType.JOBCENTER, EconomyVillagerType.getEnum("jobcenter"));
 	}
 	
 	@Test
 	public void getEnumUndefined() {
-		assertEquals(EconomyVillager.UNDEFINED, EconomyVillager.getEnum("kthschnll"));
+		assertEquals(EconomyVillagerType.UNDEFINED, EconomyVillagerType.getEnum("kthschnll"));
 	}
 }

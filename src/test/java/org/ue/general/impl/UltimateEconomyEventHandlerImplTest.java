@@ -36,11 +36,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.utils.Updater;
 import org.ue.common.utils.Updater.UpdateResult;
 import org.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.EconomyVillager;
 import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemEventHandler;
@@ -241,7 +241,7 @@ public class UltimateEconomyEventHandlerImplTest {
 		when(event.getRightClicked()).thenReturn(entity);
 		when(entity.hasMetadata("ue-type")).thenReturn(true);
 		when(entity.getMetadata("ue-type"))
-				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.JOBCENTER)));
+				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillagerType.JOBCENTER)));
 		handler.onNPCOpenInv(event);
 		verifyNoInteractions(shopEventHandler);
 		verify(jobsystemEventHandler).handleOpenInventory(event);
@@ -256,7 +256,7 @@ public class UltimateEconomyEventHandlerImplTest {
 		when(event.getRightClicked()).thenReturn(entity);
 		when(entity.hasMetadata("ue-type")).thenReturn(true);
 		when(entity.getMetadata("ue-type"))
-				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.ADMINSHOP)));
+				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillagerType.ADMINSHOP)));
 		handler.onNPCOpenInv(event);
 		verifyNoInteractions(jobsystemEventHandler);
 		verify(shopEventHandler).handleOpenInventory(event);
@@ -271,7 +271,7 @@ public class UltimateEconomyEventHandlerImplTest {
 		when(event.getRightClicked()).thenReturn(entity);
 		when(entity.hasMetadata("ue-type")).thenReturn(true);
 		when(entity.getMetadata("ue-type"))
-				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.PLAYERSHOP)));
+				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillagerType.PLAYERSHOP)));
 		handler.onNPCOpenInv(event);
 		verifyNoInteractions(jobsystemEventHandler);
 		verify(shopEventHandler).handleOpenInventory(event);
@@ -286,7 +286,7 @@ public class UltimateEconomyEventHandlerImplTest {
 		when(event.getRightClicked()).thenReturn(entity);
 		when(entity.hasMetadata("ue-type")).thenReturn(true);
 		when(entity.getMetadata("ue-type")).thenReturn(
-				Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.PLAYERSHOP_RENTABLE)));
+				Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillagerType.RENTSHOP)));
 		handler.onNPCOpenInv(event);
 		verifyNoInteractions(jobsystemEventHandler);
 		verify(shopEventHandler).handleOpenInventory(event);
@@ -301,7 +301,7 @@ public class UltimateEconomyEventHandlerImplTest {
 		when(event.getRightClicked()).thenReturn(entity);
 		when(entity.hasMetadata("ue-type")).thenReturn(true);
 		when(entity.getMetadata("ue-type"))
-				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.PLOTSALE)));
+				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillagerType.PLOTSALE)));
 		handler.onNPCOpenInv(event);
 		verifyNoInteractions(jobsystemEventHandler);
 		verifyNoInteractions(shopEventHandler);
@@ -316,7 +316,7 @@ public class UltimateEconomyEventHandlerImplTest {
 		when(event.getRightClicked()).thenReturn(entity);
 		when(entity.hasMetadata("ue-type")).thenReturn(true);
 		when(entity.getMetadata("ue-type"))
-				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.TOWNMANAGER)));
+				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillagerType.TOWNMANAGER)));
 		handler.onNPCOpenInv(event);
 		verifyNoInteractions(jobsystemEventHandler);
 		verifyNoInteractions(shopEventHandler);
@@ -361,7 +361,7 @@ public class UltimateEconomyEventHandlerImplTest {
 		when(inv.getHolder()).thenReturn(entity);
 		when(entity.hasMetadata("ue-type")).thenReturn(true);
 		when(entity.getMetadata("ue-type"))
-				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.JOBCENTER)));
+				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillagerType.JOBCENTER)));
 		handler.onInvClickEvent(event);
 		verifyNoInteractions(shopEventHandler);
 		verify(jobsystemEventHandler).handleInventoryClick(event);
@@ -378,7 +378,7 @@ public class UltimateEconomyEventHandlerImplTest {
 		when(inv.getHolder()).thenReturn(entity);
 		when(entity.hasMetadata("ue-type")).thenReturn(true);
 		when(entity.getMetadata("ue-type"))
-				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.ADMINSHOP)));
+				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillagerType.ADMINSHOP)));
 		handler.onInvClickEvent(event);
 		verifyNoInteractions(jobsystemEventHandler);
 		verify(shopEventHandler).handleInventoryClick(event);
@@ -395,7 +395,7 @@ public class UltimateEconomyEventHandlerImplTest {
 		when(inv.getHolder()).thenReturn(entity);
 		when(entity.hasMetadata("ue-type")).thenReturn(true);
 		when(entity.getMetadata("ue-type"))
-				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.PLAYERSHOP)));
+				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillagerType.PLAYERSHOP)));
 		handler.onInvClickEvent(event);
 		verifyNoInteractions(jobsystemEventHandler);
 		verify(shopEventHandler).handleInventoryClick(event);
@@ -412,7 +412,7 @@ public class UltimateEconomyEventHandlerImplTest {
 		when(inv.getHolder()).thenReturn(entity);
 		when(entity.hasMetadata("ue-type")).thenReturn(true);
 		when(entity.getMetadata("ue-type")).thenReturn(
-				Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.PLAYERSHOP_RENTABLE)));
+				Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillagerType.RENTSHOP)));
 		handler.onInvClickEvent(event);
 		verifyNoInteractions(jobsystemEventHandler);
 		verify(shopEventHandler).handleInventoryClick(event);
@@ -429,7 +429,7 @@ public class UltimateEconomyEventHandlerImplTest {
 		when(inv.getHolder()).thenReturn(entity);
 		when(entity.hasMetadata("ue-type")).thenReturn(true);
 		when(entity.getMetadata("ue-type"))
-				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.PLOTSALE)));
+				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillagerType.PLOTSALE)));
 		handler.onInvClickEvent(event);
 		verifyNoInteractions(jobsystemEventHandler);
 		verifyNoInteractions(shopEventHandler);
@@ -446,7 +446,7 @@ public class UltimateEconomyEventHandlerImplTest {
 		when(inv.getHolder()).thenReturn(entity);
 		when(entity.hasMetadata("ue-type")).thenReturn(true);
 		when(entity.getMetadata("ue-type"))
-				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillager.TOWNMANAGER)));
+				.thenReturn(Arrays.asList(new FixedMetadataValue(mock(Plugin.class), EconomyVillagerType.TOWNMANAGER)));
 		handler.onInvClickEvent(event);
 		verifyNoInteractions(jobsystemEventHandler);
 		verifyNoInteractions(shopEventHandler);

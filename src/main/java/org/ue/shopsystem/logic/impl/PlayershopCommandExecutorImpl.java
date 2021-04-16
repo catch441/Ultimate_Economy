@@ -126,7 +126,7 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 		if (args.length == 3) {
 			playershopManager.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
-					.changeShopSize(Integer.valueOf(args[2]));
+					.changeSize(Integer.valueOf(args[2]));
 			player.sendMessage(messageWrapper.getString("shop_resize", args[2]));
 		} else {
 			player.sendMessage("/" + label + " resize <shop> <new size>");
@@ -138,7 +138,7 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
 		if (args.length == 2) {
 			playershopManager.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
-					.moveShop(player.getLocation());
+					.changeLocation(player.getLocation());
 		} else {
 			player.sendMessage("/" + label + " move <shop>");
 		}

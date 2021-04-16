@@ -1,33 +1,29 @@
 package org.ue.shopsystem.logic.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
-import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.ue.common.api.CustomSkullService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.ue.common.logic.api.CustomSkullService;
+import org.ue.common.logic.api.EconomyVillagerType;
+import org.ue.common.logic.impl.EconomyVillagerImpl;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
 import org.ue.shopsystem.logic.ShopExceptionMessageEnum;
@@ -39,60 +35,55 @@ import org.ue.shopsystem.logic.api.ShopSlotEditorHandler;
 import org.ue.shopsystem.logic.api.ShopValidationHandler;
 import org.ue.townsystem.logic.TownSystemException;
 
-public abstract class AbstractShopImpl implements AbstractShop {
+public abstract class AbstractShopImpl extends EconomyVillagerImpl implements AbstractShop {
 
-	protected final ServerProvider serverProvider;
+	private static final Logger log = LoggerFactory.getLogger(AbstractShopImpl.class);
 	protected final CustomSkullService skullService;
 	protected final MessageWrapper messageWrapper;
 	protected final ConfigManager configManager;
 	protected final ShopValidationHandler validationHandler;
-	protected final GeneralEconomyValidationHandler generalValidator;
-	private Villager villager;
-	private Location location;
-	private Inventory shopInventory;
-	private int size;
+	protected final ShopDao shopDao;
+	protected String name;
 	private Map<Integer, ShopItem> shopItems = new HashMap<>();
-	private String name;
 	private String shopId;
-	private final ShopDao shopDao;
+
 	private ShopSlotEditorHandler slotEditorHandler;
 	private ShopEditorHandler editorHandler;
 
 	public AbstractShopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
-			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ConfigManager configManager,
-			GeneralEconomyValidationHandler generalValidator) {
+			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ConfigManager configManager) {
+		super(serverProvider, shopDao, validationHandler);
 		this.shopDao = shopDao;
-		this.serverProvider = serverProvider;
 		this.skullService = skullService;
 		this.validationHandler = validationHandler;
 		this.messageWrapper = messageWrapper;
 		this.configManager = configManager;
-		this.generalValidator = generalValidator;
 	}
 
-	@Override
-	public void setupNew(String name, String shopId, Location spawnLocation, int size) {
+	protected void setupNew(EconomyVillagerType ecoVillagerType, String name, String shopId, Location spawnLocation,
+			int size, int reservedSlots) throws GeneralEconomyException, EconomyPlayerException {
 		shopDao.setupSavefile(shopId);
-		setShopId(shopId);
-		setupShopLocation(spawnLocation);
-		setupShopName(name);
-		setupShopSize(size);
-		setupShopVillager();
-		setupShopInventory();
+		this.shopId = shopId;
+		this.name = name;
+		shopDao.saveShopName(name);
+		setupNewEconomyVillager(spawnLocation, ecoVillagerType, name, size, reservedSlots);
+		setupShopInvDefaultItems();
 		slotEditorHandler = new ShopSlotEditorHandlerImpl(serverProvider, messageWrapper, validationHandler,
 				skullService, this);
-		editorHandler = new ShopEditorHandlerImpl(serverProvider, skullService, this);
+		editorHandler = new ShopEditorHandlerImpl(skullService, this);
 	}
 
-	@Override
-	public void setupExisting(String name, String shopId)
-			throws ShopSystemException, TownSystemException, GeneralEconomyException {
+	protected void setupExisting(EconomyVillagerType ecoVillagerType, String shopId, int reservedSlots)
+			throws TownSystemException, GeneralEconomyException, EconomyPlayerException {
 		shopDao.setupSavefile(shopId);
-		if (name != null) {
-			loadExistingShopOld(name, shopId);
-		} else {
-			loadExistingShop(shopId);
-		}
+		this.shopId = shopId;
+		this.name = shopDao.loadShopName();
+		setupExistingEconomyVillager(ecoVillagerType, name, reservedSlots);
+		setupShopInvDefaultItems();
+		slotEditorHandler = new ShopSlotEditorHandlerImpl(serverProvider, messageWrapper, validationHandler,
+				skullService, this);
+		loadShopItems();
+		editorHandler = new ShopEditorHandlerImpl(skullService, this);
 	}
 
 	@Override
@@ -111,18 +102,10 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	@Override
-	public ShopDao getShopDao() {
-		return shopDao;
-	}
+	public ShopItem getShopItem(int slot) throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
+		validationHandler.checkForValidSlot(slot, getSize() - 1 - getReservedSlots());
+		validationHandler.checkForSlotIsNotEmpty(slot, getInventory());
 
-	@Override
-	public Villager getShopVillager() {
-		return villager;
-	}
-
-	@Override
-	public ShopItem getShopItem(int slot) throws GeneralEconomyException, ShopSystemException {
-		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
 		return shopItems.get(slot);
 	}
 
@@ -146,83 +129,75 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	@Override
-	public void changeProfession(Profession profession) {
-		getShopVillager().setProfession(profession);
-		getShopDao().saveProfession(profession);
-	}
-
-	@Override
-	public void changeShopSize(int newSize)
-			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
-		generalValidator.checkForValidSize(newSize);
-		validationHandler.checkForResizePossible(getShopInventory(), getSize(), newSize, 1);
-		setSize(newSize);
-		getShopDao().saveShopSize(newSize);
-		setupShopInventory();
-		reloadShopItems();
+	public void changeSize(int newSize) throws ShopSystemException, GeneralEconomyException {
+		super.changeSize(newSize);
 		getEditorHandler().setup(1);
 	}
 
 	@Override
 	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack)
 			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
-		validationHandler.checkForSlotIsEmpty(slot, getShopInventory(), 1);
-		validationHandler.checkForValidPrice(String.valueOf(sellPrice));
-		validationHandler.checkForValidPrice(String.valueOf(buyPrice));
+		validationHandler.checkForPositiveValue(buyPrice);
+		validationHandler.checkForPositiveValue(sellPrice);
 		validationHandler.checkForPricesGreaterThenZero(sellPrice, buyPrice);
 		ShopItem shopItem = new ShopItemImpl(itemStack, itemStack.getAmount(), sellPrice, buyPrice, slot);
 		int itemHash = shopItem.getItemHash();
 		validationHandler.checkForItemDoesNotExist(itemHash, getItemList());
+		// throws an error if the slot is occupied or invalid
+		addShopItemToInventory(itemStack.clone(), shopItem.getAmount(), slot, sellPrice, buyPrice);
+
 		shopItems.put(slot, shopItem);
 		getEditorHandler().setOccupied(true, slot);
-		getShopDao().saveShopItem(shopItem, false);
-		addShopItemToInv(itemStack.clone(), shopItem.getAmount(), slot, sellPrice, buyPrice);
+		shopDao.saveShopItem(shopItem, false);
+
 	}
 
 	@Override
-	public String editShopItem(int slot, String newAmount, String newSellPrice, String newBuyPrice)
+	public String editShopItem(int slot, Integer newAmount, Double newSellPrice, Double newBuyPrice)
 			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
-		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
-		validationHandler.checkForValidAmount(newAmount);
-		validationHandler.checkForValidPrice(newSellPrice);
-		validationHandler.checkForValidPrice(newBuyPrice);
-		validationHandler.checkForOnePriceGreaterThenZeroIfBothAvailable(newSellPrice, newBuyPrice);
+		if (newSellPrice != null && newBuyPrice != null) {
+			// at least one price > 0
+			validationHandler.checkForPricesGreaterThenZero(newSellPrice, newBuyPrice);
+		}
 		ShopItem shopItem = getShopItem(slot);
 		int itemHash = shopItem.getItemHash();
 		String message = ChatColor.GOLD + "Updated ";
-		if (!"none".equals(newAmount)) {
-			shopItem.setAmount(Integer.valueOf(newAmount));
-			getShopDao().saveShopItemAmount(itemHash, shopItem.getAmount());
-			message = message + ChatColor.GREEN + "amount ";
+		if (newAmount != null) {
+			validationHandler.checkForValidAmount(newAmount);
+			shopItem.setAmount(newAmount);
+			shopDao.saveShopItemAmount(itemHash, shopItem.getAmount());
+			message += ChatColor.GREEN + "amount ";
 		}
-		if (!"none".equals(newSellPrice)) {
-			shopItem.setSellPrice(Double.valueOf(newSellPrice));
-			getShopDao().saveShopItemSellPrice(itemHash, shopItem.getSellPrice());
-			message = message + ChatColor.GREEN + "sellPrice ";
+		if (newSellPrice != null) {
+			validationHandler.checkForPositiveValue(newSellPrice);
+			shopItem.setSellPrice(newSellPrice);
+			shopDao.saveShopItemSellPrice(itemHash, shopItem.getSellPrice());
+			message += ChatColor.GREEN + "sellPrice ";
 		}
-		if (!"none".equals(newBuyPrice)) {
-			shopItem.setBuyPrice(Double.valueOf(newBuyPrice));
-			getShopDao().saveShopItemBuyPrice(itemHash, shopItem.getBuyPrice());
-			message = message + ChatColor.GREEN + "buyPrice ";
+		if (newBuyPrice != null) {
+			validationHandler.checkForPositiveValue(newBuyPrice);
+			shopItem.setBuyPrice(newBuyPrice);
+			shopDao.saveShopItemBuyPrice(itemHash, shopItem.getBuyPrice());
+			message += ChatColor.GREEN + "buyPrice ";
 		}
-		addShopItemToInv(shopItem.getItemStack(), shopItem.getAmount(), shopItem.getSlot(), shopItem.getSellPrice(),
+		// throws an error if the slot is invalid
+		addShopItemToInventory(shopItem.getItemStack(), shopItem.getAmount(), slot, shopItem.getSellPrice(),
 				shopItem.getBuyPrice());
-		message = message + ChatColor.GOLD + "for item " + ChatColor.GREEN
+		message += ChatColor.GOLD + "for item " + ChatColor.GREEN
 				+ shopItem.getItemStack().getType().name().toLowerCase();
 		return message;
-
 	}
 
 	@Override
-	public void removeShopItem(int slot) throws ShopSystemException, GeneralEconomyException {
+	public void removeShopItem(int slot) throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
 		validationHandler.checkForItemCanBeDeleted(slot, getSize());
-		generalValidator.checkForValidSlot(slot, getSize() - 1);
-		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
+		validationHandler.checkForValidSlot(slot, getSize() - 1 - getReservedSlots());
+		validationHandler.checkForSlotIsNotEmpty(slot, getInventory());
 		ShopItem shopItem = getShopItem(slot);
-		getShopInventory().clear(slot);
+		getInventory().clear(slot);
 		shopItems.remove(slot);
 		getEditorHandler().setOccupied(false, slot);
-		getShopDao().saveShopItem(shopItem, true);
+		shopDao.saveShopItem(shopItem, true);
 	}
 
 	@Override
@@ -232,8 +207,8 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	@Override
 	public void sellShopItem(int slot, int amount, EconomyPlayer ecoPlayer, boolean sendMessage)
 			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
-		generalValidator.checkForValidSlot(slot, getSize() - 1);
-		validationHandler.checkForSlotIsNotEmpty(slot, getShopInventory(), 1);
+		validationHandler.checkForValidSlot(slot, getSize() - 1 - getReservedSlots());
+		validationHandler.checkForSlotIsNotEmpty(slot, getInventory());
 		validationHandler.checkForPlayerIsOnline(ecoPlayer);
 		ShopItem shopItem = getShopItem(slot);
 		if (shopItem.getSellPrice() != 0.0) {
@@ -253,54 +228,26 @@ public abstract class AbstractShopImpl implements AbstractShop {
 
 	@Override
 	public void openSlotEditor(Player player, int slot) throws ShopSystemException, GeneralEconomyException {
-		generalValidator.checkForValidSlot(slot, getSize() - 1);
+		validationHandler.checkForValidSlot(slot, getSize() - 1 - getReservedSlots());
 		getSlotEditorHandler().setSelectedSlot(slot);
 		player.openInventory(getSlotEditorHandler().getSlotEditorInventory());
 	}
 
 	@Override
-	public void despawnVillager() {
-		getShopVillager().remove();
-	}
-
-	@Override
 	public void deleteShop() {
-		despawnVillager();
-		getShopDao().deleteFile();
-		getShopLocation().getWorld().save();
-	}
-
-	@Override
-	public void openShopInventory(Player player) throws ShopSystemException {
-		player.openInventory(getShopInventory());
-	}
-
-	@Override
-	public void moveShop(Location location) throws TownSystemException, EconomyPlayerException {
-		this.location = location;
-		getShopDao().saveShopLocation(location);
-		getShopVillager().teleport(location);
-	}
-
-	@Override
-	public Location getShopLocation() {
-		return location;
-	}
-
-	@Override
-	public Inventory getShopInventory() {
-		return shopInventory;
-	}
-
-	@Override
-	public int getSize() {
-		return size;
+		despawn();
+		shopDao.deleteFile();
+		getLocation().getWorld().save();
 	}
 
 	/*
 	 * Utility methods
 	 * 
 	 */
+
+	protected Set<Integer> getOccupiedSlots() {
+		return shopItems.keySet();
+	}
 
 	protected void sendBuySellPlayerMessage(int amount, EconomyPlayer ecoPlayer, double price, String sellBuy) {
 		if (amount > 1) {
@@ -358,14 +305,6 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		return list;
 	}
 
-	protected void setName(String name) {
-		this.name = name;
-	}
-
-	protected void setSize(int size) {
-		this.size = size;
-	}
-
 	protected void reloadShopItems() throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
 		for (int item : getUniqueItemStringList()) {
 			loadShopItem(item);
@@ -373,9 +312,7 @@ public abstract class AbstractShopImpl implements AbstractShop {
 	}
 
 	protected void changeInventoryNames(String name) {
-		Inventory inventoryNew = serverProvider.createInventory(getShopVillager(), getSize(), name);
-		inventoryNew.setContents(shopInventory.getContents());
-		shopInventory = inventoryNew;
+		changeInventoryName(name);
 		getEditorHandler().changeInventoryName(name);
 		getSlotEditorHandler().changeInventoryName(name);
 	}
@@ -399,13 +336,14 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		}
 	}
 
-	protected void addShopItemToInv(ItemStack itemStack, int amount, int slot, double sellPrice, double buyPrice) {
+	protected void addShopItemToInventory(ItemStack itemStack, int amount, int slot, double sellPrice, double buyPrice)
+			throws GeneralEconomyException, EconomyPlayerException {
 		ItemMeta meta = itemStack.getItemMeta();
 		List<String> loreList = createItemLoreList(meta, amount, sellPrice, buyPrice);
 		meta.setLore(loreList);
 		itemStack.setItemMeta(meta);
 		itemStack.setAmount(amount);
-		getShopInventory().setItem(slot, itemStack);
+		addItemStack(itemStack, slot, false, true);
 	}
 
 	private List<String> createItemLoreList(ItemMeta meta, int amount, double sellPrice, double buyPrice) {
@@ -446,104 +384,35 @@ public abstract class AbstractShopImpl implements AbstractShop {
 		return list;
 	}
 
-	private void setShopId(String shopId) {
-		this.shopId = shopId;
-	}
-
-	protected void setupShopLocation(Location location) {
-		this.location = location;
-		getShopDao().saveShopLocation(location);
-	}
-
-	protected void setupShopName(String name) {
-		setName(name);
-		getShopDao().saveShopName(name);
-	}
-
-	protected void setupShopSize(int size) {
-		setSize(size);
-		getShopDao().saveShopSize(size);
-	}
-
-	private void setupShopVillager() {
-		getShopLocation().getChunk().load();
-		Collection<Entity> entitys = getShopLocation().getWorld().getNearbyEntities(getShopLocation(), 10, 10, 10);
-		// TODO find a better solution without "contains"
-		for (Entity entity : entitys) {
-			if (getName() != null && entity.getCustomName() != null && entity.getCustomName().contains(getName())) {
-				entity.remove();
-			}
-		}
-		villager = (Villager) getShopLocation().getWorld().spawnEntity(getShopLocation(), EntityType.VILLAGER);
-		getShopVillager().setCustomName(getName());
-		getShopVillager().setCustomNameVisible(true);
-		getShopVillager().setSilent(true);
-		getShopVillager().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
-		getShopVillager().setVillagerLevel(2);
-		getShopVillager().setMetadata("ue-id",
-				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), getShopId()));
-		getShopVillager().setCollidable(false);
-		getShopVillager().setInvulnerable(true);
-		getShopVillager().setProfession(Profession.NITWIT);
-	}
-
-	protected void setupShopInventory() {
-		shopInventory = serverProvider.createInventory(getShopVillager(), getSize(), getName());
-		setupShopInvDefaultItems();
-	}
-
-	protected void setupShopInvDefaultItems() {
+	protected void setupShopInvDefaultItems() throws GeneralEconomyException, EconomyPlayerException {
 		int slot = getSize() - 1;
 		ItemStack anvil = serverProvider.createItemStack(Material.ANVIL, 1);
 		ItemMeta meta = anvil.getItemMeta();
 		meta.setDisplayName("Info");
 		anvil.setItemMeta(meta);
-		addShopItemToInv(anvil, 1, slot, 0.0, 0.0);
-	}
-
-	/*
-	 * Loading methods
-	 * 
-	 */
-
-	private void loadExistingShop(String shopId) throws TownSystemException {
-		setShopId(shopId);
-		setName(getShopDao().loadShopName());
-		setSize(getShopDao().loadShopSize());
-		location = getShopDao().loadShopLocation();
-		setupShopVillager();
-		getShopVillager().setProfession(getShopDao().loadShopVillagerProfession());
-		setupShopInventory();
-		slotEditorHandler = new ShopSlotEditorHandlerImpl(serverProvider, messageWrapper, validationHandler,
-				skullService, this);
-		loadShopItems();
-		editorHandler = new ShopEditorHandlerImpl(serverProvider, skullService, this);
+		addShopItemToInventory(anvil, 1, slot, 0.0, 0.0);
 	}
 
 	private void loadShopItems() {
-		for (int item : getShopDao().loadItemHashList()) {
+		for (int item : shopDao.loadItemHashList()) {
 			loadShopItem(item);
 		}
 	}
 
 	@SuppressWarnings("deprecation")
 	protected void loadShopItem(int itemHash) {
-		if (!getShopDao().removeIfCorrupted(itemHash)) {
-			ShopItem shopItem = getShopDao().loadItem(itemHash);
-			shopItems.put(shopItem.getSlot(), shopItem);
-			addShopItemToInv(shopItem.getItemStack(), shopItem.getAmount(), shopItem.getSlot(), shopItem.getSellPrice(),
-					shopItem.getBuyPrice());
+		if (!shopDao.removeIfCorrupted(itemHash)) {
+			ShopItem shopItem = shopDao.loadItem(itemHash);
+			try {
+				addShopItemToInventory(shopItem.getItemStack(), shopItem.getAmount(), shopItem.getSlot(),
+						shopItem.getSellPrice(), shopItem.getBuyPrice());
+				shopItems.put(shopItem.getSlot(), shopItem);
+			} catch (GeneralEconomyException | EconomyPlayerException e) {
+				log.warn("[Ultimate_Economy] Failed to load the shop item "
+						+ shopItem.getItemStack().getType().name().toLowerCase() + " for shop " + name);
+				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+			}
+
 		}
-	}
-
-	/*
-	 * Deprecated
-	 * 
-	 */
-
-	@Deprecated
-	private void loadExistingShopOld(String name, String shopId) throws TownSystemException, ShopSystemException {
-		getShopDao().changeSavefileName(serverProvider.getPluginInstance().getDataFolder(), shopId);
-		loadExistingShop(shopId);
 	}
 }

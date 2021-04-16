@@ -17,7 +17,7 @@ public class SaveFileUtils {
 	 * Saves a configuration into the file.
 	 * 
 	 */
-	public void save() {
+	protected void save() {
 		try {
 			config.save(file);
 		} catch (IOException e) {
@@ -31,7 +31,7 @@ public class SaveFileUtils {
 	 * 
 	 * @param file
 	 */
-	public void createFile(File file) {
+	protected void createFile(File file) {
 		try {
 			file.createNewFile();
 		} catch (IOException e) {

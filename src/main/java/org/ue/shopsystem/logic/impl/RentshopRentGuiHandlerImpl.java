@@ -9,8 +9,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.ue.common.api.CustomSkullService;
-import org.ue.common.api.SkullTextureEnum;
+import org.ue.common.logic.api.CustomSkullService;
+import org.ue.common.logic.api.SkullTextureEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
@@ -54,9 +54,9 @@ public class RentshopRentGuiHandlerImpl implements RentshopRentGuiHandler {
 	}
 
 	private void setupRentGui() {
-		rentShopGUIInv = serverProvider.createInventory(getShop().getShopVillager(), 9, getShop().getName());
+		rentShopGUIInv = shop.createVillagerInventory(9, shop.getName());
 		List<String> loreListRent = new ArrayList<>();
-		loreListRent.add(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + getShop().getRentalFee());
+		loreListRent.add(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + shop.getRentalFee());
 		ItemStack itemStack = serverProvider.createItemStack(Material.GREEN_WOOL, 1);
 		ItemMeta meta = itemStack.getItemMeta();
 		meta.setDisplayName(ChatColor.YELLOW + "Rent");
@@ -88,10 +88,6 @@ public class RentshopRentGuiHandlerImpl implements RentshopRentGuiHandler {
 	@Override
 	public Inventory getRentGui() {
 		return rentShopGUIInv;
-	}
-
-	private Rentshop getShop() {
-		return shop;
 	}
 
 	@Override
@@ -129,7 +125,7 @@ public class RentshopRentGuiHandlerImpl implements RentshopRentGuiHandler {
 
 	private void handleRentClick(InventoryClickEvent event, int duration) {
 		try {
-			getShop().rentShop(ecoPlayerManager.getEconomyPlayerByName(event.getWhoClicked().getName()), duration);
+			shop.rentShop(ecoPlayerManager.getEconomyPlayerByName(event.getWhoClicked().getName()), duration);
 			event.getWhoClicked().sendMessage(messageWrapper.getString("rent_rented"));
 		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
 			event.getWhoClicked().sendMessage(e.getMessage());
@@ -159,7 +155,7 @@ public class RentshopRentGuiHandlerImpl implements RentshopRentGuiHandler {
 
 	private void refreshRentalFeeOnRentGUI(int duration) {
 		List<String> loreList = new ArrayList<>();
-		loreList.add(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + (duration * getShop().getRentalFee()));
+		loreList.add(ChatColor.GOLD + "RentalFee: " + ChatColor.GREEN + (duration * shop.getRentalFee()));
 		ItemStack stack = getRentGui().getItem(0);
 		ItemMeta meta = stack.getItemMeta();
 		meta.setLore(loreList);

@@ -6,15 +6,13 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
+import org.ue.common.logic.impl.EconomyVillagerValidationHandlerImpl;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.EconomyPlayerException;
 import org.ue.economyplayer.logic.EconomyPlayerExceptionMessageEnum;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.general.GeneralEconomyExceptionMessageEnum;
 import org.ue.shopsystem.logic.ShopExceptionMessageEnum;
@@ -27,28 +25,17 @@ import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
 import org.ue.townsystem.logic.TownSystemException;
 
-public class ShopValidationHandlerImpl implements ShopValidationHandler {
+public class ShopValidationHandlerImpl extends EconomyVillagerValidationHandlerImpl implements ShopValidationHandler {
 
-	private final MessageWrapper messageWrapper;
 	private final ConfigManager configManager;
 	private final TownworldManager townworldManager;
-	private final GeneralEconomyValidationHandler generalValiator;
 
 	@Inject
 	public ShopValidationHandlerImpl(MessageWrapper messageWrapper, ConfigManager configManager,
-			TownworldManager townworldManager, GeneralEconomyValidationHandler generalValiator) {
-		this.messageWrapper = messageWrapper;
+			TownworldManager townworldManager) {
+		super(messageWrapper);
 		this.configManager = configManager;
 		this.townworldManager = townworldManager;
-		this.generalValiator = generalValiator;
-	}
-
-	@Override
-	public void checkForOnePriceGreaterThenZeroIfBothAvailable(String sellPrice, String buyPrice)
-			throws ShopSystemException {
-		if (!"none".equals(sellPrice) && !"none".equals(buyPrice)) {
-			checkForPricesGreaterThenZero(Double.valueOf(sellPrice), Double.valueOf(buyPrice));
-		}
 	}
 
 	@Override
@@ -59,59 +46,10 @@ public class ShopValidationHandlerImpl implements ShopValidationHandler {
 	}
 
 	@Override
-	public void checkForSlotIsNotEmpty(int slot, Inventory inventory, int reservedSlots)
-			throws GeneralEconomyException, ShopSystemException {
-		if (isSlotEmpty(slot, inventory, reservedSlots)) {
-			throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.INVENTORY_SLOT_EMPTY);
-		}
-	}
-
-	@Override
-	public void checkForSlotIsEmpty(int slot, Inventory inventory, int reservedSlots)
-			throws GeneralEconomyException, EconomyPlayerException {
-		if (!isSlotEmpty(slot, inventory, reservedSlots)) {
-			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.INVENTORY_SLOT_OCCUPIED);
-		}
-	}
-
-	@Override
-	public boolean isSlotEmpty(int slot, Inventory inventory, int reservedSlots) throws GeneralEconomyException {
-		generalValiator.checkForValidSlot(slot, inventory.getSize() - reservedSlots);
-		boolean isEmpty = false;
-		if (inventory.getItem(slot) == null || inventory.getItem(slot).getType() == Material.AIR) {
-			isEmpty = true;
-		}
-		return isEmpty;
-	}
-
-	@Override
-	public void checkForValidAmount(String amount) throws GeneralEconomyException {
-		if (!"none".equals(amount) && (Integer.valueOf(amount) <= 0 || Integer.valueOf(amount) > 64)) {
+	public void checkForValidAmount(int amount) throws GeneralEconomyException {
+		if (amount <= 0 || Integer.valueOf(amount) > 64) {
 			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
 					amount);
-		}
-	}
-
-	@Override
-	public void checkForValidPrice(String price) throws GeneralEconomyException {
-		if (!"none".equals(price) && Double.valueOf(price) < 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					price);
-		}
-	}
-
-	@Override
-	public void checkForResizePossible(Inventory inventory, int oldSize, int newSize, int reservedSlots)
-			throws ShopSystemException, GeneralEconomyException {
-		int diff = oldSize - newSize;
-		generalValiator.checkForValidSize(newSize);
-		if (oldSize > newSize) {
-			for (int i = 1; i <= diff; i++) {
-				ItemStack stack = inventory.getItem(oldSize - i - reservedSlots);
-				if (stack != null && stack.getType() != Material.AIR) {
-					throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.RESIZING_FAILED);
-				}
-			}
 		}
 	}
 

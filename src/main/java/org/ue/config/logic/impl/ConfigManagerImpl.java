@@ -4,10 +4,10 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.config.logic.api.ConfigManager;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.general.GeneralEconomyExceptionMessageEnum;
 
@@ -15,7 +15,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	private final ConfigDao configDao;
 	private final MessageWrapper messageWrapper;
-	private final GeneralEconomyValidationHandler generalValidator;
+	private final GeneralValidationHandler generalValidator;
 
 	private int maxHomes;
 	private int maxJobs;
@@ -33,7 +33,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Inject
 	public ConfigManagerImpl(ConfigDao configDao, MessageWrapper messageWrapper,
-			GeneralEconomyValidationHandler generalValidator) {
+			GeneralValidationHandler generalValidator) {
 		this.configDao = configDao;
 		this.messageWrapper = messageWrapper;
 		this.generalValidator = generalValidator;

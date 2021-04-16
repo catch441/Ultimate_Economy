@@ -10,8 +10,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
+import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.EconomyVillager;
 import org.ue.general.GeneralEconomyException;
 import org.ue.shopsystem.logic.ShopSystemException;
 import org.ue.shopsystem.logic.api.AbstractShop;
@@ -43,7 +43,7 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 		if (event.getCurrentItem() != null) {
 			event.setCancelled(true);
 			Entity entity = (Entity) event.getInventory().getHolder();
-			EconomyVillager economyVillager = (EconomyVillager) entity.getMetadata("ue-type").get(0).value();
+			EconomyVillagerType economyVillager = (EconomyVillagerType) entity.getMetadata("ue-type").get(0).value();
 			String shopId = (String) entity.getMetadata("ue-id").get(0).value();
 			try {
 				switch (economyVillager) {
@@ -53,7 +53,7 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 				case ADMINSHOP:
 					handleShopInvClickEvent(adminshopManager.getAdminShopById(shopId), event);
 					break;
-				case PLAYERSHOP_RENTABLE:
+				case RENTSHOP:
 					RentshopImpl rentshop = (RentshopImpl) rentshopManager.getRentShopById(shopId);
 					if (rentshop.isRentable()) {
 						rentshop.getRentGuiHandler().handleRentShopGUIClick(event);
@@ -89,10 +89,10 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 	private void handleBuySell(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
 			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
 		Entity entity = (Entity) event.getInventory().getHolder();
-		EconomyVillager economyVillager = EconomyVillager
+		EconomyVillagerType economyVillager = EconomyVillagerType
 				.getEnum(entity.getMetadata("ue-type").get(0).value().toString());
 		int reservedSlots = 2;
-		if (economyVillager == EconomyVillager.ADMINSHOP) {
+		if (economyVillager == EconomyVillagerType.ADMINSHOP) {
 			reservedSlots = 1;
 		}
 		if (event.getRawSlot() < (abstractShop.getSize() - reservedSlots)
@@ -166,23 +166,23 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 	public void handleOpenInventory(PlayerInteractEntityEvent event) {
 		event.setCancelled(true);
 		Entity entity = event.getRightClicked();
-		EconomyVillager economyVillager = EconomyVillager
+		EconomyVillagerType economyVillager = EconomyVillagerType
 				.getEnum(entity.getMetadata("ue-type").get(0).value().toString());
 		String shopId = (String) entity.getMetadata("ue-id").get(0).value();
 		try {
 			switch (economyVillager) {
 			case PLAYERSHOP:
-				playershopManager.getPlayerShopById(shopId).openShopInventory(event.getPlayer());
+				playershopManager.getPlayerShopById(shopId).openInventory(event.getPlayer());
 				break;
 			case ADMINSHOP:
-				adminshopManager.getAdminShopById(shopId).openShopInventory(event.getPlayer());
+				adminshopManager.getAdminShopById(shopId).openInventory(event.getPlayer());
 				break;
-			case PLAYERSHOP_RENTABLE:
+			case RENTSHOP:
 				Rentshop shop = rentshopManager.getRentShopById(shopId);
 				if (shop.isRentable()) {
 					shop.openRentGUI(event.getPlayer());
 				} else {
-					shop.openShopInventory(event.getPlayer());
+					shop.openInventory(event.getPlayer());
 				}
 				break;
 			default:

@@ -11,8 +11,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.ue.common.api.CustomSkullService;
-import org.ue.common.api.SkullTextureEnum;
+import org.ue.common.logic.api.CustomSkullService;
+import org.ue.common.logic.api.SkullTextureEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.EconomyPlayerException;
@@ -54,8 +54,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	}
 
 	private void setupSlotEditor() {
-		slotEditorInv = serverProvider.createInventory(getShop().getShopVillager(), 27,
-				getShop().getName() + "-SlotEditor");
+		slotEditorInv = shop.createVillagerInventory(27, shop.getName() + "-SlotEditor");
 		setupFactorItem();
 		setupDefaultItem(Material.GREEN_WOOL, ChatColor.YELLOW + "save changes", 8);
 		setupDefaultItem(Material.RED_WOOL, ChatColor.RED + "exit without save", 7);
@@ -83,8 +82,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 
 	@Override
 	public void changeInventoryName(String newName) {
-		Inventory slotEditorNew = serverProvider.createInventory(getShop().getShopVillager(), 27,
-				newName + "-SlotEditor");
+		Inventory slotEditorNew = shop.createVillagerInventory(27, newName + "-SlotEditor");
 		slotEditorNew.setContents(getSlotEditorInventory().getContents());
 		slotEditorInv = slotEditorNew;
 	}
@@ -95,17 +93,14 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		setupSlotEditorWithShopItemInformations(slot);
 	}
 
-	private AbstractShop getShop() {
-		return shop;
-	}
-
 	private void setupSlotEditorWithShopItemInformations(int slot) throws ShopSystemException, GeneralEconomyException {
 		double buyPrice = 0;
 		double sellPrice = 0;
-		if (!validationHandler.isSlotEmpty(slot, getShop().getShopInventory(), 1)) {
-			ShopItem item = getShop().getShopItem(slot);
+		try {
+			ShopItem item = shop.getShopItem(slot);
 			buyPrice = item.getBuyPrice();
 			sellPrice = item.getSellPrice();
+		} catch (EconomyPlayerException e) {
 		}
 		List<String> listBuy = new ArrayList<String>();
 		List<String> listSell = new ArrayList<String>();
@@ -121,17 +116,17 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	}
 
 	private void setupSlotItemInSlotEditor(int slot) throws GeneralEconomyException, ShopSystemException {
-		if (validationHandler.isSlotEmpty(slot, getShop().getShopInventory(), 1)) {
+		try {
+			ShopItem item = shop.getShopItem(slot);
+			ItemStack stack = item.getItemStack();
+			stack.setAmount(item.getAmount());
+			getSlotEditorInventory().setItem(0, stack);
+		} catch (EconomyPlayerException e) {
 			ItemStack item = serverProvider.createItemStack(Material.BARRIER, 1);
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName(ChatColor.GREEN + "select item");
 			item.setItemMeta(meta);
 			getSlotEditorInventory().setItem(0, item);
-		} else {
-			ShopItem item = getShop().getShopItem(slot);
-			ItemStack stack = item.getItemStack();
-			stack.setAmount(item.getAmount());
-			getSlotEditorInventory().setItem(0, stack);
 		}
 	}
 
@@ -204,12 +199,12 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 			break;
 		case "save changes":
 			handleSaveChanges(player);
-			getShop().openEditor(player);
+			shop.openEditor(player);
 			break;
 		case "remove item":
 			handleRemoveItem(player);
 		case "exit without save":
-			getShop().openEditor(player);
+			shop.openEditor(player);
 			break;
 		default:
 			if (!"buyprice".equals(command) && !"sellprice".equals(command)) {
@@ -236,56 +231,57 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		validationHandler.checkForPricesGreaterThenZero(sellPrice, buyPrice);
 		ItemStack stackInEditor = getSlotEditorInventory().getItem(0);
 		try {
-			ShopItem shopItem = getShop().getShopItem(selectedEditorSlot);
+			ShopItem shopItem = shop.getShopItem(selectedEditorSlot);
 			// slot is occupied, check if item changed
 			if (!shopItem.getItemStack().isSimilar(stackInEditor)) {
 				// remove and add
 				handleRemoveItem(player);
-				getShop().addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
+				shop.addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
 				player.sendMessage(messageWrapper.getString("added", stackInEditor.getType().toString().toLowerCase()));
 			} else {
 				// edit
-				String amountString = generateChangeAmountString(stackInEditor.getAmount(), shopItem);
-				String sellPriceString = generateChangeSellPriceString(sellPrice, shopItem);
-				String buyPriceString = generateChangeBuyPriceString(buyPrice, shopItem);
+				Integer amountChange = generateChangeAmount(stackInEditor.getAmount(), shopItem);
+				Double sellPriceChange = generateChangeSellPrice(sellPrice, shopItem);
+				Double buyPriceChange = generateChangeBuyPrice(buyPrice, shopItem);
 				player.sendMessage(
-						getShop().editShopItem(selectedEditorSlot, amountString, sellPriceString, buyPriceString));
+						shop.editShopItem(selectedEditorSlot, amountChange, sellPriceChange, buyPriceChange));
 			}
 		} catch (GeneralEconomyException | ShopSystemException e) {
 			// item is new
-			validationHandler.checkForItemDoesNotExist(stackInEditor.toString().hashCode(), getShop().getItemList());
+			validationHandler.checkForItemDoesNotExist(stackInEditor.toString().hashCode(), shop.getItemList());
 			if (stackInEditor.getType() != Material.BARRIER) {
-				getShop().addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
+				shop.addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
 				player.sendMessage(messageWrapper.getString("added", stackInEditor.getType().toString().toLowerCase()));
 			}
 		}
 	}
 
-	private String generateChangeAmountString(int value, ShopItem shopItem) {
+	private Integer generateChangeAmount(int value, ShopItem shopItem) {
 		if (shopItem.getAmount() == value) {
-			return "none";
+			return null;
 		}
-		return String.valueOf(value);
+		return value;
 	}
 
-	private String generateChangeSellPriceString(double value, ShopItem shopItem) {
+	private Double generateChangeSellPrice(double value, ShopItem shopItem) {
 		if (shopItem.getSellPrice() == value) {
-			return "none";
+			return null;
 		}
-		return String.valueOf(value);
+		return value;
 	}
 
-	private String generateChangeBuyPriceString(double value, ShopItem shopItem) {
+	private Double generateChangeBuyPrice(double value, ShopItem shopItem) {
 		if (shopItem.getBuyPrice() == value) {
-			return "none";
+			return null;
 		}
-		return String.valueOf(value);
+		return value;
 	}
 
-	private void handleRemoveItem(Player player) throws ShopSystemException, GeneralEconomyException {
-		ItemStack item = getShop().getShopItem(selectedEditorSlot).getItemStack();
+	private void handleRemoveItem(Player player)
+			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+		ItemStack item = shop.getShopItem(selectedEditorSlot).getItemStack();
 		String deletedIem = item.getType().toString().toLowerCase();
-		getShop().removeShopItem(selectedEditorSlot);
+		shop.removeShopItem(selectedEditorSlot);
 		if (item.getType() == Material.SPAWNER) {
 			player.sendMessage(messageWrapper.getString("removed", item.getItemMeta().getDisplayName().toLowerCase()));
 		} else {

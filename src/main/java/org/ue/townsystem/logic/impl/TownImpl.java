@@ -24,12 +24,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankManager;
+import org.ue.common.logic.api.EconomyVillagerType;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.api.GeneralEconomyValidationHandler;
-import org.ue.general.EconomyVillager;
 import org.ue.general.GeneralEconomyException;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
 import org.ue.townsystem.logic.TownExceptionMessageEnum;
@@ -45,7 +45,7 @@ public class TownImpl implements Town {
 	private static final Logger log = LoggerFactory.getLogger(TownImpl.class);
 	private final MessageWrapper messageWrapper;
 	private final TownsystemValidationHandler validationHandler;
-	private final GeneralEconomyValidationHandler generalValidator;
+	private final GeneralValidationHandler generalValidator;
 	private final BankManager bankManager;
 	private final TownworldManager townworldManager;
 	private final ServerProvider serverProvider;
@@ -85,7 +85,7 @@ public class TownImpl implements Town {
 	public TownImpl(boolean isNew, EconomyPlayer mayor, String townName, Location location,
 			TownworldManager townworldManager, BankManager bankManager, TownsystemValidationHandler validationHandler,
 			MessageWrapper messageWrapper, TownworldDao townworldDao, Townworld townworld,
-			ServerProvider serverProvider, GeneralEconomyValidationHandler generalValidator)
+			ServerProvider serverProvider, GeneralValidationHandler generalValidator)
 			throws EconomyPlayerException, NumberFormatException, TownSystemException, GeneralEconomyException {
 		this.townworldDao = townworldDao;
 		this.messageWrapper = messageWrapper;
@@ -133,7 +133,7 @@ public class TownImpl implements Town {
 		villager.setCustomNameVisible(true);
 		// set the tye of the villager
 		villager.setMetadata("ue-type",
-				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillager.TOWNMANAGER));
+				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillagerType.TOWNMANAGER));
 		villager.setProfession(Villager.Profession.NITWIT);
 		villager.setSilent(true);
 		villager.setInvulnerable(true);

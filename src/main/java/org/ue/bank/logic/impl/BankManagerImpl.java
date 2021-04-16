@@ -11,19 +11,19 @@ import org.ue.bank.dataaccess.api.BankDao;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankManager;
 import org.ue.bank.logic.api.BankValidationHandler;
-import org.ue.general.api.GeneralEconomyValidationHandler;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.general.GeneralEconomyException;
 
 public class BankManagerImpl implements BankManager {
 
 	private final BankDao bankDao;
 	private final BankValidationHandler validationHandler;
-	private final GeneralEconomyValidationHandler generalValidator;
+	private final GeneralValidationHandler generalValidator;
 	private Map<String, BankAccount> accounts = new HashMap<>();
 
 	@Inject
 	public BankManagerImpl(BankDao bankDao, BankValidationHandler validationHandler,
-			GeneralEconomyValidationHandler generalValidator) {
+			GeneralValidationHandler generalValidator) {
 		this.bankDao = bankDao;
 		this.validationHandler = validationHandler;
 		this.generalValidator = generalValidator;

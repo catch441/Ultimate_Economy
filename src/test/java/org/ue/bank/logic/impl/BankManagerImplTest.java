@@ -22,8 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.dataaccess.api.BankDao;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankValidationHandler;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.api.MessageWrapper;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,7 +38,7 @@ public class BankManagerImplTest {
 	@Mock
 	BankValidationHandler validationHandler;
 	@Mock
-	GeneralEconomyValidationHandler generalValidator;
+	GeneralValidationHandler generalValidator;
 
 	@AfterEach
 	private void cleanUp() {

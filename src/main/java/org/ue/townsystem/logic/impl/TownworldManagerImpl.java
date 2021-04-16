@@ -13,6 +13,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.ue.bank.logic.api.BankManager;
+import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
@@ -20,7 +21,6 @@ import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.api.GeneralEconomyValidationHandler;
 import org.ue.general.GeneralEconomyException;
 import org.ue.general.GeneralEconomyExceptionMessageEnum;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
@@ -37,7 +37,7 @@ public class TownworldManagerImpl implements TownworldManager {
 	private final MessageWrapper messageWrapper;
 	private final ServerProvider serverProvider;
 	private final TownsystemValidationHandler townsystemValidationHandler;
-	private final GeneralEconomyValidationHandler generalValidator;
+	private final GeneralValidationHandler generalValidator;
 	private final BankManager bankManager;
 	private final EconomyPlayerValidationHandler ecoPlayerValidationHandler;
 	private final ConfigDao configDao;
@@ -49,7 +49,7 @@ public class TownworldManagerImpl implements TownworldManager {
 	public TownworldManagerImpl(ConfigDao configDao, EconomyPlayerValidationHandler ecoPlayerValidationHandler,
 			BankManager bankManager, EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
 			TownsystemValidationHandler townsystemValidationHandler, ServerProvider serverProvider,
-			GeneralEconomyValidationHandler generalValidator) {
+			GeneralValidationHandler generalValidator) {
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.townsystemValidationHandler = townsystemValidationHandler;
 		this.messageWrapper = messageWrapper;
