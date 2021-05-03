@@ -16,9 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,14 +24,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.logic.api.BankAccount;
-import org.ue.common.logic.api.GeneralValidationHandler;
+import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
+import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.townsystem.logic.api.TownworldManager;
 
@@ -49,13 +46,13 @@ public class EconomyPlayerCommandExecutorImplTest {
 	@Mock
 	EconomyPlayerManager ecoPlayerManager;
 	@Mock
+	EconomyPlayerValidationHandler validationHandler;
+	@Mock
 	TownworldManager townworldManager;
 	@Mock
 	Player player;
 	@Mock
 	EconomyPlayer ecoPlayer;
-	@Mock
-	GeneralValidationHandler generalValidator;
 
 	@Test
 	public void invalidCommandTest() {
@@ -237,14 +234,14 @@ public class EconomyPlayerCommandExecutorImplTest {
 		assertDoesNotThrow(() -> verify(ecoPlayer).addHome("myhome", location, true));
 		assertTrue(result);
 	}
-	
+
 	@Test
-	public void setHomeCommandTestWithException() throws GeneralEconomyException, EconomyPlayerException {
+	public void setHomeCommandTestWithException() throws EconomyPlayerException {
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		String[] args = { "myhome" };
 		when(messageWrapper.getErrorString("already_exists", "myhome")).thenReturn("§cMy error message!");
-		doThrow(new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, "myhome"))
+		doThrow(new EconomyPlayerException(messageWrapper, ExceptionMessageEnum.ALREADY_EXISTS, "myhome"))
 				.when(ecoPlayer).addHome("myhome", null, true);
 
 		assertEquals(0, ecoPlayer.getHomeList().size());
@@ -366,11 +363,11 @@ public class EconomyPlayerCommandExecutorImplTest {
 	}
 
 	@Test
-	public void givemoneyCommandTestTwoArgsNegative() throws GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void givemoneyCommandTestTwoArgsNegative() throws EconomyPlayerException {
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");
-		doThrow(e).when(generalValidator).checkForPositiveValue(-10.0);
-		
+		doThrow(e).when(validationHandler).checkForPositiveValue(-10.0);
+
 		String[] args = { "catch441", "-10" };
 		boolean result = executor.onCommand(player, null, "givemoney", args);
 		verify(player).sendMessage("my error message");
@@ -421,22 +418,16 @@ public class EconomyPlayerCommandExecutorImplTest {
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		Location location = mock(Location.class);
-		World world = mock(World.class);
-		Chunk chunk = mock(Chunk.class);
-		when(location.getChunk()).thenReturn(chunk);
-		when(player.getWorld()).thenReturn(world);
-		when(world.getName()).thenReturn("World");
-		when(player.getLocation()).thenReturn(location);
 		assertDoesNotThrow(() -> when(ecoPlayer.getHome("myhome")).thenReturn(location));
 
 		String[] args = { "myhome" };
 		boolean result = executor.onCommand(player, null, "home", args);
 		verify(player).teleport(location);
-		verify(townworldManager).performTownWorldLocationCheck("World", chunk, ecoPlayer);
+		verify(townworldManager).performTownWorldLocationCheck(ecoPlayer);
 		verifyNoMoreInteractions(player);
 		assertTrue(result);
 	}
-	
+
 	@Test
 	public void removemoneyCommandTestZeroArgs() {
 		String[] args = {};
@@ -466,11 +457,11 @@ public class EconomyPlayerCommandExecutorImplTest {
 	}
 
 	@Test
-	public void removemoneyCommandTestTwoArgsNegative() throws GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void removemoneyCommandTestTwoArgsNegative() throws EconomyPlayerException {
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");
-		doThrow(e).when(generalValidator).checkForPositiveValue(-10.0);
-		
+		doThrow(e).when(validationHandler).checkForPositiveValue(-10.0);
+
 		String[] args = { "catch441", "-10" };
 		boolean result = executor.onCommand(player, null, "removemoney", args);
 		verify(player).sendMessage("my error message");

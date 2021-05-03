@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -22,17 +21,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.SkullTextureEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.shopsystem.logic.api.Rentshop;
-import org.ue.shopsystem.logic.ShopSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class RentshopRentGuiHandlerTest {
@@ -51,7 +50,6 @@ public class RentshopRentGuiHandlerTest {
 	Rentshop shop;
 	
 	private RentshopRentGuiHandlerImpl createHandler() {
-		Villager villager = mock(Villager.class);
 		Inventory inv = mock(Inventory.class);
 		ItemStack rentItem = mock(ItemStack.class);
 		ItemStack plusItem = mock(ItemStack.class);
@@ -71,17 +69,15 @@ public class RentshopRentGuiHandlerTest {
 		when(skullService.getSkullWithName(SkullTextureEnum.SEVEN, "seven")).thenReturn(sevenItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(rentItem);
 		when(serverProvider.createItemStack(Material.CLOCK, 1)).thenReturn(clockItem);
-		when(shop.getShopVillager()).thenReturn(villager);
 		when(shop.getName()).thenReturn("Shop#R0");
 		when(shop.getRentalFee()).thenReturn(5.5);
-		when(serverProvider.createInventory(villager, 9, "Shop#R0")).thenReturn(inv);
+		when(shop.createVillagerInventory(9, "Shop#R0")).thenReturn(inv);
 		return new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager,
 				skullService, configManager, shop, serverProvider);
 	}
 
 	@Test
 	public void constructorTest() {
-		Villager villager = mock(Villager.class);
 		Inventory inv = mock(Inventory.class);
 		ItemStack rentItem = mock(ItemStack.class);
 		ItemStack plusItem = mock(ItemStack.class);
@@ -101,10 +97,9 @@ public class RentshopRentGuiHandlerTest {
 		when(skullService.getSkullWithName(SkullTextureEnum.SEVEN, "seven")).thenReturn(sevenItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(rentItem);
 		when(serverProvider.createItemStack(Material.CLOCK, 1)).thenReturn(clockItem);
-		when(shop.getShopVillager()).thenReturn(villager);
 		when(shop.getName()).thenReturn("Shop#R0");
 		when(shop.getRentalFee()).thenReturn(5.5);
-		when(serverProvider.createInventory(villager, 9, "Shop#R0")).thenReturn(inv);
+		when(shop.createVillagerInventory(9, "Shop#R0")).thenReturn(inv);
 		new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager,
 				skullService, configManager, shop, serverProvider);
 
@@ -293,8 +288,7 @@ public class RentshopRentGuiHandlerTest {
 	}
 
 	@Test
-	public void handleRentShopGuiClickTestRentClickError() throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
-		Villager villager = mock(Villager.class);
+	public void handleRentShopGuiClickTestRentClickError() throws ShopsystemException, BankException, EconomyPlayerException {
 		Inventory inv = mock(Inventory.class);
 		ItemStack rentItem = mock(ItemStack.class);
 		ItemStack plusItem = mock(ItemStack.class);
@@ -314,10 +308,9 @@ public class RentshopRentGuiHandlerTest {
 		when(skullService.getSkullWithName(SkullTextureEnum.SEVEN, "seven")).thenReturn(sevenItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(rentItem);
 		when(serverProvider.createItemStack(Material.CLOCK, 1)).thenReturn(clockItem);
-		when(shop.getShopVillager()).thenReturn(villager);
 		when(shop.getName()).thenReturn("Shop#R0");
 		when(shop.getRentalFee()).thenReturn(5.5);
-		when(serverProvider.createInventory(villager, 9, "Shop#R0")).thenReturn(inv);
+		when(shop.createVillagerInventory(9, "Shop#R0")).thenReturn(inv);
 		RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager,
 				skullService, configManager, shop, serverProvider);
 		
@@ -350,7 +343,7 @@ public class RentshopRentGuiHandlerTest {
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 			
 		
-		ShopSystemException e = mock(ShopSystemException.class);
+		ShopsystemException e = mock(ShopsystemException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		doThrow(e).when(shop).rentShop(ecoPlayer, 2);
 		
@@ -363,7 +356,6 @@ public class RentshopRentGuiHandlerTest {
 
 	@Test
 	public void handleRentShopGuiClickTestRentClick() {
-		Villager villager = mock(Villager.class);
 		Inventory inv = mock(Inventory.class);
 		ItemStack rentItem = mock(ItemStack.class);
 		ItemStack plusItem = mock(ItemStack.class);
@@ -383,10 +375,9 @@ public class RentshopRentGuiHandlerTest {
 		when(skullService.getSkullWithName(SkullTextureEnum.SEVEN, "seven")).thenReturn(sevenItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(rentItem);
 		when(serverProvider.createItemStack(Material.CLOCK, 1)).thenReturn(clockItem);
-		when(shop.getShopVillager()).thenReturn(villager);
 		when(shop.getName()).thenReturn("Shop#R0");
 		when(shop.getRentalFee()).thenReturn(5.5);
-		when(serverProvider.createInventory(villager, 9, "Shop#R0")).thenReturn(inv);
+		when(shop.createVillagerInventory(9, "Shop#R0")).thenReturn(inv);
 		RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager,
 				skullService, configManager, shop, serverProvider);
 		

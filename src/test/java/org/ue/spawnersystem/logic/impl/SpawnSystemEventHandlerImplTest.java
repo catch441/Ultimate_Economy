@@ -38,9 +38,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
-import org.ue.economyplayer.logic.EconomyPlayerExceptionMessageEnum;
 import org.ue.spawnersystem.logic.api.SpawnerManager;
 
 @ExtendWith(MockitoExtension.class)
@@ -158,7 +158,7 @@ public class SpawnSystemEventHandlerImplTest {
 		when(block.getBlockData()).thenReturn(data);
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		when(player.getName()).thenReturn("catch441");
-		when(messageWrapper.getErrorString(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()))
 				.thenReturn("my error");
 		eventHandler.handleSetBlockEvent(event);
 		verifyNoInteractions(spawnerManager);
@@ -260,7 +260,7 @@ public class SpawnSystemEventHandlerImplTest {
 		when(inv.firstEmpty()).thenReturn(1);
 		when(player.getName()).thenReturn("Wulfgar");
 		when(player.getInventory()).thenReturn(inv);
-		when(messageWrapper.getErrorString(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()))
 				.thenReturn("my error");
 		eventHandler.handleBreakBlockEvent(event);
 		verifyNoInteractions(spawnerManager);

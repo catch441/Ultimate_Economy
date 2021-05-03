@@ -12,15 +12,14 @@ import org.slf4j.LoggerFactory;
 import org.ue.common.utils.ServerProvider;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.dataaccess.api.JobDao;
-import org.ue.jobsystem.logic.JobSystemException;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
+import org.ue.jobsystem.logic.api.JobsystemException;
 import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
 
 public class JobManagerImpl implements JobManager {
@@ -54,7 +53,7 @@ public class JobManagerImpl implements JobManager {
 	}
 
 	@Override
-	public Job getJobByName(String jobName) throws GeneralEconomyException {
+	public Job getJobByName(String jobName) throws JobsystemException {
 		Job job = jobList.get(jobName);
 		validationHandler.checkForValueExists(job, jobName);
 		return job;
@@ -70,7 +69,7 @@ public class JobManagerImpl implements JobManager {
 	}
 
 	@Override
-	public void createJob(String jobName) throws GeneralEconomyException {
+	public void createJob(String jobName) throws JobsystemException {
 		validationHandler.checkForValueNotInList(getJobNameList(), jobName);
 		JobDao jobDao = serverProvider.getServiceComponent().getJobDao();
 		jobList.put(jobName, new JobImpl(validationHandler, jobDao, jobName, true));
@@ -104,7 +103,7 @@ public class JobManagerImpl implements JobManager {
 			if (jobcenter.hasJob(job)) {
 				try {
 					jobcenter.removeJob(job);
-				} catch (JobSystemException e) {
+				} catch (JobsystemException e) {
 					log.warn("[Ultimate_Economy] Failed remove the job " + job.getName());
 					log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 				}

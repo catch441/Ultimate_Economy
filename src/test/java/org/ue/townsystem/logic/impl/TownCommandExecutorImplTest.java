@@ -22,18 +22,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.bank.logic.api.BankException;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
+import org.ue.townsystem.logic.api.TownsystemException;
 import org.ue.townsystem.logic.api.TownsystemValidationHandler;
 import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
-import org.ue.townsystem.logic.TownSystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class TownCommandExecutorImplTest {
@@ -104,8 +104,8 @@ public class TownCommandExecutorImplTest {
 	}
 
 	@Test
-	public void addDeputyCommandTestWithoutPermissions() throws EconomyPlayerException {
-		EconomyPlayerException e = mock(EconomyPlayerException.class);
+	public void addDeputyCommandTestWithoutPermissions() throws TownsystemException {
+		TownsystemException e = mock(TownsystemException.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		EconomyPlayer otherPlayer = mock(EconomyPlayer.class);
 		Town town = mock(Town.class);
@@ -275,7 +275,7 @@ public class TownCommandExecutorImplTest {
 		String[] args = { "moveTownManager" };
 		boolean result = executor.onCommand(player, null, "town", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(town).moveTownManagerVillager(loc, ecoPlayer));
+		assertDoesNotThrow(() -> verify(town).changeLocation(loc, ecoPlayer));
 		verify(player, never()).sendMessage(anyString());
 	}
 
@@ -323,7 +323,7 @@ public class TownCommandExecutorImplTest {
 	}
 
 	@Test
-	public void payCommandTestWithNotEnoughMoney() throws GeneralEconomyException, EconomyPlayerException {
+	public void payCommandTestWithNotEnoughMoney() throws EconomyPlayerException, BankException {
 		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
@@ -369,8 +369,8 @@ public class TownCommandExecutorImplTest {
 	}
 
 	@Test
-	public void removeDeputyCommandTestWithoutPermissions() throws EconomyPlayerException {
-		EconomyPlayerException e = mock(EconomyPlayerException.class);
+	public void removeDeputyCommandTestWithoutPermissions() throws TownsystemException {
+		TownsystemException e = mock(TownsystemException.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		EconomyPlayer otherPlayer = mock(EconomyPlayer.class);
 		Town town = mock(Town.class);
@@ -568,8 +568,8 @@ public class TownCommandExecutorImplTest {
 	}
 
 	@Test
-	public void withdrawCommandTestWithoutPermission() throws EconomyPlayerException {
-		EconomyPlayerException e = mock(EconomyPlayerException.class);
+	public void withdrawCommandTestWithoutPermission() throws TownsystemException {
+		TownsystemException e = mock(TownsystemException.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Town town = mock(Town.class);
 		when(e.getMessage()).thenReturn("my error message");
@@ -605,9 +605,8 @@ public class TownCommandExecutorImplTest {
 	}
 
 	@Test
-	public void withdrawCommandTestWithNotEnoughMoney()
-			throws GeneralEconomyException, EconomyPlayerException, TownSystemException {
-		TownSystemException e = mock(TownSystemException.class);
+	public void withdrawCommandTestWithNotEnoughMoney() throws TownsystemException, BankException {
+		TownsystemException e = mock(TownsystemException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Town town = mock(Town.class);

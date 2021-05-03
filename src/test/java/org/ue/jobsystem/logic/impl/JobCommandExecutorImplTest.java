@@ -28,12 +28,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
-import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
-import org.ue.jobsystem.logic.JobSystemException;
+import org.ue.jobsystem.logic.api.JobsystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class JobCommandExecutorImplTest {
@@ -196,7 +195,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void deleteCommandTestWithInvalidJobcenter() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobcenterManager.getJobcenterByName("center")).thenThrow(exception));
 		Player player = mock(Player.class);
@@ -208,7 +207,7 @@ public class JobCommandExecutorImplTest {
 	}
 
 	@Test
-	public void moveCommandTest() {
+	public void moveCommandTest() throws JobsystemException {
 		Jobcenter center = mock(Jobcenter.class);
 		assertDoesNotThrow(() -> when(jobcenterManager.getJobcenterByName("center")).thenReturn(center));
 		Player player = mock(Player.class);
@@ -217,7 +216,7 @@ public class JobCommandExecutorImplTest {
 		String[] args = { "move", "center" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
 		assertTrue(result);
-		verify(center).moveJobcenter(location);
+		verify(center).changeLocation(location);
 		verify(player).getLocation();
 		verifyNoMoreInteractions(player);
 	}
@@ -234,7 +233,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void moveCommandTestWithInvalidJobcenter() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobcenterManager.getJobcenterByName("center")).thenThrow(exception));
 		Player player = mock(Player.class);
@@ -290,7 +289,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void addJobCommandTestWithInvalidJob() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenThrow(exception));
 		Player player = mock(Player.class);
@@ -303,7 +302,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void addJobCommandTestWithInvalidJobcenter() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobcenterManager.getJobcenterByName("center")).thenThrow(exception));
 		Player player = mock(Player.class);
@@ -342,7 +341,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void removeJobCommandTestWithInvalidJobcenter() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobcenterManager.getJobcenterByName("center")).thenThrow(exception));
 		Player player = mock(Player.class);
@@ -355,7 +354,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void removeJobCommandTestWithInvalidJob() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenThrow(exception));
 		Player player = mock(Player.class);
@@ -414,7 +413,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void deleteJobCommandTestWithInvalidJob() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenThrow(exception));
 		Player player = mock(Player.class);
@@ -461,10 +460,10 @@ public class JobCommandExecutorImplTest {
 	}
 
 	@Test
-	public void jobAddFisherCommandTestInvalidFisherType() throws JobSystemException, GeneralEconomyException {
+	public void jobAddFisherCommandTestInvalidFisherType() throws JobsystemException {
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My exception.");
 		doThrow(exception).when(job).addFisherLootType("test", 1.5);
 		
@@ -478,7 +477,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobAddFisherCommandTestInvalidJob() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenThrow(exception));
 
@@ -527,7 +526,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobAddItemCommandTestWithInvalidJob() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenThrow(exception));
 
@@ -575,10 +574,10 @@ public class JobCommandExecutorImplTest {
 	}
 
 	@Test
-	public void jobAddMobCommandTestWithInvalidEntity() throws JobSystemException, GeneralEconomyException {
+	public void jobAddMobCommandTestWithInvalidEntity() throws JobsystemException {
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My exception.");
 		doThrow(exception).when(job).addMob("test", 1.5);
 
@@ -592,7 +591,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobAddMobCommandTestWithInvalidJob() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenThrow(exception));
 
@@ -629,10 +628,10 @@ public class JobCommandExecutorImplTest {
 	}
 
 	@Test
-	public void jobRemoveMobCommandTestWithInvalidMob() throws JobSystemException, GeneralEconomyException {
+	public void jobRemoveMobCommandTestWithInvalidMob() throws JobsystemException {
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My exception.");
 		doThrow(exception).when(job).deleteMob("test");
 
@@ -646,7 +645,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobRemoveMobCommandTestWithInvalidJob() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenThrow(exception));
 
@@ -694,7 +693,7 @@ public class JobCommandExecutorImplTest {
 	}
 
 	@Test
-	public void jobAddBreedableCommandTestWithInvalidEntity() throws JobSystemException, GeneralEconomyException {
+	public void jobAddBreedableCommandTestWithInvalidEntity() throws JobsystemException {
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		when(messageWrapper.getErrorString("invalid_parameter", "test")).thenReturn("My exception.");
@@ -709,7 +708,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobAddBreedableCommandTestWithInvalidJob() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenThrow(exception));
 
@@ -761,7 +760,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobRemoveBreedableCommandTestWithInvalidJob() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenThrow(exception));
 
@@ -799,10 +798,10 @@ public class JobCommandExecutorImplTest {
 	}
 
 	@Test
-	public void jobRemoveFisherCommandTestWithInvalidType() throws JobSystemException, GeneralEconomyException {
+	public void jobRemoveFisherCommandTestWithInvalidType() throws JobsystemException {
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My exception.");
 		doThrow(exception).when(job).removeFisherLootType("test");
 
@@ -816,7 +815,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobRemoveFisherCommandTestWithInvalidJob() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenThrow(exception));
 
@@ -854,10 +853,10 @@ public class JobCommandExecutorImplTest {
 	}
 
 	@Test
-	public void jobRemoveItemCommandTestWithInvalidItem() throws JobSystemException, GeneralEconomyException {
+	public void jobRemoveItemCommandTestWithInvalidItem() throws JobsystemException {
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My exception.");
 		doThrow(exception).when(job).deleteBlock("test");
 		Player player = mock(Player.class);
@@ -870,7 +869,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobRemoveItemCommandTestWithInvalidJob() {
-		GeneralEconomyException exception = mock(GeneralEconomyException.class);
+		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My message.");
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenThrow(exception));
 

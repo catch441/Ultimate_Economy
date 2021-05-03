@@ -6,26 +6,24 @@ import javax.inject.Inject;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
-import org.ue.shopsystem.logic.ShopSystemException;
 import org.ue.shopsystem.logic.api.Playershop;
 import org.ue.shopsystem.logic.api.PlayershopManager;
 import org.ue.shopsystem.logic.api.ShopItem;
 import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 import org.ue.townsystem.logic.api.TownworldManager;
-import org.ue.townsystem.logic.TownSystemException;
 
 public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
@@ -59,16 +57,14 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	}
 
 	@Override
-	public void setupNew(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size)
-			throws GeneralEconomyException, EconomyPlayerException {
+	public void setupNew(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size) {
 		setupNew(EconomyVillagerType.PLAYERSHOP, name, shopId, spawnLocation, size, 1);
 		setupShopOwner(owner);
-		getEditorHandler().setup(2);
+		getEditorHandler().setup(1);
 	}
 
 	@Override
-	public void setupExisting(String shopId)
-			throws TownSystemException, GeneralEconomyException, EconomyPlayerException {
+	public void setupExisting(String shopId) throws EconomyPlayerException {
 		setupExisting(EconomyVillagerType.PLAYERSHOP, shopId, 1);
 		getEditorHandler().setup(1);
 		loadStock();
@@ -76,24 +72,17 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	}
 
 	/**
-	 * Overridden, because of reserved slots. {@inheritDoc}
-	 */
-	@Override
-	public void openSlotEditor(Player player, int slot) throws ShopSystemException, GeneralEconomyException {
-		validationHandler.checkForValidSlot(slot, getSize() - 1 - getReservedSlots());
-		getSlotEditorHandler().setSelectedSlot(slot);
-		player.openInventory(getSlotEditorHandler().getSlotEditorInventory());
-	}
-
-	/**
 	 * Overridden, because of the shop owner. {@inheritDoc}
+	 * 
+	 * @throws EconomyPlayerException
+	 * @throws BankException
 	 */
 	@Override
 	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
-			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
-		validationHandler.checkForValidSlot(slot, getSize() - 1 - getReservedSlots());
+			throws ShopsystemException, BankException, EconomyPlayerException {
+		validationHandler.checkForValidSlot(slot, getSize() - getReservedSlots());
 		validationHandler.checkForPlayerIsOnline(ecoPlayer);
-		validationHandler.checkForSlotIsNotEmpty(slot, getInventory());
+		validationHandler.checkForSlotIsNotEmpty(getOccupiedSlots(), slot);
 		validationHandler.checkForPlayerInventoryNotFull(ecoPlayer.getPlayer().getInventory());
 		ShopItem shopItem = getShopItem(slot);
 		int entireStock = shopItem.getStock();
@@ -116,7 +105,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	}
 
 	private void buyItemAsOwner(int slot, EconomyPlayer ecoPlayer, boolean sendMessage, ShopItem shopItem)
-			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
+			throws ShopsystemException {
 		ItemStack stack = shopItem.getItemStack();
 		int amount = shopItem.getAmount();
 		if (shopItem.getStock() < shopItem.getAmount()) {
@@ -133,12 +122,15 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
 	/**
 	 * Overridden, because of the shop owner. {@inheritDoc}
+	 * 
+	 * @throws EconomyPlayerException
+	 * @throws BankException
 	 */
 	@Override
 	public void sellShopItem(int slot, int amount, EconomyPlayer ecoPlayer, boolean sendMessage)
-			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
-		validationHandler.checkForValidSlot(slot, getSize() - 1 - getReservedSlots());
-		validationHandler.checkForSlotIsNotEmpty(slot, getInventory());
+			throws ShopsystemException, BankException, EconomyPlayerException {
+		validationHandler.checkForValidSlot(slot, getSize() - getReservedSlots());
+		validationHandler.checkForSlotIsNotEmpty(getOccupiedSlots(), slot);
 		validationHandler.checkForPlayerIsOnline(ecoPlayer);
 		ShopItem shopItem = getShopItem(slot);
 		double sellPrice = shopItem.getSellPrice() / shopItem.getAmount() * amount;
@@ -160,34 +152,37 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
 	/**
 	 * Overridden, because of the permission validation. {@inheritDoc}
-	 * 
-	 * @throws TownSystemException
-	 * @throws EconomyPlayerException
 	 */
 	@Override
-	public void changeLocation(Location location) throws EconomyPlayerException, TownSystemException {
+	public void changeLocation(Location location) throws ShopsystemException {
 		if (townworldManager.isTownWorld(location.getWorld().getName())) {
 			validationHandler.checkForPlayerHasPermissionAtLocation(location, getOwner());
 		}
 		super.changeLocation(location);
 	}
-	
-	protected void superChangeLocation(Location location) throws EconomyPlayerException, TownSystemException {
-		super.changeLocation(location);
+
+	protected void superChangeLocation(Location location) {
+		try {
+			super.changeLocation(location);
+		} catch (ShopsystemException e) {
+		}
 	}
 
 	/**
 	 * Overridden, because of the naming convention. {@inheritDoc}
 	 * 
-	 * @throws GeneralEconomyException
 	 */
 	@Override
-	public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
+	public void changeShopName(String name) throws ShopsystemException {
 		validationHandler.checkForShopNameIsFree(playershopManager.getPlayerShopUniqueNameList(), name, getOwner());
 		validationHandler.checkForValidShopName(name);
 		this.name = name;
 		shopDao.saveShopName(name);
-		getVillager().setCustomName(name + "_" + getOwner().getName());
+		String newName = name;
+		if (getOwner() != null) {
+			newName += "_" + getOwner().getName();
+		}
+		getVillager().setCustomName(newName);
 		changeInventoryNames(name);
 	}
 
@@ -201,29 +196,16 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 */
 	@Override
 	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack)
-			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
-		validationHandler.checkForValidSlot(slot, getSize() - 1 - getReservedSlots());
-		validationHandler.checkForSlotIsEmpty(getInventory(), slot);
+			throws ShopsystemException {
 		super.addShopItem(slot, sellPrice, buyPrice, itemStack);
 		ShopItem item = getShopItem(slot);
-		shopDao.saveStock(item.getItemHash(), 0);
+		shopDao.saveStock(item.getSlot(), 0);
 		updateItemStock(slot);
 	}
 
-	/**
-	 * Overridden, because of stockpile. {@inheritDoc}
-	 * 
-	 */
 	@Override
-	public void removeShopItem(int slot) throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
-		validationHandler.checkForValidSlot(slot, getSize() - 1 - getReservedSlots());
-		validationHandler.checkForSlotIsNotEmpty(slot, getInventory());
-		super.removeShopItem(slot);
-	}
-
-	@Override
-	public boolean isAvailable(int slot) throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
-		validationHandler.checkForValidSlot(slot, getSize() - 1 - getReservedSlots());
+	public boolean isAvailable(int slot) throws ShopsystemException {
+		validationHandler.checkForValidSlot(slot, getSize() - getReservedSlots());
 		ShopItem item = getShopItem(slot);
 		if (item.getStock() >= item.getAmount()) {
 			return true;
@@ -232,7 +214,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	}
 
 	@Override
-	public void changeOwner(EconomyPlayer newOwner) throws EconomyPlayerException, ShopSystemException {
+	public void changeOwner(EconomyPlayer newOwner) throws ShopsystemException {
 		validationHandler.checkForChangeOwnerIsPossible(playershopManager.getPlayerShopUniqueNameList(), newOwner,
 				getName());
 		setOwner(newOwner);
@@ -249,27 +231,27 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	}
 
 	@Override
-	public void decreaseStock(int slot, int stock)
-			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
-		validationHandler.checkForPositiveValue(stock);
-		validationHandler.checkForValidSlot(slot, getSize() - 1 - getReservedSlots());
+	public void decreaseStock(int slot, int stock) throws ShopsystemException {
+		validationHandler.checkForPositiveValue(Double.valueOf(stock));
+		validationHandler.checkForValidSlot(slot, getSize() - getReservedSlots());
+		validationHandler.checkForSlotIsNotEmpty(getOccupiedSlots(), slot);
 		ShopItem item = getShopItem(slot);
 		int entireStock = item.getStock();
 		validationHandler.checkForValidStockDecrease(entireStock, stock);
 		item.setStock(entireStock - stock);
-		shopDao.saveStock(item.getItemHash(), item.getStock());
+		shopDao.saveStock(item.getSlot(), item.getStock());
 		updateItemStock(slot);
 	}
 
 	@Override
-	public void increaseStock(int slot, int stock)
-			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
-		validationHandler.checkForPositiveValue(stock);
-		validationHandler.checkForValidSlot(slot, getSize() - 1 - getReservedSlots());
+	public void increaseStock(int slot, int stock) throws ShopsystemException {
+		validationHandler.checkForPositiveValue(Double.valueOf(stock));
+		validationHandler.checkForValidSlot(slot, getSize() - getReservedSlots());
+		validationHandler.checkForSlotIsNotEmpty(getOccupiedSlots(), slot);
 		ShopItem item = getShopItem(slot);
 		int entireStock = item.getStock();
 		item.setStock(entireStock + stock);
-		shopDao.saveStock(item.getItemHash(), item.getStock());
+		shopDao.saveStock(item.getSlot(), item.getStock());
 		updateItemStock(slot);
 	}
 
@@ -283,12 +265,13 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 		}
 	}
 
-	private void updateItemStock(int slot) throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
+	private void updateItemStock(int slot) throws ShopsystemException {
 		ItemStack original = getInventory().getItem(slot);
 		if (original != null) {
-			ItemStack stack = getInventory().getItem(slot);
+			original = getInventory().getItem(slot);
+
 			int stock = getShopItem(slot).getStock();
-			ItemMeta meta = stack.getItemMeta();
+			ItemMeta meta = original.getItemMeta();
 			List<String> list = removeStockFromLore(meta.getLore());
 			if (stock != 1) {
 				list.add(ChatColor.GREEN + String.valueOf(stock) + ChatColor.GOLD + " Items");
@@ -296,7 +279,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 				list.add(ChatColor.GREEN + String.valueOf(stock) + ChatColor.GOLD + " Item");
 			}
 			meta.setLore(list);
-			stack.setItemMeta(meta);
+			original.setItemMeta(meta);
 		}
 	}
 
@@ -320,22 +303,22 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	protected void loadStock() {
 		try {
 			for (ShopItem item : getItemList()) {
-				item.setStock(shopDao.loadStock(item.getItemHash()));
+				item.setStock(shopDao.loadStock(item.getSlot()));
 				updateItemStock(item.getSlot());
 			}
-		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
+		} catch (ShopsystemException e) {
 			// only rentshop
 		}
 	}
 
-	protected void loadOwner() throws GeneralEconomyException {
+	protected void loadOwner() throws EconomyPlayerException {
 		String owner = shopDao.loadOwner();
 		if (owner != null && !"".equals(owner)) {
 			setOwner(ecoPlayerManager.getEconomyPlayerByName(owner));
 			getVillager().setCustomName(getName() + "_" + getOwner().getName());
 		}
 	}
-	
+
 	private void setupShopOwner(EconomyPlayer owner) {
 		setOwner(owner);
 		shopDao.saveOwner(owner);

@@ -1,14 +1,13 @@
 package org.ue.bank.dataaccess.impl;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -99,30 +98,27 @@ public class BankDaoImplTest {
 		dao.setupSavefile();
 		assertEquals("12.34", String.valueOf(dao.loadAmount("myiban")));
 	}
-	
+
 	@Test
 	public void removeOldIbanListTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		
 		dao.setupSavefile();
 		File file = new File("src/BankAccounts.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		List<String> list = new ArrayList<>();
-		list.add("myiban");
+		List<String> list = Arrays.asList("myiban");
 		config.set("Ibans", list);
-		save(file,config);
-		
-		config = YamlConfiguration.loadConfiguration(file);
-		assertFalse(config.getConfigurationSection("Ibans") != null);
+		config.set("myiban", 100.0);
+		save(file, config);
+
+		assertTrue(config.contains("Ibans"));
 		dao.setupSavefile();
-		assertTrue(config.getConfigurationSection("Ibans") == null);
+		List<String> result = dao.loadIbanList();
+		assertEquals("myiban", result.get(0));
+		config = YamlConfiguration.loadConfiguration(file);
+		assertFalse(config.contains("Ibans"));
 	}
 
 	private void save(File file, YamlConfiguration config) {
-		try {
-			config.save(file);
-		} catch (IOException e) {
-			fail();
-		}
+		assertDoesNotThrow(() -> config.save(file));
 	}
 }

@@ -9,11 +9,11 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
+import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.EconomyVillagerType;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.shopsystem.logic.ShopSystemException;
+import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.shopsystem.logic.api.AbstractShop;
 import org.ue.shopsystem.logic.api.AdminshopManager;
 import org.ue.shopsystem.logic.api.PlayershopManager;
@@ -21,6 +21,7 @@ import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopManager;
 import org.ue.shopsystem.logic.api.ShopEventHandler;
 import org.ue.shopsystem.logic.api.ShopItem;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class ShopEventHandlerImpl implements ShopEventHandler {
 
@@ -81,13 +82,13 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 				EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(player.getName());
 				handleBuySell(abstractShop, event, ecoPlayer);
 			}
-		} catch (GeneralEconomyException | ShopSystemException | EconomyPlayerException e) {
+		} catch (ShopsystemException | BankException | EconomyPlayerException e) {
 			player.sendMessage(e.getMessage());
 		}
 	}
 
 	private void handleBuySell(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
-			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+			throws ShopsystemException, BankException, EconomyPlayerException {
 		Entity entity = (Entity) event.getInventory().getHolder();
 		EconomyVillagerType economyVillager = EconomyVillagerType
 				.getEnum(entity.getMetadata("ue-type").get(0).value().toString());
@@ -114,7 +115,7 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 	}
 
 	private void handleBuy(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
-			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
+			throws ShopsystemException, BankException, EconomyPlayerException {
 		// check if click was inside the shop inventory, buying should be only possible
 		// inside the
 		// shop inventory, not the player inventory
@@ -125,7 +126,7 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 	}
 
 	private void handleSellSpecific(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
-			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+			throws ShopsystemException, BankException, EconomyPlayerException {
 		ShopItem shopItem = abstractShop.getShopItem(event.getCurrentItem());
 		int amount = getAmountInInventory(event.getWhoClicked().getInventory(), shopItem);
 		if (amount >= shopItem.getAmount()) {
@@ -134,7 +135,7 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 	}
 
 	private void handleSellAll(AbstractShop abstractShop, InventoryClickEvent event, EconomyPlayer ecoPlayer)
-			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+			throws ShopsystemException, BankException, EconomyPlayerException {
 		ShopItem shopItem = abstractShop.getShopItem(event.getCurrentItem());
 		int amount = getAmountInInventory(event.getWhoClicked().getInventory(), shopItem);
 		if (amount > 0) {
@@ -188,7 +189,7 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 			default:
 				break;
 			}
-		} catch (GeneralEconomyException | ShopSystemException e) {
+		} catch (ShopsystemException e) {
 		}
 	}
 }

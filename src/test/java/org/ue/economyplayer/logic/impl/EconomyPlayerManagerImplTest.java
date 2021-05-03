@@ -20,16 +20,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankManager;
-import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
 import org.ue.jobsystem.logic.api.JobManager;
 
 import dagger.Lazy;
@@ -53,8 +50,6 @@ public class EconomyPlayerManagerImplTest {
 	Lazy<JobManager> jobManager;
 	@Mock
 	ServerProvider serverProvider;
-	@Mock
-	GeneralValidationHandler generalValidator;
 
 	@Test
 	public void createEconomyPlayerTest() {
@@ -65,14 +60,14 @@ public class EconomyPlayerManagerImplTest {
 		assertDoesNotThrow(() -> ecoPlayerManager.createEconomyPlayer("catch441"));
 		assertEquals(1, ecoPlayerManager.getAllEconomyPlayers().size());
 		assertEquals("catch441", ecoPlayerManager.getAllEconomyPlayers().get(0).getName());
-		assertDoesNotThrow(() -> verify(generalValidator).checkForValueNotInList(new ArrayList<>(), "catch441"));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValueNotInList(new ArrayList<>(), "catch441"));
 	}
 
 	@Test
-	public void createEconomyPlayerTestWithExistingName() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueNotInList(new ArrayList<>(),
+	public void createEconomyPlayerTestWithExistingName() throws EconomyPlayerException {
+		doThrow(EconomyPlayerException.class).when(validationHandler).checkForValueNotInList(new ArrayList<>(),
 				"catch441");
-		assertThrows(GeneralEconomyException.class, () -> ecoPlayerManager.createEconomyPlayer("catch441"));
+		assertThrows(EconomyPlayerException.class, () -> ecoPlayerManager.createEconomyPlayer("catch441"));
 		assertEquals(0, ecoPlayerManager.getAllEconomyPlayers().size());
 	}
 
@@ -102,14 +97,9 @@ public class EconomyPlayerManagerImplTest {
 	}
 
 	@Test
-	public void getEconomyPlayerByNameTestWithNoPlayer() {
-		try {
-			ecoPlayerManager.getEconomyPlayerByName("catch441");
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals("catch441", e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
-		}
+	public void getEconomyPlayerByNameTestWithNoPlayer() throws EconomyPlayerException {
+		doThrow(EconomyPlayerException.class).when(validationHandler).checkForValueExists(null, "catch441");
+		assertThrows(EconomyPlayerException.class, () -> ecoPlayerManager.getEconomyPlayerByName("catch441"));
 	}
 
 	@Test
@@ -146,7 +136,7 @@ public class EconomyPlayerManagerImplTest {
 		BossBar bossBar = mock(BossBar.class);
 		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(ecoPlayerDao.loadPlayerList()).thenReturn(Arrays.asList("catch441"));
-		
+
 		ecoPlayerManager.getAllEconomyPlayers().clear();
 		ecoPlayerManager.loadAllEconomyPlayers();
 		List<EconomyPlayer> list = ecoPlayerManager.getAllEconomyPlayers();

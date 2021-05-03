@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,25 +40,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankManager;
-import org.ue.common.logic.api.GeneralValidationHandler;
+import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.ServiceComponent;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
 import org.ue.townsystem.logic.api.Town;
+import org.ue.townsystem.logic.api.TownsystemException;
 import org.ue.townsystem.logic.api.TownsystemValidationHandler;
 import org.ue.townsystem.logic.api.Townworld;
-import org.ue.townsystem.logic.TownExceptionMessageEnum;
-import org.ue.townsystem.logic.TownSystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class TownworldManagerImplTest {
@@ -72,28 +69,22 @@ public class TownworldManagerImplTest {
 	@Mock
 	TownsystemValidationHandler townsystemValidationHandler;
 	@Mock
-	Logger logger;
-	@Mock
 	BankManager bankManager;
 	@Mock
-	EconomyPlayerValidationHandler ecoPlayerValidationHandler;
-	@Mock
 	ConfigDao configDao;
-	@Mock
-	GeneralValidationHandler generalValidator;
 
 	@Test
-	public void createTownWorldTestWithWorldDoesNotExist() throws TownSystemException {
-		doThrow(TownSystemException.class).when(townsystemValidationHandler).checkForWorldExists("world");
-		assertThrows(TownSystemException.class, () -> townworldManager.createTownWorld("world"));
+	public void createTownWorldTestWithWorldDoesNotExist() throws TownsystemException {
+		doThrow(TownsystemException.class).when(townsystemValidationHandler).checkForWorldExists("world");
+		assertThrows(TownsystemException.class, () -> townworldManager.createTownWorld("world"));
 		verify(configDao, never()).saveTownworldNamesList(anyList());
 	}
 
 	@Test
-	public void createTownWorldTestWithTownworldExists() throws TownSystemException {
-		doThrow(TownSystemException.class).when(townsystemValidationHandler).checkForTownworldDoesNotExist(anyMap(),
+	public void createTownWorldTestWithTownworldExists() throws TownsystemException {
+		doThrow(TownsystemException.class).when(townsystemValidationHandler).checkForTownworldDoesNotExist(anyMap(),
 				eq("world"));
-		assertThrows(TownSystemException.class, () -> townworldManager.createTownWorld("world"));
+		assertThrows(TownsystemException.class, () -> townworldManager.createTownWorld("world"));
 		verify(configDao, never()).saveTownworldNamesList(anyList());
 	}
 
@@ -110,17 +101,17 @@ public class TownworldManagerImplTest {
 	}
 
 	@Test
-	public void deleteTownWorldTestWithWorldDoesNotExist() throws TownSystemException {
-		doThrow(TownSystemException.class).when(townsystemValidationHandler).checkForWorldExists("world");
-		assertThrows(TownSystemException.class, () -> townworldManager.deleteTownWorld("world"));
+	public void deleteTownWorldTestWithWorldDoesNotExist() throws TownsystemException {
+		doThrow(TownsystemException.class).when(townsystemValidationHandler).checkForWorldExists("world");
+		assertThrows(TownsystemException.class, () -> townworldManager.deleteTownWorld("world"));
 		verify(configDao, never()).saveTownworldNamesList(anyList());
 	}
 
 	@Test
-	public void deleteTownWorldTestWithTownworldDoesNotExists() throws TownSystemException {
-		doThrow(TownSystemException.class).when(townsystemValidationHandler).checkForTownworldExists(anyMap(),
+	public void deleteTownWorldTestWithTownworldDoesNotExists() throws TownsystemException {
+		doThrow(TownsystemException.class).when(townsystemValidationHandler).checkForTownworldExists(anyMap(),
 				eq("world"));
-		assertThrows(TownSystemException.class, () -> townworldManager.deleteTownWorld("world"));
+		assertThrows(TownsystemException.class, () -> townworldManager.deleteTownWorld("world"));
 		verify(configDao, never()).saveTownworldNamesList(anyList());
 	}
 
@@ -177,23 +168,18 @@ public class TownworldManagerImplTest {
 
 	@Test
 	public void getTownWorldByNameTestWithNoTownworld() {
-		try {
-			townworldManager.getTownWorldByName("world");
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.TOWNWORLD_DOES_NOT_EXIST, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> townworldManager.getTownWorldByName("world"));
+		assertEquals(ExceptionMessageEnum.TOWNWORLD_DOES_NOT_EXIST, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
 	public void getTownByNameTestWithNoTown() {
-		try {
-			townworldManager.getTownByName("town");
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals("town", e.getParams()[0]);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class, () -> townworldManager.getTownByName("town"));
+		assertEquals(ExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
+		assertEquals(1, e.getParams().length);
+		assertEquals("town", e.getParams()[0]);
 	}
 
 	@Test
@@ -209,29 +195,37 @@ public class TownworldManagerImplTest {
 		World world = mock(World.class);
 		BossBar bossbar = mock(BossBar.class);
 		Location loc = mock(Location.class);
+		when(loc.getWorld()).thenReturn(world);
 		when(player.getLocation()).thenReturn(loc);
 		when(ecoPlayer.getBossBar()).thenReturn(bossbar);
-		when(player.getWorld()).thenReturn(world);
-		when(player.getName()).thenReturn("catch441");
-		when(serverProvider.getOnlinePlayers()).thenReturn(Arrays.asList(player));
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		
+		when(ecoPlayer.isOnline()).thenReturn(true);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(Arrays.asList(ecoPlayer)));
+
 		assertDoesNotThrow(() -> townworldManager.performTownworldLocationCheckAllPlayers());
-		
+
 		verify(bossbar).setVisible(false);
 	}
 
 	@Test
 	public void performTownWorldLocationCheckTestWithNoTownworld() {
-		Chunk chunk = mock(Chunk.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		BossBar bossbar = mock(BossBar.class);
+		World world = mock(World.class);
+		Location loc = mock(Location.class);
+		when(loc.getWorld()).thenReturn(world);
 		when(ecoPlayer.getBossBar()).thenReturn(bossbar);
-		townworldManager.performTownWorldLocationCheck("myworld", chunk, ecoPlayer);
-	
+		when(ecoPlayer.isOnline()).thenReturn(true);
+		Player player = mock(Player.class);
+		when(player.getLocation()).thenReturn(loc);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		when(ecoPlayer.isOnline()).thenReturn(true);
+		when(world.getName()).thenReturn("world");
+		townworldManager.performTownWorldLocationCheck(ecoPlayer);
+
 		verify(bossbar).setVisible(false);
 	}
-	
+
 	@Test
 	public void performTownWorldLocationCheckTestWithWilderness() {
 		TownworldDao dao = mock(TownworldDao.class);
@@ -239,17 +233,25 @@ public class TownworldManagerImplTest {
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
-		Chunk chunk = mock(Chunk.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		BossBar bossbar = mock(BossBar.class);
 		when(ecoPlayer.getBossBar()).thenReturn(bossbar);
-		townworldManager.performTownWorldLocationCheck("world", chunk, ecoPlayer);
-		
+
+		Player player = mock(Player.class);
+		World world = mock(World.class);
+		Location loc = mock(Location.class);
+		when(loc.getWorld()).thenReturn(world);
+		when(player.getLocation()).thenReturn(loc);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		when(ecoPlayer.isOnline()).thenReturn(true);
+		when(world.getName()).thenReturn("world");
+		townworldManager.performTownWorldLocationCheck(ecoPlayer);
+
 		verify(bossbar).setTitle("Wilderness");
 		verify(bossbar).setColor(BarColor.GREEN);
 		verify(bossbar).setVisible(true);
 	}
-	
+
 	@Test
 	public void performTownWorldLocationCheckTestWithInTown() {
 		TownworldDao dao = mock(TownworldDao.class);
@@ -257,7 +259,7 @@ public class TownworldManagerImplTest {
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getTownworldDao()).thenReturn(dao);
 		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
-		BossBar bossbar = mock(BossBar.class);				
+		BossBar bossbar = mock(BossBar.class);
 		JavaPlugin plugin = mock(JavaPlugin.class);
 		Location loc = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
@@ -275,6 +277,7 @@ public class TownworldManagerImplTest {
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(leaveItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(joinItem);
+		when(serverProvider.createInventory(null, 9, "Plot 1/2")).thenReturn(inv);
 		when(serverProvider.createInventory(villager, 9, "mytown TownManager")).thenReturn(inv);
 		when(bankManager.createBankAccount(0)).thenReturn(account);
 		when(chunk.getX()).thenReturn(1);
@@ -287,8 +290,14 @@ public class TownworldManagerImplTest {
 		Townworld townworld = assertDoesNotThrow(() -> townworldManager.getTownWorldByName("world"));
 		assertDoesNotThrow(() -> townworld.foundTown("mytown", loc, ecoPlayer));
 		when(ecoPlayer.getBossBar()).thenReturn(bossbar);
-		townworldManager.performTownWorldLocationCheck("world", chunk, ecoPlayer);
-		
+
+		Player player = mock(Player.class);
+		when(player.getLocation()).thenReturn(loc);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		when(ecoPlayer.isOnline()).thenReturn(true);
+		when(world.getName()).thenReturn("world");
+		townworldManager.performTownWorldLocationCheck(ecoPlayer);
+
 		verify(bossbar).setTitle("mytown");
 		verify(bossbar).setColor(BarColor.RED);
 		verify(bossbar).setVisible(true);
@@ -318,9 +327,8 @@ public class TownworldManagerImplTest {
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(leaveItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(joinItem);
-		when(serverProvider.createInventory(villager, 9, "mytown TownManager")).thenReturn(inv);
-		when(serverProvider.createInventory(villager, 9, "other TownManager")).thenReturn(inv);
-		when(serverProvider.createInventory(villager, 9, "some TownManager")).thenReturn(inv);
+		when(serverProvider.createInventory(any(Villager.class), anyInt(), anyString())).thenReturn(inv);
+		when(serverProvider.createInventory(eq(null), anyInt(), anyString())).thenReturn(inv);
 		when(bankManager.createBankAccount(0)).thenReturn(account);
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
@@ -337,7 +345,7 @@ public class TownworldManagerImplTest {
 		Town town = assertDoesNotThrow(() -> townworldManager.getTownByName("mytown"));
 		assertEquals("mytown", town.getTownName());
 	}
-	
+
 	@Test
 	public void despawnAllVillagersTest() {
 		TownworldDao dao = mock(TownworldDao.class);
@@ -362,6 +370,7 @@ public class TownworldManagerImplTest {
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(leaveItem);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(joinItem);
+		when(serverProvider.createInventory(null, 9, "Plot 1/2")).thenReturn(inv);
 		when(serverProvider.createInventory(villager, 9, "mytown TownManager")).thenReturn(inv);
 		when(bankManager.createBankAccount(0)).thenReturn(account);
 		when(chunk.getX()).thenReturn(1);
@@ -373,7 +382,7 @@ public class TownworldManagerImplTest {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Townworld townworld = assertDoesNotThrow(() -> townworldManager.getTownWorldByName("world"));
 		assertDoesNotThrow(() -> townworld.foundTown("mytown", loc, ecoPlayer));
-		
+
 		townworldManager.despawnAllVillagers();
 		verify(villager).remove();
 	}

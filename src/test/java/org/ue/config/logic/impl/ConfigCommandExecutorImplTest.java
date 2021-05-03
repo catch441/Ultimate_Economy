@@ -18,12 +18,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.utils.api.MessageWrapper;
+import org.ue.config.logic.api.ConfigException;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigCommandExecutorImplTest {
@@ -68,7 +69,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void currencyCommandTestWithTwoArg() {
 		Player player = mock(Player.class);
-		String[] args = { "currency", "kth" };
+		String[] args = { "currency", "catch" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
 		assertTrue(result);
 		verify(player).sendMessage("/ue-config currency <singular> <plural>");
@@ -78,18 +79,18 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void currencyCommandTestWithThreeArg() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("config_change", "kth kths"))
-				.thenReturn("§6The configuration was changed to §akth kths§6.");
+		when(messageWrapper.getString("config_change", "catch catchs"))
+				.thenReturn("§6The configuration was changed to §acatch catchs§6.");
 		when(messageWrapper.getString("restart")).thenReturn("§6Please restart the server!");
 
-		String[] args = { "currency", "kth", "kths" };
+		String[] args = { "currency", "catch", "catchs" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
 		assertTrue(result);
-		verify(player).sendMessage("§6The configuration was changed to §akth kths§6.");
+		verify(player).sendMessage("§6The configuration was changed to §acatch catchs§6.");
 		verify(player).sendMessage("§6Please restart the server!");
 		verifyNoMoreInteractions(player);
-		verify(configManager).setCurrencyPl("kths");
-		verify(configManager).setCurrencySg("kth");
+		verify(configManager).setCurrencyPl("catchs");
+		verify(configManager).setCurrencySg("catch");
 	}
 
 	@Test
@@ -115,7 +116,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void languageCommandTestWithMoreArgs() {
 		Player player = mock(Player.class);
-		String[] args = { "language", "de", "DE", "kth" };
+		String[] args = { "language", "de", "DE", "catch" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
 		assertTrue(result);
 		verify(player).sendMessage("/ue-config language <language> <country>");
@@ -138,8 +139,8 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void languageCommandTestWithException() throws GeneralEconomyException {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "kth")).thenReturn("My error message!");
-		doThrow(new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, "kth"))
+		when(messageWrapper.getErrorString("invalid_parameter", "catch")).thenReturn("My error message!");
+		doThrow(new ConfigException(messageWrapper, ExceptionMessageEnum.INVALID_PARAMETER, "catch"))
 				.when(configManager).setLocale("de", "DE");
 
 		String[] args = { "language", "de", "DE" };
@@ -175,13 +176,13 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxRentedDaysCommandTestWithInvalidInteger() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "kth"))
-				.thenReturn("§c§cThe parameter §4kth§c is invalid!");
+		when(messageWrapper.getErrorString("invalid_parameter", "catch"))
+				.thenReturn("§c§cThe parameter §4catch§c is invalid!");
 
-		String[] args = { "maxRentedDays", "kth" };
+		String[] args = { "maxRentedDays", "catch" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
 		assertTrue(result);
-		verify(player).sendMessage("§c§cThe parameter §4kth§c is invalid!");
+		verify(player).sendMessage("§c§cThe parameter §4catch§c is invalid!");
 		verifyNoMoreInteractions(player);
 	}
 
@@ -247,13 +248,13 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxHomesCommandTestWithInvalidInteger() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "kth"))
-				.thenReturn("§c§cThe parameter §4kth§c is invalid!");
+		when(messageWrapper.getErrorString("invalid_parameter", "catch"))
+				.thenReturn("§c§cThe parameter §4catch§c is invalid!");
 
-		String[] args = { "maxHomes", "kth" };
+		String[] args = { "maxHomes", "catch" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
 		assertTrue(result);
-		verify(player).sendMessage("§c§cThe parameter §4kth§c is invalid!");
+		verify(player).sendMessage("§c§cThe parameter §4catch§c is invalid!");
 		verifyNoMoreInteractions(player);
 	}
 
@@ -283,13 +284,13 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxJobsCommandTestWithInvalidInteger() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "kth"))
-				.thenReturn("§c§cThe parameter §4kth§c is invalid!");
+		when(messageWrapper.getErrorString("invalid_parameter", "catch"))
+				.thenReturn("§c§cThe parameter §4catch§c is invalid!");
 
-		String[] args = { "maxJobs", "kth" };
+		String[] args = { "maxJobs", "catch" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
 		assertTrue(result);
-		verify(player).sendMessage("§c§cThe parameter §4kth§c is invalid!");
+		verify(player).sendMessage("§c§cThe parameter §4catch§c is invalid!");
 		verifyNoMoreInteractions(player);
 	}
 
@@ -319,13 +320,13 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxJoinedTownsCommandTestWithInvalidInteger() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "kth"))
-				.thenReturn("§c§cThe parameter §4kth§c is invalid!");
+		when(messageWrapper.getErrorString("invalid_parameter", "catch"))
+				.thenReturn("§c§cThe parameter §4catch§c is invalid!");
 
-		String[] args = { "maxJoinedTowns", "kth" };
+		String[] args = { "maxJoinedTowns", "catch" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
 		assertTrue(result);
-		verify(player).sendMessage("§c§cThe parameter §4kth§c is invalid!");
+		verify(player).sendMessage("§c§cThe parameter §4catch§c is invalid!");
 		verifyNoMoreInteractions(player);
 	}
 
@@ -355,13 +356,13 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxPlayershopsCommandTestWithInvalidInteger() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "kth"))
-				.thenReturn("§c§cThe parameter §4kth§c is invalid!");
+		when(messageWrapper.getErrorString("invalid_parameter", "catch"))
+				.thenReturn("§c§cThe parameter §4catch§c is invalid!");
 
-		String[] args = { "maxPlayershops", "kth" };
+		String[] args = { "maxPlayershops", "catch" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
 		assertTrue(result);
-		verify(player).sendMessage("§c§cThe parameter §4kth§c is invalid!");
+		verify(player).sendMessage("§c§cThe parameter §4catch§c is invalid!");
 		verifyNoMoreInteractions(player);
 	}
 
@@ -394,13 +395,13 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void homesCommandTestWithInvalidNumber() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "kth"))
-				.thenReturn("§cThe parameter §4kth§c is invalid!");
+		when(messageWrapper.getErrorString("invalid_parameter", "catch"))
+				.thenReturn("§cThe parameter §4catch§c is invalid!");
 
-		String[] args = { "homes", "kth" };
+		String[] args = { "homes", "catch" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
 		assertTrue(result);
-		verify(player).sendMessage("§cThe parameter §4kth§c is invalid!");
+		verify(player).sendMessage("§cThe parameter §4catch§c is invalid!");
 		verifyNoMoreInteractions(player);
 	}
 
@@ -517,13 +518,13 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void wildernessInteractionCommandTestWithInvalidBoolean() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "kth"))
-				.thenReturn("§cThe parameter §4kth§c is invalid!");
+		when(messageWrapper.getErrorString("invalid_parameter", "catch"))
+				.thenReturn("§cThe parameter §4catch§c is invalid!");
 
-		String[] args = { "wildernessInteraction", "kth" };
+		String[] args = { "wildernessInteraction", "catch" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
 		assertTrue(result);
-		verify(player).sendMessage("§cThe parameter §4kth§c is invalid!");
+		verify(player).sendMessage("§cThe parameter §4catch§c is invalid!");
 		verifyNoMoreInteractions(player);
 	}
 }

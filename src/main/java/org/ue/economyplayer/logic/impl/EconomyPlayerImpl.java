@@ -13,22 +13,24 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ue.bank.logic.api.BankAccount;
+import org.ue.bank.logic.api.BankException;
 import org.ue.bank.logic.api.BankManager;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
-import org.ue.economyplayer.logic.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
-import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
+import org.ue.jobsystem.logic.api.JobsystemException;
 
 public class EconomyPlayerImpl implements EconomyPlayer {
 
-	private final Logger logger;
+	private static final Logger log = LoggerFactory.getLogger(EconomyPlayerImpl.class);
 	private final ServerProvider serverProvider;
 	private final ConfigManager configManager;
 	private final BankManager bankManager;
@@ -48,7 +50,6 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	/**
 	 * Constructor for creating a new economyPlayer/loading an existing player.
 	 * 
-	 * @param logger
 	 * @param serverProvider
 	 * @param validationHandler
 	 * @param ecoPlayerDao
@@ -60,13 +61,12 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	 * @param name
 	 * @param isNew
 	 */
-	public EconomyPlayerImpl(Logger logger, ServerProvider serverProvider,
+	public EconomyPlayerImpl(ServerProvider serverProvider,
 			EconomyPlayerValidationHandler validationHandler, EconomyPlayerDao ecoPlayerDao,
 			MessageWrapper messageWrapper, ConfigManager configManager, BankManager bankManager, JobManager jobManager,
 			Player player, String name, boolean isNew) {
 		this.configManager = configManager;
 		this.bankManager = bankManager;
-		this.logger = logger;
 		this.jobManager = jobManager;
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerDao = ecoPlayerDao;
@@ -99,7 +99,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	@Override
 	public void joinJob(Job job, boolean sendMessage) throws EconomyPlayerException {
-		validationHandler.checkForNotReachedMaxJoinedJobs(reachedMaxJoinedJobs());
+		validationHandler.checkForNotReachedMax(reachedMaxJoinedJobs());
 		validationHandler.checkForJobNotJoined(getJobList(), job);
 		getJobList().add(job);
 		ecoPlayerDao.saveJoinedJobsList(getName(), getJobList());
@@ -129,7 +129,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	@Override
-	public Location getHome(String homeName) throws GeneralEconomyException {
+	public Location getHome(String homeName) throws EconomyPlayerException {
 		validationHandler.checkForValueInList(new ArrayList<>(getHomeList().keySet()), homeName);
 		return getHomeList().get(homeName);
 	}
@@ -142,7 +142,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	@Override
 	public void addJoinedTown(String townName) throws EconomyPlayerException {
 		validationHandler.checkForTownNotJoined(getJoinedTownList(), townName);
-		validationHandler.checkForNotReachedMaxJoinedTowns(reachedMaxJoinedTowns());
+		validationHandler.checkForNotReachedMax(reachedMaxJoinedTowns());
 		getJoinedTownList().add(townName);
 		ecoPlayerDao.saveJoinedTowns(getName(), getJoinedTownList());
 	}
@@ -175,10 +175,9 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	@Override
-	public void addHome(String homeName, Location location, boolean sendMessage)
-			throws GeneralEconomyException, EconomyPlayerException {
+	public void addHome(String homeName, Location location, boolean sendMessage) throws EconomyPlayerException {
 		validationHandler.checkForValueNotInList(new ArrayList<>(getHomeList().keySet()), homeName);
-		validationHandler.checkForNotReachedMaxHomes(reachedMaxHomes());
+		validationHandler.checkForNotReachedMax(reachedMaxHomes());
 		homes.put(homeName, location);
 		ecoPlayerDao.saveHome(getName(), homeName, location);
 		if (isOnline() && sendMessage) {
@@ -188,7 +187,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	@Override
-	public void removeHome(String homeName, boolean sendMessage) throws GeneralEconomyException {
+	public void removeHome(String homeName, boolean sendMessage) throws EconomyPlayerException {
 		validationHandler.checkForValueInList(new ArrayList<>(getHomeList().keySet()), homeName);
 		getHomeList().remove(homeName);
 		ecoPlayerDao.saveHome(getName(), homeName, null);
@@ -226,7 +225,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	@Override
 	public void payToOtherPlayer(EconomyPlayer reciever, double amount, boolean sendMessage)
-			throws GeneralEconomyException, EconomyPlayerException {
+			throws BankException, EconomyPlayerException {
 		decreasePlayerAmount(amount, true);
 		reciever.increasePlayerAmount(amount, false);
 		if (reciever.isOnline() && sendMessage) {
@@ -240,7 +239,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	@Override
-	public void increasePlayerAmount(double amount, boolean sendMessage) throws GeneralEconomyException {
+	public void increasePlayerAmount(double amount, boolean sendMessage) throws BankException {
 		getBankAccount().increaseAmount(amount);
 		if (isOnline()) {
 			updateScoreBoardObjective();
@@ -252,8 +251,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	@Override
-	public void decreasePlayerAmount(double amount, boolean personal)
-			throws GeneralEconomyException, EconomyPlayerException {
+	public void decreasePlayerAmount(double amount, boolean personal) throws BankException, EconomyPlayerException {
 		validationHandler.checkForEnoughMoney(getBankAccount(), amount, personal);
 		getBankAccount().decreaseAmount(amount);
 		if (isOnline()) {
@@ -262,8 +260,9 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	}
 
 	@Override
-	public boolean hasEnoughtMoney(double amount) throws GeneralEconomyException {
-		return getBankAccount().hasAmount(amount);
+	public boolean hasEnoughtMoney(double amount) throws EconomyPlayerException {
+		validationHandler.checkForPositiveValue(amount);
+		return getBankAccount().getAmount() >= amount;
 	}
 
 	@Override
@@ -350,8 +349,8 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		String iban = ecoPlayerDao.loadBankIban(getName());
 		try {
 			bankAccount = bankManager.getBankAccountByIban(iban);
-		} catch (GeneralEconomyException e) {
-			logger.warn("[Ultimate_Economy] Failed to load the bank account " + iban + " for the player " + getName());
+		} catch (BankException e) {
+			log.warn("[Ultimate_Economy] Failed to load the bank account " + iban + " for the player " + getName());
 		}
 	}
 
@@ -359,8 +358,8 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		for (String jobName : ecoPlayerDao.loadJobsList(getName())) {
 			try {
 				getJobList().add(jobManager.getJobByName(jobName));
-			} catch (GeneralEconomyException e) {
-				logger.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
+			} catch (JobsystemException e) {
+				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
 	}

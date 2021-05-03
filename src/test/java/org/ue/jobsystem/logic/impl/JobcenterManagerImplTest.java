@@ -21,16 +21,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.ServiceComponent;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.Jobcenter;
+import org.ue.jobsystem.logic.api.JobsystemException;
+import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
 
 @ExtendWith(MockitoExtension.class)
 public class JobcenterManagerImplTest {
@@ -44,7 +44,7 @@ public class JobcenterManagerImplTest {
 	@Mock
 	ConfigDao configDao;
 	@Mock
-	GeneralValidationHandler generalValidator;
+	JobsystemValidationHandler validator;
 
 	@Test
 	public void getJobcenterByNameTest() {
@@ -65,9 +65,9 @@ public class JobcenterManagerImplTest {
 	}
 
 	@Test
-	public void getJobcenterByNameTestWithNoJobcenter() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueExists(null, "center");
-		assertThrows(GeneralEconomyException.class, () -> manager.getJobcenterByName("center"));
+	public void getJobcenterByNameTestWithNoJobcenter() throws JobsystemException {
+		doThrow(JobsystemException.class).when(validator).checkForValueExists(null, "center");
+		assertThrows(JobsystemException.class, () -> manager.getJobcenterByName("center"));
 	}
 
 	@Test
@@ -90,7 +90,7 @@ public class JobcenterManagerImplTest {
 	public void despawnAllVillagersTest() {
 		Jobcenter center = createJobcenter("center");
 		manager.despawnAllVillagers();
-		verify(center).despawnVillager();
+		verify(center).despawn();
 		;
 	}
 
@@ -154,18 +154,18 @@ public class JobcenterManagerImplTest {
 	}
 
 	@Test
-	public void createJobcenterTestWithAlreadyExists() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueNotInList(new ArrayList<>(),
+	public void createJobcenterTestWithAlreadyExists() throws JobsystemException {
+		doThrow(JobsystemException.class).when(validator).checkForValueNotInList(new ArrayList<>(),
 				"center");
-		assertThrows(GeneralEconomyException.class, () -> manager.createJobcenter("center", null, 9));
+		assertThrows(JobsystemException.class, () -> manager.createJobcenter("center", null, 9));
 		assertEquals(0, manager.getJobcenterList().size());
 		verify(configDao, never()).saveJobcenterList(anyList());
 	}
 
 	@Test
-	public void createJobcenterTestWithInvalidSize() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValidSize(9);
-		assertThrows(GeneralEconomyException.class, () -> manager.createJobcenter("center", null, 9));
+	public void createJobcenterTestWithInvalidSize() throws JobsystemException {
+		doThrow(JobsystemException.class).when(validator).checkForValidSize(9);
+		assertThrows(JobsystemException.class, () -> manager.createJobcenter("center", null, 9));
 		assertEquals(0, manager.getJobcenterList().size());
 		verify(configDao, never()).saveJobcenterList(anyList());
 	}
@@ -178,8 +178,8 @@ public class JobcenterManagerImplTest {
 		when(serviceComponent.getJobcenter()).thenReturn(center);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		assertDoesNotThrow(() -> manager.createJobcenter("center", location, 9));
-		assertDoesNotThrow(() -> verify(generalValidator).checkForValueNotInList(new ArrayList<>(), "center"));
-		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSize(9));
+		assertDoesNotThrow(() -> verify(validator).checkForValueNotInList(new ArrayList<>(), "center"));
+		assertDoesNotThrow(() -> verify(validator).checkForValidSize(9));
 		verify(configDao).saveJobcenterList(Arrays.asList("center"));
 		Jobcenter result = manager.getJobcenterList().get(0);
 		assertEquals(center, result);
@@ -196,6 +196,6 @@ public class JobcenterManagerImplTest {
 		manager.loadAllJobcenters();
 		Jobcenter result = manager.getJobcenterList().get(0);
 		assertEquals(center, result);
-		verify(center).setupExisting("center");
+		assertDoesNotThrow(() -> verify(center).setupExisting("center"));
 	}
 }

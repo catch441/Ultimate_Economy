@@ -18,8 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.general.GeneralEconomyException;
 
 @ExtendWith(MockitoExtension.class)
 public class EconomyPlayerTabCompleterImplTest {
@@ -116,14 +116,14 @@ public class EconomyPlayerTabCompleterImplTest {
 	}
 	
 	@Test
-	public void homeCommandWithNoEcoPlayer() throws GeneralEconomyException {
+	public void homeCommandWithNoEcoPlayer() throws EconomyPlayerException {
 		Command command = mock(Command.class);
 		when(command.getName()).thenReturn("home");
 		
 		String[] args = { "" };
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
 		
 		List<String> result = tabCompleter.onTabComplete(player, command, null, args);
 		assertEquals(0, result.size());

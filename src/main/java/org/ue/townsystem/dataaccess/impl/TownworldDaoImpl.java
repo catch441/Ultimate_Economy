@@ -13,30 +13,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankManager;
-import org.ue.common.utils.SaveFileUtils;
+import org.ue.common.dataaccess.impl.EconomyVillagerDaoImpl;
+import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.utils.ServerProvider;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.general.GeneralEconomyException;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
+import org.ue.townsystem.logic.api.TownsystemException;
 import org.ue.townsystem.logic.api.TownsystemValidationHandler;
-import org.ue.townsystem.logic.TownSystemException;
 
-public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
+public class TownworldDaoImpl extends EconomyVillagerDaoImpl implements TownworldDao {
 
 	private static final Logger log = LoggerFactory.getLogger(TownworldDaoImpl.class);
 	private final TownsystemValidationHandler validationHandler;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final BankManager bankManager;
-	private final ServerProvider serverProvider;
 
 	@Inject
 	public TownworldDaoImpl(TownsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
 			BankManager bankManager, ServerProvider serverProvider) {
+		super(serverProvider);
 		this.validationHandler = validationHandler;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.bankManager = bankManager;
-		this.serverProvider = serverProvider;
 	}
 
 	@Override
@@ -51,16 +51,6 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	@Override
 	public void deleteSavefile() {
 		file.delete();
-	}
-
-	@Override
-	public void savePlotVillagerLocation(String townName, String chunkCoords, Location location) {
-		config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.x", location.getX());
-		config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.y", location.getY());
-		config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.z", location.getZ());
-		config.set("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.world",
-				location.getWorld().getName());
-		save();
 	}
 
 	@Override
@@ -88,15 +78,6 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	@Override
 	public void savePlotSalePrice(String townName, String chunkCoords, double salePrice) {
 		config.set("Towns." + townName + ".Plots." + chunkCoords + ".salePrice", salePrice);
-		save();
-	}
-
-	@Override
-	public void saveTownManagerLocation(String townName, Location location) {
-		config.set("Towns." + townName + ".TownManagerVillager.x", location.getX());
-		config.set("Towns." + townName + ".TownManagerVillager.y", location.getY());
-		config.set("Towns." + townName + ".TownManagerVillager.z", location.getZ());
-		config.set("Towns." + townName + ".TownManagerVillager.world", location.getWorld().getName());
 		save();
 	}
 
@@ -184,17 +165,7 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	}
 
 	@Override
-	public Location loadPlotVillagerLocation(String townName, String chunkCoords) throws TownSystemException {
-		double x = config.getDouble("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.x");
-		double y = config.getDouble("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.y");
-		double z = config.getDouble("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.z");
-		String world = config.getString("Towns." + townName + ".Plots." + chunkCoords + ".SaleVillager.world");
-		validationHandler.checkForWorldExists(world);
-		return new Location(serverProvider.getWorld(world), x, y, z);
-	}
-
-	@Override
-	public EconomyPlayer loadPlotOwner(String townName, String chunkCoords) throws GeneralEconomyException {
+	public EconomyPlayer loadPlotOwner(String townName, String chunkCoords) throws EconomyPlayerException {
 		String playerName = config.getString("Towns." + townName + ".Plots." + chunkCoords + ".owner");
 		return ecoPlayerManager.getEconomyPlayerByName(playerName);
 	}
@@ -241,7 +212,7 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	}
 
 	@Override
-	public EconomyPlayer loadMayor(String townName) throws GeneralEconomyException {
+	public EconomyPlayer loadMayor(String townName) throws EconomyPlayerException {
 		return ecoPlayerManager.getEconomyPlayerByName(config.getString("Towns." + townName + ".owner"));
 	}
 
@@ -266,7 +237,7 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 	}
 
 	@Override
-	public Location loadTownSpawn(String townName) throws TownSystemException, NumberFormatException {
+	public Location loadTownSpawn(String townName) throws TownsystemException, NumberFormatException {
 		String world = config.getString("World");
 		validationHandler.checkForWorldExists(world);
 		String locationString = config.getString("Towns." + townName + ".townspawn");
@@ -289,16 +260,6 @@ public class TownworldDaoImpl extends SaveFileUtils implements TownworldDao {
 			}
 		}
 		return citizens;
-	}
-
-	@Override
-	public Location loadTownManagerLocation(String townName) throws TownSystemException {
-		String world = config.getString("World");
-		validationHandler.checkForWorldExists(config.getString("World"));
-		return new Location(serverProvider.getWorld(world),
-				config.getDouble("Towns." + townName + ".TownManagerVillager.x"),
-				config.getDouble("Towns." + townName + ".TownManagerVillager.y"),
-				config.getDouble("Towns." + townName + ".TownManagerVillager.z"));
 	}
 
 	@Override

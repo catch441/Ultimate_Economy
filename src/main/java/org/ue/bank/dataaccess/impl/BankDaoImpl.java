@@ -61,7 +61,7 @@ public class BankDaoImpl extends SaveFileUtils implements BankDao {
 	 */
 	@Deprecated
 	private void removeIbanList() {
-		if (config.getConfigurationSection("Ibans") != null) {
+		if (config.contains("Ibans")) {
 			config.set("Ibans", null);
 			save();
 		}

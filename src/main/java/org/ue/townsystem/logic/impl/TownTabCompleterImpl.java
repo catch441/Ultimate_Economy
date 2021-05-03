@@ -11,9 +11,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.utils.TabCompleterUtils;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.general.GeneralEconomyException;
 import org.ue.townsystem.logic.api.TownworldManager;
 
 public class TownTabCompleterImpl extends TabCompleterUtils implements TabCompleter {

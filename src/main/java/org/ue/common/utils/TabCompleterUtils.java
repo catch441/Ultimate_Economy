@@ -3,8 +3,6 @@ package org.ue.common.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.entity.Villager.Profession;
-
 public class TabCompleterUtils {
 	
 	protected void addIfMatching(List<String> list, String command, String arg) {
@@ -25,14 +23,6 @@ public class TabCompleterUtils {
 		List<String> list = new ArrayList<>();
 		for (Enum<? extends T> value : fullList) {
 			addIfMatching(list, value.name().toLowerCase(), arg);
-		}
-		return list;
-	}
-	
-	protected List<String> getPrsofessions(String arg) {
-		List<String> list = new ArrayList<>();
-		for (Profession profession : Profession.values()) {
-			addIfMatching(list, profession.name().toLowerCase(), arg);
 		}
 		return list;
 	}

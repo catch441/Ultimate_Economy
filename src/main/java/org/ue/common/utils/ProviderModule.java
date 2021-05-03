@@ -13,16 +13,16 @@ import org.ue.bank.logic.api.BankValidationHandler;
 import org.ue.bank.logic.impl.BankManagerImpl;
 import org.ue.bank.logic.impl.BankValidationHandlerImpl;
 import org.ue.common.logic.api.CustomSkullService;
-import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.logic.impl.CustomSkullServiceImpl;
-import org.ue.common.logic.impl.GeneralValidationHandlerImpl;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.config.dataaccess.impl.ConfigDaoImpl;
 import org.ue.config.logic.api.ConfigManager;
+import org.ue.config.logic.api.ConfigValidationHandler;
 import org.ue.config.logic.impl.ConfigCommandExecutorImpl;
 import org.ue.config.logic.impl.ConfigManagerImpl;
 import org.ue.config.logic.impl.ConfigTabCompleterImpl;
+import org.ue.config.logic.impl.ConfigValidationHandlerImpl;
 import org.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import org.ue.economyplayer.dataaccess.impl.EconomyPlayerDaoImpl;
 import org.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
@@ -104,11 +104,11 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	UltimateEconomy provideUltimateEconomy(Economy vaultEconomy, SpawnerManager spawnerManager, ConfigManager configManager,
-			BankManager bankManager, EconomyPlayerManager ecoPlayerManager, JobManager jobManager,
-			JobcenterManager jobcenterManager, AdminshopManager adminshopManager, PlayershopManager playershopManager,
-			RentshopManager rentshopManager, TownworldManager townworldManager, Metrics metrics,
-			Updater updater, MessageWrapper messageWrapper, CustomSkullService skullService,
+	UltimateEconomy provideUltimateEconomy(Economy vaultEconomy, SpawnerManager spawnerManager,
+			ConfigManager configManager, BankManager bankManager, EconomyPlayerManager ecoPlayerManager,
+			JobManager jobManager, JobcenterManager jobcenterManager, AdminshopManager adminshopManager,
+			PlayershopManager playershopManager, RentshopManager rentshopManager, TownworldManager townworldManager,
+			Metrics metrics, Updater updater, MessageWrapper messageWrapper, CustomSkullService skullService,
 			ServerProvider serverProvider, ShopEventHandler shopEventHandler,
 			JobsystemEventHandler jobsystemEventHandler, EconomyPlayerEventHandler ecoPlayerEventHandler,
 			TownsystemEventHandler townsystemEventHandler, SpawnerSystemEventHandler spawnerSystemEventHandler,
@@ -128,14 +128,14 @@ public class ProviderModule {
 			@Named("RentshopTabCompleter") TabCompleter rentshopTabCompleter,
 			@Named("TownTabCompleter") TabCompleter townTabCompleter,
 			@Named("TownworldTabCompleter") TabCompleter townworldTabCompleter) {
-		return new UltimateEconomy(vaultEconomy, spawnerManager, configManager, bankManager, ecoPlayerManager, jobManager,
-				jobcenterManager, adminshopManager, playershopManager, rentshopManager, townworldManager,
-				metrics, updater, messageWrapper, skullService, serverProvider, shopEventHandler,
-				jobsystemEventHandler, ecoPlayerEventHandler, townsystemEventHandler, spawnerSystemEventHandler,
-				configCommandExecutor, ecoPlayerCommandExecutor, jobCommandExecutor, playershopCommandExecutor,
-				adminshopCommandExecutor, rentshopCommandExecutor, townCommandExecutor, townworldCommandExecutor,
-				ecoPlayerTabCompleter, configTabCompleter, jobTabCompleter, playershopTabCompleter,
-				adminshopTabCompleter, rentshopTabCompleter, townTabCompleter, townworldTabCompleter);
+		return new UltimateEconomy(vaultEconomy, spawnerManager, configManager, bankManager, ecoPlayerManager,
+				jobManager, jobcenterManager, adminshopManager, playershopManager, rentshopManager, townworldManager,
+				metrics, updater, messageWrapper, skullService, serverProvider, shopEventHandler, jobsystemEventHandler,
+				ecoPlayerEventHandler, townsystemEventHandler, spawnerSystemEventHandler, configCommandExecutor,
+				ecoPlayerCommandExecutor, jobCommandExecutor, playershopCommandExecutor, adminshopCommandExecutor,
+				rentshopCommandExecutor, townCommandExecutor, townworldCommandExecutor, ecoPlayerTabCompleter,
+				configTabCompleter, jobTabCompleter, playershopTabCompleter, adminshopTabCompleter,
+				rentshopTabCompleter, townTabCompleter, townworldTabCompleter);
 	}
 
 	@Singleton
@@ -161,28 +161,28 @@ public class ProviderModule {
 	Economy provideVaultEconomy(UltimateEconomyVaultImpl euVault) {
 		return euVault;
 	}
-	
+
 	@Singleton
 	@Provides
 	MessageWrapper provideMessageWrapper() {
 		return new MessageWrapperImpl();
 	}
-	
+
 	@Provides
 	Jobcenter provideJobcenter(JobcenterImpl jobcenter) {
 		return jobcenter;
 	}
-	
+
 	@Provides
 	Adminshop provideAdminshop(AdminshopImpl shop) {
 		return shop;
 	}
-	
+
 	@Provides
 	Playershop providePlayershop(PlayershopImpl shop) {
 		return shop;
 	}
-	
+
 	@Provides
 	Rentshop provideRentshop(RentshopImpl shop) {
 		return shop;
@@ -403,19 +403,19 @@ public class ProviderModule {
 	TownworldDao provideTownworldDao(TownworldDaoImpl townworldDao) {
 		return townworldDao;
 	}
-	
-	@Singleton
-	@Provides
-	GeneralValidationHandler provideGeneralValidationHandler(MessageWrapper messageWrapper) {
-		return new GeneralValidationHandlerImpl(messageWrapper);
-	}
 
 	@Singleton
 	@Provides
 	BankValidationHandler provideBankValidationHandler(BankValidationHandlerImpl bankValidator) {
 		return bankValidator;
 	}
-	
+
+	@Singleton
+	@Provides
+	ConfigValidationHandler provideConfigValidationHandler(ConfigValidationHandlerImpl validationHandler) {
+		return validationHandler;
+	}
+
 	@Singleton
 	@Provides
 	EconomyPlayerValidationHandler provideEcoPlayerValidationHandler(

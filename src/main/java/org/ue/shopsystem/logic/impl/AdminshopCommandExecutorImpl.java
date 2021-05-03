@@ -17,15 +17,13 @@ import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.logic.api.JobManager;
-import org.ue.jobsystem.logic.JobSystemException;
-import org.ue.shopsystem.logic.AdminshopCommandEnum;
-import org.ue.shopsystem.logic.ShopSystemException;
+import org.ue.jobsystem.logic.api.JobsystemException;
+import org.ue.shopsystem.logic.api.AdminshopCommandEnum;
 import org.ue.shopsystem.logic.api.AdminshopManager;
-import org.ue.townsystem.logic.TownSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class AdminshopCommandExecutorImpl implements CommandExecutor {
 
@@ -54,8 +52,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 			Player player = (Player) sender;
 			try {
 				return handleCommand(label, args, player);
-			} catch (JobSystemException | TownSystemException | ShopSystemException | EconomyPlayerException
-					| GeneralEconomyException e) {
+			} catch (JobsystemException | ShopsystemException | EconomyPlayerException e) {
 				player.sendMessage(e.getMessage());
 			} catch (NumberFormatException e) {
 				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", "number"));
@@ -65,8 +62,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean handleCommand(String label, String[] args, Player player)
-			throws NumberFormatException, GeneralEconomyException, EconomyPlayerException, ShopSystemException,
-			TownSystemException, JobSystemException {
+			throws EconomyPlayerException, JobsystemException, ShopsystemException {
 		switch (label) {
 		case "shoplist":
 			return handleShopListCommand(label, args, player);
@@ -83,7 +79,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean handleShopCommand(String label, String[] args, Player player)
-			throws EconomyPlayerException, ShopSystemException, GeneralEconomyException {
+			throws EconomyPlayerException, JobsystemException, ShopsystemException {
 		if (args.length == 1) {
 			EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(player.getName());
 			if (configManager.isAllowQuickshop() || ecoPlayer.hasJob(jobManager.getJobByName(args[0]))) {
@@ -106,7 +102,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean handleAdminshopCommand(String label, String[] args, Player player)
-			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException, TownSystemException {
+			throws NumberFormatException, ShopsystemException {
 		switch (AdminshopCommandEnum.getEnum(args[0])) {
 		case ADDSPAWNER:
 			return performAddSpawnerCommand(label, args, player);
@@ -130,7 +126,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performCreateCommand(String label, String[] args, Player player)
-			throws NumberFormatException, ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+			throws NumberFormatException, ShopsystemException {
 		if (args.length == 3) {
 			adminshopManager.createAdminShop(args[1], player.getLocation(), Integer.valueOf(args[2]));
 			player.sendMessage(messageWrapper.getString("created", args[1]));
@@ -140,8 +136,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performDeleteCommand(String label, String[] args, Player player)
-			throws ShopSystemException, GeneralEconomyException {
+	private boolean performDeleteCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 2) {
 			adminshopManager.deleteAdminShop(adminshopManager.getAdminShopByName(args[1]));
 			player.sendMessage(messageWrapper.getString("deleted", args[1]));
@@ -151,8 +146,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performRenameCommand(String label, String[] args, Player player)
-			throws ShopSystemException, GeneralEconomyException {
+	private boolean performRenameCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 3) {
 			adminshopManager.getAdminShopByName(args[1]).changeShopName(args[2]);
 			player.sendMessage(messageWrapper.getString("shop_rename", args[1], args[2]));
@@ -163,7 +157,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performResizeCommand(String label, String[] args, Player player)
-			throws NumberFormatException, ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+			throws NumberFormatException, ShopsystemException {
 		if (args.length == 3) {
 			adminshopManager.getAdminShopByName(args[1]).changeSize(Integer.valueOf(args[2]));
 			player.sendMessage(messageWrapper.getString("shop_resize", args[2]));
@@ -173,8 +167,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performMoveCommand(String label, String[] args, Player player)
-			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
+	private boolean performMoveCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 2) {
 			adminshopManager.getAdminShopByName(args[1]).changeLocation(player.getLocation());
 		} else {
@@ -183,8 +176,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performEditShopCommand(String label, String[] args, Player player)
-			throws ShopSystemException, GeneralEconomyException {
+	private boolean performEditShopCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 2) {
 			adminshopManager.getAdminShopByName(args[1]).openEditor(player);
 		} else {
@@ -194,7 +186,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performChangeProfessionCommand(String label, String[] args, Player player)
-			throws GeneralEconomyException {
+			throws ShopsystemException {
 		if (args.length == 3) {
 			try {
 				adminshopManager.getAdminShopByName(args[1])
@@ -210,7 +202,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performAddSpawnerCommand(String label, String[] args, Player player)
-			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
+			throws NumberFormatException, ShopsystemException {
 		if (args.length == 5) {
 			try {
 				EntityType.valueOf(args[2].toUpperCase());

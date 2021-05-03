@@ -10,41 +10,39 @@ import javax.inject.Inject;
 import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.ServerProvider;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.jobsystem.logic.JobSystemException;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
-import org.ue.townsystem.logic.TownSystemException;
+import org.ue.jobsystem.logic.api.JobsystemException;
+import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
 
 public class JobcenterManagerImpl implements JobcenterManager {
 
 	private static final Logger log = LoggerFactory.getLogger(JobcenterManagerImpl.class);
 	private final EconomyPlayerManager ecoPlayerManager;
-	private final GeneralValidationHandler generalValidator;
+	private final JobsystemValidationHandler validationHandler;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
 	private Map<String, Jobcenter> jobcenterList = new HashMap<>();
 
 	@Inject
 	public JobcenterManagerImpl(ConfigDao configDao, ServerProvider serverProvider,
-			EconomyPlayerManager ecoPlayerManager, GeneralValidationHandler generalValidator) {
+			EconomyPlayerManager ecoPlayerManager, JobsystemValidationHandler validationHandler) {
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.serverProvider = serverProvider;
 		this.configDao = configDao;
-		this.generalValidator = generalValidator;
+		this.validationHandler = validationHandler;
 	}
 
 	@Override
-	public Jobcenter getJobcenterByName(String name) throws GeneralEconomyException {
+	public Jobcenter getJobcenterByName(String name) throws JobsystemException {
 		Jobcenter jobcenter = jobcenterList.get(name);
-		generalValidator.checkForValueExists(jobcenter, name);
+		validationHandler.checkForValueExists(jobcenter, name);
 		return jobcenter;
 	}
 
@@ -59,7 +57,7 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	}
 
 	@Override
-	public void deleteJobcenter(Jobcenter jobcenter) throws JobSystemException {
+	public void deleteJobcenter(Jobcenter jobcenter) throws JobsystemException {
 		jobcenter.deleteJobcenter();
 		jobcenterList.remove(jobcenter.getName());
 		for (Job job : jobcenter.getJobList()) {
@@ -83,7 +81,7 @@ public class JobcenterManagerImpl implements JobcenterManager {
 		}
 	}
 
-	private boolean otherJobcenterHasJob(Job job) throws JobSystemException {
+	private boolean otherJobcenterHasJob(Job job) throws JobsystemException {
 		for (Jobcenter jobCenter : jobcenterList.values()) {
 			if (jobCenter.hasJob(job)) {
 				return true;
@@ -93,10 +91,9 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	}
 
 	@Override
-	public void createJobcenter(String name, Location spawnLocation, int size)
-			throws JobSystemException, GeneralEconomyException, EconomyPlayerException {
-		generalValidator.checkForValueNotInList(getJobcenterNameList(), name);
-		generalValidator.checkForValidSize(size);
+	public void createJobcenter(String name, Location spawnLocation, int size) throws JobsystemException {
+		validationHandler.checkForValueNotInList(getJobcenterNameList(), name);
+		validationHandler.checkForValidSize(size);
 		Jobcenter jobcenter = serverProvider.getServiceComponent().getJobcenter();
 		jobcenter.setupNew(name, spawnLocation, size);
 		jobcenterList.put(name, jobcenter);
@@ -106,14 +103,9 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	@Override
 	public void loadAllJobcenters() {
 		for (String jobcenterName : configDao.loadJobcenterList()) {
-			try {
-				Jobcenter jobcenter = serverProvider.getServiceComponent().getJobcenter();
-				jobcenter.setupExisting(jobcenterName);
-				jobcenterList.put(jobcenterName, jobcenter);
-			} catch (TownSystemException | GeneralEconomyException | EconomyPlayerException e) {
-				log.warn("[Ultimate_Economy] Failed to load the jobcenter " + jobcenterName);
-				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
-			}
+			Jobcenter jobcenter = serverProvider.getServiceComponent().getJobcenter();
+			jobcenter.setupExisting(jobcenterName);
+			jobcenterList.put(jobcenterName, jobcenter);
 		}
 	}
 

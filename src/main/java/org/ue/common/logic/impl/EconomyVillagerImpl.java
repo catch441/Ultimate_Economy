@@ -17,42 +17,49 @@ import org.ue.common.dataaccess.api.EconomyVillagerDao;
 import org.ue.common.logic.api.EconomyVillager;
 import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.logic.api.EconomyVillagerValidationHandler;
+import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.utils.ServerProvider;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.shopsystem.logic.ShopSystemException;
-import org.ue.townsystem.logic.TownSystemException;
 
-public abstract class EconomyVillagerImpl implements EconomyVillager {
+public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> implements EconomyVillager<T> {
 
 	protected final ServerProvider serverProvider;
 	private final EconomyVillagerDao ecoVillagerDao;
-	private final EconomyVillagerValidationHandler validationHandler;
+	private final EconomyVillagerValidationHandler<T> validationHandler;
 	private Villager villager;
 	private Location location;
 	private Inventory inventory;
 	private int size;
-	int reservedSlots;
+	private int reservedSlots;
 	private String inventoryTitle;
+	private boolean visible;
+	private Profession profession;
+	private EconomyVillagerType villagerType;
+	private String savePrefix;
 
 	public EconomyVillagerImpl(ServerProvider serverProvider, EconomyVillagerDao ecoVillagerDao,
-			EconomyVillagerValidationHandler validationHandler) {
+			EconomyVillagerValidationHandler<T> validationHandler, String savePrefix) {
 		this.serverProvider = serverProvider;
 		this.ecoVillagerDao = ecoVillagerDao;
 		this.validationHandler = validationHandler;
+		this.savePrefix = savePrefix;
 	}
 
 	@Override
 	public void changeProfession(Profession profession) {
-		villager.setProfession(profession);
-		ecoVillagerDao.saveProfession(profession);
+		this.profession = profession;
+		ecoVillagerDao.saveProfession(savePrefix, profession);
+		if(visible) {
+			villager.setProfession(profession);
+		}
 	}
 
 	@Override
-	public void changeLocation(Location location) throws EconomyPlayerException, TownSystemException {
-		villager.teleport(location);
+	public void changeLocation(Location location) throws T {
 		this.location = location;
-		ecoVillagerDao.saveLocation(location);
+		ecoVillagerDao.saveLocation(savePrefix, location);
+		if(visible) {
+			villager.teleport(location);
+		}
 	}
 
 	@Override
@@ -62,11 +69,14 @@ public abstract class EconomyVillagerImpl implements EconomyVillager {
 
 	@Override
 	public void despawn() {
-		villager.remove();
+		if(visible) {
+			villager.remove();
+			villager = null;
+		}
 	}
 
 	@Override
-	public void changeSize(int newSize) throws ShopSystemException, GeneralEconomyException {
+	public void changeSize(int newSize) throws T {
 		validationHandler.checkForValidSize(newSize);
 		validationHandler.checkForResizePossible(inventory, size, newSize, reservedSlots);
 		ItemStack[] content = new ItemStack[newSize];
@@ -81,16 +91,16 @@ public abstract class EconomyVillagerImpl implements EconomyVillager {
 		}
 		// copy reserved slots
 		for (int i = 0; i < reservedSlots; i++) {
-			content[newSize - 1 - i] = inventory.getItem(newSize - 1 - i);
+			content[newSize - 1 - i] = inventory.getItem(size - 1 - i);
 		}
 		size = newSize;
-		ecoVillagerDao.saveSize(size);
+		ecoVillagerDao.saveSize(savePrefix, size);
 		inventory = serverProvider.createInventory(villager, size, inventoryTitle);
 		inventory.setContents(content);
 	}
 
 	@Override
-	public void openInventory(Player player) throws ShopSystemException {
+	public void openInventory(Player player) throws T {
 		player.openInventory(inventory);
 	}
 
@@ -98,25 +108,24 @@ public abstract class EconomyVillagerImpl implements EconomyVillager {
 	public int getSize() {
 		return size;
 	}
-	
+
 	@Override
 	public Inventory createVillagerInventory(int size, String title) {
 		return serverProvider.createInventory(villager, size, title);
 	}
 
-	protected void addItemStack(ItemStack item, int slot, boolean reserved, boolean override)
-			throws GeneralEconomyException, EconomyPlayerException {
-		int checkSize = size;
-		if (!reserved) {
-			checkSize -= reservedSlots;
+	@Override
+	public void setVisible(boolean visible) throws T {
+		if(visible) {
+			setupVillager();
+			changeInventoryName(inventoryTitle);
+		} else {
+			despawn();
 		}
-		if (!override) {
-			validationHandler.checkForSlotIsEmpty(inventory, slot);
-		}
-		validationHandler.checkForValidSlot(slot, checkSize);
-		inventory.setItem(slot, item);
+		this.visible = visible;
+		ecoVillagerDao.saveVisible(savePrefix, visible);
 	}
-
+	
 	protected Inventory getInventory() {
 		return inventory;
 	}
@@ -136,45 +145,57 @@ public abstract class EconomyVillagerImpl implements EconomyVillager {
 	}
 
 	protected void setupNewEconomyVillager(Location location, EconomyVillagerType villagerType, String name, int size,
-			int reservedSlots) {
+			int reservedSlots, boolean visible) {
 		this.reservedSlots = reservedSlots;
 		this.location = location;
 		this.size = size;
+		this.visible = visible;
+		this.villagerType = villagerType;
 		inventoryTitle = name;
-		ecoVillagerDao.saveLocation(location);
-		ecoVillagerDao.saveSize(size);
-		ecoVillagerDao.saveProfession(Profession.NITWIT);
-		setupVillager(Profession.NITWIT, name, villagerType);
+		profession = Profession.NITWIT;
+		ecoVillagerDao.saveVisible(savePrefix, visible);
+		ecoVillagerDao.saveSize(savePrefix, size);
+		ecoVillagerDao.saveProfession(savePrefix, profession);
+		if (visible) {
+			ecoVillagerDao.saveLocation(savePrefix, location);
+			setupVillager();
+		}
+		// villager is null, when visible is false
 		inventory = serverProvider.createInventory(villager, size, name);
 	}
 
-	protected void setupExistingEconomyVillager(EconomyVillagerType villagerType, String name, int reservedSlots)
-			throws TownSystemException {
+	protected void setupExistingEconomyVillager(EconomyVillagerType villagerType, String name, int reservedSlots) {
 		this.reservedSlots = reservedSlots;
-		this.location = ecoVillagerDao.loadLocation();
-		this.size = ecoVillagerDao.loadSize();
+		this.villagerType = villagerType;
+		location = ecoVillagerDao.loadLocation(savePrefix);
+		size = ecoVillagerDao.loadSize(savePrefix);
+		visible = ecoVillagerDao.loadVisible(savePrefix);
 		inventoryTitle = name;
-		Profession profession = ecoVillagerDao.loadProfession();
-		setupVillager(profession, name, villagerType);
+		profession = ecoVillagerDao.loadProfession(savePrefix);
+		if (visible) {
+			setupVillager();
+		}
+		// villager is null, when visible is false
 		inventory = serverProvider.createInventory(villager, size, name);
 	}
 
-	private void setupVillager(Profession profession, String name, EconomyVillagerType villagerType) {
+	private void setupVillager() {
 		location.getChunk().load();
 		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10, 10, 10);
 		for (Entity e : entitys) {
-			if (name.equals(e.getCustomName())) {
+			if (inventoryTitle.equals(e.getCustomName())) {
 				e.remove();
 			}
 		}
 		villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
-		villager.setCustomName(name);
+		villager.setCustomName(inventoryTitle);
 		villager.setMetadata("ue-type", new FixedMetadataValue(serverProvider.getJavaPluginInstance(), villagerType));
 		villager.setCustomNameVisible(true);
 		villager.setProfession(profession);
 		villager.setSilent(true);
 		villager.setCollidable(false);
 		villager.setInvulnerable(true);
+		villager.setVillagerLevel(2);
 		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
 	}
 }

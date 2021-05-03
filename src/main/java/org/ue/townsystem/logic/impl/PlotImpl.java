@@ -1,47 +1,35 @@
 package org.ue.townsystem.logic.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
-import org.bukkit.entity.Villager.Profession;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
+
 import org.ue.common.logic.api.EconomyVillagerType;
+import org.ue.common.logic.impl.EconomyVillagerImpl;
 import org.ue.common.utils.ServerProvider;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
-import org.ue.townsystem.logic.TownSystemException;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
+import org.ue.townsystem.logic.api.TownsystemException;
 import org.ue.townsystem.logic.api.TownsystemValidationHandler;
 
-public class PlotImpl implements Plot {
+public class PlotImpl extends EconomyVillagerImpl<TownsystemException> implements Plot {
 
 	private final TownsystemValidationHandler validationHandler;
 	private final TownworldDao townworldDao;
-	private final ServerProvider serverProvider;
 	private final String chunkCoords;
 	private EconomyPlayer owner;
 	private List<EconomyPlayer> residents;
 	private boolean isForSale;
 	private double salePrice;
-	private Villager villager;
-	private Inventory salesVillagerInv;
 	private Town town;
 
 	/**
@@ -54,13 +42,13 @@ public class PlotImpl implements Plot {
 	 * @param owner
 	 * @param serverProvider
 	 */
-	public PlotImpl(String chunkCoords, TownsystemValidationHandler validationHandler,
-			TownworldDao townworldDao, Town town, EconomyPlayer owner, ServerProvider serverProvider) {
+	public PlotImpl(String chunkCoords, TownsystemValidationHandler validationHandler, TownworldDao townworldDao,
+			Town town, EconomyPlayer owner, ServerProvider serverProvider) {
+		super(serverProvider, townworldDao, validationHandler, "Towns." + town.getTownName() + ".Plots." + chunkCoords + ".SaleVillager");
 		this.chunkCoords = chunkCoords;
 		this.town = town;
 		this.townworldDao = townworldDao;
 		this.validationHandler = validationHandler;
-		this.serverProvider = serverProvider;
 		setupNewPlot(owner);
 	}
 
@@ -72,28 +60,25 @@ public class PlotImpl implements Plot {
 	 * @param townworldDao
 	 * @param town
 	 * @param serverProvider
-	 * @throws TownSystemException
-	 * @throws GeneralEconomyException
+	 * @throws EconomyPlayerException 
 	 */
-	public PlotImpl(String chunkCoords, TownsystemValidationHandler validationHandler,
-			TownworldDao townworldDao, Town town, ServerProvider serverProvider)
-			throws GeneralEconomyException, TownSystemException {
+	public PlotImpl(String chunkCoords, TownsystemValidationHandler validationHandler, TownworldDao townworldDao,
+			Town town, ServerProvider serverProvider) throws EconomyPlayerException {
+		super(serverProvider, townworldDao, validationHandler, "Towns." + town.getTownName() + ".Plots." + chunkCoords + ".SaleVillager");
 		this.chunkCoords = chunkCoords;
 		this.town = town;
 		this.townworldDao = townworldDao;
 		this.validationHandler = validationHandler;
-		this.serverProvider = serverProvider;
 		loadExistingPlot();
 	}
 
-	private void loadExistingPlot() throws GeneralEconomyException, TownSystemException {
+	private void loadExistingPlot() throws EconomyPlayerException {
 		owner = townworldDao.loadPlotOwner(town.getTownName(), chunkCoords);
 		residents = townworldDao.loadResidents(town.getTownName(), chunkCoords);
 		salePrice = townworldDao.loadPlotSalePrice(town.getTownName(), chunkCoords);
 		isForSale = townworldDao.loadPlotIsForSale(town.getTownName(), chunkCoords);
-		if (isForSale) {
-			spawnSaleVillager(townworldDao.loadPlotVillagerLocation(town.getTownName(), chunkCoords));
-		}
+		setupExistingEconomyVillager(EconomyVillagerType.PLOTSALE, "Plot " + chunkCoords, 0);
+		setupSaleVillagerInventory();
 	}
 
 	private void setupNewPlot(EconomyPlayer owner) {
@@ -104,18 +89,11 @@ public class PlotImpl implements Plot {
 		townworldDao.savePlotResidents(town.getTownName(), chunkCoords, residents);
 		townworldDao.savePlotSalePrice(town.getTownName(), chunkCoords, salePrice);
 		townworldDao.savePlotIsForSale(town.getTownName(), chunkCoords, isForSale);
+		setupNewEconomyVillager(null, EconomyVillagerType.PLOTSALE, "Plot " + chunkCoords, 9, 0, false);
+		setupSaleVillagerInventory();
 	}
 
-	private void spawnSaleVillager(Location location) {
-		location.getChunk().load();
-		removeDuplicatedVillagers(location);
-		setupSaleVillager(location);
-		setupSaleVillagerInventory(location);
-	}
-
-	private void setupSaleVillagerInventory(Location location) {
-		salesVillagerInv = serverProvider.createInventory(villager, 9,
-				"Plot " + location.getChunk().getX() + "/" + location.getChunk().getZ());
+	private void setupSaleVillagerInventory() {
 		ItemStack buyStack = serverProvider.createItemStack(Material.GREEN_WOOL, 1);
 		ItemMeta buyItemMeta = buyStack.getItemMeta();
 		buyItemMeta.setDisplayName("Buy");
@@ -124,7 +102,7 @@ public class PlotImpl implements Plot {
 		listBuy.add(ChatColor.GOLD + "Is sold by " + ChatColor.GREEN + owner.getName());
 		buyItemMeta.setLore(listBuy);
 		buyStack.setItemMeta(buyItemMeta);
-		salesVillagerInv.setItem(0, buyStack);
+		getInventory().setItem(0, buyStack);
 		ItemStack cancelStack = serverProvider.createItemStack(Material.RED_WOOL, 1);
 		ItemMeta cancelItemMeta = cancelStack.getItemMeta();
 		List<String> listCancel = new ArrayList<String>();
@@ -132,52 +110,30 @@ public class PlotImpl implements Plot {
 		cancelItemMeta.setDisplayName("Cancel Sale");
 		cancelItemMeta.setLore(listCancel);
 		cancelStack.setItemMeta(cancelItemMeta);
-		salesVillagerInv.setItem(8, cancelStack);
+		getInventory().setItem(8, cancelStack);
 	}
 
-	private void setupSaleVillager(Location location) {
-		villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
-		villager.setCustomName("Plot " + location.getChunk().getX() + "/" + location.getChunk().getZ() + " For Sale!");
-		villager.setCustomNameVisible(true);
-		// set the tye of the villager to meta
-		villager.setMetadata("ue-type",
-				new FixedMetadataValue(serverProvider.getJavaPluginInstance(), EconomyVillagerType.PLOTSALE));
-		villager.setProfession(Profession.NITWIT);
-		villager.setSilent(true);
-		villager.setInvulnerable(true);
-		villager.setCollidable(false);
-		villager.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30000000, 30000000));
-	}
-
-	private void removeDuplicatedVillagers(Location location) {
-		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10, 10, 10);
-		for (Entity entity : entitys) {
-			if (entity.getName()
-					.equals("Plot " + location.getChunk().getX() + "/" + location.getChunk().getZ() + " For Sale!")) {
-				entity.remove();
-			}
-		}
+	/**
+	 * Overridden because it should only be possible to change the visible if the
+	 * plot is for sale.
+	 */
+	@Override
+	public void setVisible(boolean visible) throws TownsystemException {
+		validationHandler.checkForPlotIsForSale(isForSale());
+		super.setVisible(visible);
 	}
 
 	@Override
-	public void despawnSaleVillager() {
-		if (villager != null) {
-			villager.remove();
-		}
-	}
-
-	@Override
-	public void moveSaleVillager(Location newLocation) throws EconomyPlayerException, TownSystemException {
+	public void changeLocation(Location newLocation) throws TownsystemException {
+		validationHandler.checkForPlotIsForSale(isForSale());
 		validationHandler.checkForLocationInsidePlot(chunkCoords, newLocation);
-		validationHandler.checkForPlotIsForSale(isForSale());
-		villager.teleport(newLocation);
-		townworldDao.savePlotVillagerLocation(town.getTownName(), chunkCoords, newLocation);
+		super.changeLocation(newLocation);
 	}
 
 	@Override
-	public void openSaleVillagerInv(Player player) throws TownSystemException {
+	public void openInventory(Player player) throws TownsystemException {
 		validationHandler.checkForPlotIsForSale(isForSale());
-		player.openInventory(salesVillagerInv);
+		super.openInventory(player);
 	}
 
 	@Override
@@ -197,15 +153,15 @@ public class PlotImpl implements Plot {
 	}
 
 	@Override
-	public void addResident(EconomyPlayer player) throws TownSystemException {
-		validationHandler.checkForPlayerIsNotResidentOfPlot(getResidents(), player);
+	public void addResident(EconomyPlayer player) throws TownsystemException {
+		validationHandler.checkForPlayerIsNotResidentOfPlot(residents, player);
 		residents.add(player);
 		townworldDao.savePlotResidents(town.getTownName(), chunkCoords, residents);
 	}
 
 	@Override
-	public void removeResident(EconomyPlayer player) throws TownSystemException {
-		validationHandler.checkForPlayerIsResidentOfPlot(getResidents(), player);
+	public void removeResident(EconomyPlayer player) throws TownsystemException {
+		validationHandler.checkForPlayerIsResidentOfPlot(residents, player);
 		residents.remove(player);
 		townworldDao.savePlotResidents(town.getTownName(), chunkCoords, residents);
 	}
@@ -242,28 +198,37 @@ public class PlotImpl implements Plot {
 	}
 
 	@Override
-	public void removeFromSale(EconomyPlayer owner) throws EconomyPlayerException {
+	public void removeFromSale(EconomyPlayer owner) throws TownsystemException {
 		validationHandler.checkForIsPlotOwner(getOwner(), owner);
 		isForSale = false;
-		World world = villager.getLocation().getWorld();
-		villager.remove();
-		world.save();
+		despawn();
+		getLocation().getWorld().save();
 		salePrice = 0;
 		townworldDao.savePlotSalePrice(town.getTownName(), chunkCoords, salePrice);
 		townworldDao.savePlotIsForSale(town.getTownName(), chunkCoords, isForSale);
 	}
 
 	@Override
-	public void setForSale(double salePrice, Location playerLocation, EconomyPlayer player)
-			throws TownSystemException, EconomyPlayerException {
+	public void setForSale(double salePrice, Location playerLocation, EconomyPlayer player) throws TownsystemException {
 		validationHandler.checkForIsPlotOwner(getOwner(), player);
 		validationHandler.checkForPlotIsNotForSale(isForSale());
 		isForSale = true;
 		this.salePrice = salePrice;
-		spawnSaleVillager(playerLocation);
+		changeSalePriceInInventory(salePrice);
+		changeLocation(playerLocation);
+		setVisible(true);
 		townworldDao.savePlotSalePrice(town.getTownName(), chunkCoords, salePrice);
 		townworldDao.savePlotIsForSale(town.getTownName(), chunkCoords, isForSale);
-		townworldDao.savePlotVillagerLocation(town.getTownName(), chunkCoords, villager.getLocation());
+	}
+
+	private void changeSalePriceInInventory(double salePrice) {
+		ItemStack stack = getInventory().getItem(0);
+		ItemMeta buyItemMeta = stack.getItemMeta();
+		List<String> listBuy = buyItemMeta.getLore();
+		listBuy.set(0, ChatColor.GOLD + "Price: " + ChatColor.GREEN + salePrice);
+		buyItemMeta.setLore(listBuy);
+		stack.setItemMeta(buyItemMeta);
+		getInventory().setItem(0, stack);
 	}
 
 	@Override

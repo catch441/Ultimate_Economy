@@ -8,13 +8,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
 import org.ue.common.utils.api.MessageWrapper;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.shopsystem.logic.RentshopCommandEnum;
-import org.ue.shopsystem.logic.ShopSystemException;
 import org.ue.shopsystem.logic.api.Rentshop;
+import org.ue.shopsystem.logic.api.RentshopCommandEnum;
 import org.ue.shopsystem.logic.api.RentshopManager;
-import org.ue.townsystem.logic.TownSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class RentshopCommandExecutorImpl implements CommandExecutor {
 
@@ -38,7 +35,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 				return false;
 			} catch (NumberFormatException e) {
 				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", "number"));
-			} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException | TownSystemException e) {
+			} catch (ShopsystemException e) {
 				player.sendMessage(e.getMessage());
 			}
 		}
@@ -46,7 +43,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performCommand(String label, String[] args, Player player)
-			throws TownSystemException, EconomyPlayerException, GeneralEconomyException, ShopSystemException {
+			throws NumberFormatException, ShopsystemException {
 		switch (RentshopCommandEnum.getEnum(args[0])) {
 		case CHANGEPROFESSION:
 			return performChangeProfessionCommand(label, args, player);
@@ -73,13 +70,12 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performCreateCommand(String label, String[] args, Player player)
-			throws NumberFormatException, GeneralEconomyException, EconomyPlayerException {
+			throws NumberFormatException, ShopsystemException {
 		if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 			if (args.length == 3) {
 				Rentshop shop = rentshopManager.createRentShop(player.getLocation(), Integer.valueOf(args[1]),
 						Double.valueOf(args[2]));
 				player.sendMessage(messageWrapper.getString("created", shop.getName()));
-
 			} else {
 				player.sendMessage("/" + label + " create <size> <rentalFee per 24h>");
 			}
@@ -87,7 +83,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performDeleteCommand(String label, String[] args, Player player) throws GeneralEconomyException {
+	private boolean performDeleteCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 			if (args.length == 2) {
 				rentshopManager.deleteRentShop(rentshopManager.getRentShopByUniqueName(args[1]));
@@ -99,8 +95,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performMoveCommand(String label, String[] args, Player player)
-			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
+	private boolean performMoveCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 			if (args.length == 2) {
 				rentshopManager.getRentShopByUniqueName(args[1]).changeLocation(player.getLocation());
@@ -112,7 +107,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performResizeCommand(String label, String[] args, Player player)
-			throws NumberFormatException, ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+			throws NumberFormatException, ShopsystemException {
 		if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 			if (args.length == 3) {
 				rentshopManager.getRentShopByUniqueName(args[1]).changeSize(Integer.valueOf(args[2]));
@@ -125,7 +120,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performChangeProfessionCommand(String label, String[] args, Player player)
-			throws GeneralEconomyException {
+			throws ShopsystemException {
 		if (args.length == 3) {
 			try {
 				rentshopManager.getRentShopByUniqueName(args[1] + "_" + player.getName())
@@ -140,8 +135,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performRenameCommand(String label, String[] args, Player player)
-			throws ShopSystemException, GeneralEconomyException {
+	private boolean performRenameCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 3) {
 			rentshopManager.getRentShopByUniqueName(args[1] + "_" + player.getName()).changeShopName(args[2]);
 			player.sendMessage(messageWrapper.getString("shop_rename", args[1], args[2]));
@@ -151,8 +145,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performEditShopCommand(String label, String[] args, Player player)
-			throws ShopSystemException, GeneralEconomyException {
+	private boolean performEditShopCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 2) {
 			rentshopManager.getRentShopByUniqueName(args[1] + "_" + player.getName()).openEditor(player);
 		} else {

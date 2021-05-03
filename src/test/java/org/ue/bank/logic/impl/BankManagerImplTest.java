@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,10 +20,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.dataaccess.api.BankDao;
 import org.ue.bank.logic.api.BankAccount;
+import org.ue.bank.logic.api.BankException;
 import org.ue.bank.logic.api.BankValidationHandler;
-import org.ue.common.logic.api.GeneralValidationHandler;
-import org.ue.common.utils.api.MessageWrapper;
-import org.ue.general.GeneralEconomyException;
 
 @ExtendWith(MockitoExtension.class)
 public class BankManagerImplTest {
@@ -32,13 +29,9 @@ public class BankManagerImplTest {
 	@InjectMocks
 	BankManagerImpl bankManager;
 	@Mock
-	MessageWrapper messageWrapper;
-	@Mock
 	BankDao bankDao;
 	@Mock
 	BankValidationHandler validationHandler;
-	@Mock
-	GeneralValidationHandler generalValidator;
 
 	@AfterEach
 	private void cleanUp() {
@@ -69,16 +62,16 @@ public class BankManagerImplTest {
 		List<String> ibans = new ArrayList<>();
 		ibans.add("myiban");
 		assertTrue(bankManager.getBankAccounts().contains(account));
-		assertDoesNotThrow(() -> verify(generalValidator).checkForValueNotInList(new ArrayList<>(), "myiban"));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValueNotInList(new ArrayList<>(), "myiban"));
 	}
 
 	@Test
-	public void createExternalBankAccountTestFail() throws GeneralEconomyException {
+	public void createExternalBankAccountTestFail() throws BankException {
 		List<String> ibans = new ArrayList<>();
 		ibans.add("myiban");
 		assertDoesNotThrow(() -> bankManager.createExternalBankAccount(10.0, "myiban"));
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueNotInList(ibans, "myiban");
-		assertThrows(GeneralEconomyException.class, () -> bankManager.createExternalBankAccount(10.0, "myiban"));
+		doThrow(BankException.class).when(validationHandler).checkForValueNotInList(ibans, "myiban");
+		assertThrows(BankException.class, () -> bankManager.createExternalBankAccount(10.0, "myiban"));
 	}
 
 	@Test
@@ -112,20 +105,16 @@ public class BankManagerImplTest {
 
 	@Test
 	public void getBankAccountByIbanTest() {
-		try {
-			bankManager.createBankAccount(10.0);
-			BankAccount account2 = bankManager.createBankAccount(10.0);
-			BankAccount result = bankManager.getBankAccountByIban(account2.getIban());
-			assertEquals(account2, result);
-		} catch (GeneralEconomyException e) {
-			fail();
-		}
+		bankManager.createBankAccount(10.0);
+		BankAccount account2 = bankManager.createBankAccount(10.0);
+		BankAccount result = assertDoesNotThrow(() -> bankManager.getBankAccountByIban(account2.getIban()));
+		assertEquals(account2, result);
 	}
 
 	@Test
-	public void getBankAccountByIbanTestFail() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueExists(null, "catch");
-		assertThrows(GeneralEconomyException.class, () -> bankManager.getBankAccountByIban("catch"));
+	public void getBankAccountByIbanTestFail() throws BankException {
+		doThrow(BankException.class).when(validationHandler).checkForValueExists(null, "catch");
+		assertThrows(BankException.class, () -> bankManager.getBankAccountByIban("catch"));
 	}
 
 	@Test

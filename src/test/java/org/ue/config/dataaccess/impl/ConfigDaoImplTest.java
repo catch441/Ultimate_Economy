@@ -24,9 +24,6 @@ public class ConfigDaoImplTest {
 	@Mock
 	ServerProvider serverProvider;
 
-	/**
-	 * Unload all.
-	 */
 	@AfterEach
 	public void unload() {
 		new File("src/config.yml").delete();

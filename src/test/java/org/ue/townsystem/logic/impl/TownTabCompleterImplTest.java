@@ -16,8 +16,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.general.GeneralEconomyException;
 import org.ue.townsystem.logic.api.TownworldManager;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,10 +63,10 @@ public class TownTabCompleterImplTest {
 	}
 	
 	@Test
-	public void twoArgsTestWithPlayerNotFoundError() throws GeneralEconomyException {
+	public void twoArgsTestWithPlayerNotFoundError() throws EconomyPlayerException {
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
 		String[] args = { "expand", "" };

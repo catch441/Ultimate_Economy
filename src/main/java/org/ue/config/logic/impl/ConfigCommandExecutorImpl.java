@@ -7,11 +7,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.ue.common.utils.api.MessageWrapper;
-import org.ue.config.logic.ConfigCommandEnum;
+import org.ue.config.logic.api.ConfigCommandEnum;
+import org.ue.config.logic.api.ConfigException;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.general.GeneralEconomyException;
 
 public class ConfigCommandExecutorImpl implements CommandExecutor {
 
@@ -32,7 +32,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 		if (args.length != 0) {
 			try {
 				return performCommand(label, args, sender);
-			} catch (GeneralEconomyException e) {
+			} catch (ConfigException e) {
 				sender.sendMessage(ChatColor.RED + e.getMessage());
 			} catch (IllegalArgumentException e) {
 				sender.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[1]));
@@ -44,7 +44,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performCommand(String label, String[] args, CommandSender sender)
-			throws NumberFormatException, GeneralEconomyException {
+			throws NumberFormatException, ConfigException {
 		switch (ConfigCommandEnum.getEnum(args[0])) {
 		case CURRENCY:
 			return performCurrencyCommand(label, args, sender);
@@ -76,7 +76,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performAllowQuickshopCommand(String label, String[] args, CommandSender sender)
-			throws NumberFormatException, GeneralEconomyException {
+			throws NumberFormatException, ConfigException {
 		if (args.length == 2) {
 			boolean input = stringToBoolean(args[1]);
 			configManager.setAllowQuickshop(input);
@@ -88,7 +88,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performStartAmountCommand(String label, String[] args, CommandSender sender)
-			throws NumberFormatException, GeneralEconomyException {
+			throws NumberFormatException, ConfigException {
 		if (args.length == 2) {
 			configManager.setStartAmount(Double.valueOf(args[1]));
 			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
@@ -99,7 +99,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performLanguageCommand(String label, String[] args, CommandSender sender)
-			throws GeneralEconomyException {
+			throws ConfigException {
 		if (args.length == 3) {
 			configManager.setLocale(args[1], args[2]);
 			sender.sendMessage(messageWrapper.getString("restart"));
@@ -110,7 +110,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performMaxHomesCommand(String label, String[] args, CommandSender sender)
-			throws NumberFormatException, GeneralEconomyException {
+			throws NumberFormatException, ConfigException {
 		if (args.length == 2) {
 			configManager.setMaxHomes(Integer.valueOf(args[1]));
 			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
@@ -121,7 +121,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performMaxRentedDaysCommand(String label, String[] args, CommandSender sender)
-			throws NumberFormatException, GeneralEconomyException {
+			throws NumberFormatException, ConfigException {
 		if (args.length == 2) {
 			configManager.setMaxRentedDays(Integer.valueOf(args[1]));
 			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
@@ -132,7 +132,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performMaxJobsCommand(String label, String[] args, CommandSender sender)
-			throws NumberFormatException, GeneralEconomyException {
+			throws NumberFormatException, ConfigException {
 		if (args.length == 2) {
 			configManager.setMaxJobs(Integer.valueOf(args[1]));
 			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
@@ -143,7 +143,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performMaxJoinedTownsCommand(String label, String[] args, CommandSender sender)
-			throws NumberFormatException, GeneralEconomyException {
+			throws NumberFormatException, ConfigException {
 		if (args.length == 2) {
 			configManager.setMaxJoinedTowns(Integer.valueOf(args[1]));
 			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
@@ -165,7 +165,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performMaxPlayershopsCommand(String label, String[] args, CommandSender sender)
-			throws NumberFormatException, GeneralEconomyException {
+			throws NumberFormatException, ConfigException {
 		if (args.length == 2) {
 			configManager.setMaxPlayershops(Integer.valueOf(args[1]));
 			sender.sendMessage(messageWrapper.getString("config_change", args[1]));

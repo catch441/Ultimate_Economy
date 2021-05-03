@@ -7,11 +7,10 @@ import javax.inject.Inject;
 import org.bukkit.OfflinePlayer;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankManager;
+import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.utils.ServerProvider;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
@@ -197,7 +196,7 @@ public class UltimateEconomyVaultImpl implements Economy {
 		try {
 			ecoPlayerManager.getEconomyPlayerByName(owner).decreasePlayerAmount(amount, false);
 			return new EconomyResponse(amount, getBalance(owner), ResponseType.SUCCESS, "");
-		} catch (EconomyPlayerException | GeneralEconomyException e) {
+		} catch (GeneralEconomyException e) {
 			return new EconomyResponse(0, 0, ResponseType.FAILURE, e.getMessage());
 		}
 	}

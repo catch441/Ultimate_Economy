@@ -1,12 +1,10 @@
 package org.ue.shopsystem.logic.impl;
 
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.ue.shopsystem.logic.api.ShopItem;
 
 public class ShopItemImpl implements ShopItem {
 
-	private int itemHash; // hashed item string
 	private ItemStack itemStack;
 	private int amount;
 	private double sellPrice;
@@ -31,11 +29,6 @@ public class ShopItemImpl implements ShopItem {
 		setItemStack(itemStack.clone());
 		setStock(0);
 		setSlot(slot);
-		if (itemStack.getType() == Material.SPAWNER) {
-			setItemString("SPAWNER_" + itemStack.getItemMeta().getDisplayName());
-		} else {
-			setItemString(itemStack.toString());
-		}
 	}
 
 	@Override
@@ -79,11 +72,6 @@ public class ShopItemImpl implements ShopItem {
 	}
 
 	@Override
-	public int getItemHash() {
-		return itemHash;
-	}
-
-	@Override
 	public int getStock() {
 		return stock;
 	}
@@ -106,14 +94,4 @@ public class ShopItemImpl implements ShopItem {
 	private void setSlot(int slot) {
 		this.slot = slot;
 	}
-	
-	/**
-	 * Set the unique item string.
-	 * 
-	 * @param itemString
-	 */
-	private void setItemString(String itemString) {
-		this.itemHash = itemString.hashCode();
-	}
-
 }

@@ -1,7 +1,9 @@
 package org.ue.jobsystem.logic.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -17,19 +19,17 @@ import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.logic.impl.EconomyVillagerImpl;
 import org.ue.common.utils.ServerProvider;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.dataaccess.api.JobcenterDao;
-import org.ue.jobsystem.logic.JobSystemException;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
+import org.ue.jobsystem.logic.api.JobsystemException;
 import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
-import org.ue.townsystem.logic.TownSystemException;
 
-public class JobcenterImpl extends EconomyVillagerImpl implements Jobcenter {
+public class JobcenterImpl extends EconomyVillagerImpl<JobsystemException> implements Jobcenter {
 
 	private static final Logger log = LoggerFactory.getLogger(JobcenterImpl.class);
 	private final JobManager jobManager;
@@ -38,13 +38,13 @@ public class JobcenterImpl extends EconomyVillagerImpl implements Jobcenter {
 	private final JobsystemValidationHandler validationHandler;
 	private final JobcenterDao jobcenterDao;
 	private String name;
-	private List<Job> jobs = new ArrayList<>();
+	private Map<Integer, Job> jobs = new HashMap<>();
 
 	@Inject
 	public JobcenterImpl(JobcenterDao jobcenterDao, JobManager jobManager, JobcenterManager jobcenterManager,
 			EconomyPlayerManager ecoPlayerManager, JobsystemValidationHandler validationHandler,
 			ServerProvider serverProvider) {
-		super(serverProvider, jobcenterDao, validationHandler);
+		super(serverProvider, jobcenterDao, validationHandler, "");
 		this.jobManager = jobManager;
 		this.jobcenterManager = jobcenterManager;
 		this.ecoPlayerManager = ecoPlayerManager;
@@ -53,17 +53,16 @@ public class JobcenterImpl extends EconomyVillagerImpl implements Jobcenter {
 	}
 
 	@Override
-	public void setupNew(String name, Location spawnLocation, int size)
-			throws GeneralEconomyException, EconomyPlayerException {
+	public void setupNew(String name, Location spawnLocation, int size) {
 		jobcenterDao.setupSavefile(name);
 		this.name = name;
 		jobcenterDao.saveJobcenterName(name);
-		setupNewEconomyVillager(spawnLocation, EconomyVillagerType.JOBCENTER, name, size, 1);
+		setupNewEconomyVillager(spawnLocation, EconomyVillagerType.JOBCENTER, name, size, 1, true);
 		setupDefaultJobcenterInventory();
 	}
 
 	@Override
-	public void setupExisting(String name) throws TownSystemException, GeneralEconomyException, EconomyPlayerException {
+	public void setupExisting(String name) {
 		jobcenterDao.setupSavefile(name);
 		this.name = name;
 		setupExistingEconomyVillager(EconomyVillagerType.JOBCENTER, name, 1);
@@ -72,30 +71,29 @@ public class JobcenterImpl extends EconomyVillagerImpl implements Jobcenter {
 	}
 
 	@Override
-	public void addJob(Job job, String itemMaterial, int slot)
-			throws EconomyPlayerException, GeneralEconomyException, JobSystemException {
+	public void addJob(Job job, String itemMaterial, int slot) throws JobsystemException {
 		validationHandler.checkForJobDoesNotExistInJobcenter(getJobList(), job);
 		itemMaterial = itemMaterial.toUpperCase();
 		validationHandler.checkForValidEnum(Material.values(), itemMaterial);
+		validationHandler.checkForValidSlot(slot, getSize() - getReservedSlots());
+		validationHandler.checkForSlotIsEmpty(jobs.keySet(), slot);
 
 		ItemStack jobItem = serverProvider.createItemStack(Material.valueOf(itemMaterial), 1);
 		ItemMeta meta = jobItem.getItemMeta();
 		meta.setDisplayName(job.getName());
 		meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 		jobItem.setItemMeta(meta);
-		// throws an exception if the slot is occupied
-		addItemStack(jobItem, slot, false, false);
-
-		getJobList().add(job);
+		getInventory().setItem(slot, jobItem);
+		jobs.put(slot, job);
 		jobcenterDao.saveJobNameList(getJobNameList());
 		jobcenterDao.saveJob(job, itemMaterial, slot);
 	}
 
 	@Override
-	public void removeJob(Job job) throws JobSystemException {
+	public void removeJob(Job job) throws JobsystemException {
 		validationHandler.checkForJobExistsInJobcenter(getJobList(), job);
 		getInventory().clear(getJobSlot(job));
-		getJobList().remove(job);
+		jobs.values().removeIf(value -> value.equals(job));
 		jobcenterDao.saveJob(job, null, 0);
 		jobcenterDao.saveJobNameList(getJobNameList());
 		if (!isJAvailableInOtherJobcenter(job)) {
@@ -114,7 +112,7 @@ public class JobcenterImpl extends EconomyVillagerImpl implements Jobcenter {
 
 	@Override
 	public List<Job> getJobList() {
-		return jobs;
+		return new ArrayList<>(jobs.values());
 	}
 
 	@Override
@@ -149,7 +147,7 @@ public class JobcenterImpl extends EconomyVillagerImpl implements Jobcenter {
 		return jobcenterDao.loadJobSlot(job);
 	}
 
-	private boolean isJAvailableInOtherJobcenter(Job job) throws JobSystemException {
+	private boolean isJAvailableInOtherJobcenter(Job job) throws JobsystemException {
 		for (Jobcenter jobcenter : jobcenterManager.getJobcenterList()) {
 			if (jobcenter.hasJob(job)) {
 				return true;
@@ -158,7 +156,7 @@ public class JobcenterImpl extends EconomyVillagerImpl implements Jobcenter {
 		return false;
 	}
 
-	private void setupDefaultJobcenterInventory() throws GeneralEconomyException, EconomyPlayerException {
+	private void setupDefaultJobcenterInventory() {
 		int slot = getSize() - 1;
 		ItemStack info = serverProvider.createItemStack(Material.ANVIL, 1);
 		ItemMeta meta = info.getItemMeta();
@@ -168,7 +166,7 @@ public class JobcenterImpl extends EconomyVillagerImpl implements Jobcenter {
 		lore.add(ChatColor.GOLD + "Rightclick: " + ChatColor.RED + "Leave");
 		meta.setLore(lore);
 		info.setItemMeta(meta);
-		addItemStack(info, slot, true, true);
+		getInventory().setItem(slot, info);
 	}
 
 	private void loadJobs() {
@@ -180,9 +178,10 @@ public class JobcenterImpl extends EconomyVillagerImpl implements Jobcenter {
 				meta.setDisplayName(job.getName());
 				meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 				jobItem.setItemMeta(meta);
-				addItemStack(jobItem, jobcenterDao.loadJobSlot(job), false, true);
-				getJobList().add(job);
-			} catch (GeneralEconomyException | EconomyPlayerException e) {
+				int slot = jobcenterDao.loadJobSlot(job);
+				getInventory().setItem(slot, jobItem);
+				jobs.put(slot, job);
+			} catch (JobsystemException e) {
 				log.warn("[Ultimate_Economy] Failed to load the job " + jobName + " for the jobcenter " + getName());
 				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}

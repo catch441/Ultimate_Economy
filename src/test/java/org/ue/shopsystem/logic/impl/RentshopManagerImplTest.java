@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -23,17 +22,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ue.common.logic.api.GeneralValidationHandler;
+import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.ServiceComponent;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.ShopValidationHandler;
-import org.ue.shopsystem.logic.ShopSystemException;
-import org.ue.townsystem.logic.TownSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class RentshopManagerImplTest {
@@ -46,12 +43,10 @@ public class RentshopManagerImplTest {
 	ServerProvider serverProvider;
 	@Mock
 	ConfigDao configDao;
-	@Mock
-	GeneralValidationHandler generalValidator;
-	
+
 	@BeforeEach
 	public void cleanUp() {
-		for(Rentshop shop: rentshopManager.getRentShops()) {
+		for (Rentshop shop : rentshopManager.getRentShops()) {
 			rentshopManager.deleteRentShop(shop);
 		}
 	}
@@ -89,10 +84,10 @@ public class RentshopManagerImplTest {
 	}
 
 	@Test
-	public void getRentShopByIdTestFail() throws GeneralEconomyException {
+	public void getRentShopByIdTestFail() throws ShopsystemException {
 		createRentshop("R0");
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueExists(null, "R1");
-		assertThrows(GeneralEconomyException.class, () -> rentshopManager.getRentShopById("R1"));
+		doThrow(ShopsystemException.class).when(validationHandler).checkForValueExists(null, "R1");
+		assertThrows(ShopsystemException.class, () -> rentshopManager.getRentShopById("R1"));
 	}
 
 	@Test
@@ -133,14 +128,11 @@ public class RentshopManagerImplTest {
 
 	@Test
 	public void getRentShopByUniqueNameTestWithoutShop() {
-		try {
-			rentshopManager.getRentShopByUniqueName("RentShop#R1");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(1, e.getParams().length);
-			assertEquals("RentShop#R1", e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
-		}
+		ShopsystemException exception = assertThrows(ShopsystemException.class,
+				() -> rentshopManager.getRentShopByUniqueName("RentShop#R1"));
+		assertEquals(1, exception.getParams().length);
+		assertEquals("RentShop#R1", exception.getParams()[0]);
+		assertEquals(ExceptionMessageEnum.DOES_NOT_EXIST, exception.getKey());
 	}
 
 	@Test
@@ -157,8 +149,8 @@ public class RentshopManagerImplTest {
 		Rentshop shop = createRentshop("R0");
 		Rentshop shop2 = createRentshop("R1");
 		rentshopManager.despawnAllVillagers();
-		verify(shop).despawnVillager();
-		verify(shop2).despawnVillager();
+		verify(shop).despawn();
+		verify(shop2).despawn();
 	}
 
 	@Test
@@ -171,17 +163,17 @@ public class RentshopManagerImplTest {
 	}
 
 	@Test
-	public void createRentshopTestWithInvalidSize() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValidSize(5);
-		assertThrows(GeneralEconomyException.class, () -> rentshopManager.createRentShop(null, 5, 2.5));
+	public void createRentshopTestWithInvalidSize() throws ShopsystemException {
+		doThrow(ShopsystemException.class).when(validationHandler).checkForValidSize(5);
+		assertThrows(ShopsystemException.class, () -> rentshopManager.createRentShop(null, 5, 2.5));
 		assertEquals(0, rentshopManager.getRentShops().size());
 		verifyNoInteractions(configDao);
 	}
 
 	@Test
-	public void createRentshopTestWithInvalidRentalFee() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForPositiveValue(-2.5);
-		assertThrows(GeneralEconomyException.class, () -> rentshopManager.createRentShop(null, 9, -2.5));
+	public void createRentshopTestWithInvalidRentalFee() throws ShopsystemException {
+		doThrow(ShopsystemException.class).when(validationHandler).checkForPositiveValue(-2.5);
+		assertThrows(ShopsystemException.class, () -> rentshopManager.createRentShop(null, 9, -2.5));
 		assertEquals(0, rentshopManager.getRentShops().size());
 		verifyNoInteractions(configDao);
 	}
@@ -195,8 +187,8 @@ public class RentshopManagerImplTest {
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		assertDoesNotThrow(() -> rentshopManager.createRentShop(loc, 9, 2.5));
 
-		assertDoesNotThrow(() -> verify(generalValidator).checkForPositiveValue(2.5));
-		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSize(9));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForPositiveValue(2.5));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(9));
 		verify(configDao).saveRentshopIds(anyList());
 		assertEquals(1, rentshopManager.getRentShops().size());
 		Rentshop result = rentshopManager.getRentShops().get(0);
@@ -213,21 +205,20 @@ public class RentshopManagerImplTest {
 		when(configDao.loadRentshopIds()).thenReturn(Arrays.asList("R0"));
 		rentshopManager.loadAllRentShops();
 		assertEquals(1, rentshopManager.getRentShops().size());
-		assertDoesNotThrow(() -> verify(shop).setupExisting(null, "R0"));
+		assertDoesNotThrow(() -> verify(shop).setupExisting("R0"));
 	}
 
 	@Test
-	public void loadAllRentshopsTestWithLoadingError()
-			throws TownSystemException, ShopSystemException, GeneralEconomyException {
+	public void loadAllRentshopsTestWithLoadingError() throws EconomyPlayerException {
 		Rentshop shop = mock(Rentshop.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		when(serviceComponent.getRentshop()).thenReturn(shop);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(configDao.loadRentshopIds()).thenReturn(Arrays.asList("R0"));
-		TownSystemException e = mock(TownSystemException.class);
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		when(configDao.loadRentshopIds()).thenReturn(Arrays.asList("R0"));
-		doThrow(e).when(shop).setupExisting(null, "R0");
+		doThrow(e).when(shop).setupExisting("R0");
 		rentshopManager.loadAllRentShops();
 		assertEquals(0, rentshopManager.getRentShops().size());
 		verify(e).getMessage();

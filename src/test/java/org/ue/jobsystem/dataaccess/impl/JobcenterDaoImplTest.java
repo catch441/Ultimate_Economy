@@ -1,14 +1,13 @@
 package org.ue.jobsystem.dataaccess.impl;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,15 +37,15 @@ public class JobcenterDaoImplTest {
 	 */
 	@AfterEach
 	public void cleanUp() {
-		File file = new File("src/kthcenter-JobCenter.yml");
+		File file = new File("src/catchcenter-JobCenter.yml");
 		file.delete();
 	}
-	
+
 	@Test
 	public void deleteSavefileTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
-		File file = new File("src/kthcenter-JobCenter.yml");
+		jobcenterDao.setupSavefile("catchcenter");
+		File file = new File("src/catchcenter-JobCenter.yml");
 		assertTrue(file.exists());
 		jobcenterDao.deleteSavefile();
 		assertFalse(file.exists());
@@ -54,41 +53,41 @@ public class JobcenterDaoImplTest {
 
 	@Test
 	public void setupSavefileTest() {
-		File result = new File("src/kthcenter-JobCenter.yml");
+		File result = new File("src/catchcenter-JobCenter.yml");
 		assertFalse(result.exists());
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
+		jobcenterDao.setupSavefile("catchcenter");
 		assertTrue(result.exists());
 	}
 
 	@Test
 	public void setupSavefileLoadTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
-		jobcenterDao.saveJobcenterSize(9);
-		jobcenterDao.setupSavefile("kthcenter");
-		File file = new File("src/kthcenter-JobCenter.yml");
+		jobcenterDao.setupSavefile("catchcenter");
+		jobcenterDao.saveSize("", 9);
+		jobcenterDao.setupSavefile("catchcenter");
+		File file = new File("src/catchcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertTrue(file.exists());
-		assertTrue(config.isSet("JobCenterSize"));
+		assertTrue(config.isSet("Size"));
 	}
 
 	@Test
 	public void saveJobcenterSizeTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
-		jobcenterDao.saveJobcenterSize(9);
-		File file = new File("src/kthcenter-JobCenter.yml");
+		jobcenterDao.setupSavefile("catchcenter");
+		jobcenterDao.saveSize("", 9);
+		File file = new File("src/catchcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		assertEquals(9, config.getInt("JobCenterSize"));
+		assertEquals(9, config.getInt("Size"));
 	}
 
 	@Test
 	public void saveJobcenterNameTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
+		jobcenterDao.setupSavefile("catchcenter");
 		jobcenterDao.saveJobcenterName("myname");
-		File file = new File("src/kthcenter-JobCenter.yml");
+		File file = new File("src/catchcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals("myname", config.getString("JobCenterName"));
 	}
@@ -96,27 +95,27 @@ public class JobcenterDaoImplTest {
 	@Test
 	public void saveJobcenterLocationTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
+		jobcenterDao.setupSavefile("catchcenter");
 		World world = mock(World.class);
 		when(world.getName()).thenReturn("World");
 		Location loc = new Location(world, 1, 2, 3);
-		jobcenterDao.saveJobcenterLocation(loc);
-		File file = new File("src/kthcenter-JobCenter.yml");
+		jobcenterDao.saveLocation("", loc);
+		File file = new File("src/catchcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		assertEquals("World", config.getString("JobcenterLocation.World"));
-		assertEquals(1, config.getInt("JobcenterLocation.x"));
-		assertEquals(2, config.getInt("JobcenterLocation.y"));
-		assertEquals(3, config.getInt("JobcenterLocation.z"));
+		assertEquals("World", config.getString("Location.world"));
+		assertEquals(1, config.getInt("Location.x"));
+		assertEquals(2, config.getInt("Location.y"));
+		assertEquals(3, config.getInt("Location.z"));
 	}
 
 	@Test
 	public void saveJobNameListTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
+		jobcenterDao.setupSavefile("catchcenter");
 		List<String> list = new ArrayList<>();
 		list.add("myjob");
 		jobcenterDao.saveJobNameList(list);
-		File file = new File("src/kthcenter-JobCenter.yml");
+		File file = new File("src/catchcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals(1, config.getStringList("Jobnames").size());
 		assertEquals("myjob", config.getStringList("Jobnames").get(0));
@@ -125,11 +124,11 @@ public class JobcenterDaoImplTest {
 	@Test
 	public void saveJobTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
+		jobcenterDao.setupSavefile("catchcenter");
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
 		jobcenterDao.saveJob(job, "stone", 4);
-		File file = new File("src/kthcenter-JobCenter.yml");
+		File file = new File("src/catchcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals("stone", config.getString("Jobs.myjob.ItemMaterial"));
 		assertEquals(4, config.getInt("Jobs.myjob.Slot"));
@@ -138,12 +137,12 @@ public class JobcenterDaoImplTest {
 	@Test
 	public void saveJobTestWithDelete() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
+		jobcenterDao.setupSavefile("catchcenter");
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
 		jobcenterDao.saveJob(job, "stone", 4);
 		jobcenterDao.saveJob(job, null, 4);
-		File file = new File("src/kthcenter-JobCenter.yml");
+		File file = new File("src/catchcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertFalse(config.isSet("Jobs.myjob"));
 	}
@@ -151,23 +150,23 @@ public class JobcenterDaoImplTest {
 	@Test
 	public void loadJobcenterSizeTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
-		jobcenterDao.saveJobcenterSize(9);
-		jobcenterDao.setupSavefile("kthcenter");
-		assertEquals(9, jobcenterDao.loadJobcenterSize());
+		jobcenterDao.setupSavefile("catchcenter");
+		jobcenterDao.saveSize("", 9);
+		jobcenterDao.setupSavefile("catchcenter");
+		assertEquals(9, jobcenterDao.loadSize(""));
 	}
 
 	@Test
 	public void loadJobcenterLocationTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
+		jobcenterDao.setupSavefile("catchcenter");
 		World world = mock(World.class);
 		when(world.getName()).thenReturn("World");
 		when(serverProvider.getWorld("World")).thenReturn(world);
 		Location loc = new Location(world, 1, 2, 3);
-		jobcenterDao.saveJobcenterLocation(loc);
-		jobcenterDao.setupSavefile("kthcenter");
-		Location result = jobcenterDao.loadJobcenterLocation();
+		jobcenterDao.saveLocation("", loc);
+		jobcenterDao.setupSavefile("catchcenter");
+		Location result = jobcenterDao.loadLocation("");
 		assertEquals(world, result.getWorld());
 		assertEquals("1.0", String.valueOf(result.getX()));
 		assertEquals("2.0", String.valueOf(result.getY()));
@@ -176,35 +175,35 @@ public class JobcenterDaoImplTest {
 
 	@Test
 	public void loadJobcenterLocationDeprecatedTest() {
-		File file = new File("src/kthcenter-JobCenter.yml");
+		File file = new File("src/catchcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		config.set("ShopLocation.World", "World");
-		config.set("ShopLocation.x", 1);
-		config.set("ShopLocation.y", 2);
-		config.set("ShopLocation.z", 3);
+		config.set("JobcenterLocation.World", "World");
+		config.set("JobcenterLocation.x", 1);
+		config.set("JobcenterLocation.y", 2);
+		config.set("JobcenterLocation.z", 3);
 		save(file, config);
 		World world = mock(World.class);
 		when(world.getName()).thenReturn("World");
 		when(serverProvider.getWorld("World")).thenReturn(world);
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
-		Location result = jobcenterDao.loadJobcenterLocation();
+		jobcenterDao.setupSavefile("catchcenter");
+		Location result = jobcenterDao.loadLocation("");
 		assertEquals(world, result.getWorld());
 		assertEquals("1.0", String.valueOf(result.getX()));
 		assertEquals("2.0", String.valueOf(result.getY()));
 		assertEquals("3.0", String.valueOf(result.getZ()));
 		YamlConfiguration configAfter = YamlConfiguration.loadConfiguration(file);
-		assertFalse(configAfter.isSet("ShopLocation"));
+		assertFalse(configAfter.isSet("JobcenterLocation"));
 	}
 
 	@Test
 	public void loadJobSlotTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
+		jobcenterDao.setupSavefile("catchcenter");
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
 		jobcenterDao.saveJob(job, "stone", 3);
-		jobcenterDao.setupSavefile("kthcenter");
+		jobcenterDao.setupSavefile("catchcenter");
 		assertEquals(3, jobcenterDao.loadJobSlot(job));
 	}
 
@@ -212,12 +211,12 @@ public class JobcenterDaoImplTest {
 	public void loadJobSlotDeprecatedTest() {
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
-		File file = new File("src/kthcenter-JobCenter.yml");
+		File file = new File("src/catchcenter-JobCenter.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		config.set("Jobs.myjob.ItemSlot", 9);
 		save(file, config);
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
+		jobcenterDao.setupSavefile("catchcenter");
 		assertEquals(8, jobcenterDao.loadJobSlot(job));
 		YamlConfiguration configAfter = YamlConfiguration.loadConfiguration(file);
 		assertFalse(configAfter.isSet("Jobs.myjob.ItemSlot"));
@@ -226,11 +225,11 @@ public class JobcenterDaoImplTest {
 	@Test
 	public void loadJobNameListTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
+		jobcenterDao.setupSavefile("catchcenter");
 		List<String> list = new ArrayList<>();
 		list.add("myjob");
 		jobcenterDao.saveJobNameList(list);
-		jobcenterDao.setupSavefile("kthcenter");
+		jobcenterDao.setupSavefile("catchcenter");
 		assertEquals(1, jobcenterDao.loadJobNameList().size());
 		assertEquals("myjob", jobcenterDao.loadJobNameList().get(0));
 	}
@@ -238,19 +237,15 @@ public class JobcenterDaoImplTest {
 	@Test
 	public void loadJobItemMaterialTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		jobcenterDao.setupSavefile("kthcenter");
+		jobcenterDao.setupSavefile("catchcenter");
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
 		jobcenterDao.saveJob(job, "STONE", 3);
-		jobcenterDao.setupSavefile("kthcenter");
+		jobcenterDao.setupSavefile("catchcenter");
 		assertEquals(Material.STONE, jobcenterDao.loadJobItemMaterial(job));
 	}
 
 	private void save(File file, YamlConfiguration config) {
-		try {
-			config.save(file);
-		} catch (IOException e) {
-			fail();
-		}
+		assertDoesNotThrow(() -> config.save(file));
 	}
 }

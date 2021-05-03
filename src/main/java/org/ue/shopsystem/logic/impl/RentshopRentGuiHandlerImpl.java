@@ -9,17 +9,17 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.SkullTextureEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.shopsystem.logic.ShopSystemException;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopRentGuiHandler;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class RentshopRentGuiHandlerImpl implements RentshopRentGuiHandler {
 
@@ -127,7 +127,7 @@ public class RentshopRentGuiHandlerImpl implements RentshopRentGuiHandler {
 		try {
 			shop.rentShop(ecoPlayerManager.getEconomyPlayerByName(event.getWhoClicked().getName()), duration);
 			event.getWhoClicked().sendMessage(messageWrapper.getString("rent_rented"));
-		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
+		} catch (ShopsystemException | BankException | EconomyPlayerException e) {
 			event.getWhoClicked().sendMessage(e.getMessage());
 		}
 		event.getWhoClicked().closeInventory();

@@ -10,31 +10,30 @@ import javax.inject.Inject;
 import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.ue.common.logic.api.GeneralValidationHandler;
+import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopManager;
-import org.ue.townsystem.logic.TownSystemException;
+import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class RentshopManagerImpl implements RentshopManager {
 
 	private static final Logger log = LoggerFactory.getLogger(RentshopManagerImpl.class);
 	private final MessageWrapper messageWrapper;
-	private final GeneralValidationHandler generalValidator;
+	private final ShopValidationHandler validationHandler;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
 	private Map<String, Rentshop> rentShopList = new HashMap<>();
 
 	@Inject
-	public RentshopManagerImpl(MessageWrapper messageWrapper, GeneralValidationHandler generalValidator,
+	public RentshopManagerImpl(MessageWrapper messageWrapper, ShopValidationHandler validationHandler,
 			ServerProvider serverProvider, ConfigDao configDao) {
 		this.messageWrapper = messageWrapper;
-		this.generalValidator = generalValidator;
+		this.validationHandler = validationHandler;
 		this.serverProvider = serverProvider;
 		this.configDao = configDao;
 	}
@@ -53,14 +52,14 @@ public class RentshopManagerImpl implements RentshopManager {
 	}
 
 	@Override
-	public Rentshop getRentShopById(String id) throws GeneralEconomyException {
+	public Rentshop getRentShopById(String id) throws ShopsystemException {
 		Rentshop shop = rentShopList.get(id);
-		generalValidator.checkForValueExists(shop, id);
+		validationHandler.checkForValueExists(shop, id);
 		return shop;
 	}
 
 	@Override
-	public Rentshop getRentShopByUniqueName(String name) throws GeneralEconomyException {
+	public Rentshop getRentShopByUniqueName(String name) throws ShopsystemException {
 		for (Rentshop shop : getRentShops()) {
 			if (shop.isRentable()) {
 				if (("RentShop#" + shop.getShopId()).equals(name)) {
@@ -72,7 +71,7 @@ public class RentshopManagerImpl implements RentshopManager {
 				}
 			}
 		}
-		throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
+		throw new ShopsystemException(messageWrapper, ExceptionMessageEnum.DOES_NOT_EXIST, name);
 	}
 
 	@Override
@@ -94,10 +93,9 @@ public class RentshopManagerImpl implements RentshopManager {
 	}
 
 	@Override
-	public Rentshop createRentShop(Location spawnLocation, int size, double rentalFee)
-			throws GeneralEconomyException, EconomyPlayerException {
-		generalValidator.checkForValidSize(size);
-		generalValidator.checkForPositiveValue(rentalFee);
+	public Rentshop createRentShop(Location spawnLocation, int size, double rentalFee) throws ShopsystemException {
+		validationHandler.checkForValidSize(size);
+		validationHandler.checkForPositiveValue(rentalFee);
 		Rentshop shop = serverProvider.getServiceComponent().getRentshop();
 		shop.setupNew(generateFreeRentShopId(), spawnLocation, size, rentalFee);
 		rentShopList.put(shop.getShopId(), shop);
@@ -126,7 +124,7 @@ public class RentshopManagerImpl implements RentshopManager {
 				Rentshop shop = serverProvider.getServiceComponent().getRentshop();
 				shop.setupExisting(shopId);
 				rentShopList.put(shopId, shop);
-			} catch (TownSystemException | GeneralEconomyException | EconomyPlayerException e) {
+			} catch (EconomyPlayerException e) {
 				log.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}

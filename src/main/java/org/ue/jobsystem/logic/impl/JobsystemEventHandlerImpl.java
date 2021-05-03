@@ -25,17 +25,16 @@ import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
+import org.ue.bank.logic.api.BankException;
 import org.ue.common.utils.ServerProvider;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.jobsystem.logic.JobSystemException;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemEventHandler;
-import org.ue.shopsystem.logic.ShopSystemException;
+import org.ue.jobsystem.logic.api.JobsystemException;
 
 public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 
@@ -65,7 +64,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 		try {
 			EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getBreeder().getName());
 			payForBreedJob(event.getEntityType(), ecoPlayer);
-		} catch (GeneralEconomyException e) {
+		} catch (EconomyPlayerException e) {
 		}
 	}
 
@@ -86,7 +85,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 				if (entity.getKiller().getGameMode() == GameMode.SURVIVAL) {
 					payForKillJob(entity, ecoPlayer);
 				}
-			} catch (GeneralEconomyException e) {
+			} catch (EconomyPlayerException e) {
 			}
 		}
 	}
@@ -97,7 +96,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 				double d = job.getBreedPrice(entity);
 				ecoPlayer.increasePlayerAmount(d, false);
 				break;
-			} catch (GeneralEconomyException e) {
+			} catch (JobsystemException | BankException e) {
 			}
 		}
 	}
@@ -108,7 +107,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 				double d = job.getKillPrice(entity.getType().toString());
 				ecoPlayer.increasePlayerAmount(d, false);
 				break;
-			} catch (GeneralEconomyException e) {
+			} catch (JobsystemException | BankException e) {
 			}
 		}
 	}
@@ -120,7 +119,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 				EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getPlayer().getName());
 				List<MetadataValue> list = event.getBlock().getMetadata("placedBy");
 				payForBreakJob(ecoPlayer, event.getBlock(), list);
-			} catch (GeneralEconomyException e) {
+			} catch (EconomyPlayerException e) {
 			}
 		}
 	}
@@ -135,13 +134,13 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 					ecoPlayer.increasePlayerAmount(d, false);
 				}
 				break;
-			} catch (JobSystemException | GeneralEconomyException e) {
+			} catch (JobsystemException | BankException e) {
 			}
 		}
 	}
 
 	private void payForCrops(Block block, EconomyPlayer ecoPlayer, Job job)
-			throws JobSystemException, GeneralEconomyException {
+			throws JobsystemException, BankException {
 		Ageable ageable = (Ageable) block.getBlockData();
 		if (ageable.getAge() == ageable.getMaximumAge()) {
 			double d = job.getBlockPrice(block.getType().toString());
@@ -162,7 +161,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 						payForFisherJob(ecoPlayer, jobList, lootType);
 					}
 				}
-			} catch (ClassCastException | GeneralEconomyException e) {
+			} catch (ClassCastException | EconomyPlayerException e) {
 			}
 		}
 	}
@@ -173,7 +172,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 				Double price = job.getFisherPrice(lootType);
 				ecoPlayer.increasePlayerAmount(price, false);
 				break;
-			} catch (GeneralEconomyException e) {
+			} catch (JobsystemException | BankException e) {
 			}
 		}
 	}
@@ -205,7 +204,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 						ecoPlayer.joinJob(jobManager.getJobByName(displayname), true);
 					}
 				}
-			} catch (GeneralEconomyException e) {
+			} catch (JobsystemException e) {
 			} catch (EconomyPlayerException e) {
 				event.getWhoClicked().sendMessage(ChatColor.RED + e.getMessage());
 			}
@@ -217,7 +216,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 		try {
 			event.setCancelled(true);
 			jobcenterManager.getJobcenterByName(event.getRightClicked().getCustomName()).openInventory(event.getPlayer());
-		} catch (GeneralEconomyException | ShopSystemException e) {
+		} catch (JobsystemException e) {
 		}
 	}
 }

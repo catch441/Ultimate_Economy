@@ -15,13 +15,11 @@ import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.SkullTextureEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.shopsystem.logic.ShopSystemException;
 import org.ue.shopsystem.logic.api.AbstractShop;
 import org.ue.shopsystem.logic.api.ShopItem;
 import org.ue.shopsystem.logic.api.ShopSlotEditorHandler;
 import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 
@@ -88,19 +86,19 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	}
 
 	@Override
-	public void setSelectedSlot(int slot) throws ShopSystemException, GeneralEconomyException {
+	public void setSelectedSlot(int slot) {
 		selectedEditorSlot = slot;
 		setupSlotEditorWithShopItemInformations(slot);
 	}
 
-	private void setupSlotEditorWithShopItemInformations(int slot) throws ShopSystemException, GeneralEconomyException {
+	private void setupSlotEditorWithShopItemInformations(int slot) {
 		double buyPrice = 0;
 		double sellPrice = 0;
 		try {
 			ShopItem item = shop.getShopItem(slot);
 			buyPrice = item.getBuyPrice();
 			sellPrice = item.getSellPrice();
-		} catch (EconomyPlayerException e) {
+		} catch (ShopsystemException e) {
 		}
 		List<String> listBuy = new ArrayList<String>();
 		List<String> listSell = new ArrayList<String>();
@@ -115,13 +113,13 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		setupSlotItemInSlotEditor(slot);
 	}
 
-	private void setupSlotItemInSlotEditor(int slot) throws GeneralEconomyException, ShopSystemException {
+	private void setupSlotItemInSlotEditor(int slot) {
 		try {
 			ShopItem item = shop.getShopItem(slot);
 			ItemStack stack = item.getItemStack();
 			stack.setAmount(item.getAmount());
 			getSlotEditorInventory().setItem(0, stack);
-		} catch (EconomyPlayerException e) {
+		} catch (ShopsystemException e) {
 			ItemStack item = serverProvider.createItemStack(Material.BARRIER, 1);
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName(ChatColor.GREEN + "select item");
@@ -170,15 +168,14 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 					}
 					handleSlotEditorCommand(event, player, slot, operator, price, editorItemStack, command);
 				}
-			} catch (ShopSystemException | EconomyPlayerException | GeneralEconomyException e) {
+			} catch (ShopsystemException e) {
 				player.sendMessage(e.getMessage());
 			}
 		}
 	}
 
 	private void handleSlotEditorCommand(InventoryClickEvent event, Player player, int slot, String operator,
-			double price, ItemStack editorItemStack, String command)
-			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
+			double price, ItemStack editorItemStack, String command) throws ShopsystemException {
 		switch (ChatColor.stripColor(command)) {
 		case "minus":
 		case "plus":
@@ -222,8 +219,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		}
 	}
 
-	private void handleSaveChanges(Player player)
-			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
+	private void handleSaveChanges(Player player) throws ShopsystemException {
 		double buyPrice = Double
 				.valueOf(getSlotEditorInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
 		double sellPrice = Double
@@ -246,9 +242,8 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 				player.sendMessage(
 						shop.editShopItem(selectedEditorSlot, amountChange, sellPriceChange, buyPriceChange));
 			}
-		} catch (GeneralEconomyException | ShopSystemException e) {
+		} catch (ShopsystemException e) {
 			// item is new
-			validationHandler.checkForItemDoesNotExist(stackInEditor.toString().hashCode(), shop.getItemList());
 			if (stackInEditor.getType() != Material.BARRIER) {
 				shop.addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
 				player.sendMessage(messageWrapper.getString("added", stackInEditor.getType().toString().toLowerCase()));
@@ -277,8 +272,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		return value;
 	}
 
-	private void handleRemoveItem(Player player)
-			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+	private void handleRemoveItem(Player player) throws ShopsystemException {
 		ItemStack item = shop.getShopItem(selectedEditorSlot).getItemStack();
 		String deletedIem = item.getType().toString().toLowerCase();
 		shop.removeShopItem(selectedEditorSlot);

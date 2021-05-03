@@ -1,6 +1,5 @@
 package org.ue.config.logic.impl;
 
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,6 +9,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,12 +17,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
+import org.ue.config.logic.api.ConfigException;
+import org.ue.config.logic.api.ConfigValidationHandler;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigManagerImplTest {
@@ -36,7 +35,7 @@ public class ConfigManagerImplTest {
 	@Mock
 	EconomyPlayerManager ecoPlayerManager;
 	@Mock
-	GeneralValidationHandler generalValidator;
+	ConfigValidationHandler validationHandler;
 
 	@Test
 	public void setupConfigInitTest() {
@@ -136,6 +135,18 @@ public class ConfigManagerImplTest {
 	}
 
 	@Test
+	public void setupConfigTestWithSetupFail() throws ConfigException {
+		when(dao.hasMaxHomes()).thenReturn(false);
+		// 3 is positive, but this is the only way to trigger the exception for the
+		// setup method
+		doThrow(ConfigException.class).when(validationHandler).checkForPositiveValue(3.0);
+
+		manager.setupConfig();
+		
+		verifyNoMoreInteractions(dao);
+	}
+
+	@Test
 	public void setExtendedInteractionTest() {
 		manager.setupConfig();
 		assertFalse(manager.isExtendedInteraction());
@@ -187,9 +198,9 @@ public class ConfigManagerImplTest {
 	}
 
 	@Test
-	public void setMaxRentedDaysExceptionTest() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueGreaterZero(-7);
-		assertThrows(GeneralEconomyException.class, () -> manager.setMaxRentedDays(-7));
+	public void setMaxRentedDaysExceptionTest() throws ConfigException {
+		doThrow(ConfigException.class).when(validationHandler).checkForValueGreaterZero(-7);
+		assertThrows(ConfigException.class, () -> manager.setMaxRentedDays(-7));
 	}
 
 	@Test
@@ -202,9 +213,9 @@ public class ConfigManagerImplTest {
 	}
 
 	@Test
-	public void setMaxPlayershopsExceptionTest() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForPositiveValue(-1);
-		assertThrows(GeneralEconomyException.class, () -> manager.setMaxPlayershops(-1));
+	public void setMaxPlayershopsExceptionTest() throws ConfigException {
+		doThrow(ConfigException.class).when(validationHandler).checkForPositiveValue(-1.0);
+		assertThrows(ConfigException.class, () -> manager.setMaxPlayershops(-1));
 	}
 
 	@Test
@@ -217,9 +228,9 @@ public class ConfigManagerImplTest {
 	}
 
 	@Test
-	public void setMaxHomesExceptionTest() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForPositiveValue(-1);
-		assertThrows(GeneralEconomyException.class, () -> manager.setMaxHomes(-1));
+	public void setMaxHomesExceptionTest() throws ConfigException {
+		doThrow(ConfigException.class).when(validationHandler).checkForPositiveValue(-1.0);
+		assertThrows(ConfigException.class, () -> manager.setMaxHomes(-1));
 	}
 
 	@Test
@@ -232,9 +243,9 @@ public class ConfigManagerImplTest {
 	}
 
 	@Test
-	public void setMaxJobsExceptionTest() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForPositiveValue(-1);
-		assertThrows(GeneralEconomyException.class, () -> manager.setMaxJobs(-1));
+	public void setMaxJobsExceptionTest() throws ConfigException {
+		doThrow(ConfigException.class).when(validationHandler).checkForPositiveValue(-1.0);
+		assertThrows(ConfigException.class, () -> manager.setMaxJobs(-1));
 	}
 
 	@Test
@@ -247,9 +258,9 @@ public class ConfigManagerImplTest {
 	}
 
 	@Test
-	public void setMaxJoinedTownesExceptionTest() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForPositiveValue(-3);
-		assertThrows(GeneralEconomyException.class, () -> manager.setMaxJoinedTowns(-3));
+	public void setMaxJoinedTownesExceptionTest() throws ConfigException {
+		doThrow(ConfigException.class).when(validationHandler).checkForPositiveValue(-3.0);
+		assertThrows(ConfigException.class, () -> manager.setMaxJoinedTowns(-3));
 	}
 
 	@Test
@@ -294,53 +305,27 @@ public class ConfigManagerImplTest {
 	}
 
 	@Test
-	public void setLocaleTest() {
+	public void setLocaleTest() throws ConfigException {
 		assertDoesNotThrow(() -> manager.setLocale("de", "DE"));
 		assertEquals("DE", manager.getLocale().getCountry());
 		assertEquals("de", manager.getLocale().getLanguage());
 		verify(dao).saveLanguage("de");
 		verify(dao).saveCountry("DE");
+		verify(validationHandler).checkForSupportedLanguage("de");
+		verify(validationHandler).checkForCountryMatching("de", "DE");
 	}
 
 	@Test
-	public void setLocaleCsCzTest() {
-		assertDoesNotThrow(() -> manager.setLocale("cs", "CZ"));
-		assertEquals("CZ", manager.getLocale().getCountry());
-		assertEquals("cs", manager.getLocale().getLanguage());
-		verify(dao).saveLanguage("cs");
-		verify(dao).saveCountry("CZ");
+	public void setLocaleUnsupportedLanguage() throws ConfigException {
+		doThrow(ConfigException.class).when(validationHandler).checkForSupportedLanguage("catch");
+		assertThrows(ConfigException.class, () -> manager.setLocale("catch", "CATCH"));
+		verifyNoMoreInteractions(dao);
 	}
 
 	@Test
-	public void setLocaleZhCnTest() {
-		assertDoesNotThrow(() -> manager.setLocale("zh", "CN"));
-		assertEquals("CN", manager.getLocale().getCountry());
-		assertEquals("zh", manager.getLocale().getLanguage());
-		verify(dao).saveLanguage("zh");
-		verify(dao).saveCountry("CN");
-	}
-
-	@Test
-	public void setLocaleUnsupportedLanguage() {
-		try {
-			manager.setLocale("kth", "KTH");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals("kth", e.getParams()[0]);
-		}
-	}
-
-	@Test
-	public void setLocaleCountryNotMatching() {
-		try {
-			manager.setLocale("de", "KTH");
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals("KTH", e.getParams()[0]);
-		}
+	public void setLocaleCountryNotMatching() throws ConfigException {
+		doThrow(ConfigException.class).when(validationHandler).checkForCountryMatching("catch", "CATCH");
+		assertThrows(ConfigException.class, () -> manager.setLocale("catch", "CATCH"));
+		verifyNoMoreInteractions(dao);
 	}
 }

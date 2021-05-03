@@ -34,18 +34,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.logic.api.BankAccount;
+import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
+import org.ue.townsystem.logic.api.TownsystemException;
 import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
-import org.ue.townsystem.logic.TownSystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class TownsystemEventHandlerImplTest {
@@ -67,26 +67,21 @@ public class TownsystemEventHandlerImplTest {
 	public void handlePlayerTeleportTest() {
 		Player player = mock(Player.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		World world = mock(World.class);
 		Location loc = mock(Location.class);
-		Chunk chunk = mock(Chunk.class);
-		when(loc.getChunk()).thenReturn(chunk);
-		when(world.getName()).thenReturn("world");
-		when(player.getWorld()).thenReturn(world);
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 
 		PlayerTeleportEvent event = new PlayerTeleportEvent(player, null, loc);
 		eventHandler.handlePlayerTeleport(event);
-		verify(townworldManager).performTownWorldLocationCheck("world", chunk, ecoPlayer);
+		verify(townworldManager).performTownWorldLocationCheck(ecoPlayer);
 	}
 
 	@Test
-	public void handlePlayerTeleportTestWithError() throws GeneralEconomyException {
+	public void handlePlayerTeleportTestWithError() throws EconomyPlayerException {
 		Player player = mock(Player.class);
 		Location loc = mock(Location.class);
 		when(player.getName()).thenReturn("catch441");
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
 
 		PlayerTeleportEvent event = new PlayerTeleportEvent(player, null, loc);
 		assertDoesNotThrow(() -> eventHandler.handlePlayerTeleport(event));
@@ -96,26 +91,19 @@ public class TownsystemEventHandlerImplTest {
 	public void handlePlayerJoinTest() {
 		Player player = mock(Player.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		World world = mock(World.class);
-		Location loc = mock(Location.class);
-		Chunk chunk = mock(Chunk.class);
-		when(loc.getChunk()).thenReturn(chunk);
-		when(world.getName()).thenReturn("world");
-		when(player.getWorld()).thenReturn(world);
 		when(player.getName()).thenReturn("catch441");
-		when(player.getLocation()).thenReturn(loc);
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 
 		PlayerJoinEvent event = new PlayerJoinEvent(player, null);
 		eventHandler.handlePlayerJoin(event);
-		verify(townworldManager).performTownWorldLocationCheck("world", chunk, ecoPlayer);
+		verify(townworldManager).performTownWorldLocationCheck(ecoPlayer);
 	}
 
 	@Test
-	public void handlePlayerJoinTestWithError() throws GeneralEconomyException {
+	public void handlePlayerJoinTestWithError() throws EconomyPlayerException {
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
 
 		PlayerJoinEvent event = new PlayerJoinEvent(player, null);
 		assertDoesNotThrow(() -> eventHandler.handlePlayerJoin(event));
@@ -125,7 +113,6 @@ public class TownsystemEventHandlerImplTest {
 	public void handlerPlayerMoveTestCrossChunk() {
 		Player player = mock(Player.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		World world = mock(World.class);
 		Location from = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
 		Location to = mock(Location.class);
@@ -137,14 +124,12 @@ public class TownsystemEventHandlerImplTest {
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(1);
 		when(from.getChunk()).thenReturn(chunk);
-		when(world.getName()).thenReturn("world");
-		when(to.getWorld()).thenReturn(world);
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 
 		PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
 		eventHandler.handlerPlayerMove(event);
-		verify(townworldManager).performTownWorldLocationCheck("world", toChunk, ecoPlayer);
+		verify(townworldManager).performTownWorldLocationCheck(ecoPlayer);
 	}
 
 	@Test
@@ -166,7 +151,7 @@ public class TownsystemEventHandlerImplTest {
 	}
 
 	@Test
-	public void handlerPlayerMoveTestError() throws GeneralEconomyException {
+	public void handlerPlayerMoveTestError() throws EconomyPlayerException {
 		Player player = mock(Player.class);
 		Location from = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
@@ -180,14 +165,14 @@ public class TownsystemEventHandlerImplTest {
 		when(chunk.getZ()).thenReturn(1);
 		when(from.getChunk()).thenReturn(chunk);
 		when(player.getName()).thenReturn("catch441");
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
 
 		PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
 		assertDoesNotThrow(() -> eventHandler.handlerPlayerMove(event));
 	}
 
 	@Test
-	public void handleOpenTownmanagerInventoryTest() {
+	public void handleOpenTownmanagerInventoryTest() throws TownsystemException {
 		Player who = mock(Player.class);
 		World world = mock(World.class);
 		Townworld townworld = mock(Townworld.class);
@@ -204,17 +189,17 @@ public class TownsystemEventHandlerImplTest {
 
 		PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(who, villager);
 		eventHandler.handleOpenTownmanagerInventory(event);
-		verify(town).openTownManagerVillagerInv(who);
+		verify(town).openInventory(who);
 	}
 
 	@Test
-	public void handleOpenTownmanagerInventoryTestWithError() throws TownSystemException {
+	public void handleOpenTownmanagerInventoryTestWithError() throws TownsystemException {
 		Player who = mock(Player.class);
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
 		when(villager.getWorld()).thenReturn(world);
 		when(world.getName()).thenReturn("world");
-		when(townworldManager.getTownWorldByName("world")).thenThrow(TownSystemException.class);
+		when(townworldManager.getTownWorldByName("world")).thenThrow(TownsystemException.class);
 
 		PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(who, villager);
 		assertDoesNotThrow(() -> eventHandler.handleOpenTownmanagerInventory(event));
@@ -245,20 +230,20 @@ public class TownsystemEventHandlerImplTest {
 	}
 
 	@Test
-	public void handleOpenPlotSaleInventoryTestWithError() throws TownSystemException {
+	public void handleOpenPlotSaleInventoryTestWithError() throws TownsystemException {
 		Player who = mock(Player.class);
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
 		when(villager.getWorld()).thenReturn(world);
 		when(world.getName()).thenReturn("world");
-		when(townworldManager.getTownWorldByName("world")).thenThrow(TownSystemException.class);
+		when(townworldManager.getTownWorldByName("world")).thenThrow(TownsystemException.class);
 
 		PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(who, villager);
 		assertDoesNotThrow(() -> eventHandler.handleOpenPlotSaleInventory(event));
 	}
-	
+
 	@Test
-	public void handleInventoryClickTestWithError() throws TownSystemException {
+	public void handleInventoryClickTestWithError() throws TownsystemException {
 		Player player = mock(Player.class);
 		ItemStack currentItem = mock(ItemStack.class);
 		ItemMeta currentItemMeta = mock(ItemMeta.class);
@@ -274,7 +259,8 @@ public class TownsystemEventHandlerImplTest {
 		when(event.getWhoClicked()).thenReturn(player);
 		when(player.getWorld()).thenReturn(world);
 
-		when(townworldManager.getTownWorldByName("world")).thenThrow(TownSystemException.class);
+		when(townworldManager.getTownWorldByName("world"))
+				.thenThrow(new TownsystemException(messageWrapper, ExceptionMessageEnum.ALREADY_EXISTS));
 
 		assertDoesNotThrow(() -> eventHandler.handleInventoryClick(event));
 	}
@@ -446,7 +432,7 @@ public class TownsystemEventHandlerImplTest {
 		assertDoesNotThrow(() -> verify(plot).removeFromSale(ecoPlayer));
 		verify(player).sendMessage(ChatColor.GOLD + "You removed this plot from sale!");
 	}
-	
+
 	@Test
 	public void handleInventoryClickTestPlayerInv() {
 		Player player = mock(Player.class);
@@ -463,9 +449,9 @@ public class TownsystemEventHandlerImplTest {
 		verify(event).setCancelled(true);
 		verify(player, never()).sendMessage(anyString());
 	}
-	
+
 	@Test
-	public void handleInventoryClickWithEcoPlayerError() throws EconomyPlayerException, GeneralEconomyException {
+	public void handleInventoryClickWithEcoPlayerError() throws EconomyPlayerException {
 		Player player = mock(Player.class);
 		ItemStack currentItem = mock(ItemStack.class);
 		ItemMeta currentItemMeta = mock(ItemMeta.class);
@@ -504,13 +490,13 @@ public class TownsystemEventHandlerImplTest {
 		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		doThrow(e).when(ecoPlayerValidationHandler).checkForEnoughMoney(account, 1.5, true);
-		
+
 		eventHandler.handleInventoryClick(event);
 
 		assertDoesNotThrow(() -> verify(town, never()).buyPlot(ecoPlayer, 1, 2));
 		verify(player).sendMessage("my error message");
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@Test
 	public void handlePlayerInteractTestWilderness() {
@@ -521,9 +507,9 @@ public class TownsystemEventHandlerImplTest {
 		Player player = mock(Player.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Chunk chunk = mock(Chunk.class);
-		
+
 		PlayerInteractEvent event = new PlayerInteractEvent(player, null, null, block, null);
-		
+
 		when(block.getLocation()).thenReturn(loc);
 		when(loc.getWorld()).thenReturn(world);
 		when(loc.getChunk()).thenReturn(chunk);
@@ -531,17 +517,17 @@ public class TownsystemEventHandlerImplTest {
 		when(player.getName()).thenReturn("catch441");
 		when(townworld.isChunkFree(chunk)).thenReturn(true);
 		when(player.hasPermission("ultimate_economy.wilderness")).thenReturn(false);
-		
+
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(messageWrapper.getErrorString("wilderness")).thenReturn("my error message");
-		
+
 		eventHandler.handlePlayerInteract(event);
-		
+
 		assertTrue(event.isCancelled());
 		verify(player).sendMessage("my error message");
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@Test
 	public void handlePlayerInteractTestTownWithBuildPermissions() {
@@ -554,9 +540,9 @@ public class TownsystemEventHandlerImplTest {
 		Chunk chunk = mock(Chunk.class);
 		Town town = mock(Town.class);
 		Plot plot = mock(Plot.class);
-		
+
 		PlayerInteractEvent event = new PlayerInteractEvent(player, Action.LEFT_CLICK_BLOCK, null, block, null);
-		
+
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
 		when(block.getLocation()).thenReturn(loc);
@@ -567,18 +553,18 @@ public class TownsystemEventHandlerImplTest {
 		when(townworld.isChunkFree(chunk)).thenReturn(false);
 		when(player.hasPermission("ultimate_economy.towninteract")).thenReturn(false);
 		when(town.hasBuildPermissions(ecoPlayer, plot)).thenReturn(true);
-		
+
 		assertDoesNotThrow(() -> when(town.getPlotByChunk("1/2")).thenReturn(plot));
 		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		
+
 		eventHandler.handlePlayerInteract(event);
-		
+
 		assertFalse(event.isCancelled());
 		verify(player, never()).sendMessage(anyString());
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@Test
 	public void handlePlayerInteractTestTownWithInteractPermissions() {
@@ -590,9 +576,9 @@ public class TownsystemEventHandlerImplTest {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Chunk chunk = mock(Chunk.class);
 		Town town = mock(Town.class);
-		
+
 		PlayerInteractEvent event = new PlayerInteractEvent(player, Action.LEFT_CLICK_BLOCK, null, block, null);
-		
+
 		when(block.getLocation()).thenReturn(loc);
 		when(loc.getWorld()).thenReturn(world);
 		when(loc.getChunk()).thenReturn(chunk);
@@ -600,17 +586,17 @@ public class TownsystemEventHandlerImplTest {
 		when(player.getName()).thenReturn("catch441");
 		when(townworld.isChunkFree(chunk)).thenReturn(false);
 		when(player.hasPermission("ultimate_economy.towninteract")).thenReturn(true);
-		
+
 		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		
+
 		eventHandler.handlePlayerInteract(event);
-		
+
 		assertFalse(event.isCancelled());
 		verify(player, never()).sendMessage(anyString());
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@Test
 	public void handlePlayerInteractTestTownWithExtendedInteractionFalse() {
@@ -623,9 +609,9 @@ public class TownsystemEventHandlerImplTest {
 		Chunk chunk = mock(Chunk.class);
 		Town town = mock(Town.class);
 		Plot plot = mock(Plot.class);
-		
+
 		PlayerInteractEvent event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, null, block, null);
-		
+
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
 		when(block.getLocation()).thenReturn(loc);
@@ -638,18 +624,18 @@ public class TownsystemEventHandlerImplTest {
 		when(town.hasBuildPermissions(ecoPlayer, plot)).thenReturn(true);
 		when(configManager.isExtendedInteraction()).thenReturn(false);
 		when(block.getType()).thenReturn(Material.ACACIA_DOOR);
-		
+
 		assertDoesNotThrow(() -> when(town.getPlotByChunk("1/2")).thenReturn(plot));
 		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		
+
 		eventHandler.handlePlayerInteract(event);
-		
+
 		assertFalse(event.isCancelled());
 		verify(player, never()).sendMessage(anyString());
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@Test
 	public void handlePlayerInteractTestTownWithExtendedInteractionTrue() {
@@ -662,9 +648,9 @@ public class TownsystemEventHandlerImplTest {
 		Chunk chunk = mock(Chunk.class);
 		Town town = mock(Town.class);
 		Plot plot = mock(Plot.class);
-		
+
 		PlayerInteractEvent event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, null, block, null);
-		
+
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
 		when(block.getLocation()).thenReturn(loc);
@@ -677,19 +663,19 @@ public class TownsystemEventHandlerImplTest {
 		when(town.hasBuildPermissions(ecoPlayer, plot)).thenReturn(true);
 		when(configManager.isExtendedInteraction()).thenReturn(true);
 		when(block.getType()).thenReturn(Material.ACACIA_FENCE_GATE);
-		
+
 		assertDoesNotThrow(() -> when(town.getPlotByChunk("1/2")).thenReturn(plot));
 		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(messageWrapper.getErrorString("no_permission_on_plot")).thenReturn("my error message");
-		
+
 		eventHandler.handlePlayerInteract(event);
-		
+
 		assertTrue(event.isCancelled());
 		verify(player).sendMessage("my error message");
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@Test
 	public void handlePlayerInteractTestTownWithExtendedInteractionTrueNoPerms() {
@@ -702,9 +688,9 @@ public class TownsystemEventHandlerImplTest {
 		Chunk chunk = mock(Chunk.class);
 		Town town = mock(Town.class);
 		Plot plot = mock(Plot.class);
-		
+
 		PlayerInteractEvent event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, null, block, null);
-		
+
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
 		when(block.getLocation()).thenReturn(loc);
@@ -716,33 +702,33 @@ public class TownsystemEventHandlerImplTest {
 		when(player.hasPermission("ultimate_economy.towninteract")).thenReturn(false);
 		when(town.hasBuildPermissions(ecoPlayer, plot)).thenReturn(true);
 		when(block.getType()).thenReturn(Material.STONE);
-		
+
 		assertDoesNotThrow(() -> when(town.getPlotByChunk("1/2")).thenReturn(plot));
 		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		
+
 		eventHandler.handlePlayerInteract(event);
-		
+
 		assertFalse(event.isCancelled());
 		verify(player, never()).sendMessage(anyString());
 	}
-	
+
 	@Test
-	public void handlePlayerInteractTestWithError() throws TownSystemException {
+	public void handlePlayerInteractTestWithError() throws TownsystemException {
 		Block block = mock(Block.class);
 		Location loc = mock(Location.class);
 		World world = mock(World.class);
 		Player player = mock(Player.class);
-		
+
 		PlayerInteractEvent event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, null, block, null);
-		
+
 		when(block.getLocation()).thenReturn(loc);
 		when(loc.getWorld()).thenReturn(world);
 		when(world.getName()).thenReturn("world");
-		
-		when(townworldManager.getTownWorldByName("world")).thenThrow(TownSystemException.class);
-		
+
+		when(townworldManager.getTownWorldByName("world")).thenThrow(TownsystemException.class);
+
 		assertDoesNotThrow(() -> eventHandler.handlePlayerInteract(event));
 	}
 }

@@ -34,10 +34,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
+import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.EconomyVillagerType;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.shopsystem.logic.api.Adminshop;
 import org.ue.shopsystem.logic.api.AdminshopManager;
 import org.ue.shopsystem.logic.api.Playershop;
@@ -45,7 +45,7 @@ import org.ue.shopsystem.logic.api.PlayershopManager;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopManager;
 import org.ue.shopsystem.logic.api.RentshopRentGuiHandler;
-import org.ue.shopsystem.logic.ShopSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class ShopEventHandlerImplTest {
@@ -75,9 +75,9 @@ public class ShopEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(playershopManager.getPlayerShopById("P0")).thenReturn(shop));
 		eventHandler.handleOpenInventory(event);
 		assertTrue(event.isCancelled());
-		assertDoesNotThrow(() -> verify(shop).openShopInventory(player));
+		assertDoesNotThrow(() -> verify(shop).openInventory(player));
 	}
-	
+
 	@Test
 	public void handleOpenInventoryTestWithInvalidEconomyVillagerType() {
 		Plugin plugin = mock(Plugin.class);
@@ -96,7 +96,7 @@ public class ShopEventHandlerImplTest {
 	}
 
 	@Test
-	public void handleOpenInventoryTestWithPlayershopNotExists() throws GeneralEconomyException {
+	public void handleOpenInventoryTestWithPlayershopNotExists() throws ShopsystemException {
 		Plugin plugin = mock(Plugin.class);
 		Villager villager = mock(Villager.class);
 		Player player = mock(Player.class);
@@ -105,7 +105,7 @@ public class ShopEventHandlerImplTest {
 		FixedMetadataValue metaDataId = new FixedMetadataValue(plugin, "P0");
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
-		doThrow(GeneralEconomyException.class).when(playershopManager).getPlayerShopById("P0");
+		doThrow(ShopsystemException.class).when(playershopManager).getPlayerShopById("P0");
 		eventHandler.handleOpenInventory(event);
 		assertTrue(event.isCancelled());
 	}
@@ -124,7 +124,7 @@ public class ShopEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopById("A0")).thenReturn(shop));
 		eventHandler.handleOpenInventory(event);
 		assertTrue(event.isCancelled());
-		assertDoesNotThrow(() -> verify(shop).openShopInventory(player));
+		assertDoesNotThrow(() -> verify(shop).openInventory(player));
 	}
 
 	@Test
@@ -160,12 +160,11 @@ public class ShopEventHandlerImplTest {
 		when(shop.isRentable()).thenReturn(false);
 		eventHandler.handleOpenInventory(event);
 		assertTrue(event.isCancelled());
-		assertDoesNotThrow(() -> verify(shop).openShopInventory(player));
+		assertDoesNotThrow(() -> verify(shop).openInventory(player));
 	}
 
 	@Test
-	public void handleInventoryClickTestNoShop()
-			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
+	public void handleInventoryClickTestNoShop() throws ShopsystemException, BankException, EconomyPlayerException {
 		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		Adminshop shop = mock(Adminshop.class);
 		Villager villager = mock(Villager.class);
@@ -204,8 +203,7 @@ public class ShopEventHandlerImplTest {
 	}
 
 	@Test
-	public void handleInventoryClickTestAdminshopLeftClickBuyError()
-			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
+	public void handleInventoryClickTestAdminshopLeftClickBuyError() throws ShopsystemException {
 		Villager villager = mock(Villager.class);
 		Plugin plugin = mock(Plugin.class);
 		Inventory shopInv = mock(Inventory.class);
@@ -216,7 +214,7 @@ public class ShopEventHandlerImplTest {
 		FixedMetadataValue metaData = new FixedMetadataValue(plugin, EconomyVillagerType.ADMINSHOP);
 		when(villager.getMetadata("ue-type")).thenReturn(Arrays.asList(metaData));
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(metaDataId));
-		doThrow(GeneralEconomyException.class).when(adminshopManager).getAdminShopById("A0");
+		doThrow(ShopsystemException.class).when(adminshopManager).getAdminShopById("A0");
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		when(event.getInventory()).thenReturn(shopInv);
 		when(shopInv.getHolder()).thenReturn(villager);
@@ -263,7 +261,7 @@ public class ShopEventHandlerImplTest {
 		verify(player, never()).sendMessage(anyString());
 		verifyNoInteractions(ecoPlayer);
 	}
-	
+
 	@Test
 	public void handleInventoryClickTestAdminshopShiftLeftClick() {
 		Adminshop shop = mock(Adminshop.class);
@@ -507,7 +505,7 @@ public class ShopEventHandlerImplTest {
 		verify(player, never()).sendMessage(anyString());
 		verifyNoInteractions(ecoPlayer);
 	}
-	
+
 	@Test
 	public void handleInventoryClickTestWithInvalidEconomyVillagerType() {
 		Villager villager = mock(Villager.class);
@@ -568,9 +566,9 @@ public class ShopEventHandlerImplTest {
 		when(shopItem.getItemStack()).thenReturn(shopItemStack);
 		when(shopItem.getSlot()).thenReturn(4);
 		when(shop.getSize()).thenReturn(9);
-		
+
 		when(clickedItem.getAmount()).thenReturn(10);
-		
+
 		ItemStack[] contents = new ItemStack[1];
 		contents[0] = clickedItem;
 		when(playerInv.getStorageContents()).thenReturn(contents);
@@ -578,7 +576,7 @@ public class ShopEventHandlerImplTest {
 		when(shopItemStack.clone()).thenReturn(shopItemStackClone);
 		when(clickedItemClone.toString()).thenReturn("itemString");
 		when(shopItemStackClone.toString()).thenReturn("itemString");
-		
+
 		eventHandler.handleInventoryClick(event);
 		verify(event).setCancelled(true);
 		assertDoesNotThrow(() -> verify(shop).sellShopItem(4, 10, ecoPlayer, true));
@@ -617,9 +615,9 @@ public class ShopEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(player.getName()).thenReturn("catch441");
 		when(shopItem.getAmount()).thenReturn(10);
-		
+
 		when(playerInv.getStorageContents()).thenReturn(new ItemStack[1]);
-		
+
 		eventHandler.handleInventoryClick(event);
 		verify(event).setCancelled(true);
 		assertDoesNotThrow(() -> verify(shop, never()).sellShopItem(anyInt(), anyInt(), eq(ecoPlayer), anyBoolean()));
@@ -676,12 +674,12 @@ public class ShopEventHandlerImplTest {
 		contents.add(playerStack);
 		array = contents.toArray(array);
 		when(playerInv.getStorageContents()).thenReturn(array);
-				
+
 		when(shopItemStack.clone()).thenReturn(shopItemStackClone);
 		when(playerStackClone.toString()).thenReturn("itemString");
 		when(playerStack2Clone.toString()).thenReturn("other");
 		when(shopItemStackClone.toString()).thenReturn("itemString");
-		
+
 		eventHandler.handleInventoryClick(event);
 		verify(event).setCancelled(true);
 		assertDoesNotThrow(() -> verify(shop).sellShopItem(4, 6, ecoPlayer, true));
@@ -726,7 +724,7 @@ public class ShopEventHandlerImplTest {
 		when(shopItem.getItemStack()).thenReturn(shopItemStack);
 		when(shopItem.getSlot()).thenReturn(4);
 		when(clickedItem.getAmount()).thenReturn(10);
-		
+
 		ItemStack[] contents = new ItemStack[1];
 		contents[0] = clickedItem;
 		when(playerInv.getStorageContents()).thenReturn(contents);
@@ -734,7 +732,7 @@ public class ShopEventHandlerImplTest {
 		when(shopItemStack.clone()).thenReturn(shopItemStackClone);
 		when(clickedItemClone.toString()).thenReturn("itemString");
 		when(shopItemStackClone.toString()).thenReturn("itemString");
-		
+
 		eventHandler.handleInventoryClick(event);
 		verify(event).setCancelled(true);
 		assertDoesNotThrow(() -> verify(shop).sellShopItem(4, 10, ecoPlayer, true));

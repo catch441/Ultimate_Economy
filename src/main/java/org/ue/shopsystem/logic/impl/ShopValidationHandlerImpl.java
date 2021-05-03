@@ -7,165 +7,158 @@ import javax.inject.Inject;
 
 import org.bukkit.Location;
 import org.bukkit.inventory.Inventory;
+import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.logic.impl.EconomyVillagerValidationHandlerImpl;
+import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.economyplayer.logic.EconomyPlayerExceptionMessageEnum;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
-import org.ue.shopsystem.logic.ShopExceptionMessageEnum;
-import org.ue.shopsystem.logic.ShopSystemException;
 import org.ue.shopsystem.logic.api.Playershop;
-import org.ue.shopsystem.logic.api.ShopItem;
 import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 import org.ue.townsystem.logic.api.Town;
+import org.ue.townsystem.logic.api.TownsystemException;
 import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
-import org.ue.townsystem.logic.TownSystemException;
 
-public class ShopValidationHandlerImpl extends EconomyVillagerValidationHandlerImpl implements ShopValidationHandler {
+public class ShopValidationHandlerImpl extends EconomyVillagerValidationHandlerImpl<ShopsystemException>
+		implements ShopValidationHandler {
 
 	private final ConfigManager configManager;
 	private final TownworldManager townworldManager;
 
 	@Inject
-	public ShopValidationHandlerImpl(MessageWrapper messageWrapper, ConfigManager configManager,
-			TownworldManager townworldManager) {
-		super(messageWrapper);
+	public ShopValidationHandlerImpl(ServerProvider serverProvider, MessageWrapper messageWrapper,
+			ConfigManager configManager, TownworldManager townworldManager) {
+		super(serverProvider, messageWrapper);
 		this.configManager = configManager;
 		this.townworldManager = townworldManager;
 	}
 
 	@Override
-	public void checkForPricesGreaterThenZero(double sellPrice, double buyPrice) throws ShopSystemException {
+	protected ShopsystemException createNew(MessageWrapper messageWrapper, ExceptionMessageEnum key, Object... params) {
+		return new ShopsystemException(messageWrapper, key, params);
+	}
+
+	@Override
+	public void checkForPricesGreaterThenZero(double sellPrice, double buyPrice) throws ShopsystemException {
 		if (buyPrice == 0 && sellPrice == 0) {
-			throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.INVALID_PRICES);
+			throw createNew(messageWrapper, ExceptionMessageEnum.INVALID_PRICES);
 		}
 	}
 
 	@Override
-	public void checkForValidAmount(int amount) throws GeneralEconomyException {
+	public void checkForValidAmount(int amount) throws ShopsystemException {
 		if (amount <= 0 || Integer.valueOf(amount) > 64) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					amount);
+			throw createNew(messageWrapper, ExceptionMessageEnum.INVALID_PARAMETER, amount);
 		}
 	}
 
 	@Override
-	public void checkForItemDoesNotExist(int itemHash, List<ShopItem> itemList) throws ShopSystemException {
-		for (ShopItem item : itemList) {
-			if (item.getItemHash() == itemHash) {
-				throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.ITEM_ALREADY_EXISTS);
-			}
-		}
-	}
-
-	@Override
-	public void checkForItemCanBeDeleted(int slot, int size) throws ShopSystemException {
+	public void checkForItemCanBeDeleted(int slot, int size) throws ShopsystemException {
 		if ((slot + 1) == size) {
-			throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.ITEM_CANNOT_BE_DELETED);
+			throw createNew(messageWrapper, ExceptionMessageEnum.ITEM_CANNOT_BE_DELETED);
 		}
 	}
 
 	@Override
-	public void checkForValidStockDecrease(int entireStock, int stock) throws ShopSystemException {
+	public void checkForValidStockDecrease(int entireStock, int stock) throws ShopsystemException {
 		if ((entireStock - stock) < 0 || entireStock == 0) {
-			throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.ITEM_UNAVAILABLE);
+			throw createNew(messageWrapper, ExceptionMessageEnum.ITEM_UNAVAILABLE);
 		}
 	}
 
 	@Override
 	public void checkForChangeOwnerIsPossible(List<String> uniqueShopNameList, EconomyPlayer newOwner, String shopName)
-			throws ShopSystemException {
+			throws ShopsystemException {
 		if (uniqueShopNameList.contains(shopName + "_" + newOwner.getName())) {
-			throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.SHOP_CHANGEOWNER_ERROR);
+			throw createNew(messageWrapper, ExceptionMessageEnum.SHOP_CHANGEOWNER_ERROR);
 		}
 	}
 
 	@Override
-	public void checkForValidShopName(String name) throws ShopSystemException {
+	public void checkForValidShopName(String name) throws ShopsystemException {
 		if (name.contains("_")) {
-			throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
+			throw createNew(messageWrapper, ExceptionMessageEnum.INVALID_CHAR_IN_SHOP_NAME);
 		}
 	}
 
 	@Override
 	public void checkForShopNameIsFree(List<String> shopNames, String name, EconomyPlayer owner)
-			throws GeneralEconomyException {
+			throws ShopsystemException {
 		String suffix = "";
 		if (owner != null) {
 			suffix = "_" + owner.getName();
 		}
 		if (shopNames.contains(name + suffix)) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS,
-					name + suffix);
+			throw createNew(messageWrapper, ExceptionMessageEnum.ALREADY_EXISTS, name + suffix);
 		}
 	}
 
 	@Override
 	public void checkForPlayerHasPermissionAtLocation(Location location, EconomyPlayer owner)
-			throws EconomyPlayerException, TownSystemException {
-		Townworld townworld = townworldManager.getTownWorldByName(location.getWorld().getName());
-		if (townworld.isChunkFree(location.getChunk())) {
-			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
-		} else {
-			Town town = townworld.getTownByChunk(location.getChunk());
-			if (!town.hasBuildPermissions(owner,
-					town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
-				throw new EconomyPlayerException(messageWrapper,
-						EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
+			throws ShopsystemException {
+		try {
+			Townworld townworld = townworldManager.getTownWorldByName(location.getWorld().getName());
+			if (townworld.isChunkFree(location.getChunk())) {
+				throw createNew(messageWrapper, ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
+			} else {
+				Town town = townworld.getTownByChunk(location.getChunk());
+				if (!town.hasBuildPermissions(owner,
+						town.getPlotByChunk(location.getChunk().getX() + "/" + location.getChunk().getZ()))) {
+					throw createNew(messageWrapper, ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
+				}
 			}
+		} catch (TownsystemException e) {
+			// no townworld or has permission
 		}
 	}
 
 	@Override
-	public void checkForIsRentable(boolean isRentable) throws ShopSystemException {
+	public void checkForIsRentable(boolean isRentable) throws ShopsystemException {
 		if (!isRentable) {
-			throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.ALREADY_RENTED);
+			throw createNew(messageWrapper, ExceptionMessageEnum.ALREADY_RENTED);
 		}
 	}
 
 	@Override
-	public void checkForIsRented(boolean isRentable) throws ShopSystemException {
+	public void checkForIsRented(boolean isRentable) throws ShopsystemException {
 		if (isRentable) {
-			throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.NOT_RENTED);
+			throw createNew(messageWrapper, ExceptionMessageEnum.NOT_RENTED);
 		}
 	}
 
 	@Override
-	public void checkForPlayerIsOnline(EconomyPlayer ecoPlayer) throws EconomyPlayerException {
+	public void checkForPlayerIsOnline(EconomyPlayer ecoPlayer) throws ShopsystemException {
 		if (!ecoPlayer.isOnline()) {
-			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.NOT_ONLINE);
+			throw createNew(messageWrapper, ExceptionMessageEnum.NOT_ONLINE);
 		}
 	}
 
 	@Override
-	public void checkForPlayerInventoryNotFull(Inventory inventory) throws EconomyPlayerException {
+	public void checkForPlayerInventoryNotFull(Inventory inventory) throws ShopsystemException {
 		if (inventory.firstEmpty() == -1) {
-			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.INVENTORY_FULL);
+			throw createNew(messageWrapper, ExceptionMessageEnum.INVENTORY_FULL);
 		}
 	}
 
 	@Override
-	public void checkForShopOwnerHasEnoughMoney(EconomyPlayer ecoPlayer, double money)
-			throws GeneralEconomyException, ShopSystemException {
-		if (!ecoPlayer.hasEnoughtMoney(money)) {
-			throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.SHOPOWNER_NOT_ENOUGH_MONEY);
+	public void checkForShopOwnerHasEnoughMoney(EconomyPlayer ecoPlayer, double money) throws ShopsystemException {
+		if (ecoPlayer.getBankAccount().getAmount() < money) {
+			throw createNew(messageWrapper, ExceptionMessageEnum.SHOPOWNER_NOT_ENOUGH_MONEY);
 		}
 	}
 
 	@Override
-	public void checkForRenamingSavefileIsPossible(File newFile) throws ShopSystemException {
+	public void checkForRenamingSavefileIsPossible(File newFile) throws ShopsystemException {
 		if (newFile.exists()) {
-			throw new ShopSystemException(messageWrapper, ShopExceptionMessageEnum.ERROR_ON_RENAMING);
+			throw createNew(messageWrapper, ExceptionMessageEnum.ERROR_ON_RENAMING);
 		}
 	}
 
 	@Override
 	public void checkForMaxPlayershopsForPlayer(List<Playershop> shopList, EconomyPlayer ecoPlayer)
-			throws EconomyPlayerException {
+			throws ShopsystemException {
 		int actualNumber = 0;
 		for (Playershop shop : shopList) {
 			if (shop.isOwner(ecoPlayer)) {
@@ -173,7 +166,7 @@ public class ShopValidationHandlerImpl extends EconomyVillagerValidationHandlerI
 			}
 		}
 		if (actualNumber >= configManager.getMaxPlayershops()) {
-			throw new EconomyPlayerException(messageWrapper, EconomyPlayerExceptionMessageEnum.MAX_REACHED);
+			throw createNew(messageWrapper, ExceptionMessageEnum.MAX_REACHED);
 		}
 	}
 }

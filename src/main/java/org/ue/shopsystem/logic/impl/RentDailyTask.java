@@ -7,11 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.shopsystem.logic.ShopSystemException;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopManager;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class RentDailyTask extends BukkitRunnable {
 
@@ -51,7 +49,7 @@ public class RentDailyTask extends BukkitRunnable {
 	private void resetShop(Rentshop shop) {
 		try {
 			shop.resetShop();
-		} catch (ShopSystemException | GeneralEconomyException | EconomyPlayerException e) {
+		} catch (ShopsystemException e) {
 			log.warn("[Ultimate_Economy] Error on rent task: reset shop");
 			log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 		}

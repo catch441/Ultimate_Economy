@@ -38,12 +38,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.utils.ServerProvider;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
-import org.ue.economyplayer.logic.EconomyPlayerException;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
+import org.ue.townsystem.logic.api.TownsystemException;
 import org.ue.townsystem.logic.api.TownsystemValidationHandler;
-import org.ue.townsystem.logic.TownSystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class PlotImplTest {
@@ -55,14 +54,42 @@ public class PlotImplTest {
 	@Mock
 	ServerProvider serverProvider;
 
-	private Plot createPlot() {
+	private class Values {
+		Plot plot;
+		Inventory inv;
+		Villager villager;
+		World world;
+		EconomyPlayer owner;
+
+		public Values(Plot plot, Inventory inv, Villager villager, World world, EconomyPlayer owner) {
+			this.plot = plot;
+			this.inv = inv;
+			this.villager = villager;
+			this.world = world;
+			this.owner = owner;
+		}
+	}
+
+	private Values createPlot() {
+		Inventory inv = mock(Inventory.class);
+		ItemStack buyItem = mock(ItemStack.class);
+		ItemStack cancelItem = mock(ItemStack.class);
+		ItemMeta cancelItemMeta = mock(ItemMeta.class);
+		ItemMeta buyItemMeta = mock(ItemMeta.class);
+		when(cancelItem.getItemMeta()).thenReturn(cancelItemMeta);
+		when(buyItem.getItemMeta()).thenReturn(buyItemMeta);
+		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(cancelItem);
+		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(buyItem);
+		when(serverProvider.createInventory(null, 9, "Plot 1/2")).thenReturn(inv);
+
 		Town town = mock(Town.class);
 		when(town.getTownName()).thenReturn("mytown");
 		EconomyPlayer owner = mock(EconomyPlayer.class);
-		return new PlotImpl("1/2", validationHandler, townworldDao, town, owner, serverProvider);
+		Plot plot = new PlotImpl("1/2", validationHandler, townworldDao, town, owner, serverProvider);
+		return new Values(plot, inv, null, null, owner);
 	}
 
-	private Plot createPlotForSale() {
+	private Values createPlotForSale() {
 		Town town = mock(Town.class);
 		EconomyPlayer owner = mock(EconomyPlayer.class);
 		EconomyPlayer resident = mock(EconomyPlayer.class);
@@ -85,24 +112,35 @@ public class PlotImplTest {
 		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
-		when(duplicated.getName()).thenReturn("Plot 1/2 For Sale!");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
 		when(loc.getWorld()).thenReturn(world);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(chunk.getX()).thenReturn(1);
-		when(chunk.getZ()).thenReturn(2);
 		when(town.getTownName()).thenReturn("mytown");
-		assertDoesNotThrow(() -> when(townworldDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
+		when(townworldDao.loadVisible("Towns.mytown.Plots.1/2.SaleVillager")).thenReturn(true);
 		when(townworldDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
 		when(townworldDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
 		when(townworldDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
+		when(townworldDao.loadLocation("Towns.mytown.Plots.1/2.SaleVillager")).thenReturn(loc);
+		when(townworldDao.loadSize("Towns.mytown.Plots.1/2.SaleVillager")).thenReturn(9);
 		assertDoesNotThrow(() -> when(townworldDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
-		return assertDoesNotThrow(
+		Plot plot = assertDoesNotThrow(
 				() -> new PlotImpl("1/2", validationHandler, townworldDao, town, serverProvider));
+		return new Values(plot, inv, villager, world, owner);
 	}
 
 	@Test
 	public void constructorNewTest() {
+		Inventory inv = mock(Inventory.class);
+		ItemStack buyItem = mock(ItemStack.class);
+		ItemStack cancelItem = mock(ItemStack.class);
+		ItemMeta cancelItemMeta = mock(ItemMeta.class);
+		ItemMeta buyItemMeta = mock(ItemMeta.class);
+		when(cancelItem.getItemMeta()).thenReturn(cancelItemMeta);
+		when(buyItem.getItemMeta()).thenReturn(buyItemMeta);
+		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(cancelItem);
+		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(buyItem);
+		when(serverProvider.createInventory(null, 9, "Plot 1/2")).thenReturn(inv);
+
 		Town town = mock(Town.class);
 		when(town.getTownName()).thenReturn("mytown");
 		EconomyPlayer owner = mock(EconomyPlayer.class);
@@ -145,14 +183,15 @@ public class PlotImplTest {
 		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
-		when(duplicated.getName()).thenReturn("Plot 1/2 For Sale!");
+		when(duplicated.getCustomName()).thenReturn("Plot 1/2");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
 		when(loc.getWorld()).thenReturn(world);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(chunk.getX()).thenReturn(1);
-		when(chunk.getZ()).thenReturn(2);
 		when(town.getTownName()).thenReturn("mytown");
-		assertDoesNotThrow(() -> when(townworldDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
+		when(townworldDao.loadProfession("Towns.mytown.Plots.1/2.SaleVillager")).thenReturn(Profession.ARMORER);
+		when(townworldDao.loadLocation("Towns.mytown.Plots.1/2.SaleVillager")).thenReturn(loc);
+		when(townworldDao.loadVisible("Towns.mytown.Plots.1/2.SaleVillager")).thenReturn(true);
+		when(townworldDao.loadSize("Towns.mytown.Plots.1/2.SaleVillager")).thenReturn(9);
 		when(townworldDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
 		when(townworldDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
 		when(townworldDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
@@ -179,9 +218,9 @@ public class PlotImplTest {
 		verify(cancelItem).setItemMeta(cancelItemMeta);
 		verify(inv).setItem(8, cancelItem);
 
-		verify(villager).setCustomName("Plot 1/2 For Sale!");
+		verify(villager).setCustomName("Plot 1/2");
 		verify(villager).setCustomNameVisible(true);
-		verify(villager).setProfession(Profession.NITWIT);
+		verify(villager).setProfession(Profession.ARMORER);
 		verify(villager).setSilent(true);
 		verify(villager).setInvulnerable(true);
 		verify(villager).setCollidable(false);
@@ -191,320 +230,182 @@ public class PlotImplTest {
 
 	@Test
 	public void despawnSaleVillagerTestNotForSale() {
-		Plot plot = createPlot();
-		assertDoesNotThrow(() -> plot.despawnSaleVillager());
+		Values values = createPlot();
+		assertDoesNotThrow(() -> values.plot.despawn());
 	}
 
 	@Test
 	public void despawnSaleVillagerTestForSale() {
-		Town town = mock(Town.class);
-		EconomyPlayer owner = mock(EconomyPlayer.class);
-		EconomyPlayer resident = mock(EconomyPlayer.class);
-		Location loc = mock(Location.class);
-		Chunk chunk = mock(Chunk.class);
-		World world = mock(World.class);
-		Villager duplicated = mock(Villager.class);
-		Villager villager = mock(Villager.class);
-		JavaPlugin plugin = mock(JavaPlugin.class);
-		Inventory inv = mock(Inventory.class);
-		ItemStack buyItem = mock(ItemStack.class);
-		ItemStack cancelItem = mock(ItemStack.class);
-		ItemMeta cancelItemMeta = mock(ItemMeta.class);
-		ItemMeta buyItemMeta = mock(ItemMeta.class);
-		when(owner.getName()).thenReturn("catch441");
-		when(cancelItem.getItemMeta()).thenReturn(cancelItemMeta);
-		when(buyItem.getItemMeta()).thenReturn(buyItemMeta);
-		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(cancelItem);
-		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(buyItem);
-		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
-		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
-		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
-		when(duplicated.getName()).thenReturn("Plot 1/2 For Sale!");
-		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
-		when(loc.getWorld()).thenReturn(world);
-		when(loc.getChunk()).thenReturn(chunk);
-		when(chunk.getX()).thenReturn(1);
-		when(chunk.getZ()).thenReturn(2);
-		when(town.getTownName()).thenReturn("mytown");
-		assertDoesNotThrow(() -> when(townworldDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
-		when(townworldDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
-		when(townworldDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
-		when(townworldDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
-		assertDoesNotThrow(() -> when(townworldDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
-		Plot plot = assertDoesNotThrow(
-				() -> new PlotImpl("1/2", validationHandler, townworldDao, town, serverProvider));
+		Values values = createPlotForSale();
 
-		plot.despawnSaleVillager();
-		verify(villager).remove();
+		values.plot.despawn();
+		verify(values.villager).remove();
 	}
 
 	@Test
-	public void moveSaleVillagerTestWithNotForSale() throws TownSystemException {
-		doThrow(TownSystemException.class).when(validationHandler).checkForPlotIsForSale(false);
-		Plot plot = createPlot();
-		assertThrows(TownSystemException.class, () -> plot.moveSaleVillager(null));
+	public void moveSaleVillagerTestWithNotForSale() throws TownsystemException {
+		doThrow(TownsystemException.class).when(validationHandler).checkForPlotIsForSale(false);
+		Values values = createPlot();
+		assertThrows(TownsystemException.class, () -> values.plot.changeLocation(null));
 	}
 
 	@Test
-	public void moveSaleVillagerTestWithLocationNotInPlot() throws EconomyPlayerException {
+	public void moveSaleVillagerTestWithLocationNotInPlot() throws TownsystemException {
 		Location loc = mock(Location.class);
-		doThrow(EconomyPlayerException.class).when(validationHandler).checkForLocationInsidePlot("1/2", loc);
-		Plot plot = createPlot();
-		assertThrows(EconomyPlayerException.class, () -> plot.moveSaleVillager(loc));
+		doThrow(TownsystemException.class).when(validationHandler).checkForLocationInsidePlot("1/2", loc);
+		Values values = createPlot();
+		assertThrows(TownsystemException.class, () -> values.plot.changeLocation(loc));
 	}
 
 	@Test
 	public void moveSaleVillagerTest() {
-		Town town = mock(Town.class);
-		EconomyPlayer owner = mock(EconomyPlayer.class);
-		EconomyPlayer resident = mock(EconomyPlayer.class);
-		Location loc = mock(Location.class);
-		Chunk chunk = mock(Chunk.class);
-		World world = mock(World.class);
-		Villager villager = mock(Villager.class);
-		JavaPlugin plugin = mock(JavaPlugin.class);
-		Inventory inv = mock(Inventory.class);
-		ItemStack buyItem = mock(ItemStack.class);
-		ItemStack cancelItem = mock(ItemStack.class);
-		ItemMeta cancelItemMeta = mock(ItemMeta.class);
-		ItemMeta buyItemMeta = mock(ItemMeta.class);
-		when(owner.getName()).thenReturn("catch441");
-		when(cancelItem.getItemMeta()).thenReturn(cancelItemMeta);
-		when(buyItem.getItemMeta()).thenReturn(buyItemMeta);
-		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(cancelItem);
-		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(buyItem);
-		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
-		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
-		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
-		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(new ArrayList<>());
-		when(loc.getWorld()).thenReturn(world);
-		when(loc.getChunk()).thenReturn(chunk);
-		when(chunk.getX()).thenReturn(1);
-		when(chunk.getZ()).thenReturn(2);
-		when(town.getTownName()).thenReturn("mytown");
-		assertDoesNotThrow(() -> when(townworldDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
-		when(townworldDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
-		when(townworldDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
-		when(townworldDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
-		assertDoesNotThrow(() -> when(townworldDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
-		Plot plot = assertDoesNotThrow(
-				() -> new PlotImpl("1/2", validationHandler, townworldDao, town, serverProvider));
+		Values values = createPlotForSale();
+
 		Location newLoc = mock(Location.class);
 
-		assertDoesNotThrow(() -> plot.moveSaleVillager(newLoc));
+		assertDoesNotThrow(() -> values.plot.changeLocation(newLoc));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlotIsForSale(true));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForLocationInsidePlot("1/2", newLoc));
-		verify(townworldDao).savePlotVillagerLocation("mytown", "1/2", newLoc);
-		verify(villager).teleport(newLoc);
+		verify(townworldDao).saveLocation("Towns.mytown.Plots.1/2.SaleVillager", newLoc);
+		verify(values.villager).teleport(newLoc);
 	}
 
 	@Test
-	public void openSaleVillagerInvTestWithNotForSale() throws TownSystemException {
-		doThrow(TownSystemException.class).when(validationHandler).checkForPlotIsForSale(false);
-		Plot plot = createPlot();
-		assertThrows(TownSystemException.class, () -> plot.openSaleVillagerInv(null));
+	public void openSaleVillagerInvTestWithNotForSale() throws TownsystemException {
+		doThrow(TownsystemException.class).when(validationHandler).checkForPlotIsForSale(false);
+		Values values = createPlot();
+		assertThrows(TownsystemException.class, () -> values.plot.openInventory(null));
 	}
 
 	@Test
 	public void openSaleVillagerInvTest() {
-		Town town = mock(Town.class);
-		EconomyPlayer owner = mock(EconomyPlayer.class);
-		EconomyPlayer resident = mock(EconomyPlayer.class);
-		Location loc = mock(Location.class);
-		Chunk chunk = mock(Chunk.class);
-		World world = mock(World.class);
-		Villager duplicated = mock(Villager.class);
-		Villager villager = mock(Villager.class);
-		JavaPlugin plugin = mock(JavaPlugin.class);
-		Inventory inv = mock(Inventory.class);
-		ItemStack buyItem = mock(ItemStack.class);
-		ItemStack cancelItem = mock(ItemStack.class);
-		ItemMeta cancelItemMeta = mock(ItemMeta.class);
-		ItemMeta buyItemMeta = mock(ItemMeta.class);
-		when(owner.getName()).thenReturn("catch441");
-		when(cancelItem.getItemMeta()).thenReturn(cancelItemMeta);
-		when(buyItem.getItemMeta()).thenReturn(buyItemMeta);
-		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(cancelItem);
-		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(buyItem);
-		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
-		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
-		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
-		when(duplicated.getName()).thenReturn("Plot 1/2 For Sale!");
-		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
-		when(loc.getWorld()).thenReturn(world);
-		when(loc.getChunk()).thenReturn(chunk);
-		when(chunk.getX()).thenReturn(1);
-		when(chunk.getZ()).thenReturn(2);
-		when(town.getTownName()).thenReturn("mytown");
-		assertDoesNotThrow(() -> when(townworldDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
-		when(townworldDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
-		when(townworldDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
-		when(townworldDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
-		assertDoesNotThrow(() -> when(townworldDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
-		Plot plot = assertDoesNotThrow(
-				() -> new PlotImpl("1/2", validationHandler, townworldDao, town, serverProvider));
+		Values values = createPlotForSale();
 
 		Player player = mock(Player.class);
-		assertDoesNotThrow(() -> plot.openSaleVillagerInv(player));
-		verify(player).openInventory(inv);
+		assertDoesNotThrow(() -> values.plot.openInventory(player));
+		verify(player).openInventory(values.inv);
 	}
 
 	@Test
 	public void getOwnerTest() {
-		Town town = mock(Town.class);
-		when(town.getTownName()).thenReturn("mytown");
-		EconomyPlayer owner = mock(EconomyPlayer.class);
-		Plot plot = new PlotImpl("1/2", validationHandler, townworldDao, town, owner, serverProvider);
-		assertEquals(owner, plot.getOwner());
+		Values values = createPlot();
+		assertEquals(values.owner, values.plot.getOwner());
 	}
 
 	@Test
 	public void setOwner() {
-		Plot plot = createPlot();
+		Values values = createPlot();
 		EconomyPlayer newOwner = mock(EconomyPlayer.class);
-		plot.setOwner(newOwner);
+		values.plot.setOwner(newOwner);
 		verify(townworldDao).savePlotOwner("mytown", "1/2", newOwner);
-		assertEquals(newOwner, plot.getOwner());
+		assertEquals(newOwner, values.plot.getOwner());
 	}
 
 	@Test
-	public void addResidentTestWithIsAlreadyResident() throws TownSystemException {
-		Plot plot = createPlot();
+	public void addResidentTestWithIsAlreadyResident() throws TownsystemException {
+		Values values = createPlot();
 		EconomyPlayer newResident = mock(EconomyPlayer.class);
-		doThrow(TownSystemException.class).when(validationHandler).checkForPlayerIsNotResidentOfPlot(new ArrayList<>(),
+		doThrow(TownsystemException.class).when(validationHandler).checkForPlayerIsNotResidentOfPlot(new ArrayList<>(),
 				newResident);
-		assertThrows(TownSystemException.class, () -> plot.addResident(newResident));
-		assertEquals(0, plot.getResidents().size());
+		assertThrows(TownsystemException.class, () -> values.plot.addResident(newResident));
+		assertEquals(0, values.plot.getResidents().size());
 	}
 
 	@Test
 	public void addResidentTest() {
-		Plot plot = createPlot();
+		Values values = createPlot();
 		reset(townworldDao);
 		EconomyPlayer newResident = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> plot.addResident(newResident));
-		assertEquals(Arrays.asList(newResident), plot.getResidents());
+		assertDoesNotThrow(() -> values.plot.addResident(newResident));
+		assertEquals(Arrays.asList(newResident), values.plot.getResidents());
 		verify(townworldDao).savePlotResidents("mytown", "1/2", Arrays.asList(newResident));
 	}
 
 	@Test
-	public void removeResidentTestWithIsNotResident() throws TownSystemException {
-		Plot plot = createPlot();
+	public void removeResidentTestWithIsNotResident() throws TownsystemException {
+		Values values = createPlot();
 		EconomyPlayer newResident = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> plot.addResident(newResident));
-		doThrow(TownSystemException.class).when(validationHandler)
+		assertDoesNotThrow(() -> values.plot.addResident(newResident));
+		doThrow(TownsystemException.class).when(validationHandler)
 				.checkForPlayerIsResidentOfPlot(Arrays.asList(newResident), newResident);
-		assertThrows(TownSystemException.class, () -> plot.removeResident(newResident));
-		assertEquals(1, plot.getResidents().size());
+		assertThrows(TownsystemException.class, () -> values.plot.removeResident(newResident));
+		assertEquals(1, values.plot.getResidents().size());
 	}
 
 	@Test
-	public void removeResidentTest() throws TownSystemException {
-		Plot plot = createPlot();
+	public void removeResidentTest() throws TownsystemException {
+		Values values = createPlot();
 		EconomyPlayer newResident = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> plot.addResident(newResident));
+		assertDoesNotThrow(() -> values.plot.addResident(newResident));
 		reset(townworldDao);
-		plot.removeResident(newResident);
+		values.plot.removeResident(newResident);
 		verify(validationHandler).checkForPlayerIsResidentOfPlot(anyList(), eq(newResident));
-		assertEquals(0, plot.getResidents().size());
+		assertEquals(0, values.plot.getResidents().size());
 		verify(townworldDao).savePlotResidents("mytown", "1/2", new ArrayList<>());
 	}
 
 	@Test
 	public void isOwnerTest() {
-		Plot plot = createPlot();
+		Values values = createPlot();
 		EconomyPlayer other = mock(EconomyPlayer.class);
-		assertTrue(plot.isOwner(plot.getOwner()));
-		assertFalse(plot.isOwner(other));
+		assertTrue(values.plot.isOwner(values.plot.getOwner()));
+		assertFalse(values.plot.isOwner(other));
 	}
 
 	@Test
 	public void isResidentTest() {
-		Plot plot = createPlot();
+		Values values = createPlot();
 		EconomyPlayer resident = mock(EconomyPlayer.class);
 		EconomyPlayer other = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> plot.addResident(resident));
-		assertTrue(plot.isResident(plot.getResidents().get(0)));
-		assertFalse(plot.isResident(other));
+		assertDoesNotThrow(() -> values.plot.addResident(resident));
+		assertTrue(values.plot.isResident(values.plot.getResidents().get(0)));
+		assertFalse(values.plot.isResident(other));
 	}
 
 	@Test
-	public void removeFromSaleTestWithIsNotPlotOwner() throws EconomyPlayerException {
-		Plot plot = createPlotForSale();
+	public void removeFromSaleTestWithIsNotPlotOwner() throws TownsystemException {
+		Values values = createPlotForSale();
 		EconomyPlayer notOwner = mock(EconomyPlayer.class);
-		doThrow(EconomyPlayerException.class).when(validationHandler).checkForIsPlotOwner(plot.getOwner(), notOwner);
-		assertThrows(EconomyPlayerException.class, () -> plot.removeFromSale(notOwner));
+		doThrow(TownsystemException.class).when(validationHandler).checkForIsPlotOwner(values.plot.getOwner(),
+				notOwner);
+		assertThrows(TownsystemException.class, () -> values.plot.removeFromSale(notOwner));
 	}
-	
+
 	@Test
 	public void removeFromSaleTes() {
-		Town town = mock(Town.class);
-		EconomyPlayer owner = mock(EconomyPlayer.class);
-		EconomyPlayer resident = mock(EconomyPlayer.class);
-		Location loc = mock(Location.class);
-		Chunk chunk = mock(Chunk.class);
-		World world = mock(World.class);
-		Villager duplicated = mock(Villager.class);
-		Villager villager = mock(Villager.class);
-		JavaPlugin plugin = mock(JavaPlugin.class);
-		Inventory inv = mock(Inventory.class);
-		ItemStack buyItem = mock(ItemStack.class);
-		ItemStack cancelItem = mock(ItemStack.class);
-		ItemMeta cancelItemMeta = mock(ItemMeta.class);
-		ItemMeta buyItemMeta = mock(ItemMeta.class);
-		when(villager.getLocation()).thenReturn(loc);
-		when(owner.getName()).thenReturn("catch441");
-		when(cancelItem.getItemMeta()).thenReturn(cancelItemMeta);
-		when(buyItem.getItemMeta()).thenReturn(buyItemMeta);
-		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(cancelItem);
-		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(buyItem);
-		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
-		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
-		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
-		when(duplicated.getName()).thenReturn("Plot 1/2 For Sale!");
-		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
-		when(loc.getWorld()).thenReturn(world);
-		when(loc.getChunk()).thenReturn(chunk);
-		when(chunk.getX()).thenReturn(1);
-		when(chunk.getZ()).thenReturn(2);
-		when(town.getTownName()).thenReturn("mytown");
-		assertDoesNotThrow(() -> when(townworldDao.loadPlotVillagerLocation("mytown", "1/2")).thenReturn(loc));
-		when(townworldDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
-		when(townworldDao.loadResidents("mytown", "1/2")).thenReturn(Arrays.asList(resident));
-		when(townworldDao.loadPlotIsForSale("mytown", "1/2")).thenReturn(true);
-		assertDoesNotThrow(() -> when(townworldDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
-		Plot plot = assertDoesNotThrow(
-				() -> new PlotImpl("1/2", validationHandler, townworldDao, town, serverProvider));
-		
-		assertDoesNotThrow(() -> plot.removeFromSale(plot.getOwner()));
-		
-		assertDoesNotThrow(() -> verify(validationHandler).checkForIsPlotOwner(plot.getOwner(), plot.getOwner()));
-		assertFalse(plot.isForSale());
-		verify(villager).remove();
-		verify(world).save();
-		assertEquals("0.0", String.valueOf(plot.getSalePrice()));
+		Values values = createPlotForSale();
+
+		assertDoesNotThrow(() -> values.plot.removeFromSale(values.plot.getOwner()));
+
+		assertDoesNotThrow(
+				() -> verify(validationHandler).checkForIsPlotOwner(values.plot.getOwner(), values.plot.getOwner()));
+		assertFalse(values.plot.isForSale());
+		verify(values.villager).remove();
+		verify(values.world).save();
+		assertEquals("0.0", String.valueOf(values.plot.getSalePrice()));
 		verify(townworldDao).savePlotSalePrice("mytown", "1/2", 0.0);
 		verify(townworldDao).savePlotIsForSale("mytown", "1/2", false);
 	}
-	
+
 	@Test
-	public void setForSaleTestWithIsNotPlotOwner() throws EconomyPlayerException {
-		Plot plot = createPlotForSale();
+	public void setForSaleTestWithIsNotPlotOwner() throws TownsystemException {
+		Values values = createPlotForSale();
 		EconomyPlayer notOwner = mock(EconomyPlayer.class);
-		doThrow(EconomyPlayerException.class).when(validationHandler).checkForIsPlotOwner(plot.getOwner(), notOwner);
-		assertThrows(EconomyPlayerException.class, () -> plot.setForSale(1.0, null, notOwner));
+		doThrow(TownsystemException.class).when(validationHandler).checkForIsPlotOwner(values.plot.getOwner(),
+				notOwner);
+		assertThrows(TownsystemException.class, () -> values.plot.setForSale(1.0, null, notOwner));
 	}
-	
+
 	@Test
-	public void setForSaleTestWithAlreadyForSale() throws TownSystemException {
-		Plot plot = createPlotForSale();
-		doThrow(TownSystemException.class).when(validationHandler).checkForPlotIsNotForSale(true);
-		assertThrows(TownSystemException.class, () -> plot.setForSale(1.0, null, plot.getOwner()));
+	public void setForSaleTestWithAlreadyForSale() throws TownsystemException {
+		Values values = createPlotForSale();
+		doThrow(TownsystemException.class).when(validationHandler).checkForPlotIsNotForSale(true);
+		assertThrows(TownsystemException.class, () -> values.plot.setForSale(1.0, null, values.plot.getOwner()));
 	}
-	
+
 	@Test
 	public void setForSaleTest() {
-		Plot plot = createPlot();
+		Values values = createPlot();
 		Location loc = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
 		World world = mock(World.class);
@@ -513,40 +414,26 @@ public class PlotImplTest {
 		JavaPlugin plugin = mock(JavaPlugin.class);
 		Inventory inv = mock(Inventory.class);
 		ItemStack buyItem = mock(ItemStack.class);
-		ItemStack cancelItem = mock(ItemStack.class);
-		ItemMeta cancelItemMeta = mock(ItemMeta.class);
 		ItemMeta buyItemMeta = mock(ItemMeta.class);
-		when(plot.getOwner().getName()).thenReturn("catch441");
-		when(cancelItem.getItemMeta()).thenReturn(cancelItemMeta);
 		when(buyItem.getItemMeta()).thenReturn(buyItemMeta);
-		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(cancelItem);
-		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(buyItem);
+		when(buyItemMeta.getLore()).thenReturn(Arrays.asList("test1", "test2"));
+		when(values.inv.getItem(0)).thenReturn(buyItem);
 		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
-		when(duplicated.getName()).thenReturn("Plot 1/2 For Sale!");
+		when(duplicated.getCustomName()).thenReturn("Plot 1/2");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
 		when(loc.getWorld()).thenReturn(world);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(chunk.getX()).thenReturn(1);
-		when(chunk.getZ()).thenReturn(2);
-		when(villager.getLocation()).thenReturn(loc);
-		assertDoesNotThrow(() -> plot.setForSale(1.5, loc, plot.getOwner()));
-		
+		assertDoesNotThrow(() -> values.plot.setForSale(1.5, loc, values.plot.getOwner()));
+
 		verify(chunk).load();
 		verify(duplicated).remove();
-		verify(buyItemMeta).setDisplayName("Buy");
-		verify(buyItemMeta).setLore(Arrays.asList(ChatColor.GOLD + "Price: " + ChatColor.GREEN + "1.5",
-				ChatColor.GOLD + "Is sold by " + ChatColor.GREEN + "catch441"));
+		verify(buyItemMeta).setLore(Arrays.asList(ChatColor.GOLD + "Price: " + ChatColor.GREEN + "1.5", "test2"));
 		verify(buyItem).setItemMeta(buyItemMeta);
-		verify(inv).setItem(0, buyItem);
+		verify(values.inv).setItem(0, buyItem);
 
-		verify(cancelItemMeta).setDisplayName("Cancel Sale");
-		verify(cancelItemMeta).setLore(Arrays.asList(ChatColor.RED + "Only for plot owner!"));
-		verify(cancelItem).setItemMeta(cancelItemMeta);
-		verify(inv).setItem(8, cancelItem);
-
-		verify(villager).setCustomName("Plot 1/2 For Sale!");
+		verify(villager).setCustomName("Plot 1/2");
 		verify(villager).setCustomNameVisible(true);
 		verify(villager).setProfession(Profession.NITWIT);
 		verify(villager).setSilent(true);
@@ -554,13 +441,14 @@ public class PlotImplTest {
 		verify(villager).setCollidable(false);
 		verify(villager).setMetadata(eq("ue-type"), any(FixedMetadataValue.class));
 		verify(villager).addPotionEffect(any(PotionEffect.class));
-		
-		assertTrue(plot.isForSale());
-		assertEquals("1.5", String.valueOf(plot.getSalePrice()));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForIsPlotOwner(plot.getOwner(), plot.getOwner()));
+
+		assertTrue(values.plot.isForSale());
+		assertEquals("1.5", String.valueOf(values.plot.getSalePrice()));
+		assertDoesNotThrow(
+				() -> verify(validationHandler).checkForIsPlotOwner(values.plot.getOwner(), values.plot.getOwner()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPlotIsNotForSale(false));
 		verify(townworldDao).savePlotSalePrice("mytown", "1/2", 1.5);
 		verify(townworldDao).savePlotIsForSale("mytown", "1/2", true);
-		verify(townworldDao).savePlotVillagerLocation("mytown", "1/2", loc);
+		verify(townworldDao).saveLocation("Towns.mytown.Plots.1/2.SaleVillager", loc);
 	}
 }

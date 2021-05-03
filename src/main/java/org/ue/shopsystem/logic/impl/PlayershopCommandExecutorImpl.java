@@ -9,13 +9,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.shopsystem.logic.PlayershopCommandEnum;
-import org.ue.shopsystem.logic.ShopSystemException;
+import org.ue.shopsystem.logic.api.PlayershopCommandEnum;
 import org.ue.shopsystem.logic.api.PlayershopManager;
-import org.ue.townsystem.logic.TownSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class PlayershopCommandExecutorImpl implements CommandExecutor {
 
@@ -40,7 +38,7 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 					return performCommand(label, args, player);
 				}
 				return false;
-			} catch (TownSystemException | EconomyPlayerException | ShopSystemException | GeneralEconomyException e) {
+			} catch (EconomyPlayerException | ShopsystemException e) {
 				player.sendMessage(e.getMessage());
 			} catch (IllegalArgumentException e) {
 				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[2]));
@@ -49,8 +47,8 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performCommand(String label, String[] args, Player player) throws NumberFormatException,
-			ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
+	private boolean performCommand(String label, String[] args, Player player)
+			throws IllegalArgumentException, ShopsystemException, EconomyPlayerException {
 		switch (PlayershopCommandEnum.getEnum(args[0])) {
 		case CHANGEOWNER:
 			return performChangeOwnerCommand(label, args, player);
@@ -75,8 +73,8 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 		}
 	}
 
-	private boolean performCreateCommand(String label, String[] args, Player player) throws NumberFormatException,
-			ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
+	private boolean performCreateCommand(String label, String[] args, Player player)
+			throws NumberFormatException, ShopsystemException, EconomyPlayerException {
 		if (args.length == 3) {
 			playershopManager.createPlayerShop(args[1], player.getLocation(), Integer.valueOf(args[2]),
 					ecoPlayerManager.getEconomyPlayerByName(player.getName()));
@@ -87,7 +85,7 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performDeleteCommand(String label, String[] args, Player player) throws GeneralEconomyException {
+	private boolean performDeleteCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 2) {
 			playershopManager
 					.deletePlayerShop(playershopManager.getPlayerShopByUniqueName(args[1] + "_" + player.getName()));
@@ -98,8 +96,7 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performDeleteOtherCommand(String label, String[] args, Player player)
-			throws GeneralEconomyException {
+	private boolean performDeleteOtherCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (player.hasPermission("ultimate_economy.adminshop")) {
 			if (args.length == 2) {
 				playershopManager.deletePlayerShop(playershopManager.getPlayerShopByUniqueName(args[1]));
@@ -111,8 +108,7 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performRenameCommand(String label, String[] args, Player player)
-			throws ShopSystemException, GeneralEconomyException {
+	private boolean performRenameCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 3) {
 			playershopManager.getPlayerShopByUniqueName(args[1] + "_" + player.getName()).changeShopName(args[2]);
 			player.sendMessage(messageWrapper.getString("shop_rename", args[1], args[2]));
@@ -123,7 +119,7 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performResizeCommand(String label, String[] args, Player player)
-			throws NumberFormatException, ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+			throws NumberFormatException, ShopsystemException {
 		if (args.length == 3) {
 			playershopManager.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
 					.changeSize(Integer.valueOf(args[2]));
@@ -134,8 +130,7 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performMoveCommand(String label, String[] args, Player player)
-			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
+	private boolean performMoveCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 2) {
 			playershopManager.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
 					.changeLocation(player.getLocation());
@@ -146,7 +141,7 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performChangeOwnerCommand(String label, String[] args, Player player)
-			throws EconomyPlayerException, ShopSystemException, GeneralEconomyException {
+			throws EconomyPlayerException, ShopsystemException {
 		if (args.length == 3) {
 			EconomyPlayer newOwner = ecoPlayerManager.getEconomyPlayerByName(args[2]);
 			playershopManager.getPlayerShopByUniqueName(args[1] + "_" + player.getName()).changeOwner(newOwner);
@@ -162,7 +157,7 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performChangeProfessionCommand(String label, String[] args, Player player)
-			throws GeneralEconomyException {
+			throws ShopsystemException, IllegalArgumentException {
 		if (args.length == 3) {
 			playershopManager.getPlayerShopByUniqueName(args[1] + "_" + player.getName())
 					.changeProfession(Profession.valueOf(args[2].toUpperCase()));
@@ -173,8 +168,7 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performEditShopCommand(String label, String[] args, Player player)
-			throws ShopSystemException, GeneralEconomyException {
+	private boolean performEditShopCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 2) {
 			playershopManager.getPlayerShopByUniqueName(args[1] + "_" + player.getName()).openEditor(player);
 		} else {

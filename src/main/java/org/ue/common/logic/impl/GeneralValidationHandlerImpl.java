@@ -2,86 +2,91 @@ package org.ue.common.logic.impl;
 
 import java.util.List;
 
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.api.MessageWrapper;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
 
-public class GeneralValidationHandlerImpl implements GeneralValidationHandler {
+public abstract class GeneralValidationHandlerImpl<T extends GeneralEconomyException>
+		implements GeneralValidationHandler<T> {
 
 	protected final MessageWrapper messageWrapper;
 
 	public GeneralValidationHandlerImpl(MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
+
 	}
 
+	protected abstract T createNew(MessageWrapper messageWrapper, ExceptionMessageEnum key, Object... params);
+
 	@Override
-	public <T extends Enum<T>> void checkForValidEnum(Enum<? extends T>[] enumList, String value)
-			throws GeneralEconomyException {
+	public <S extends Enum<S>> void checkForValidEnum(Enum<? extends S>[] enumList, String value) throws T {
 		boolean valid = false;
 		value = value.toUpperCase();
-		for (Enum<? extends T> enumValue : enumList) {
+		for (Enum<? extends S> enumValue : enumList) {
 			if (enumValue.name().equals(value)) {
 				valid = true;
 			}
 		}
 		if (!valid) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					value);
+			throw createNew(messageWrapper, ExceptionMessageEnum.INVALID_PARAMETER, value.toLowerCase());
+		}
+	}
+	
+	@Override
+	public void checkForNotReachedMax(boolean reachedMax) throws T {
+		if (reachedMax) {
+			throw createNew(messageWrapper, ExceptionMessageEnum.MAX_REACHED);
 		}
 	}
 
 	@Override
-	public void checkForPositiveValue(double value) throws GeneralEconomyException {
+	public void checkForPositiveValue(Double value) throws T {
 		if (value < 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					value);
+			throw createNew(messageWrapper, ExceptionMessageEnum.INVALID_PARAMETER, value);
 		}
 	}
 
 	@Override
-	public void checkForValueGreaterZero(double value) throws GeneralEconomyException {
+	public void checkForValueGreaterZero(double value) throws T {
 		if (value <= 0) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					value);
+			throw createNew(messageWrapper, ExceptionMessageEnum.INVALID_PARAMETER, value);
 		}
 	}
 
 	@Override
-	public <T> void checkForValueNotInList(List<T> list, T value) throws GeneralEconomyException {
+	public <S> void checkForValueNotInList(List<S> list, S value) throws T {
 		if (list.contains(value)) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.ALREADY_EXISTS, value.toString().toLowerCase());
+			throw createNew(messageWrapper, ExceptionMessageEnum.ALREADY_EXISTS, value.toString().toLowerCase());
 		}
 	}
 
 	@Override
-	public <T> void checkForValueInList(List<T> list, T value) throws GeneralEconomyException {
+	public <S> void checkForValueInList(List<S> list, S value) throws T {
 		if (!list.contains(value)) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, value.toString().toLowerCase());
+			throw createNew(messageWrapper, ExceptionMessageEnum.DOES_NOT_EXIST, value.toString().toLowerCase());
 		}
 	}
 
 	@Override
-	public void checkForValueExists(Object value, String name) throws GeneralEconomyException {
+	public void checkForValueExists(Object value, String name) throws T {
 		if (value == null) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, value);
+			throw createNew(messageWrapper, ExceptionMessageEnum.DOES_NOT_EXIST, name);
 		}
 	}
 
 	@Override
-	public void checkForValidSize(int size) throws GeneralEconomyException {
+	public void checkForValidSize(int size) throws T {
 		if (size < 9 || size % 9 != 0 || size > 54) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					size);
+			throw createNew(messageWrapper, ExceptionMessageEnum.INVALID_PARAMETER, size);
 		}
 	}
 
 	@Override
-	public void checkForValidSlot(int slot, int size) throws GeneralEconomyException {
+	public void checkForValidSlot(int slot, int size) throws T {
 		if (slot < 0 || slot >= size) {
 			// +1 for player readable style
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					slot + 1);
+			throw createNew(messageWrapper, ExceptionMessageEnum.INVALID_PARAMETER, slot + 1);
 		}
 	}
 }

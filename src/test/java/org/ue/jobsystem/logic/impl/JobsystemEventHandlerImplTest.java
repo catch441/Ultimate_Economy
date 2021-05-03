@@ -42,16 +42,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.utils.ServerProvider;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
+import org.ue.jobsystem.logic.api.JobsystemException;
 
 @ExtendWith(MockitoExtension.class)
-public class JobSystemEventHandlerImplTest {
+public class JobsystemEventHandlerImplTest {
 
 	@InjectMocks
 	JobsystemEventHandlerImpl eventHandler;
@@ -81,7 +81,7 @@ public class JobSystemEventHandlerImplTest {
 	}
 	
 	@Test
-	public void handleBreedEventTestWithEmptyJob() throws GeneralEconomyException {
+	public void handleBreedEventTestWithEmptyJob() throws JobsystemException {
 		Player player = mock(Player.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Job job = mock(Job.class);
@@ -91,15 +91,15 @@ public class JobSystemEventHandlerImplTest {
 		EntityBreedEvent event = mock(EntityBreedEvent.class);
 		when(event.getBreeder()).thenReturn(player);
 		when(event.getEntityType()).thenReturn(EntityType.COW);
-		when(job.getBreedPrice(EntityType.COW)).thenThrow(GeneralEconomyException.class);
+		when(job.getBreedPrice(EntityType.COW)).thenThrow(JobsystemException.class);
 		eventHandler.handleBreedEvent(event);
 		assertDoesNotThrow(() -> verify(ecoPlayer, never()).increasePlayerAmount(1.5, false));
 	}
 	
 	@Test
-	public void handleBreedEventTestWithNoEcoPlayer() throws GeneralEconomyException {
+	public void handleBreedEventTestWithNoEcoPlayer() throws EconomyPlayerException {
 		Player player = mock(Player.class);
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
 		when(player.getName()).thenReturn("catch441");
 		EntityBreedEvent event = mock(EntityBreedEvent.class);
 		when(event.getBreeder()).thenReturn(player);
@@ -149,7 +149,7 @@ public class JobSystemEventHandlerImplTest {
 		Job job0 = mock(Job.class);
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(job.getKillPrice("COW")).thenReturn(10.5));
-		assertDoesNotThrow(() -> when(job0.getKillPrice("COW")).thenThrow(GeneralEconomyException.class));
+		assertDoesNotThrow(() -> when(job0.getKillPrice("COW")).thenThrow(JobsystemException.class));
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job0, job));
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
@@ -198,8 +198,8 @@ public class JobSystemEventHandlerImplTest {
 	}
 	
 	@Test
-	public void handleEntityDeathTestWithError() throws GeneralEconomyException {
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
+	public void handleEntityDeathTestWithError() throws EconomyPlayerException {
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
 		LivingEntity entity = mock(LivingEntity.class);
@@ -214,7 +214,7 @@ public class JobSystemEventHandlerImplTest {
 		Job job0 = mock(Job.class);
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(job.getBlockPrice("STONE")).thenReturn(10.5));
-		assertDoesNotThrow(() -> when(job0.getBlockPrice("STONE")).thenThrow(GeneralEconomyException.class));
+		assertDoesNotThrow(() -> when(job0.getBlockPrice("STONE")).thenThrow(JobsystemException.class));
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
@@ -279,7 +279,7 @@ public class JobSystemEventHandlerImplTest {
 		Job job0 = mock(Job.class);
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(job.getBlockPrice("WHEAT")).thenReturn(10.5));
-		assertDoesNotThrow(() -> when(job0.getBlockPrice("WHEAT")).thenThrow(GeneralEconomyException.class));
+		assertDoesNotThrow(() -> when(job0.getBlockPrice("WHEAT")).thenThrow(JobsystemException.class));
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
@@ -321,11 +321,11 @@ public class JobSystemEventHandlerImplTest {
 	}
 	
 	@Test
-	public void handleBreakBlockTestWithError() throws GeneralEconomyException {
+	public void handleBreakBlockTestWithError() throws EconomyPlayerException {
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
 
 		BlockBreakEvent event = new BlockBreakEvent(null, player);
 		assertDoesNotThrow(() -> eventHandler.handleBreakBlock(event));
@@ -336,7 +336,7 @@ public class JobSystemEventHandlerImplTest {
 		Job job0 = mock(Job.class);
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(job.getFisherPrice("fish")).thenReturn(10.5));
-		assertDoesNotThrow(() -> when(job0.getFisherPrice("fish")).thenThrow(GeneralEconomyException.class));
+		assertDoesNotThrow(() -> when(job0.getFisherPrice("fish")).thenThrow(JobsystemException.class));
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
@@ -357,7 +357,7 @@ public class JobSystemEventHandlerImplTest {
 		Job job0 = mock(Job.class);
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(job.getFisherPrice("treasure")).thenReturn(10.5));
-		assertDoesNotThrow(() -> when(job0.getFisherPrice("treasure")).thenThrow(GeneralEconomyException.class));
+		assertDoesNotThrow(() -> when(job0.getFisherPrice("treasure")).thenThrow(JobsystemException.class));
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
@@ -378,7 +378,7 @@ public class JobSystemEventHandlerImplTest {
 		Job job0 = mock(Job.class);
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(job.getFisherPrice("junk")).thenReturn(10.5));
-		assertDoesNotThrow(() -> when(job0.getFisherPrice("junk")).thenThrow(GeneralEconomyException.class));
+		assertDoesNotThrow(() -> when(job0.getFisherPrice("junk")).thenThrow(JobsystemException.class));
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
@@ -457,7 +457,7 @@ public class JobSystemEventHandlerImplTest {
 	}
 
 	@Test
-	public void handleOpenInventoryTest() {
+	public void handleOpenInventoryTest() throws JobsystemException {
 		Player player = mock(Player.class);
 		Entity villager = mock(Entity.class);
 		when(villager.getCustomName()).thenReturn("kthcenter");
@@ -466,15 +466,15 @@ public class JobSystemEventHandlerImplTest {
 
 		PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, villager);
 		eventHandler.handleOpenInventory(event);
-		verify(center).openInv(player);
+		verify(center).openInventory(player);
 	}
 	
 	@Test
-	public void handleOpenInventoryTestNoJobcenter() throws GeneralEconomyException {
+	public void handleOpenInventoryTestNoJobcenter() throws JobsystemException {
 		Player player = mock(Player.class);
 		Entity villager = mock(Entity.class);
 		when(villager.getCustomName()).thenReturn("center");
-		when(jobcenterManager.getJobcenterByName("center")).thenThrow(GeneralEconomyException.class);
+		when(jobcenterManager.getJobcenterByName("center")).thenThrow(JobsystemException.class);
 
 		PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, villager);
 		assertDoesNotThrow(() -> eventHandler.handleOpenInventory(event));
@@ -577,8 +577,8 @@ public class JobSystemEventHandlerImplTest {
 	}
 	
 	@Test
-	public void handleInventoryClickTestWithNoJob() throws GeneralEconomyException {
-		when(jobManager.getJobByName("myjob")).thenThrow(GeneralEconomyException.class);
+	public void handleInventoryClickTestWithNoJob() throws JobsystemException {
+		when(jobManager.getJobByName("myjob")).thenThrow(JobsystemException.class);
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);

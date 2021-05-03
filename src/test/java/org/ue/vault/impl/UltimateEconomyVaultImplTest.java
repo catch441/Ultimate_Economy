@@ -18,13 +18,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.logic.api.BankAccount;
+import org.ue.bank.logic.api.BankException;
 import org.ue.bank.logic.api.BankManager;
 import org.ue.common.utils.ServerProvider;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
@@ -71,7 +71,7 @@ public class UltimateEconomyVaultImplTest {
 	public void getBalanceTestError() {
 		Player player = mock(Player.class);
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441"))
-				.thenThrow(GeneralEconomyException.class));
+				.thenThrow(EconomyPlayerException.class));
 		when(player.getName()).thenReturn("catch441");
 		assertEquals("0.0", String.valueOf(vault.getBalance(player)));
 	}
@@ -108,8 +108,8 @@ public class UltimateEconomyVaultImplTest {
 	}
 
 	@Test
-	public void getBalanceTestWithStringError() throws EconomyPlayerException, GeneralEconomyException {
-		when(bankManager.getBankAccountByIban("mybank")).thenThrow(GeneralEconomyException.class);
+	public void getBalanceTestWithStringError() throws BankException {
+		when(bankManager.getBankAccountByIban("mybank")).thenThrow(BankException.class);
 		when(ecoPlayerManager.getEconomyPlayerNameList()).thenReturn(Arrays.asList("catch441"));
 		assertEquals("0.0", String.valueOf(vault.getBalance("mybank")));
 	}
@@ -184,9 +184,9 @@ public class UltimateEconomyVaultImplTest {
 	}
 
 	@Test
-	public void hasTestWithNoEcoPlayer() throws GeneralEconomyException {
+	public void hasTestWithNoEcoPlayer() throws EconomyPlayerException {
 		Player player = mock(Player.class);
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
 		when(player.getName()).thenReturn("catch441");
 		assertFalse(vault.has(player, 1.5));
 	}
@@ -208,8 +208,8 @@ public class UltimateEconomyVaultImplTest {
 	}
 
 	@Test
-	public void hasTestWithStringNoEcoPlayer() throws GeneralEconomyException {
-		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(GeneralEconomyException.class);
+	public void hasTestWithStringNoEcoPlayer() throws EconomyPlayerException {
+		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
 		assertFalse(vault.has("catch441", 1.5));
 	}
 
@@ -242,8 +242,8 @@ public class UltimateEconomyVaultImplTest {
 	}
 
 	@Test
-	public void bankDepositTestNoBankAccount() throws GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void bankDepositTestNoBankAccount() throws BankException {
+		BankException e = mock(BankException.class);
 		when(e.getMessage()).thenReturn("error");
 		when(bankManager.getBankAccountByIban("myiban")).thenThrow(e);
 		EconomyResponse response = vault.bankDeposit("myiban", 1.5);
@@ -316,10 +316,10 @@ public class UltimateEconomyVaultImplTest {
 	}
 
 	@Test
-	public void depositPlayerTestError() throws GeneralEconomyException {
+	public void depositPlayerTestError() throws EconomyPlayerException {
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("error");
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
 		EconomyResponse response = vault.depositPlayer(player, 1.5);
@@ -353,8 +353,8 @@ public class UltimateEconomyVaultImplTest {
 	}
 	
 	@Test
-	public void withdrawPlayerTestError() throws GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void withdrawPlayerTestError() throws EconomyPlayerException {
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("error");
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
 		EconomyResponse response = vault.withdrawPlayer("catch441", 1.5);
@@ -461,8 +461,8 @@ public class UltimateEconomyVaultImplTest {
 	}
 	
 	@Test
-	public void bankBalanceTestError() throws GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void bankBalanceTestError() throws BankException {
+		BankException e = mock(BankException.class);
 		when(e.getMessage()).thenReturn("error");
 		when(bankManager.getBankAccountByIban("myiban")).thenThrow(e);
 		EconomyResponse response = vault.bankBalance("myiban");
@@ -488,8 +488,8 @@ public class UltimateEconomyVaultImplTest {
 	}
 	
 	@Test
-	public void createBankTestError() throws GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void createBankTestError() throws BankException {
+		BankException e = mock(BankException.class);
 		when(e.getMessage()).thenReturn("error");
 		when(bankManager.createExternalBankAccount(0, "myiban")).thenThrow(e);
 		EconomyResponse response = vault.createBank("myiban", "catch441");
@@ -507,8 +507,8 @@ public class UltimateEconomyVaultImplTest {
 	}
 	
 	@Test
-	public void deleteBankTestError() throws GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void deleteBankTestError() throws BankException {
+		BankException e = mock(BankException.class);
 		when(e.getMessage()).thenReturn("error");
 		when(bankManager.getBankAccountByIban("myiban")).thenThrow(e);
 		EconomyResponse response = vault.deleteBank("myiban");
@@ -529,8 +529,8 @@ public class UltimateEconomyVaultImplTest {
 	}
 	
 	@Test
-	public void bankWithdrawTestError() throws GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void bankWithdrawTestError() throws BankException {
+		BankException e = mock(BankException.class);
 		when(e.getMessage()).thenReturn("error");
 		when(bankManager.getBankAccountByIban("myiban")).thenThrow(e);
 		EconomyResponse response = vault.bankWithdraw("myiban", 1.5);
@@ -539,8 +539,8 @@ public class UltimateEconomyVaultImplTest {
 	}
 	
 	@Test
-	public void bankHasTestError() throws GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void bankHasTestError() throws BankException {
+		BankException e = mock(BankException.class);
 		when(e.getMessage()).thenReturn("error");
 		when(bankManager.getBankAccountByIban("myiban")).thenThrow(e);
 		EconomyResponse response = vault.bankHas("myiban", 1.5);

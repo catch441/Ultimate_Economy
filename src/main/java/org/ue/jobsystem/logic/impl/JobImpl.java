@@ -8,14 +8,15 @@ import java.util.Map;
 
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
-import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.dataaccess.api.JobDao;
+import org.ue.jobsystem.logic.api.FishingLootTypeEnum;
 import org.ue.jobsystem.logic.api.Job;
+import org.ue.jobsystem.logic.api.JobsystemException;
 import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
 
 public class JobImpl implements Job {
 
-	private static final List<EntityType> breedableMobs = Arrays.asList(EntityType.BEE, EntityType.COW, EntityType.HOGLIN,
+	protected static final List<EntityType> breedableMobs = Arrays.asList(EntityType.BEE, EntityType.COW, EntityType.HOGLIN,
 			EntityType.MUSHROOM_COW, EntityType.PIG, EntityType.SHEEP, EntityType.WOLF, EntityType.CAT,
 			EntityType.DONKEY, EntityType.HORSE, EntityType.OCELOT, EntityType.POLAR_BEAR, EntityType.TURTLE,
 			EntityType.CHICKEN, EntityType.FOX, EntityType.LLAMA, EntityType.PANDA, EntityType.RABBIT,
@@ -49,8 +50,8 @@ public class JobImpl implements Job {
 	}
 
 	@Override
-	public void addFisherLootType(String lootType, double price) throws GeneralEconomyException {
-		validationHandler.checkForValidFisherLootType(lootType);
+	public void addFisherLootType(String lootType, double price) throws JobsystemException {
+		validationHandler.checkForValidEnum(FishingLootTypeEnum.values(), lootType);
 		validationHandler.checkForValueGreaterZero(price);
 		validationHandler.checkForValueNotInList(new ArrayList<>(getFisherList().keySet()), lootType);
 		getFisherList().put(lootType, price);
@@ -58,15 +59,15 @@ public class JobImpl implements Job {
 	}
 
 	@Override
-	public void removeFisherLootType(String lootType) throws GeneralEconomyException {
-		validationHandler.checkForValidFisherLootType(lootType);
+	public void removeFisherLootType(String lootType) throws JobsystemException {
+		validationHandler.checkForValidEnum(FishingLootTypeEnum.values(), lootType);
 		validationHandler.checkForValueInList(new ArrayList<>(getFisherList().keySet()), lootType);
 		getFisherList().remove(lootType);
 		jobDao.saveFisherList(getFisherList());
 	}
 
 	@Override
-	public void addMob(String entity, double price) throws GeneralEconomyException {
+	public void addMob(String entity, double price) throws JobsystemException {
 		entity = entity.toUpperCase();
 		validationHandler.checkForValidEnum(EntityType.values(), entity);
 		validationHandler.checkForValueNotInList(new ArrayList<>(getEntityList().keySet()), entity);
@@ -76,7 +77,7 @@ public class JobImpl implements Job {
 	}
 
 	@Override
-	public void deleteMob(String entity) throws GeneralEconomyException {
+	public void deleteMob(String entity) throws JobsystemException {
 		entity = entity.toUpperCase();
 		validationHandler.checkForValidEnum(EntityType.values(), entity);
 		validationHandler.checkForValueInList(new ArrayList<>(getEntityList().keySet()), entity);
@@ -85,7 +86,7 @@ public class JobImpl implements Job {
 	}
 
 	@Override
-	public void addBreedable(EntityType breedable, double price) throws GeneralEconomyException {
+	public void addBreedable(EntityType breedable, double price) throws JobsystemException {
 		validationHandler.checkForValueInList(breedableMobs, breedable);
 		validationHandler.checkForValueNotInList(new ArrayList<>(getBreedableList().keySet()),
 				breedable.toString().toUpperCase());
@@ -95,7 +96,7 @@ public class JobImpl implements Job {
 	}
 
 	@Override
-	public void deleteBreedable(EntityType breedable) throws GeneralEconomyException {
+	public void deleteBreedable(EntityType breedable) throws JobsystemException {
 		validationHandler.checkForValueInList(breedableMobs, breedable);
 		validationHandler.checkForValueInList(new ArrayList<>(getBreedableList().keySet()),
 				breedable.toString().toUpperCase());
@@ -104,7 +105,7 @@ public class JobImpl implements Job {
 	}
 
 	@Override
-	public void addBlock(String material, double price) throws GeneralEconomyException {
+	public void addBlock(String material, double price) throws JobsystemException {
 		material = material.toUpperCase();
 		validationHandler.checkForValidEnum(Material.values(), material);
 		validationHandler.checkForValueGreaterZero(price);
@@ -114,7 +115,7 @@ public class JobImpl implements Job {
 	}
 
 	@Override
-	public void deleteBlock(String material) throws GeneralEconomyException {
+	public void deleteBlock(String material) throws JobsystemException {
 		material = material.toUpperCase();
 		validationHandler.checkForValidEnum(Material.values(), material);
 		validationHandler.checkForValueInList(new ArrayList<>(getBlockList().keySet()), material);
@@ -128,7 +129,7 @@ public class JobImpl implements Job {
 	}
 
 	@Override
-	public double getBreedPrice(EntityType breedable) throws GeneralEconomyException {
+	public double getBreedPrice(EntityType breedable) throws JobsystemException {
 		validationHandler.checkForValueInList(breedableMobs, breedable);
 		validationHandler.checkForValueInList(new ArrayList<>(getBreedableList().keySet()),
 				breedable.toString().toUpperCase());
@@ -136,7 +137,7 @@ public class JobImpl implements Job {
 	}
 
 	@Override
-	public double getBlockPrice(String material) throws GeneralEconomyException {
+	public double getBlockPrice(String material) throws JobsystemException {
 		material = material.toUpperCase();
 		validationHandler.checkForValidEnum(Material.values(), material);
 		validationHandler.checkForValueInList(new ArrayList<>(getBlockList().keySet()), material);
@@ -144,14 +145,14 @@ public class JobImpl implements Job {
 	}
 
 	@Override
-	public double getFisherPrice(String lootType) throws GeneralEconomyException {
-		validationHandler.checkForValidFisherLootType(lootType);
+	public double getFisherPrice(String lootType) throws JobsystemException {
+		validationHandler.checkForValidEnum(FishingLootTypeEnum.values(), lootType);
 		validationHandler.checkForValueInList(new ArrayList<>(getFisherList().keySet()), lootType);
 		return getFisherList().get(lootType);
 	}
 
 	@Override
-	public double getKillPrice(String entityName) throws GeneralEconomyException {
+	public double getKillPrice(String entityName) throws JobsystemException {
 		entityName = entityName.toUpperCase();
 		validationHandler.checkForValidEnum(EntityType.values(), entityName);
 		validationHandler.checkForValueInList(new ArrayList<>(getEntityList().keySet()), entityName);

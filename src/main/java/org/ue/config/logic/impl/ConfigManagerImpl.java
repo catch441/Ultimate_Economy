@@ -4,18 +4,15 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
-import org.ue.common.logic.api.GeneralValidationHandler;
-import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
+import org.ue.config.logic.api.ConfigException;
 import org.ue.config.logic.api.ConfigManager;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
+import org.ue.config.logic.api.ConfigValidationHandler;
 
 public class ConfigManagerImpl implements ConfigManager {
 
 	private final ConfigDao configDao;
-	private final MessageWrapper messageWrapper;
-	private final GeneralValidationHandler generalValidator;
+	private final ConfigValidationHandler validationHandler;
 
 	private int maxHomes;
 	private int maxJobs;
@@ -32,11 +29,9 @@ public class ConfigManagerImpl implements ConfigManager {
 	private double startAmount;
 
 	@Inject
-	public ConfigManagerImpl(ConfigDao configDao, MessageWrapper messageWrapper,
-			GeneralValidationHandler generalValidator) {
+	public ConfigManagerImpl(ConfigDao configDao, ConfigValidationHandler validationHandler) {
 		this.configDao = configDao;
-		this.messageWrapper = messageWrapper;
-		this.generalValidator = generalValidator;
+		this.validationHandler = validationHandler;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -57,7 +52,7 @@ public class ConfigManagerImpl implements ConfigManager {
 			setupStartAmount();
 			setupAllowQuickshop();
 			configDao.removeDeprecatedTownNames();
-		} catch (GeneralEconomyException e) {
+		} catch (ConfigException e) {
 		}
 	}
 
@@ -69,7 +64,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		}
 	}
 
-	private void setupStartAmount() throws GeneralEconomyException {
+	private void setupStartAmount() throws ConfigException {
 		if (!configDao.hasStartAmount()) {
 			setStartAmount(0.0);
 		} else {
@@ -77,7 +72,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		}
 	}
 
-	private void setupLocale() throws GeneralEconomyException {
+	private void setupLocale() throws ConfigException {
 		if (!configDao.hasCountry()) {
 			setLocale("en", "US");
 		} else {
@@ -85,7 +80,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		}
 	}
 
-	private void setupMaxRentedDays() throws GeneralEconomyException {
+	private void setupMaxRentedDays() throws ConfigException {
 		if (!configDao.hasMaxRentedDays()) {
 			setMaxRentedDays(14);
 		} else {
@@ -133,7 +128,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		}
 	}
 
-	private void setupMaxPlayershops() throws GeneralEconomyException {
+	private void setupMaxPlayershops() throws ConfigException {
 		if (!configDao.hasMaxPlayershops()) {
 			setMaxPlayershops(3);
 		} else {
@@ -141,7 +136,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		}
 	}
 
-	private void setupMaxJoinedTowns() throws GeneralEconomyException {
+	private void setupMaxJoinedTowns() throws ConfigException {
 		if (!configDao.hasMaxJoinedTowns()) {
 			setMaxJoinedTowns(1);
 		} else {
@@ -149,7 +144,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		}
 	}
 
-	private void setupMaxJobs() throws GeneralEconomyException {
+	private void setupMaxJobs() throws ConfigException {
 		if (!configDao.hasMaxJobs()) {
 			setMaxJobs(2);
 		} else {
@@ -157,7 +152,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		}
 	}
 
-	private void setupMaxHomes() throws GeneralEconomyException {
+	private void setupMaxHomes() throws ConfigException {
 		if (!configDao.hasMaxHomes()) {
 			setMaxHomes(3);
 		} else {
@@ -177,8 +172,8 @@ public class ConfigManagerImpl implements ConfigManager {
 	}
 
 	@Override
-	public void setStartAmount(double amount) throws GeneralEconomyException {
-		generalValidator.checkForPositiveValue(amount);
+	public void setStartAmount(double amount) throws ConfigException {
+		validationHandler.checkForPositiveValue(amount);
 		startAmount = amount;
 		configDao.saveStartAmount(amount);
 	}
@@ -216,8 +211,8 @@ public class ConfigManagerImpl implements ConfigManager {
 	}
 
 	@Override
-	public void setMaxRentedDays(int days) throws GeneralEconomyException {
-		generalValidator.checkForValueGreaterZero(days);
+	public void setMaxRentedDays(int days) throws ConfigException {
+		validationHandler.checkForValueGreaterZero(days);
 		maxRentedDays = days;
 		configDao.saveMaxRentedDays(maxRentedDays);
 	}
@@ -228,23 +223,17 @@ public class ConfigManagerImpl implements ConfigManager {
 	}
 
 	@Override
-	public void setLocale(String language, String country) throws GeneralEconomyException {
-		if (!isLanguageSupported(language)) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					language);
-		} else if (!isCountryMatching(language, country)) {
-			throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.INVALID_PARAMETER,
-					country);
-		} else {
-			locale = new Locale(language, country);
-			configDao.saveLanguage(language);
-			configDao.saveCountry(country);
-		}
+	public void setLocale(String language, String country) throws ConfigException {
+		validationHandler.checkForSupportedLanguage(language);
+		validationHandler.checkForCountryMatching(language, country);
+		locale = new Locale(language, country);
+		configDao.saveLanguage(language);
+		configDao.saveCountry(country);
 	}
 
 	@Override
-	public void setMaxPlayershops(int value) throws GeneralEconomyException {
-		generalValidator.checkForPositiveValue(value);
+	public void setMaxPlayershops(int value) throws ConfigException {
+		validationHandler.checkForPositiveValue(Double.valueOf(value));
 		maxPlayershops = value;
 		configDao.saveMaxPlayershops(maxPlayershops);
 	}
@@ -255,8 +244,8 @@ public class ConfigManagerImpl implements ConfigManager {
 	}
 
 	@Override
-	public void setMaxHomes(int value) throws GeneralEconomyException {
-		generalValidator.checkForPositiveValue(value);
+	public void setMaxHomes(int value) throws ConfigException {
+		validationHandler.checkForPositiveValue(Double.valueOf(value));
 		maxHomes = value;
 		configDao.saveMaxHomes(maxHomes);
 	}
@@ -267,8 +256,8 @@ public class ConfigManagerImpl implements ConfigManager {
 	}
 
 	@Override
-	public void setMaxJobs(int value) throws GeneralEconomyException {
-		generalValidator.checkForPositiveValue(value);
+	public void setMaxJobs(int value) throws ConfigException {
+		validationHandler.checkForPositiveValue(Double.valueOf(value));
 		maxJobs = value;
 		configDao.saveMaxJobs(maxJobs);
 	}
@@ -279,8 +268,8 @@ public class ConfigManagerImpl implements ConfigManager {
 	}
 
 	@Override
-	public void setMaxJoinedTowns(int value) throws GeneralEconomyException {
-		generalValidator.checkForPositiveValue(value);
+	public void setMaxJoinedTowns(int value) throws ConfigException {
+		validationHandler.checkForPositiveValue(Double.valueOf(value));
 		maxJoinedTowns = value;
 		configDao.saveMaxJoinedTowns(maxJoinedTowns);
 	}
@@ -330,45 +319,5 @@ public class ConfigManagerImpl implements ConfigManager {
 		} else {
 			return getCurrencyPl();
 		}
-	}
-
-	private boolean isLanguageSupported(String lang) {
-		switch (lang) {
-		case "cs":
-		case "de":
-		case "en":
-		case "fr":
-		case "zh":
-		case "ru":
-		case "es":
-		case "lt":
-		case "it":
-		case "pl":
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	private boolean isCountryMatching(String lang, String country) {
-		switch (lang) {
-		case "cs":
-			if ("CZ".equals(country)) {
-				return true;
-			}
-		case "en":
-			if ("US".equals(country)) {
-				return true;
-			}
-		case "zh":
-			if ("CN".equals(country)) {
-				return true;
-			}
-		default:
-			if (lang.toUpperCase().equals(country)) {
-				return true;
-			}
-		}
-		return false;
 	}
 }

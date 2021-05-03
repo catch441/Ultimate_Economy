@@ -7,10 +7,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.townsystem.logic.TownSystemException;
-import org.ue.townsystem.logic.TownworldCommandEnum;
+import org.ue.townsystem.logic.api.TownsystemException;
+import org.ue.townsystem.logic.api.TownworldCommandEnum;
 import org.ue.townsystem.logic.api.TownworldManager;
 
 public class TownworldCommandExecutorImpl implements CommandExecutor {
@@ -35,7 +33,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 			} else {
 				return false;
 			}
-		} catch (EconomyPlayerException | TownSystemException | GeneralEconomyException e) {
+		} catch (TownsystemException e) {
 			sender.sendMessage(e.getMessage());
 		} catch (NumberFormatException e) {
 			sender.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[2]));
@@ -44,7 +42,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performCommand(CommandSender sender, String label, String[] args)
-			throws EconomyPlayerException, GeneralEconomyException, TownSystemException {
+			throws NumberFormatException, TownsystemException {
 		switch (TownworldCommandEnum.getEnum(args[0])) {
 		case DISABLE:
 			return performDisableCommand(sender, label, args);
@@ -60,7 +58,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performSetExpandPriceCommand(CommandSender sender, String label, String[] args)
-			throws TownSystemException, NumberFormatException, GeneralEconomyException {
+			throws NumberFormatException, TownsystemException {
 		if (args.length == 3) {
 			townworldManager.getTownWorldByName(args[1]).setExpandPrice(Double.valueOf(args[2]));
 			sender.sendMessage(messageWrapper.getString("townworld_setExpandPrice", args[2],
@@ -72,7 +70,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performSetFoundationPriceCommand(CommandSender sender, String label, String[] args)
-			throws TownSystemException, NumberFormatException, GeneralEconomyException {
+			throws NumberFormatException, TownsystemException {
 		if (args.length == 3) {
 			townworldManager.getTownWorldByName(args[1]).setFoundationPrice(Double.valueOf(args[2]));
 			sender.sendMessage(messageWrapper.getString("townworld_setFoundationPrice", args[2],
@@ -84,7 +82,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performDisableCommand(CommandSender sender, String label, String[] args)
-			throws EconomyPlayerException, GeneralEconomyException, TownSystemException {
+			throws TownsystemException {
 		if (args.length == 2) {
 			townworldManager.deleteTownWorld(args[1]);
 			sender.sendMessage(messageWrapper.getString("townworld_disable", args[1]));
@@ -94,8 +92,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performEnableCommand(CommandSender sender, String label, String[] args)
-			throws TownSystemException, EconomyPlayerException, GeneralEconomyException {
+	private boolean performEnableCommand(CommandSender sender, String label, String[] args) throws TownsystemException {
 		if (args.length == 2) {
 			townworldManager.createTownWorld(args[1]);
 			sender.sendMessage(messageWrapper.getString("townworld_enable", args[1]));

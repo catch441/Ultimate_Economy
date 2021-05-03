@@ -22,17 +22,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ue.common.logic.api.GeneralValidationHandler;
+import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.ServiceComponent;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.logic.api.Adminshop;
 import org.ue.shopsystem.logic.api.ShopValidationHandler;
-import org.ue.shopsystem.logic.ShopSystemException;
-import org.ue.townsystem.logic.TownSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class AdminshopManagerImplTest {
@@ -47,29 +45,27 @@ public class AdminshopManagerImplTest {
 	ServerProvider serverProvider;
 	@Mock
 	ConfigDao configDao;
-	@Mock
-	GeneralValidationHandler generalValidator;
 
 	@Test
-	public void createAdminshopTestWithInvalidSize() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValidSize(5);
-		assertThrows(GeneralEconomyException.class, () -> adminshopManager.createAdminShop("myshop", null, 5));
+	public void createAdminshopTestWithInvalidSize() throws ShopsystemException {
+		doThrow(ShopsystemException.class).when(validationHandler).checkForValidSize(5);
+		assertThrows(ShopsystemException.class, () -> adminshopManager.createAdminShop("myshop", null, 5));
 		assertEquals(0, adminshopManager.getAdminshopList().size());
 		verifyNoInteractions(configDao);
 	}
 
 	@Test
-	public void createAdminshopTestWithExistingName() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueNotInList(anyList(), eq("my_shop"));
-		assertThrows(GeneralEconomyException.class, () -> adminshopManager.createAdminShop("my_shop", null, 5));
+	public void createAdminshopTestWithExistingName() throws ShopsystemException {
+		doThrow(ShopsystemException.class).when(validationHandler).checkForValueNotInList(anyList(), eq("my_shop"));
+		assertThrows(ShopsystemException.class, () -> adminshopManager.createAdminShop("my_shop", null, 5));
 		assertEquals(0, adminshopManager.getAdminshopList().size());
 		verifyNoInteractions(configDao);
 	}
 
 	@Test
-	public void createAdminshopTestWithInvalidName() throws ShopSystemException {
-		doThrow(ShopSystemException.class).when(validationHandler).checkForValidShopName("my_shop");
-		assertThrows(ShopSystemException.class, () -> adminshopManager.createAdminShop("my_shop", null, 5));
+	public void createAdminshopTestWithInvalidName() throws ShopsystemException {
+		doThrow(ShopsystemException.class).when(validationHandler).checkForValidShopName("my_shop");
+		assertThrows(ShopsystemException.class, () -> adminshopManager.createAdminShop("my_shop", null, 5));
 		assertEquals(0, adminshopManager.getAdminshopList().size());
 		verifyNoInteractions(configDao);
 	}
@@ -83,8 +79,8 @@ public class AdminshopManagerImplTest {
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		assertDoesNotThrow(() -> adminshopManager.createAdminShop("myshop", loc, 9));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidShopName("myshop"));
-		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSize(9));
-		assertDoesNotThrow(() -> verify(generalValidator).checkForValueNotInList(anyList(), eq("myshop")));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(9));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValueNotInList(anyList(), eq("myshop")));
 		verify(configDao).saveAdminshopIds(anyList());
 		assertEquals(1, adminshopManager.getAdminshopList().size());
 		Adminshop result = adminshopManager.getAdminshopList().get(0);
@@ -109,10 +105,10 @@ public class AdminshopManagerImplTest {
 			when(shop.getName()).thenReturn("myshop");
 			adminshopManager.getAdminShopByName("myshop2");
 			fail();
-		} catch (GeneralEconomyException e) {
+		} catch (ShopsystemException e) {
 			assertEquals(1, e.getParams().length);
 			assertEquals("myshop2", e.getParams()[0]);
-			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
+			assertEquals(ExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
 		}
 	}
 
@@ -133,10 +129,10 @@ public class AdminshopManagerImplTest {
 	}
 
 	@Test
-	public void getAdminshopByIdFailTest() throws GeneralEconomyException {
+	public void getAdminshopByIdFailTest() throws ShopsystemException {
 		createAdminshop("A0");
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueExists(null, "A1");
-		assertThrows(GeneralEconomyException.class, () -> adminshopManager.getAdminShopById("A1"));
+		doThrow(ShopsystemException.class).when(validationHandler).checkForValueExists(null, "A1");
+		assertThrows(ShopsystemException.class, () -> adminshopManager.getAdminShopById("A1"));
 	}
 
 	@Test
@@ -148,20 +144,18 @@ public class AdminshopManagerImplTest {
 		assertEquals("A1", id2);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void loadAllAdminShopsTest() {
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		Adminshop shop = mock(Adminshop.class);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getAdminshop()).thenReturn(shop);
-		when(configDao.hasAdminShopNames()).thenReturn(false);
 		when(configDao.loadAdminshopIds()).thenReturn(Arrays.asList("A0"));
 
 		adminshopManager.loadAllAdminShops();
 		assertEquals(shop, adminshopManager.getAdminshopList().get(0));
 		assertEquals(1, adminshopManager.getAdminshopList().size());
-		assertDoesNotThrow(() -> verify(shop).setupExisting(null, "A0"));
+		assertDoesNotThrow(() -> verify(shop).setupExisting("A0"));
 	}
 
 	@Test
@@ -169,64 +163,23 @@ public class AdminshopManagerImplTest {
 		Adminshop shop1 = createAdminshop("A0");
 		Adminshop shop2 = createAdminshop("A1");
 		adminshopManager.despawnAllVillagers();
-		verify(shop1).despawnVillager();
-		verify(shop2).despawnVillager();
+		verify(shop1).despawn();
+		verify(shop2).despawn();
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
-	public void loadAllAdminShopsTestWithLoadingError()
-			throws TownSystemException, ShopSystemException, GeneralEconomyException {
+	public void loadAllAdminShopsTestWithLoadingError() throws EconomyPlayerException {
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		TownSystemException e = mock(TownSystemException.class);
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		Adminshop shop = mock(Adminshop.class);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getAdminshop()).thenReturn(shop);
-		when(configDao.hasAdminShopNames()).thenReturn(false);
 		when(configDao.loadAdminshopIds()).thenReturn(Arrays.asList("A0"));
-		doThrow(e).when(shop).setupExisting(null, "A0");
+		doThrow(e).when(shop).setupExisting("A0");
 		adminshopManager.loadAllAdminShops();
 		assertEquals(0, adminshopManager.getAdminshopList().size());
 		verify(e).getMessage();
-	}
-
-	@SuppressWarnings("deprecation")
-	@Test
-	public void loadAllAdminshopsOldTest() {
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		Adminshop shop = mock(Adminshop.class);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(serviceComponent.getAdminshop()).thenReturn(shop);
-		when(configDao.hasAdminShopNames()).thenReturn(true);
-		when(configDao.loadAdminShopNames()).thenReturn(Arrays.asList("myshop"));
-		adminshopManager.loadAllAdminShops();
-		assertEquals(1, adminshopManager.getAdminshopList().size());
-		assertEquals(shop, adminshopManager.getAdminshopList().get(0));
-		assertDoesNotThrow(() -> verify(shop).setupExisting("myshop", "A0"));
-		verify(configDao).removeDeprecatedAdminshopNames();
-		verify(configDao).saveAdminshopIds(anyList());
-	}
-
-	@SuppressWarnings("deprecation")
-	@Test
-	public void loadAllAdminshopsOldTestWithLoadingError()
-			throws TownSystemException, ShopSystemException, GeneralEconomyException {
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		Adminshop shop = mock(Adminshop.class);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(serviceComponent.getAdminshop()).thenReturn(shop);
-		TownSystemException e = mock(TownSystemException.class);
-		when(e.getMessage()).thenReturn("my error message");
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(configDao.hasAdminShopNames()).thenReturn(true);
-		when(configDao.loadAdminShopNames()).thenReturn(Arrays.asList("myshop"));
-		doThrow(e).when(shop).setupExisting("myshop", "A0");
-		adminshopManager.loadAllAdminShops();
-		assertEquals(0, adminshopManager.getAdminshopList().size());
-		verify(e).getMessage();
-		verify(configDao).removeDeprecatedAdminshopNames();
-		verify(configDao).saveAdminshopIds(anyList());
 	}
 
 	private Adminshop createAdminshop(String id) {

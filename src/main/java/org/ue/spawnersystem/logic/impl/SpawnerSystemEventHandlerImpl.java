@@ -17,9 +17,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
+import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
-import org.ue.economyplayer.logic.EconomyPlayerExceptionMessageEnum;
 import org.ue.spawnersystem.logic.api.SpawnerManager;
 import org.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
 
@@ -74,8 +74,8 @@ public class SpawnerSystemEventHandlerImpl implements SpawnerSystemEventHandler 
 				}
 			} else {
 				event.setCancelled(true);
-				event.getPlayer().sendMessage(messageWrapper
-						.getErrorString(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()));
+				event.getPlayer().sendMessage(
+						messageWrapper.getErrorString(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()));
 			}
 		}
 	}
@@ -112,8 +112,8 @@ public class SpawnerSystemEventHandlerImpl implements SpawnerSystemEventHandler 
 			spawnerManager.addSpawner(string.substring(0, string.lastIndexOf("-")), event.getPlayer(),
 					event.getBlock().getLocation());
 		} else {
-			event.getPlayer().sendMessage(
-					messageWrapper.getErrorString(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()));
+			event.getPlayer()
+					.sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()));
 			event.setCancelled(true);
 		}
 	}

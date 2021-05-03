@@ -106,7 +106,6 @@ public class LanguagePackConsistencyCheck {
 		assertFalse(messageWrapper.getString("shop_changeOwner_error").equals("!shop_changeOwner_error!"));
 		assertFalse(messageWrapper.getString("invalid_char_in_shop_name").equals("!invalid_char_in_shop_name!"));
 		assertFalse(messageWrapper.getString("invalid_prices").equals("!invalid_prices!"));
-		assertFalse(messageWrapper.getString("inventory_slot_empty").equals("!inventory_slot_empty!"));
 		assertFalse(messageWrapper.getString("item_already_exists_in_shop").equals("!item_already_exists_in_shop!"));
 		assertFalse(messageWrapper.getString("item_does_not_exist_in_shop").equals("!item_does_not_exist_in_shop!"));
 		assertFalse(messageWrapper.getString("item_cannot_be_deleted").equals("!item_cannot_be_deleted!"));
@@ -117,7 +116,6 @@ public class LanguagePackConsistencyCheck {
 		assertFalse(messageWrapper.getString("resizing_failed").equals("!resizing_failed!"));
 		assertFalse(messageWrapper.getString("you_have_no_permission").equals("!you_have_no_permission!"));
 		assertFalse(messageWrapper.getString("inventory_full").equals("!inventory_full!"));
-		assertFalse(messageWrapper.getString("inventory_slot_occupied").equals("!inventory_slot_occupied!"));
 		assertFalse(messageWrapper.getString("wilderness").equals("!wilderness!"));
 		assertFalse(messageWrapper.getString("no_permission_on_plot").equals("!no_permission_on_plot!"));
 		assertFalse(messageWrapper.getString("town_already_joined").equals("!town_already_joined!"));

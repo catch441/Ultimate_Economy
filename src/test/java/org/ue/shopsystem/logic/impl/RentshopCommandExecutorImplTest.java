@@ -23,11 +23,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.utils.api.MessageWrapper;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopManager;
-import org.ue.shopsystem.logic.ShopSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class RentshopCommandExecutorImplTest {
@@ -173,7 +171,7 @@ public class RentshopCommandExecutorImplTest {
 		String[] args = { "move", "RentShop#R0" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(shop).moveShop(loc));
+		assertDoesNotThrow(() -> verify(shop).changeLocation(loc));
 		verify(player, never()).sendMessage(anyString());
 	}
 
@@ -199,11 +197,10 @@ public class RentshopCommandExecutorImplTest {
 	}
 
 	@Test
-	public void resizeCommandTestWithInvalidSize()
-			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void resizeCommandTestWithInvalidSize() throws ShopsystemException {
+		ShopsystemException e = mock(ShopsystemException.class);
 		Rentshop shop = mock(Rentshop.class);
-		doThrow(e).when(shop).changeShopSize(16);
+		doThrow(e).when(shop).changeSize(16);
 		when(e.getMessage()).thenReturn("my error message");
 		assertDoesNotThrow(() -> when(rentshopManager.getRentShopByUniqueName("RentShop#R0")).thenReturn(shop));
 		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
@@ -236,7 +233,7 @@ public class RentshopCommandExecutorImplTest {
 		String[] args = { "resize", "RentShop#R0", "9" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(shop).changeShopSize(9));
+		assertDoesNotThrow(() -> verify(shop).changeSize(9));
 		verify(player).sendMessage("my message");
 		verify(player, times(1)).sendMessage(anyString());
 	}
@@ -288,7 +285,7 @@ public class RentshopCommandExecutorImplTest {
 	}
 	
 	@Test
-	public void renameCommandTestRented() throws GeneralEconomyException {
+	public void renameCommandTestRented() throws ShopsystemException {
 		Rentshop shop = mock(Rentshop.class);
 		assertDoesNotThrow(() -> when(rentshopManager.getRentShopByUniqueName("Shop#R0_catch441")).thenReturn(shop));
 		when(messageWrapper.getString("shop_rename", "Shop#R0", "NewName")).thenReturn("my message");
@@ -324,8 +321,8 @@ public class RentshopCommandExecutorImplTest {
 	}
 
 	@Test
-	public void editShopCommandTestWithNotRentedError() throws ShopSystemException {
-		ShopSystemException e = mock(ShopSystemException.class);
+	public void editShopCommandTestWithNotRentedError() throws ShopsystemException {
+		ShopsystemException e = mock(ShopsystemException.class);
 		Rentshop shop = mock(Rentshop.class);
 		doThrow(e).when(shop).openEditor(player);
 		when(e.getMessage()).thenReturn("my error message");

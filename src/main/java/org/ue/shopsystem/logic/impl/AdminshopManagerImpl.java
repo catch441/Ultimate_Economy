@@ -10,53 +10,48 @@ import javax.inject.Inject;
 import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.ue.common.logic.api.GeneralValidationHandler;
+import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
-import org.ue.shopsystem.logic.ShopSystemException;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.logic.api.Adminshop;
 import org.ue.shopsystem.logic.api.AdminshopManager;
 import org.ue.shopsystem.logic.api.ShopValidationHandler;
-import org.ue.townsystem.logic.TownSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class AdminshopManagerImpl implements AdminshopManager {
 
 	private static final Logger log = LoggerFactory.getLogger(AdminshopManagerImpl.class);
 	private final MessageWrapper messageWrapper;
 	private final ShopValidationHandler validationHandler;
-	private final GeneralValidationHandler generalValidator;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
 	private Map<String, Adminshop> adminShopList = new HashMap<>();
 
 	@Inject
 	public AdminshopManagerImpl(ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
-			ServerProvider serverProvider, ConfigDao configDao, GeneralValidationHandler generalValidator) {
+			ServerProvider serverProvider, ConfigDao configDao) {
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
 		this.serverProvider = serverProvider;
 		this.configDao = configDao;
-		this.generalValidator = generalValidator;
 	}
 
 	@Override
-	public Adminshop getAdminShopByName(String name) throws GeneralEconomyException {
+	public Adminshop getAdminShopByName(String name) throws ShopsystemException {
 		for (Adminshop shop : adminShopList.values()) {
 			if (shop.getName().equals(name)) {
 				return shop;
 			}
 		}
-		throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
+		throw new ShopsystemException(messageWrapper, ExceptionMessageEnum.DOES_NOT_EXIST, name);
 	}
 
 	@Override
-	public Adminshop getAdminShopById(String id) throws GeneralEconomyException {
+	public Adminshop getAdminShopById(String id) throws ShopsystemException {
 		Adminshop shop = adminShopList.get(id);
-		generalValidator.checkForValueExists(shop, id);
+		validationHandler.checkForValueExists(shop, id);
 		return shop;
 	}
 
@@ -93,11 +88,10 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	}
 
 	@Override
-	public void createAdminShop(String name, Location spawnLocation, int size)
-			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+	public void createAdminShop(String name, Location spawnLocation, int size) throws ShopsystemException {
 		validationHandler.checkForValidShopName(name);
-		generalValidator.checkForValidSize(size);
-		generalValidator.checkForValueNotInList(getAdminshopNameList(), name);
+		validationHandler.checkForValidSize(size);
+		validationHandler.checkForValueNotInList(getAdminshopNameList(), name);
 		Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
 		shop.setupNew(name, generateFreeAdminShopId(), spawnLocation, size);
 		adminShopList.put(shop.getShopId(), shop);
@@ -125,7 +119,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 				Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
 				shop.setupExisting(shopId);
 				adminShopList.put(shopId, shop);
-			} catch (TownSystemException | GeneralEconomyException | EconomyPlayerException e) {
+			} catch (EconomyPlayerException e) {
 				log.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}

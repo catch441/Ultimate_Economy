@@ -20,7 +20,7 @@ import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopManager;
-import org.ue.shopsystem.logic.ShopSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class RentDailyTaskTest {
@@ -65,7 +65,7 @@ public class RentDailyTaskTest {
 	
 	@Test
 	public void runTaskTestWithResetError() {
-		ShopSystemException e = mock(ShopSystemException.class);
+		ShopsystemException e = mock(ShopsystemException.class);
 		Rentshop shop = mock(Rentshop.class);
 		assertDoesNotThrow(() -> doThrow(e).when(shop).resetShop());
 		when(e.getMessage()).thenReturn("my error message");

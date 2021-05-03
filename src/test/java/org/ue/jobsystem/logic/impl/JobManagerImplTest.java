@@ -20,20 +20,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ue.common.logic.api.GeneralValidationHandler;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.ServiceComponent;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.dataaccess.api.JobDao;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
+import org.ue.jobsystem.logic.api.JobsystemException;
 import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
-import org.ue.jobsystem.logic.JobSystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class JobManagerImplTest {
@@ -50,8 +48,6 @@ public class JobManagerImplTest {
 	EconomyPlayerManager ecoPlayerManager;
 	@Mock
 	ConfigDao configDao;
-	@Mock
-	GeneralValidationHandler generalValidator;
 
 	@Test
 	public void loadAllJobsTest() {
@@ -73,16 +69,16 @@ public class JobManagerImplTest {
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
 		when(serviceComponent.getJobDao()).thenReturn(jobDao);
 		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
-		assertDoesNotThrow(() -> verify(generalValidator).checkForValueNotInList(anyList(), eq("myJob")));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValueNotInList(anyList(), eq("myJob")));
 		verify(configDao).saveJobList(anyList());
 		assertEquals(1, jobManager.getJobList().size());
 		assertEquals("myJob", jobManager.getJobList().get(0).getName());
 	}
 
 	@Test
-	public void createJobTestWithSameName() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueNotInList(anyList(), eq("myJob"));
-		assertThrows(GeneralEconomyException.class, () -> jobManager.createJob("myJob"));
+	public void createJobTestWithSameName() throws JobsystemException {
+		doThrow(JobsystemException.class).when(validationHandler).checkForValueNotInList(anyList(), eq("myJob"));
+		assertThrows(JobsystemException.class, () -> jobManager.createJob("myJob"));
 		verify(configDao, never()).saveJobList(anyList());
 		assertEquals(0, jobManager.getJobList().size());
 	}
@@ -136,7 +132,7 @@ public class JobManagerImplTest {
 	}
 
 	@Test
-	public void deleteJobTestWithFailedToRemoveJob() throws JobSystemException {
+	public void deleteJobTestWithFailedToRemoveJob() throws JobsystemException {
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		JobDao jobDao = mock(JobDao.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
@@ -147,7 +143,7 @@ public class JobManagerImplTest {
 		reset(configDao);
 		Job job = jobManager.getJobList().get(0);
 		Jobcenter jobcenter = mock(Jobcenter.class);
-		JobSystemException e = mock(JobSystemException.class);
+		JobsystemException e = mock(JobsystemException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		doThrow(e).when(jobcenter).removeJob(job);
 		when(jobcenterManager.getJobcenterList()).thenReturn(Arrays.asList(jobcenter));
@@ -199,8 +195,8 @@ public class JobManagerImplTest {
 	}
 
 	@Test
-	public void getJobByNameTestWithNoJob() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueExists(null, "myJob");
-		assertThrows(GeneralEconomyException.class, () -> jobManager.getJobByName("myJob"));
+	public void getJobByNameTestWithNoJob() throws JobsystemException {
+		doThrow(JobsystemException.class).when(validationHandler).checkForValueExists(null, "myJob");
+		assertThrows(JobsystemException.class, () -> jobManager.getJobByName("myJob"));
 	}
 }

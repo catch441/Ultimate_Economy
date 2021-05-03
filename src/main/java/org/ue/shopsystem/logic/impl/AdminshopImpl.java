@@ -6,21 +6,20 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
-import org.ue.shopsystem.logic.ShopSystemException;
 import org.ue.shopsystem.logic.api.Adminshop;
 import org.ue.shopsystem.logic.api.AdminshopManager;
 import org.ue.shopsystem.logic.api.ShopItem;
 import org.ue.shopsystem.logic.api.ShopValidationHandler;
-import org.ue.townsystem.logic.TownSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 
@@ -46,19 +45,17 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	}
 
 	@Override
-	public void setupNew(String name, String shopId, Location spawnLocation, int size)
-			throws GeneralEconomyException, EconomyPlayerException {
+	public void setupNew(String name, String shopId, Location spawnLocation, int size) {
 		setupNew(EconomyVillagerType.ADMINSHOP, name, shopId, spawnLocation, size, 1);
 	}
 
 	@Override
-	public void setupExisting(String shopId)
-			throws TownSystemException, GeneralEconomyException, EconomyPlayerException {
+	public void setupExisting(String shopId) {
 		setupExisting(EconomyVillagerType.ADMINSHOP, shopId, 1);
 	}
 
 	@Override
-	public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
+	public void changeShopName(String name) throws ShopsystemException {
 		validationHandler.checkForValueNotInList(adminshopManager.getAdminshopNameList(), name);
 		validationHandler.checkForValidShopName(name);
 		this.name = name;
@@ -69,18 +66,20 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 
 	/**
 	 * Overridden, because of custom shopitem spawner name. {@inheritDoc}
+	 * 
+	 * @throws EconomyPlayerException
+	 * @throws BankException
 	 */
 	@Override
 	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
-			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
-		validationHandler.checkForValidSlot(slot, getSize() - 1 - getReservedSlots());
+			throws ShopsystemException, BankException, EconomyPlayerException {
+		validationHandler.checkForValidSlot(slot, getSize() - getReservedSlots());
 		validationHandler.checkForPlayerIsOnline(ecoPlayer);
-		validationHandler.checkForSlotIsNotEmpty(slot, getInventory());
+		validationHandler.checkForSlotIsNotEmpty(getOccupiedSlots(), slot);
 		validationHandler.checkForPlayerInventoryNotFull(ecoPlayer.getPlayer().getInventory());
 		ShopItem shopItem = getShopItem(slot);
 		if (shopItem.getBuyPrice() != 0.0) {
-			// if player has not enough money, then the decrease method throws a
-			// playerexception
+			// enough money check is performed inside the decrease method
 			ecoPlayer.decreasePlayerAmount(shopItem.getBuyPrice(), true);
 			ItemStack stack = shopItem.getItemStack();
 			stack.setAmount(shopItem.getAmount());

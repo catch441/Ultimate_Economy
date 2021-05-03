@@ -22,12 +22,12 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.utils.Updater;
 import org.ue.common.utils.Updater.UpdateResult;
 import org.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
-import org.ue.general.GeneralEconomyException;
-import org.ue.economyplayer.logic.EconomyPlayerException;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemEventHandler;
 import org.ue.shopsystem.logic.api.AdminshopManager;
@@ -220,7 +220,7 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 		try {
 			ecoPlayerEventHandler.handleJoin(event);
 			townSystemEventHandler.handlePlayerJoin(event);
-		} catch (EconomyPlayerException | GeneralEconomyException e) {
+		} catch (EconomyPlayerException | BankException e) {
 			log.warn("[Ultimate_Economy] " + e.getMessage());
 		}
 		if (event.getPlayer().isOp()) {

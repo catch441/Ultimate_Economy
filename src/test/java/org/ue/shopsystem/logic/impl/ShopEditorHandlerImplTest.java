@@ -13,8 +13,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -25,11 +26,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.SkullTextureEnum;
-import org.ue.common.utils.ServerProvider;
-import org.ue.general.GeneralEconomyException;
 import org.ue.shopsystem.logic.api.AbstractShop;
 import org.ue.shopsystem.logic.api.ShopEditorHandler;
-import org.ue.shopsystem.logic.ShopSystemException;
+import org.ue.shopsystem.logic.api.ShopItem;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class ShopEditorHandlerImplTest {
@@ -37,39 +37,30 @@ public class ShopEditorHandlerImplTest {
 	@Mock
 	CustomSkullService skullService;
 	@Mock
-	ServerProvider serverProvider;
-	@Mock
 	AbstractShop shop;
 
 	@Test
 	public void constructorTest() {
 		Inventory inv = mock(Inventory.class);
-		Inventory shopInv = mock(Inventory.class);
-		Villager villager = mock(Villager.class);
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackFilled = mock(ItemStack.class);
-		when(shop.getShopInventory()).thenReturn(shopInv);
+		ShopItem item1 = mock(ShopItem.class);
+		ShopItem item2 = mock(ShopItem.class);
+		when(item1.getSlot()).thenReturn(6);
+		when(item2.getSlot()).thenReturn(7);
 		when(shop.getSize()).thenReturn(9);
 		when(shop.getName()).thenReturn("myshop");
-		when(shop.getShopVillager()).thenReturn(villager);
-		when(serverProvider.createInventory(villager, 9, "myshop-Editor")).thenReturn(inv);
+		when(shop.createVillagerInventory(9, "myshop-Editor")).thenReturn(inv);
 		when(skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot 1")).thenReturn(stack);
 		when(skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot 2")).thenReturn(stack);
 		when(skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot 3")).thenReturn(stack);
 		when(skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot 4")).thenReturn(stack);
 		when(skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot 5")).thenReturn(stack);
 		when(skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot 6")).thenReturn(stack);
-		when(shopInv.getItem(0)).thenReturn(null);
-		when(shopInv.getItem(1)).thenReturn(null);
-		when(shopInv.getItem(2)).thenReturn(null);
-		when(shopInv.getItem(3)).thenReturn(null);
-		when(shopInv.getItem(4)).thenReturn(null);
-		when(shopInv.getItem(5)).thenReturn(null);
-		when(shopInv.getItem(6)).thenReturn(stackFilled);
-		when(shopInv.getItem(7)).thenReturn(stackFilled);
+		when(shop.getItemList()).thenReturn(Arrays.asList(item1, item2));
 		when(skullService.getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 7")).thenReturn(stackFilled);
 		when(skullService.getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 8")).thenReturn(stackFilled);
-		new ShopEditorHandlerImpl(serverProvider, skullService, shop);
+		new ShopEditorHandlerImpl(skullService, shop);
 		verify(inv).setItem(0, stack);
 		verify(inv).setItem(1, stack);
 		verify(inv).setItem(2, stack);
@@ -84,15 +75,11 @@ public class ShopEditorHandlerImplTest {
 	@Test
 	public void setOccupiedTestTrue() {
 		Inventory inv = mock(Inventory.class);
-		Inventory shopInv = mock(Inventory.class);
-		Villager villager = mock(Villager.class);
 		ItemStack stack = mock(ItemStack.class);
-		when(shop.getShopInventory()).thenReturn(shopInv);
 		when(shop.getSize()).thenReturn(9);
 		when(shop.getName()).thenReturn("myshop");
-		when(shop.getShopVillager()).thenReturn(villager);
-		when(serverProvider.createInventory(villager, 9, "myshop-Editor")).thenReturn(inv);
-		ShopEditorHandler handler = new ShopEditorHandlerImpl(serverProvider, skullService, shop);
+		when(shop.createVillagerInventory(9, "myshop-Editor")).thenReturn(inv);
+		ShopEditorHandler handler = new ShopEditorHandlerImpl(skullService, shop);
 		when(skullService.getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1")).thenReturn(stack);
 		handler.setOccupied(true, 0);
 		verify(inv).setItem(0, stack);
@@ -101,15 +88,11 @@ public class ShopEditorHandlerImplTest {
 	@Test
 	public void setOccupiedTestFalse() {
 		Inventory inv = mock(Inventory.class);
-		Inventory shopInv = mock(Inventory.class);
-		Villager villager = mock(Villager.class);
 		ItemStack stack = mock(ItemStack.class);
-		when(shop.getShopInventory()).thenReturn(shopInv);
 		when(shop.getSize()).thenReturn(9);
 		when(shop.getName()).thenReturn("myshop");
-		when(shop.getShopVillager()).thenReturn(villager);
-		when(serverProvider.createInventory(villager, 9, "myshop-Editor")).thenReturn(inv);
-		ShopEditorHandler handler = new ShopEditorHandlerImpl(serverProvider, skullService, shop);
+		when(shop.createVillagerInventory(9, "myshop-Editor")).thenReturn(inv);
+		ShopEditorHandler handler = new ShopEditorHandlerImpl(skullService, shop);
 		handler.setOccupied(true, 0);
 		when(skullService.getSkullWithName(SkullTextureEnum.SLOTEMPTY, "Slot 1")).thenReturn(stack);
 		handler.setOccupied(false, 0);
@@ -120,15 +103,11 @@ public class ShopEditorHandlerImplTest {
 	public void changeInventoryNameTest() {
 		Inventory inv = mock(Inventory.class);
 		Inventory newInv = mock(Inventory.class);
-		Inventory shopInv = mock(Inventory.class);
-		Villager villager = mock(Villager.class);
-		when(shop.getShopInventory()).thenReturn(shopInv);
 		when(shop.getSize()).thenReturn(9);
 		when(shop.getName()).thenReturn("myshop");
-		when(shop.getShopVillager()).thenReturn(villager);
-		when(serverProvider.createInventory(villager, 9, "myshop-Editor")).thenReturn(inv);
-		when(serverProvider.createInventory(villager, 9, "catch-Editor")).thenReturn(newInv);
-		ShopEditorHandler handler = new ShopEditorHandlerImpl(serverProvider, skullService, shop);
+		when(shop.createVillagerInventory(9, "myshop-Editor")).thenReturn(inv);
+		when(shop.createVillagerInventory(9, "catch-Editor")).thenReturn(newInv);
+		ShopEditorHandler handler = new ShopEditorHandlerImpl(skullService, shop);
 
 		handler.changeInventoryName("catch");
 		verify(newInv).setContents(any());
@@ -139,17 +118,13 @@ public class ShopEditorHandlerImplTest {
 	@Test
 	public void handleInventoryClickTestFree() {
 		Inventory inv = mock(Inventory.class);
-		Inventory shopInv = mock(Inventory.class);
-		Villager villager = mock(Villager.class);
 		ItemStack stack = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
 		Player player = mock(Player.class);
-		when(shop.getShopInventory()).thenReturn(shopInv);
 		when(shop.getSize()).thenReturn(9);
 		when(shop.getName()).thenReturn("myshop");
-		when(shop.getShopVillager()).thenReturn(villager);
-		when(serverProvider.createInventory(villager, 9, "myshop-Editor")).thenReturn(inv);
-		ShopEditorHandler handler = new ShopEditorHandlerImpl(serverProvider, skullService, shop);
+		when(shop.createVillagerInventory(9, "myshop-Editor")).thenReturn(inv);
+		ShopEditorHandler handler = new ShopEditorHandlerImpl(skullService, shop);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		when(event.getRawSlot()).thenReturn(0);
 		when(event.getCurrentItem()).thenReturn(stack);
@@ -163,14 +138,10 @@ public class ShopEditorHandlerImplTest {
 	@Test
 	public void handleInventoryClickTestBottomInvClick() {
 		Inventory inv = mock(Inventory.class);
-		Inventory shopInv = mock(Inventory.class);
-		Villager villager = mock(Villager.class);
-		when(shop.getShopInventory()).thenReturn(shopInv);
 		when(shop.getSize()).thenReturn(9);
 		when(shop.getName()).thenReturn("myshop");
-		when(shop.getShopVillager()).thenReturn(villager);
-		when(serverProvider.createInventory(villager, 9, "myshop-Editor")).thenReturn(inv);
-		ShopEditorHandler handler = new ShopEditorHandlerImpl(serverProvider, skullService, shop);
+		when(shop.createVillagerInventory(9, "myshop-Editor")).thenReturn(inv);
+		ShopEditorHandler handler = new ShopEditorHandlerImpl(skullService, shop);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		when(event.getRawSlot()).thenReturn(14);
 		reset(shop);
@@ -180,26 +151,22 @@ public class ShopEditorHandlerImplTest {
 	}
 
 	@Test
-	public void handleInventoryClickTestWithException() throws ShopSystemException, GeneralEconomyException {
+	public void handleInventoryClickTestWithException() throws ShopsystemException {
 		Inventory inv = mock(Inventory.class);
-		Inventory shopInv = mock(Inventory.class);
-		Villager villager = mock(Villager.class);
 		ItemStack stack = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
 		Player player = mock(Player.class);
-		when(shop.getShopInventory()).thenReturn(shopInv);
 		when(shop.getSize()).thenReturn(9);
 		when(shop.getName()).thenReturn("myshop");
-		when(shop.getShopVillager()).thenReturn(villager);
-		when(serverProvider.createInventory(villager, 9, "myshop-Editor")).thenReturn(inv);
-		ShopEditorHandler handler = new ShopEditorHandlerImpl(serverProvider, skullService, shop);
+		when(shop.createVillagerInventory(9, "myshop-Editor")).thenReturn(inv);
+		ShopEditorHandler handler = new ShopEditorHandlerImpl(skullService, shop);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		when(event.getRawSlot()).thenReturn(0);
 		when(event.getCurrentItem()).thenReturn(stack);
 		when(stack.getItemMeta()).thenReturn(meta);
 		when(meta.getDisplayName()).thenReturn("Slot 1");
 		when(event.getWhoClicked()).thenReturn(player);
-		doThrow(GeneralEconomyException.class).when(shop).openSlotEditor(player, 0);;
+		doThrow(ShopsystemException.class).when(shop).openSlotEditor(player, 0);;
 		handler.handleInventoryClick(event);
 		assertDoesNotThrow(() -> verify(shop).openSlotEditor(player, 0));
 		verifyNoInteractions(player);

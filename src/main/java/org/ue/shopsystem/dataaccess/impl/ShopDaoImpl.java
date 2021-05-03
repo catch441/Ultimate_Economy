@@ -11,7 +11,6 @@ import javax.inject.Inject;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.ue.common.dataaccess.impl.EconomyVillagerDaoImpl;
@@ -46,51 +45,38 @@ public class ShopDaoImpl extends EconomyVillagerDaoImpl implements ShopDao {
 	@Override
 	public void saveShopItem(ShopItem shopItem, boolean delete) {
 		if (delete) {
-			config.set("ShopItems." + shopItem.getItemHash(), null);
+			config.set("ShopItems." + shopItem.getSlot(), null);
 			save();
 		} else {
-			if (shopItem.getItemStack().getType() == Material.SPAWNER) {
-				String entityType = shopItem.getItemStack().getItemMeta().getDisplayName();
-				config.set("ShopItems." + shopItem.getItemHash() + ".Name", "SPAWNER_" + entityType);
-			} else {
-				config.set("ShopItems." + shopItem.getItemHash() + ".Name", shopItem.getItemStack());
-			}
-			config.set("ShopItems." + shopItem.getItemHash() + ".Slot", shopItem.getSlot());
-			config.set("ShopItems." + shopItem.getItemHash() + ".newSaveMethod", "true");
+			config.set("ShopItems." + shopItem.getSlot() + ".Name", shopItem.getItemStack());
 			save();
-			saveShopItemSellPrice(shopItem.getItemHash(), shopItem.getSellPrice());
-			saveShopItemBuyPrice(shopItem.getItemHash(), shopItem.getBuyPrice());
-			saveShopItemAmount(shopItem.getItemHash(), shopItem.getAmount());
+			saveShopItemSellPrice(shopItem.getSlot(), shopItem.getSellPrice());
+			saveShopItemBuyPrice(shopItem.getSlot(), shopItem.getBuyPrice());
+			saveShopItemAmount(shopItem.getSlot(), shopItem.getAmount());
 		}
 	}
 
 	@Override
-	public void saveShopItemSellPrice(int itemHash, double sellPrice) {
-		config.set("ShopItems." + itemHash + ".sellPrice", sellPrice);
+	public void saveShopItemSellPrice(int slot, double sellPrice) {
+		config.set("ShopItems." + slot + ".sellPrice", sellPrice);
 		save();
 	}
 
 	@Override
-	public void saveShopItemBuyPrice(int itemHash, double buyPrice) {
-		config.set("ShopItems." + itemHash + ".buyPrice", buyPrice);
+	public void saveShopItemBuyPrice(int slot, double buyPrice) {
+		config.set("ShopItems." + slot + ".buyPrice", buyPrice);
 		save();
 	}
 
 	@Override
-	public void saveShopItemAmount(int itemHash, int amount) {
-		config.set("ShopItems." + itemHash + ".Amount", amount);
+	public void saveShopItemAmount(int slot, int amount) {
+		config.set("ShopItems." + slot + ".Amount", amount);
 		save();
 	}
 
 	@Override
-	public void saveProfession(Profession profession) {
-		config.set("Profession", profession.name());
-		save();
-	}
-
-	@Override
-	public void saveStock(int itemHash, int stock) {
-		config.set("ShopItems." + itemHash + ".stock", stock);
+	public void saveStock(int slot, int stock) {
+		config.set("ShopItems." + slot + ".stock", stock);
 		save();
 	}
 
@@ -175,28 +161,37 @@ public class ShopDaoImpl extends EconomyVillagerDaoImpl implements ShopDao {
 	}
 
 	@Override
-	public ShopItem loadItem(int itemHash) {
-		ItemStack stack = null;
-		if (config.getString("ShopItems." + itemHash + ".Name").contains("SPAWNER_")) {
-			stack = serverProvider.createItemStack(Material.SPAWNER, 1);
-			ItemMeta meta = stack.getItemMeta();
-			String name = config.getString("ShopItems." + itemHash + ".Name");
-			meta.setDisplayName(name.substring(8));
-			stack.setItemMeta(meta);
-		} else {
-			stack = config.getItemStack("ShopItems." + itemHash + ".Name");
-		}
-		int amount = config.getInt("ShopItems." + itemHash + ".Amount");
-		double sellPrice = config.getInt("ShopItems." + itemHash + ".sellPrice");
-		double buyPrice = config.getInt("ShopItems." + itemHash + ".buyPrice");
-		int slot = config.getInt("ShopItems." + itemHash + ".Slot");
+	public ShopItem loadItem(int slot) {
+		convertToSpawnerItemSave(slot);
+		ItemStack stack = config.getItemStack("ShopItems." + slot + ".Name");
+		int amount = config.getInt("ShopItems." + slot + ".Amount");
+		double sellPrice = config.getInt("ShopItems." + slot + ".sellPrice");
+		double buyPrice = config.getInt("ShopItems." + slot + ".buyPrice");
 		return new ShopItemImpl(stack, amount, sellPrice, buyPrice, slot);
+	}
+	
+	/**
+	 * @since 1.2.7
+	 * @param slot
+	 */
+	@Deprecated
+	private void convertToSpawnerItemSave(int slot) {
+		if (config.contains("ShopItems." + slot + ".newSaveMethod")) {
+			ItemStack stack = serverProvider.createItemStack(Material.SPAWNER, 1);
+			ItemMeta meta = stack.getItemMeta();
+			String name = config.getString("ShopItems." + slot + ".Name");
+			meta.setDisplayName(name.substring(8));
+			stack.setItemMeta(meta);	
+			config.set("ShopItems." + slot + ".Name", stack);
+			config.set("ShopItems." + slot + ".newSaveMethod", null);
+			save();
+		}
 	}
 
 	@Override
-	public List<Integer> loadItemHashList() {
+	public List<Integer> loadItemSlotList() {
 		removeShopItemList();
-		convertToItemHash();
+		convertToItemSlot();
 		if (config.getConfigurationSection("ShopItems") != null) {
 			Set<String> keySet = config.getConfigurationSection("ShopItems").getKeys(false);
 			Set<Integer> setOfInteger = keySet.stream().map(s -> Integer.parseInt(s)).collect(Collectors.toSet());
@@ -265,9 +260,9 @@ public class ShopDaoImpl extends EconomyVillagerDaoImpl implements ShopDao {
 
 	@Override
 	@Deprecated
-	public boolean removeIfCorrupted(int itemHash) {
-		if (!config.isSet("ShopItems." + itemHash + ".Name")) {
-			config.set("ShopItems." + itemHash, null);
+	public boolean removeIfCorrupted(int slot) {
+		if (!config.isSet("ShopItems." + slot + ".Name")) {
+			config.set("ShopItems." + slot, null);
 			save();
 			return true;
 		}
@@ -280,7 +275,7 @@ public class ShopDaoImpl extends EconomyVillagerDaoImpl implements ShopDao {
 	 */
 	@SuppressWarnings("unchecked")
 	@Deprecated
-	private void convertToItemHash() {
+	private void convertToItemSlot() {
 		if (config.getConfigurationSection("ShopItems") != null) {
 			Set<String> keySet = config.getConfigurationSection("ShopItems").getKeys(false);
 			for (String key : keySet) {
@@ -289,14 +284,16 @@ public class ShopDaoImpl extends EconomyVillagerDaoImpl implements ShopDao {
 				} catch (NumberFormatException e) {
 					// convert to new format
 					Map<String, Object> vals = config.getConfigurationSection("ShopItems." + key).getValues(true);
+					int slot = config.getInt("ShopItems." + key + ".Slot");
 					for (String s : vals.keySet()) {
 						Object val = vals.get(s);
 						if (val instanceof List) {
 							val = new ArrayList<Object>((List<Object>) val);
 						}
-						config.set("ShopItems." + key.hashCode() + "." + s, val);
+						config.set("ShopItems." + slot + "." + s, val);
 					}
 					config.set("ShopItems." + key, null);
+					config.set("ShopItems." + slot + ".Slot", null);
 					save();
 				}
 			}

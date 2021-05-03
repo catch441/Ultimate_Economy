@@ -13,14 +13,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -33,10 +31,9 @@ import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.SkullTextureEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
-import org.ue.general.GeneralEconomyException;
 import org.ue.shopsystem.logic.api.AbstractShop;
 import org.ue.shopsystem.logic.api.ShopValidationHandler;
-import org.ue.shopsystem.logic.ShopSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class ShopSlotEditorHandlerImplTest {
@@ -55,7 +52,6 @@ public class ShopSlotEditorHandlerImplTest {
 	@Test
 	public void constructorSetupTest() {
 		Inventory inv = mock(Inventory.class);
-		Villager villager = mock(Villager.class);
 		ItemStack k_off = mock(ItemStack.class);
 		ItemStack save = mock(ItemStack.class);
 		ItemStack exit = mock(ItemStack.class);
@@ -65,14 +61,13 @@ public class ShopSlotEditorHandlerImplTest {
 		ItemMeta removeMeta = mock(ItemMeta.class);
 		when(skullService.getSkullWithName(SkullTextureEnum.K_OFF, "factor off")).thenReturn(k_off);
 		when(shop.getName()).thenReturn("myshop");
-		when(shop.getShopVillager()).thenReturn(villager);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(save);
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(exit);
 		when(serverProvider.createItemStack(Material.BARRIER, 1)).thenReturn(remove);
 		when(save.getItemMeta()).thenReturn(saveMeta);
 		when(exit.getItemMeta()).thenReturn(exitMeta);
 		when(remove.getItemMeta()).thenReturn(removeMeta);
-		when(serverProvider.createInventory(villager, 27, "myshop-SlotEditor")).thenReturn(inv);
+		when(shop.createVillagerInventory(27, "myshop-SlotEditor")).thenReturn(inv);
 		new ShopSlotEditorHandlerImpl(serverProvider, messageWrapper, validationHandler, skullService, shop);
 		verify(inv).setItem(12, k_off);
 		verify(inv).setItem(21, k_off);
@@ -87,7 +82,6 @@ public class ShopSlotEditorHandlerImplTest {
 
 	private ShopSlotEditorHandlerImpl createSlotEditorHandler() {
 		Inventory inv = mock(Inventory.class);
-		Villager villager = mock(Villager.class);
 		ItemStack k_off = mock(ItemStack.class);
 		ItemStack save = mock(ItemStack.class);
 		ItemStack exit = mock(ItemStack.class);
@@ -97,14 +91,13 @@ public class ShopSlotEditorHandlerImplTest {
 		ItemMeta removeMeta = mock(ItemMeta.class);
 		when(skullService.getSkullWithName(SkullTextureEnum.K_OFF, "factor off")).thenReturn(k_off);
 		when(shop.getName()).thenReturn("myshop");
-		when(shop.getShopVillager()).thenReturn(villager);
 		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(save);
 		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(exit);
 		when(serverProvider.createItemStack(Material.BARRIER, 1)).thenReturn(remove);
 		when(save.getItemMeta()).thenReturn(saveMeta);
 		when(exit.getItemMeta()).thenReturn(exitMeta);
 		when(remove.getItemMeta()).thenReturn(removeMeta);
-		when(serverProvider.createInventory(villager, 27, "myshop-SlotEditor")).thenReturn(inv);
+		when(shop.createVillagerInventory(27, "myshop-SlotEditor")).thenReturn(inv);
 		return new ShopSlotEditorHandlerImpl(serverProvider, messageWrapper, validationHandler, skullService, shop);
 	}
 
@@ -115,16 +108,15 @@ public class ShopSlotEditorHandlerImplTest {
 		Inventory oldInv = handler.getSlotEditorInventory();
 		ItemStack[] contents = new ItemStack[27];
 		when(oldInv.getContents()).thenReturn(contents);
-		when(serverProvider.createInventory(shop.getShopVillager(), 27, "kth-SlotEditor")).thenReturn(inv);
-		handler.changeInventoryName("kth");
+		when(shop.createVillagerInventory(27, "catch-SlotEditor")).thenReturn(inv);
+		handler.changeInventoryName("catch");
 		verify(inv).setContents(contents);
 		assertEquals(inv, handler.getSlotEditorInventory());
 	}
 
 	@Test
-	public void setSelectedSlotTestEmpty() {
+	public void setSelectedSlotTestEmpty() throws ShopsystemException {
 		ShopSlotEditorHandlerImpl handler = createSlotEditorHandler();
-		assertDoesNotThrow(() -> when(validationHandler.isSlotEmpty(1, shop.getShopInventory(), 1)).thenReturn(true));
 
 		ItemStack plus = mock(ItemStack.class);
 		ItemStack twenty = mock(ItemStack.class);
@@ -154,6 +146,7 @@ public class ShopSlotEditorHandlerImplTest {
 		when(sell.getItemMeta()).thenReturn(sellMeta);
 		when(buy.getItemMeta()).thenReturn(buyMeta);
 		when(empty.getItemMeta()).thenReturn(emptyMeta);
+		doThrow(ShopsystemException.class).when(shop).getShopItem(1);
 
 		assertDoesNotThrow(() -> handler.setSelectedSlot(1));
 
@@ -191,7 +184,6 @@ public class ShopSlotEditorHandlerImplTest {
 	@Test
 	public void setSelectedSlotTestFilled() {
 		ShopSlotEditorHandlerImpl handler = createSlotEditorHandler();
-		assertDoesNotThrow(() -> when(validationHandler.isSlotEmpty(1, shop.getShopInventory(), 1)).thenReturn(false));
 
 		ShopItemImpl shopItem = mock(ShopItemImpl.class);
 		assertDoesNotThrow(() -> when(shop.getShopItem(1)).thenReturn(shopItem));
@@ -504,7 +496,7 @@ public class ShopSlotEditorHandlerImplTest {
 	}
 
 	@Test
-	public void handleSlotEditorTestSaveChangesNew() throws GeneralEconomyException, ShopSystemException {
+	public void handleSlotEditorTestSaveChangesNew() throws ShopsystemException {
 		ShopSlotEditorHandlerImpl handler = createSlotEditorHandler();
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		ItemStack currentItem = mock(ItemStack.class);
@@ -515,7 +507,6 @@ public class ShopSlotEditorHandlerImplTest {
 		ItemMeta sellPriceItemMeta = mock(ItemMeta.class);
 		ItemMeta currentItemMeta = mock(ItemMeta.class);
 		Player player = mock(Player.class);
-		when(selectedItem.toString()).thenReturn("item string");
 		when(selectedItem.getType()).thenReturn(Material.STONE);
 		when(handler.getSlotEditorInventory().getItem(9)).thenReturn(buyPriceItem);
 		when(handler.getSlotEditorInventory().getItem(18)).thenReturn(sellPriceItem);
@@ -529,13 +520,11 @@ public class ShopSlotEditorHandlerImplTest {
 		when(currentItemMeta.getDisplayName()).thenReturn("save changes");
 		when(sellPriceItemMeta.getLore()).thenReturn(Arrays.asList(ChatColor.GOLD + "Price: 3.0"));
 		when(buyPriceItemMeta.getLore()).thenReturn(Arrays.asList(ChatColor.GOLD + "Price: 0.0"));
-		assertDoesNotThrow(() -> when(shop.getItemList()).thenReturn(new ArrayList<>()));
-		when(shop.getShopItem(0)).thenThrow(ShopSystemException.class);
+		when(shop.getShopItem(0)).thenThrow(ShopsystemException.class);
 		when(messageWrapper.getString("added", "stone")).thenReturn("my message");
 
 		handler.handleSlotEditor(event);
 
-		assertDoesNotThrow(() -> verify(validationHandler).checkForItemDoesNotExist("item string".hashCode(), new ArrayList<>()));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPricesGreaterThenZero(3.0, 0.0));
 		assertDoesNotThrow(() -> verify(shop).openEditor(player));
 		assertDoesNotThrow(() -> verify(shop).addShopItem(0, 3.0, 0.0, selectedItem));
@@ -544,7 +533,7 @@ public class ShopSlotEditorHandlerImplTest {
 	}
 
 	@Test
-	public void handleSlotEditorTestSaveChangesNewNoSelectedItem() throws GeneralEconomyException, ShopSystemException {
+	public void handleSlotEditorTestSaveChangesNewNoSelectedItem() throws ShopsystemException {
 		ShopSlotEditorHandlerImpl handler = createSlotEditorHandler();
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		ItemStack currentItem = mock(ItemStack.class);
@@ -555,7 +544,6 @@ public class ShopSlotEditorHandlerImplTest {
 		ItemMeta sellPriceItemMeta = mock(ItemMeta.class);
 		ItemMeta currentItemMeta = mock(ItemMeta.class);
 		Player player = mock(Player.class);
-		when(selectedItem.toString()).thenReturn("item string");
 		when(selectedItem.getType()).thenReturn(Material.BARRIER);
 		when(handler.getSlotEditorInventory().getItem(9)).thenReturn(buyPriceItem);
 		when(handler.getSlotEditorInventory().getItem(18)).thenReturn(sellPriceItem);
@@ -569,12 +557,10 @@ public class ShopSlotEditorHandlerImplTest {
 		when(currentItemMeta.getDisplayName()).thenReturn("save changes");
 		when(sellPriceItemMeta.getLore()).thenReturn(Arrays.asList(ChatColor.GOLD + "Price: 3.0"));
 		when(buyPriceItemMeta.getLore()).thenReturn(Arrays.asList(ChatColor.GOLD + "Price: 0.0"));
-		when(shop.getItemList()).thenReturn(new ArrayList<>());
-		when(shop.getShopItem(0)).thenThrow(ShopSystemException.class);
+		when(shop.getShopItem(0)).thenThrow(ShopsystemException.class);
 
 		handler.handleSlotEditor(event);
 
-		verify(validationHandler).checkForItemDoesNotExist("item string".hashCode(), new ArrayList<>());
 		verify(validationHandler).checkForPricesGreaterThenZero(3.0, 0.0);
 		assertDoesNotThrow(() -> verify(shop).openEditor(player));
 		assertDoesNotThrow(() -> verify(shop, never()).addShopItem(0, 3.0, 0.0, selectedItem));
@@ -583,7 +569,7 @@ public class ShopSlotEditorHandlerImplTest {
 	}
 
 	@Test
-	public void handleSlotEditorTestSaveChangesNewWithNoPrices() throws ShopSystemException {
+	public void handleSlotEditorTestSaveChangesNewWithNoPrices() throws ShopsystemException {
 		ShopSlotEditorHandlerImpl handler = createSlotEditorHandler();
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		ItemStack currentItem = mock(ItemStack.class);
@@ -606,7 +592,7 @@ public class ShopSlotEditorHandlerImplTest {
 		when(currentItemMeta.getDisplayName()).thenReturn("save changes");
 		when(sellPriceItemMeta.getLore()).thenReturn(Arrays.asList(ChatColor.GOLD + "Price: 0.0"));
 		when(buyPriceItemMeta.getLore()).thenReturn(Arrays.asList(ChatColor.GOLD + "Price: 0.0"));
-		ShopSystemException e = mock(ShopSystemException.class);
+		ShopsystemException e = mock(ShopsystemException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		doThrow(e).when(validationHandler).checkForPricesGreaterThenZero(0.0, 0.0);
 
@@ -648,7 +634,7 @@ public class ShopSlotEditorHandlerImplTest {
 		assertDoesNotThrow(() -> when(shop.getShopItem(0)).thenReturn(shopItem));
 		when(shopItem.getItemStack()).thenReturn(shopItemStack);
 		when(shopItemStack.isSimilar(selectedItem)).thenReturn(true);
-		assertDoesNotThrow(() -> when(shop.editShopItem(0, "20", "3.0", "1.5")).thenReturn("edit message"));
+		assertDoesNotThrow(() -> when(shop.editShopItem(0, 20, 3.0, 1.5)).thenReturn("edit message"));
 
 		handler.handleSlotEditor(event);
 
@@ -691,7 +677,7 @@ public class ShopSlotEditorHandlerImplTest {
 		when(shopItem.getBuyPrice()).thenReturn(1.5);
 		when(shopItem.getAmount()).thenReturn(20);
 		when(shopItemStack.isSimilar(selectedItem)).thenReturn(true);
-		assertDoesNotThrow(() -> when(shop.editShopItem(0, "none", "none", "none")).thenReturn("edit message"));
+		assertDoesNotThrow(() -> when(shop.editShopItem(0, null, null, null)).thenReturn("edit message"));
 
 		handler.handleSlotEditor(event);
 

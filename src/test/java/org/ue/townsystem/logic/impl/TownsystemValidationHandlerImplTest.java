@@ -1,9 +1,8 @@
 package org.ue.townsystem.logic.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -21,17 +20,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.bank.logic.api.BankAccount;
+import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.economyplayer.logic.EconomyPlayerExceptionMessageEnum;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
+import org.ue.townsystem.logic.api.TownsystemException;
 import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
-import org.ue.townsystem.logic.TownExceptionMessageEnum;
-import org.ue.townsystem.logic.TownSystemException;
 
 import dagger.Lazy;
 
@@ -48,6 +46,33 @@ public class TownsystemValidationHandlerImplTest {
 	TownworldManager townworldManager;
 	@Mock
 	ServerProvider serverProvider;
+	
+	@Test
+	public void checkForEnoughMoneyTestValid() {
+		BankAccount account = mock(BankAccount.class);
+		when(account.getAmount()).thenReturn(5.0);
+		assertDoesNotThrow(() -> validationHandler.checkForEnoughMoney(account, 2.0, true));
+	}
+	
+	@Test
+	public void checkForEnoughMoneyTestFailPersonal() {
+		BankAccount account = mock(BankAccount.class);
+		when(account.getAmount()).thenReturn(5.0);
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForEnoughMoney(account, 20.0, true));
+		assertEquals(ExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL, e.getKey());
+		assertEquals(0, e.getParams().length);
+	}
+	
+	@Test
+	public void checkForEnoughMoneyTestFailNonPersonal() {
+		BankAccount account = mock(BankAccount.class);
+		when(account.getAmount()).thenReturn(5.0);
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForEnoughMoney(account, 20.0, false));
+		assertEquals(ExceptionMessageEnum.NOT_ENOUGH_MONEY_NON_PERSONAL, e.getKey());
+		assertEquals(0, e.getParams().length);
+	}
 
 	@Test
 	public void checkForLocationInsidePlotTestValid() {
@@ -66,13 +91,10 @@ public class TownsystemValidationHandlerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
-		try {
-			validationHandler.checkForLocationInsidePlot("1/2", loc);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(EconomyPlayerExceptionMessageEnum.OUTSIDE_OF_THE_PLOT, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForLocationInsidePlot("1/2", loc));
+		assertEquals(ExceptionMessageEnum.OUTSIDE_OF_THE_PLOT, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -85,13 +107,10 @@ public class TownsystemValidationHandlerImplTest {
 	public void checkForPlayerIsNotResidentOfPlotTestFail() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		List<EconomyPlayer> list = Arrays.asList(ecoPlayer);
-		try {
-			validationHandler.checkForPlayerIsNotResidentOfPlot(list, ecoPlayer);
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.PLAYER_IS_ALREADY_RESIDENT, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForPlayerIsNotResidentOfPlot(list, ecoPlayer));
+		assertEquals(ExceptionMessageEnum.PLAYER_IS_ALREADY_RESIDENT, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -104,13 +123,10 @@ public class TownsystemValidationHandlerImplTest {
 	@Test
 	public void checkForPlayerIsResidentOfPlotTestFail() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		try {
-			validationHandler.checkForPlayerIsResidentOfPlot(new ArrayList<>(), ecoPlayer);
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.PLAYER_IS_NO_RESIDENT, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForPlayerIsResidentOfPlot(new ArrayList<>(), ecoPlayer));
+		assertEquals(ExceptionMessageEnum.PLAYER_IS_NO_RESIDENT, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -123,13 +139,10 @@ public class TownsystemValidationHandlerImplTest {
 	public void checkForIsPlotOwnerTestFail() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		EconomyPlayer owner = mock(EconomyPlayer.class);
-		try {
-			validationHandler.checkForIsPlotOwner(owner, ecoPlayer);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForIsPlotOwner(owner, ecoPlayer));
+		assertEquals(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -139,13 +152,10 @@ public class TownsystemValidationHandlerImplTest {
 
 	@Test
 	public void checkForPlotIsNotForSaleTestFail() {
-		try {
-			validationHandler.checkForPlotIsNotForSale(true);
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.PLOT_IS_ALREADY_FOR_SALE, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForPlotIsNotForSale(true));
+		assertEquals(ExceptionMessageEnum.PLOT_IS_ALREADY_FOR_SALE, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -158,13 +168,10 @@ public class TownsystemValidationHandlerImplTest {
 	@Test
 	public void checkForPlayerIsDeputyTestFail() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		try {
-			validationHandler.checkForPlayerIsDeputy(new ArrayList<>(), ecoPlayer);
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.PLAYER_IS_NO_DEPUTY, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForPlayerIsDeputy(new ArrayList<>(), ecoPlayer));
+		assertEquals(ExceptionMessageEnum.PLAYER_IS_NO_DEPUTY, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -177,13 +184,10 @@ public class TownsystemValidationHandlerImplTest {
 	@Test
 	public void checkForPlayerIsCitizenTestFail() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		try {
-			validationHandler.checkForPlayerIsCitizen(new ArrayList<>(), ecoPlayer);
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.PLAYER_IS_NOT_CITIZEN, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForPlayerIsCitizen(new ArrayList<>(), ecoPlayer));
+		assertEquals(ExceptionMessageEnum.PLAYER_IS_NOT_CITIZEN, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -198,13 +202,10 @@ public class TownsystemValidationHandlerImplTest {
 
 	@Test
 	public void checkForTownHasEnoughMoneyTestFail() {
-		try {
-			validationHandler.checkForTownHasEnoughMoney(2.0, 3.5);
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.TOWN_HAS_NOT_ENOUGH_MONEY, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForTownHasEnoughMoney(2.0, 3.5));
+		assertEquals(ExceptionMessageEnum.TOWN_HAS_NOT_ENOUGH_MONEY, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -214,13 +215,10 @@ public class TownsystemValidationHandlerImplTest {
 
 	@Test
 	public void checkForPlayerHasDeputyPermissionTestFail() {
-		try {
-			validationHandler.checkForPlayerHasDeputyPermission(false);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForPlayerHasDeputyPermission(false));
+		assertEquals(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -230,13 +228,10 @@ public class TownsystemValidationHandlerImplTest {
 
 	@Test
 	public void checkForPlotIsForSaleTestFail() {
-		try {
-			validationHandler.checkForPlotIsForSale(false);
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.PLOT_IS_NOT_FOR_SALE, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForPlotIsForSale(false));
+		assertEquals(ExceptionMessageEnum.PLOT_IS_NOT_FOR_SALE, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -249,13 +244,10 @@ public class TownsystemValidationHandlerImplTest {
 	public void checkForPlayerIsMayorTestFail() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		EconomyPlayer mayor = mock(EconomyPlayer.class);
-		try {
-			validationHandler.checkForPlayerIsMayor(mayor, ecoPlayer);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForPlayerIsMayor(mayor, ecoPlayer));
+		assertEquals(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -268,13 +260,10 @@ public class TownsystemValidationHandlerImplTest {
 	@Test
 	public void checkForPlayerIsNotMayorTestFail() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		try {
-			validationHandler.checkForPlayerIsNotMayor(ecoPlayer, ecoPlayer);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_ARE_THE_OWNER, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForPlayerIsNotMayor(ecoPlayer, ecoPlayer));
+		assertEquals(ExceptionMessageEnum.YOU_ARE_THE_OWNER, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -286,13 +275,10 @@ public class TownsystemValidationHandlerImplTest {
 	@Test
 	public void checkForPlayerIsNotDeputyTestFail() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		try {
-			validationHandler.checkForPlayerIsNotDeputy(Arrays.asList(ecoPlayer), ecoPlayer);
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.PLAYER_IS_ALREADY_DEPUTY, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForPlayerIsNotDeputy(Arrays.asList(ecoPlayer), ecoPlayer));
+		assertEquals(ExceptionMessageEnum.PLAYER_IS_ALREADY_DEPUTY, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -304,13 +290,10 @@ public class TownsystemValidationHandlerImplTest {
 	@Test
 	public void checkForPlayerIsNotCitizenPersonalTestFail() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		try {
-			validationHandler.checkForPlayerIsNotCitizenPersonal(Arrays.asList(ecoPlayer), ecoPlayer);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_ARE_ALREADY_CITIZEN, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForPlayerIsNotCitizenPersonal(Arrays.asList(ecoPlayer), ecoPlayer));
+		assertEquals(ExceptionMessageEnum.YOU_ARE_ALREADY_CITIZEN, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -331,13 +314,10 @@ public class TownsystemValidationHandlerImplTest {
 		Location loc = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
 		when(loc.getChunk()).thenReturn(chunk);
-		try {
-			validationHandler.checkForLocationIsInTown(chunkList, loc);
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.LOCATION_NOT_IN_TOWN, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForLocationIsInTown(chunkList, loc));
+		assertEquals(ExceptionMessageEnum.LOCATION_NOT_IN_TOWN, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -353,13 +333,10 @@ public class TownsystemValidationHandlerImplTest {
 		Townworld townworld = mock(Townworld.class);
 		Chunk chunk = mock(Chunk.class);
 		when(townworld.isChunkFree(chunk)).thenReturn(false);
-		try {
-			validationHandler.checkForChunkNotClaimed(townworld, chunk);
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForChunkNotClaimed(townworld, chunk));
+		assertEquals(ExceptionMessageEnum.CHUNK_ALREADY_CLAIMED, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -372,13 +349,10 @@ public class TownsystemValidationHandlerImplTest {
 	@Test
 	public void checkForPlayerIsCitizenPersonalErrorTestFail() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		try {
-			validationHandler.checkForPlayerIsCitizenPersonalError(new ArrayList<>(), ecoPlayer);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_ARE_NO_CITIZEN, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForPlayerIsCitizenPersonalError(new ArrayList<>(), ecoPlayer));
+		assertEquals(ExceptionMessageEnum.YOU_ARE_NO_CITIZEN, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -394,13 +368,10 @@ public class TownsystemValidationHandlerImplTest {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Plot plot = mock(Plot.class);
 		when(plot.isOwner(ecoPlayer)).thenReturn(true);
-		try {
-			validationHandler.checkForPlayerIsNotPlotOwner(ecoPlayer, plot);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_ARE_THE_OWNER, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForPlayerIsNotPlotOwner(ecoPlayer, plot));
+		assertEquals(ExceptionMessageEnum.YOU_ARE_THE_OWNER, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -414,13 +385,10 @@ public class TownsystemValidationHandlerImplTest {
 	public void checkForPlayerDidNotReachedMaxTownsTestFail() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayer.reachedMaxJoinedTowns()).thenReturn(true);
-		try {
-			validationHandler.checkForPlayerDidNotReachedMaxTowns(ecoPlayer);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(EconomyPlayerExceptionMessageEnum.MAX_REACHED, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForPlayerDidNotReachedMaxTowns(ecoPlayer));
+		assertEquals(ExceptionMessageEnum.MAX_REACHED, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -430,13 +398,10 @@ public class TownsystemValidationHandlerImplTest {
 
 	@Test
 	public void checkForChunkIsConnectedToTownTestFail() {
-		try {
-			validationHandler.checkForChunkIsConnectedToTown(false);
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.CHUNK_IS_NOT_CONNECTED_WITH_TOWN, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForChunkIsConnectedToTown(false));
+		assertEquals(ExceptionMessageEnum.CHUNK_IS_NOT_CONNECTED_WITH_TOWN, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -448,13 +413,10 @@ public class TownsystemValidationHandlerImplTest {
 	public void checkForChunkIsNotClaimedByThisTownTestFail() {
 		Map<String, Plot> map = new HashMap<>();
 		map.put("1/2", null);
-		try {
-			validationHandler.checkForChunkIsNotClaimedByThisTown(map, "1/2");
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForChunkIsNotClaimedByThisTown(map, "1/2"));
+		assertEquals(ExceptionMessageEnum.CHUNK_ALREADY_CLAIMED, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -466,13 +428,10 @@ public class TownsystemValidationHandlerImplTest {
 
 	@Test
 	public void checkForChunkIsClaimedByThisTownTestFail() {
-		try {
-			validationHandler.checkForChunkIsClaimedByThisTown(new HashMap<>(), "1/2");
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.CHUNK_NOT_CLAIMED_BY_TOWN, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForChunkIsClaimedByThisTown(new HashMap<>(), "1/2"));
+		assertEquals(ExceptionMessageEnum.CHUNK_NOT_CLAIMED_BY_TOWN, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -484,13 +443,10 @@ public class TownsystemValidationHandlerImplTest {
 	public void checkForTownworldDoesNotExistTestFail() {
 		Map<String, Townworld> map = new HashMap<>();
 		map.put("world", null);
-		try {
-			validationHandler.checkForTownworldDoesNotExist(map, "world");
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.TOWNWORLD_ALREADY_EXIST, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForTownworldDoesNotExist(map, "world"));
+		assertEquals(ExceptionMessageEnum.TOWNWORLD_ALREADY_EXIST, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -502,13 +458,10 @@ public class TownsystemValidationHandlerImplTest {
 
 	@Test
 	public void checkForTownworldExistsTestFail() {
-		try {
-			validationHandler.checkForTownworldExists(new HashMap<>(), "world");
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.TOWNWORLD_DOES_NOT_EXIST, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForTownworldExists(new HashMap<>(), "world"));
+		assertEquals(ExceptionMessageEnum.TOWNWORLD_DOES_NOT_EXIST, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -528,13 +481,10 @@ public class TownsystemValidationHandlerImplTest {
 		Chunk chunk = mock(Chunk.class);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(townworld.isChunkFree(chunk)).thenReturn(false);
-		try {
-			validationHandler.checkForChunkIsFree(townworld, loc);
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.CHUNK_ALREADY_CLAIMED, e.getKey());
-			assertEquals(0, e.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForChunkIsFree(townworld, loc));
+		assertEquals(ExceptionMessageEnum.CHUNK_ALREADY_CLAIMED, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -547,14 +497,11 @@ public class TownsystemValidationHandlerImplTest {
 	@Test
 	public void checkForWorldExistsTestFail() {
 		when(serverProvider.getWorld("world")).thenReturn(null);
-		try {
-			validationHandler.checkForWorldExists("world");
-			fail();
-		} catch (TownSystemException e) {
-			assertEquals(TownExceptionMessageEnum.WORLD_DOES_NOT_EXIST, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals("world", e.getParams()[0]);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForWorldExists("world"));
+		assertEquals(ExceptionMessageEnum.WORLD_DOES_NOT_EXIST, e.getKey());
+		assertEquals(1, e.getParams().length);
+		assertEquals("world", e.getParams()[0]);
 	}
 
 	@Test
@@ -581,15 +528,10 @@ public class TownsystemValidationHandlerImplTest {
 		when(townworldManager.isTownWorld("world")).thenReturn(true);
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 		when(townworld.isChunkFree(chunk)).thenReturn(true);
-		try {
-			validationHandler.checkForTownworldPlotPermission(loc, null);
-			fail();
-		} catch (EconomyPlayerException | TownSystemException e) {
-			assertTrue(e instanceof EconomyPlayerException);
-			EconomyPlayerException ex = (EconomyPlayerException) e;
-			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, ex.getKey());
-			assertEquals(0, ex.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForTownworldPlotPermission(loc, null));
+		assertEquals(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -637,15 +579,10 @@ public class TownsystemValidationHandlerImplTest {
 		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
 		assertDoesNotThrow(() -> when(town.getPlotByChunk("1/2")).thenReturn(plot));
 		when(town.hasBuildPermissions(ecoPlayer, plot)).thenReturn(false);
-		try {
-			validationHandler.checkForTownworldPlotPermission(loc, ecoPlayer);
-			fail();
-		} catch (EconomyPlayerException | TownSystemException e) {
-			assertTrue(e instanceof EconomyPlayerException);
-			EconomyPlayerException ex = (EconomyPlayerException) e;
-			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, ex.getKey());
-			assertEquals(0, ex.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForTownworldPlotPermission(loc, ecoPlayer));
+		assertEquals(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 
 	@Test
@@ -662,14 +599,9 @@ public class TownsystemValidationHandlerImplTest {
 		when(townworldManager.isTownWorld("world")).thenReturn(true);
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 		when(townworld.isChunkFree(chunk)).thenReturn(true);
-		try {
-			validationHandler.checkForTownworldPlotPermission(loc, ecoPlayer);
-			fail();
-		} catch (EconomyPlayerException | TownSystemException e) {
-			assertTrue(e instanceof EconomyPlayerException);
-			EconomyPlayerException ex = (EconomyPlayerException) e;
-			assertEquals(EconomyPlayerExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, ex.getKey());
-			assertEquals(0, ex.getParams().length);
-		}
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> validationHandler.checkForTownworldPlotPermission(loc, ecoPlayer));
+		assertEquals(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION, e.getKey());
+		assertEquals(0, e.getParams().length);
 	}
 }

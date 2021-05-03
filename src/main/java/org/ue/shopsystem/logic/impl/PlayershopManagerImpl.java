@@ -10,43 +10,33 @@ import javax.inject.Inject;
 import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.ue.common.logic.api.GeneralValidationHandler;
+import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
-import org.ue.shopsystem.logic.ShopSystemException;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.logic.api.Playershop;
 import org.ue.shopsystem.logic.api.PlayershopManager;
 import org.ue.shopsystem.logic.api.ShopValidationHandler;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
-import org.ue.townsystem.logic.TownSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class PlayershopManagerImpl implements PlayershopManager {
 
 	private static final Logger log = LoggerFactory.getLogger(PlayershopManagerImpl.class);
 	private final MessageWrapper messageWrapper;
 	private final ShopValidationHandler validationHandler;
-	private final TownsystemValidationHandler townsystemValidationHandler;
-	private final GeneralValidationHandler generalValidator;
 	private final ConfigDao configDao;
 	private final ServerProvider serverProvider;
 	private Map<String, Playershop> playerShopList = new HashMap<>();
-	
+
 	@Inject
-	public PlayershopManagerImpl(ConfigDao configDao, TownsystemValidationHandler townsystemValidationHandler,
-			ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
-			ServerProvider serverProvider,
-			GeneralValidationHandler generalValidator) {
+	public PlayershopManagerImpl(ConfigDao configDao, ShopValidationHandler validationHandler,
+			MessageWrapper messageWrapper, ServerProvider serverProvider) {
 		this.configDao = configDao;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
-		this.townsystemValidationHandler = townsystemValidationHandler;
 		this.serverProvider = serverProvider;
-		this.generalValidator = generalValidator;
 	}
 
 	@Override
@@ -72,19 +62,19 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	}
 
 	@Override
-	public Playershop getPlayerShopByUniqueName(String name) throws GeneralEconomyException {
+	public Playershop getPlayerShopByUniqueName(String name) throws ShopsystemException {
 		for (Playershop shop : playerShopList.values()) {
 			if (name.equals(shop.getName() + "_" + shop.getOwner().getName())) {
 				return shop;
 			}
 		}
-		throw new GeneralEconomyException(messageWrapper, GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, name);
+		throw new ShopsystemException(messageWrapper, ExceptionMessageEnum.DOES_NOT_EXIST, name);
 	}
 
 	@Override
-	public Playershop getPlayerShopById(String id) throws GeneralEconomyException {
+	public Playershop getPlayerShopById(String id) throws ShopsystemException {
 		Playershop shop = playerShopList.get(id);
-		generalValidator.checkForValueExists(shop, id);
+		validationHandler.checkForValueExists(shop, id);
 		return shop;
 	}
 
@@ -100,12 +90,12 @@ public class PlayershopManagerImpl implements PlayershopManager {
 
 	@Override
 	public void createPlayerShop(String name, Location spawnLocation, int size, EconomyPlayer ecoPlayer)
-			throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
+			throws ShopsystemException {
 		validationHandler.checkForValidShopName(name);
 		validationHandler.checkForMaxPlayershopsForPlayer(getPlayerShops(), ecoPlayer);
-		townsystemValidationHandler.checkForTownworldPlotPermission(spawnLocation, ecoPlayer);
+		validationHandler.checkForPlayerHasPermissionAtLocation(spawnLocation, ecoPlayer);
 		validationHandler.checkForShopNameIsFree(getPlayerShopUniqueNameList(), name, ecoPlayer);
-		generalValidator.checkForValidSize(size);
+		validationHandler.checkForValidSize(size);
 		Playershop shop = serverProvider.getServiceComponent().getPlayershop();
 		shop.setupNew(name, ecoPlayer, generateFreePlayerShopId(), spawnLocation, size);
 		playerShopList.put(shop.getShopId(), shop);
@@ -133,7 +123,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 				Playershop shop = serverProvider.getServiceComponent().getPlayershop();
 				shop.setupExisting(shopId);
 				playerShopList.put(shopId, shop);
-			} catch (TownSystemException | GeneralEconomyException | EconomyPlayerException e) {
+			} catch (EconomyPlayerException e) {
 				log.warn("[Ultimate_Economy] Failed to load the shop " + shopId);
 				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}

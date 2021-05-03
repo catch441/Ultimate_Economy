@@ -22,20 +22,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ue.common.logic.api.GeneralValidationHandler;
+import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.ServiceComponent;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.logic.api.Playershop;
 import org.ue.shopsystem.logic.api.ShopValidationHandler;
-import org.ue.shopsystem.logic.ShopSystemException;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
-import org.ue.townsystem.logic.TownSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class PlayershopManagerImplTest {
@@ -47,67 +43,58 @@ public class PlayershopManagerImplTest {
 	@Mock
 	ShopValidationHandler validationHandler;
 	@Mock
-	TownsystemValidationHandler townsystemValidationHandler;
-	@Mock
 	ConfigDao configDao;
 	@Mock
 	ServerProvider serverProvider;
-	@Mock
-	GeneralValidationHandler generalValidator;
 
 	@Test
-	public void createNewPlayershopTestWithInvalidSize() throws GeneralEconomyException {
+	public void createNewPlayershopTestWithInvalidSize() throws ShopsystemException {
 		Location loc = mock(Location.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValidSize(5);
-		assertThrows(GeneralEconomyException.class,
-				() -> playershopManager.createPlayerShop("myshop", loc, 5, ecoPlayer));
+		doThrow(ShopsystemException.class).when(validationHandler).checkForValidSize(5);
+		assertThrows(ShopsystemException.class, () -> playershopManager.createPlayerShop("myshop", loc, 5, ecoPlayer));
 		assertEquals(0, playershopManager.getPlayerShops().size());
 		verify(configDao, never()).savePlayershopIds(anyList());
 	}
 
 	@Test
-	public void createNewAdminshopTestWithExistingName() throws GeneralEconomyException {
+	public void createNewPlayershopTestWithExistingName() throws ShopsystemException {
 		Location loc = mock(Location.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		doThrow(GeneralEconomyException.class).when(validationHandler).checkForShopNameIsFree(anyList(), eq("myshop"),
+		doThrow(ShopsystemException.class).when(validationHandler).checkForShopNameIsFree(anyList(), eq("myshop"),
 				eq(ecoPlayer));
-		assertThrows(GeneralEconomyException.class,
-				() -> playershopManager.createPlayerShop("myshop", loc, 5, ecoPlayer));
+		assertThrows(ShopsystemException.class, () -> playershopManager.createPlayerShop("myshop", loc, 5, ecoPlayer));
 		assertEquals(0, playershopManager.getPlayerShops().size());
 		verify(configDao, never()).savePlayershopIds(anyList());
 	}
 
 	@Test
-	public void createNewAdminshopTestWithInvalidName() throws ShopSystemException {
+	public void createNewPlayershopTestWithInvalidName() throws ShopsystemException {
 		Location loc = mock(Location.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		doThrow(ShopSystemException.class).when(validationHandler).checkForValidShopName("myshop_");
-		assertThrows(ShopSystemException.class, () -> playershopManager.createPlayerShop("myshop_", loc, 9, ecoPlayer));
+		doThrow(ShopsystemException.class).when(validationHandler).checkForValidShopName("myshop_");
+		assertThrows(ShopsystemException.class, () -> playershopManager.createPlayerShop("myshop_", loc, 9, ecoPlayer));
 		assertEquals(0, playershopManager.getPlayerShops().size());
 		verify(configDao, never()).savePlayershopIds(anyList());
 	}
 
 	@Test
-	public void createNewAdminshopTestWithMaxShopsReached() throws EconomyPlayerException {
+	public void createNewAdminshopTestWithMaxShopsReached() throws ShopsystemException {
 		Location loc = mock(Location.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		doThrow(EconomyPlayerException.class).when(validationHandler).checkForMaxPlayershopsForPlayer(anyList(),
+		doThrow(ShopsystemException.class).when(validationHandler).checkForMaxPlayershopsForPlayer(anyList(),
 				eq(ecoPlayer));
-		assertThrows(EconomyPlayerException.class,
-				() -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
+		assertThrows(ShopsystemException.class, () -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
 		assertEquals(0, playershopManager.getPlayerShops().size());
 		verify(configDao, never()).savePlayershopIds(anyList());
 	}
 
 	@Test
-	public void createNewPlayershopTestWithNoPlotPermission() throws EconomyPlayerException, TownSystemException {
+	public void createNewPlayershopTestWithNoPlotPermission() throws ShopsystemException {
 		Location loc = mock(Location.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		doThrow(EconomyPlayerException.class).when(townsystemValidationHandler).checkForTownworldPlotPermission(loc,
-				ecoPlayer);
-		assertThrows(EconomyPlayerException.class,
-				() -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
+		doThrow(ShopsystemException.class).when(validationHandler).checkForPlayerHasPermissionAtLocation(loc, ecoPlayer);
+		assertThrows(ShopsystemException.class, () -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
 		assertEquals(0, playershopManager.getPlayerShops().size());
 		verify(configDao, never()).savePlayershopIds(anyList());
 	}
@@ -127,8 +114,8 @@ public class PlayershopManagerImplTest {
 		assertDoesNotThrow(() -> verify(validationHandler).checkForMaxPlayershopsForPlayer(anyList(), eq(ecoPlayer)));
 		assertDoesNotThrow(
 				() -> verify(validationHandler).checkForShopNameIsFree(anyList(), eq("myshop"), eq(ecoPlayer)));
-		assertDoesNotThrow(() -> verify(generalValidator).checkForValidSize(9));
-		assertDoesNotThrow(() -> verify(townsystemValidationHandler).checkForTownworldPlotPermission(loc, ecoPlayer));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(9));
+		assertDoesNotThrow(() -> verify(validationHandler).checkForPlayerHasPermissionAtLocation(loc, ecoPlayer));
 		assertEquals(1, playershopManager.getPlayerShops().size());
 		Playershop result = playershopManager.getPlayerShops().get(0);
 		assertEquals(shop, result);
@@ -193,13 +180,11 @@ public class PlayershopManagerImplTest {
 
 	@Test
 	public void getPlayerShopByUniqueNameTestWithNoShop() {
-		try {
-			playershopManager.getPlayerShopByUniqueName("myshop_catch441");
-		} catch (GeneralEconomyException e) {
-			assertEquals(GeneralEconomyExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
-			assertEquals(1, e.getParams().length);
-			assertEquals("myshop_catch441", e.getParams()[0]);
-		}
+		ShopsystemException exception = assertThrows(ShopsystemException.class,
+				() -> playershopManager.getPlayerShopByUniqueName("myshop_catch441"));
+		assertEquals(ExceptionMessageEnum.DOES_NOT_EXIST, exception.getKey());
+		assertEquals(1, exception.getParams().length);
+		assertEquals("myshop_catch441", exception.getParams()[0]);
 	}
 
 	@Test
@@ -213,9 +198,9 @@ public class PlayershopManagerImplTest {
 	}
 
 	@Test
-	public void getPlayerShopByIdTestWithNoShop() throws GeneralEconomyException {
-		doThrow(GeneralEconomyException.class).when(generalValidator).checkForValueExists(null, "P0");
-		assertThrows(GeneralEconomyException.class, () -> playershopManager.getPlayerShopById("P0"));
+	public void getPlayerShopByIdTestWithNoShop() throws ShopsystemException {
+		doThrow(ShopsystemException.class).when(validationHandler).checkForValueExists(null, "P0");
+		assertThrows(ShopsystemException.class, () -> playershopManager.getPlayerShopById("P0"));
 	}
 
 	@Test
@@ -230,7 +215,7 @@ public class PlayershopManagerImplTest {
 	public void despawnAllVillagersTest() {
 		Playershop shop = createPlayershop("P0");
 		playershopManager.despawnAllVillagers();
-		verify(shop).despawnVillager();
+		verify(shop).despawn();
 	}
 
 	@Test
@@ -242,73 +227,31 @@ public class PlayershopManagerImplTest {
 		verify(shop).deleteShop();
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void loadAllPlayerShopsTest() {
 		Playershop shop = mock(Playershop.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		when(serviceComponent.getPlayershop()).thenReturn(shop);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(configDao.hasPlayerShopNames()).thenReturn(false);
 		when(configDao.loadPlayershopIds()).thenReturn(Arrays.asList("P0"));
 		playershopManager.loadAllPlayerShops();
 		assertEquals(1, playershopManager.getPlayerShops().size());
 		assertEquals(shop, playershopManager.getPlayerShops().get(0));
-		assertDoesNotThrow(() -> verify(shop).setupExisting(null, "P0"));
+		assertDoesNotThrow(() -> verify(shop).setupExisting("P0"));
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
-	public void loadAllPlayerShopsTestWithLoadingError()
-			throws TownSystemException, ShopSystemException, GeneralEconomyException {
+	public void loadAllPlayerShopsTestWithLoadingError() throws EconomyPlayerException {
 		Playershop shop = mock(Playershop.class);
 		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		when(serviceComponent.getPlayershop()).thenReturn(shop);
 		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		TownSystemException e = mock(TownSystemException.class);
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");
-		when(configDao.hasPlayerShopNames()).thenReturn(false);
 		when(configDao.loadPlayershopIds()).thenReturn(Arrays.asList("P0"));
-		doThrow(e).when(shop).setupExisting(null, "P0");
+		doThrow(e).when(shop).setupExisting("P0");
 		playershopManager.loadAllPlayerShops();
 		assertEquals(0, playershopManager.getPlayerShops().size());
 		verify(e).getMessage();
-	}
-
-	@SuppressWarnings("deprecation")
-	@Test
-	public void loadAllPlayershopsTestWithOldLoading() {
-		Playershop shop = mock(Playershop.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(serviceComponent.getPlayershop()).thenReturn(shop);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(configDao.hasPlayerShopNames()).thenReturn(true);
-		when(configDao.loadPlayerShopNames()).thenReturn(Arrays.asList("myshop"));
-		playershopManager.loadAllPlayerShops();
-		assertEquals(1, playershopManager.getPlayerShops().size());
-		assertEquals(shop, playershopManager.getPlayerShops().get(0));
-		assertDoesNotThrow(() -> verify(shop).setupExisting("myshop", "P0"));
-		verify(configDao).removeDeprecatedPlayerShopNames();
-		verify(configDao).savePlayershopIds(anyList());
-	}
-
-	@SuppressWarnings("deprecation")
-	@Test
-	public void loadAllPlayershopsTestWithOldLoadingAndLoadError()
-			throws TownSystemException, ShopSystemException, GeneralEconomyException {
-		Playershop shop = mock(Playershop.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(serviceComponent.getPlayershop()).thenReturn(shop);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		TownSystemException e = mock(TownSystemException.class);
-		when(e.getMessage()).thenReturn("my error message");
-		when(configDao.hasPlayerShopNames()).thenReturn(true);
-		when(configDao.loadPlayerShopNames()).thenReturn(Arrays.asList("myshop"));
-		doThrow(e).when(shop).setupExisting("myshop", "P0");
-		playershopManager.loadAllPlayerShops();
-		assertEquals(0, playershopManager.getPlayerShops().size());
-		verify(e).getMessage();
-		verify(configDao).removeDeprecatedPlayerShopNames();
-		verify(configDao).savePlayershopIds(anyList());
 	}
 }

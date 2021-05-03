@@ -24,12 +24,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.shopsystem.logic.api.Playershop;
 import org.ue.shopsystem.logic.api.PlayershopManager;
-import org.ue.shopsystem.logic.ShopSystemException;
-import org.ue.townsystem.logic.TownSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class PlayershopCommandExecutorImplTest {
@@ -89,9 +86,8 @@ public class PlayershopCommandExecutorImplTest {
 	}
 
 	@Test
-	public void createCommandTestWithInvalidNumber2()
-			throws ShopSystemException, TownSystemException, EconomyPlayerException, GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void createCommandTestWithInvalidNumber2() throws ShopsystemException {
+		ShopsystemException e = mock(ShopsystemException.class);
 		doThrow(e).when(playershopManager).createPlayerShop("myshop", null, 6, null);
 		when(e.getMessage()).thenReturn("my error message");
 		String[] args = { "create", "myshop", "6" };
@@ -125,8 +121,8 @@ public class PlayershopCommandExecutorImplTest {
 	}
 
 	@Test
-	public void deleteCommandTestWithNoShop() throws GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void deleteCommandTestWithNoShop() throws ShopsystemException {
+		ShopsystemException e = mock(ShopsystemException.class);
 		when(player.getName()).thenReturn("catch441");
 		when(e.getMessage()).thenReturn("my error message");
 		doThrow(e).when(playershopManager).getPlayerShopByUniqueName("myshop_catch441");
@@ -152,8 +148,8 @@ public class PlayershopCommandExecutorImplTest {
 	}
 
 	@Test
-	public void renameCommandTestWithInvalidName() throws ShopSystemException, GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void renameCommandTestWithInvalidName() throws ShopsystemException {
+		ShopsystemException e = mock(ShopsystemException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		Playershop shop = mock(Playershop.class);
 		when(player.getName()).thenReturn("catch441");
@@ -193,19 +189,18 @@ public class PlayershopCommandExecutorImplTest {
 		String[] args = { "resize", "myshop", "27" };
 		boolean result = executor.onCommand(player, null, "playershop", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(shop).changeShopSize(27));
+		assertDoesNotThrow(() -> verify(shop).changeSize(27));
 		verify(player).sendMessage("my message");
 		verify(player, times(1)).sendMessage(anyString());
 	}
 
 	@Test
-	public void resizeCommandTestWithInvalidSize()
-			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void resizeCommandTestWithInvalidSize() throws ShopsystemException {
+		ShopsystemException e = mock(ShopsystemException.class);
 		Playershop shop = mock(Playershop.class);
 		when(e.getMessage()).thenReturn("my error message");
 		when(player.getName()).thenReturn("catch441");
-		doThrow(e).when(shop).changeShopSize(7);
+		doThrow(e).when(shop).changeSize(7);
 		assertDoesNotThrow(() -> when(playershopManager.getPlayerShopByUniqueName("myshop_catch441")).thenReturn(shop));
 		String[] args = { "resize", "myshop", "7" };
 		boolean result = executor.onCommand(player, null, "playershop", args);
@@ -298,7 +293,7 @@ public class PlayershopCommandExecutorImplTest {
 		String[] args = { "move", "myshop" };
 		boolean result = executor.onCommand(player, null, "playershop", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(shop).moveShop(loc));
+		assertDoesNotThrow(() -> verify(shop).changeLocation(loc));
 		verify(player, never()).sendMessage(anyString());
 	}
 
@@ -353,8 +348,8 @@ public class PlayershopCommandExecutorImplTest {
 	}
 
 	@Test
-	public void changeOwnerCommandTestWithHasSameShop() throws EconomyPlayerException, ShopSystemException {
-		ShopSystemException e = mock(ShopSystemException.class);
+	public void changeOwnerCommandTestWithHasSameShop() throws ShopsystemException {
+		ShopsystemException e = mock(ShopsystemException.class);
 		EconomyPlayer newOwner = mock(EconomyPlayer.class);
 		Player newPlayer = mock(Player.class);
 		Playershop shop = mock(Playershop.class);

@@ -9,10 +9,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ue.common.logic.api.GeneralValidationHandler;
+import org.ue.bank.logic.api.BankException;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.utils.api.MessageWrapper;
-import org.ue.general.GeneralEconomyException;
-import org.ue.general.GeneralEconomyExceptionMessageEnum;
 
 @ExtendWith(MockitoExtension.class)
 public class BankValidationHandlerTest {
@@ -21,8 +21,6 @@ public class BankValidationHandlerTest {
 	BankValidationHandlerImpl validationHandler;
 	@Mock
 	MessageWrapper messageWrapper;
-	@Mock
-	GeneralValidationHandler generalHandler;
 
 	@Test
 	public void checkForHasEnoughMoneyTestFail() {
@@ -31,13 +29,21 @@ public class BankValidationHandlerTest {
 			fail();
 		} catch (GeneralEconomyException e) {
 			assertEquals(0, e.getParams().length);
-			assertEquals(GeneralEconomyExceptionMessageEnum.NOT_ENOUGH_MONEY, e.getKey());
+			assertEquals(ExceptionMessageEnum.NOT_ENOUGH_MONEY, e.getKey());
 		}
 	}
-	
+
 	@Test
 	public void checkForHasEnoughMoneyTestValid() {
 		assertDoesNotThrow(() -> validationHandler.checkForHasEnoughMoney(10.0, 5.0));
 	}
-	
+
+	@Test
+	public void createNewTest() {
+		BankException exception = validationHandler.createNew(messageWrapper, ExceptionMessageEnum.NOT_ENOUGH_MONEY,
+				"param");
+		assertEquals(1, exception.getParams().length);
+		assertEquals("param", exception.getParams()[0]);
+		assertEquals(ExceptionMessageEnum.NOT_ENOUGH_MONEY, exception.getKey());
+	}
 }

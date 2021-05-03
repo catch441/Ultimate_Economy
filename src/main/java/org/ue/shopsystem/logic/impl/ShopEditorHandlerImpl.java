@@ -1,16 +1,19 @@
 package org.ue.shopsystem.logic.impl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.SkullTextureEnum;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.shopsystem.logic.ShopSystemException;
 import org.ue.shopsystem.logic.api.AbstractShop;
 import org.ue.shopsystem.logic.api.ShopEditorHandler;
+import org.ue.shopsystem.logic.api.ShopItem;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class ShopEditorHandlerImpl implements ShopEditorHandler {
 
@@ -33,13 +36,14 @@ public class ShopEditorHandlerImpl implements ShopEditorHandler {
 	@Override
 	public void setup(int reservedSlots) {
 		editor = shop.createVillagerInventory(shop.getSize(), shop.getName() + "-Editor");
-		for (int i = 0; i < (shop.getSize() - reservedSlots); i++) {
-			try {
-				shop.getShopItem(i);
-				setOccupied(true, i);
-			} catch (GeneralEconomyException | EconomyPlayerException | ShopSystemException e) {
-				setOccupied(false, i);
-			}
+		List<Integer> slots = IntStream.rangeClosed(0, shop.getSize() - 1 - reservedSlots).boxed()
+				.collect(Collectors.toList());
+		for (ShopItem item : shop.getItemList()) {
+			setOccupied(true, item.getSlot());
+			slots.remove((Integer) item.getSlot());
+		}
+		for(Integer i:slots) {
+			setOccupied(false, i);
 		}
 	}
 
@@ -50,7 +54,7 @@ public class ShopEditorHandlerImpl implements ShopEditorHandler {
 			int slot = Integer.valueOf(clickedItemMeta.getDisplayName().substring(5));
 			try {
 				shop.openSlotEditor((Player) event.getWhoClicked(), slot - 1);
-			} catch (ShopSystemException | GeneralEconomyException e) {
+			} catch (ShopsystemException e) {
 			}
 		}
 	}

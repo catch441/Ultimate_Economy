@@ -9,8 +9,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.ue.common.utils.TabCompleterUtils;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.general.GeneralEconomyException;
 
 public class EconomyPlayerTabCompleterImpl extends TabCompleterUtils implements TabCompleter {
 
@@ -46,7 +46,7 @@ public class EconomyPlayerTabCompleterImpl extends TabCompleterUtils implements 
 			List<String> homes = new ArrayList<String>(
 					ecoPlayerManager.getEconomyPlayerByName(playerName).getHomeList().keySet());
 			list = getMatchingList(homes, arg);
-		} catch (GeneralEconomyException e) {
+		} catch (EconomyPlayerException e) {
 		}
 		return list;
 	}

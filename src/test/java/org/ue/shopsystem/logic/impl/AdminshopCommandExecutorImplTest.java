@@ -33,13 +33,11 @@ import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.shopsystem.logic.api.Adminshop;
 import org.ue.shopsystem.logic.api.AdminshopManager;
-import org.ue.shopsystem.logic.ShopSystemException;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class AdminshopCommandExecutorImplTest {
@@ -105,7 +103,7 @@ public class AdminshopCommandExecutorImplTest {
 		String[] args = { "myjob" };
 		boolean result = executor.onCommand(player, null, "shop", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(adminshop).openShopInventory(player));
+		assertDoesNotThrow(() -> verify(adminshop).openInventory(player));
 		verify(player, never()).sendMessage(anyString());
 	}
 	
@@ -120,7 +118,7 @@ public class AdminshopCommandExecutorImplTest {
 		String[] args = { "myshop" };
 		boolean result = executor.onCommand(player, null, "shop", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(adminshop).openShopInventory(player));
+		assertDoesNotThrow(() -> verify(adminshop).openInventory(player));
 		verify(player, never()).sendMessage(anyString());
 	}
 
@@ -201,8 +199,8 @@ public class AdminshopCommandExecutorImplTest {
 	}
 
 	@Test
-	public void deleteCommandTestWithNoShop() throws GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void deleteCommandTestWithNoShop() throws ShopsystemException {
+		ShopsystemException e = mock(ShopsystemException.class);
 		doThrow(e).when(adminshopManager).getAdminShopByName("myshop");
 		String[] args = { "delete", "myshop" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
@@ -256,11 +254,10 @@ public class AdminshopCommandExecutorImplTest {
 	}
 
 	@Test
-	public void resizeCommandTestWithInvalidNumber()
-			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void resizeCommandTestWithInvalidNumber() throws ShopsystemException {
+		ShopsystemException e = mock(ShopsystemException.class);
 		Adminshop shop = mock(Adminshop.class);
-		doThrow(e).when(shop).changeShopSize(2);
+		doThrow(e).when(shop).changeSize(2);
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopByName("myshop")).thenReturn(shop));
 		String[] args = { "resize", "myshop", "2" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
@@ -276,7 +273,7 @@ public class AdminshopCommandExecutorImplTest {
 		String[] args = { "resize", "myshop", "18" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(shop).changeShopSize(18));
+		assertDoesNotThrow(() -> verify(shop).changeSize(18));
 		verify(player).sendMessage("my message");
 		verifyNoMoreInteractions(player);
 	}
@@ -299,7 +296,7 @@ public class AdminshopCommandExecutorImplTest {
 		String[] args = { "move", "myshop" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(shop).moveShop(loc));
+		assertDoesNotThrow(() -> verify(shop).changeLocation(loc));
 		verify(player, never()).sendMessage(anyString());
 	}
 

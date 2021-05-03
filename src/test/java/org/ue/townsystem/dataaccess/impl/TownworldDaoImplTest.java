@@ -24,8 +24,8 @@ import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankManager;
 import org.ue.common.utils.ServerProvider;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.general.GeneralEconomyException;
 import org.ue.townsystem.logic.api.TownsystemValidationHandler;
 
 @ExtendWith(MockitoExtension.class)
@@ -169,26 +169,6 @@ public class TownworldDaoImplTest {
 	}
 
 	@Test
-	public void savePlotVillagerLocationTest() {
-		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		dao.setupSavefile("world");
-		Location loc = mock(Location.class);
-		World world = mock(World.class);
-		when(loc.getWorld()).thenReturn(world);
-		when(world.getName()).thenReturn("world");
-		when(loc.getX()).thenReturn(1.1);
-		when(loc.getY()).thenReturn(2.2);
-		when(loc.getZ()).thenReturn(3.3);
-		dao.savePlotVillagerLocation("town", "1/2", loc);
-		File file = new File("src/world_TownWorld.yml");
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		assertEquals(1.1, config.getDouble("Towns.town.Plots.1/2.SaleVillager.x"));
-		assertEquals(2.2, config.getDouble("Towns.town.Plots.1/2.SaleVillager.y"));
-		assertEquals(3.3, config.getDouble("Towns.town.Plots.1/2.SaleVillager.z"));
-		assertEquals("world", config.getString("Towns.town.Plots.1/2.SaleVillager.world"));
-	}
-
-	@Test
 	public void savePlotOwnerTest() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		dao.setupSavefile("world");
@@ -234,26 +214,6 @@ public class TownworldDaoImplTest {
 		File file = new File("src/world_TownWorld.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals(Arrays.asList("catch441"), config.getStringList("Towns.town.Plots.1/2.coOwners"));
-	}
-
-	@Test
-	public void saveTownManagerLocationTest() {
-		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		dao.setupSavefile("world");
-		Location loc = mock(Location.class);
-		World world = mock(World.class);
-		when(loc.getWorld()).thenReturn(world);
-		when(world.getName()).thenReturn("world");
-		when(loc.getX()).thenReturn(1.1);
-		when(loc.getY()).thenReturn(2.2);
-		when(loc.getZ()).thenReturn(3.3);
-		dao.saveTownManagerLocation("town", loc);
-		File file = new File("src/world_TownWorld.yml");
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		assertEquals(1.1, config.getDouble("Towns.town.TownManagerVillager.x"));
-		assertEquals(2.2, config.getDouble("Towns.town.TownManagerVillager.y"));
-		assertEquals(3.3, config.getDouble("Towns.town.TownManagerVillager.z"));
-		assertEquals("world", config.getString("Towns.town.TownManagerVillager.world"));
 	}
 
 	@Test
@@ -314,8 +274,8 @@ public class TownworldDaoImplTest {
 	}
 	
 	@Test
-	public void loadDeputiesTestWithLoadingError() throws GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void loadDeputiesTestWithLoadingError() throws EconomyPlayerException {
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
@@ -339,8 +299,8 @@ public class TownworldDaoImplTest {
 	}
 	
 	@Test
-	public void loadCitizensTestWithLoadingError() throws GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void loadCitizensTestWithLoadingError() throws EconomyPlayerException {
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
@@ -364,8 +324,8 @@ public class TownworldDaoImplTest {
 	}
 	
 	@Test
-	public void loadResidentsTestWithLoadingError() throws GeneralEconomyException {
-		GeneralEconomyException e = mock(GeneralEconomyException.class);
+	public void loadResidentsTestWithLoadingError() throws EconomyPlayerException {
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(e);
@@ -406,50 +366,6 @@ public class TownworldDaoImplTest {
 		dao.saveWorldName("world");
 		when(serverProvider.getWorld("world")).thenReturn(world);
 		Location loaded = assertDoesNotThrow(() -> dao.loadTownSpawn("town"));
-		assertEquals("1.1", String.valueOf(loaded.getX()));
-		assertEquals("2.2", String.valueOf(loaded.getY()));
-		assertEquals("3.3", String.valueOf(loaded.getZ()));
-		assertEquals(world, loaded.getWorld());
-		assertDoesNotThrow(() -> verify(validationHandler).checkForWorldExists("world"));
-	}
-
-	@Test
-	public void loadTownManagerLocationTest() {
-		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		dao.setupSavefile("world");
-		Location loc = mock(Location.class);
-		World world = mock(World.class);
-		when(loc.getWorld()).thenReturn(world);
-		when(world.getName()).thenReturn("world");
-		when(loc.getX()).thenReturn(1.1);
-		when(loc.getY()).thenReturn(2.2);
-		when(loc.getZ()).thenReturn(3.3);
-		dao.saveWorldName("world");
-		dao.saveTownManagerLocation("town", loc);
-		when(serverProvider.getWorld("world")).thenReturn(world);
-		Location loaded = assertDoesNotThrow(() -> dao.loadTownManagerLocation("town"));
-		assertEquals("1.1", String.valueOf(loaded.getX()));
-		assertEquals("2.2", String.valueOf(loaded.getY()));
-		assertEquals("3.3", String.valueOf(loaded.getZ()));
-		assertEquals(world, loaded.getWorld());
-		assertDoesNotThrow(() -> verify(validationHandler).checkForWorldExists("world"));
-	}
-
-	@Test
-	public void loadPlotVillagerLocationTest() {
-		when(serverProvider.getDataFolderPath()).thenReturn("src");
-		dao.setupSavefile("world");
-		Location loc = mock(Location.class);
-		World world = mock(World.class);
-		when(loc.getWorld()).thenReturn(world);
-		when(world.getName()).thenReturn("world");
-		when(loc.getX()).thenReturn(1.1);
-		when(loc.getY()).thenReturn(2.2);
-		when(loc.getZ()).thenReturn(3.3);
-		dao.saveWorldName("world");
-		dao.savePlotVillagerLocation("town", "1/2", loc);
-		when(serverProvider.getWorld("world")).thenReturn(world);
-		Location loaded = assertDoesNotThrow(() -> dao.loadPlotVillagerLocation("town", "1/2"));
 		assertEquals("1.1", String.valueOf(loaded.getX()));
 		assertEquals("2.2", String.valueOf(loaded.getY()));
 		assertEquals("3.3", String.valueOf(loaded.getZ()));

@@ -2,8 +2,7 @@ package org.ue.economyplayer.logic.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,10 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.logic.api.BankAccount;
+import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.economyplayer.logic.EconomyPlayerExceptionMessageEnum;
-import org.ue.general.GeneralEconomyException;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.jobsystem.logic.api.Job;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,55 +31,29 @@ public class EconomyPlayerValidationHandlerImplTest {
 
 	@Test
 	public void checkForEnoughMoneyTestPersonal() {
-		try {
-			BankAccount account = mock(BankAccount.class);
-			assertDoesNotThrow(() -> when(account.hasAmount(10)).thenReturn(false));
-			validationHandler.checkForEnoughMoney(account, 10, true);
-			fail();
-		} catch (EconomyPlayerException | GeneralEconomyException e) {
-			assertTrue(e instanceof EconomyPlayerException);
-			EconomyPlayerException ex = (EconomyPlayerException) e;
-			assertEquals(0, ex.getParams().length);
-			assertEquals(EconomyPlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL, ex.getKey());
-		}
+		BankAccount account = mock(BankAccount.class);
+		when(account.getAmount()).thenReturn(5.0);
+		EconomyPlayerException e = assertThrows(EconomyPlayerException.class,
+				() -> validationHandler.checkForEnoughMoney(account, 10, true));
+		assertEquals(0, e.getParams().length);
+		assertEquals(ExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL, e.getKey());
 	}
 
 	@Test
 	public void checkForEnoughMoneyTestNonPersonal() {
-		try {
-			BankAccount account = mock(BankAccount.class);
-			assertDoesNotThrow(() -> when(account.hasAmount(10)).thenReturn(false));
-			validationHandler.checkForEnoughMoney(account, 10, false);
-			fail();
-		} catch (EconomyPlayerException | GeneralEconomyException e) {
-			assertTrue(e instanceof EconomyPlayerException);
-			EconomyPlayerException ex = (EconomyPlayerException) e;
-			assertEquals(0, ex.getParams().length);
-			assertEquals(EconomyPlayerExceptionMessageEnum.NOT_ENOUGH_MONEY_NON_PERSONAL, ex.getKey());
-		}
+		BankAccount account = mock(BankAccount.class);
+		when(account.getAmount()).thenReturn(5.0);
+		EconomyPlayerException e = assertThrows(EconomyPlayerException.class,
+				() -> validationHandler.checkForEnoughMoney(account, 10, false));
+		assertEquals(0, e.getParams().length);
+		assertEquals(ExceptionMessageEnum.NOT_ENOUGH_MONEY_NON_PERSONAL, e.getKey());
 	}
 
 	@Test
 	public void checkForEnoughMoneyTestSuccess() {
 		BankAccount account = mock(BankAccount.class);
-		assertDoesNotThrow(() -> when(account.hasAmount(0.5)).thenReturn(true));
+		when(account.getAmount()).thenReturn(0.5);
 		assertDoesNotThrow(() -> validationHandler.checkForEnoughMoney(account, 0.5, false));
-	}
-
-	@Test
-	public void checkForNotReachedMaxHomesTestSuccess() {
-		assertDoesNotThrow(() -> validationHandler.checkForNotReachedMaxHomes(false));
-	}
-
-	@Test
-	public void checkForNotReachedMaxHomesTestFail() {
-		try {
-			validationHandler.checkForNotReachedMaxHomes(true);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(EconomyPlayerExceptionMessageEnum.MAX_REACHED, e.getKey());
-		}
 	}
 
 	@Test
@@ -93,16 +65,13 @@ public class EconomyPlayerValidationHandlerImplTest {
 
 	@Test
 	public void checkForJobNotJoinedTestFail() {
-		try {
-			List<Job> jobs = new ArrayList<>();
-			Job job = mock(Job.class);
-			jobs.add(job);
-			validationHandler.checkForJobNotJoined(jobs, job);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(EconomyPlayerExceptionMessageEnum.JOB_ALREADY_JOINED, e.getKey());
-		}
+		List<Job> jobs = new ArrayList<>();
+		Job job = mock(Job.class);
+		jobs.add(job);
+		EconomyPlayerException e = assertThrows(EconomyPlayerException.class,
+				() -> validationHandler.checkForJobNotJoined(jobs, job));
+		assertEquals(0, e.getParams().length);
+		assertEquals(ExceptionMessageEnum.JOB_ALREADY_JOINED, e.getKey());
 	}
 
 	@Test
@@ -115,31 +84,12 @@ public class EconomyPlayerValidationHandlerImplTest {
 
 	@Test
 	public void checkForJobJoinedTestFail() {
-		try {
-			List<Job> jobs = new ArrayList<>();
-			Job job = mock(Job.class);
-			validationHandler.checkForJobJoined(jobs, job);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(EconomyPlayerExceptionMessageEnum.JOB_NOT_JOINED, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForNotReachedMaxJoinedJobsTestSuccess() {
-		assertDoesNotThrow(() -> validationHandler.checkForNotReachedMaxJoinedJobs(false));
-	}
-
-	@Test
-	public void checkForNotReachedMaxJoinedJobsTestFail() {
-		try {
-			validationHandler.checkForNotReachedMaxJoinedJobs(true);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(EconomyPlayerExceptionMessageEnum.MAX_REACHED, e.getKey());
-		}
+		List<Job> jobs = new ArrayList<>();
+		Job job = mock(Job.class);
+		EconomyPlayerException e = assertThrows(EconomyPlayerException.class,
+				() -> validationHandler.checkForJobJoined(jobs, job));
+		assertEquals(0, e.getParams().length);
+		assertEquals(ExceptionMessageEnum.JOB_NOT_JOINED, e.getKey());
 	}
 
 	@Test
@@ -149,13 +99,10 @@ public class EconomyPlayerValidationHandlerImplTest {
 
 	@Test
 	public void checkForTownNotJoinedTestFail() {
-		try {
-			validationHandler.checkForTownNotJoined(Arrays.asList("mytown"), "mytown");
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(EconomyPlayerExceptionMessageEnum.TOWN_ALREADY_JOINED, e.getKey());
-		}
+		EconomyPlayerException e = assertThrows(EconomyPlayerException.class,
+				() -> validationHandler.checkForTownNotJoined(Arrays.asList("mytown"), "mytown"));
+		assertEquals(0, e.getParams().length);
+		assertEquals(ExceptionMessageEnum.TOWN_ALREADY_JOINED, e.getKey());
 	}
 
 	@Test
@@ -165,28 +112,9 @@ public class EconomyPlayerValidationHandlerImplTest {
 
 	@Test
 	public void checkForJoinedTownTestFail() {
-		try {
-			validationHandler.checkForJoinedTown(new ArrayList<>(), "mytown");
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(EconomyPlayerExceptionMessageEnum.TOWN_NOT_JOINED, e.getKey());
-		}
-	}
-
-	@Test
-	public void checkForNotReachedMaxJoinedTownsTestSuccess() {
-		assertDoesNotThrow(() -> validationHandler.checkForNotReachedMaxJoinedTowns(false));
-	}
-
-	@Test
-	public void checkForNotReachedMaxJoinedTownsTestFail() {
-		try {
-			validationHandler.checkForNotReachedMaxJoinedTowns(true);
-			fail();
-		} catch (EconomyPlayerException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(EconomyPlayerExceptionMessageEnum.MAX_REACHED, e.getKey());
-		}
+		EconomyPlayerException e = assertThrows(EconomyPlayerException.class,
+				() -> validationHandler.checkForJoinedTown(new ArrayList<>(), "mytown"));
+		assertEquals(0, e.getParams().length);
+		assertEquals(ExceptionMessageEnum.TOWN_NOT_JOINED, e.getKey());
 	}
 }

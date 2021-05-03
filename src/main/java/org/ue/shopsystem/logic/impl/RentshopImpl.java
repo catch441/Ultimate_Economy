@@ -6,24 +6,23 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
+import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
-import org.ue.shopsystem.logic.ShopSystemException;
 import org.ue.shopsystem.logic.api.PlayershopManager;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopRentGuiHandler;
 import org.ue.shopsystem.logic.api.ShopItem;
 import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopsystemException;
 import org.ue.townsystem.logic.api.TownworldManager;
-import org.ue.townsystem.logic.TownSystemException;
 
 public class RentshopImpl extends PlayershopImpl implements Rentshop {
 
@@ -57,8 +56,8 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	}
 
 	@Override
-	public void setupNew(String shopId, Location spawnLocation, int size, double rentalFee)
-			throws GeneralEconomyException, EconomyPlayerException {
+	public void setupNew(String shopId, Location spawnLocation, int size, double rentalFee) {
+		name = "RentShop#" + shopId;
 		setupNew(EconomyVillagerType.RENTSHOP, name, shopId, spawnLocation, size, 1);
 		getEditorHandler().setup(1);
 		this.rentalFee = rentalFee;
@@ -70,8 +69,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	}
 
 	@Override
-	public void setupExisting(String shopId)
-			throws GeneralEconomyException, TownSystemException, EconomyPlayerException {
+	public void setupExisting(String shopId) throws EconomyPlayerException {
 		setupExisting(EconomyVillagerType.RENTSHOP, shopId, 1);
 		getEditorHandler().setup(1);
 		loadStock();
@@ -90,8 +88,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * Overridden, because of rentable value. {@inheritDoc}
 	 */
 	@Override
-	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack)
-			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
+	public void addShopItem(int slot, double sellPrice, double buyPrice, ItemStack itemStack) throws ShopsystemException {
 		validationHandler.checkForIsRented(isRentable());
 		super.addShopItem(slot, sellPrice, buyPrice, itemStack);
 	}
@@ -101,7 +98,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 */
 	@Override
 	public String editShopItem(int slot, Integer newAmount, Double newSellPrice, Double newBuyPrice)
-			throws ShopSystemException, EconomyPlayerException, GeneralEconomyException {
+			throws ShopsystemException {
 		validationHandler.checkForIsRented(isRentable());
 		return super.editShopItem(slot, newAmount, newSellPrice, newBuyPrice);
 	}
@@ -110,7 +107,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * Overridden, because of rentable value. {@inheritDoc}
 	 */
 	@Override
-	public ShopItem getShopItem(int slot) throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+	public ShopItem getShopItem(int slot) throws ShopsystemException {
 		validationHandler.checkForIsRented(isRentable());
 		return super.getShopItem(slot);
 	}
@@ -119,7 +116,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * Overridden, because of rentable value. {@inheritDoc}
 	 */
 	@Override
-	public ShopItem getShopItem(ItemStack stack) throws ShopSystemException {
+	public ShopItem getShopItem(ItemStack stack) throws ShopsystemException {
 		validationHandler.checkForIsRented(isRentable());
 		return super.getShopItem(stack);
 	}
@@ -128,16 +125,18 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * Overridden, because of rentable value. {@inheritDoc}
 	 */
 	@Override
-	public boolean isAvailable(int slot) throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+	public boolean isAvailable(int slot) throws ShopsystemException {
 		validationHandler.checkForIsRented(isRentable());
 		return super.isAvailable(slot);
 	}
 
 	/**
 	 * Overridden, because of rentable value. {@inheritDoc}
+	 * 
+	 * @throws ShopsystemException
 	 */
 	@Override
-	public void openInventory(Player player) throws ShopSystemException {
+	public void openInventory(Player player) throws ShopsystemException {
 		validationHandler.checkForIsRented(isRentable());
 		super.openInventory(player);
 	}
@@ -146,8 +145,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * Overridden, because of rentable value. {@inheritDoc}
 	 */
 	@Override
-	public void decreaseStock(int slot, int stock)
-			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
+	public void decreaseStock(int slot, int stock) throws ShopsystemException {
 		validationHandler.checkForIsRented(isRentable());
 		super.decreaseStock(slot, stock);
 	}
@@ -156,8 +154,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * Overridden, because of rentable value. {@inheritDoc}
 	 */
 	@Override
-	public void increaseStock(int slot, int stock)
-			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
+	public void increaseStock(int slot, int stock) throws ShopsystemException {
 		validationHandler.checkForIsRented(isRentable());
 		super.increaseStock(slot, stock);
 	}
@@ -166,7 +163,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * Overridden, because of rentable value. {@inheritDoc}
 	 */
 	@Override
-	public void removeShopItem(int slot) throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+	public void removeShopItem(int slot) throws ShopsystemException {
 		validationHandler.checkForIsRented(isRentable());
 		super.removeShopItem(slot);
 	}
@@ -175,7 +172,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * Overridden, because of rentable value. {@inheritDoc}
 	 */
 	@Override
-	public void openSlotEditor(Player player, int slot) throws ShopSystemException, GeneralEconomyException {
+	public void openSlotEditor(Player player, int slot) throws ShopsystemException {
 		validationHandler.checkForIsRented(isRentable());
 		super.openSlotEditor(player, slot);
 	}
@@ -184,7 +181,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * Overridden, because of rentable value. {@inheritDoc}
 	 */
 	@Override
-	public void openEditor(Player player) throws ShopSystemException {
+	public void openEditor(Player player) throws ShopsystemException {
 		validationHandler.checkForIsRented(isRentable());
 		super.openEditor(player);
 	}
@@ -194,7 +191,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * permissions like the parent playershop. {@inheritDoc}
 	 */
 	@Override
-	public void changeLocation(Location location) throws EconomyPlayerException, TownSystemException {
+	public void changeLocation(Location location) {
 		superChangeLocation(location);
 	}
 
@@ -203,7 +200,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 */
 	@Override
 	public void buyShopItem(int slot, EconomyPlayer ecoPlayer, boolean sendMessage)
-			throws GeneralEconomyException, EconomyPlayerException, ShopSystemException {
+			throws ShopsystemException, BankException, EconomyPlayerException {
 		validationHandler.checkForIsRented(isRentable());
 		super.buyShopItem(slot, ecoPlayer, sendMessage);
 	}
@@ -213,7 +210,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 */
 	@Override
 	public void sellShopItem(int slot, int amount, EconomyPlayer ecoPlayer, boolean sendMessage)
-			throws GeneralEconomyException, ShopSystemException, EconomyPlayerException {
+			throws ShopsystemException, BankException, EconomyPlayerException {
 		validationHandler.checkForIsRented(isRentable());
 		super.sellShopItem(slot, amount, ecoPlayer, sendMessage);
 	}
@@ -237,18 +234,18 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * Overridden, because check for rentable is needed. {@inheritDoc}
 	 */
 	@Override
-	public void changeShopName(String name) throws ShopSystemException, GeneralEconomyException {
+	public void changeShopName(String name) throws ShopsystemException {
 		validationHandler.checkForIsRented(isRentable());
 		super.changeShopName(name);
 	}
 
 	@Override
 	public void rentShop(EconomyPlayer player, int duration)
-			throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+			throws ShopsystemException, BankException, EconomyPlayerException {
 		validationHandler.checkForIsRentable(isRentable());
 		// minus 1 because then the validator can prevent, that the duration is 0
-		validationHandler.checkForPositiveValue(duration - 1);
-		// throws a playerexception, if the player has not enough money.
+		validationHandler.checkForPositiveValue(Double.valueOf(duration - 1));
+		// checks if the player has enough money.
 		player.decreasePlayerAmount(duration * getRentalFee(), true);
 		changeOwner(player);
 		rentable = false;
@@ -259,7 +256,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	}
 
 	@Override
-	public void changeRentalFee(double fee) throws GeneralEconomyException {
+	public void changeRentalFee(double fee) throws ShopsystemException {
 		validationHandler.checkForPositiveValue(fee);
 		rentalFee = fee;
 		shopDao.saveRentalFee(fee);
@@ -269,7 +266,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * Overridden, because of is not rented check. {@inheritDoc}
 	 */
 	@Override
-	public void changeSize(int newSize) throws ShopSystemException, GeneralEconomyException {
+	public void changeSize(int newSize) throws ShopsystemException {
 		validationHandler.checkForIsRentable(isRentable());
 		super.changeSize(newSize);
 	}
@@ -280,19 +277,19 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void changeOwner(EconomyPlayer newOwner) throws EconomyPlayerException, ShopSystemException {
+	public void changeOwner(EconomyPlayer newOwner) throws ShopsystemException {
 		validationHandler.checkForIsRentable(isRentable());
 		super.changeOwner(newOwner);
 	}
 
 	@Override
-	public void openRentGUI(Player player) throws ShopSystemException {
+	public void openRentGUI(Player player) throws ShopsystemException {
 		validationHandler.checkForIsRentable(isRentable());
 		player.openInventory(getRentGuiHandler().getRentGui());
 	}
 
 	@Override
-	public void resetShop() throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+	public void resetShop() throws ShopsystemException {
 		removeAllItems();
 		setOwner(null);
 		expiresAt = 0L;
@@ -304,7 +301,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		shopDao.saveRentable(true);
 	}
 
-	private void removeAllItems() throws ShopSystemException, GeneralEconomyException, EconomyPlayerException {
+	private void removeAllItems() throws ShopsystemException {
 		for (ShopItem item : getItemList()) {
 			removeShopItem(item.getSlot());
 		}

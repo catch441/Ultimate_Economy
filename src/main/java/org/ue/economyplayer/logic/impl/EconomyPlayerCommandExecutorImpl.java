@@ -14,14 +14,14 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.ue.common.logic.api.GeneralValidationHandler;
+import org.ue.bank.logic.api.BankException;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
-import org.ue.economyplayer.logic.EconomyPlayerCommandEnum;
-import org.ue.economyplayer.logic.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerCommandEnum;
+import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.general.GeneralEconomyException;
+import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.townsystem.logic.api.TownworldManager;
 
@@ -31,17 +31,17 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final TownworldManager townworldManager;
-	private final GeneralValidationHandler generalValidator;
+	private final EconomyPlayerValidationHandler validationHandler;
 
 	@Inject
-	public EconomyPlayerCommandExecutorImpl(ConfigManager configManager, MessageWrapper messageWrapper,
-			EconomyPlayerManager ecoPlayerManager, TownworldManager townworldManager,
-			GeneralValidationHandler generalValidator) {
+	public EconomyPlayerCommandExecutorImpl(EconomyPlayerValidationHandler validationHandler,
+			ConfigManager configManager, MessageWrapper messageWrapper, EconomyPlayerManager ecoPlayerManager,
+			TownworldManager townworldManager) {
 		this.configManager = configManager;
 		this.messageWrapper = messageWrapper;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.townworldManager = townworldManager;
-		this.generalValidator = generalValidator;
+		this.validationHandler = validationHandler;
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 					return performCommand(label, args, (Player) sender, ecoPlayer);
 				}
 			}
-		} catch (EconomyPlayerException | GeneralEconomyException e) {
+		} catch (EconomyPlayerException | BankException e) {
 			sender.sendMessage(e.getMessage());
 		} catch (NumberFormatException e) {
 			sender.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[1]));
@@ -67,7 +67,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performCommand(String label, String[] args, Player player, EconomyPlayer ecoPlayer)
-			throws EconomyPlayerException, NumberFormatException, GeneralEconomyException {
+			throws EconomyPlayerException, NumberFormatException, BankException {
 		switch (EconomyPlayerCommandEnum.getEnum(label)) {
 		case BANK:
 			return performBankCommand(args, player, ecoPlayer);
@@ -106,7 +106,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performMoneyCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
-			throws GeneralEconomyException {
+			throws EconomyPlayerException {
 		DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.ROOT);
 		otherSymbols.setDecimalSeparator('.');
 		otherSymbols.setGroupingSeparator(',');
@@ -144,12 +144,11 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performHomeCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
-			throws GeneralEconomyException {
+			throws EconomyPlayerException {
 		if (args.length == 1) {
 			Location location = ecoPlayer.getHome(args[0]);
 			player.teleport(location);
-			townworldManager.performTownWorldLocationCheck(player.getWorld().getName(), player.getLocation().getChunk(),
-					ecoPlayer);
+			townworldManager.performTownWorldLocationCheck(ecoPlayer);
 		} else if (args.length == 0) {
 			player.sendMessage(messageWrapper.getString("home_info", ecoPlayer.getHomeList().keySet().toString()));
 		} else {
@@ -159,7 +158,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performSetHomeCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
-			throws EconomyPlayerException, GeneralEconomyException {
+			throws EconomyPlayerException {
 		if (args.length == 1) {
 			ecoPlayer.addHome(args[0], player.getLocation(), true);
 		} else {
@@ -169,7 +168,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performDelHomeCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
-			throws GeneralEconomyException {
+			throws EconomyPlayerException {
 		if (args.length == 1) {
 			ecoPlayer.removeHome(args[0], true);
 		} else {
@@ -179,7 +178,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performPayCommand(String[] args, Player player, EconomyPlayer ecoPlayer)
-			throws NumberFormatException, GeneralEconomyException, EconomyPlayerException {
+			throws NumberFormatException, EconomyPlayerException, BankException {
 		if (args.length == 2) {
 			ecoPlayer.payToOtherPlayer(ecoPlayerManager.getEconomyPlayerByName(args[0]), Double.valueOf(args[1]), true);
 		} else {
@@ -189,10 +188,10 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performGiveMoneyCommand(String[] args)
-			throws EconomyPlayerException, GeneralEconomyException, NumberFormatException {
+			throws EconomyPlayerException, BankException, NumberFormatException {
 		if (args.length == 2) {
 			double amount = Double.valueOf(args[1]);
-			generalValidator.checkForPositiveValue(amount);
+			validationHandler.checkForPositiveValue(amount);
 			EconomyPlayer receiver = ecoPlayerManager.getEconomyPlayerByName(args[0]);
 			receiver.increasePlayerAmount(amount, true);
 		} else {
@@ -202,10 +201,10 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performRemoveMoneyCommand(String[] args)
-			throws EconomyPlayerException, GeneralEconomyException, NumberFormatException {
+			throws EconomyPlayerException, BankException, NumberFormatException {
 		if (args.length == 2) {
 			double amount = Double.valueOf(args[1]);
-			generalValidator.checkForPositiveValue(amount);
+			validationHandler.checkForPositiveValue(amount);
 			EconomyPlayer receiver = ecoPlayerManager.getEconomyPlayerByName(args[0]);
 			receiver.decreasePlayerAmount(amount, false);
 		} else {

@@ -17,9 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
+import org.ue.townsystem.logic.api.TownsystemException;
 import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
-import org.ue.townsystem.logic.TownSystemException;
 
 @ExtendWith(MockitoExtension.class)
 public class TownworldCommandExecutorImplTest {
@@ -126,7 +126,7 @@ public class TownworldCommandExecutorImplTest {
 	
 	@Test
 	public void setExpandPriceCommandTestWithNoTownworld() {
-		TownSystemException e = mock(TownSystemException.class);
+		TownsystemException e = mock(TownsystemException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenThrow(e));
 		String[] args = { "setExpandPrice", "world", "2" };

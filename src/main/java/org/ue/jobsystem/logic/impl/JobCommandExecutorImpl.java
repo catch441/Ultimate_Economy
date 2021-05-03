@@ -13,15 +13,12 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
-import org.ue.economyplayer.logic.EconomyPlayerException;
-import org.ue.general.GeneralEconomyException;
-import org.ue.jobsystem.logic.JobCommandEnum;
-import org.ue.jobsystem.logic.JobSystemException;
 import org.ue.jobsystem.logic.api.Job;
+import org.ue.jobsystem.logic.api.JobCommandEnum;
 import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
-import org.ue.townsystem.logic.TownSystemException;
+import org.ue.jobsystem.logic.api.JobsystemException;
 
 public class JobCommandExecutorImpl implements CommandExecutor {
 
@@ -45,7 +42,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 			Player player = (Player) sender;
 			try {
 				return handleCommand(label, args, player);
-			} catch (JobSystemException | EconomyPlayerException | GeneralEconomyException | TownSystemException e) {
+			} catch (JobsystemException e) {
 				player.sendMessage(e.getMessage());
 			} catch (NumberFormatException e) {
 				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", "number"));
@@ -54,8 +51,8 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean handleCommand(String label, String[] args, Player player) throws NumberFormatException,
-			GeneralEconomyException, JobSystemException, EconomyPlayerException, TownSystemException {
+	private boolean handleCommand(String label, String[] args, Player player)
+			throws NumberFormatException, JobsystemException {
 		switch (label) {
 		case "joblist":
 			return handleJobListCommand(args, player);
@@ -80,8 +77,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		return false;
 	}
 
-	private boolean handleJobInfoCommand(String[] args, Player player)
-			throws JobSystemException, GeneralEconomyException {
+	private boolean handleJobInfoCommand(String[] args, Player player) throws JobsystemException {
 		if (args.length == 1) {
 			Job job = jobManager.getJobByName(args[0]);
 			player.sendMessage(messageWrapper.getString("jobinfo_info", job.getName()));
@@ -123,8 +119,8 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		}
 	}
 
-	private boolean performJobcenterCommand(String label, String[] args, Player player) throws NumberFormatException,
-			GeneralEconomyException, JobSystemException, EconomyPlayerException, TownSystemException {
+	private boolean performJobcenterCommand(String label, String[] args, Player player)
+			throws NumberFormatException, JobsystemException {
 		switch (JobCommandEnum.getEnum(args[0])) {
 		case ADDJOB:
 			return performAddJobCommand(label, args, player);
@@ -144,7 +140,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performCreateCommand(String label, String[] args, Player player)
-			throws NumberFormatException, JobSystemException, GeneralEconomyException, EconomyPlayerException {
+			throws NumberFormatException, JobsystemException {
 		if (args.length == 3) {
 			jobcenterManager.createJobcenter(args[1], player.getLocation(), Integer.parseInt(args[2]));
 			player.sendMessage(messageWrapper.getString("created", args[1]));
@@ -154,8 +150,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performDeleteCommand(String label, String[] args, Player player)
-			throws JobSystemException, GeneralEconomyException {
+	private boolean performDeleteCommand(String label, String[] args, Player player) throws JobsystemException {
 		if (args.length == 2) {
 			jobcenterManager.deleteJobcenter(jobcenterManager.getJobcenterByName(args[1]));
 			player.sendMessage(messageWrapper.getString("deleted", args[1]));
@@ -165,8 +160,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performMoveCommand(String label, String[] args, Player player)
-			throws GeneralEconomyException, EconomyPlayerException, TownSystemException {
+	private boolean performMoveCommand(String label, String[] args, Player player) throws JobsystemException {
 		if (args.length == 2) {
 			Jobcenter jobcenter = jobcenterManager.getJobcenterByName(args[1]);
 			jobcenter.changeLocation(player.getLocation());
@@ -177,7 +171,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performAddJobCommand(String label, String[] args, Player player)
-			throws GeneralEconomyException, NumberFormatException, JobSystemException, EconomyPlayerException {
+			throws NumberFormatException, JobsystemException {
 		if (args.length == 5) {
 			Jobcenter jobcenter = jobcenterManager.getJobcenterByName(args[1]);
 			Job job = jobManager.getJobByName(args[2]);
@@ -189,8 +183,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performRemoveJobCommand(String label, String[] args, Player player)
-			throws JobSystemException, GeneralEconomyException {
+	private boolean performRemoveJobCommand(String label, String[] args, Player player) throws JobsystemException {
 		if (args.length == 3) {
 			Jobcenter jobcenter = jobcenterManager.getJobcenterByName(args[1]);
 			Job job = jobManager.getJobByName(args[2]);
@@ -202,7 +195,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performJobCreateCommand(String label, String[] args, Player player) throws GeneralEconomyException {
+	private boolean performJobCreateCommand(String label, String[] args, Player player) throws JobsystemException {
 		if (args.length == 3) {
 			jobManager.createJob(args[2]);
 			player.sendMessage(messageWrapper.getString("created", args[2]));
@@ -212,7 +205,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performJobDeleteCommand(String label, String[] args, Player player) throws GeneralEconomyException {
+	private boolean performJobDeleteCommand(String label, String[] args, Player player) throws JobsystemException {
 		if (args.length == 3) {
 			jobManager.deleteJob(jobManager.getJobByName(args[2]));
 			player.sendMessage(messageWrapper.getString("deleted", args[2]));
@@ -223,7 +216,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performJobAddFisherCommand(String label, String[] args, Player player)
-			throws NumberFormatException, JobSystemException, GeneralEconomyException {
+			throws NumberFormatException, JobsystemException {
 		if (args.length == 5) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.addFisherLootType(args[3], Double.valueOf(args[4]));
@@ -235,7 +228,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performJobRemoveFisherCommand(String label, String[] args, Player player)
-			throws GeneralEconomyException, JobSystemException {
+			throws JobsystemException {
 		if (args.length == 4) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.removeFisherLootType(args[3]);
@@ -247,7 +240,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performJobAddItemCommand(String label, String[] args, Player player)
-			throws NumberFormatException, JobSystemException, GeneralEconomyException {
+			throws NumberFormatException, JobsystemException {
 		if (args.length == 5) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.addBlock(args[3], Double.valueOf(args[4]));
@@ -258,8 +251,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performJobRemoveItemCommand(String label, String[] args, Player player)
-			throws JobSystemException, GeneralEconomyException {
+	private boolean performJobRemoveItemCommand(String label, String[] args, Player player) throws JobsystemException {
 		if (args.length == 4) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.deleteBlock(args[3]);
@@ -271,7 +263,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performJobAddMobCommand(String label, String[] args, Player player)
-			throws GeneralEconomyException, NumberFormatException, JobSystemException {
+			throws NumberFormatException, JobsystemException {
 		if (args.length == 5) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.addMob(args[3], Double.valueOf(args[4]));
@@ -282,8 +274,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performJobRemoveMobCommand(String label, String[] args, Player player)
-			throws GeneralEconomyException, JobSystemException {
+	private boolean performJobRemoveMobCommand(String label, String[] args, Player player) throws JobsystemException {
 		if (args.length == 4) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.deleteMob(args[3]);
@@ -295,7 +286,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performJobAddBreedableCommand(String label, String[] args, Player player)
-			throws GeneralEconomyException, NumberFormatException, JobSystemException {
+			throws NumberFormatException, JobsystemException {
 		if (args.length == 5) {
 			Job job = jobManager.getJobByName(args[2]);
 			EntityType entity = null;
@@ -314,7 +305,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performJobRemoveBreedableCommand(String label, String[] args, Player player)
-			throws GeneralEconomyException, JobSystemException {
+			throws JobsystemException, NumberFormatException {
 		if (args.length == 4) {
 			try {
 				Job job = jobManager.getJobByName(args[2]);
@@ -330,7 +321,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performJobCommand(String label, String[] args, Player player)
-			throws GeneralEconomyException, JobSystemException {
+			throws NumberFormatException, JobsystemException {
 		if (args.length == 1) {
 			player.sendMessage("/jobcenter job [create/delete/addItem/removeItem/"
 					+ "addMob/removeMob/addFisher/removeFisher/addBreedable/removeBreedable]");

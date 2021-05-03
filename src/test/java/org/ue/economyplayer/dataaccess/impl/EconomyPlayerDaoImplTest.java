@@ -226,12 +226,21 @@ public class EconomyPlayerDaoImplTest {
 	}
 
 	@Test
-	public void loadScoreboardObjectiveVisibleTest() {
+	public void loadScoreboardObjectiveVisibleTestTrue() {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		ecoPlayerDao.setupSavefile();
 		ecoPlayerDao.saveScoreboardObjectiveVisible("catch", true);
 		ecoPlayerDao.setupSavefile();
 		assertTrue(ecoPlayerDao.loadScoreboardObjectiveVisible("catch"));
+	}
+	
+	@Test
+	public void loadScoreboardObjectiveVisibleTestFalse() {
+		when(serverProvider.getDataFolderPath()).thenReturn("src");
+		ecoPlayerDao.setupSavefile();
+		ecoPlayerDao.saveScoreboardObjectiveVisible("catch", false);
+		ecoPlayerDao.setupSavefile();
+		assertFalse(ecoPlayerDao.loadScoreboardObjectiveVisible("catch"));
 	}
 
 	@Test
