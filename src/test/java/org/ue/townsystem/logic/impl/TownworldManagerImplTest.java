@@ -1,0 +1,414 @@
+package org.ue.townsystem.logic.impl;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import static org.mockito.Mockito.never;
+
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BossBar;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.bank.logic.api.BankAccount;
+import org.ue.bank.logic.api.BankManager;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.utils.ServerProvider;
+import org.ue.common.utils.ServiceComponent;
+import org.ue.common.utils.api.MessageWrapper;
+import org.ue.config.dataaccess.api.ConfigDao;
+import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyplayer.logic.api.EconomyPlayerManager;
+import org.ue.townsystem.dataaccess.api.TownworldDao;
+import org.ue.townsystem.logic.api.Town;
+import org.ue.townsystem.logic.api.TownsystemException;
+import org.ue.townsystem.logic.api.TownsystemValidationHandler;
+import org.ue.townsystem.logic.api.Townworld;
+
+@ExtendWith(MockitoExtension.class)
+public class TownworldManagerImplTest {
+
+	@InjectMocks
+	TownworldManagerImpl townworldManager;
+	@Mock
+	EconomyPlayerManager ecoPlayerManager;
+	@Mock
+	MessageWrapper messageWrapper;
+	@Mock
+	ServerProvider serverProvider;
+	@Mock
+	TownsystemValidationHandler townsystemValidationHandler;
+	@Mock
+	BankManager bankManager;
+	@Mock
+	ConfigDao configDao;
+
+	@Test
+	public void createTownWorldTestWithWorldDoesNotExist() throws TownsystemException {
+		doThrow(TownsystemException.class).when(townsystemValidationHandler).checkForWorldExists("world");
+		assertThrows(TownsystemException.class, () -> townworldManager.createTownWorld("world"));
+		verify(configDao, never()).saveTownworldNamesList(anyList());
+	}
+
+	@Test
+	public void createTownWorldTestWithTownworldExists() throws TownsystemException {
+		doThrow(TownsystemException.class).when(townsystemValidationHandler).checkForTownworldDoesNotExist(anyMap(),
+				eq("world"));
+		assertThrows(TownsystemException.class, () -> townworldManager.createTownWorld("world"));
+		verify(configDao, never()).saveTownworldNamesList(anyList());
+	}
+
+	@Test
+	public void createTownTest() {
+		TownworldDao dao = mock(TownworldDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serviceComponent.getTownworldDao()).thenReturn(dao);
+		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
+		verify(configDao).saveTownworldNamesList(Arrays.asList("world"));
+		assertEquals(Arrays.asList("world"), townworldManager.getTownWorldNameList());
+		verify(dao).setupSavefile("world");
+	}
+
+	@Test
+	public void deleteTownWorldTestWithWorldDoesNotExist() throws TownsystemException {
+		doThrow(TownsystemException.class).when(townsystemValidationHandler).checkForWorldExists("world");
+		assertThrows(TownsystemException.class, () -> townworldManager.deleteTownWorld("world"));
+		verify(configDao, never()).saveTownworldNamesList(anyList());
+	}
+
+	@Test
+	public void deleteTownWorldTestWithTownworldDoesNotExists() throws TownsystemException {
+		doThrow(TownsystemException.class).when(townsystemValidationHandler).checkForTownworldExists(anyMap(),
+				eq("world"));
+		assertThrows(TownsystemException.class, () -> townworldManager.deleteTownWorld("world"));
+		verify(configDao, never()).saveTownworldNamesList(anyList());
+	}
+
+	@Test
+	public void deleteTownWorldTest() {
+		TownworldDao dao = mock(TownworldDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serviceComponent.getTownworldDao()).thenReturn(dao);
+		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
+		assertDoesNotThrow(() -> townworldManager.deleteTownWorld("world"));
+		verify(dao).deleteSavefile();
+		verify(configDao).saveTownworldNamesList(new ArrayList<>());
+		assertEquals(0, townworldManager.getTownWorldList().size());
+	}
+
+	@Test
+	public void loadAllTownWorldsTest() {
+		TownworldDao dao = mock(TownworldDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serviceComponent.getTownworldDao()).thenReturn(dao);
+		when(configDao.loadTownworldNames()).thenReturn(Arrays.asList("myworld"));
+		townworldManager.loadAllTownWorlds();
+		verify(dao).setupSavefile("myworld");
+		assertEquals(1, townworldManager.getTownWorldList().size());
+		assertDoesNotThrow(() -> assertNotNull(townworldManager.getTownWorldByName("myworld")));
+	}
+
+	@Test
+	public void isTownWorldTest() {
+		TownworldDao dao = mock(TownworldDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serviceComponent.getTownworldDao()).thenReturn(dao);
+		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
+
+		assertTrue(townworldManager.isTownWorld("world"));
+		assertFalse(townworldManager.isTownWorld("other"));
+	}
+
+	@Test
+	public void getTownWorldByNameTest() {
+		TownworldDao dao = mock(TownworldDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serviceComponent.getTownworldDao()).thenReturn(dao);
+		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
+		assertDoesNotThrow(() -> townworldManager.createTownWorld("other"));
+
+		Townworld townworld = assertDoesNotThrow(() -> townworldManager.getTownWorldByName("world"));
+		assertEquals("world", townworld.getWorldName());
+	}
+
+	@Test
+	public void getTownWorldByNameTestWithNoTownworld() {
+		TownsystemException e = assertThrows(TownsystemException.class,
+				() -> townworldManager.getTownWorldByName("world"));
+		assertEquals(ExceptionMessageEnum.TOWNWORLD_DOES_NOT_EXIST, e.getKey());
+		assertEquals(0, e.getParams().length);
+	}
+
+	@Test
+	public void getTownByNameTestWithNoTown() {
+		TownsystemException e = assertThrows(TownsystemException.class, () -> townworldManager.getTownByName("town"));
+		assertEquals(ExceptionMessageEnum.DOES_NOT_EXIST, e.getKey());
+		assertEquals(1, e.getParams().length);
+		assertEquals("town", e.getParams()[0]);
+	}
+
+	@Test
+	public void getTownNameListTest() {
+		townworldManager.setTownNameList(Arrays.asList("mytown1"));
+		assertEquals(Arrays.asList("mytown1"), townworldManager.getTownNameList());
+	}
+
+	@Test
+	public void performTownworldLocationCheckAllPlayersTest() {
+		Player player = mock(Player.class);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		World world = mock(World.class);
+		BossBar bossbar = mock(BossBar.class);
+		Location loc = mock(Location.class);
+		when(loc.getWorld()).thenReturn(world);
+		when(player.getLocation()).thenReturn(loc);
+		when(ecoPlayer.getBossBar()).thenReturn(bossbar);
+		when(ecoPlayer.isOnline()).thenReturn(true);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(Arrays.asList(ecoPlayer)));
+
+		assertDoesNotThrow(() -> townworldManager.performTownworldLocationCheckAllPlayers());
+
+		verify(bossbar).setVisible(false);
+	}
+
+	@Test
+	public void performTownWorldLocationCheckTestWithNoTownworld() {
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		BossBar bossbar = mock(BossBar.class);
+		World world = mock(World.class);
+		Location loc = mock(Location.class);
+		when(loc.getWorld()).thenReturn(world);
+		when(ecoPlayer.getBossBar()).thenReturn(bossbar);
+		when(ecoPlayer.isOnline()).thenReturn(true);
+		Player player = mock(Player.class);
+		when(player.getLocation()).thenReturn(loc);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		when(ecoPlayer.isOnline()).thenReturn(true);
+		when(world.getName()).thenReturn("world");
+		townworldManager.performTownWorldLocationCheck(ecoPlayer, null);
+
+		verify(bossbar).setVisible(false);
+	}
+
+	@Test
+	public void performTownWorldLocationCheckTestWithWilderness() {
+		TownworldDao dao = mock(TownworldDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serviceComponent.getTownworldDao()).thenReturn(dao);
+		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		BossBar bossbar = mock(BossBar.class);
+		when(ecoPlayer.getBossBar()).thenReturn(bossbar);
+
+		Player player = mock(Player.class);
+		World world = mock(World.class);
+		Location loc = mock(Location.class);
+		when(loc.getWorld()).thenReturn(world);
+		when(player.getLocation()).thenReturn(loc);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		when(ecoPlayer.isOnline()).thenReturn(true);
+		when(world.getName()).thenReturn("world");
+		townworldManager.performTownWorldLocationCheck(ecoPlayer, null);
+
+		verify(bossbar).setTitle("Wilderness");
+		verify(bossbar).setColor(BarColor.GREEN);
+		verify(bossbar).setVisible(true);
+	}
+	
+	@Test
+	public void performTownWorldLocationCheckTestWithWildernessAndOtherLocation() {
+		TownworldDao dao = mock(TownworldDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serviceComponent.getTownworldDao()).thenReturn(dao);
+		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		BossBar bossbar = mock(BossBar.class);
+		when(ecoPlayer.getBossBar()).thenReturn(bossbar);
+
+		Player player = mock(Player.class);
+		World world = mock(World.class);
+		Location loc = mock(Location.class);
+		when(loc.getWorld()).thenReturn(world);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		when(ecoPlayer.isOnline()).thenReturn(true);
+		when(world.getName()).thenReturn("world");
+		townworldManager.performTownWorldLocationCheck(ecoPlayer, loc);
+
+		verify(bossbar).setTitle("Wilderness");
+		verify(bossbar).setColor(BarColor.GREEN);
+		verify(bossbar).setVisible(true);
+	}
+
+	@Test
+	public void performTownWorldLocationCheckTestWithInTown() {
+		TownworldDao dao = mock(TownworldDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serviceComponent.getTownworldDao()).thenReturn(dao);
+		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
+		BossBar bossbar = mock(BossBar.class);
+		JavaPlugin plugin = mock(JavaPlugin.class);
+		Location loc = mock(Location.class);
+		Chunk chunk = mock(Chunk.class);
+		World world = mock(World.class);
+		BankAccount account = mock(BankAccount.class);
+		Inventory inv = mock(Inventory.class);
+		Villager villager = mock(Villager.class);
+		ItemStack joinItem = mock(ItemStack.class);
+		ItemStack leaveItem = mock(ItemStack.class);
+		ItemMeta joinItemMeta = mock(ItemMeta.class);
+		ItemMeta leaveItemMeta = mock(ItemMeta.class);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
+		when(joinItem.getItemMeta()).thenReturn(joinItemMeta);
+		when(leaveItem.getItemMeta()).thenReturn(leaveItemMeta);
+		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
+		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(leaveItem);
+		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(joinItem);
+		when(serverProvider.createInventory(null, 9, "Plot 1/2")).thenReturn(inv);
+		when(serverProvider.createInventory(villager, 9, "mytown TownManager")).thenReturn(inv);
+		when(bankManager.createBankAccount(0)).thenReturn(account);
+		when(chunk.getX()).thenReturn(1);
+		when(chunk.getZ()).thenReturn(2);
+		when(chunk.getWorld()).thenReturn(world);
+		when(world.getHighestBlockYAt(any(Location.class))).thenReturn(60);
+		when(loc.getChunk()).thenReturn(chunk);
+		when(loc.getWorld()).thenReturn(world);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		Townworld townworld = assertDoesNotThrow(() -> townworldManager.getTownWorldByName("world"));
+		assertDoesNotThrow(() -> townworld.foundTown("mytown", loc, ecoPlayer));
+		when(ecoPlayer.getBossBar()).thenReturn(bossbar);
+
+		Player player = mock(Player.class);
+		when(player.getLocation()).thenReturn(loc);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		when(ecoPlayer.isOnline()).thenReturn(true);
+		when(world.getName()).thenReturn("world");
+		townworldManager.performTownWorldLocationCheck(ecoPlayer, null);
+
+		verify(bossbar).setTitle("mytown");
+		verify(bossbar).setColor(BarColor.RED);
+		verify(bossbar).setVisible(true);
+	}
+
+	@Test
+	public void getTownByNameTest() {
+		TownworldDao dao = mock(TownworldDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serviceComponent.getTownworldDao()).thenReturn(dao);
+		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
+		JavaPlugin plugin = mock(JavaPlugin.class);
+		Location loc = mock(Location.class);
+		Chunk chunk = mock(Chunk.class);
+		World world = mock(World.class);
+		BankAccount account = mock(BankAccount.class);
+		Inventory inv = mock(Inventory.class);
+		Villager villager = mock(Villager.class);
+		ItemStack joinItem = mock(ItemStack.class);
+		ItemStack leaveItem = mock(ItemStack.class);
+		ItemMeta joinItemMeta = mock(ItemMeta.class);
+		ItemMeta leaveItemMeta = mock(ItemMeta.class);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
+		when(joinItem.getItemMeta()).thenReturn(joinItemMeta);
+		when(leaveItem.getItemMeta()).thenReturn(leaveItemMeta);
+		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
+		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(leaveItem);
+		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(joinItem);
+		when(serverProvider.createInventory(any(Villager.class), anyInt(), anyString())).thenReturn(inv);
+		when(serverProvider.createInventory(eq(null), anyInt(), anyString())).thenReturn(inv);
+		when(bankManager.createBankAccount(0)).thenReturn(account);
+		when(chunk.getX()).thenReturn(1);
+		when(chunk.getZ()).thenReturn(2);
+		when(chunk.getWorld()).thenReturn(world);
+		when(world.getHighestBlockYAt(any(Location.class))).thenReturn(60);
+		when(loc.getChunk()).thenReturn(chunk);
+		when(loc.getWorld()).thenReturn(world);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		Townworld townworld = assertDoesNotThrow(() -> townworldManager.getTownWorldByName("world"));
+		assertDoesNotThrow(() -> townworld.foundTown("other", loc, ecoPlayer));
+		assertDoesNotThrow(() -> townworld.foundTown("mytown", loc, ecoPlayer));
+		assertDoesNotThrow(() -> townworld.foundTown("some", loc, ecoPlayer));
+
+		Town town = assertDoesNotThrow(() -> townworldManager.getTownByName("mytown"));
+		assertEquals("mytown", town.getTownName());
+	}
+
+	@Test
+	public void despawnAllVillagersTest() {
+		TownworldDao dao = mock(TownworldDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serviceComponent.getTownworldDao()).thenReturn(dao);
+		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
+		JavaPlugin plugin = mock(JavaPlugin.class);
+		Location loc = mock(Location.class);
+		Chunk chunk = mock(Chunk.class);
+		World world = mock(World.class);
+		BankAccount account = mock(BankAccount.class);
+		Inventory inv = mock(Inventory.class);
+		Villager villager = mock(Villager.class);
+		ItemStack joinItem = mock(ItemStack.class);
+		ItemStack leaveItem = mock(ItemStack.class);
+		ItemMeta joinItemMeta = mock(ItemMeta.class);
+		ItemMeta leaveItemMeta = mock(ItemMeta.class);
+		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
+		when(joinItem.getItemMeta()).thenReturn(joinItemMeta);
+		when(leaveItem.getItemMeta()).thenReturn(leaveItemMeta);
+		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
+		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(leaveItem);
+		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(joinItem);
+		when(serverProvider.createInventory(null, 9, "Plot 1/2")).thenReturn(inv);
+		when(serverProvider.createInventory(villager, 9, "mytown TownManager")).thenReturn(inv);
+		when(bankManager.createBankAccount(0)).thenReturn(account);
+		when(chunk.getX()).thenReturn(1);
+		when(chunk.getZ()).thenReturn(2);
+		when(chunk.getWorld()).thenReturn(world);
+		when(world.getHighestBlockYAt(any(Location.class))).thenReturn(60);
+		when(loc.getChunk()).thenReturn(chunk);
+		when(loc.getWorld()).thenReturn(world);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		Townworld townworld = assertDoesNotThrow(() -> townworldManager.getTownWorldByName("world"));
+		assertDoesNotThrow(() -> townworld.foundTown("mytown", loc, ecoPlayer));
+
+		townworldManager.despawnAllVillagers();
+		verify(villager).remove();
+	}
+}
