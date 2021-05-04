@@ -36,7 +36,7 @@
 		<spigot.api.version>1.16.5-R0.1-SNAPSHOT</spigot.api.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<output.dir>./target</output.dir>
-		<!--output.dir>D:\Programme\bukkitserver\paper-1.16.5\plugins\</output.dir-->
+		<!--output.dir>D:\Programme\bukkitserver\paper-1.16.5\plugins\</output.dir -->
 	</properties>
 
 	<dependencies>
@@ -141,7 +141,13 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.22.2</version>
 				<configuration>
-					<forkCount>0</forkCount>
+					<configuration>
+						<forkMode>once</forkMode>
+						<forkCount>1</forkCount>
+						<argLine>@{argLine} -Xmx1024m </argLine>
+						<reuseForks>false</reuseForks>
+
+					</configuration>
 				</configuration>
 			</plugin>
 			<plugin>
