@@ -58,14 +58,12 @@ public class PlotImplTest {
 		Plot plot;
 		Inventory inv;
 		Villager villager;
-		World world;
 		EconomyPlayer owner;
 
-		public Values(Plot plot, Inventory inv, Villager villager, World world, EconomyPlayer owner) {
+		public Values(Plot plot, Inventory inv, Villager villager, EconomyPlayer owner) {
 			this.plot = plot;
 			this.inv = inv;
 			this.villager = villager;
-			this.world = world;
 			this.owner = owner;
 		}
 	}
@@ -86,7 +84,7 @@ public class PlotImplTest {
 		when(town.getTownName()).thenReturn("mytown");
 		EconomyPlayer owner = mock(EconomyPlayer.class);
 		Plot plot = new PlotImpl("1/2", validationHandler, townworldDao, town, owner, serverProvider);
-		return new Values(plot, inv, null, null, owner);
+		return new Values(plot, inv, null, owner);
 	}
 
 	private Values createPlotForSale() {
@@ -115,6 +113,7 @@ public class PlotImplTest {
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
 		when(loc.getWorld()).thenReturn(world);
 		when(loc.getChunk()).thenReturn(chunk);
+		when(duplicated.getName()).thenReturn("Plot 1/2");
 		when(town.getTownName()).thenReturn("mytown");
 		when(townworldDao.loadVisible("Towns.mytown.Plots.1/2.SaleVillager")).thenReturn(true);
 		when(townworldDao.loadPlotSalePrice("mytown", "1/2")).thenReturn(2.5);
@@ -125,7 +124,7 @@ public class PlotImplTest {
 		assertDoesNotThrow(() -> when(townworldDao.loadPlotOwner("mytown", "1/2")).thenReturn(owner));
 		Plot plot = assertDoesNotThrow(
 				() -> new PlotImpl("1/2", validationHandler, townworldDao, town, serverProvider));
-		return new Values(plot, inv, villager, world, owner);
+		return new Values(plot, inv, villager, owner);
 	}
 
 	@Test
@@ -183,7 +182,7 @@ public class PlotImplTest {
 		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
-		when(duplicated.getCustomName()).thenReturn("Plot 1/2");
+		when(duplicated.getName()).thenReturn("Plot 1/2");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
 		when(loc.getWorld()).thenReturn(world);
 		when(loc.getChunk()).thenReturn(chunk);
@@ -372,7 +371,7 @@ public class PlotImplTest {
 	}
 
 	@Test
-	public void removeFromSaleTes() {
+	public void removeFromSaleTest() {
 		Values values = createPlotForSale();
 
 		assertDoesNotThrow(() -> values.plot.removeFromSale(values.plot.getOwner()));
@@ -381,7 +380,6 @@ public class PlotImplTest {
 				() -> verify(validationHandler).checkForIsPlotOwner(values.plot.getOwner(), values.plot.getOwner()));
 		assertFalse(values.plot.isForSale());
 		verify(values.villager).remove();
-		verify(values.world).save();
 		assertEquals("0.0", String.valueOf(values.plot.getSalePrice()));
 		verify(townworldDao).savePlotSalePrice("mytown", "1/2", 0.0);
 		verify(townworldDao).savePlotIsForSale("mytown", "1/2", false);
@@ -421,7 +419,7 @@ public class PlotImplTest {
 		when(serverProvider.createInventory(villager, 9, "Plot 1/2")).thenReturn(inv);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
-		when(duplicated.getCustomName()).thenReturn("Plot 1/2");
+		when(duplicated.getName()).thenReturn("Plot 1/2");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
 		when(loc.getWorld()).thenReturn(world);
 		when(loc.getChunk()).thenReturn(chunk);

@@ -200,9 +200,8 @@ public class PlotImpl extends EconomyVillagerImpl<TownsystemException> implement
 	@Override
 	public void removeFromSale(EconomyPlayer owner) throws TownsystemException {
 		validationHandler.checkForIsPlotOwner(getOwner(), owner);
+		setVisible(false);
 		isForSale = false;
-		despawn();
-		getLocation().getWorld().save();
 		salePrice = 0;
 		townworldDao.savePlotSalePrice(town.getTownName(), chunkCoords, salePrice);
 		townworldDao.savePlotIsForSale(town.getTownName(), chunkCoords, isForSale);

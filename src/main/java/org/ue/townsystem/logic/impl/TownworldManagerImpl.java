@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
+import org.bukkit.Location;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BossBar;
 import org.ue.bank.logic.api.BankManager;
@@ -106,13 +107,17 @@ public class TownworldManagerImpl implements TownworldManager {
 	}
 
 	@Override
-	public void performTownWorldLocationCheck(EconomyPlayer ecoPlayer) {
+	public void performTownWorldLocationCheck(EconomyPlayer ecoPlayer, Location location) {
 		if (ecoPlayer.isOnline()) {
 			BossBar bossbar = ecoPlayer.getBossBar();
+			Location loc = ecoPlayer.getPlayer().getLocation();
+			if (location != null) {
+				loc = location;
+			}
 			try {
-				Townworld townworld = getTownWorldByName(ecoPlayer.getPlayer().getLocation().getWorld().getName());
+				Townworld townworld = getTownWorldByName(loc.getWorld().getName());
 				try {
-					Town town = townworld.getTownByChunk(ecoPlayer.getPlayer().getLocation().getChunk());
+					Town town = townworld.getTownByChunk(loc.getChunk());
 					bossbar.setTitle(town.getTownName());
 					bossbar.setColor(BarColor.RED);
 					bossbar.setVisible(true);
@@ -132,7 +137,7 @@ public class TownworldManagerImpl implements TownworldManager {
 	@Override
 	public void performTownworldLocationCheckAllPlayers() {
 		for (EconomyPlayer ecoPlayer : ecoPlayerManager.getAllEconomyPlayers()) {
-			performTownWorldLocationCheck(ecoPlayer);
+			performTownWorldLocationCheck(ecoPlayer, null);
 		}
 	}
 

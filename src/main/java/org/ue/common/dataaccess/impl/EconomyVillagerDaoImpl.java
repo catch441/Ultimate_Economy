@@ -96,7 +96,7 @@ public abstract class EconomyVillagerDaoImpl extends SaveFileUtils implements Ec
 		if(!config.isSet(prefix + "visible")) {
 			// plot
 			if(prefix.contains(".Plots.")) {
-				String otherPrefix = prefix.replace("SaleVillager", "isForSale");
+				String otherPrefix = prefix.replace("SaleVillager.", "isForSale");
 				saveVisible(prefix, config.getBoolean(otherPrefix));
 			} else {
 				saveVisible(prefix, true);

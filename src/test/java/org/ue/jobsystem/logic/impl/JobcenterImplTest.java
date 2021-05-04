@@ -88,7 +88,7 @@ public class JobcenterImplTest {
 		when(stack.getItemMeta()).thenReturn(meta);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
 		when(world.getNearbyEntities(location, 10, 10, 10)).thenReturn(Arrays.asList(entity));
-		when(entity.getCustomName()).thenReturn("center");
+		when(entity.getName()).thenReturn("center");
 		jobcenter.setupNew("center", location, 9);
 		verify(jobcenterDao).setupSavefile("center");
 		verify(jobcenterDao).saveJobcenterName("center");

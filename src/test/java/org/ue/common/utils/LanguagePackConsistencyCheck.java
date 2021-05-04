@@ -1,23 +1,17 @@
 package org.ue.common.utils;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 
 @ExtendWith(MockitoExtension.class)
 public class LanguagePackConsistencyCheck {
 
-	@InjectMocks
-	MessageWrapperImpl messageWrapper;
-	@Mock
-	Logger logger;
+	MessageWrapperImpl messageWrapper = new MessageWrapperImpl();
 	
 	@Test
 	public void checkEnUsLanguage() {

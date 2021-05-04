@@ -162,7 +162,7 @@ public class TownImplTest {
 		when(world.getHighestBlockYAt(any(Location.class))).thenReturn(60);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(loc.getWorld()).thenReturn(world);
-		when(duplicated.getCustomName()).thenReturn("mytown TownManager");
+		when(duplicated.getName()).thenReturn("mytown TownManager");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicated));
 		Town town = assertDoesNotThrow(() -> new TownImpl(true, mayor, "mytown", loc, townworldManager, bankManager,
 				validationHandler, messageWrapper, townworldDao, townworld, serverProvider));

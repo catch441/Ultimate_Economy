@@ -73,7 +73,7 @@ public class TownsystemEventHandlerImplTest {
 
 		PlayerTeleportEvent event = new PlayerTeleportEvent(player, null, loc);
 		eventHandler.handlePlayerTeleport(event);
-		verify(townworldManager).performTownWorldLocationCheck(ecoPlayer);
+		verify(townworldManager).performTownWorldLocationCheck(ecoPlayer, null);
 	}
 
 	@Test
@@ -96,7 +96,7 @@ public class TownsystemEventHandlerImplTest {
 
 		PlayerJoinEvent event = new PlayerJoinEvent(player, null);
 		eventHandler.handlePlayerJoin(event);
-		verify(townworldManager).performTownWorldLocationCheck(ecoPlayer);
+		verify(townworldManager).performTownWorldLocationCheck(ecoPlayer, null);
 	}
 
 	@Test
@@ -129,7 +129,7 @@ public class TownsystemEventHandlerImplTest {
 
 		PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
 		eventHandler.handlerPlayerMove(event);
-		verify(townworldManager).performTownWorldLocationCheck(ecoPlayer);
+		verify(townworldManager).performTownWorldLocationCheck(ecoPlayer, to);
 	}
 
 	@Test

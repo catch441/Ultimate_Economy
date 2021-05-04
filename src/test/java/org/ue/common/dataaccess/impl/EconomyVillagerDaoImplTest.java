@@ -145,13 +145,13 @@ public class EconomyVillagerDaoImplTest {
 		dao.setup();
 		File file = new File("src/villager.yml");
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		config.set("prefix.Plots.isForSale", false);
+		config.set("prefix.Plots.isForSale", true);
 		save(file, config);
 		dao.setup();
 		boolean result = dao.loadVisible("prefix.Plots.SaleVillager");
-		assertFalse(result);
+		assertTrue(result);
 		YamlConfiguration config2 = YamlConfiguration.loadConfiguration(file);
-		assertFalse(config2.getBoolean("prefix.Plots.SaleVillager.visible"));
+		assertTrue(config2.getBoolean("prefix.Plots.SaleVillager.visible"));
 	}
 
 	@Test

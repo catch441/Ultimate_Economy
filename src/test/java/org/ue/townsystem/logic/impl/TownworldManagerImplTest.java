@@ -221,7 +221,7 @@ public class TownworldManagerImplTest {
 		when(ecoPlayer.getPlayer()).thenReturn(player);
 		when(ecoPlayer.isOnline()).thenReturn(true);
 		when(world.getName()).thenReturn("world");
-		townworldManager.performTownWorldLocationCheck(ecoPlayer);
+		townworldManager.performTownWorldLocationCheck(ecoPlayer, null);
 
 		verify(bossbar).setVisible(false);
 	}
@@ -245,7 +245,32 @@ public class TownworldManagerImplTest {
 		when(ecoPlayer.getPlayer()).thenReturn(player);
 		when(ecoPlayer.isOnline()).thenReturn(true);
 		when(world.getName()).thenReturn("world");
-		townworldManager.performTownWorldLocationCheck(ecoPlayer);
+		townworldManager.performTownWorldLocationCheck(ecoPlayer, null);
+
+		verify(bossbar).setTitle("Wilderness");
+		verify(bossbar).setColor(BarColor.GREEN);
+		verify(bossbar).setVisible(true);
+	}
+	
+	@Test
+	public void performTownWorldLocationCheckTestWithWildernessAndOtherLocation() {
+		TownworldDao dao = mock(TownworldDao.class);
+		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(serviceComponent.getTownworldDao()).thenReturn(dao);
+		assertDoesNotThrow(() -> townworldManager.createTownWorld("world"));
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		BossBar bossbar = mock(BossBar.class);
+		when(ecoPlayer.getBossBar()).thenReturn(bossbar);
+
+		Player player = mock(Player.class);
+		World world = mock(World.class);
+		Location loc = mock(Location.class);
+		when(loc.getWorld()).thenReturn(world);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		when(ecoPlayer.isOnline()).thenReturn(true);
+		when(world.getName()).thenReturn("world");
+		townworldManager.performTownWorldLocationCheck(ecoPlayer, loc);
 
 		verify(bossbar).setTitle("Wilderness");
 		verify(bossbar).setColor(BarColor.GREEN);
@@ -296,7 +321,7 @@ public class TownworldManagerImplTest {
 		when(ecoPlayer.getPlayer()).thenReturn(player);
 		when(ecoPlayer.isOnline()).thenReturn(true);
 		when(world.getName()).thenReturn("world");
-		townworldManager.performTownWorldLocationCheck(ecoPlayer);
+		townworldManager.performTownWorldLocationCheck(ecoPlayer, null);
 
 		verify(bossbar).setTitle("mytown");
 		verify(bossbar).setColor(BarColor.RED);

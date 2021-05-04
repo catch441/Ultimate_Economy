@@ -183,7 +183,7 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> imp
 		location.getChunk().load();
 		Collection<Entity> entitys = location.getWorld().getNearbyEntities(location, 10, 10, 10);
 		for (Entity e : entitys) {
-			if (inventoryTitle.equals(e.getCustomName())) {
+			if (e.getName().startsWith(inventoryTitle)) {
 				e.remove();
 			}
 		}

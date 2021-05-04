@@ -52,7 +52,7 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 	public void handlePlayerTeleport(PlayerTeleportEvent event) {
 		try {
 			EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getPlayer().getName());
-			townworldManager.performTownWorldLocationCheck(ecoPlayer);
+			townworldManager.performTownWorldLocationCheck(ecoPlayer, null);
 		} catch (EconomyPlayerException e) {
 		}
 	}
@@ -61,7 +61,7 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 	public void handlePlayerJoin(PlayerJoinEvent event) {
 		try {
 			EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getPlayer().getName());
-			townworldManager.performTownWorldLocationCheck(ecoPlayer);
+			townworldManager.performTownWorldLocationCheck(ecoPlayer, null);
 		} catch (EconomyPlayerException e) {
 		}
 	}
@@ -73,7 +73,7 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 				|| event.getFrom().getChunk().getZ() != event.getTo().getChunk().getZ()) {
 			try {
 				EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getPlayer().getName());
-				townworldManager.performTownWorldLocationCheck(ecoPlayer);
+				townworldManager.performTownWorldLocationCheck(ecoPlayer, event.getTo());
 			} catch (EconomyPlayerException e) {
 			}
 		}

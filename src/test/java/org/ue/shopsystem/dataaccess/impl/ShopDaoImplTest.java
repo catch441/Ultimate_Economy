@@ -222,12 +222,12 @@ public class ShopDaoImplTest {
 		when(serverProvider.getDataFolderPath()).thenReturn("src");
 		shopDao.setupSavefile("A1");
 		shopDao.saveShopItem(item, false);
+		
 		ShopItem result = shopDao.loadItem(4);
 		assertEquals(4, result.getSlot());
 		assertEquals("2.0", String.valueOf(result.getSellPrice()));
 		assertEquals("3.0", String.valueOf(result.getBuyPrice()));
 		assertEquals(1, result.getAmount());
-
 		// cannot be tested
 		// assertEquals("ItemStack{STONE x 1}", result.getItemString());
 		// assertNotNull(result.getItemStack());
@@ -256,7 +256,7 @@ public class ShopDaoImplTest {
 		shopDao.loadItem(4);
 		
 		YamlConfiguration config2 = YamlConfiguration.loadConfiguration(file);
-		assertFalse(config2.contains("ShopItems.4.newSaveMethod"));
+		assertFalse(config2.isSet("ShopItems.4.newSaveMethod"));
 		verify(meta).setDisplayName("PIG");
 		verify(stack).setItemMeta(meta);
 	}

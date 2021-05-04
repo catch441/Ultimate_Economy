@@ -423,7 +423,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 		String[] args = { "myhome" };
 		boolean result = executor.onCommand(player, null, "home", args);
 		verify(player).teleport(location);
-		verify(townworldManager).performTownWorldLocationCheck(ecoPlayer);
+		verify(townworldManager).performTownWorldLocationCheck(ecoPlayer, null);
 		verifyNoMoreInteractions(player);
 		assertTrue(result);
 	}

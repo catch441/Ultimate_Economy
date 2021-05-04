@@ -79,7 +79,7 @@ public class EconomyVillagerTest {
 		when(loc.getWorld()).thenReturn(world);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(duplicate.getCustomName()).thenReturn("myName");
+		when(duplicate.getName()).thenReturn("myName");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicate));
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(serverProvider.createInventory(villager, 9, "myName")).thenReturn(inv);
@@ -100,7 +100,7 @@ public class EconomyVillagerTest {
 		when(loc.getWorld()).thenReturn(world);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(duplicate.getCustomName()).thenReturn("myName");
+		when(duplicate.getName()).thenReturn("myName");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicate));
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(serverProvider.createInventory(villager, 9, "myName")).thenReturn(inv);
@@ -139,7 +139,7 @@ public class EconomyVillagerTest {
 		when(loc.getWorld()).thenReturn(world);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(duplicate.getCustomName()).thenReturn("myName");
+		when(duplicate.getName()).thenReturn("myName");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicate));
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(serverProvider.createInventory(villager, 9, "myName")).thenReturn(inv);

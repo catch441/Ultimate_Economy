@@ -148,7 +148,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 1) {
 			Location location = ecoPlayer.getHome(args[0]);
 			player.teleport(location);
-			townworldManager.performTownWorldLocationCheck(ecoPlayer);
+			townworldManager.performTownWorldLocationCheck(ecoPlayer, null);
 		} else if (args.length == 0) {
 			player.sendMessage(messageWrapper.getString("home_info", ecoPlayer.getHomeList().keySet().toString()));
 		} else {

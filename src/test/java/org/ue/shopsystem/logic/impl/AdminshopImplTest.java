@@ -311,7 +311,7 @@ public class AdminshopImplTest {
 		Inventory slotEditor = mock(Inventory.class);
 		ShopItemImpl shopItem = mock(ShopItemImpl.class);
 		Entity entity = mock(Entity.class);
-		when(entity.getCustomName()).thenReturn("myshop");
+		when(entity.getName()).thenReturn("myshop");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(entity));
 		when(infoItemMeta.getDisplayName()).thenReturn("Info");
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editor);

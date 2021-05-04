@@ -176,13 +176,15 @@ public class ShopDaoImpl extends EconomyVillagerDaoImpl implements ShopDao {
 	 */
 	@Deprecated
 	private void convertToSpawnerItemSave(int slot) {
-		if (config.contains("ShopItems." + slot + ".newSaveMethod")) {
-			ItemStack stack = serverProvider.createItemStack(Material.SPAWNER, 1);
-			ItemMeta meta = stack.getItemMeta();
+		if (config.getItemStack("ShopItems." + slot + ".Name") == null) {
 			String name = config.getString("ShopItems." + slot + ".Name");
-			meta.setDisplayName(name.substring(8));
-			stack.setItemMeta(meta);	
-			config.set("ShopItems." + slot + ".Name", stack);
+			if(name.contains("SPAWNER_")) {
+				ItemStack stack1 = serverProvider.createItemStack(Material.SPAWNER, 1);
+				ItemMeta meta = stack1.getItemMeta();
+				meta.setDisplayName(name.substring(8));
+				stack1.setItemMeta(meta);	
+				config.set("ShopItems." + slot + ".Name", stack1);
+			}
 			config.set("ShopItems." + slot + ".newSaveMethod", null);
 			save();
 		}
