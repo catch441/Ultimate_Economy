@@ -19,11 +19,6 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 8
-    - name: Build with Maven
-      run: mvn -B clean package -s settings.xml
-      env:
-        USERNAME: ${{ secrets.USERNAME }}
-        TOKEN: ${{ secrets.UE_API_REPO_READ_TOKEN }}
     # Runs code climate test coverage
     - name: Code Climate Coverage Action
       run: |
@@ -38,3 +33,10 @@ jobs:
         JACOCO_SOURCE_PATH:  src/main/java
         USERNAME: ${{ secrets.USERNAME }}
         TOKEN: ${{ secrets.UE_API_REPO_READ_TOKEN }}
+        
+    - name: Publish to GitHub Packages Apache Maven
+      if: github.ref == 'refs/heads/master'
+      run: mvn deploy -s settings.xml
+      env:
+        USERNAME: ${{ secrets.USERNAME }}
+        TOKEN: ${{ secrets.DEPLOY_KEY }}
