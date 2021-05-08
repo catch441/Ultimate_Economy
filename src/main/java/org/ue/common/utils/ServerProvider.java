@@ -19,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.Scoreboard;
 import org.ue.general.impl.PluginImpl;
 import org.ue.general.impl.UltimateEconomyCommand;
 
@@ -134,6 +135,15 @@ public class ServerProvider {
 	public Inventory createInventory(InventoryHolder owner, int size, String name) {
 		return Bukkit.createInventory(owner, size, name);
 	}
+	
+	/**
+	 * Returns a new scoreboard.
+	 * 
+	 */
+	public Scoreboard createScoreboard() {
+		return Bukkit.getScoreboardManager().getNewScoreboard();
+	}
+
 
 	/**
 	 * Creates a new itemstack. Makes it possible to use the verify method of

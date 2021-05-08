@@ -61,10 +61,9 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	 * @param name
 	 * @param isNew
 	 */
-	public EconomyPlayerImpl(ServerProvider serverProvider,
-			EconomyPlayerValidationHandler validationHandler, EconomyPlayerDao ecoPlayerDao,
-			MessageWrapper messageWrapper, ConfigManager configManager, BankManager bankManager, JobManager jobManager,
-			Player player, String name, boolean isNew) {
+	public EconomyPlayerImpl(ServerProvider serverProvider, EconomyPlayerValidationHandler validationHandler,
+			EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper, ConfigManager configManager,
+			BankManager bankManager, JobManager jobManager, Player player, String name, boolean isNew) {
 		this.configManager = configManager;
 		this.bankManager = bankManager;
 		this.jobManager = jobManager;
@@ -203,24 +202,18 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	@Override
 	public void setScoreBoardObjectiveVisible(boolean visible) {
+		boolean old = scoreboardObjectiveVisible;
 		scoreboardObjectiveVisible = visible;
 		ecoPlayerDao.saveScoreboardObjectiveVisible(getName(), isScoreBoardObjectiveVisible());
-		if (isScoreBoardObjectiveVisible()) {
+		if (visible) {
+			setupScoreboard();
 			updateScoreBoardObjective();
 		} else {
-			if (isOnline()) {
-				Objective o = getPlayer().getScoreboard().getObjective(DisplaySlot.SIDEBAR);
-				if (o != null && "bank".equals(o.getName())) {
-					o.unregister();
-				} else {
-					int score = 0;
-					if (getBankAccount() != null) {
-						score = (int) getBankAccount().getAmount();
-					}
-					getPlayer().getScoreboard().resetScores(ChatColor.GOLD + configManager.getCurrencyText(score));
-				}
+			if (isOnline()&&old) {
+				getPlayer().getScoreboard().getObjective(DisplaySlot.SIDEBAR).unregister();
 			}
 		}
+		
 	}
 
 	@Override
@@ -281,6 +274,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		this.player = player;
 		if (isOnline()) {
 			getBossBar().addPlayer(player);
+			setupScoreboard();
 			updateScoreBoardObjective();
 		}
 	}
@@ -301,16 +295,12 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		}
 	}
 
-	private void setScoreboard(int score) {
-		if (isScoreBoardObjectiveVisible()) {
-			Scoreboard board = getPlayer().getScoreboard();
-			Objective o = board.getObjective(DisplaySlot.SIDEBAR);
-			// null, if no objective on the sidebar exists
-			if (o == null) {
-				o = board.registerNewObjective("bank", "dummy", messageWrapper.getString("bank"));
-				o.setDisplaySlot(DisplaySlot.SIDEBAR);
-			}
-			o.getScore(ChatColor.GOLD + configManager.getCurrencyText(score)).setScore(score);
+	private void setupScoreboard() {
+		if (isOnline() && isScoreBoardObjectiveVisible()) {
+			Scoreboard board = serverProvider.createScoreboard();
+			Objective o = board.registerNewObjective("bank", "dummy", messageWrapper.getString("bank"));
+			o.setDisplaySlot(DisplaySlot.SIDEBAR);
+			getPlayer().setScoreboard(board);
 		}
 	}
 
@@ -320,7 +310,11 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			score = (int) getBankAccount().getAmount();
 		}
 		if (isOnline()) {
-			setScoreboard(score);
+			if (isScoreBoardObjectiveVisible()) {
+				Scoreboard board = getPlayer().getScoreboard();
+				Objective o = board.getObjective(DisplaySlot.SIDEBAR);
+				o.getScore(ChatColor.GOLD + configManager.getCurrencyText(score)).setScore(score);
+			}
 		}
 	}
 
@@ -342,6 +336,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		joinedTowns = ecoPlayerDao.loadJoinedTowns(getName());
 		homes = ecoPlayerDao.loadHomeList(getName());
 		loadBankAccount();
+		setupScoreboard();
 		updateScoreBoardObjective();
 	}
 
