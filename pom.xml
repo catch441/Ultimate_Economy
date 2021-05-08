@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.ue</groupId>
 	<artifactId>ultimate_economy</artifactId>
-	<version>1.2.7</version>
+	<version>1.2.7b</version>
 	<name>Ultimate_Economy</name>
 	<repositories>
 		<repository>
@@ -36,7 +36,7 @@
 		<spigot.api.version>1.16.5-R0.1-SNAPSHOT</spigot.api.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<output.dir>./target</output.dir>
-		<!--output.dir>D:\Programme\bukkitserver\paper-1.16.5\plugins\</output.dir -->
+		<!--output.dir>D:\Programme\bukkitserver\paper-1.16.5\plugins\</output.dir-->
 	</properties>
 
 	<dependencies>

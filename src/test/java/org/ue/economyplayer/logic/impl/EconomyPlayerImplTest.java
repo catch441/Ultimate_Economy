@@ -72,8 +72,6 @@ public class EconomyPlayerImplTest {
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
 		Player player = mock(Player.class);
-		Scoreboard board = mock(Scoreboard.class);
-		when(player.getScoreboard()).thenReturn(board);
 		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
 		when(account.getIban()).thenReturn("myiban");
@@ -105,8 +103,11 @@ public class EconomyPlayerImplTest {
 		Scoreboard board = mock(Scoreboard.class);
 		Objective o = mock(Objective.class);
 		Score score = mock(Score.class);
+		when(account.getAmount()).thenReturn(10.5);
+		when(serverProvider.createScoreboard()).thenReturn(board);
 		when(player.getScoreboard()).thenReturn(board);
 		when(board.registerNewObjective("bank", "dummy", null)).thenReturn(o);
+		when(board.getObjective(DisplaySlot.SIDEBAR)).thenReturn(o);
 		when(o.getScore("§6null")).thenReturn(score);
 		Location location = mock(Location.class);
 		Map<String, Location> homes = new HashMap<>();
@@ -129,6 +130,8 @@ public class EconomyPlayerImplTest {
 		assertEquals(job, ecoPlayer.getJobList().get(0));
 		assertEquals(1, ecoPlayer.getJoinedTownList().size());
 		assertEquals("mytown", ecoPlayer.getJoinedTownList().get(0));
+		verify(player).setScoreboard(board);
+		verify(score).setScore(10);
 		verify(serverProvider).createBossBar();
 		verify(bossBar).setVisible(false);
 		verify(ecoPlayerDao).loadScoreboardObjectiveVisible("catch441");
@@ -156,8 +159,10 @@ public class EconomyPlayerImplTest {
 		Scoreboard board = mock(Scoreboard.class);
 		Objective o = mock(Objective.class);
 		Score score = mock(Score.class);
+		when(serverProvider.createScoreboard()).thenReturn(board);
 		when(player.getScoreboard()).thenReturn(board);
 		when(board.registerNewObjective("bank", "dummy", null)).thenReturn(o);
+		when(board.getObjective(DisplaySlot.SIDEBAR)).thenReturn(o);
 		when(o.getScore("§6null")).thenReturn(score);
 		Location location = mock(Location.class);
 		Map<String, Location> homes = new HashMap<>();
@@ -414,13 +419,16 @@ public class EconomyPlayerImplTest {
 	public void increasePlayerAmountTest() {
 		when(configManager.getCurrencyText(10.0)).thenReturn("$");
 		when(configManager.getCurrencyText(0.0)).thenReturn("$");
+		when(messageWrapper.getString("bank")).thenReturn("Bank");
 		when(messageWrapper.getString("got_money", 10.0, "$")).thenReturn("My message.");
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
 		Player player = mock(Player.class);
 		Scoreboard board = mock(Scoreboard.class);
 		Objective o = mock(Objective.class);
+		when(board.registerNewObjective("bank", "dummy", "Bank")).thenReturn(o);
 		when(board.getObjective(DisplaySlot.SIDEBAR)).thenReturn(o);
+		when(serverProvider.createScoreboard()).thenReturn(board);
 		when(player.getScoreboard()).thenReturn(board);
 		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
@@ -430,7 +438,7 @@ public class EconomyPlayerImplTest {
 
 		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
 				configManager, bankManager, jobManager, player, "catch441", true);
-
+		
 		ecoPlayer.setScoreBoardObjectiveVisible(true);
 		// start test
 		when(ecoPlayer.getBankAccount().getAmount()).thenReturn(10.0);
@@ -446,14 +454,17 @@ public class EconomyPlayerImplTest {
 	public void decreasePlayerAmountTest() {
 		when(configManager.getCurrencyText(10.0)).thenReturn("$");
 		when(configManager.getCurrencyText(0.0)).thenReturn("$");
+		when(messageWrapper.getString("bank")).thenReturn("Bank");
 
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
 		Player player = mock(Player.class);
 		Scoreboard board = mock(Scoreboard.class);
 		Objective o = mock(Objective.class);
+		when(board.registerNewObjective("bank", "dummy", "Bank")).thenReturn(o);
 		when(board.getObjective(DisplaySlot.SIDEBAR)).thenReturn(o);
 		when(player.getScoreboard()).thenReturn(board);
+		when(serverProvider.createScoreboard()).thenReturn(board);
 		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
 		Score score = mock(Score.class);
@@ -462,6 +473,7 @@ public class EconomyPlayerImplTest {
 				configManager, bankManager, jobManager, player, "catch441", true);
 
 		ecoPlayer.setScoreBoardObjectiveVisible(true);
+		verify(player).setScoreboard(board);
 		// start test
 		when(ecoPlayer.getBankAccount().getAmount()).thenReturn(10.0);
 
@@ -508,7 +520,6 @@ public class EconomyPlayerImplTest {
 	@Test
 	public void payToOtherPlayerTest() {
 		when(configManager.getCurrencyText(10)).thenReturn("$");
-		when(configManager.getCurrencyText(0)).thenReturn("nix");
 		when(messageWrapper.getString("got_money_with_sender", 10.0, "$", "catch441")).thenReturn("My message.");
 		when(messageWrapper.getString("gave_money", "catch441", 10.0, "$")).thenReturn("My message. 2");
 		EconomyPlayer reciever = createEcoPlayerMock();
@@ -599,13 +610,14 @@ public class EconomyPlayerImplTest {
 		Scoreboard board = mock(Scoreboard.class);
 		Objective o = mock(Objective.class);
 		Score score = mock(Score.class);
-
+		when(serverProvider.createScoreboard()).thenReturn(board);
 		when(player.getScoreboard()).thenReturn(board);
 		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
 		when(account.getAmount()).thenReturn(10.0);
 		when(configManager.getCurrencyText(10.0)).thenReturn("$");
 		when(board.registerNewObjective("bank", "dummy", "bank")).thenReturn(o);
+		when(board.getObjective(DisplaySlot.SIDEBAR)).thenReturn(o);
 		when(o.getScore("§6$")).thenReturn(score);
 		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
 				configManager, bankManager, jobManager, player, "catch441", true);
@@ -624,35 +636,42 @@ public class EconomyPlayerImplTest {
 		BankAccount account = mock(BankAccount.class);
 		Player player = mock(Player.class);
 		Scoreboard board = mock(Scoreboard.class);
-		when(player.getScoreboard()).thenReturn(board);
 		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
-		when(account.getAmount()).thenReturn(10.0);
-		when(configManager.getCurrencyText(10.0)).thenReturn("$");
 		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
 				configManager, bankManager, jobManager, player, "catch441", true);
 
 		assertFalse(ecoPlayer.isScoreBoardObjectiveVisible());
 		verify(ecoPlayerDao).saveScoreboardObjectiveVisible("catch441", false);
 		verify(board, never()).registerNewObjective("bank", "dummy", "bank");
-		verify(board).resetScores("§6$");
 	}
-
+	
 	@Test
-	public void setScoreBoardObjectiveVisibleTestFalseOneScore() {
+	public void setScoreBoardObjectiveVisibleTestFalseWithOldTrue() {
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
 		Player player = mock(Player.class);
 		Scoreboard board = mock(Scoreboard.class);
 		Objective o = mock(Objective.class);
+		Score score = mock(Score.class);
+		when(messageWrapper.getString("bank")).thenReturn("bank");
+		when(serverProvider.createScoreboard()).thenReturn(board);
 		when(player.getScoreboard()).thenReturn(board);
 		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
+		when(account.getAmount()).thenReturn(10.0);
+		when(configManager.getCurrencyText(10.0)).thenReturn("$");
+		when(board.registerNewObjective("bank", "dummy", "bank")).thenReturn(o);
+		when(o.getScore("§6$")).thenReturn(score);
 		when(board.getObjective(DisplaySlot.SIDEBAR)).thenReturn(o);
-		when(o.getName()).thenReturn("bank");
 		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
 				configManager, bankManager, jobManager, player, "catch441", true);
-
+		reset(ecoPlayerDao);
+		ecoPlayer.setScoreBoardObjectiveVisible(true);
+		reset(board);
+		when(board.getObjective(DisplaySlot.SIDEBAR)).thenReturn(o);
+		ecoPlayer.setScoreBoardObjectiveVisible(false);
+		
 		assertFalse(ecoPlayer.isScoreBoardObjectiveVisible());
 		verify(ecoPlayerDao).saveScoreboardObjectiveVisible("catch441", false);
 		verify(board, never()).registerNewObjective("bank", "dummy", "bank");
@@ -663,10 +682,6 @@ public class EconomyPlayerImplTest {
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
 		Player player = mock(Player.class);
-		Scoreboard board = mock(Scoreboard.class);
-		Objective o = mock(Objective.class);
-		when(board.getObjective(DisplaySlot.SIDEBAR)).thenReturn(o);
-		when(player.getScoreboard()).thenReturn(board);
 		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
 		return new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper, configManager,
