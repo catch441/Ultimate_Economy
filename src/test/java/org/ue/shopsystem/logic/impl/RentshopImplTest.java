@@ -339,10 +339,10 @@ public class RentshopImplTest {
 
 		verify(shopDao).saveOwner(ecoPlayer);
 		verify(shopDao).saveRentable(false);
-		verify(shopDao).saveExpiresAt(60000L);
+		verify(shopDao).saveExpiresAt(3468000L);
 		assertDoesNotThrow(() -> verify(ecoPlayer).decreasePlayerAmount(11.0, true));
 		assertFalse(rentshop.isRentable());
-		assertEquals(60000L, rentshop.getExpiresAt());
+		assertEquals(3468000L, rentshop.getExpiresAt());
 		assertEquals(ecoPlayer, rentshop.getOwner());
 		assertEquals("Shop#R0", rentshop.getName());
 		assertDoesNotThrow(() -> verify(validationHandler, times(2)).checkForIsRentable(true));
