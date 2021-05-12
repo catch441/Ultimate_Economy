@@ -30,7 +30,7 @@ import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import org.ue.economyplayer.logic.api.EconomyPlayerValidator;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.townsystem.logic.api.TownworldManager;
 
@@ -46,7 +46,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 	@Mock
 	EconomyPlayerManager ecoPlayerManager;
 	@Mock
-	EconomyPlayerValidationHandler validationHandler;
+	EconomyPlayerValidator validationHandler;
 	@Mock
 	TownworldManager townworldManager;
 	@Mock

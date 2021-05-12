@@ -25,7 +25,7 @@ import org.ue.jobsystem.logic.api.Job;
 public class EconomyPlayerValidationHandlerImplTest {
 
 	@InjectMocks
-	EconomyPlayerValidationHandlerImpl validationHandler;
+	EconomyPlayerValidatorImpl validationHandler;
 	@Mock
 	MessageWrapper messageWrapper;
 

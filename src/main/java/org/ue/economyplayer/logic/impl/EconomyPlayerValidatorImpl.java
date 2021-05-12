@@ -6,17 +6,17 @@ import javax.inject.Inject;
 
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.common.logic.api.ExceptionMessageEnum;
-import org.ue.common.logic.impl.GeneralValidationHandlerImpl;
+import org.ue.common.logic.impl.GeneralValidatorImpl;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
-import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import org.ue.economyplayer.logic.api.EconomyPlayerValidator;
 import org.ue.jobsystem.logic.api.Job;
 
-public class EconomyPlayerValidationHandlerImpl extends GeneralValidationHandlerImpl<EconomyPlayerException>
-		implements EconomyPlayerValidationHandler {
+public class EconomyPlayerValidatorImpl extends GeneralValidatorImpl<EconomyPlayerException>
+		implements EconomyPlayerValidator {
 
 	@Inject
-	public EconomyPlayerValidationHandlerImpl(MessageWrapper messageWrapper) {
+	public EconomyPlayerValidatorImpl(MessageWrapper messageWrapper) {
 		super(messageWrapper);
 	}
 	

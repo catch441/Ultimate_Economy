@@ -10,6 +10,8 @@ import java.util.ResourceBundle;
 import org.bukkit.ChatColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 
 public class MessageWrapperImpl implements MessageWrapper {
@@ -30,16 +32,16 @@ public class MessageWrapperImpl implements MessageWrapper {
 	}
 
 	@Override
-	public String getErrorString(String key) {
+	public String getErrorString(ExceptionMessageEnum key) {
 		try {
-			return ChatColor.RED + messages.getString(key);
+			return ChatColor.RED + messages.getString(key.getValue());
 		} catch (MissingResourceException e) {
-			return '!' + key + '!';
+			return '!' + key.getValue() + '!';
 		}
 	}
 
 	@Override
-	public String getErrorString(String key, Object... params) {
+	public String getErrorString(ExceptionMessageEnum key, Object... params) {
 		try {
 			List<String> colored = new ArrayList<>();
 			for (Object object : params) {
@@ -49,26 +51,26 @@ public class MessageWrapperImpl implements MessageWrapper {
 					colored.add("§4null§c");
 				}
 			}
-			String message = "§c" + messages.getString(key);
+			String message = "§c" + messages.getString(key.getValue());
 			message = message.replace("'", "''");
 			String newMessage = MessageFormat.format(message, colored.toArray());
 			return ChatColor.translateAlternateColorCodes('§', newMessage);
 		} catch (MissingResourceException e) {
-			return '!' + key + '!';
+			return '!' + key.getValue() + '!';
 		}
 	}
 
 	@Override
-	public String getString(String key) {
+	public String getString(MessageEnum key) {
 		try {
-			return ChatColor.GOLD + messages.getString(key);
+			return ChatColor.GOLD + messages.getString(key.getValue());
 		} catch (MissingResourceException e) {
-			return '!' + key + '!';
+			return '!' + key.getValue() + '!';
 		}
 	}
 
 	@Override
-	public String getString(String key, Object... params) {
+	public String getString(MessageEnum key, Object... params) {
 		try {
 			List<String> colored = new ArrayList<>();
 
@@ -79,12 +81,12 @@ public class MessageWrapperImpl implements MessageWrapper {
 					colored.add("§anull§6");
 				}
 			}
-			String message = "§6" + messages.getString(key);
+			String message = "§6" + messages.getString(key.getValue());
 			message = message.replace("'", "''");
 			String newMessage = MessageFormat.format(message, colored.toArray());
 			return ChatColor.translateAlternateColorCodes('§', newMessage);
 		} catch (MissingResourceException e) {
-			return '!' + key + '!';
+			return '!' + key.getValue() + '!';
 		}
 	}
 }

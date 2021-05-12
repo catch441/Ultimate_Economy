@@ -52,7 +52,7 @@ import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
+import org.ue.townsystem.logic.api.TownsystemValidator;
 import org.ue.townsystem.logic.api.Townworld;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,7 +67,7 @@ public class TownworldManagerImplTest {
 	@Mock
 	ServerProvider serverProvider;
 	@Mock
-	TownsystemValidationHandler townsystemValidationHandler;
+	TownsystemValidator townsystemValidationHandler;
 	@Mock
 	BankManager bankManager;
 	@Mock

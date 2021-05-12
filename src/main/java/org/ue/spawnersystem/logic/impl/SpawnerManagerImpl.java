@@ -6,16 +6,16 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.ue.common.utils.ServerProvider;
-import org.ue.spawnersystem.dataaccess.api.SpawnerSystemDao;
+import org.ue.spawnersystem.dataaccess.api.SpawnersystemDao;
 import org.ue.spawnersystem.logic.api.SpawnerManager;
 
 public class SpawnerManagerImpl implements SpawnerManager {
 
-	private final SpawnerSystemDao spawnerSystemDao;
+	private final SpawnersystemDao spawnerSystemDao;
 	private final ServerProvider serverProvider;
 
 	@Inject
-	public SpawnerManagerImpl(SpawnerSystemDao spawnerSystemDao, ServerProvider serverProvider) {
+	public SpawnerManagerImpl(SpawnersystemDao spawnerSystemDao, ServerProvider serverProvider) {
 		this.spawnerSystemDao = spawnerSystemDao;
 		this.serverProvider = serverProvider;
 	}

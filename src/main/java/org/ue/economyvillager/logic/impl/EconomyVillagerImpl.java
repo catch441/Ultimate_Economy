@@ -1,4 +1,4 @@
-package org.ue.common.logic.impl;
+package org.ue.economyvillager.logic.impl;
 
 import java.util.Collection;
 
@@ -8,23 +8,29 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Villager.Profession;
+import org.bukkit.entity.Villager.Type;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.ue.common.dataaccess.api.EconomyVillagerDao;
-import org.ue.common.logic.api.EconomyVillager;
-import org.ue.common.logic.api.EconomyVillagerType;
-import org.ue.common.logic.api.EconomyVillagerValidationHandler;
+import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.utils.ServerProvider;
+import org.ue.common.utils.api.MessageWrapper;
+import org.ue.economyvillager.dataaccess.api.EconomyVillagerDao;
+import org.ue.economyvillager.logic.api.EconomyVillager;
+import org.ue.economyvillager.logic.api.EconomyVillagerCustomizeHandler;
+import org.ue.economyvillager.logic.api.EconomyVillagerType;
+import org.ue.economyvillager.logic.api.EconomyVillagerValidator;
 
-public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> implements EconomyVillager<T> {
+public abstract class EconomyVillagerImpl<T extends GeneralEconomyException>
+		extends EconomyVillagerCustomizeHandlerImpl<T> implements EconomyVillager<T> {
 
 	protected final ServerProvider serverProvider;
 	private final EconomyVillagerDao ecoVillagerDao;
-	private final EconomyVillagerValidationHandler<T> validationHandler;
+	private final EconomyVillagerValidator<T> validationHandler;
+	private EconomyVillagerCustomizeHandler<T> customizeHandler;
 	private Villager villager;
 	private Location location;
 	private Inventory inventory;
@@ -33,11 +39,14 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> imp
 	private String inventoryTitle;
 	private boolean visible;
 	private Profession profession;
+	private Type biomeType;
 	private EconomyVillagerType villagerType;
 	private String savePrefix;
 
-	public EconomyVillagerImpl(ServerProvider serverProvider, EconomyVillagerDao ecoVillagerDao,
-			EconomyVillagerValidationHandler<T> validationHandler, String savePrefix) {
+	public EconomyVillagerImpl(MessageWrapper messageWrapper, ServerProvider serverProvider,
+			EconomyVillagerDao ecoVillagerDao, EconomyVillagerValidator<T> validationHandler,
+			CustomSkullService skullService, String savePrefix) {
+		super(messageWrapper, serverProvider, skullService);
 		this.serverProvider = serverProvider;
 		this.ecoVillagerDao = ecoVillagerDao;
 		this.validationHandler = validationHandler;
@@ -45,10 +54,19 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> imp
 	}
 
 	@Override
+	public void changeBiomeType(Type biomeType) {
+		this.biomeType = biomeType;
+		ecoVillagerDao.saveBiomeType(savePrefix, biomeType);
+		if (visible) {
+			villager.setVillagerType(biomeType);
+		}
+	}
+
+	@Override
 	public void changeProfession(Profession profession) {
 		this.profession = profession;
 		ecoVillagerDao.saveProfession(savePrefix, profession);
-		if(visible) {
+		if (visible) {
 			villager.setProfession(profession);
 		}
 	}
@@ -57,7 +75,7 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> imp
 	public void changeLocation(Location location) throws T {
 		this.location = location;
 		ecoVillagerDao.saveLocation(savePrefix, location);
-		if(visible) {
+		if (visible) {
 			villager.teleport(location);
 		}
 	}
@@ -69,7 +87,7 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> imp
 
 	@Override
 	public void despawn() {
-		if(visible) {
+		if (visible) {
 			villager.remove();
 			villager = null;
 		}
@@ -116,7 +134,7 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> imp
 
 	@Override
 	public void setVisible(boolean visible) throws T {
-		if(visible) {
+		if (visible) {
 			setupVillager();
 			changeInventoryName(inventoryTitle);
 		} else {
@@ -125,7 +143,11 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> imp
 		this.visible = visible;
 		ecoVillagerDao.saveVisible(savePrefix, visible);
 	}
-	
+
+	protected EconomyVillagerCustomizeHandler<T> getCustomizeHandler() {
+		return customizeHandler;
+	}
+
 	protected Inventory getInventory() {
 		return inventory;
 	}
@@ -159,15 +181,18 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> imp
 		if (visible) {
 			ecoVillagerDao.saveLocation(savePrefix, location);
 			setupVillager();
+			ecoVillagerDao.saveBiomeType(savePrefix, villager.getVillagerType());
 		}
 		// villager is null, when visible is false
 		inventory = serverProvider.createInventory(villager, size, name);
+		setupCustomizeHandler(this, biomeType, profession);
 	}
 
 	protected void setupExistingEconomyVillager(EconomyVillagerType villagerType, String name, int reservedSlots) {
 		this.reservedSlots = reservedSlots;
 		this.villagerType = villagerType;
 		location = ecoVillagerDao.loadLocation(savePrefix);
+		biomeType = ecoVillagerDao.loadBiomeType(savePrefix);
 		size = ecoVillagerDao.loadSize(savePrefix);
 		visible = ecoVillagerDao.loadVisible(savePrefix);
 		inventoryTitle = name;
@@ -177,6 +202,7 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> imp
 		}
 		// villager is null, when visible is false
 		inventory = serverProvider.createInventory(villager, size, name);
+		setupCustomizeHandler(this, biomeType, profession);
 	}
 
 	private void setupVillager() {
@@ -192,6 +218,9 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> imp
 		villager.setMetadata("ue-type", new FixedMetadataValue(serverProvider.getJavaPluginInstance(), villagerType));
 		villager.setCustomNameVisible(true);
 		villager.setProfession(profession);
+		if (biomeType != null) {
+			villager.setVillagerType(biomeType);
+		}
 		villager.setSilent(true);
 		villager.setCollidable(false);
 		villager.setInvulnerable(true);

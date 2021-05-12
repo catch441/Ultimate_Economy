@@ -40,7 +40,7 @@ import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import org.ue.economyplayer.logic.api.EconomyPlayerValidator;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
@@ -61,7 +61,7 @@ public class TownsystemEventHandlerImplTest {
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock
-	EconomyPlayerValidationHandler ecoPlayerValidationHandler;
+	EconomyPlayerValidator ecoPlayerValidationHandler;
 
 	@Test
 	public void handlePlayerTeleportTest() {

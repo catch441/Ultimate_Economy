@@ -9,26 +9,26 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.common.logic.api.ExceptionMessageEnum;
-import org.ue.common.logic.impl.EconomyVillagerValidationHandlerImpl;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyvillager.logic.impl.EconomyVillagerValidatorImpl;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
+import org.ue.townsystem.logic.api.TownsystemValidator;
 import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
 
 import dagger.Lazy;
 
-public class TownsystemValidationHandlerImpl extends EconomyVillagerValidationHandlerImpl<TownsystemException>
-		implements TownsystemValidationHandler {
+public class TownsystemValidatorImpl extends EconomyVillagerValidatorImpl<TownsystemException>
+		implements TownsystemValidator {
 
 	private final Lazy<TownworldManager> townworldManager;
 
 	@Inject
-	public TownsystemValidationHandlerImpl(MessageWrapper messageWrapper, Lazy<TownworldManager> townworldManager,
+	public TownsystemValidatorImpl(MessageWrapper messageWrapper, Lazy<TownworldManager> townworldManager,
 			ServerProvider serverProvider) {
 		super(serverProvider, messageWrapper);
 		this.townworldManager = townworldManager;

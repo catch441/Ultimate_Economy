@@ -9,21 +9,22 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import org.ue.common.logic.api.EconomyVillagerType;
-import org.ue.common.logic.impl.EconomyVillagerImpl;
+import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.utils.ServerProvider;
+import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
+import org.ue.economyvillager.logic.api.EconomyVillagerType;
+import org.ue.economyvillager.logic.impl.EconomyVillagerImpl;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
+import org.ue.townsystem.logic.api.TownsystemValidator;
 
 public class PlotImpl extends EconomyVillagerImpl<TownsystemException> implements Plot {
 
-	private final TownsystemValidationHandler validationHandler;
+	private final TownsystemValidator validationHandler;
 	private final TownworldDao townworldDao;
 	private final String chunkCoords;
 	private EconomyPlayer owner;
@@ -41,10 +42,14 @@ public class PlotImpl extends EconomyVillagerImpl<TownsystemException> implement
 	 * @param town
 	 * @param owner
 	 * @param serverProvider
+	 * @param skullService
+	 * @param messageWrapper
 	 */
-	public PlotImpl(String chunkCoords, TownsystemValidationHandler validationHandler, TownworldDao townworldDao,
-			Town town, EconomyPlayer owner, ServerProvider serverProvider) {
-		super(serverProvider, townworldDao, validationHandler, "Towns." + town.getTownName() + ".Plots." + chunkCoords + ".SaleVillager");
+	public PlotImpl(String chunkCoords, TownsystemValidator validationHandler, TownworldDao townworldDao,
+			Town town, EconomyPlayer owner, ServerProvider serverProvider, CustomSkullService skullService,
+			MessageWrapper messageWrapper) {
+		super(messageWrapper, serverProvider, townworldDao, validationHandler, skullService,
+				"Towns." + town.getTownName() + ".Plots." + chunkCoords + ".SaleVillager");
 		this.chunkCoords = chunkCoords;
 		this.town = town;
 		this.townworldDao = townworldDao;
@@ -60,11 +65,15 @@ public class PlotImpl extends EconomyVillagerImpl<TownsystemException> implement
 	 * @param townworldDao
 	 * @param town
 	 * @param serverProvider
-	 * @throws EconomyPlayerException 
+	 * @param skullService
+	 * @param messageWrapper
+	 * @throws EconomyPlayerException
 	 */
-	public PlotImpl(String chunkCoords, TownsystemValidationHandler validationHandler, TownworldDao townworldDao,
-			Town town, ServerProvider serverProvider) throws EconomyPlayerException {
-		super(serverProvider, townworldDao, validationHandler, "Towns." + town.getTownName() + ".Plots." + chunkCoords + ".SaleVillager");
+	public PlotImpl(String chunkCoords, TownsystemValidator validationHandler, TownworldDao townworldDao,
+			Town town, ServerProvider serverProvider, CustomSkullService skullService, MessageWrapper messageWrapper)
+			throws EconomyPlayerException {
+		super(messageWrapper, serverProvider, townworldDao, validationHandler, skullService,
+				"Towns." + town.getTownName() + ".Plots." + chunkCoords + ".SaleVillager");
 		this.chunkCoords = chunkCoords;
 		this.town = town;
 		this.townworldDao = townworldDao;

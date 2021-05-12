@@ -11,6 +11,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.jobsystem.logic.api.Job;
@@ -45,7 +47,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 			} catch (JobsystemException e) {
 				player.sendMessage(e.getMessage());
 			} catch (NumberFormatException e) {
-				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", "number"));
+				player.sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "number"));
 			}
 		}
 		return true;
@@ -71,7 +73,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	private boolean handleJobListCommand(String[] args, Player player) {
 		if (args.length == 0) {
 			List<String> jobNames = jobManager.getJobNameList();
-			player.sendMessage(messageWrapper.getString("joblist_info", jobNames.toString()));
+			player.sendMessage(messageWrapper.getString(MessageEnum.JOBLIST_INFO, jobNames.toString()));
 			return true;
 		}
 		return false;
@@ -80,7 +82,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	private boolean handleJobInfoCommand(String[] args, Player player) throws JobsystemException {
 		if (args.length == 1) {
 			Job job = jobManager.getJobByName(args[0]);
-			player.sendMessage(messageWrapper.getString("jobinfo_info", job.getName()));
+			player.sendMessage(messageWrapper.getString(MessageEnum.JOBLIST_INFO, job.getName()));
 			sendBlockInfo(player, job);
 			sendFisherInfo(player, job);
 			sendEntityInfo(player, job);
@@ -93,21 +95,21 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 
 	private void sendBreedableInfo(Player player, Job job) {
 		for (Entry<String, Double> entry : job.getBreedableList().entrySet()) {
-			player.sendMessage(messageWrapper.getString("jobinfo_breedprice", entry.getKey().toLowerCase(),
+			player.sendMessage(messageWrapper.getString(MessageEnum.JOBINFO_BREEDPRICE, entry.getKey().toLowerCase(),
 					entry.getValue(), configManager.getCurrencyText(entry.getValue())));
 		}
 	}
 
 	private void sendEntityInfo(Player player, Job job) {
 		for (Entry<String, Double> entry : job.getEntityList().entrySet()) {
-			player.sendMessage(messageWrapper.getString("jobinfo_killprice", entry.getKey().toLowerCase(),
+			player.sendMessage(messageWrapper.getString(MessageEnum.JOBINFO_KILLPRICE, entry.getKey().toLowerCase(),
 					entry.getValue(), configManager.getCurrencyText(entry.getValue())));
 		}
 	}
 
 	private void sendFisherInfo(Player player, Job job) {
 		for (Entry<String, Double> entry : job.getFisherList().entrySet()) {
-			player.sendMessage(messageWrapper.getString("jobinfo_fishingprice", entry.getKey().toLowerCase(),
+			player.sendMessage(messageWrapper.getString(MessageEnum.JOBINFO_FISHINGPRICE, entry.getKey().toLowerCase(),
 					entry.getValue(), configManager.getCurrencyText(entry.getValue())));
 		}
 	}
@@ -143,7 +145,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, JobsystemException {
 		if (args.length == 3) {
 			jobcenterManager.createJobcenter(args[1], player.getLocation(), Integer.parseInt(args[2]));
-			player.sendMessage(messageWrapper.getString("created", args[1]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.CREATED, args[1]));
 		} else {
 			player.sendMessage("/jobcenter create <jobcenter> <size> <- size have to be a multible of 9");
 		}
@@ -153,7 +155,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	private boolean performDeleteCommand(String label, String[] args, Player player) throws JobsystemException {
 		if (args.length == 2) {
 			jobcenterManager.deleteJobcenter(jobcenterManager.getJobcenterByName(args[1]));
-			player.sendMessage(messageWrapper.getString("deleted", args[1]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.DELETED, args[1]));
 		} else {
 			player.sendMessage("/jobcenter delete <jobcenter>");
 		}
@@ -176,7 +178,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 			Jobcenter jobcenter = jobcenterManager.getJobcenterByName(args[1]);
 			Job job = jobManager.getJobByName(args[2]);
 			jobcenter.addJob(job, args[3], Integer.valueOf(args[4]) - 1);
-			player.sendMessage(messageWrapper.getString("added", args[2]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.ADDED, args[2]));
 		} else {
 			player.sendMessage("/jobcenter addJob <jobcenter> <job> <material> <slot>");
 		}
@@ -188,7 +190,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 			Jobcenter jobcenter = jobcenterManager.getJobcenterByName(args[1]);
 			Job job = jobManager.getJobByName(args[2]);
 			jobcenter.removeJob(job);
-			player.sendMessage(messageWrapper.getString("removed", args[2]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.REMOVED, args[2]));
 		} else {
 			player.sendMessage("/jobcenter removeJob <jobcenter> <job>");
 		}
@@ -198,7 +200,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	private boolean performJobCreateCommand(String label, String[] args, Player player) throws JobsystemException {
 		if (args.length == 3) {
 			jobManager.createJob(args[2]);
-			player.sendMessage(messageWrapper.getString("created", args[2]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.CREATED, args[2]));
 		} else {
 			player.sendMessage("/jobcenter job create <job>");
 		}
@@ -208,7 +210,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	private boolean performJobDeleteCommand(String label, String[] args, Player player) throws JobsystemException {
 		if (args.length == 3) {
 			jobManager.deleteJob(jobManager.getJobByName(args[2]));
-			player.sendMessage(messageWrapper.getString("deleted", args[2]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.DELETED, args[2]));
 		} else {
 			player.sendMessage("/jobcenter job delete <job>");
 		}
@@ -220,7 +222,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 5) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.addFisherLootType(args[3], Double.valueOf(args[4]));
-			player.sendMessage(messageWrapper.getString("added", args[3]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.ADDED, args[3]));
 		} else {
 			player.sendMessage("/jobcenter job addFisher <job> [fish/treasure/junk] <price>");
 		}
@@ -232,7 +234,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 4) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.removeFisherLootType(args[3]);
-			player.sendMessage(messageWrapper.getString("removed", args[3]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.REMOVED, args[3]));
 		} else {
 			player.sendMessage("/jobcenter job removeFisher <jobname> <fish/treasure/junk>");
 		}
@@ -244,7 +246,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 5) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.addBlock(args[3], Double.valueOf(args[4]));
-			player.sendMessage(messageWrapper.getString("added", args[3]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.ADDED, args[3]));
 		} else {
 			player.sendMessage("/jobcenter job addItem <job> <material> <price>");
 		}
@@ -255,7 +257,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 4) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.deleteBlock(args[3]);
-			player.sendMessage(messageWrapper.getString("removed", args[3]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.REMOVED, args[3]));
 		} else {
 			player.sendMessage("/jobcenter job removeItem <job> <material>");
 		}
@@ -267,7 +269,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 5) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.addMob(args[3], Double.valueOf(args[4]));
-			player.sendMessage(messageWrapper.getString("added", args[3]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.ADDED, args[3]));
 		} else {
 			player.sendMessage("/jobcenter job addMob <job> <entity> <price>");
 		}
@@ -278,7 +280,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 4) {
 			Job job = jobManager.getJobByName(args[2]);
 			job.deleteMob(args[3]);
-			player.sendMessage(messageWrapper.getString("removed", args[3]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.REMOVED, args[3]));
 		} else {
 			player.sendMessage("/jobcenter job removeMob <jobname> <entity>");
 		}
@@ -293,11 +295,11 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 			try {
 				entity = EntityType.valueOf(args[3].toUpperCase());
 			} catch (IllegalArgumentException e) {
-				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[3]));
+				player.sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, args[3]));
 				return true;
 			}
 			job.addBreedable(entity, Double.valueOf(args[4]));
-			player.sendMessage(messageWrapper.getString("added", args[3]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.ADDED, args[3]));
 		} else {
 			player.sendMessage("/jobcenter job addBreedable <job> <entity> <price>");
 		}
@@ -310,9 +312,9 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 			try {
 				Job job = jobManager.getJobByName(args[2]);
 				job.deleteBreedable(EntityType.valueOf(args[3].toUpperCase()));
-				player.sendMessage(messageWrapper.getString("removed", args[3]));
+				player.sendMessage(messageWrapper.getString(MessageEnum.REMOVED, args[3]));
 			} catch (IllegalArgumentException e) {
-				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[3]));
+				player.sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, args[3]));
 			}
 		} else {
 			player.sendMessage("/jobcenter job removeBreedable <jobname> <entity>");

@@ -42,13 +42,13 @@ import org.ue.townsystem.dataaccess.api.TownworldDao;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
+import org.ue.townsystem.logic.api.TownsystemValidator;
 
 @ExtendWith(MockitoExtension.class)
 public class PlotImplTest {
 
 	@Mock
-	TownsystemValidationHandler validationHandler;
+	TownsystemValidator validationHandler;
 	@Mock
 	TownworldDao townworldDao;
 	@Mock

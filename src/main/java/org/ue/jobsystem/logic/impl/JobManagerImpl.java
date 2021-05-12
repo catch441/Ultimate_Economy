@@ -20,13 +20,13 @@ import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemException;
-import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.jobsystem.logic.api.JobsystemValidator;
 
 public class JobManagerImpl implements JobManager {
 
 	private static final Logger log = LoggerFactory.getLogger(JobManagerImpl.class);
 	private final EconomyPlayerManager ecoPlayerManager;
-	private final JobsystemValidationHandler validationHandler;
+	private final JobsystemValidator validationHandler;
 	private final JobcenterManager jobcenterManager;
 	private final ConfigDao configDao;
 	private final ServerProvider serverProvider;
@@ -34,7 +34,7 @@ public class JobManagerImpl implements JobManager {
 
 	@Inject
 	public JobManagerImpl(ServerProvider serverProvider, ConfigDao configDao, JobcenterManager jobcenterManager,
-			JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager) {
+			JobsystemValidator validationHandler, EconomyPlayerManager ecoPlayerManager) {
 		this.configDao = configDao;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;

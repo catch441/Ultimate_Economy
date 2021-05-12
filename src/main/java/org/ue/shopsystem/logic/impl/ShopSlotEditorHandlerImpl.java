@@ -12,13 +12,14 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.ue.common.logic.api.CustomSkullService;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.logic.api.SkullTextureEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.shopsystem.logic.api.AbstractShop;
 import org.ue.shopsystem.logic.api.ShopItem;
 import org.ue.shopsystem.logic.api.ShopSlotEditorHandler;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
@@ -27,7 +28,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	private int selectedEditorSlot;
 	private AbstractShop shop;
 	private final CustomSkullService skullService;
-	private final ShopValidationHandler validationHandler;
+	private final ShopValidator validationHandler;
 	private final MessageWrapper messageWrapper;
 	private final ServerProvider serverProvider;
 
@@ -41,7 +42,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	 * @param shop
 	 */
 	public ShopSlotEditorHandlerImpl(ServerProvider serverProvider, MessageWrapper messageWrapper,
-			ShopValidationHandler validationHandler, CustomSkullService skullService, AbstractShop shop) {
+			ShopValidator validationHandler, CustomSkullService skullService, AbstractShop shop) {
 		this.shop = shop;
 		this.skullService = skullService;
 		this.validationHandler = validationHandler;
@@ -233,7 +234,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 				// remove and add
 				handleRemoveItem(player);
 				shop.addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
-				player.sendMessage(messageWrapper.getString("added", stackInEditor.getType().toString().toLowerCase()));
+				player.sendMessage(messageWrapper.getString(MessageEnum.ADDED, stackInEditor.getType().toString().toLowerCase()));
 			} else {
 				// edit
 				Integer amountChange = generateChangeAmount(stackInEditor.getAmount(), shopItem);
@@ -246,7 +247,7 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 			// item is new
 			if (stackInEditor.getType() != Material.BARRIER) {
 				shop.addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
-				player.sendMessage(messageWrapper.getString("added", stackInEditor.getType().toString().toLowerCase()));
+				player.sendMessage(messageWrapper.getString(MessageEnum.ADDED, stackInEditor.getType().toString().toLowerCase()));
 			}
 		}
 	}
@@ -277,9 +278,9 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		String deletedIem = item.getType().toString().toLowerCase();
 		shop.removeShopItem(selectedEditorSlot);
 		if (item.getType() == Material.SPAWNER) {
-			player.sendMessage(messageWrapper.getString("removed", item.getItemMeta().getDisplayName().toLowerCase()));
+			player.sendMessage(messageWrapper.getString(MessageEnum.REMOVED, item.getItemMeta().getDisplayName().toLowerCase()));
 		} else {
-			player.sendMessage(messageWrapper.getString("removed", deletedIem));
+			player.sendMessage(messageWrapper.getString(MessageEnum.REMOVED, deletedIem));
 		}
 	}
 

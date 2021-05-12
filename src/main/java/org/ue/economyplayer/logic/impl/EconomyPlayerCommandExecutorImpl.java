@@ -15,13 +15,15 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.ue.bank.logic.api.BankException;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerCommandEnum;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import org.ue.economyplayer.logic.api.EconomyPlayerValidator;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.townsystem.logic.api.TownworldManager;
 
@@ -31,10 +33,10 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final TownworldManager townworldManager;
-	private final EconomyPlayerValidationHandler validationHandler;
+	private final EconomyPlayerValidator validationHandler;
 
 	@Inject
-	public EconomyPlayerCommandExecutorImpl(EconomyPlayerValidationHandler validationHandler,
+	public EconomyPlayerCommandExecutorImpl(EconomyPlayerValidator validationHandler,
 			ConfigManager configManager, MessageWrapper messageWrapper, EconomyPlayerManager ecoPlayerManager,
 			TownworldManager townworldManager) {
 		this.configManager = configManager;
@@ -61,7 +63,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 		} catch (EconomyPlayerException | BankException e) {
 			sender.sendMessage(e.getMessage());
 		} catch (NumberFormatException e) {
-			sender.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[1]));
+			sender.sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, args[1]));
 		}
 		return true;
 	}
@@ -113,14 +115,14 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 		DecimalFormat dFormat = new DecimalFormat("#.##", otherSymbols);
 		dFormat.setRoundingMode(RoundingMode.DOWN);
 		if (args.length == 0) {
-			player.sendMessage(
-					messageWrapper.getString("money_info", dFormat.format(ecoPlayer.getBankAccount().getAmount()),
-							configManager.getCurrencyText(ecoPlayer.getBankAccount().getAmount())));
+			player.sendMessage(messageWrapper.getString(MessageEnum.MONEY_INFO,
+					dFormat.format(ecoPlayer.getBankAccount().getAmount()),
+					configManager.getCurrencyText(ecoPlayer.getBankAccount().getAmount())));
 		} else if (args.length == 1 && player.hasPermission("Ultimate_Economy.adminpay")) {
 			EconomyPlayer otherPlayer = ecoPlayerManager.getEconomyPlayerByName(args[0]);
-			player.sendMessage(
-					messageWrapper.getString("money_info", dFormat.format(otherPlayer.getBankAccount().getAmount()),
-							configManager.getCurrencyText(otherPlayer.getBankAccount().getAmount())));
+			player.sendMessage(messageWrapper.getString(MessageEnum.MONEY_INFO,
+					dFormat.format(otherPlayer.getBankAccount().getAmount()),
+					configManager.getCurrencyText(otherPlayer.getBankAccount().getAmount())));
 		} else if (player.hasPermission("Ultimate_Economy.adminpay")) {
 			player.sendMessage("/money or /money <player>");
 		} else {
@@ -136,7 +138,7 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 			for (Job job : jobs) {
 				jobNames.add(job.getName());
 			}
-			player.sendMessage(messageWrapper.getString("myjobs_info", jobNames.toString()));
+			player.sendMessage(messageWrapper.getString(MessageEnum.MYJOBS_INFO, jobNames.toString()));
 		} else {
 			return false;
 		}
@@ -150,7 +152,8 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 			player.teleport(location);
 			townworldManager.performTownWorldLocationCheck(ecoPlayer, null);
 		} else if (args.length == 0) {
-			player.sendMessage(messageWrapper.getString("home_info", ecoPlayer.getHomeList().keySet().toString()));
+			player.sendMessage(
+					messageWrapper.getString(MessageEnum.HOME_INFO, ecoPlayer.getHomeList().keySet().toString()));
 		} else {
 			return false;
 		}

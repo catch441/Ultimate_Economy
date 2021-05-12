@@ -5,18 +5,18 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.ue.common.logic.api.ExceptionMessageEnum;
-import org.ue.common.logic.impl.EconomyVillagerValidationHandlerImpl;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
+import org.ue.economyvillager.logic.impl.EconomyVillagerValidatorImpl;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobsystemException;
-import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.jobsystem.logic.api.JobsystemValidator;
 
-public class JobsystemValidationHandlerImpl extends EconomyVillagerValidationHandlerImpl<JobsystemException>
-		implements JobsystemValidationHandler {
+public class JobsystemValidatorImpl extends EconomyVillagerValidatorImpl<JobsystemException>
+		implements JobsystemValidator {
 
 	@Inject
-	public JobsystemValidationHandlerImpl(ServerProvider serverProvider, MessageWrapper messageWrapper) {
+	public JobsystemValidatorImpl(ServerProvider serverProvider, MessageWrapper messageWrapper) {
 		super(serverProvider, messageWrapper);
 	}
 

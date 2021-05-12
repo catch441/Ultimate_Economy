@@ -9,7 +9,7 @@ import org.bukkit.command.TabCompleter;
 import org.ue.bank.dataaccess.api.BankDao;
 import org.ue.bank.dataaccess.impl.BankDaoImpl;
 import org.ue.bank.logic.api.BankManager;
-import org.ue.bank.logic.api.BankValidationHandler;
+import org.ue.bank.logic.api.BankValidator;
 import org.ue.bank.logic.impl.BankManagerImpl;
 import org.ue.bank.logic.impl.BankValidationHandlerImpl;
 import org.ue.common.logic.api.CustomSkullService;
@@ -18,21 +18,21 @@ import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.config.dataaccess.impl.ConfigDaoImpl;
 import org.ue.config.logic.api.ConfigManager;
-import org.ue.config.logic.api.ConfigValidationHandler;
+import org.ue.config.logic.api.ConfigValidator;
 import org.ue.config.logic.impl.ConfigCommandExecutorImpl;
 import org.ue.config.logic.impl.ConfigManagerImpl;
 import org.ue.config.logic.impl.ConfigTabCompleterImpl;
-import org.ue.config.logic.impl.ConfigValidationHandlerImpl;
+import org.ue.config.logic.impl.ConfigValidatorImpl;
 import org.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import org.ue.economyplayer.dataaccess.impl.EconomyPlayerDaoImpl;
 import org.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import org.ue.economyplayer.logic.api.EconomyPlayerValidator;
 import org.ue.economyplayer.logic.impl.EconomyPlayerCommandExecutorImpl;
 import org.ue.economyplayer.logic.impl.EconomyPlayerEventHandlerImpl;
 import org.ue.economyplayer.logic.impl.EconomyPlayerManagerImpl;
 import org.ue.economyplayer.logic.impl.EconomyPlayerTabCompleterImpl;
-import org.ue.economyplayer.logic.impl.EconomyPlayerValidationHandlerImpl;
+import org.ue.economyplayer.logic.impl.EconomyPlayerValidatorImpl;
 import org.ue.general.impl.PluginImpl;
 import org.ue.general.impl.UltimateEconomy;
 import org.ue.jobsystem.dataaccess.api.JobDao;
@@ -43,14 +43,14 @@ import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemEventHandler;
-import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.jobsystem.logic.api.JobsystemValidator;
 import org.ue.jobsystem.logic.impl.JobCommandExecutorImpl;
 import org.ue.jobsystem.logic.impl.JobManagerImpl;
 import org.ue.jobsystem.logic.impl.JobTabCompleterImpl;
 import org.ue.jobsystem.logic.impl.JobcenterImpl;
 import org.ue.jobsystem.logic.impl.JobcenterManagerImpl;
 import org.ue.jobsystem.logic.impl.JobsystemEventHandlerImpl;
-import org.ue.jobsystem.logic.impl.JobsystemValidationHandlerImpl;
+import org.ue.jobsystem.logic.impl.JobsystemValidatorImpl;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
 import org.ue.shopsystem.dataaccess.impl.ShopDaoImpl;
 import org.ue.shopsystem.logic.api.Adminshop;
@@ -60,7 +60,7 @@ import org.ue.shopsystem.logic.api.PlayershopManager;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopManager;
 import org.ue.shopsystem.logic.api.ShopEventHandler;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.impl.AdminshopCommandExecutorImpl;
 import org.ue.shopsystem.logic.impl.AdminshopImpl;
 import org.ue.shopsystem.logic.impl.AdminshopManagerImpl;
@@ -74,22 +74,22 @@ import org.ue.shopsystem.logic.impl.RentshopImpl;
 import org.ue.shopsystem.logic.impl.RentshopManagerImpl;
 import org.ue.shopsystem.logic.impl.RentshopTabCompleterImpl;
 import org.ue.shopsystem.logic.impl.ShopEventHandlerImpl;
-import org.ue.shopsystem.logic.impl.ShopValidationHandlerImpl;
-import org.ue.spawnersystem.dataaccess.api.SpawnerSystemDao;
-import org.ue.spawnersystem.dataaccess.impl.SpawnerSystemDaoImpl;
+import org.ue.shopsystem.logic.impl.ShopValidatorImpl;
+import org.ue.spawnersystem.dataaccess.api.SpawnersystemDao;
+import org.ue.spawnersystem.dataaccess.impl.SpawnerystemDaoImpl;
 import org.ue.spawnersystem.logic.api.SpawnerManager;
-import org.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
+import org.ue.spawnersystem.logic.api.SpawnersystemEventHandler;
 import org.ue.spawnersystem.logic.impl.SpawnerManagerImpl;
-import org.ue.spawnersystem.logic.impl.SpawnerSystemEventHandlerImpl;
+import org.ue.spawnersystem.logic.impl.SpawnerystemEventHandlerImpl;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
 import org.ue.townsystem.dataaccess.impl.TownworldDaoImpl;
 import org.ue.townsystem.logic.api.TownsystemEventHandler;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
+import org.ue.townsystem.logic.api.TownsystemValidator;
 import org.ue.townsystem.logic.api.TownworldManager;
 import org.ue.townsystem.logic.impl.TownCommandExecutorImpl;
 import org.ue.townsystem.logic.impl.TownTabCompleterImpl;
 import org.ue.townsystem.logic.impl.TownsystemEventHandlerImpl;
-import org.ue.townsystem.logic.impl.TownsystemValidationHandlerImpl;
+import org.ue.townsystem.logic.impl.TownsystemValidatorImpl;
 import org.ue.townsystem.logic.impl.TownworldCommandExecutorImpl;
 import org.ue.townsystem.logic.impl.TownworldManagerImpl;
 import org.ue.townsystem.logic.impl.TownworldTabCompleterImpl;
@@ -111,7 +111,7 @@ public class ProviderModule {
 			Metrics metrics, Updater updater, MessageWrapper messageWrapper, CustomSkullService skullService,
 			ServerProvider serverProvider, ShopEventHandler shopEventHandler,
 			JobsystemEventHandler jobsystemEventHandler, EconomyPlayerEventHandler ecoPlayerEventHandler,
-			TownsystemEventHandler townsystemEventHandler, SpawnerSystemEventHandler spawnerSystemEventHandler,
+			TownsystemEventHandler townsystemEventHandler, SpawnersystemEventHandler spawnerSystemEventHandler,
 			@Named("ConfigCommandExecutor") CommandExecutor configCommandExecutor,
 			@Named("EconomyPlayerCommandExecutor") CommandExecutor ecoPlayerCommandExecutor,
 			@Named("JobCommandExecutor") CommandExecutor jobCommandExecutor,
@@ -380,7 +380,7 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	SpawnerSystemDao provideSpawnerSystemDao(SpawnerSystemDaoImpl spawnerSystemDao) {
+	SpawnersystemDao provideSpawnerSystemDao(SpawnerystemDaoImpl spawnerSystemDao) {
 		return spawnerSystemDao;
 	}
 
@@ -406,45 +406,45 @@ public class ProviderModule {
 
 	@Singleton
 	@Provides
-	BankValidationHandler provideBankValidationHandler(BankValidationHandlerImpl bankValidator) {
+	BankValidator provideBankValidationHandler(BankValidationHandlerImpl bankValidator) {
 		return bankValidator;
 	}
 
 	@Singleton
 	@Provides
-	ConfigValidationHandler provideConfigValidationHandler(ConfigValidationHandlerImpl validationHandler) {
+	ConfigValidator provideConfigValidationHandler(ConfigValidatorImpl validationHandler) {
 		return validationHandler;
 	}
 
 	@Singleton
 	@Provides
-	EconomyPlayerValidationHandler provideEcoPlayerValidationHandler(
-			EconomyPlayerValidationHandlerImpl ecoPlayerValidator) {
+	EconomyPlayerValidator provideEcoPlayerValidationHandler(
+			EconomyPlayerValidatorImpl ecoPlayerValidator) {
 		return ecoPlayerValidator;
 	}
 
 	@Singleton
 	@Provides
-	JobsystemValidationHandler provideJobsystemValidationHandler(JobsystemValidationHandlerImpl jobsystemValidator) {
+	JobsystemValidator provideJobsystemValidationHandler(JobsystemValidatorImpl jobsystemValidator) {
 		return jobsystemValidator;
 	}
 
 	@Singleton
 	@Provides
-	ShopValidationHandler provideShopValidationHandler(ShopValidationHandlerImpl shopValidator) {
+	ShopValidator provideShopValidationHandler(ShopValidatorImpl shopValidator) {
 		return shopValidator;
 	}
 
 	@Singleton
 	@Provides
-	TownsystemValidationHandler provideTownsystemValidationHandler(
-			TownsystemValidationHandlerImpl townsystemValidator) {
+	TownsystemValidator provideTownsystemValidationHandler(
+			TownsystemValidatorImpl townsystemValidator) {
 		return townsystemValidator;
 	}
 
 	@Singleton
 	@Provides
-	SpawnerSystemEventHandler provideSpawnerEventHandler(SpawnerSystemEventHandlerImpl spawnerEventHandler) {
+	SpawnersystemEventHandler provideSpawnerEventHandler(SpawnerystemEventHandlerImpl spawnerEventHandler) {
 		return spawnerEventHandler;
 	}
 

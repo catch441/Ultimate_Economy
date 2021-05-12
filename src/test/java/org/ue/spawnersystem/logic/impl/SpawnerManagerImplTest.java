@@ -20,7 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.utils.ServerProvider;
-import org.ue.spawnersystem.dataaccess.api.SpawnerSystemDao;
+import org.ue.spawnersystem.dataaccess.api.SpawnersystemDao;
 
 @ExtendWith(MockitoExtension.class)
 public class SpawnerManagerImplTest {
@@ -28,7 +28,7 @@ public class SpawnerManagerImplTest {
 	@InjectMocks
 	SpawnerManagerImpl spawnerManager;
 	@Mock
-	SpawnerSystemDao spawnerSystemDao;
+	SpawnersystemDao spawnerSystemDao;
 	@Mock
 	ServerProvider serverProvider;
 	

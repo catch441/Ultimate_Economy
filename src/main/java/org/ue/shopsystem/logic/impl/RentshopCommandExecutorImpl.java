@@ -6,7 +6,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager.Profession;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopCommandEnum;
@@ -34,7 +35,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 				}
 				return false;
 			} catch (NumberFormatException e) {
-				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", "number"));
+				player.sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "number"));
 			} catch (ShopsystemException e) {
 				player.sendMessage(e.getMessage());
 			}
@@ -45,8 +46,6 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 	private boolean performCommand(String label, String[] args, Player player)
 			throws NumberFormatException, ShopsystemException {
 		switch (RentshopCommandEnum.getEnum(args[0])) {
-		case CHANGEPROFESSION:
-			return performChangeProfessionCommand(label, args, player);
 		case CREATE:
 			return performCreateCommand(label, args, player);
 		case DELETE:
@@ -57,8 +56,6 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 			return performMoveCommand(label, args, player);
 		case RENAME:
 			return performRenameCommand(label, args, player);
-		case RESIZE:
-			return performResizeCommand(label, args, player);
 		default:
 			if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 				player.sendMessage("/" + label + " [create/delete/move/resize/editShop]");
@@ -75,7 +72,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 			if (args.length == 3) {
 				Rentshop shop = rentshopManager.createRentShop(player.getLocation(), Integer.valueOf(args[1]),
 						Double.valueOf(args[2]));
-				player.sendMessage(messageWrapper.getString("created", shop.getName()));
+				player.sendMessage(messageWrapper.getString(MessageEnum.CREATED, shop.getName()));
 			} else {
 				player.sendMessage("/" + label + " create <size> <rentalFee per 24h>");
 			}
@@ -87,7 +84,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 		if (player.hasPermission("ultimate_economy.rentshop.admin")) {
 			if (args.length == 2) {
 				rentshopManager.deleteRentShop(rentshopManager.getRentShopByUniqueName(args[1]));
-				player.sendMessage(messageWrapper.getString("deleted", args[1]));
+				player.sendMessage(messageWrapper.getString(MessageEnum.DELETED, args[1]));
 			} else {
 				player.sendMessage("/" + label + " delete <shopname>");
 			}
@@ -106,39 +103,10 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performResizeCommand(String label, String[] args, Player player)
-			throws NumberFormatException, ShopsystemException {
-		if (player.hasPermission("ultimate_economy.rentshop.admin")) {
-			if (args.length == 3) {
-				rentshopManager.getRentShopByUniqueName(args[1]).changeSize(Integer.valueOf(args[2]));
-				player.sendMessage(messageWrapper.getString("shop_resize", args[2]));
-			} else {
-				player.sendMessage("/" + label + " resize <shopname> <new size>");
-			}
-		}
-		return true;
-	}
-
-	private boolean performChangeProfessionCommand(String label, String[] args, Player player)
-			throws ShopsystemException {
-		if (args.length == 3) {
-			try {
-				rentshopManager.getRentShopByUniqueName(args[1] + "_" + player.getName())
-						.changeProfession(Profession.valueOf(args[2].toUpperCase()));
-				player.sendMessage(messageWrapper.getString("profession_changed"));
-			} catch (IllegalArgumentException e) {
-				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[2]));
-			}
-		} else {
-			player.sendMessage("/" + label + " changeProfession <shopname> <profession>");
-		}
-		return true;
-	}
-
 	private boolean performRenameCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 3) {
 			rentshopManager.getRentShopByUniqueName(args[1] + "_" + player.getName()).changeShopName(args[2]);
-			player.sendMessage(messageWrapper.getString("shop_rename", args[1], args[2]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.SHOP_RENAME, args[1], args[2]));
 		} else {
 			player.sendMessage("/" + label + " rename <oldName> <newName>");
 		}

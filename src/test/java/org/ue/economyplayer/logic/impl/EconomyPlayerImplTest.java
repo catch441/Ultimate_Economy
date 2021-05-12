@@ -44,7 +44,7 @@ import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
-import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import org.ue.economyplayer.logic.api.EconomyPlayerValidator;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.JobsystemException;
@@ -65,7 +65,7 @@ public class EconomyPlayerImplTest {
 	@Mock
 	EconomyPlayerDao ecoPlayerDao;
 	@Mock
-	EconomyPlayerValidationHandler validationHandler;
+	EconomyPlayerValidator validationHandler;
 
 	@Test
 	public void constructorNewTest() {

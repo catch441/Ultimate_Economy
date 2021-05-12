@@ -54,7 +54,7 @@ import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
 import org.ue.shopsystem.logic.api.PlayershopManager;
 import org.ue.shopsystem.logic.api.ShopItem;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 import org.ue.townsystem.logic.api.TownworldManager;
 
@@ -68,7 +68,7 @@ public class PlayershopImplTest {
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock
-	ShopValidationHandler validationHandler;
+	ShopValidator validationHandler;
 	@Mock
 	CustomSkullService customSkullService;
 	@Mock

@@ -30,7 +30,7 @@ import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.logic.api.Playershop;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +41,7 @@ public class PlayershopManagerImplTest {
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock
-	ShopValidationHandler validationHandler;
+	ShopValidator validationHandler;
 	@Mock
 	ConfigDao configDao;
 	@Mock

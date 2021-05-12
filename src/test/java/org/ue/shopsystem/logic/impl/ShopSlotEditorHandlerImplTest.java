@@ -32,7 +32,7 @@ import org.ue.common.logic.api.SkullTextureEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.shopsystem.logic.api.AbstractShop;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +41,7 @@ public class ShopSlotEditorHandlerImplTest {
 	@Mock
 	CustomSkullService skullService;
 	@Mock
-	ShopValidationHandler validationHandler;
+	ShopValidator validationHandler;
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock

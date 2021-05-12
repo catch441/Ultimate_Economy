@@ -15,19 +15,21 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.ue.common.logic.api.EconomyVillagerType;
-import org.ue.common.logic.impl.EconomyVillagerImpl;
+import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.utils.ServerProvider;
+import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
+import org.ue.economyvillager.logic.api.EconomyVillagerType;
+import org.ue.economyvillager.logic.impl.EconomyVillagerImpl;
 import org.ue.jobsystem.dataaccess.api.JobcenterDao;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemException;
-import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.jobsystem.logic.api.JobsystemValidator;
 
 public class JobcenterImpl extends EconomyVillagerImpl<JobsystemException> implements Jobcenter {
 
@@ -35,16 +37,16 @@ public class JobcenterImpl extends EconomyVillagerImpl<JobsystemException> imple
 	private final JobManager jobManager;
 	private final JobcenterManager jobcenterManager;
 	private final EconomyPlayerManager ecoPlayerManager;
-	private final JobsystemValidationHandler validationHandler;
+	private final JobsystemValidator validationHandler;
 	private final JobcenterDao jobcenterDao;
 	private String name;
 	private Map<Integer, Job> jobs = new HashMap<>();
 
 	@Inject
 	public JobcenterImpl(JobcenterDao jobcenterDao, JobManager jobManager, JobcenterManager jobcenterManager,
-			EconomyPlayerManager ecoPlayerManager, JobsystemValidationHandler validationHandler,
-			ServerProvider serverProvider) {
-		super(serverProvider, jobcenterDao, validationHandler, "");
+			EconomyPlayerManager ecoPlayerManager, JobsystemValidator validationHandler,
+			ServerProvider serverProvider, CustomSkullService skullService, MessageWrapper messageWrapper) {
+		super(messageWrapper, serverProvider, jobcenterDao, validationHandler, skullService, "");
 		this.jobManager = jobManager;
 		this.jobcenterManager = jobcenterManager;
 		this.ecoPlayerManager = ecoPlayerManager;

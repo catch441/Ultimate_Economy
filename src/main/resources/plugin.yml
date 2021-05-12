@@ -2,7 +2,7 @@ name: Ultimate_Economy
 api: []
 main: org.ue.general.impl.PluginImpl
 author: catch441
-version: 1.2.7b
+version: 1.2.8
 
 api-version: "1.16"
 
@@ -136,7 +136,7 @@ commands:
         permission: ultimate_economy.adminshop
         permission-message: You don't have the permission.
         description: Manage adminshops.
-        usage: /<command> [create/delete/move/rename/resize/editShop/changeProfession/addSpawner]
+        usage: /<command> [create/delete/move/rename/editShop/addSpawner]
 
     givemoney:
         permission: ultimate_economy.adminpay

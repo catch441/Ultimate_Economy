@@ -23,18 +23,18 @@ import org.bukkit.inventory.InventoryHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ue.bank.logic.api.BankException;
-import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.utils.Updater;
 import org.ue.common.utils.Updater.UpdateResult;
 import org.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
+import org.ue.economyvillager.logic.api.EconomyVillagerType;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemEventHandler;
 import org.ue.shopsystem.logic.api.AdminshopManager;
 import org.ue.shopsystem.logic.api.PlayershopManager;
 import org.ue.shopsystem.logic.api.RentshopManager;
 import org.ue.shopsystem.logic.api.ShopEventHandler;
-import org.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
+import org.ue.spawnersystem.logic.api.SpawnersystemEventHandler;
 import org.ue.townsystem.logic.api.TownsystemEventHandler;
 
 public class UltimateEconomyEventHandlerImpl implements Listener {
@@ -44,7 +44,7 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 	private final JobsystemEventHandler jobsystemEventHandler;
 	private final ShopEventHandler shopEventHandler;
 	private final TownsystemEventHandler townSystemEventHandler;
-	private final SpawnerSystemEventHandler spawnerSystemEventHandler;
+	private final SpawnersystemEventHandler spawnerSystemEventHandler;
 	private final Updater updater;
 	private final AdminshopManager adminshopManager;
 	private final PlayershopManager playershopManager;
@@ -53,7 +53,7 @@ public class UltimateEconomyEventHandlerImpl implements Listener {
 	
 	public UltimateEconomyEventHandlerImpl(JobcenterManager jobcenterManager, RentshopManager rentshopManager,
 			PlayershopManager playershopManager, AdminshopManager adminshopManager, Updater updater,
-			SpawnerSystemEventHandler spawnerSystemEventHandler, TownsystemEventHandler townSystemEventHandler,
+			SpawnersystemEventHandler spawnerSystemEventHandler, TownsystemEventHandler townSystemEventHandler,
 			ShopEventHandler shopEventHandler, JobsystemEventHandler jobsystemEventHandler,
 			EconomyPlayerEventHandler ecoPlayerEventHandler) {
 		this.ecoPlayerEventHandler = ecoPlayerEventHandler;

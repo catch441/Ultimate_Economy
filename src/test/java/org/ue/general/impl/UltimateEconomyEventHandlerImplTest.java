@@ -36,19 +36,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.utils.Updater;
 import org.ue.common.utils.Updater.UpdateResult;
 import org.ue.economyplayer.logic.api.EconomyPlayerEventHandler;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
+import org.ue.economyvillager.logic.api.EconomyVillagerType;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemEventHandler;
 import org.ue.shopsystem.logic.api.AdminshopManager;
 import org.ue.shopsystem.logic.api.PlayershopManager;
 import org.ue.shopsystem.logic.api.RentshopManager;
 import org.ue.shopsystem.logic.api.ShopEventHandler;
-import org.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
+import org.ue.spawnersystem.logic.api.SpawnersystemEventHandler;
 import org.ue.townsystem.logic.api.TownsystemEventHandler;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,7 +63,7 @@ public class UltimateEconomyEventHandlerImplTest {
 	@Mock
 	TownsystemEventHandler townSystemEventHandler;
 	@Mock
-	SpawnerSystemEventHandler spawnerSystemEventHandler;
+	SpawnersystemEventHandler spawnerSystemEventHandler;
 	@Mock
 	Updater updater;
 	@Mock

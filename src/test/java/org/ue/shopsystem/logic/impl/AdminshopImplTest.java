@@ -54,7 +54,7 @@ import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
 import org.ue.shopsystem.logic.api.AdminshopManager;
 import org.ue.shopsystem.logic.api.ShopItem;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,7 +71,7 @@ public class AdminshopImplTest {
 	@Mock
 	ShopDao shopDao;
 	@Mock
-	ShopValidationHandler validationHandler;
+	ShopValidator validationHandler;
 	@Mock
 	ConfigManager configManager;
 	@Mock

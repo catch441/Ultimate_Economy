@@ -20,13 +20,14 @@ import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
+import org.ue.economyvillager.logic.impl.EconomyVillagerValidatorImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class EconomyVillagerValidationHandlerTest {
 
 	static AbstractValidator validator;
 
-	private static class AbstractValidator extends EconomyVillagerValidationHandlerImpl<AbstractException> {
+	private static class AbstractValidator extends EconomyVillagerValidatorImpl<AbstractException> {
 
 		public AbstractValidator(ServerProvider serverProvider, MessageWrapper messageWrapper) {
 			super(serverProvider, messageWrapper);

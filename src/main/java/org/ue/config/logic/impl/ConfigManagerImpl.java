@@ -7,12 +7,12 @@ import javax.inject.Inject;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.config.logic.api.ConfigException;
 import org.ue.config.logic.api.ConfigManager;
-import org.ue.config.logic.api.ConfigValidationHandler;
+import org.ue.config.logic.api.ConfigValidator;
 
 public class ConfigManagerImpl implements ConfigManager {
 
 	private final ConfigDao configDao;
-	private final ConfigValidationHandler validationHandler;
+	private final ConfigValidator validationHandler;
 
 	private int maxHomes;
 	private int maxJobs;
@@ -29,7 +29,7 @@ public class ConfigManagerImpl implements ConfigManager {
 	private double startAmount;
 
 	@Inject
-	public ConfigManagerImpl(ConfigDao configDao, ConfigValidationHandler validationHandler) {
+	public ConfigManagerImpl(ConfigDao configDao, ConfigValidator validationHandler) {
 		this.configDao = configDao;
 		this.validationHandler = validationHandler;
 	}

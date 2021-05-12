@@ -6,18 +6,18 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.ue.common.logic.api.ExceptionMessageEnum;
-import org.ue.common.logic.impl.GeneralValidationHandlerImpl;
+import org.ue.common.logic.impl.GeneralValidatorImpl;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigException;
-import org.ue.config.logic.api.ConfigValidationHandler;
+import org.ue.config.logic.api.ConfigValidator;
 
-public class ConfigValidationHandlerImpl extends GeneralValidationHandlerImpl<ConfigException>
-		implements ConfigValidationHandler {
+public class ConfigValidatorImpl extends GeneralValidatorImpl<ConfigException>
+		implements ConfigValidator {
 	
 	private static final List<String> languages = Arrays.asList("cs", "de", "en", "fr", "zh", "ru", "es", "lt", "it", "pl");
 
 	@Inject
-	public ConfigValidationHandlerImpl(MessageWrapper messageWrapper) {
+	public ConfigValidatorImpl(MessageWrapper messageWrapper) {
 		super(messageWrapper);
 	}
 

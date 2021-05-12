@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.utils.ServerProvider;
+import org.ue.economyvillager.dataaccess.impl.EconomyVillagerDaoImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class EconomyVillagerDaoImplTest {

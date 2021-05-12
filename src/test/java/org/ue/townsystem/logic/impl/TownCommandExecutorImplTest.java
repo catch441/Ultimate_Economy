@@ -31,7 +31,7 @@ import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
+import org.ue.townsystem.logic.api.TownsystemValidator;
 import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
 
@@ -49,7 +49,7 @@ public class TownCommandExecutorImplTest {
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock
-	TownsystemValidationHandler townsystemValidationHandler;
+	TownsystemValidator townsystemValidationHandler;
 	@Mock
 	Player player;
 

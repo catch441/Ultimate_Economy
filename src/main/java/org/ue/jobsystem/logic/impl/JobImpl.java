@@ -12,7 +12,7 @@ import org.ue.jobsystem.dataaccess.api.JobDao;
 import org.ue.jobsystem.logic.api.FishingLootTypeEnum;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobsystemException;
-import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.jobsystem.logic.api.JobsystemValidator;
 
 public class JobImpl implements Job {
 
@@ -21,7 +21,7 @@ public class JobImpl implements Job {
 			EntityType.DONKEY, EntityType.HORSE, EntityType.OCELOT, EntityType.POLAR_BEAR, EntityType.TURTLE,
 			EntityType.CHICKEN, EntityType.FOX, EntityType.LLAMA, EntityType.PANDA, EntityType.RABBIT,
 			EntityType.VILLAGER);
-	private final JobsystemValidationHandler validationHandler;
+	private final JobsystemValidator validationHandler;
 	private final JobDao jobDao;
 	private Map<String, Double> entityList = new HashMap<>();
 	private Map<String, Double> blockList = new HashMap<>();
@@ -37,7 +37,7 @@ public class JobImpl implements Job {
 	 * @param name
 	 * @param isNew
 	 */
-	public JobImpl(JobsystemValidationHandler validationHandler,
+	public JobImpl(JobsystemValidator validationHandler,
 			JobDao jobDao, String name, boolean isNew) {
 		this.jobDao = jobDao;
 		this.validationHandler = validationHandler;

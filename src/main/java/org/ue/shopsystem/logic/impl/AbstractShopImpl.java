@@ -17,28 +17,28 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.CustomSkullService;
-import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.logic.api.ExceptionMessageEnum;
-import org.ue.common.logic.impl.EconomyVillagerImpl;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
+import org.ue.economyvillager.logic.api.EconomyVillagerType;
+import org.ue.economyvillager.logic.impl.EconomyVillagerImpl;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
 import org.ue.shopsystem.logic.api.AbstractShop;
 import org.ue.shopsystem.logic.api.ShopEditorHandler;
 import org.ue.shopsystem.logic.api.ShopItem;
 import org.ue.shopsystem.logic.api.ShopSlotEditorHandler;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemException> implements AbstractShop {
 
-	protected final CustomSkullService skullService;
 	protected final MessageWrapper messageWrapper;
 	protected final ConfigManager configManager;
-	protected final ShopValidationHandler validationHandler;
+	protected final ShopValidator validationHandler;
 	protected final ShopDao shopDao;
 	protected String name;
 	private Map<Integer, ShopItem> shopItems = new HashMap<>();
@@ -48,10 +48,9 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 	private ShopEditorHandler editorHandler;
 
 	public AbstractShopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
-			ShopValidationHandler validationHandler, MessageWrapper messageWrapper, ConfigManager configManager) {
-		super(serverProvider, shopDao, validationHandler, "");
+			ShopValidator validationHandler, MessageWrapper messageWrapper, ConfigManager configManager) {
+		super(messageWrapper, serverProvider, shopDao, validationHandler, skullService, "");
 		this.shopDao = shopDao;
-		this.skullService = skullService;
 		this.validationHandler = validationHandler;
 		this.messageWrapper = messageWrapper;
 		this.configManager = configManager;
@@ -68,7 +67,7 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 		setupShopInvDefaultItems();
 		slotEditorHandler = new ShopSlotEditorHandlerImpl(serverProvider, messageWrapper, validationHandler,
 				skullService, this);
-		editorHandler = new ShopEditorHandlerImpl(skullService, this);
+		editorHandler = new ShopEditorHandlerImpl(serverProvider, skullService, this);
 	}
 
 	protected void setupExisting(EconomyVillagerType ecoVillagerType, String shopId, int reservedSlots) {
@@ -81,7 +80,7 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 		slotEditorHandler = new ShopSlotEditorHandlerImpl(serverProvider, messageWrapper, validationHandler,
 				skullService, this);
 		loadShopItems();
-		editorHandler = new ShopEditorHandlerImpl(skullService, this);
+		editorHandler = new ShopEditorHandlerImpl(serverProvider, skullService, this);
 	}
 
 	@Override
@@ -240,10 +239,10 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 
 	protected void sendBuySellPlayerMessage(int amount, EconomyPlayer ecoPlayer, double price, String sellBuy) {
 		if (amount > 1) {
-			ecoPlayer.getPlayer().sendMessage(messageWrapper.getString("shop_" + sellBuy + "_plural",
+			ecoPlayer.getPlayer().sendMessage(messageWrapper.getString(MessageEnum.getSellBuyPluralValue(sellBuy),
 					String.valueOf(amount), price, configManager.getCurrencyText(price)));
 		} else {
-			ecoPlayer.getPlayer().sendMessage(messageWrapper.getString("shop_" + sellBuy + "_singular",
+			ecoPlayer.getPlayer().sendMessage(messageWrapper.getString(MessageEnum.getSellBuySingularValue(sellBuy),
 					String.valueOf(amount), price, configManager.getCurrencyText(price)));
 		}
 	}

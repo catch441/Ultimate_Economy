@@ -12,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BossBar;
 import org.ue.bank.logic.api.BankManager;
+import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
@@ -21,7 +22,7 @@ import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
+import org.ue.townsystem.logic.api.TownsystemValidator;
 import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
 
@@ -30,7 +31,8 @@ public class TownworldManagerImpl implements TownworldManager {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final MessageWrapper messageWrapper;
 	private final ServerProvider serverProvider;
-	private final TownsystemValidationHandler validationHandler;
+	private final CustomSkullService skullService;
+	private final TownsystemValidator validationHandler;
 	private final BankManager bankManager;
 	private final ConfigDao configDao;
 
@@ -39,14 +41,15 @@ public class TownworldManagerImpl implements TownworldManager {
 
 	@Inject
 	public TownworldManagerImpl(ConfigDao configDao, BankManager bankManager, EconomyPlayerManager ecoPlayerManager,
-			MessageWrapper messageWrapper, TownsystemValidationHandler validationHandler,
-			ServerProvider serverProvider) {
+			MessageWrapper messageWrapper, TownsystemValidator validationHandler, ServerProvider serverProvider,
+			CustomSkullService skullService) {
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
 		this.messageWrapper = messageWrapper;
 		this.bankManager = bankManager;
 		this.serverProvider = serverProvider;
 		this.configDao = configDao;
+		this.skullService = skullService;
 	}
 
 	protected void setTownNameList(List<String> townNameList) {
@@ -148,7 +151,7 @@ public class TownworldManagerImpl implements TownworldManager {
 		TownworldDao townworldDao = serverProvider.getServiceComponent().getTownworldDao();
 		townworldDao.setupSavefile(world);
 		townWorldList.put(world, new TownworldImpl(world, true, townworldDao, validationHandler, this, messageWrapper,
-				bankManager, serverProvider));
+				bankManager, serverProvider, skullService));
 		configDao.saveTownworldNamesList(getTownWorldNameList());
 	}
 
@@ -167,7 +170,7 @@ public class TownworldManagerImpl implements TownworldManager {
 			TownworldDao townworldDao = serverProvider.getServiceComponent().getTownworldDao();
 			townworldDao.setupSavefile(townWorldName);
 			Townworld townworld = new TownworldImpl(townWorldName, false, townworldDao, validationHandler, this,
-					messageWrapper, bankManager, serverProvider);
+					messageWrapper, bankManager, serverProvider, skullService);
 			townNameList.addAll(townworld.getTownNameList());
 			townWorldList.put(townWorldName, townworld);
 		}

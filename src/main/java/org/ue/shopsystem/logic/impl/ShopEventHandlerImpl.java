@@ -11,8 +11,8 @@ import org.bukkit.inventory.PlayerInventory;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
+import org.ue.economyvillager.logic.api.EconomyVillagerType;
 import org.ue.bank.logic.api.BankException;
-import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.shopsystem.logic.api.AbstractShop;
 import org.ue.shopsystem.logic.api.AdminshopManager;
@@ -78,6 +78,8 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 				((AbstractShopImpl) abstractShop).getEditorHandler().handleInventoryClick(event);
 			} else if ((abstractShop.getName() + "-SlotEditor").equals(inventoryName)) {
 				((AbstractShopImpl) abstractShop).getSlotEditorHandler().handleSlotEditor(event);
+			} else if("Customize Villager".equals(inventoryName)) {
+				abstractShop.handleCustomizeInventoryClick(event);
 			} else {
 				EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(player.getName());
 				handleBuySell(abstractShop, event, ecoPlayer);

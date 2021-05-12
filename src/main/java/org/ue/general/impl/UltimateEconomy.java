@@ -29,7 +29,7 @@ import org.ue.shopsystem.logic.api.PlayershopManager;
 import org.ue.shopsystem.logic.api.RentshopManager;
 import org.ue.shopsystem.logic.api.ShopEventHandler;
 import org.ue.spawnersystem.logic.api.SpawnerManager;
-import org.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
+import org.ue.spawnersystem.logic.api.SpawnersystemEventHandler;
 import org.ue.townsystem.logic.api.TownsystemEventHandler;
 import org.ue.townsystem.logic.api.TownworldManager;
 
@@ -62,7 +62,7 @@ public class UltimateEconomy {
 	private final JobsystemEventHandler jobsystemEventHandler;
 	private final EconomyPlayerEventHandler ecoPlayerEventHandler;
 	private final TownsystemEventHandler townsystemEventHandler;
-	private final SpawnerSystemEventHandler spawnerSystemEventHandler;
+	private final SpawnersystemEventHandler spawnerSystemEventHandler;
 	private final CommandExecutor configCommandExecutor;
 	private final CommandExecutor ecoPlayerCommandExecutor;
 	private final CommandExecutor jobCommandExecutor;
@@ -89,7 +89,7 @@ public class UltimateEconomy {
 			MessageWrapper messageWrapper, CustomSkullService skullService,
 			ServerProvider serverProvider, ShopEventHandler shopEventHandler,
 			JobsystemEventHandler jobsystemEventHandler, EconomyPlayerEventHandler ecoPlayerEventHandler,
-			TownsystemEventHandler townsystemEventHandler, SpawnerSystemEventHandler spawnerSystemEventHandler,
+			TownsystemEventHandler townsystemEventHandler, SpawnersystemEventHandler spawnerSystemEventHandler,
 			CommandExecutor configCommandExecutor, CommandExecutor ecoPlayerCommandExecutor,
 			CommandExecutor jobCommandExecutor, CommandExecutor playershopCommandExecutor,
 			CommandExecutor adminshopCommandExecutor, CommandExecutor rentshopCommandExecutor,

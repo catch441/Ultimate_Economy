@@ -30,7 +30,7 @@ import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobsystemException;
-import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.jobsystem.logic.api.JobsystemValidator;
 
 @ExtendWith(MockitoExtension.class)
 public class JobcenterManagerImplTest {
@@ -44,7 +44,7 @@ public class JobcenterManagerImplTest {
 	@Mock
 	ConfigDao configDao;
 	@Mock
-	JobsystemValidationHandler validator;
+	JobsystemValidator validator;
 
 	@Test
 	public void getJobcenterByNameTest() {

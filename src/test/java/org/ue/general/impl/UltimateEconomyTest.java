@@ -42,7 +42,7 @@ import org.ue.shopsystem.logic.api.PlayershopManager;
 import org.ue.shopsystem.logic.api.RentshopManager;
 import org.ue.shopsystem.logic.api.ShopEventHandler;
 import org.ue.spawnersystem.logic.api.SpawnerManager;
-import org.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
+import org.ue.spawnersystem.logic.api.SpawnersystemEventHandler;
 import org.ue.townsystem.logic.api.TownsystemEventHandler;
 import org.ue.townsystem.logic.api.TownworldManager;
 
@@ -90,7 +90,7 @@ public class UltimateEconomyTest {
 	@Mock
 	TownsystemEventHandler townsystemEventHandler;
 	@Mock
-	SpawnerSystemEventHandler spawnerSystemEventHandler;
+	SpawnersystemEventHandler spawnerSystemEventHandler;
 	@Mock
 	@Named("ConfigCommandExecutor")
 	CommandExecutor configCommandExecutor;

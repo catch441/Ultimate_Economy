@@ -12,17 +12,17 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.utils.api.MessageWrapper;
+import org.ue.economyvillager.logic.api.EconomyVillagerType;
 
 @ExtendWith(MockitoExtension.class)
 public class GeneralEconomyValidationHandlerImplTest {
 
 	static AbstractValidator validator;
 
-	private static class AbstractValidator extends GeneralValidationHandlerImpl<GeneralEconomyException> {
+	private static class AbstractValidator extends GeneralValidatorImpl<GeneralEconomyException> {
 
 		public AbstractValidator(MessageWrapper messageWrapper) {
 			super(messageWrapper);

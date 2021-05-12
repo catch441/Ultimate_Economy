@@ -10,9 +10,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
@@ -55,7 +56,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 			} catch (JobsystemException | ShopsystemException | EconomyPlayerException e) {
 				player.sendMessage(e.getMessage());
 			} catch (NumberFormatException e) {
-				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", "number"));
+				player.sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "number"));
 			}
 		}
 		return true;
@@ -85,7 +86,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 			if (configManager.isAllowQuickshop() || ecoPlayer.hasJob(jobManager.getJobByName(args[0]))) {
 				adminshopManager.getAdminShopByName(args[0]).openInventory(player);
 			} else {
-				player.sendMessage(messageWrapper.getErrorString("job_not_joined"));
+				player.sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.JOB_NOT_JOINED));
 			}
 			return true;
 		}
@@ -95,7 +96,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	private boolean handleShopListCommand(String label, String[] args, Player player) {
 		if (args.length == 0) {
 			List<String> shopNames = adminshopManager.getAdminshopNameList();
-			player.sendMessage(messageWrapper.getString("shoplist_info", shopNames.toString()));
+			player.sendMessage(messageWrapper.getString(MessageEnum.SHOPLIST_INFO, shopNames.toString()));
 			return true;
 		}
 		return false;
@@ -106,8 +107,6 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 		switch (AdminshopCommandEnum.getEnum(args[0])) {
 		case ADDSPAWNER:
 			return performAddSpawnerCommand(label, args, player);
-		case CHANGEPROFESSION:
-			return performChangeProfessionCommand(label, args, player);
 		case CREATE:
 			return performCreateCommand(label, args, player);
 		case DELETE:
@@ -118,8 +117,6 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 			return performMoveCommand(label, args, player);
 		case RENAME:
 			return performRenameCommand(label, args, player);
-		case RESIZE:
-			return performResizeCommand(label, args, player);
 		default:
 			return false;
 		}
@@ -129,7 +126,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, ShopsystemException {
 		if (args.length == 3) {
 			adminshopManager.createAdminShop(args[1], player.getLocation(), Integer.valueOf(args[2]));
-			player.sendMessage(messageWrapper.getString("created", args[1]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.CREATED, args[1]));
 		} else {
 			player.sendMessage("/" + label + " create <shopname> <size> <- size have to be a multible of 9");
 		}
@@ -139,7 +136,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	private boolean performDeleteCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 2) {
 			adminshopManager.deleteAdminShop(adminshopManager.getAdminShopByName(args[1]));
-			player.sendMessage(messageWrapper.getString("deleted", args[1]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.DELETED, args[1]));
 		} else {
 			player.sendMessage("/" + label + " delete <shopname>");
 		}
@@ -149,20 +146,9 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	private boolean performRenameCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 3) {
 			adminshopManager.getAdminShopByName(args[1]).changeShopName(args[2]);
-			player.sendMessage(messageWrapper.getString("shop_rename", args[1], args[2]));
+			player.sendMessage(messageWrapper.getString(MessageEnum.SHOP_RENAME, args[1], args[2]));
 		} else {
 			player.sendMessage("/" + label + " rename <oldName> <newName>");
-		}
-		return true;
-	}
-
-	private boolean performResizeCommand(String label, String[] args, Player player)
-			throws NumberFormatException, ShopsystemException {
-		if (args.length == 3) {
-			adminshopManager.getAdminShopByName(args[1]).changeSize(Integer.valueOf(args[2]));
-			player.sendMessage(messageWrapper.getString("shop_resize", args[2]));
-		} else {
-			player.sendMessage("/" + label + " resize <shopname> <new size>");
 		}
 		return true;
 	}
@@ -185,22 +171,6 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 		return true;
 	}
 
-	private boolean performChangeProfessionCommand(String label, String[] args, Player player)
-			throws ShopsystemException {
-		if (args.length == 3) {
-			try {
-				adminshopManager.getAdminShopByName(args[1])
-						.changeProfession(Profession.valueOf(args[2].toUpperCase()));
-				player.sendMessage(messageWrapper.getString("profession_changed"));
-			} catch (IllegalArgumentException e) {
-				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[2]));
-			}
-		} else {
-			player.sendMessage("/" + label + " changeProfession <shopname> <profession>");
-		}
-		return true;
-	}
-
 	private boolean performAddSpawnerCommand(String label, String[] args, Player player)
 			throws NumberFormatException, ShopsystemException {
 		if (args.length == 5) {
@@ -212,9 +182,9 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 				itemStack.setItemMeta(meta);
 				adminshopManager.getAdminShopByName(args[1]).addShopItem(Integer.valueOf(args[3]) - 1, 0.0,
 						Double.valueOf(args[4]), itemStack);
-				player.sendMessage(messageWrapper.getString("added", args[2]));
+				player.sendMessage(messageWrapper.getString(MessageEnum.ADDED, args[2]));
 			} catch (IllegalArgumentException e) {
-				player.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[2]));
+				player.sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, args[2]));
 			}
 		} else {
 			player.sendMessage("/" + label + " addSpawner <shopname> <entity type> <slot> <buyPrice>");

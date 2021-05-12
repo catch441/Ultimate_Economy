@@ -37,7 +37,7 @@ import dagger.Lazy;
 public class TownsystemValidationHandlerImplTest {
 
 	@InjectMocks
-	TownsystemValidationHandlerImpl validationHandler;
+	TownsystemValidatorImpl validationHandler;
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock

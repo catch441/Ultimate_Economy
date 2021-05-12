@@ -7,8 +7,8 @@ import javax.inject.Inject;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.ue.common.dataaccess.impl.EconomyVillagerDaoImpl;
 import org.ue.common.utils.ServerProvider;
+import org.ue.economyvillager.dataaccess.impl.EconomyVillagerDaoImpl;
 import org.ue.jobsystem.dataaccess.api.JobcenterDao;
 import org.ue.jobsystem.logic.api.Job;
 

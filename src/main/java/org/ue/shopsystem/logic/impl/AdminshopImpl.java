@@ -8,17 +8,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.CustomSkullService;
-import org.ue.common.logic.api.EconomyVillagerType;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
+import org.ue.economyvillager.logic.api.EconomyVillagerType;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
 import org.ue.shopsystem.logic.api.Adminshop;
 import org.ue.shopsystem.logic.api.AdminshopManager;
 import org.ue.shopsystem.logic.api.ShopItem;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
@@ -38,7 +39,7 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 */
 	@Inject
 	public AdminshopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
-			AdminshopManager adminshopManager, ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
+			AdminshopManager adminshopManager, ShopValidator validationHandler, MessageWrapper messageWrapper,
 			ConfigManager configManager) {
 		super(shopDao, serverProvider, skullService, validationHandler, messageWrapper, configManager);
 		this.adminshopManager = adminshopManager;
@@ -92,12 +93,12 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 			if (sendMessage) {
 				if (shopItem.getAmount() > 1) {
 					ecoPlayer.getPlayer()
-							.sendMessage(messageWrapper.getString("shop_buy_plural",
+							.sendMessage(messageWrapper.getString(MessageEnum.SHOP_BUY_PLURAL,
 									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
 									configManager.getCurrencyText(shopItem.getBuyPrice())));
 				} else {
 					ecoPlayer.getPlayer()
-							.sendMessage(messageWrapper.getString("shop_buy_singular",
+							.sendMessage(messageWrapper.getString(MessageEnum.SHOP_BUY_SINGULAR,
 									String.valueOf(shopItem.getAmount()), shopItem.getBuyPrice(),
 									configManager.getCurrencyText(shopItem.getBuyPrice())));
 				}

@@ -31,13 +31,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ue.common.dataaccess.api.EconomyVillagerDao;
-import org.ue.common.logic.api.EconomyVillagerType;
-import org.ue.common.logic.api.EconomyVillagerValidationHandler;
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
+import org.ue.economyvillager.dataaccess.api.EconomyVillagerDao;
+import org.ue.economyvillager.logic.api.EconomyVillagerType;
+import org.ue.economyvillager.logic.api.EconomyVillagerValidator;
+import org.ue.economyvillager.logic.impl.EconomyVillagerImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class EconomyVillagerTest {
@@ -47,11 +48,11 @@ public class EconomyVillagerTest {
 	@Mock
 	EconomyVillagerDao ecoVillagerDao;
 	@Mock
-	EconomyVillagerValidationHandler<AbstractException> validationHandler;
+	EconomyVillagerValidator<AbstractException> validationHandler;
 
 	private static class AbstractVillager extends EconomyVillagerImpl<AbstractException> {
 		public AbstractVillager(ServerProvider serverProvider, EconomyVillagerDao ecoVillagerDao,
-				EconomyVillagerValidationHandler<AbstractException> validationHandler, String savePrefix) {
+				EconomyVillagerValidator<AbstractException> validationHandler, String savePrefix) {
 			super(serverProvider, ecoVillagerDao, validationHandler, savePrefix);
 		}
 	}

@@ -15,7 +15,7 @@ import org.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import org.ue.economyplayer.logic.api.EconomyPlayerValidator;
 import org.ue.jobsystem.logic.api.JobManager;
 
 import dagger.Lazy;
@@ -24,7 +24,7 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 
 	private final EconomyPlayerDao ecoPlayerDao;
 	private final MessageWrapper messageWrapper;
-	private final EconomyPlayerValidationHandler validationHandler;
+	private final EconomyPlayerValidator validationHandler;
 	private final BankManager bankManager;
 	private final ConfigManager configManager;
 	// lazy because of circulating dependency, cannot resolved with refactoring
@@ -36,7 +36,7 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 
 	@Inject
 	public EconomyPlayerManagerImpl(EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper,
-			EconomyPlayerValidationHandler validationHandler, BankManager bankManager, ConfigManager configManager,
+			EconomyPlayerValidator validationHandler, BankManager bankManager, ConfigManager configManager,
 			Lazy<JobManager> jobManager, ServerProvider serverProvider) {
 		this.ecoPlayerDao = ecoPlayerDao;
 		this.messageWrapper = messageWrapper;

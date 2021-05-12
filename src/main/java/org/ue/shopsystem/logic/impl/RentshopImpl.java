@@ -8,19 +8,19 @@ import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.CustomSkullService;
-import org.ue.common.logic.api.EconomyVillagerType;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
+import org.ue.economyvillager.logic.api.EconomyVillagerType;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
 import org.ue.shopsystem.logic.api.PlayershopManager;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopRentGuiHandler;
 import org.ue.shopsystem.logic.api.ShopItem;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 import org.ue.townsystem.logic.api.TownworldManager;
 
@@ -49,7 +49,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 */
 	@Inject
 	public RentshopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
-			ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
+			ShopValidator validationHandler, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,
 			PlayershopManager playershopManager) {
 		super(shopDao, serverProvider, skullService, validationHandler, ecoPlayerManager, messageWrapper, configManager,

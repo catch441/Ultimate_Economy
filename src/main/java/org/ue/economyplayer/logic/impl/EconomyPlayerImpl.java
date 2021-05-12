@@ -17,13 +17,14 @@ import org.slf4j.LoggerFactory;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankException;
 import org.ue.bank.logic.api.BankManager;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
-import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import org.ue.economyplayer.logic.api.EconomyPlayerValidator;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.JobsystemException;
@@ -37,7 +38,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	private final JobManager jobManager;
 	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerDao ecoPlayerDao;
-	private final EconomyPlayerValidationHandler validationHandler;
+	private final EconomyPlayerValidator validationHandler;
 	private Map<String, Location> homes = new HashMap<>();
 	private BankAccount bankAccount;
 	private Player player;
@@ -61,7 +62,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	 * @param name
 	 * @param isNew
 	 */
-	public EconomyPlayerImpl(ServerProvider serverProvider, EconomyPlayerValidationHandler validationHandler,
+	public EconomyPlayerImpl(ServerProvider serverProvider, EconomyPlayerValidator validationHandler,
 			EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper, ConfigManager configManager,
 			BankManager bankManager, JobManager jobManager, Player player, String name, boolean isNew) {
 		this.configManager = configManager;
@@ -103,7 +104,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		getJobList().add(job);
 		ecoPlayerDao.saveJoinedJobsList(getName(), getJobList());
 		if (sendMessage && isOnline()) {
-			getPlayer().sendMessage(messageWrapper.getString("job_join", job.getName()));
+			getPlayer().sendMessage(messageWrapper.getString(MessageEnum.JOB_JOIN, job.getName()));
 		}
 	}
 
@@ -113,7 +114,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		getJobList().remove(job);
 		ecoPlayerDao.saveJoinedJobsList(getName(), getJobList());
 		if (isOnline() && sendMessage) {
-			getPlayer().sendMessage(messageWrapper.getString("job_left", job.getName()));
+			getPlayer().sendMessage(messageWrapper.getString(MessageEnum.JOB_LEFT, job.getName()));
 		}
 	}
 
@@ -180,7 +181,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		homes.put(homeName, location);
 		ecoPlayerDao.saveHome(getName(), homeName, location);
 		if (isOnline() && sendMessage) {
-			getPlayer().sendMessage(messageWrapper.getString("created", homeName));
+			getPlayer().sendMessage(messageWrapper.getString(MessageEnum.CREATED, homeName));
 		}
 
 	}
@@ -191,7 +192,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		getHomeList().remove(homeName);
 		ecoPlayerDao.saveHome(getName(), homeName, null);
 		if (isOnline() && sendMessage) {
-			getPlayer().sendMessage(messageWrapper.getString("deleted", homeName));
+			getPlayer().sendMessage(messageWrapper.getString(MessageEnum.DELETED, homeName));
 		}
 	}
 
@@ -209,11 +210,11 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			setupScoreboard();
 			updateScoreBoardObjective();
 		} else {
-			if (isOnline()&&old) {
+			if (isOnline() && old) {
 				getPlayer().getScoreboard().getObjective(DisplaySlot.SIDEBAR).unregister();
 			}
 		}
-		
+
 	}
 
 	@Override
@@ -222,11 +223,11 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		decreasePlayerAmount(amount, true);
 		reciever.increasePlayerAmount(amount, false);
 		if (reciever.isOnline() && sendMessage) {
-			reciever.getPlayer().sendMessage(messageWrapper.getString("got_money_with_sender", amount,
+			reciever.getPlayer().sendMessage(messageWrapper.getString(MessageEnum.GOT_MONEY_WITH_SENDER, amount,
 					configManager.getCurrencyText(amount), getName()));
 		}
 		if (isOnline() && sendMessage) {
-			getPlayer().sendMessage(messageWrapper.getString("gave_money", reciever.getName(), amount,
+			getPlayer().sendMessage(messageWrapper.getString(MessageEnum.GAVE_MONEY, reciever.getName(), amount,
 					configManager.getCurrencyText(amount)));
 		}
 	}
@@ -238,7 +239,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 			updateScoreBoardObjective();
 			if (sendMessage) {
 				getPlayer().sendMessage(
-						messageWrapper.getString("got_money", amount, configManager.getCurrencyText(amount)));
+						messageWrapper.getString(MessageEnum.GOT_MONEY, amount, configManager.getCurrencyText(amount)));
 			}
 		}
 	}
@@ -298,7 +299,7 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	private void setupScoreboard() {
 		if (isOnline() && isScoreBoardObjectiveVisible()) {
 			Scoreboard board = serverProvider.createScoreboard();
-			Objective o = board.registerNewObjective("bank", "dummy", messageWrapper.getString("bank"));
+			Objective o = board.registerNewObjective("bank", "dummy", messageWrapper.getString(MessageEnum.BANK));
 			o.setDisplaySlot(DisplaySlot.SIDEBAR);
 			getPlayer().setScoreboard(board);
 		}

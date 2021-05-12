@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.config.logic.api.ConfigException;
-import org.ue.config.logic.api.ConfigValidationHandler;
+import org.ue.config.logic.api.ConfigValidator;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +35,7 @@ public class ConfigManagerImplTest {
 	@Mock
 	EconomyPlayerManager ecoPlayerManager;
 	@Mock
-	ConfigValidationHandler validationHandler;
+	ConfigValidator validationHandler;
 
 	@Test
 	public void setupConfigInitTest() {

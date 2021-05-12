@@ -1,22 +1,23 @@
-package org.ue.common.logic.impl;
+package org.ue.economyvillager.logic.impl;
 
 import java.util.Set;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.ue.common.logic.api.EconomyVillagerValidationHandler;
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.logic.api.GeneralEconomyException;
+import org.ue.common.logic.impl.GeneralValidatorImpl;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
+import org.ue.economyvillager.logic.api.EconomyVillagerValidator;
 
-public abstract class EconomyVillagerValidationHandlerImpl<T extends GeneralEconomyException>
-		extends GeneralValidationHandlerImpl<T> implements EconomyVillagerValidationHandler<T> {
+public abstract class EconomyVillagerValidatorImpl<T extends GeneralEconomyException>
+		extends GeneralValidatorImpl<T> implements EconomyVillagerValidator<T> {
 
 	protected final ServerProvider serverProvider;
 
-	public EconomyVillagerValidationHandlerImpl(ServerProvider serverProvider, MessageWrapper messageWrapper) {
+	public EconomyVillagerValidatorImpl(ServerProvider serverProvider, MessageWrapper messageWrapper) {
 		super(messageWrapper);
 		this.serverProvider = serverProvider;
 	}

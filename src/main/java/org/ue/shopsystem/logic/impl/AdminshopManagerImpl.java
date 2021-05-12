@@ -17,20 +17,20 @@ import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.logic.api.Adminshop;
 import org.ue.shopsystem.logic.api.AdminshopManager;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class AdminshopManagerImpl implements AdminshopManager {
 
 	private static final Logger log = LoggerFactory.getLogger(AdminshopManagerImpl.class);
 	private final MessageWrapper messageWrapper;
-	private final ShopValidationHandler validationHandler;
+	private final ShopValidator validationHandler;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
 	private Map<String, Adminshop> adminShopList = new HashMap<>();
 
 	@Inject
-	public AdminshopManagerImpl(ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
+	public AdminshopManagerImpl(ShopValidator validationHandler, MessageWrapper messageWrapper,
 			ServerProvider serverProvider, ConfigDao configDao) {
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;

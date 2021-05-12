@@ -16,7 +16,7 @@ import org.ue.config.logic.api.ConfigException;
 public class ConfigValidationHandlerTest {
 
 	@InjectMocks
-	ConfigValidationHandlerImpl validationHandler;
+	ConfigValidatorImpl validationHandler;
 	@Mock
 	MessageWrapper messageWrapper;
 	

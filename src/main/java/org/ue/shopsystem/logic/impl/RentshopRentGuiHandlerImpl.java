@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.CustomSkullService;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.logic.api.SkullTextureEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
@@ -126,7 +127,7 @@ public class RentshopRentGuiHandlerImpl implements RentshopRentGuiHandler {
 	private void handleRentClick(InventoryClickEvent event, int duration) {
 		try {
 			shop.rentShop(ecoPlayerManager.getEconomyPlayerByName(event.getWhoClicked().getName()), duration);
-			event.getWhoClicked().sendMessage(messageWrapper.getString("rent_rented"));
+			event.getWhoClicked().sendMessage(messageWrapper.getString(MessageEnum.RENT_RENRED));
 		} catch (ShopsystemException | BankException | EconomyPlayerException e) {
 			event.getWhoClicked().sendMessage(e.getMessage());
 		}

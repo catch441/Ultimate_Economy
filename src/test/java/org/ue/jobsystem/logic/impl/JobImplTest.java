@@ -28,7 +28,7 @@ import org.ue.jobsystem.dataaccess.api.JobDao;
 import org.ue.jobsystem.logic.api.FishingLootTypeEnum;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobsystemException;
-import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.jobsystem.logic.api.JobsystemValidator;
 
 @ExtendWith(MockitoExtension.class)
 public class JobImplTest {
@@ -36,7 +36,7 @@ public class JobImplTest {
 	@Mock
 	JobDao jobDao;
 	@Mock
-	JobsystemValidationHandler validationHandler;
+	JobsystemValidator validationHandler;
 
 	@Test
 	public void constructorNewTest() {

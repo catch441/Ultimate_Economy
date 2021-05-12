@@ -31,7 +31,7 @@ import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemException;
-import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.jobsystem.logic.api.JobsystemValidator;
 
 @ExtendWith(MockitoExtension.class)
 public class JobManagerImplTest {
@@ -43,7 +43,7 @@ public class JobManagerImplTest {
 	@Mock
 	JobcenterManager jobcenterManager;
 	@Mock
-	JobsystemValidationHandler validationHandler;
+	JobsystemValidator validationHandler;
 	@Mock
 	EconomyPlayerManager ecoPlayerManager;
 	@Mock

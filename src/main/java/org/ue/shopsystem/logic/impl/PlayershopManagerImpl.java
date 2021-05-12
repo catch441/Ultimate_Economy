@@ -18,20 +18,20 @@ import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.logic.api.Playershop;
 import org.ue.shopsystem.logic.api.PlayershopManager;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class PlayershopManagerImpl implements PlayershopManager {
 
 	private static final Logger log = LoggerFactory.getLogger(PlayershopManagerImpl.class);
 	private final MessageWrapper messageWrapper;
-	private final ShopValidationHandler validationHandler;
+	private final ShopValidator validationHandler;
 	private final ConfigDao configDao;
 	private final ServerProvider serverProvider;
 	private Map<String, Playershop> playerShopList = new HashMap<>();
 
 	@Inject
-	public PlayershopManagerImpl(ConfigDao configDao, ShopValidationHandler validationHandler,
+	public PlayershopManagerImpl(ConfigDao configDao, ShopValidator validationHandler,
 			MessageWrapper messageWrapper, ServerProvider serverProvider) {
 		this.configDao = configDao;
 		this.messageWrapper = messageWrapper;

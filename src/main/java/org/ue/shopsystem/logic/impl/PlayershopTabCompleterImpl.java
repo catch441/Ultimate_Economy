@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Villager.Profession;
 import org.ue.common.utils.TabCompleterUtils;
 import org.ue.shopsystem.logic.api.PlayershopManager;
 
@@ -32,26 +31,14 @@ public class PlayershopTabCompleterImpl extends TabCompleterUtils implements Tab
 		case "delete":
 		case "move":
 		case "editShop":
-		case "resize":
 		case "changeOwner":
 		case "rename":
 			return handlePlayershopNameTabComplete(sender, args);
-		case "changeProfession":
-			return handleChangeProfessionTabComplete(sender, args);
 		case "":
 			return getAllCommands(sender);
 		default:
 			return handleDefaultMatchingTabComplete(sender, args);
 		}
-	}
-
-	private List<String> handleChangeProfessionTabComplete(CommandSender sender, String[] args) {
-		if (args.length == 3) {
-			return getMatchingEnumList(Profession.values(), args[2]);
-		} else if (args.length == 2) {
-			return getMatchingList(getPlayershopNameListForPlayer(sender.getName()), args[1]);
-		}
-		return new ArrayList<>();
 	}
 
 	private List<String> handleDeleteOtherTabComplete(String[] args) {
@@ -76,7 +63,7 @@ public class PlayershopTabCompleterImpl extends TabCompleterUtils implements Tab
 	}
 
 	private List<String> getAllCommands(CommandSender sender) {
-		List<String> list = new ArrayList<>(Arrays.asList("create", "delete", "move", "editShop", "rename", "resize", "changeProfession", "changeOwner"));
+		List<String> list = new ArrayList<>(Arrays.asList("create", "delete", "move", "editShop", "rename", "changeOwner"));
 		if (sender.hasPermission("ultimate_economy.adminshop")) {
 			list.add("deleteOther");
 		}

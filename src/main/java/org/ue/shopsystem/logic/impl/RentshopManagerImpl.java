@@ -17,20 +17,20 @@ import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopManager;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class RentshopManagerImpl implements RentshopManager {
 
 	private static final Logger log = LoggerFactory.getLogger(RentshopManagerImpl.class);
 	private final MessageWrapper messageWrapper;
-	private final ShopValidationHandler validationHandler;
+	private final ShopValidator validationHandler;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
 	private Map<String, Rentshop> rentShopList = new HashMap<>();
 
 	@Inject
-	public RentshopManagerImpl(MessageWrapper messageWrapper, ShopValidationHandler validationHandler,
+	public RentshopManagerImpl(MessageWrapper messageWrapper, ShopValidator validationHandler,
 			ServerProvider serverProvider, ConfigDao configDao) {
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;

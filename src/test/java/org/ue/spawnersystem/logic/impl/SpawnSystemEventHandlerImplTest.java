@@ -47,7 +47,7 @@ import org.ue.spawnersystem.logic.api.SpawnerManager;
 public class SpawnSystemEventHandlerImplTest {
 
 	@InjectMocks
-	SpawnerSystemEventHandlerImpl eventHandler;
+	SpawnerystemEventHandlerImpl eventHandler;
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock

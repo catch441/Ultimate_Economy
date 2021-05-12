@@ -16,18 +16,19 @@ import org.slf4j.LoggerFactory;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankException;
 import org.ue.bank.logic.api.BankManager;
-import org.ue.common.logic.api.EconomyVillagerType;
+import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.ExceptionMessageEnum;
-import org.ue.common.logic.impl.EconomyVillagerImpl;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
+import org.ue.economyvillager.logic.api.EconomyVillagerType;
+import org.ue.economyvillager.logic.impl.EconomyVillagerImpl;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
+import org.ue.townsystem.logic.api.TownsystemValidator;
 import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
 
@@ -35,7 +36,7 @@ public class TownImpl extends EconomyVillagerImpl<TownsystemException> implement
 
 	private static final Logger log = LoggerFactory.getLogger(TownImpl.class);
 	private final MessageWrapper messageWrapper;
-	private final TownsystemValidationHandler validationHandler;
+	private final TownsystemValidator validationHandler;
 	private final BankManager bankManager;
 	private final TownworldManager townworldManager;
 	private final TownworldDao townworldDao;
@@ -65,16 +66,19 @@ public class TownImpl extends EconomyVillagerImpl<TownsystemException> implement
 	 * @param townworld
 	 * @param serverProvider
 	 * @param generalValidator
+	 * @param skullService
 	 * @throws EconomyPlayerException
 	 * @throws BankException
 	 * @throws NumberFormatException
 	 * @throws TownsystemException
 	 */
 	public TownImpl(boolean isNew, EconomyPlayer mayor, String townName, Location location,
-			TownworldManager townworldManager, BankManager bankManager, TownsystemValidationHandler validationHandler,
+			TownworldManager townworldManager, BankManager bankManager, TownsystemValidator validationHandler,
 			MessageWrapper messageWrapper, TownworldDao townworldDao, Townworld townworld,
-			ServerProvider serverProvider) throws EconomyPlayerException, TownsystemException, BankException {
-		super(serverProvider, townworldDao, validationHandler, "Towns." + townName + ".TownManagerVillager");
+			ServerProvider serverProvider, CustomSkullService skullService)
+			throws EconomyPlayerException, TownsystemException, BankException {
+		super(messageWrapper, serverProvider, townworldDao, validationHandler, skullService,
+				"Towns." + townName + ".TownManagerVillager");
 		this.townworldDao = townworldDao;
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
@@ -112,7 +116,7 @@ public class TownImpl extends EconomyVillagerImpl<TownsystemException> implement
 		validationHandler.checkForChunkIsConnectedToTown(isChunkConnectedToTown(chunk.getX(), chunk.getZ()));
 		decreaseTownBankAmount(getTownworld().getExpandPrice());
 		Plot plot = new PlotImpl(chunk.getX() + "/" + chunk.getZ(), validationHandler, townworldDao, this, player,
-				serverProvider);
+				serverProvider, skullService, messageWrapper);
 		plots.put(plot.getChunkCoords(), plot);
 		townworldManager.performTownworldLocationCheckAllPlayers();
 	}
@@ -380,8 +384,8 @@ public class TownImpl extends EconomyVillagerImpl<TownsystemException> implement
 	private Chunk setupStartChunk(EconomyPlayer mayor, Location location) {
 		Chunk startChunk = location.getChunk();
 		String startChunkCoords = startChunk.getX() + "/" + startChunk.getZ();
-		plots.put(startChunkCoords,
-				new PlotImpl(startChunkCoords, validationHandler, townworldDao, this, mayor, serverProvider));
+		plots.put(startChunkCoords, new PlotImpl(startChunkCoords, validationHandler, townworldDao, this, mayor,
+				serverProvider, skullService, messageWrapper));
 		return startChunk;
 	}
 
@@ -416,7 +420,7 @@ public class TownImpl extends EconomyVillagerImpl<TownsystemException> implement
 	private void loadPlots() {
 		for (String coords : townworldDao.loadTownPlotCoords(getTownName())) {
 			try {
-				Plot plot = new PlotImpl(coords, validationHandler, townworldDao, this, serverProvider);
+				Plot plot = new PlotImpl(coords, validationHandler, townworldDao, this, serverProvider, skullService, messageWrapper);
 				plots.put(coords, plot);
 			} catch (EconomyPlayerException e) {
 				log.warn("[Ultimate_Economy] Failed to load plot " + coords + " of town " + getTownName());

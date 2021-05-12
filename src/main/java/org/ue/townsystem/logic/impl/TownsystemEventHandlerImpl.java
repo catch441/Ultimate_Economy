@@ -21,7 +21,7 @@ import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import org.ue.economyplayer.logic.api.EconomyPlayerValidator;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
@@ -35,12 +35,12 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 	private final TownworldManager townworldManager;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final MessageWrapper messageWrapper;
-	private final EconomyPlayerValidationHandler ecoPlayerValidationHandler;
+	private final EconomyPlayerValidator ecoPlayerValidationHandler;
 
 	@Inject
 	public TownsystemEventHandlerImpl(ConfigManager configManager, TownworldManager townworldManager,
 			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper,
-			EconomyPlayerValidationHandler ecoPlayerValidationHandler) {
+			EconomyPlayerValidator ecoPlayerValidationHandler) {
 		this.configManager = configManager;
 		this.townworldManager = townworldManager;
 		this.ecoPlayerManager = ecoPlayerManager;
@@ -180,14 +180,14 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 					if (!event.getPlayer().hasPermission("ultimate_economy.wilderness")) {
 						event.setCancelled(true);
 						event.getPlayer().sendMessage(
-								messageWrapper.getErrorString(ExceptionMessageEnum.WILDERNESS.getValue()));
+								messageWrapper.getErrorString(ExceptionMessageEnum.WILDERNESS));
 					}
 				} else {
 					Town town = townworld.getTownByChunk(location.getChunk());
 					if (hasNoBuildPermission(event, location, economyPlayer, town)) {
 						event.setCancelled(true);
 						event.getPlayer().sendMessage(messageWrapper
-								.getErrorString(ExceptionMessageEnum.NO_PERMISSION_ON_PLOT.getValue()));
+								.getErrorString(ExceptionMessageEnum.NO_PERMISSION_ON_PLOT));
 					}
 				}
 			} catch (TownsystemException | EconomyPlayerException e) {

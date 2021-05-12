@@ -19,20 +19,20 @@ import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemException;
-import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.jobsystem.logic.api.JobsystemValidator;
 
 public class JobcenterManagerImpl implements JobcenterManager {
 
 	private static final Logger log = LoggerFactory.getLogger(JobcenterManagerImpl.class);
 	private final EconomyPlayerManager ecoPlayerManager;
-	private final JobsystemValidationHandler validationHandler;
+	private final JobsystemValidator validationHandler;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
 	private Map<String, Jobcenter> jobcenterList = new HashMap<>();
 
 	@Inject
 	public JobcenterManagerImpl(ConfigDao configDao, ServerProvider serverProvider,
-			EconomyPlayerManager ecoPlayerManager, JobsystemValidationHandler validationHandler) {
+			EconomyPlayerManager ecoPlayerManager, JobsystemValidator validationHandler) {
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.serverProvider = serverProvider;
 		this.configDao = configDao;
