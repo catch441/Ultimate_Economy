@@ -62,7 +62,7 @@ public class RentshopManagerImpl implements RentshopManager {
 	public Rentshop getRentShopByUniqueName(String name) throws ShopsystemException {
 		for (Rentshop shop : getRentShops()) {
 			if (shop.isRentable()) {
-				if (("RentShop#" + shop.getShopId()).equals(name)) {
+				if (("RentShop#" + shop.getId()).equals(name)) {
 					return shop;
 				}
 			} else {
@@ -79,7 +79,7 @@ public class RentshopManagerImpl implements RentshopManager {
 		List<String> list = new ArrayList<>();
 		for (Rentshop shop : getRentShops()) {
 			if (shop.isRentable()) {
-				list.add("RentShop#" + shop.getShopId());
+				list.add("RentShop#" + shop.getId());
 			} else {
 				list.add(shop.getName() + "_" + shop.getOwner().getName());
 			}
@@ -98,14 +98,14 @@ public class RentshopManagerImpl implements RentshopManager {
 		validationHandler.checkForPositiveValue(rentalFee);
 		Rentshop shop = serverProvider.getServiceComponent().getRentshop();
 		shop.setupNew(generateFreeRentShopId(), spawnLocation, size, rentalFee);
-		rentShopList.put(shop.getShopId(), shop);
+		rentShopList.put(shop.getId(), shop);
 		configDao.saveRentshopIds(getRentShopIdList());
 		return shop;
 	}
 
 	@Override
 	public void deleteRentShop(Rentshop rentshop) {
-		rentShopList.remove(rentshop.getShopId());
+		rentShopList.remove(rentshop.getId());
 		rentshop.deleteShop();
 		configDao.saveRentshopIds(getRentShopIdList());
 	}

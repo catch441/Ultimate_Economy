@@ -61,13 +61,11 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	public void setupNew(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size) {
 		setupNew(EconomyVillagerType.PLAYERSHOP, name, shopId, spawnLocation, size, 1);
 		setupShopOwner(owner);
-		getEditorHandler().setup(1);
 	}
 
 	@Override
 	public void setupExisting(String shopId) throws EconomyPlayerException {
 		setupExisting(EconomyVillagerType.PLAYERSHOP, shopId, 1);
-		getEditorHandler().setup(1);
 		loadStock();
 		loadOwner();
 	}
@@ -184,7 +182,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 			newName += "_" + getOwner().getName();
 		}
 		getVillager().setCustomName(newName);
-		changeInventoryNames(name);
+		changeInventoryName(name);
 	}
 
 	@Override

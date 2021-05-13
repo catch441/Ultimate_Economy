@@ -164,7 +164,7 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 
 	private boolean performEditShopCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 2) {
-			adminshopManager.getAdminShopByName(args[1]).openEditor(player);
+			adminshopManager.getAdminShopByName(args[1]).getEditorHandler().openInventory(player);;
 		} else {
 			player.sendMessage("/" + label + " editShop <shopname>");
 		}

@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -44,8 +45,8 @@ public class JobcenterImpl extends EconomyVillagerImpl<JobsystemException> imple
 
 	@Inject
 	public JobcenterImpl(JobcenterDao jobcenterDao, JobManager jobManager, JobcenterManager jobcenterManager,
-			EconomyPlayerManager ecoPlayerManager, JobsystemValidator validationHandler,
-			ServerProvider serverProvider, CustomSkullService skullService, MessageWrapper messageWrapper) {
+			EconomyPlayerManager ecoPlayerManager, JobsystemValidator validationHandler, ServerProvider serverProvider,
+			CustomSkullService skullService, MessageWrapper messageWrapper) {
 		super(messageWrapper, serverProvider, jobcenterDao, validationHandler, skullService, "");
 		this.jobManager = jobManager;
 		this.jobcenterManager = jobcenterManager;
@@ -59,7 +60,7 @@ public class JobcenterImpl extends EconomyVillagerImpl<JobsystemException> imple
 		jobcenterDao.setupSavefile(name);
 		this.name = name;
 		jobcenterDao.saveJobcenterName(name);
-		setupNewEconomyVillager(spawnLocation, EconomyVillagerType.JOBCENTER, name, size, 1, true);
+		setupNewEconomyVillager(spawnLocation, EconomyVillagerType.JOBCENTER, name, name, size, 1, true);
 		setupDefaultJobcenterInventory();
 	}
 
@@ -67,7 +68,7 @@ public class JobcenterImpl extends EconomyVillagerImpl<JobsystemException> imple
 	public void setupExisting(String name) {
 		jobcenterDao.setupSavefile(name);
 		this.name = name;
-		setupExistingEconomyVillager(EconomyVillagerType.JOBCENTER, name, 1);
+		setupExistingEconomyVillager(EconomyVillagerType.JOBCENTER, name, name, 1);
 		setupDefaultJobcenterInventory();
 		loadJobs();
 	}
@@ -137,6 +138,25 @@ public class JobcenterImpl extends EconomyVillagerImpl<JobsystemException> imple
 		return false;
 	}
 
+	@Override
+	public void handleInventoryClick(ClickType clickType, int rawSlot, EconomyPlayer whoClicked) {
+		try {
+			if (rawSlot < (getSize() - 1)) {
+				Job job = jobs.get(rawSlot);
+				// if job exists in jobcenter
+				if (job != null) {
+					if (clickType == ClickType.RIGHT) {
+						whoClicked.leaveJob(job, true);
+					} else if (clickType == ClickType.LEFT) {
+						whoClicked.joinJob(job, true);
+					}
+				}
+			}
+		} catch (EconomyPlayerException e) {
+			whoClicked.getPlayer().sendMessage(e.getMessage());
+		}
+	}
+
 	private List<String> getJobNameList() {
 		List<String> list = new ArrayList<>();
 		for (Job job : getJobList()) {
@@ -159,16 +179,10 @@ public class JobcenterImpl extends EconomyVillagerImpl<JobsystemException> imple
 	}
 
 	private void setupDefaultJobcenterInventory() {
-		int slot = getSize() - 1;
-		ItemStack info = serverProvider.createItemStack(Material.ANVIL, 1);
-		ItemMeta meta = info.getItemMeta();
-		meta.setDisplayName("Info");
 		List<String> lore = new ArrayList<>();
 		lore.add(ChatColor.GOLD + "Leftclick: " + ChatColor.GREEN + "Join");
 		lore.add(ChatColor.GOLD + "Rightclick: " + ChatColor.RED + "Leave");
-		meta.setLore(lore);
-		info.setItemMeta(meta);
-		getInventory().setItem(slot, info);
+		setItem(Material.ANVIL, lore, "Info", getSize() - 1);
 	}
 
 	private void loadJobs() {

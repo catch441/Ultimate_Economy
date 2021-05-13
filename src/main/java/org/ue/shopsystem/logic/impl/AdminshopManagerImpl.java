@@ -94,13 +94,13 @@ public class AdminshopManagerImpl implements AdminshopManager {
 		validationHandler.checkForValueNotInList(getAdminshopNameList(), name);
 		Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
 		shop.setupNew(name, generateFreeAdminShopId(), spawnLocation, size);
-		adminShopList.put(shop.getShopId(), shop);
+		adminShopList.put(shop.getId(), shop);
 		configDao.saveAdminshopIds(getAdminshopIdList());
 	}
 
 	@Override
 	public void deleteAdminShop(Adminshop adminshop) {
-		adminShopList.remove(adminshop.getShopId());
+		adminShopList.remove(adminshop.getId());
 		adminshop.deleteShop();
 		configDao.saveAdminshopIds(getAdminshopIdList());
 	}

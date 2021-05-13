@@ -143,7 +143,8 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 
 	private boolean performEditShopCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 2) {
-			playershopManager.getPlayerShopByUniqueName(args[1] + "_" + player.getName()).openEditor(player);
+			playershopManager.getPlayerShopByUniqueName(args[1] + "_" + player.getName()).getEditorHandler()
+					.openInventory(player);
 		} else {
 			player.sendMessage("/" + label + " editShop <shop>");
 		}

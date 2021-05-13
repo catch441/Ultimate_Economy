@@ -98,13 +98,13 @@ public class PlayershopManagerImpl implements PlayershopManager {
 		validationHandler.checkForValidSize(size);
 		Playershop shop = serverProvider.getServiceComponent().getPlayershop();
 		shop.setupNew(name, ecoPlayer, generateFreePlayerShopId(), spawnLocation, size);
-		playerShopList.put(shop.getShopId(), shop);
+		playerShopList.put(shop.getId(), shop);
 		configDao.savePlayershopIds(getPlayershopIdList());
 	}
 
 	@Override
 	public void deletePlayerShop(Playershop playershop) {
-		playerShopList.remove(playershop.getShopId());
+		playerShopList.remove(playershop.getId());
 		playershop.deleteShop();
 		configDao.savePlayershopIds(getPlayershopIdList());
 	}

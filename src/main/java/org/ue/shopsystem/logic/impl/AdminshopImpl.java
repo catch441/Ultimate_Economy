@@ -61,7 +61,7 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 		validationHandler.checkForValidShopName(name);
 		this.name = name;
 		shopDao.saveShopName(name);
-		changeInventoryNames(name);
+		changeInventoryName(name);
 		getVillager().setCustomName(name);
 	}
 

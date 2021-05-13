@@ -115,7 +115,7 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 
 	private boolean performEditShopCommand(String label, String[] args, Player player) throws ShopsystemException {
 		if (args.length == 2) {
-			rentshopManager.getRentShopByUniqueName(args[1] + "_" + player.getName()).openEditor(player);
+			rentshopManager.getRentShopByUniqueName(args[1] + "_" + player.getName()).getEditorHandler().openInventory(player);
 		} else {
 			player.sendMessage("/" + label + " editShop <shopname>");
 		}

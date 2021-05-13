@@ -7,7 +7,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SaveFileUtils {
+public abstract class SaveFileUtils {
 
 	private static final Logger log = LoggerFactory.getLogger(SaveFileUtils.class);
 	protected File file;
