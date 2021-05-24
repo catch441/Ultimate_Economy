@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -18,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.utils.ServerProvider;
-import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
@@ -43,11 +40,10 @@ public class JobcenterImpl extends EconomyVillagerImpl<JobsystemException> imple
 	private String name;
 	private Map<Integer, Job> jobs = new HashMap<>();
 
-	@Inject
 	public JobcenterImpl(JobcenterDao jobcenterDao, JobManager jobManager, JobcenterManager jobcenterManager,
 			EconomyPlayerManager ecoPlayerManager, JobsystemValidator validationHandler, ServerProvider serverProvider,
-			CustomSkullService skullService, MessageWrapper messageWrapper) {
-		super(messageWrapper, serverProvider, jobcenterDao, validationHandler, skullService, "");
+			CustomSkullService skullService) {
+		super(serverProvider, jobcenterDao, validationHandler, skullService);
 		this.jobManager = jobManager;
 		this.jobcenterManager = jobcenterManager;
 		this.ecoPlayerManager = ecoPlayerManager;
@@ -60,7 +56,7 @@ public class JobcenterImpl extends EconomyVillagerImpl<JobsystemException> imple
 		jobcenterDao.setupSavefile(name);
 		this.name = name;
 		jobcenterDao.saveJobcenterName(name);
-		setupNewEconomyVillager(spawnLocation, EconomyVillagerType.JOBCENTER, name, name, size, 1, true);
+		setupNewEconomyVillager(spawnLocation, EconomyVillagerType.JOBCENTER, name, name, size, 1, true, "");
 		setupDefaultJobcenterInventory();
 	}
 
@@ -68,7 +64,7 @@ public class JobcenterImpl extends EconomyVillagerImpl<JobsystemException> imple
 	public void setupExisting(String name) {
 		jobcenterDao.setupSavefile(name);
 		this.name = name;
-		setupExistingEconomyVillager(EconomyVillagerType.JOBCENTER, name, name, 1);
+		setupExistingEconomyVillager(EconomyVillagerType.JOBCENTER, name, name, 1, "");
 		setupDefaultJobcenterInventory();
 		loadJobs();
 	}
@@ -81,12 +77,7 @@ public class JobcenterImpl extends EconomyVillagerImpl<JobsystemException> imple
 		validationHandler.checkForValidSlot(slot, getSize() - getReservedSlots());
 		validationHandler.checkForSlotIsEmpty(jobs.keySet(), slot);
 
-		ItemStack jobItem = serverProvider.createItemStack(Material.valueOf(itemMaterial), 1);
-		ItemMeta meta = jobItem.getItemMeta();
-		meta.setDisplayName(job.getName());
-		meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-		jobItem.setItemMeta(meta);
-		getInventory().setItem(slot, jobItem);
+		setItem(Material.valueOf(itemMaterial), null, job.getName(), slot);
 		jobs.put(slot, job);
 		jobcenterDao.saveJobNameList(getJobNameList());
 		jobcenterDao.saveJob(job, itemMaterial, slot);

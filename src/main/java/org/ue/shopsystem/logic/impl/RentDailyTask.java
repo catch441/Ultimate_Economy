@@ -1,7 +1,5 @@
 package org.ue.shopsystem.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.scheduler.BukkitRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +18,6 @@ public class RentDailyTask extends BukkitRunnable {
 	private final RentshopManager rentshopManager;
 	private final ServerProvider serverProvider;
 
-	@Inject
 	public RentDailyTask(MessageWrapper messageWrapper, RentshopManager rentshopManager,
 			ServerProvider serverProvider) {
 		this.messageWrapper = messageWrapper;

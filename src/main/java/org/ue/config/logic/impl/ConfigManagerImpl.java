@@ -2,7 +2,7 @@ package org.ue.config.logic.impl;
 
 import java.util.Locale;
 
-import javax.inject.Inject;
+
 
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.config.logic.api.ConfigException;
@@ -28,7 +28,6 @@ public class ConfigManagerImpl implements ConfigManager {
 	private Locale locale;
 	private double startAmount;
 
-	@Inject
 	public ConfigManagerImpl(ConfigDao configDao, ConfigValidator validationHandler) {
 		this.configDao = configDao;
 		this.validationHandler = validationHandler;

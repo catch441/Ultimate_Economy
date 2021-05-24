@@ -5,45 +5,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.ue.bank.logic.api.BankManager;
 import org.ue.common.utils.ServerProvider;
-import org.ue.common.utils.api.MessageWrapper;
-import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.dataaccess.api.EconomyPlayerDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.economyplayer.logic.api.EconomyPlayerValidator;
-import org.ue.jobsystem.logic.api.JobManager;
-
-import dagger.Lazy;
 
 public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 
 	private final EconomyPlayerDao ecoPlayerDao;
-	private final MessageWrapper messageWrapper;
 	private final EconomyPlayerValidator validationHandler;
 	private final BankManager bankManager;
-	private final ConfigManager configManager;
-	// lazy because of circulating dependency, cannot resolved with refactoring
-	// the object will never be created, thats just fine, because it is only used
-	// during load player jobs and not during runtime
-	private final Lazy<JobManager> jobManager;
 	private final ServerProvider serverProvider;
 	private Map<String, EconomyPlayer> economyPlayers = new HashMap<>();
 
-	@Inject
-	public EconomyPlayerManagerImpl(EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper,
-			EconomyPlayerValidator validationHandler, BankManager bankManager, ConfigManager configManager,
-			Lazy<JobManager> jobManager, ServerProvider serverProvider) {
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param ecoPlayerDao
+	 * @param validationHandler
+	 * @param bankManager
+	 * @param serverProvider
+	 */
+	public EconomyPlayerManagerImpl(EconomyPlayerDao ecoPlayerDao, EconomyPlayerValidator validationHandler,
+			BankManager bankManager, ServerProvider serverProvider) {
 		this.ecoPlayerDao = ecoPlayerDao;
-		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
 		this.bankManager = bankManager;
-		this.configManager = configManager;
-		this.jobManager = jobManager;
 		this.serverProvider = serverProvider;
 	}
 
@@ -71,9 +61,8 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 	@Override
 	public void createEconomyPlayer(String playerName) throws EconomyPlayerException {
 		validationHandler.checkForValueNotInList(getEconomyPlayerNameList(), playerName);
-		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao,
-				messageWrapper, configManager, bankManager, jobManager.get(), serverProvider.getPlayer(playerName),
-				playerName, true);
+		EconomyPlayer ecoPlayer = serverProvider.getProvider().createEconomyPlayer();
+		ecoPlayer.setupNew(serverProvider.getPlayer(playerName), playerName);
 		economyPlayers.put(playerName, ecoPlayer);
 	}
 
@@ -89,9 +78,8 @@ public class EconomyPlayerManagerImpl implements EconomyPlayerManager {
 		ecoPlayerDao.setupSavefile();
 		List<String> playerList = ecoPlayerDao.loadPlayerList();
 		for (String player : playerList) {
-			EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao,
-					messageWrapper, configManager, bankManager, jobManager.get(), serverProvider.getPlayer(player),
-					player, false);
+			EconomyPlayer ecoPlayer = serverProvider.getProvider().createEconomyPlayer();
+			ecoPlayer.setupExisting(serverProvider.getPlayer(player), player);
 			economyPlayers.put(player, ecoPlayer);
 		}
 	}

@@ -1,4 +1,4 @@
-package org.ue.common.logic.impl;
+package org.ue.economyvillager.logic.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,6 +22,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Villager.Profession;
+import org.bukkit.entity.Villager.Type;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -31,14 +33,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.logic.api.GeneralEconomyException;
+import org.ue.common.logic.api.InventoryGuiHandler;
 import org.ue.common.utils.ServerProvider;
+import org.ue.common.utils.UltimateEconomyProvider;
 import org.ue.common.utils.api.MessageWrapper;
+import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyvillager.dataaccess.api.EconomyVillagerDao;
 import org.ue.economyvillager.logic.api.EconomyVillagerType;
 import org.ue.economyvillager.logic.api.EconomyVillagerValidator;
-import org.ue.economyvillager.logic.impl.EconomyVillagerImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class EconomyVillagerTest {
@@ -49,11 +54,19 @@ public class EconomyVillagerTest {
 	EconomyVillagerDao ecoVillagerDao;
 	@Mock
 	EconomyVillagerValidator<AbstractException> validationHandler;
+	@Mock
+	CustomSkullService customSkullService;
+	@Mock
+	UltimateEconomyProvider provider;
 
 	private static class AbstractVillager extends EconomyVillagerImpl<AbstractException> {
 		public AbstractVillager(ServerProvider serverProvider, EconomyVillagerDao ecoVillagerDao,
-				EconomyVillagerValidator<AbstractException> validationHandler, String savePrefix) {
-			super(serverProvider, ecoVillagerDao, validationHandler, savePrefix);
+				EconomyVillagerValidator<AbstractException> validationHandler, CustomSkullService customSkullService) {
+			super(serverProvider, ecoVillagerDao, validationHandler, customSkullService);
+		}
+
+		@Override
+		public void handleInventoryClick(ClickType clickType, int rawSlot, EconomyPlayer whoClicked) {
 		}
 	}
 
@@ -66,7 +79,7 @@ public class EconomyVillagerTest {
 	}
 
 	private AbstractVillager createVillager() {
-		return new AbstractVillager(serverProvider, ecoVillagerDao, validationHandler, "");
+		return new AbstractVillager(serverProvider, ecoVillagerDao, validationHandler, customSkullService);
 	}
 
 	private Villager setupMocks(AbstractVillager ecoVillager) {
@@ -77,20 +90,27 @@ public class EconomyVillagerTest {
 		Villager duplicate = mock(Villager.class);
 		Chunk chunk = mock(Chunk.class);
 		World world = mock(World.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
 		when(loc.getWorld()).thenReturn(world);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(loc.getChunk()).thenReturn(chunk);
 		when(duplicate.getName()).thenReturn("myName");
+		when(villager.getVillagerType()).thenReturn(Type.DESERT);
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicate));
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(serverProvider.createInventory(villager, 9, "myName")).thenReturn(inv);
-		ecoVillager.setupNewEconomyVillager(loc, EconomyVillagerType.ADMINSHOP, "myName", 9, 2, true);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(provider.createEconomyVillagerCustomizeHandler(ecoVillager, Type.DESERT, Profession.NITWIT))
+				.thenReturn(customizer);
+		ecoVillager.setupNewEconomyVillager(loc, EconomyVillagerType.ADMINSHOP, "myName", "id", 9, 2, true,
+				"savePrefix");
 		return villager;
 	}
 
 	@Test
 	public void setupNewEconomyVillagerTest() {
 		AbstractVillager ecoVillager = createVillager();
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
 		Location loc = mock(Location.class);
 		Inventory inv = mock(Inventory.class);
 		JavaPlugin plugin = mock(JavaPlugin.class);
@@ -105,11 +125,16 @@ public class EconomyVillagerTest {
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicate));
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(serverProvider.createInventory(villager, 9, "myName")).thenReturn(inv);
-		ecoVillager.setupNewEconomyVillager(loc, EconomyVillagerType.ADMINSHOP, "myName", 9, 2, true);
-		verify(ecoVillagerDao).saveProfession("", Profession.NITWIT);
-		verify(ecoVillagerDao).saveSize("", 9);
-		verify(ecoVillagerDao).saveVisible("", true);
-		verify(ecoVillagerDao).saveLocation("", loc);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(villager.getVillagerType()).thenReturn(Type.DESERT);
+		when(provider.createEconomyVillagerCustomizeHandler(ecoVillager, Type.DESERT, Profession.NITWIT))
+				.thenReturn(customizer);
+		ecoVillager.setupNewEconomyVillager(loc, EconomyVillagerType.ADMINSHOP, "myName", "id", 9, 2, true,
+				"savePrefix");
+		verify(ecoVillagerDao).saveProfession("savePrefix", Profession.NITWIT);
+		verify(ecoVillagerDao).saveSize("savePrefix", 9);
+		verify(ecoVillagerDao).saveVisible("savePrefix", true);
+		verify(ecoVillagerDao).saveLocation("savePrefix", loc);
 		verify(chunk).load();
 		verify(villager).setCustomName("myName");
 		verify(villager).setCustomNameVisible(true);
@@ -118,6 +143,7 @@ public class EconomyVillagerTest {
 		verify(villager).setInvulnerable(true);
 		verify(villager).setCollidable(false);
 		verify(villager).setMetadata(eq("ue-type"), any(FixedMetadataValue.class));
+		verify(villager).setMetadata(eq("ue-id"), any(FixedMetadataValue.class));
 		verify(villager).addPotionEffect(any(PotionEffect.class));
 		verify(duplicate).remove();
 		assertEquals(inv, ecoVillager.getInventory());
@@ -125,11 +151,14 @@ public class EconomyVillagerTest {
 		assertEquals(2, ecoVillager.getReservedSlots());
 		assertEquals(villager, ecoVillager.getVillager());
 		assertEquals(loc, ecoVillager.getLocation());
+		assertEquals(customizer, ecoVillager.getCustomizeGuiHandler());
+		assertEquals("id", ecoVillager.getId());
 	}
-	
+
 	@Test
 	public void setupExistingEconomyVillagerTest() {
 		AbstractVillager ecoVillager = createVillager();
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
 		Location loc = mock(Location.class);
 		Inventory inv = mock(Inventory.class);
 		JavaPlugin plugin = mock(JavaPlugin.class);
@@ -137,6 +166,9 @@ public class EconomyVillagerTest {
 		Villager duplicate = mock(Villager.class);
 		Chunk chunk = mock(Chunk.class);
 		World world = mock(World.class);
+		when(provider.createEconomyVillagerCustomizeHandler(ecoVillager, Type.DESERT, Profession.ARMORER))
+				.thenReturn(customizer);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		when(loc.getWorld()).thenReturn(world);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(loc.getChunk()).thenReturn(chunk);
@@ -144,11 +176,12 @@ public class EconomyVillagerTest {
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicate));
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(serverProvider.createInventory(villager, 9, "myName")).thenReturn(inv);
-		when(ecoVillagerDao.loadLocation("")).thenReturn(loc);
-		when(ecoVillagerDao.loadVisible("")).thenReturn(true);
-		when(ecoVillagerDao.loadProfession("")).thenReturn(Profession.ARMORER);
-		when(ecoVillagerDao.loadSize("")).thenReturn(9);
-		ecoVillager.setupExistingEconomyVillager(EconomyVillagerType.ADMINSHOP, "myName", 2);
+		when(ecoVillagerDao.loadLocation("savePrefix")).thenReturn(loc);
+		when(ecoVillagerDao.loadVisible("savePrefix")).thenReturn(true);
+		when(ecoVillagerDao.loadProfession("savePrefix")).thenReturn(Profession.ARMORER);
+		when(ecoVillagerDao.loadSize("savePrefix")).thenReturn(9);
+		when(ecoVillagerDao.loadBiomeType("savePrefix")).thenReturn(Type.DESERT);
+		ecoVillager.setupExistingEconomyVillager(EconomyVillagerType.ADMINSHOP, "myName", "id", 2, "savePrefix");
 		verify(chunk).load();
 		verify(villager).setCustomName("myName");
 		verify(villager).setCustomNameVisible(true);
@@ -164,6 +197,8 @@ public class EconomyVillagerTest {
 		assertEquals(2, ecoVillager.getReservedSlots());
 		assertEquals(villager, ecoVillager.getVillager());
 		assertEquals(loc, ecoVillager.getLocation());
+		assertEquals(customizer, ecoVillager.getCustomizeGuiHandler());
+		assertEquals("id", ecoVillager.getId());
 	}
 
 	@Test
@@ -189,8 +224,17 @@ public class EconomyVillagerTest {
 		AbstractVillager ecoVillager = createVillager();
 		Villager villager = setupMocks(ecoVillager);
 		ecoVillager.changeProfession(Profession.FARMER);
-		verify(ecoVillagerDao).saveProfession("", Profession.FARMER);
+		verify(ecoVillagerDao).saveProfession("savePrefix", Profession.FARMER);
 		verify(villager).setProfession(Profession.FARMER);
+	}
+	
+	@Test
+	public void changeBiomeTypeTest() {
+		AbstractVillager ecoVillager = createVillager();
+		Villager villager = setupMocks(ecoVillager);
+		ecoVillager.changeBiomeType(Type.JUNGLE);
+		verify(ecoVillagerDao).saveBiomeType("savePrefix", Type.JUNGLE);
+		verify(villager).setVillagerType(Type.JUNGLE);
 	}
 
 	@Test
@@ -199,7 +243,7 @@ public class EconomyVillagerTest {
 		Villager villager = setupMocks(ecoVillager);
 		Location loc = mock(Location.class);
 		assertDoesNotThrow(() -> ecoVillager.changeLocation(loc));
-		verify(ecoVillagerDao).saveLocation("", loc);
+		verify(ecoVillagerDao).saveLocation("savePrefix", loc);
 		verify(villager).teleport(loc);
 		assertEquals(loc, ecoVillager.getLocation());
 	}
@@ -223,7 +267,7 @@ public class EconomyVillagerTest {
 		Villager villager = setupMocks(ecoVillager);
 		assertDoesNotThrow(() -> ecoVillager.setVisible(false));
 		verify(villager).remove();
-		verify(ecoVillagerDao).saveVisible("", false);
+		verify(ecoVillagerDao).saveVisible("savePrefix", false);
 	}
 
 	@Test
@@ -250,7 +294,7 @@ public class EconomyVillagerTest {
 		verify(villager).setCollidable(false);
 		verify(villager).setMetadata(eq("ue-type"), any(FixedMetadataValue.class));
 		verify(villager).addPotionEffect(any(PotionEffect.class));
-		verify(ecoVillagerDao).saveVisible("", true);
+		verify(ecoVillagerDao).saveVisible("savePrefix", true);
 		verify(serverProvider, times(2)).createInventory(villager, 9, "myName");
 	}
 
@@ -296,7 +340,7 @@ public class EconomyVillagerTest {
 		when(serverProvider.createInventory(villager, 18, "myName")).thenReturn(inv);
 
 		assertDoesNotThrow(() -> ecoVillager.changeSize(18));
-		verify(ecoVillagerDao).saveSize("", 18);
+		verify(ecoVillagerDao).saveSize("savePrefix", 18);
 		assertEquals(inv, ecoVillager.getInventory());
 		ItemStack[] resultContents = new ItemStack[18];
 		resultContents[17] = infoItem;

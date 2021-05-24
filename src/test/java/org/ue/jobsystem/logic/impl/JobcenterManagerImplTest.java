@@ -22,7 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.utils.ServerProvider;
-import org.ue.common.utils.ServiceComponent;
+import org.ue.common.utils.UltimateEconomyProvider;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
@@ -56,12 +56,12 @@ public class JobcenterManagerImplTest {
 
 	private Jobcenter createJobcenter(String name) {
 		Location location = mock(Location.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		Jobcenter center = mock(Jobcenter.class);
-		when(serviceComponent.getJobcenter()).thenReturn(center);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		Jobcenter jobcenter = mock(Jobcenter.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(provider.createJobcenter()).thenReturn(jobcenter);
 		assertDoesNotThrow(() -> manager.createJobcenter(name, location, 9));
-		return center;
+		return jobcenter;
 	}
 
 	@Test
@@ -173,29 +173,29 @@ public class JobcenterManagerImplTest {
 	@Test
 	public void createJobcenterTest() {
 		Location location = mock(Location.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		Jobcenter center = mock(Jobcenter.class);
-		when(serviceComponent.getJobcenter()).thenReturn(center);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		Jobcenter jobcenter = mock(Jobcenter.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(provider.createJobcenter()).thenReturn(jobcenter);
 		assertDoesNotThrow(() -> manager.createJobcenter("center", location, 9));
 		assertDoesNotThrow(() -> verify(validator).checkForValueNotInList(new ArrayList<>(), "center"));
 		assertDoesNotThrow(() -> verify(validator).checkForValidSize(9));
 		verify(configDao).saveJobcenterList(Arrays.asList("center"));
 		Jobcenter result = manager.getJobcenterList().get(0);
-		assertEquals(center, result);
-		verify(center).setupNew("center", location, 9);
+		assertEquals(jobcenter, result);
+		verify(jobcenter).setupNew("center", location, 9);
 	}
 
 	@Test
 	public void loadAllJobcenterTest() {
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		Jobcenter jobcenter = mock(Jobcenter.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(provider.createJobcenter()).thenReturn(jobcenter);
 		when(configDao.loadJobcenterList()).thenReturn(Arrays.asList("center"));
-		Jobcenter center = mock(Jobcenter.class);
-		when(serviceComponent.getJobcenter()).thenReturn(center);
 		manager.loadAllJobcenters();
 		Jobcenter result = manager.getJobcenterList().get(0);
-		assertEquals(center, result);
-		assertDoesNotThrow(() -> verify(center).setupExisting("center"));
+		assertEquals(jobcenter, result);
+		assertDoesNotThrow(() -> verify(jobcenter).setupExisting("center"));
 	}
 }

@@ -26,6 +26,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.jobsystem.logic.api.Job;
@@ -65,27 +67,27 @@ public class JobCommandExecutorImplTest {
 		assertFalse(result);
 		verifyNoInteractions(player);
 	}
-	
+
 	@Test
 	public void joblistCommandTest() {
 		Player player = mock(Player.class);
-		String[] args = { };
+		String[] args = {};
 		when(jobManager.getJobNameList()).thenReturn(Arrays.asList("myjob"));
-		when(messageWrapper.getString("joblist_info", "[myjob]")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.JOBLIST_INFO, "[myjob]")).thenReturn("my message");
 		boolean result = executor.onCommand(player, null, "joblist", args);
 		assertTrue(result);
 		verify(player).sendMessage("my message");
 		verifyNoMoreInteractions(player);
 	}
-	
+
 	@Test
 	public void joblistCommandTestWithMoreArgs() {
 		Player player = mock(Player.class);
-		String[] args = { ""};
+		String[] args = { "" };
 		boolean result = executor.onCommand(player, null, "joblist", args);
 		assertFalse(result);
 	}
-	
+
 	@Test
 	public void jobinfoCommandTestWithMoreArgs() {
 		Player player = mock(Player.class);
@@ -93,7 +95,7 @@ public class JobCommandExecutorImplTest {
 		boolean result = executor.onCommand(player, null, "jobinfo", args);
 		assertFalse(result);
 	}
-	
+
 	@Test
 	public void unknownCommandTestWithMoreArgs() {
 		Player player = mock(Player.class);
@@ -101,17 +103,17 @@ public class JobCommandExecutorImplTest {
 		boolean result = executor.onCommand(player, null, "foo", args);
 		assertFalse(result);
 	}
-	
+
 	@Test
 	public void jobinfoCommandTest() {
 		Player player = mock(Player.class);
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
-		when(messageWrapper.getString("jobinfo_info", "myjob")).thenReturn("my message 1");
+		when(messageWrapper.getString(MessageEnum.JOBINFO_INFO, "myjob")).thenReturn("my message 1");
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
-		when(messageWrapper.getString("jobinfo_fishingprice", "stuff", 1.5, "$")).thenReturn("my message 2");
-		when(messageWrapper.getString("jobinfo_killprice", "stuff", 1.5, "$")).thenReturn("my message 3");
-		when(messageWrapper.getString("jobinfo_breedprice", "stuff", 1.5, "$")).thenReturn("my message 4");
+		when(messageWrapper.getString(MessageEnum.JOBINFO_FISHINGPRICE, "stuff", 1.5, "$")).thenReturn("my message 2");
+		when(messageWrapper.getString(MessageEnum.JOBINFO_KILLPRICE, "stuff", 1.5, "$")).thenReturn("my message 3");
+		when(messageWrapper.getString(MessageEnum.JOBINFO_BREEDPRICE, "stuff", 1.5, "$")).thenReturn("my message 4");
 		Map<String, Double> map = new HashMap<>();
 		map.put("stuff", 1.5);
 		when(job.getBlockList()).thenReturn(map);
@@ -122,7 +124,7 @@ public class JobCommandExecutorImplTest {
 		String[] args = { "myjob" };
 		boolean result = executor.onCommand(player, null, "jobinfo", args);
 		assertTrue(result);
-		
+
 		verify(player).sendMessage("my message 1");
 		verify(player).sendMessage("§6stuff §a1.5$");
 		verify(player).sendMessage("my message 2");
@@ -136,12 +138,12 @@ public class JobCommandExecutorImplTest {
 		Player player = mock(Player.class);
 		Location location = mock(Location.class);
 		when(player.getLocation()).thenReturn(location);
-		when(messageWrapper.getString("created", "center")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.CREATED, "center")).thenReturn("My message.");
 		String[] args = { "create", "center", "9" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
 		assertTrue(result);
 		assertDoesNotThrow(() -> verify(jobcenterManager).createJobcenter("center", location, 9));
-		verify(messageWrapper).getString("created", "center");
+		verify(messageWrapper).getString(MessageEnum.CREATED, "center");
 		verify(player).sendMessage("My message.");
 		verifyNoMoreInteractions(player);
 	}
@@ -149,11 +151,11 @@ public class JobCommandExecutorImplTest {
 	@Test
 	public void createCommandTestWithInvalidInteger() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "number")).thenReturn("My message.");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "number")).thenReturn("My message.");
 		String[] args = { "create", "center", "a" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
 		assertTrue(result);
-		verify(messageWrapper).getErrorString("invalid_parameter", "number");
+		verify(messageWrapper).getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "number");
 		verify(player).sendMessage("My message.");
 		verify(player).getLocation();
 		verifyNoMoreInteractions(player);
@@ -174,7 +176,7 @@ public class JobCommandExecutorImplTest {
 		Jobcenter center = mock(Jobcenter.class);
 		assertDoesNotThrow(() -> when(jobcenterManager.getJobcenterByName("center")).thenReturn(center));
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("deleted", "center")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.DELETED, "center")).thenReturn("My message.");
 		String[] args = { "delete", "center" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
 		assertTrue(result);
@@ -247,7 +249,7 @@ public class JobCommandExecutorImplTest {
 	@Test
 	public void addJobCommandTest() {
 		Jobcenter center = mock(Jobcenter.class);
-		when(messageWrapper.getString("added", "myjob")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.ADDED, "myjob")).thenReturn("my message");
 		assertDoesNotThrow(() -> when(jobcenterManager.getJobcenterByName("center")).thenReturn(center));
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
@@ -277,7 +279,7 @@ public class JobCommandExecutorImplTest {
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "number")).thenReturn("My message.");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "number")).thenReturn("My message.");
 		String[] args = { "addJob", "center", "myjob", "stone", "a" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
 		assertTrue(result);
@@ -315,7 +317,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void removeJobCommandTest() {
-		when(messageWrapper.getString("removed", "myjob")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.REMOVED, "myjob")).thenReturn("My message.");
 		Jobcenter center = mock(Jobcenter.class);
 		assertDoesNotThrow(() -> when(jobcenterManager.getJobcenterByName("center")).thenReturn(center));
 		Job job = mock(Job.class);
@@ -367,7 +369,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void createJobCommandTest() {
-		when(messageWrapper.getString("created", "myjob")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.CREATED, "myjob")).thenReturn("My message.");
 		Player player = mock(Player.class);
 		String[] args = { "job", "create", "myjob" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
@@ -389,7 +391,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void deleteJobCommandTest() {
-		when(messageWrapper.getString("deleted", "myjob")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.DELETED, "myjob")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
@@ -426,7 +428,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobAddFisherCommandTest() {
-		when(messageWrapper.getString("added", "fish")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.ADDED, "fish")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
@@ -450,7 +452,8 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobAddFisherCommandTestInvalidDouble() {
-		when(messageWrapper.getErrorString("invalid_parameter", "number")).thenReturn("My exception.");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "number"))
+				.thenReturn("My exception.");
 		Player player = mock(Player.class);
 		String[] args = { "job", "addFisher", "myjob", "fish", "a" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
@@ -466,7 +469,7 @@ public class JobCommandExecutorImplTest {
 		JobsystemException exception = mock(JobsystemException.class);
 		when(exception.getMessage()).thenReturn("My exception.");
 		doThrow(exception).when(job).addFisherLootType("test", 1.5);
-		
+
 		Player player = mock(Player.class);
 		String[] args = { "job", "addFisher", "myjob", "test", "1.5" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
@@ -491,7 +494,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobAddItemCommandTest() {
-		when(messageWrapper.getString("added", "stone")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.ADDED, "stone")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
@@ -515,7 +518,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobAddItemCommandTestWithInvalidDouble() {
-		when(messageWrapper.getErrorString("invalid_parameter", "number")).thenReturn("My exception.");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "number")).thenReturn("My exception.");
 		Player player = mock(Player.class);
 		String[] args = { "job", "addItem", "myjob", "stone", "a" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
@@ -540,7 +543,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobAddMobCommandTest() {
-		when(messageWrapper.getString("added", "cow")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.ADDED, "cow")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
@@ -564,7 +567,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobAddMobCommandTestWithInvalidDouble() {
-		when(messageWrapper.getErrorString("invalid_parameter", "number")).thenReturn("My exception.");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "number")).thenReturn("My exception.");
 		Player player = mock(Player.class);
 		String[] args = { "job", "addMob", "myjob", "cow", "a" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
@@ -605,7 +608,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobRemoveMobCommandTest() {
-		when(messageWrapper.getString("removed", "cow")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.REMOVED, "cow")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
@@ -656,10 +659,10 @@ public class JobCommandExecutorImplTest {
 		verify(player).sendMessage("My message.");
 		verifyNoMoreInteractions(player);
 	}
-	
+
 	@Test
 	public void jobAddBreedableCommandTest() {
-		when(messageWrapper.getString("added", "cow")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.ADDED, "cow")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
@@ -683,7 +686,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobAddBreedableCommandTestWithInvalidDouble() {
-		when(messageWrapper.getErrorString("invalid_parameter", "number")).thenReturn("My exception.");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "number")).thenReturn("My exception.");
 		Player player = mock(Player.class);
 		String[] args = { "job", "addBreedable", "myjob", "cow", "a" };
 		boolean result = executor.onCommand(player, null, "jobcenter", args);
@@ -696,7 +699,7 @@ public class JobCommandExecutorImplTest {
 	public void jobAddBreedableCommandTestWithInvalidEntity() throws JobsystemException {
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
-		when(messageWrapper.getErrorString("invalid_parameter", "test")).thenReturn("My exception.");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "test")).thenReturn("My exception.");
 
 		Player player = mock(Player.class);
 		String[] args = { "job", "addBreedable", "myjob", "test", "1.5" };
@@ -719,10 +722,10 @@ public class JobCommandExecutorImplTest {
 		verify(player).sendMessage("My message.");
 		verifyNoMoreInteractions(player);
 	}
-	
+
 	@Test
 	public void jobRemoveBreedableCommandTest() {
-		when(messageWrapper.getString("removed", "cow")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.REMOVED, "cow")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		Player player = mock(Player.class);
@@ -748,7 +751,7 @@ public class JobCommandExecutorImplTest {
 	public void jobRemoveBreedableCommandTestWithInvalidMob() {
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
-		when(messageWrapper.getErrorString("invalid_parameter", "test")).thenReturn("My exception.");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "test")).thenReturn("My exception.");
 
 		Player player = mock(Player.class);
 		String[] args = { "job", "removeBreedable", "myjob", "test" };
@@ -774,7 +777,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobRemoveFisherCommandTest() {
-		when(messageWrapper.getString("removed", "fish")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.REMOVED, "fish")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 
@@ -829,7 +832,7 @@ public class JobCommandExecutorImplTest {
 
 	@Test
 	public void jobRemoveItemCommandTest() {
-		when(messageWrapper.getString("removed", "stone")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.REMOVED, "stone")).thenReturn("My message.");
 		Job job = mock(Job.class);
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 

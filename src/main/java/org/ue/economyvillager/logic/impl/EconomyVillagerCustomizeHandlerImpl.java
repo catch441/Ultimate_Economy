@@ -26,6 +26,9 @@ public class EconomyVillagerCustomizeHandlerImpl<T extends GeneralEconomyExcepti
 		Profession profession;
 		Material material;
 		Type biomeType;
+		SkullTextureEnum skullType;
+		SkullTextureEnum skullTypeSelected;
+		int size;
 
 		private InvEntry(Profession profession, Material material) {
 			this.profession = profession;
@@ -35,6 +38,12 @@ public class EconomyVillagerCustomizeHandlerImpl<T extends GeneralEconomyExcepti
 		private InvEntry(Type biomeType, Material material) {
 			this.biomeType = biomeType;
 			this.material = material;
+		}
+
+		private InvEntry(SkullTextureEnum skullType, SkullTextureEnum skullTypeSelected, int size) {
+			this.skullType = skullType;
+			this.size = size;
+			this.skullTypeSelected = skullTypeSelected;
 		}
 	}
 
@@ -66,7 +75,16 @@ public class EconomyVillagerCustomizeHandlerImpl<T extends GeneralEconomyExcepti
 		BIOMES.put(26, new InvEntry(Type.TAIGA, Material.SPRUCE_LOG));
 	}
 
-	protected final CustomSkullService skullService;
+	private static final Map<Integer, InvEntry> SIZES = new HashMap<>();
+	static {
+		SIZES.put(0, new InvEntry(SkullTextureEnum.ONE, SkullTextureEnum.ONE_GOLD, 9));
+		SIZES.put(1, new InvEntry(SkullTextureEnum.TWO, SkullTextureEnum.TWO_GOLD, 18));
+		SIZES.put(2, new InvEntry(SkullTextureEnum.THREE, SkullTextureEnum.THREE_GOLD, 27));
+		SIZES.put(3, new InvEntry(SkullTextureEnum.FOUR, SkullTextureEnum.FOUR_GOLD, 36));
+		SIZES.put(4, new InvEntry(SkullTextureEnum.FIVE, SkullTextureEnum.FIVE_GOLD, 45));
+		SIZES.put(5, new InvEntry(SkullTextureEnum.SIX, SkullTextureEnum.SIX_GOLD, 54));
+	}
+
 	private final MessageWrapper messageWrapper;
 	private EconomyVillager<T> ecoVillager;
 	private Type selectedBiomeType;
@@ -76,7 +94,6 @@ public class EconomyVillagerCustomizeHandlerImpl<T extends GeneralEconomyExcepti
 	public EconomyVillagerCustomizeHandlerImpl(MessageWrapper messageWrapper, ServerProvider serverProvider,
 			CustomSkullService skullService, EconomyVillager<T> ecoVillager, Type biomeType, Profession profession) {
 		super(skullService, serverProvider, null);
-		this.skullService = skullService;
 		this.messageWrapper = messageWrapper;
 		setup(ecoVillager, biomeType, profession);
 	}
@@ -91,12 +108,15 @@ public class EconomyVillagerCustomizeHandlerImpl<T extends GeneralEconomyExcepti
 		setItem(Material.GREEN_WOOL, null, ChatColor.YELLOW + "save changes", 8);
 		setItem(Material.RED_WOOL, null, ChatColor.RED + "exit without save", 7);
 		// size
-		inventory.setItem(0, skullService.getSkullWithName(SkullTextureEnum.ONE, ChatColor.YELLOW + "9"));
-		inventory.setItem(1, skullService.getSkullWithName(SkullTextureEnum.TWO, ChatColor.YELLOW + "18"));
-		inventory.setItem(2, skullService.getSkullWithName(SkullTextureEnum.THREE, ChatColor.YELLOW + "27"));
-		inventory.setItem(3, skullService.getSkullWithName(SkullTextureEnum.FOUR, ChatColor.YELLOW + "36"));
-		inventory.setItem(4, skullService.getSkullWithName(SkullTextureEnum.FIVE, ChatColor.YELLOW + "45"));
-		inventory.setItem(5, skullService.getSkullWithName(SkullTextureEnum.SIX, ChatColor.YELLOW + "54"));
+		for (Entry<Integer, InvEntry> entry : SIZES.entrySet()) {
+			if (entry.getValue().size == selectedSize) {
+				inventory.setItem(entry.getKey(), skullService.getSkullWithName(entry.getValue().skullTypeSelected,
+						ChatColor.YELLOW + "" + entry.getValue().size));
+			} else {
+				inventory.setItem(entry.getKey(), skullService.getSkullWithName(entry.getValue().skullType,
+						ChatColor.YELLOW + "" + entry.getValue().size));
+			}
+		}
 		// biomes
 		for (Entry<Integer, InvEntry> entry : BIOMES.entrySet()) {
 			setItem(entry.getValue().material, null,
@@ -130,8 +150,10 @@ public class EconomyVillagerCustomizeHandlerImpl<T extends GeneralEconomyExcepti
 				ecoVillager.changeSize(selectedSize);
 				ecoVillager.changeProfession(selectedProfession);
 				ecoVillager.changeBiomeType(selectedBiomeType);
-				ecoPlayer.getPlayer().sendMessage(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, selectedSize + " "
-						+ selectedBiomeType.name() + " " + selectedProfession.toString().toLowerCase()));
+				ecoPlayer.getPlayer()
+						.sendMessage(messageWrapper.getString(MessageEnum.CONFIG_CHANGE,
+								selectedSize + " " + selectedBiomeType.toString().toLowerCase() + " "
+										+ selectedProfession.toString().toLowerCase()));
 			} catch (GeneralEconomyException e) {
 				ecoPlayer.getPlayer().sendMessage(e.getMessage());
 			}
@@ -144,6 +166,17 @@ public class EconomyVillagerCustomizeHandlerImpl<T extends GeneralEconomyExcepti
 					ChatColor.GOLD + PROFESSIONS.get(rawSlot).profession.toString().toLowerCase(), 36);
 			selectedProfession = PROFESSIONS.get(rawSlot).profession;
 		} else if (rawSlot < 6) {
+			// reset old selected size
+			for (Entry<Integer, InvEntry> entry : SIZES.entrySet()) {
+				if (entry.getValue().size == selectedSize) {
+					inventory.setItem(entry.getKey(), skullService.getSkullWithName(entry.getValue().skullType,
+							ChatColor.YELLOW + "" + entry.getValue().size));
+					break;
+				}
+			}
+			// set new selected size
+			inventory.setItem(rawSlot, skullService.getSkullWithName(SIZES.get(rawSlot).skullTypeSelected,
+					ChatColor.YELLOW + "" + SIZES.get(rawSlot).size));
 			selectedSize = (rawSlot + 1) * 9;
 		}
 	}

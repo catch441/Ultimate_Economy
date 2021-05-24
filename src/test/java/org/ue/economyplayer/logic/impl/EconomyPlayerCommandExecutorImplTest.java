@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
@@ -112,13 +113,13 @@ public class EconomyPlayerCommandExecutorImplTest {
 		BankAccount account = mock(BankAccount.class);
 		when(ecoPlayer.getBankAccount()).thenReturn(account);
 		when(account.getAmount()).thenReturn(21.12);
-		when(messageWrapper.getString("money_info", "21.12", "$")).thenReturn("§6Money: §a21.12§6 §a$§6");
+		when(messageWrapper.getString(MessageEnum.MONEY_INFO, "21.12", "$")).thenReturn("§6Money: §a21.12§6 §a$§6");
 		when(configManager.getCurrencyText(21.12)).thenReturn("$");
 
 		String[] args = {};
 		boolean result = executor.onCommand(player, null, "money", args);
 		verify(player).getName();
-		verify(messageWrapper).getString("money_info", "21.12", "$");
+		verify(messageWrapper).getString(MessageEnum.MONEY_INFO, "21.12", "$");
 		verify(player).sendMessage("§6Money: §a21.12§6 §a$§6");
 		verifyNoMoreInteractions(player);
 		assertTrue(result);
@@ -150,7 +151,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 		BankAccount account = mock(BankAccount.class);
 		when(ecoPlayer.getBankAccount()).thenReturn(account);
 		when(account.getAmount()).thenReturn(21.12);
-		when(messageWrapper.getString("money_info", "21.12", "$")).thenReturn("§6Money: §a21.12§6 §a$§6");
+		when(messageWrapper.getString(MessageEnum.MONEY_INFO, "21.12", "$")).thenReturn("§6Money: §a21.12§6 §a$§6");
 		when(configManager.getCurrencyText(21.12)).thenReturn("$");
 		when(player.hasPermission("Ultimate_Economy.adminpay")).thenReturn(true);
 		when(player.getName()).thenReturn("catch441");
@@ -160,7 +161,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 		String[] args = { "catch441" };
 		boolean result = executor.onCommand(player, null, "money", args);
 		verify(player).getName();
-		verify(messageWrapper).getString("money_info", "21.12", "$");
+		verify(messageWrapper).getString(MessageEnum.MONEY_INFO, "21.12", "$");
 		verify(player).sendMessage("§6Money: §a21.12§6 §a$§6");
 		verifyNoMoreInteractions(player);
 		assertDoesNotThrow(() -> verify(ecoPlayerManager, times(2)).getEconomyPlayerByName("catch441"));
@@ -184,11 +185,11 @@ public class EconomyPlayerCommandExecutorImplTest {
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
 		when(ecoPlayer.getJobList()).thenReturn(Arrays.asList(job));
-		when(messageWrapper.getString("myjobs_info", "[myjob]")).thenReturn("§6Joined jobs: §a[myjob]§6");
+		when(messageWrapper.getString(MessageEnum.MYJOBS_INFO, "[myjob]")).thenReturn("§6Joined jobs: §a[myjob]§6");
 
 		String[] args = {};
 		boolean result = executor.onCommand(player, null, "myjobs", args);
-		verify(messageWrapper).getString("myjobs_info", "[myjob]");
+		verify(messageWrapper).getString(MessageEnum.MYJOBS_INFO, "[myjob]");
 		verify(player).sendMessage("§6Joined jobs: §a[myjob]§6");
 		verifyNoMoreInteractions(player);
 		assertTrue(result);
@@ -240,7 +241,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		String[] args = { "myhome" };
-		when(messageWrapper.getErrorString("already_exists", "myhome")).thenReturn("§cMy error message!");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.ALREADY_EXISTS, "myhome")).thenReturn("§cMy error message!");
 		doThrow(new EconomyPlayerException(messageWrapper, ExceptionMessageEnum.ALREADY_EXISTS, "myhome"))
 				.when(ecoPlayer).addHome("myhome", null, true);
 
@@ -307,8 +308,8 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void payCommandTestInvalidInteger() {
-		when(messageWrapper.getErrorString("invalid_parameter", "stuff")).thenReturn("My error message!");
-		when(messageWrapper.getErrorString("invalid_parameter", "stuff"))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "stuff")).thenReturn("My error message!");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "stuff"))
 				.thenReturn("§c§cThe parameter §4stuff§c is invalid!");
 
 		String[] args = { "catch441", "stuff" };
@@ -376,8 +377,8 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void givemoneyCommandTestInvalidInteger() {
-		when(messageWrapper.getErrorString("invalid_parameter", "stuff")).thenReturn("My error message!");
-		when(messageWrapper.getErrorString("invalid_parameter", "stuff"))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "stuff")).thenReturn("My error message!");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "stuff"))
 				.thenReturn("§c§cThe parameter §4stuff§c is invalid!");
 
 		String[] args = { "catch441", "stuff" };
@@ -395,7 +396,7 @@ public class EconomyPlayerCommandExecutorImplTest {
 		homes.put("myhome1", null);
 		homes.put("myhome2", null);
 		when(ecoPlayer.getHomeList()).thenReturn(homes);
-		when(messageWrapper.getString("home_info", "[myhome2, myhome1]"))
+		when(messageWrapper.getString(MessageEnum.HOME_INFO, "[myhome2, myhome1]"))
 				.thenReturn("§6Your homes: §a[myhome2, myhome1]§6");
 
 		String[] args = {};
@@ -470,8 +471,8 @@ public class EconomyPlayerCommandExecutorImplTest {
 
 	@Test
 	public void removemoneyCommandTestInvalidInteger() {
-		when(messageWrapper.getErrorString("invalid_parameter", "stuff")).thenReturn("My error message!");
-		when(messageWrapper.getErrorString("invalid_parameter", "stuff"))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "stuff")).thenReturn("My error message!");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "stuff"))
 				.thenReturn("§c§cThe parameter §4stuff§c is invalid!");
 
 		String[] args = { "catch441", "stuff" };

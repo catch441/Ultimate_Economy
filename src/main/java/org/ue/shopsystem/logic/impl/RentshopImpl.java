@@ -1,7 +1,5 @@
 package org.ue.shopsystem.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager.Profession;
@@ -47,7 +45,6 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	 * @param townworldManager
 	 * @param playershopManager
 	 */
-	@Inject
 	public RentshopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
 			ShopValidator validationHandler, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,
@@ -64,8 +61,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		shopDao.saveRentalFee(rentalFee);
 		this.rentable = true;
 		shopDao.saveRentable(rentable);
-		rentGuiHandler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager, skullService, configManager,
-				this, serverProvider);
+		rentGuiHandler = serverProvider.getProvider().createRentshopGuiHandler(this);
 	}
 
 	@Override
@@ -76,8 +72,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 		rentalFee = shopDao.loadRentalFee();
 		rentable = shopDao.loadRentable();
 		expiresAt = shopDao.loadExpiresAt();
-		rentGuiHandler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager, skullService, configManager,
-				this, serverProvider);
+		rentGuiHandler = serverProvider.getProvider().createRentshopGuiHandler(this);
 		if (isRentable()) {
 			getVillager().setCustomName("RentShop#" + getId());
 		}
@@ -280,7 +275,7 @@ public class RentshopImpl extends PlayershopImpl implements Rentshop {
 	
 	@Override
 	public InventoryGuiHandler getRentGuiHandler() throws ShopsystemException {
-		validationHandler.checkForIsRented(isRentable());
+		validationHandler.checkForIsRentable(isRentable());
 		return rentGuiHandler;
 	}
 

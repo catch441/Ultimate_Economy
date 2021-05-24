@@ -1,7 +1,5 @@
 package org.ue.config.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -21,7 +19,6 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final MessageWrapper messageWrapper;
 
-	@Inject
 	public ConfigCommandExecutorImpl(ConfigManager configManager, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper) {
 		this.configManager = configManager;

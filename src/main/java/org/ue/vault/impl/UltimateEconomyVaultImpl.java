@@ -2,8 +2,6 @@ package org.ue.vault.impl;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.OfflinePlayer;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankManager;
@@ -24,7 +22,6 @@ public class UltimateEconomyVaultImpl implements Economy {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final ServerProvider serverProvider;
 
-	@Inject
 	public UltimateEconomyVaultImpl(ConfigManager configManager, BankManager bankManager,
 			EconomyPlayerManager ecoPlayerManager, ServerProvider serverProvider) {
 		this.configManager = configManager;

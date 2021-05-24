@@ -96,6 +96,15 @@ public class ServerProvider {
 	public String getDataFolderPath() {
 		return PluginImpl.getInstance.getDataFolder().getPath();
 	}
+	
+	/**
+	 * Returns the service component of the plugin.
+	 * 
+	 * @return service component
+	 */
+	public UltimateEconomyProvider getProvider() {
+		return PluginImpl.provider;
+	}
 
 	/**
 	 * Returns the java plugin instance.
@@ -113,15 +122,6 @@ public class ServerProvider {
 	 */
 	public Plugin getPluginInstance() {
 		return PluginImpl.getInstance;
-	}
-
-	/**
-	 * Returns the service component of the plugin.
-	 * 
-	 * @return service component
-	 */
-	public ServiceComponent getServiceComponent() {
-		return PluginImpl.serviceComponent;
 	}
 
 	/**

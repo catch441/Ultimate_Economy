@@ -2,8 +2,6 @@ package org.ue.jobsystem.logic.impl;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
@@ -15,7 +13,6 @@ import org.ue.jobsystem.logic.api.JobsystemValidator;
 public class JobsystemValidatorImpl extends EconomyVillagerValidatorImpl<JobsystemException>
 		implements JobsystemValidator {
 
-	@Inject
 	public JobsystemValidatorImpl(ServerProvider serverProvider, MessageWrapper messageWrapper) {
 		super(serverProvider, messageWrapper);
 	}

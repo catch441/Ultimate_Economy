@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -29,6 +30,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Villager.Profession;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -40,6 +42,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.utils.ServerProvider;
+import org.ue.common.utils.UltimateEconomyProvider;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
@@ -80,6 +83,8 @@ public class JobcenterImplTest {
 		JavaPlugin plugin = mock(JavaPlugin.class);
 		Chunk chunk = mock(Chunk.class);
 		Entity entity = mock(Entity.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(location.getChunk()).thenReturn(chunk);
 		when(location.getWorld()).thenReturn(world);
@@ -123,6 +128,8 @@ public class JobcenterImplTest {
 		JavaPlugin plugin = mock(JavaPlugin.class);
 		Chunk chunk = mock(Chunk.class);
 		Job job = mock(Job.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(location.getChunk()).thenReturn(chunk);
 		when(location.getWorld()).thenReturn(world);
@@ -174,6 +181,8 @@ public class JobcenterImplTest {
 		JavaPlugin plugin = mock(JavaPlugin.class);
 		Chunk chunk = mock(Chunk.class);
 		JobsystemException e = mock(JobsystemException.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		doThrow(e).when(jobManager).getJobByName("myJob");
 		when(e.getMessage()).thenReturn("my error message");
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
@@ -413,10 +422,92 @@ public class JobcenterImplTest {
 		verify(jobcenterDao).saveJob(job, "STONE", 4);
 		verify(jobcenterDao).saveJobNameList(Arrays.asList("myJob"));
 		verify(meta).setDisplayName("myJob");
-		verify(meta).addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+		verify(meta, times(2)).addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 		verify(inventory).setItem(eq(4), eq(stack));
 		assertEquals(1, jobcenter.getJobList().size());
 		assertEquals(job, jobcenter.getJobList().get(0));
+	}
+	
+	@Test
+	public void handleInventoryClickTestJobNotJoined() throws EconomyPlayerException {
+		Inventory inventory = mock(Inventory.class);
+		Job job = mock(Job.class);
+		EconomyPlayer whoClicked = mock(EconomyPlayer.class);
+		Player player = mock(Player.class);
+		ItemStack stack = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		EconomyPlayerException e = mock(EconomyPlayerException.class);
+		doThrow(e).when(whoClicked).leaveJob(job, true);
+		when(e.getMessage()).thenReturn("message");
+		when(whoClicked.getPlayer()).thenReturn(player);
+		when(stack.getItemMeta()).thenReturn(meta);
+		when(serverProvider.createItemStack(Material.STONE, 1)).thenReturn(stack);
+		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
+		setupNewJobcenter(null, mock(Villager.class), inventory);
+		assertDoesNotThrow(() -> jobcenter.addJob(job, "stone", 1));
+		jobcenter.handleInventoryClick(ClickType.RIGHT, 1, whoClicked);
+		verify(player).sendMessage("message");
+	}
+	
+	@Test
+	public void handleInventoryClickTestLeave() {
+		Inventory inventory = mock(Inventory.class);
+		Job job = mock(Job.class);
+		EconomyPlayer whoClicked = mock(EconomyPlayer.class);
+		ItemStack stack = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		when(stack.getItemMeta()).thenReturn(meta);
+		when(serverProvider.createItemStack(Material.STONE, 1)).thenReturn(stack);
+		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
+		setupNewJobcenter(null, mock(Villager.class), inventory);
+		assertDoesNotThrow(() -> jobcenter.addJob(job, "stone", 1));
+		jobcenter.handleInventoryClick(ClickType.RIGHT, 1, whoClicked);
+		assertDoesNotThrow(() -> verify(whoClicked).leaveJob(job, true));
+	}
+	
+	@Test
+	public void handleInventoryClickTestJoin() {
+		Inventory inventory = mock(Inventory.class);
+		Job job = mock(Job.class);
+		EconomyPlayer whoClicked = mock(EconomyPlayer.class);
+		ItemStack stack = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		when(stack.getItemMeta()).thenReturn(meta);
+		when(serverProvider.createItemStack(Material.STONE, 1)).thenReturn(stack);
+		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
+		setupNewJobcenter(null, mock(Villager.class), inventory);
+		assertDoesNotThrow(() -> jobcenter.addJob(job, "stone", 1));
+		jobcenter.handleInventoryClick(ClickType.LEFT, 1, whoClicked);
+		assertDoesNotThrow(() -> verify(whoClicked).joinJob(job, true));
+	}
+	
+	@Test
+	public void handleInventoryClickTestOutsideSlot() {
+		Inventory inventory = mock(Inventory.class);
+		Job job = mock(Job.class);
+		EconomyPlayer whoClicked = mock(EconomyPlayer.class);
+		ItemStack stack = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		when(stack.getItemMeta()).thenReturn(meta);
+		when(serverProvider.createItemStack(Material.STONE, 1)).thenReturn(stack);
+		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
+		setupNewJobcenter(null, mock(Villager.class), inventory);
+		assertDoesNotThrow(() -> jobcenter.addJob(job, "stone", 1));
+		jobcenter.handleInventoryClick(ClickType.LEFT, 20, whoClicked);
+		verifyNoInteractions(whoClicked);
+	}
+	
+	@Test
+	public void handleInventoryClickTestEmptySlott() {
+		Inventory inventory = mock(Inventory.class);
+		EconomyPlayer whoClicked = mock(EconomyPlayer.class);
+		ItemStack stack = mock(ItemStack.class);
+		ItemMeta meta = mock(ItemMeta.class);
+		when(stack.getItemMeta()).thenReturn(meta);
+		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(stack);
+		setupNewJobcenter(null, mock(Villager.class), inventory);
+		jobcenter.handleInventoryClick(ClickType.LEFT, 1, whoClicked);
+		verifyNoInteractions(whoClicked);
 	}
 
 	private void setupNewJobcenter(Location location, Villager villager, Inventory invMock) {
@@ -426,6 +517,8 @@ public class JobcenterImplTest {
 		World world = mock(World.class);
 		JavaPlugin plugin = mock(JavaPlugin.class);
 		Chunk chunk = mock(Chunk.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(location.getChunk()).thenReturn(chunk);
 		when(location.getWorld()).thenReturn(world);

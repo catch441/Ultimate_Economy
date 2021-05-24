@@ -3,8 +3,6 @@ package org.ue.townsystem.logic.impl;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.ue.bank.logic.api.BankAccount;
@@ -20,17 +18,17 @@ import org.ue.townsystem.logic.api.TownsystemValidator;
 import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
 
-import dagger.Lazy;
-
 public class TownsystemValidatorImpl extends EconomyVillagerValidatorImpl<TownsystemException>
 		implements TownsystemValidator {
 
-	private final Lazy<TownworldManager> townworldManager;
+	private TownworldManager townworldManager;
 
-	@Inject
-	public TownsystemValidatorImpl(MessageWrapper messageWrapper, Lazy<TownworldManager> townworldManager,
+	public TownsystemValidatorImpl(MessageWrapper messageWrapper,
 			ServerProvider serverProvider) {
 		super(serverProvider, messageWrapper);
+	}
+	
+	public void lazyInjection(TownworldManager townworldManager) {
 		this.townworldManager = townworldManager;
 	}
 
@@ -245,8 +243,8 @@ public class TownsystemValidatorImpl extends EconomyVillagerValidatorImpl<Townsy
 
 	@Override
 	public void checkForTownworldPlotPermission(Location location, EconomyPlayer ecoPlayer) throws TownsystemException {
-		if (townworldManager.get().isTownWorld(location.getWorld().getName())) {
-			Townworld townworld = townworldManager.get().getTownWorldByName(location.getWorld().getName());
+		if (townworldManager.isTownWorld(location.getWorld().getName())) {
+			Townworld townworld = townworldManager.getTownWorldByName(location.getWorld().getName());
 			if (townworld.isChunkFree(location.getChunk())) {
 				throw createNew(messageWrapper, ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
 			} else {

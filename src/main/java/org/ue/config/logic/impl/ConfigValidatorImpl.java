@@ -3,8 +3,6 @@ package org.ue.config.logic.impl;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.logic.impl.GeneralValidatorImpl;
 import org.ue.common.utils.api.MessageWrapper;
@@ -16,7 +14,6 @@ public class ConfigValidatorImpl extends GeneralValidatorImpl<ConfigException>
 	
 	private static final List<String> languages = Arrays.asList("cs", "de", "en", "fr", "zh", "ru", "es", "lt", "it", "pl");
 
-	@Inject
 	public ConfigValidatorImpl(MessageWrapper messageWrapper) {
 		super(messageWrapper);
 	}

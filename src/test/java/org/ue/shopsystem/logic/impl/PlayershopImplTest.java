@@ -44,8 +44,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.CustomSkullService;
-import org.ue.common.logic.api.SkullTextureEnum;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.ServerProvider;
+import org.ue.common.utils.UltimateEconomyProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
@@ -53,7 +54,9 @@ import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
 import org.ue.shopsystem.logic.api.PlayershopManager;
+import org.ue.shopsystem.logic.api.ShopEditorHandler;
 import org.ue.shopsystem.logic.api.ShopItem;
+import org.ue.shopsystem.logic.api.ShopSlotEditorHandler;
 import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 import org.ue.townsystem.logic.api.TownworldManager;
@@ -85,10 +88,12 @@ public class PlayershopImplTest {
 	private class Mocks {
 		Villager villager;
 		Inventory inventory;
+		ShopEditorHandler editorHandler;
 
-		public Mocks(Villager villager, Inventory inventory) {
+		public Mocks(Villager villager, Inventory inventory, ShopEditorHandler editorHandler) {
 			this.villager = villager;
 			this.inventory = inventory;
+			this.editorHandler = editorHandler;
 		}
 	}
 
@@ -99,33 +104,31 @@ public class PlayershopImplTest {
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
 		Chunk chunk = mock(Chunk.class);
-		ItemStack stockInfoItem = mock(ItemStack.class);
 		ItemStack infoItem = mock(ItemStack.class);
-		ItemStack stuff = mock(ItemStack.class);
-		ItemMeta stuffMeta = mock(ItemMeta.class);
 		ItemMeta infoItemMeta = mock(ItemMeta.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory editorStuff = mock(Inventory.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
+		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
+		Inventory backLink = mock(Inventory.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(editorHandler.getInventory()).thenReturn(backLink);
+		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
+		when(provider.createShopSlotEditorHandler(backLink)).thenReturn(slotEditorHandler);
 		when(ecoPlayer.getName()).thenReturn("catch441");
-		when(infoItemMeta.getDisplayName()).thenReturn("Info");
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editorStuff);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-SlotEditor"))).thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop"))).thenReturn(inv);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(infoItem);
-		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(stuff);
-		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(stuff);
-		when(serverProvider.createItemStack(Material.BARRIER, 1)).thenReturn(stuff);
 
 		when(loc.getWorld()).thenReturn(world);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
-		when(stuff.getItemMeta()).thenReturn(stuffMeta);
 		when(infoItem.getItemMeta()).thenReturn(infoItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(customSkullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(stockInfoItem);
 		playershop.setupNew("myshop", ecoPlayer, "P0", loc, 9);
 
+		verify(editorHandler).setup(playershop, 1);
+		verify(slotEditorHandler).setupSlotEditor(playershop);
 		verify(shopDao).setupSavefile("P0");
 		verify(shopDao).saveLocation("", loc);
 		verify(shopDao).saveShopName("myshop");
@@ -139,13 +142,13 @@ public class PlayershopImplTest {
 		verify(villager).setProfession(Profession.NITWIT);
 		verify(villager).setMetadata(eq("ue-id"), any(FixedMetadataValue.class));
 		verify(villager).setMetadata(eq("ue-type"), any(FixedMetadataValue.class));
-		assertEquals("P0", playershop.getShopId());
+		assertEquals("P0", playershop.getId());
 		assertEquals(loc, playershop.getLocation());
 		assertEquals(ecoPlayer, playershop.getOwner());
 		assertEquals("myshop", playershop.getName());
 
 		verify(infoItemMeta).setDisplayName("Info");
-		verify(infoItem, times(2)).setItemMeta(infoItemMeta);
+		verify(infoItem).setItemMeta(infoItemMeta);
 		verify(infoItemMeta).setLore(Arrays.asList("§6Rightclick: §asell specified amount",
 				"§6Shift-Rightclick: §asell all", "§6Leftclick: §abuy"));
 		verify(inv).setItem(8, infoItem);
@@ -158,35 +161,31 @@ public class PlayershopImplTest {
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
 		Chunk chunk = mock(Chunk.class);
-		ItemStack stockInfoItem = mock(ItemStack.class);
 		ItemStack infoItem = mock(ItemStack.class);
-		ItemStack stuff = mock(ItemStack.class);
 		ItemStack shopItemStack = mock(ItemStack.class);
 		ItemMeta shopItemStackMeta = mock(ItemMeta.class);
-		ItemMeta stuffMeta = mock(ItemMeta.class);
 		ItemMeta infoItemMeta = mock(ItemMeta.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory editorStuff = mock(Inventory.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		ShopItemImpl shopItem = mock(ShopItemImpl.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
+		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
+		Inventory backLink = mock(Inventory.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(editorHandler.getInventory()).thenReturn(backLink);
+		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
+		when(provider.createShopSlotEditorHandler(backLink)).thenReturn(slotEditorHandler);
 		when(ecoPlayer.getName()).thenReturn("catch441");
-		when(infoItemMeta.getDisplayName()).thenReturn("Info");
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editorStuff);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-SlotEditor"))).thenReturn(editorStuff);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop"))).thenReturn(inv);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(infoItem);
-		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(stuff);
-		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(stuff);
-		when(serverProvider.createItemStack(Material.BARRIER, 1)).thenReturn(stuff);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		when(loc.getWorld()).thenReturn(world);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(shopItemStack.getItemMeta()).thenReturn(shopItemStackMeta);
-		when(stuff.getItemMeta()).thenReturn(stuffMeta);
 		when(infoItem.getItemMeta()).thenReturn(infoItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(customSkullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(stockInfoItem);
 
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(shopDao.loadShopName()).thenReturn("myshop");
@@ -206,6 +205,8 @@ public class PlayershopImplTest {
 		when(inv.getItem(0)).thenReturn(shopItemStack);
 		assertDoesNotThrow(() -> playershop.setupExisting("P0"));
 
+		verify(editorHandler).setup(playershop, 1);
+		verify(slotEditorHandler).setupSlotEditor(playershop);
 		verify(shopDao).setupSavefile("P0");
 		verify(villager).setCustomName("myshop_catch441");
 		verify(villager).setCustomNameVisible(true);
@@ -216,7 +217,7 @@ public class PlayershopImplTest {
 		verify(villager).setProfession(Profession.ARMORER);
 		verify(villager).setMetadata(eq("ue-id"), any(FixedMetadataValue.class));
 		verify(villager).setMetadata(eq("ue-type"), any(FixedMetadataValue.class));
-		assertEquals("P0", playershop.getShopId());
+		assertEquals("P0", playershop.getId());
 		assertEquals(loc, playershop.getLocation());
 		assertEquals(ecoPlayer, playershop.getOwner());
 		assertEquals("myshop", playershop.getName());
@@ -224,7 +225,7 @@ public class PlayershopImplTest {
 		assertDoesNotThrow(() -> assertEquals(shopItem, playershop.getShopItem(0)));
 
 		verify(infoItemMeta).setDisplayName("Info");
-		verify(infoItem, times(2)).setItemMeta(infoItemMeta);
+		verify(infoItem).setItemMeta(infoItemMeta);
 		verify(infoItemMeta).setLore(Arrays.asList("§6Rightclick: §asell specified amount",
 				"§6Shift-Rightclick: §asell all", "§6Leftclick: §abuy"));
 		verify(inv).setItem(8, infoItem);
@@ -317,7 +318,7 @@ public class PlayershopImplTest {
 		when(ecoPlayer.getPlayer()).thenReturn(player);
 		when(player.getInventory()).thenReturn(inv);
 		when(configManager.getCurrencyText(2.0)).thenReturn("$");
-		when(messageWrapper.getString("shop_buy_singular", "1", 2.0, "$")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_BUY_SINGULAR, "1", 2.0, "$")).thenReturn("my message");
 		reset(validationHandler);
 		assertDoesNotThrow(() -> playershop.buyShopItem(3, ecoPlayer, true));
 
@@ -355,7 +356,7 @@ public class PlayershopImplTest {
 		when(ecoPlayer.getPlayer()).thenReturn(player);
 		when(player.getInventory()).thenReturn(inv);
 		when(configManager.getCurrencyText(4.0)).thenReturn("$");
-		when(messageWrapper.getString("shop_buy_plural", "2", 4.0, "$")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_BUY_PLURAL, "2", 4.0, "$")).thenReturn("my message");
 		reset(validationHandler);
 		assertDoesNotThrow(() -> playershop.buyShopItem(3, ecoPlayer, true));
 
@@ -425,7 +426,7 @@ public class PlayershopImplTest {
 		assertDoesNotThrow(() -> playershop.increaseStock(3, 1));
 		when(playershop.getOwner().getPlayer()).thenReturn(player);
 		when(player.getInventory()).thenReturn(inv);
-		when(messageWrapper.getString("shop_got_item_singular", "1")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_GOT_ITEM_SINGULAR, "1")).thenReturn("my message");
 		reset(validationHandler);
 		assertDoesNotThrow(() -> playershop.buyShopItem(3, playershop.getOwner(), true));
 
@@ -460,7 +461,7 @@ public class PlayershopImplTest {
 		assertDoesNotThrow(() -> playershop.increaseStock(3, 3));
 		when(playershop.getOwner().getPlayer()).thenReturn(player);
 		when(player.getInventory()).thenReturn(inv);
-		when(messageWrapper.getString("shop_got_item_plural", "2")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_GOT_ITEM_PLURAL, "2")).thenReturn("my message");
 		reset(validationHandler);
 		assertDoesNotThrow(() -> playershop.buyShopItem(3, playershop.getOwner(), true));
 
@@ -495,7 +496,7 @@ public class PlayershopImplTest {
 		assertDoesNotThrow(() -> playershop.increaseStock(3, 3));
 		when(playershop.getOwner().getPlayer()).thenReturn(player);
 		when(player.getInventory()).thenReturn(inv);
-		when(messageWrapper.getString("shop_got_item_plural", "3")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_GOT_ITEM_PLURAL, "3")).thenReturn("my message");
 		reset(validationHandler);
 		assertDoesNotThrow(() -> playershop.buyShopItem(3, playershop.getOwner(), true));
 
@@ -595,7 +596,6 @@ public class PlayershopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack stackCloneClone = mock(ItemStack.class);
-		ItemStack stackCloneCloneClone = mock(ItemStack.class);
 		ItemStack contentStack = mock(ItemStack.class);
 		ItemStack contentStackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
@@ -614,11 +614,9 @@ public class PlayershopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(contentStack.clone()).thenReturn(contentStackClone);
 		assertDoesNotThrow(() -> playershop.addShopItem(3, 1, 2, stack));
-		when(stackCloneClone.clone()).thenReturn(stackCloneCloneClone);
-		when(contentStackClone.toString()).thenReturn("itemString");
-		when(stackCloneCloneClone.toString()).thenReturn("itemString");
 		when(configManager.getCurrencyText(1.0)).thenReturn("$");
-		when(messageWrapper.getString("shop_sell_singular", "1", 1.0, "$")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_SELL_SINGULAR, "1", 1.0, "$")).thenReturn("my message");
+		when(stackCloneClone.isSimilar(contentStack)).thenReturn(true);
 		reset(validationHandler);
 		assertDoesNotThrow(() -> playershop.sellShopItem(3, 1, ecoPlayer, true));
 
@@ -659,7 +657,6 @@ public class PlayershopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack stackCloneClone = mock(ItemStack.class);
-		ItemStack stackCloneCloneClone = mock(ItemStack.class);
 		ItemStack contentStack = mock(ItemStack.class);
 		ItemStack contentStackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
@@ -679,11 +676,9 @@ public class PlayershopImplTest {
 		when(contentStack.clone()).thenReturn(contentStackClone);
 		assertDoesNotThrow(() -> playershop.addShopItem(3, 1, 2, stack));
 
-		when(stackCloneClone.clone()).thenReturn(stackCloneCloneClone);
-		when(contentStackClone.toString()).thenReturn("itemString");
-		when(stackCloneCloneClone.toString()).thenReturn("itemString");
 		when(configManager.getCurrencyText(10.0)).thenReturn("$");
-		when(messageWrapper.getString("shop_sell_plural", "10", 10.0, "$")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_SELL_PLURAL, "10", 10.0, "$")).thenReturn("my message");
+		when(stackCloneClone.isSimilar(contentStack)).thenReturn(true);
 		reset(validationHandler);
 		assertDoesNotThrow(() -> playershop.sellShopItem(3, 10, ecoPlayer, true));
 
@@ -706,7 +701,6 @@ public class PlayershopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack stackCloneClone = mock(ItemStack.class);
-		ItemStack stackCloneCloneClone = mock(ItemStack.class);
 		ItemStack contentStack = mock(ItemStack.class);
 		ItemStack contentStackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
@@ -724,10 +718,8 @@ public class PlayershopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(contentStack.clone()).thenReturn(contentStackClone);
 		assertDoesNotThrow(() -> playershop.addShopItem(3, 1, 2, stack));
-		when(stackCloneClone.clone()).thenReturn(stackCloneCloneClone);
-		when(contentStackClone.toString()).thenReturn("itemString");
-		when(stackCloneCloneClone.toString()).thenReturn("itemString");
-		when(messageWrapper.getString("shop_added_item_singular", "1")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_ADDED_ITEM_SINGULAR, "1")).thenReturn("my message");
+		when(stackCloneClone.isSimilar(contentStack)).thenReturn(true);
 		reset(validationHandler);
 		assertDoesNotThrow(() -> playershop.sellShopItem(3, 1, playershop.getOwner(), true));
 
@@ -748,7 +740,6 @@ public class PlayershopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack stackCloneClone = mock(ItemStack.class);
-		ItemStack stackCloneCloneClone = mock(ItemStack.class);
 		ItemStack contentStack = mock(ItemStack.class);
 		ItemStack contentStackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
@@ -766,10 +757,8 @@ public class PlayershopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(contentStack.clone()).thenReturn(contentStackClone);
 		assertDoesNotThrow(() -> playershop.addShopItem(3, 1, 2, stack));
-		when(stackCloneClone.clone()).thenReturn(stackCloneCloneClone);
-		when(contentStackClone.toString()).thenReturn("itemString");
-		when(stackCloneCloneClone.toString()).thenReturn("itemString");
-		when(messageWrapper.getString("shop_added_item_plural", "10")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_ADDED_ITEM_PLURAL, "10")).thenReturn("my message");
+		when(stackCloneClone.isSimilar(contentStack)).thenReturn(true);
 		reset(validationHandler);
 		assertDoesNotThrow(() -> playershop.sellShopItem(3, 10, playershop.getOwner(), true));
 
@@ -938,26 +927,22 @@ public class PlayershopImplTest {
 		assertEquals(1.0, shopItem.getSellPrice());
 		assertEquals(0, shopItem.getSlot());
 		assertEquals(stackCloneClone, shopItem.getItemStack());
-		// verify that the set occupied method of the editor is called
-		verify(customSkullService).getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1");
-		verify(mocks.inventory).setItem(0, stackClone);
-		verify(stackClone).setAmount(2);
-		verify(stackMetaClone).setLore(Arrays.asList("§62 buy for §a4.0 $", "§62 sell for §a1.0 $"));
-		verify(stackMetaClone).setLore(Arrays.asList("§a0§6 Items"));
+		verify(mocks.editorHandler).setOccupied(true, 0);
 	}
 
 	@Test
 	public void changeSizeTest() {
 		Mocks mocks = createPlayershop();
-
+		reset(mocks.editorHandler);
 		assertDoesNotThrow(() -> playershop.changeSize(18));
 
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(18));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForResizePossible(mocks.inventory, 9, 18, 1));
+		
 		assertEquals(18, playershop.getSize());
 		verify(shopDao).saveSize("", 18);
 		verify(serverProvider).createInventory(mocks.villager, 18, "myshop");
-		verify(serverProvider).createInventory(mocks.villager, 18, "myshop-Editor");
+		verify(mocks.editorHandler).setup(playershop, 1);
 	}
 
 	@Test
@@ -1048,12 +1033,15 @@ public class PlayershopImplTest {
 		ItemStack infoItem = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory editor = mock(Inventory.class);
-		Inventory slotEditor = mock(Inventory.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		when(meta.getDisplayName()).thenReturn("Info");
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editor);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-SlotEditor"))).thenReturn(slotEditor);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
+		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
+		Inventory backLink = mock(Inventory.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(editorHandler.getInventory()).thenReturn(backLink);
+		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
+		when(provider.createShopSlotEditorHandler(backLink)).thenReturn(slotEditorHandler);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop"))).thenReturn(inv);
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
@@ -1061,16 +1049,11 @@ public class PlayershopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(customSkullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		playershop.setupNew("myshop", ecoPlayer, "P0", loc, 9);
 
 		Inventory invNew = mock(Inventory.class);
-		Inventory editorNew = mock(Inventory.class);
-		Inventory slotEditorNew = mock(Inventory.class);
 
 		when(serverProvider.createInventory(villager, 9, "newName")).thenReturn(invNew);
-		when(serverProvider.createInventory(villager, 9, "newName-Editor")).thenReturn(editorNew);
-		when(serverProvider.createInventory(villager, 27, "newName-SlotEditor")).thenReturn(slotEditorNew);
 		when(playershop.getOwner().getName()).thenReturn("catch441");
 
 		assertDoesNotThrow(() -> playershop.changeShopName("newName"));
@@ -1078,8 +1061,6 @@ public class PlayershopImplTest {
 		assertEquals("newName", playershop.getName());
 		verify(shopDao).saveShopName("newName");
 		verify(invNew).setContents(inv.getContents());
-		verify(editorNew).setContents(editor.getContents());
-		verify(slotEditorNew).setContents(slotEditor.getContents());
 
 		verify(villager).setCustomName("newName_catch441");
 
@@ -1108,11 +1089,15 @@ public class PlayershopImplTest {
 		ItemStack infoItem = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory editorStuff = mock(Inventory.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		when(meta.getDisplayName()).thenReturn("Info");
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editorStuff);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-SlotEditor"))).thenReturn(editorStuff);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
+		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
+		Inventory backLink = mock(Inventory.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(editorHandler.getInventory()).thenReturn(backLink);
+		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
+		when(provider.createShopSlotEditorHandler(backLink)).thenReturn(slotEditorHandler);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop"))).thenReturn(inv);
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
@@ -1120,10 +1105,9 @@ public class PlayershopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(customSkullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		playershop.setupNew("myshop", ecoPlayer, "P0", loc, 9);
 		reset(validationHandler);
-		return new Mocks(villager, inv);
+		return new Mocks(villager, inv, editorHandler);
 	}
 
 	private ItemMeta addShopItem(Inventory inventory, int slot, double sell, double buy) {

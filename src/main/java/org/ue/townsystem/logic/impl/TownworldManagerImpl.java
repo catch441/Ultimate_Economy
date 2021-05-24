@@ -6,21 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BossBar;
-import org.ue.bank.logic.api.BankManager;
-import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.api.EconomyPlayerValidator;
-import org.ue.townsystem.dataaccess.api.TownworldDao;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
 import org.ue.townsystem.logic.api.TownsystemValidator;
@@ -32,27 +26,28 @@ public class TownworldManagerImpl implements TownworldManager {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final MessageWrapper messageWrapper;
 	private final ServerProvider serverProvider;
-	private final CustomSkullService skullService;
 	private final TownsystemValidator validationHandler;
-	private final BankManager bankManager;
 	private final ConfigDao configDao;
-	private final EconomyPlayerValidator ecoPlayerValidator;
 
 	private Map<String, Townworld> townWorldList = new HashMap<>();
 	private List<String> townNameList = new ArrayList<>();
 
-	@Inject
-	public TownworldManagerImpl(ConfigDao configDao, BankManager bankManager, EconomyPlayerManager ecoPlayerManager,
-			MessageWrapper messageWrapper, TownsystemValidator validationHandler, ServerProvider serverProvider,
-			CustomSkullService skullService, EconomyPlayerValidator ecoPlayerValidator) {
+	/**
+	 * Inject constructor.
+	 * 
+	 * @param configDao
+	 * @param ecoPlayerManager
+	 * @param messageWrapper
+	 * @param validationHandler
+	 * @param serverProvider
+	 */
+	public TownworldManagerImpl(ConfigDao configDao, EconomyPlayerManager ecoPlayerManager,
+			MessageWrapper messageWrapper, TownsystemValidator validationHandler, ServerProvider serverProvider) {
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
 		this.messageWrapper = messageWrapper;
-		this.bankManager = bankManager;
 		this.serverProvider = serverProvider;
 		this.configDao = configDao;
-		this.skullService = skullService;
-		this.ecoPlayerValidator = ecoPlayerValidator;
 	}
 
 	protected void setTownNameList(List<String> townNameList) {
@@ -151,10 +146,9 @@ public class TownworldManagerImpl implements TownworldManager {
 	public void createTownWorld(String world) throws TownsystemException {
 		validationHandler.checkForWorldExists(world);
 		validationHandler.checkForTownworldDoesNotExist(townWorldList, world);
-		TownworldDao townworldDao = serverProvider.getServiceComponent().getTownworldDao();
-		townworldDao.setupSavefile(world);
-		townWorldList.put(world, new TownworldImpl(world, true, townworldDao, validationHandler, this, messageWrapper,
-				bankManager, serverProvider, skullService, ecoPlayerValidator));
+		Townworld townworld = serverProvider.getProvider().createTownWorld();
+		townworld.setupNew(world);
+		townWorldList.put(world, townworld);
 		configDao.saveTownworldNamesList(getTownWorldNameList());
 	}
 
@@ -170,10 +164,8 @@ public class TownworldManagerImpl implements TownworldManager {
 	@Override
 	public void loadAllTownWorlds() {
 		for (String townWorldName : configDao.loadTownworldNames()) {
-			TownworldDao townworldDao = serverProvider.getServiceComponent().getTownworldDao();
-			townworldDao.setupSavefile(townWorldName);
-			Townworld townworld = new TownworldImpl(townWorldName, false, townworldDao, validationHandler, this,
-					messageWrapper, bankManager, serverProvider, skullService, ecoPlayerValidator);
+			Townworld townworld = serverProvider.getProvider().createTownWorld();
+			townworld.setupExisting(townWorldName);
 			townNameList.addAll(townworld.getTownNameList());
 			townWorldList.put(townWorldName, townworld);
 		}

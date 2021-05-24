@@ -2,8 +2,6 @@ package org.ue.shopsystem.logic.impl;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -35,7 +33,6 @@ public class AdminshopCommandExecutorImpl implements CommandExecutor {
 	private final JobManager jobManager;
 	private final ConfigManager configManager;
 
-	@Inject
 	public AdminshopCommandExecutorImpl(JobManager jobManager, EconomyPlayerManager ecoPlayerManager,
 			AdminshopManager adminshopManager, MessageWrapper messageWrapper, ServerProvider serverProvider,
 			ConfigManager configManager) {

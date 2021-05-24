@@ -3,8 +3,6 @@ package org.ue.jobsystem.dataaccess.impl;
 import java.io.File;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.ue.common.utils.ServerProvider;
@@ -14,7 +12,6 @@ import org.ue.jobsystem.logic.api.Job;
 
 public class JobcenterDaoImpl extends EconomyVillagerDaoImpl implements JobcenterDao {
 
-	@Inject
 	public JobcenterDaoImpl(ServerProvider serverProvider) {
 		super(serverProvider);
 	}

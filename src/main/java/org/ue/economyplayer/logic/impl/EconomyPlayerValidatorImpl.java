@@ -2,8 +2,6 @@ package org.ue.economyplayer.logic.impl;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.logic.impl.GeneralValidatorImpl;
@@ -15,7 +13,6 @@ import org.ue.jobsystem.logic.api.Job;
 public class EconomyPlayerValidatorImpl extends GeneralValidatorImpl<EconomyPlayerException>
 		implements EconomyPlayerValidator {
 
-	@Inject
 	public EconomyPlayerValidatorImpl(MessageWrapper messageWrapper) {
 		super(messageWrapper);
 	}

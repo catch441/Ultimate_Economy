@@ -15,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.townsystem.logic.api.TownsystemException;
@@ -34,7 +36,7 @@ public class TownworldCommandExecutorImplTest {
 	MessageWrapper messageWrapper;
 	@Mock
 	Player player;
-	
+
 	@Test
 	public void unknownCommandTest() {
 		String[] args = { "bla" };
@@ -50,7 +52,7 @@ public class TownworldCommandExecutorImplTest {
 		assertFalse(result);
 		verifyNoInteractions(player);
 	}
-	
+
 	@Test
 	public void disableCommandTestWithInvalidArgNumber() {
 		String[] args = { "disable", "world", "" };
@@ -59,10 +61,10 @@ public class TownworldCommandExecutorImplTest {
 		verify(player).sendMessage("/townworld disable <world>");
 		verifyNoMoreInteractions(player);
 	}
-	
+
 	@Test
 	public void disableCommandTest() {
-		when(messageWrapper.getString("townworld_disable", "world")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.TOWNWORLD_DISABLE, "world")).thenReturn("my message");
 		String[] args = { "disable", "world" };
 		boolean result = executor.onCommand(player, null, "townworld", args);
 		assertTrue(result);
@@ -70,7 +72,7 @@ public class TownworldCommandExecutorImplTest {
 		verify(player).sendMessage("my message");
 		verifyNoMoreInteractions(player);
 	}
-	
+
 	@Test
 	public void enableCommandTestWithInvalidArgNumber() {
 		String[] args = { "enable", "world", "" };
@@ -79,10 +81,10 @@ public class TownworldCommandExecutorImplTest {
 		verify(player).sendMessage("/townworld enable <world>");
 		verifyNoMoreInteractions(player);
 	}
-	
+
 	@Test
 	public void enableCommandTest() {
-		when(messageWrapper.getString("townworld_enable", "world")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.TOWNWORLD_ENABLE, "world")).thenReturn("my message");
 		String[] args = { "enable", "world" };
 		boolean result = executor.onCommand(player, null, "townworld", args);
 		assertTrue(result);
@@ -90,7 +92,7 @@ public class TownworldCommandExecutorImplTest {
 		verify(player).sendMessage("my message");
 		verifyNoMoreInteractions(player);
 	}
-	
+
 	@Test
 	public void setExpandPriceCommandTestWithInvalidArgNumber() {
 		String[] args = { "setExpandPrice", "world", "7", "" };
@@ -99,12 +101,12 @@ public class TownworldCommandExecutorImplTest {
 		verify(player).sendMessage("/townworld setExpandPrice <world> <price/chunk>");
 		verifyNoMoreInteractions(player);
 	}
-	
+
 	@Test
 	public void setExpandPriceCommandTest() {
 		Townworld world = mock(Townworld.class);
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(world));
-		when(messageWrapper.getString("townworld_setExpandPrice", "2", "$")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.TOWNWORLD_SETEXPANDPRICE, "2", "$")).thenReturn("my message");
 		when(configManager.getCurrencyText(2.0)).thenReturn("$");
 		String[] args = { "setExpandPrice", "world", "2" };
 		boolean result = executor.onCommand(player, null, "townworld", args);
@@ -113,17 +115,18 @@ public class TownworldCommandExecutorImplTest {
 		verify(player).sendMessage("my message");
 		verifyNoMoreInteractions(player);
 	}
-	
+
 	@Test
 	public void setExpandPriceCommandTestWithInvalidPrice() {
-		when(messageWrapper.getErrorString("invalid_parameter", "two")).thenReturn("my error message");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "two"))
+				.thenReturn("my error message");
 		String[] args = { "setExpandPrice", "world", "two" };
 		boolean result = executor.onCommand(player, null, "townworld", args);
 		assertTrue(result);
 		verify(player).sendMessage("my error message");
 		verifyNoMoreInteractions(player);
 	}
-	
+
 	@Test
 	public void setExpandPriceCommandTestWithNoTownworld() {
 		TownsystemException e = mock(TownsystemException.class);
@@ -135,7 +138,7 @@ public class TownworldCommandExecutorImplTest {
 		verify(player).sendMessage("my error message");
 		verifyNoMoreInteractions(player);
 	}
-	
+
 	@Test
 	public void setFoundationPriceCommandTestWithInvalidArgNumber() {
 		String[] args = { "setFoundationPrice", "world", "7", "" };
@@ -144,12 +147,12 @@ public class TownworldCommandExecutorImplTest {
 		verify(player).sendMessage("/townworld setFoundationPrice <world> <price>");
 		verifyNoMoreInteractions(player);
 	}
-	
+
 	@Test
 	public void setFoundationPriceCommandTest() {
 		Townworld world = mock(Townworld.class);
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(world));
-		when(messageWrapper.getString("townworld_setFoundationPrice", "2", "$")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.TOWNWORLD_SETFOUNDATIONPRICE, "2", "$")).thenReturn("my message");
 		when(configManager.getCurrencyText(2.0)).thenReturn("$");
 		String[] args = { "setFoundationPrice", "world", "2" };
 		boolean result = executor.onCommand(player, null, "townworld", args);
@@ -158,10 +161,11 @@ public class TownworldCommandExecutorImplTest {
 		verify(player).sendMessage("my message");
 		verifyNoMoreInteractions(player);
 	}
-	
+
 	@Test
 	public void setFoundationPriceCommandTestWithInvalidPrice() {
-		when(messageWrapper.getErrorString("invalid_parameter", "two")).thenReturn("my error message");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "two"))
+				.thenReturn("my error message");
 		String[] args = { "setFoundationPrice", "world", "two" };
 		boolean result = executor.onCommand(player, null, "townworld", args);
 		assertTrue(result);

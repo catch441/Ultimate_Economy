@@ -1,4 +1,4 @@
-package org.ue.common.logic.impl;
+package org.ue.economyvillager.logic.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,7 +20,6 @@ import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
-import org.ue.economyvillager.logic.impl.EconomyVillagerValidatorImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class EconomyVillagerValidationHandlerTest {

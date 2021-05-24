@@ -24,7 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
-import org.ue.common.utils.ServiceComponent;
+import org.ue.common.utils.UltimateEconomyProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
@@ -103,11 +103,11 @@ public class PlayershopManagerImplTest {
 	public void createNewPlayershopTest() {
 		Location loc = mock(Location.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
 		Playershop shop = mock(Playershop.class);
-		when(shop.getShopId()).thenReturn("P0");
-		when(serviceComponent.getPlayershop()).thenReturn(shop);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(provider.createPlayershop()).thenReturn(shop);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(shop.getId()).thenReturn("P0");
 		assertDoesNotThrow(() -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
 
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidShopName("myshop"));
@@ -135,11 +135,11 @@ public class PlayershopManagerImplTest {
 	private Playershop createPlayershop(String id) {
 		Location loc = mock(Location.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
 		Playershop shop = mock(Playershop.class);
-		when(shop.getShopId()).thenReturn(id);
-		when(serviceComponent.getPlayershop()).thenReturn(shop);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(shop.getId()).thenReturn(id);
+		when(provider.createPlayershop()).thenReturn(shop);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		assertDoesNotThrow(() -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
 		return shop;
 	}
@@ -148,10 +148,10 @@ public class PlayershopManagerImplTest {
 	public void getPlayerShopUniqueNameListTest() {
 		Location loc = mock(Location.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
 		Playershop shop = mock(Playershop.class);
-		when(serviceComponent.getPlayershop()).thenReturn(shop);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(provider.createPlayershop()).thenReturn(shop);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		assertDoesNotThrow(() -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
 		when(shop.getOwner()).thenReturn(ecoPlayer);
 		when(shop.getName()).thenReturn("myshop");
@@ -165,10 +165,10 @@ public class PlayershopManagerImplTest {
 	public void getPlayerShopByUniqueNameTest() {
 		Location loc = mock(Location.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
 		Playershop shop = mock(Playershop.class);
-		when(serviceComponent.getPlayershop()).thenReturn(shop);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(provider.createPlayershop()).thenReturn(shop);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		assertDoesNotThrow(() -> playershopManager.createPlayerShop("myshop", loc, 9, ecoPlayer));
 		when(ecoPlayer.getName()).thenReturn("catch441");
 		when(shop.getName()).thenReturn("myshop");
@@ -194,7 +194,7 @@ public class PlayershopManagerImplTest {
 		createPlayershop("P1");
 		Playershop shop = assertDoesNotThrow(() -> playershopManager.getPlayerShopById("P1"));
 		assertNotNull(shop);
-		assertEquals("P1", shop.getShopId());
+		assertEquals("P1", shop.getId());
 	}
 
 	@Test
@@ -230,9 +230,9 @@ public class PlayershopManagerImplTest {
 	@Test
 	public void loadAllPlayerShopsTest() {
 		Playershop shop = mock(Playershop.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(serviceComponent.getPlayershop()).thenReturn(shop);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		when(provider.createPlayershop()).thenReturn(shop);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		when(configDao.loadPlayershopIds()).thenReturn(Arrays.asList("P0"));
 		playershopManager.loadAllPlayerShops();
 		assertEquals(1, playershopManager.getPlayerShops().size());
@@ -242,10 +242,10 @@ public class PlayershopManagerImplTest {
 
 	@Test
 	public void loadAllPlayerShopsTestWithLoadingError() throws EconomyPlayerException {
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
 		Playershop shop = mock(Playershop.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(serviceComponent.getPlayershop()).thenReturn(shop);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(provider.createPlayershop()).thenReturn(shop);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		when(configDao.loadPlayershopIds()).thenReturn(Arrays.asList("P0"));

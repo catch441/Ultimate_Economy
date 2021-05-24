@@ -1,9 +1,7 @@
 package org.ue.general.impl;
 
-import javax.inject.Inject;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.ue.common.utils.DaggerServiceComponent;
-import org.ue.common.utils.ServiceComponent;
+import org.ue.common.utils.UltimateEconomyProvider;
 
 /**
  * @author Lukas Heubach (catch441)
@@ -11,9 +9,8 @@ import org.ue.common.utils.ServiceComponent;
 public class PluginImpl extends JavaPlugin {
 
 	public static PluginImpl getInstance;
-	public static ServiceComponent serviceComponent;
-	@Inject
-	UltimateEconomy ultimateEconomy;
+	private final UltimateEconomy ultimateEconomy;
+	public static final UltimateEconomyProvider provider = UltimateEconomyProvider.build();
 
 	/**
 	 * Default constructor.
@@ -21,8 +18,7 @@ public class PluginImpl extends JavaPlugin {
 	public PluginImpl() {
 		super();
 		getInstance = this;
-		serviceComponent = DaggerServiceComponent.builder().build();
-		serviceComponent.inject(this);
+		ultimateEconomy = new UltimateEconomy(provider);
 	}
 
 	@Override

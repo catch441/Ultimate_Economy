@@ -12,14 +12,11 @@ import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ue.bank.logic.api.BankException;
-import org.ue.bank.logic.api.BankManager;
-import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
-import org.ue.economyplayer.logic.api.EconomyPlayerValidator;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
@@ -33,70 +30,58 @@ public class TownworldImpl implements Townworld {
 	private final TownsystemValidator validationHandler;
 	private final TownworldManager townworldManager;
 	private final MessageWrapper messageWrapper;
-	private final BankManager bankManager;
 	private final ServerProvider serverProvider;
-	private final CustomSkullService skullService;
 	private final TownworldDao townworldDao;
-	private final EconomyPlayerValidator ecoPlayerValidator;
 
 	private double foundationPrice, expandPrice;
-	private final String worldName;
+	private String worldName;
 	private Map<String, Town> towns = new HashMap<>();
 
 	/**
-	 * Constructor for a townworld.
+	 * Inject constructor.
 	 * 
-	 * @param world
-	 * @param isNew
 	 * @param townworldDao
 	 * @param validationHandler
 	 * @param townworldManager
 	 * @param messageWrapper
-	 * @param bankManager
 	 * @param serverProvider
-	 * @param skullService
-	 * @param ecoPlayerValidator
 	 */
-	public TownworldImpl(String world, boolean isNew, TownworldDao townworldDao,
-			TownsystemValidator validationHandler, TownworldManager townworldManager,
-			MessageWrapper messageWrapper, BankManager bankManager, ServerProvider serverProvider,
-			CustomSkullService skullService, EconomyPlayerValidator ecoPlayerValidator) {
+	public TownworldImpl(TownworldDao townworldDao, TownsystemValidator validationHandler,
+			TownworldManager townworldManager, MessageWrapper messageWrapper, ServerProvider serverProvider) {
 		this.townworldDao = townworldDao;
 		this.validationHandler = validationHandler;
 		this.townworldManager = townworldManager;
 		this.messageWrapper = messageWrapper;
-		this.bankManager = bankManager;
 		this.serverProvider = serverProvider;
-		this.skullService = skullService;
-		this.ecoPlayerValidator = ecoPlayerValidator;
-		worldName = world;
-		if (isNew) {
-			setupNewTownworld(world);
-		} else {
-			loadExistingTownworld();
-		}
 	}
 
-	private void loadExistingTownworld() {
+	@Override
+	public void setupNew(String worldName) {
+		this.worldName = worldName;
+		foundationPrice = 0;
+		expandPrice = 0;
+		townworldDao.setupSavefile(worldName);
+		townworldDao.saveExpandPrice(0);
+		townworldDao.saveFoundationPrice(0);
+		townworldDao.saveWorldName(worldName);
+	}
+
+	@Override
+	public void setupExisting(String worldName) {
+		this.worldName = worldName;
+		townworldDao.setupSavefile(worldName);
 		foundationPrice = townworldDao.loadFoundationPrice();
 		expandPrice = townworldDao.loadExpandPrice();
 		for (String townName : townworldDao.loadTownworldTownNames()) {
 			try {
-				towns.put(townName, new TownImpl(false, null, townName, null, townworldManager, bankManager,
-						validationHandler, messageWrapper, townworldDao, this, serverProvider, skullService, ecoPlayerValidator));
+				Town town = serverProvider.getProvider().createTown(this, townworldDao);
+				town.setupExisting(this, townName);
+				towns.put(townName, town);
 			} catch (EconomyPlayerException | TownsystemException | BankException e) {
 				log.warn("[Ultimate_Economy] Failed to load town " + townName);
 				log.warn("[Ultimate_Economy] Caused by: " + e.getMessage());
 			}
 		}
-	}
-
-	private void setupNewTownworld(String world) {
-		foundationPrice = 0;
-		expandPrice = 0;
-		townworldDao.saveExpandPrice(0);
-		townworldDao.saveFoundationPrice(0);
-		townworldDao.saveWorldName(world);
 	}
 
 	@Override
@@ -121,8 +106,8 @@ public class TownworldImpl implements Townworld {
 		validationHandler.checkForChunkIsFree(this, location);
 		validationHandler.checkForNotReachedMax(player.reachedMaxJoinedTowns());
 		validationHandler.checkForEnoughMoney(player.getBankAccount(), foundationPrice, true);
-		Town town = new TownImpl(true, player, townName, location, townworldManager, bankManager, validationHandler,
-				messageWrapper, townworldDao, this, serverProvider, skullService, ecoPlayerValidator);
+		Town town = serverProvider.getProvider().createTown(this, townworldDao);
+		town.setupNew(this, player, townName, location);
 		towns.put(town.getTownName(), town);
 		player.decreasePlayerAmount(foundationPrice, true);
 		townNames.add(townName);

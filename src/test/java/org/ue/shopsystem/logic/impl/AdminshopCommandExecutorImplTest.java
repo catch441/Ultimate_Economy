@@ -20,7 +20,6 @@ import java.util.Arrays;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager.Profession;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.junit.jupiter.api.Test;
@@ -28,6 +27,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.InventoryGuiHandler;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
@@ -83,7 +85,7 @@ public class AdminshopCommandExecutorImplTest {
 		when(ecoPlayer.hasJob(job)).thenReturn(false);
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		when(messageWrapper.getErrorString("job_not_joined")).thenReturn("my message");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.JOB_NOT_JOINED)).thenReturn("my message");
 		String[] args = { "myjob" };
 		boolean result = executor.onCommand(player, null, "shop", args);
 		assertTrue(result);
@@ -134,7 +136,7 @@ public class AdminshopCommandExecutorImplTest {
 	public void shoplistCommandTest() {
 		String[] args = {};
 		when(adminshopManager.getAdminshopNameList()).thenReturn(Arrays.asList("myshop"));
-		when(messageWrapper.getString("shoplist_info", "[myshop]")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOPLIST_INFO, "[myshop]")).thenReturn("my message");
 		boolean result = executor.onCommand(player, null, "shoplist", args);
 		assertTrue(result);
 		verify(player).sendMessage("my message");
@@ -168,7 +170,7 @@ public class AdminshopCommandExecutorImplTest {
 
 	@Test
 	public void createCommandTestWithInvalidNumber() {
-		when(messageWrapper.getErrorString("invalid_parameter", "number")).thenReturn("my error message");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "number")).thenReturn("my error message");
 		String[] args = { "create", "myshop", "kth" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
 		assertTrue(result);
@@ -178,7 +180,7 @@ public class AdminshopCommandExecutorImplTest {
 
 	@Test
 	public void createCommandTest() {
-		when(messageWrapper.getString("created", "myshop")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.CREATED, "myshop")).thenReturn("my message");
 		Location location = mock(Location.class);
 		when(player.getLocation()).thenReturn(location);
 		String[] args = { "create", "myshop", "9" };
@@ -211,7 +213,7 @@ public class AdminshopCommandExecutorImplTest {
 
 	@Test
 	public void deleteCommandTest() {
-		when(messageWrapper.getString("deleted", "myshop")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.DELETED, "myshop")).thenReturn("my message");
 		Adminshop shop = mock(Adminshop.class);
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopByName("myshop")).thenReturn(shop));
 		String[] args = { "delete", "myshop" };
@@ -233,47 +235,13 @@ public class AdminshopCommandExecutorImplTest {
 
 	@Test
 	public void renameCommandTest() {
-		when(messageWrapper.getString("shop_rename", "myshop", "kth")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_RENAME, "myshop", "kth")).thenReturn("my message");
 		Adminshop shop = mock(Adminshop.class);
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopByName("myshop")).thenReturn(shop));
 		String[] args = { "rename", "myshop", "kth" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
 		assertTrue(result);
 		assertDoesNotThrow(() -> verify(shop).changeShopName("kth"));
-		verify(player).sendMessage("my message");
-		verifyNoMoreInteractions(player);
-	}
-
-	@Test
-	public void resizeCommandTestWithInvalidArgNumber() {
-		String[] args = { "resize", "myshop" };
-		boolean result = executor.onCommand(player, null, "adminshop", args);
-		assertTrue(result);
-		verify(player).sendMessage("/adminshop resize <shopname> <new size>");
-		verifyNoMoreInteractions(player);
-	}
-
-	@Test
-	public void resizeCommandTestWithInvalidNumber() throws ShopsystemException {
-		ShopsystemException e = mock(ShopsystemException.class);
-		Adminshop shop = mock(Adminshop.class);
-		doThrow(e).when(shop).changeSize(2);
-		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopByName("myshop")).thenReturn(shop));
-		String[] args = { "resize", "myshop", "2" };
-		boolean result = executor.onCommand(player, null, "adminshop", args);
-		assertTrue(result);
-		verify(player, never()).sendMessage(anyString());
-	}
-
-	@Test
-	public void resizeCommandTest() {
-		when(messageWrapper.getString("shop_resize", "18")).thenReturn("my message");
-		Adminshop shop = mock(Adminshop.class);
-		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopByName("myshop")).thenReturn(shop));
-		String[] args = { "resize", "myshop", "18" };
-		boolean result = executor.onCommand(player, null, "adminshop", args);
-		assertTrue(result);
-		assertDoesNotThrow(() -> verify(shop).changeSize(18));
 		verify(player).sendMessage("my message");
 		verifyNoMoreInteractions(player);
 	}
@@ -311,47 +279,15 @@ public class AdminshopCommandExecutorImplTest {
 
 	@Test
 	public void editShopCommandTest() {
+		InventoryGuiHandler editor = mock(InventoryGuiHandler.class);
 		Adminshop shop = mock(Adminshop.class);
+		when(shop.getEditorHandler()).thenReturn(editor);
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopByName("myshop")).thenReturn(shop));
 		String[] args = { "editShop", "myshop" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(shop).openEditor(player));
+		assertDoesNotThrow(() -> verify(editor).openInventory(player));
 		verifyNoInteractions(player);
-	}
-
-	@Test
-	public void changeProfessionCommandTestWithInvalidArgNumber() {
-		String[] args = { "changeProfession", "myshop", "Farmer", "kth" };
-		boolean result = executor.onCommand(player, null, "adminshop", args);
-		assertTrue(result);
-		verify(player).sendMessage("/adminshop changeProfession <shopname> <profession>");
-		verifyNoMoreInteractions(player);
-	}
-
-	@Test
-	public void changeProfessionCommandTestWithInvalidProfession() {
-		when(messageWrapper.getErrorString("invalid_parameter", "kth")).thenReturn("my error message");
-		Adminshop shop = mock(Adminshop.class);
-		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopByName("myshop")).thenReturn(shop));
-		String[] args = { "changeProfession", "myshop", "kth" };
-		boolean result = executor.onCommand(player, null, "adminshop", args);
-		assertTrue(result);
-		verify(player).sendMessage("my error message");
-		verify(player, times(1)).sendMessage(anyString());
-	}
-
-	@Test
-	public void changeProfessionCommandTest() {
-		when(messageWrapper.getString("profession_changed")).thenReturn("my message");
-		Adminshop shop = mock(Adminshop.class);
-		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopByName("myshop")).thenReturn(shop));
-		String[] args = { "changeProfession", "myshop", "Farmer" };
-		boolean result = executor.onCommand(player, null, "adminshop", args);
-		assertTrue(result);
-		verify(shop).changeProfession(Profession.FARMER);
-		verify(player).sendMessage("my message");
-		verifyNoMoreInteractions(player);
 	}
 
 	@Test
@@ -365,7 +301,7 @@ public class AdminshopCommandExecutorImplTest {
 
 	@Test
 	public void addSpawnerCommandTestWithInvalidEntity() {
-		when(messageWrapper.getErrorString("invalid_parameter", "Farmer")).thenReturn("my error message");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "Farmer")).thenReturn("my error message");
 		String[] args = { "addSpawner", "myshop", "Farmer", "1", "1" };
 		boolean result = executor.onCommand(player, null, "adminshop", args);
 		assertTrue(result);
@@ -375,7 +311,7 @@ public class AdminshopCommandExecutorImplTest {
 
 	@Test
 	public void addSpawnerCommandTest() {
-		when(messageWrapper.getString("added", "cow")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.ADDED, "cow")).thenReturn("my message");
 		Adminshop shop = mock(Adminshop.class);
 		assertDoesNotThrow(() -> when(adminshopManager.getAdminShopByName("myshop")).thenReturn(shop));
 		ItemMeta meta = mock(ItemMeta.class);

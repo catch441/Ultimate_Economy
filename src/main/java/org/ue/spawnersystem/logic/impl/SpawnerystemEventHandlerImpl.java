@@ -2,8 +2,6 @@ package org.ue.spawnersystem.logic.impl;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
@@ -29,7 +27,6 @@ public class SpawnerystemEventHandlerImpl implements SpawnersystemEventHandler {
 	private final ServerProvider serverProvider;
 	private final SpawnerManager spawnerManager;
 
-	@Inject
 	public SpawnerystemEventHandlerImpl(MessageWrapper messageWrapper, ServerProvider serverProvider,
 			SpawnerManager spawnerManager) {
 		this.messageWrapper = messageWrapper;

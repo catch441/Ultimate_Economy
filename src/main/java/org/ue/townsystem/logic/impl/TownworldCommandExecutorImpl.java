@@ -1,7 +1,5 @@
 package org.ue.townsystem.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -19,7 +17,6 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 	private final TownworldManager townworldManager;
 	private final MessageWrapper messageWrapper;
 
-	@Inject
 	public TownworldCommandExecutorImpl(ConfigManager configManager, TownworldManager townworldManager,
 			MessageWrapper messageWrapper) {
 		this.configManager = configManager;

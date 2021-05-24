@@ -2,8 +2,6 @@ package org.ue.shopsystem.logic.impl;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
@@ -46,7 +44,6 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 * @param townworldManager
 	 * @param playershopManager
 	 */
-	@Inject
 	public PlayershopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService customSkullService,
 			ShopValidator validationHandler, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,

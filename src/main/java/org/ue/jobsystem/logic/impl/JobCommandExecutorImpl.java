@@ -3,8 +3,6 @@ package org.ue.jobsystem.logic.impl;
 import java.util.List;
 import java.util.Map.Entry;
 
-import javax.inject.Inject;
-
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -29,7 +27,6 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	private final JobcenterManager jobcenterManager;
 	private final ConfigManager configManager;
 
-	@Inject
 	public JobCommandExecutorImpl(ConfigManager configManager, JobcenterManager jobcenterManager, JobManager jobManager,
 			MessageWrapper messageWrapper) {
 		this.jobManager = jobManager;
@@ -82,7 +79,7 @@ public class JobCommandExecutorImpl implements CommandExecutor {
 	private boolean handleJobInfoCommand(String[] args, Player player) throws JobsystemException {
 		if (args.length == 1) {
 			Job job = jobManager.getJobByName(args[0]);
-			player.sendMessage(messageWrapper.getString(MessageEnum.JOBLIST_INFO, job.getName()));
+			player.sendMessage(messageWrapper.getString(MessageEnum.JOBINFO_INFO, job.getName()));
 			sendBlockInfo(player, job);
 			sendFisherInfo(player, job);
 			sendEntityInfo(player, job);

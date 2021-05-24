@@ -5,18 +5,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 
 import java.io.File;
 import java.lang.reflect.Field;
-
-import javax.inject.Named;
 
 import org.bukkit.Server;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -29,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.logic.api.BankManager;
 import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.utils.ServerProvider;
+import org.ue.common.utils.UltimateEconomyProvider;
 import org.ue.common.utils.Updater;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
@@ -50,7 +49,7 @@ import net.milkbowl.vault.economy.Economy;
 
 @ExtendWith(MockitoExtension.class)
 public class UltimateEconomyTest {
-	
+
 	@Mock
 	SpawnerManager spawnerManager;
 	@Mock
@@ -92,74 +91,61 @@ public class UltimateEconomyTest {
 	@Mock
 	SpawnersystemEventHandler spawnerSystemEventHandler;
 	@Mock
-	@Named("ConfigCommandExecutor")
 	CommandExecutor configCommandExecutor;
 	@Mock
-	@Named("EconomyPlayerCommandExecutor")
 	CommandExecutor ecoPlayerCommandExecutor;
 	@Mock
-	@Named("JobCommandExecutor")
 	CommandExecutor jobCommandExecutor;
 	@Mock
-	@Named("PlayershopCommandExecutor")
 	CommandExecutor playershopCommandExecutor;
 	@Mock
-	@Named("AdminshopCommandExecutor")
 	CommandExecutor adminshopCommandExecutor;
 	@Mock
-	@Named("RentshopCommandExecutor")
 	CommandExecutor rentshopCommandExecutor;
 	@Mock
-	@Named("TownCommandExecutor")
 	CommandExecutor townCommandExecutor;
 	@Mock
-	@Named("TownworldCommandExecutor")
 	CommandExecutor townworldCommandExecutor;
 	@Mock
-	@Named("EconomyPlayerTabCompleter")
 	TabCompleter ecoPlayerTabCompleter;
 	@Mock
-	@Named("ConfigTabCompleter")
 	TabCompleter configTabCompleter;
 	@Mock
-	@Named("JobTabCompleter")
 	TabCompleter jobTabCompleter;
 	@Mock
-	@Named("PlayershopTabCompleter")
 	TabCompleter playershopTabCompleter;
 	@Mock
-	@Named("AdminshopTabCompleter")
 	TabCompleter adminshopTabCompleter;
 	@Mock
-	@Named("RentshopTabCompleter")
 	TabCompleter rentshopTabCompleter;
 	@Mock
-	@Named("TownTabCompleter")
 	TabCompleter townTabCompleter;
 	@Mock
-	@Named("TownworldTabCompleter")
 	TabCompleter townworldTabCompleter;
+	@Mock
+	UltimateEconomyProvider provider;
+	@Mock
+	Listener ultimateEconomyEventHandler;
 
 	@Test
 	public void onDisableTest() {
-		UltimateEconomy ue = new UltimateEconomy(vaultEconomy, spawnerManager, configManager, bankManager,
-				ecoPlayerManager, jobManager, jobcenterManager, adminshopManager, playershopManager, rentshopManager,
-				townworldManager, null, updater, messageWrapper, skullService, serverProvider, shopEventHandler,
-				jobsystemEventHandler, ecoPlayerEventHandler, townsystemEventHandler, spawnerSystemEventHandler,
-				configCommandExecutor, ecoPlayerCommandExecutor, jobCommandExecutor, playershopCommandExecutor,
-				adminshopCommandExecutor, rentshopCommandExecutor, townCommandExecutor, townworldCommandExecutor,
-				ecoPlayerTabCompleter, configTabCompleter, jobTabCompleter, playershopTabCompleter,
-				adminshopTabCompleter, rentshopTabCompleter, townTabCompleter, townworldTabCompleter);
-
-		JavaPlugin plugin = mock(JavaPlugin.class);
 		Server server = mock(Server.class);
+		Plugin vault = mock(Plugin.class);
 		PluginManager pluginManager = mock(PluginManager.class);
 		ServicesManager servicesManager = mock(ServicesManager.class);
-		when(serverProvider.getServicesManager()).thenReturn(servicesManager);
-		when(pluginManager.getPlugin("Vault")).thenReturn(mock(Plugin.class));
-		when(server.getPluginManager()).thenReturn(pluginManager);
+		UltimateEconomy ue = new UltimateEconomy(provider);
+		when(provider.getJobcenterManager()).thenReturn(jobcenterManager);
+		when(provider.getTownworldManager()).thenReturn(townworldManager);
+		when(provider.getAdminshopManager()).thenReturn(adminshopManager);
+		when(provider.getPlayershopManager()).thenReturn(playershopManager);
+		when(provider.getRentshopManager()).thenReturn(rentshopManager);
+		when(provider.getServerProvider()).thenReturn(serverProvider);
 		when(serverProvider.getServer()).thenReturn(server);
-		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
+		when(server.getPluginManager()).thenReturn(pluginManager);
+		when(pluginManager.getPlugin("Vault")).thenReturn(vault);
+		when(serverProvider.getServicesManager()).thenReturn(servicesManager);
+		when(provider.getVaultEconomy()).thenReturn(vaultEconomy);
+
 		ue.onDisable();
 
 		verify(servicesManager).unregister(Economy.class, vaultEconomy);
@@ -172,14 +158,35 @@ public class UltimateEconomyTest {
 
 	@Test
 	public void onEnableTestWithHomeEnableError() throws IllegalArgumentException, IllegalAccessException {
-		UltimateEconomy ue = new UltimateEconomy(vaultEconomy, spawnerManager, configManager, bankManager,
-				ecoPlayerManager, jobManager, jobcenterManager, adminshopManager, playershopManager, rentshopManager,
-				townworldManager, null, updater, messageWrapper, skullService, serverProvider, shopEventHandler,
-				jobsystemEventHandler, ecoPlayerEventHandler, townsystemEventHandler, spawnerSystemEventHandler,
-				configCommandExecutor, ecoPlayerCommandExecutor, jobCommandExecutor, playershopCommandExecutor,
-				adminshopCommandExecutor, rentshopCommandExecutor, townCommandExecutor, townworldCommandExecutor,
-				ecoPlayerTabCompleter, configTabCompleter, jobTabCompleter, playershopTabCompleter,
-				adminshopTabCompleter, rentshopTabCompleter, townTabCompleter, townworldTabCompleter);
+		UltimateEconomy ue = new UltimateEconomy(provider);
+		when(provider.getServerProvider()).thenReturn(serverProvider);
+		when(provider.getConfigManager()).thenReturn(configManager);
+		when(provider.getCustomSkullService()).thenReturn(skullService);
+		when(provider.getRentshopManager()).thenReturn(rentshopManager);
+		when(provider.getMessageWrapper()).thenReturn(messageWrapper);
+		when(provider.getBankManager()).thenReturn(bankManager);
+		when(provider.getJobManager()).thenReturn(jobManager);
+		when(provider.getEconomyPlayerManager()).thenReturn(ecoPlayerManager);
+		when(provider.getTownworldManager()).thenReturn(townworldManager);
+		when(provider.getSpawnerManager()).thenReturn(spawnerManager);
+		when(provider.getUpdater()).thenReturn(updater);
+		when(provider.getAdminshopCommandExecutor()).thenReturn(adminshopCommandExecutor);
+		when(provider.getPlayershopCommandExecutor()).thenReturn(playershopCommandExecutor);
+		when(provider.getRentshopCommandExecutor()).thenReturn(rentshopCommandExecutor);
+		when(provider.getJobCommandExecutor()).thenReturn(jobCommandExecutor);
+		when(provider.getTownCommandExecutor()).thenReturn(townCommandExecutor);
+		when(provider.getConfigCommandExecutor()).thenReturn(configCommandExecutor);
+		when(provider.getTownworldCommandExecutor()).thenReturn(townworldCommandExecutor);
+		when(provider.getEconomyPlayerCommandExecutor()).thenReturn(ecoPlayerCommandExecutor);
+		when(provider.getAdminshopTabCompleter()).thenReturn(adminshopTabCompleter);
+		when(provider.getConfigTabCompleter()).thenReturn(configTabCompleter);
+		when(provider.getEconomyPlayerTabCompleter()).thenReturn(ecoPlayerTabCompleter);
+		when(provider.getJobTabCompleter()).thenReturn(jobTabCompleter);
+		when(provider.getPlayershopTabCompleter()).thenReturn(playershopTabCompleter);
+		when(provider.getRentshopTabCompleter()).thenReturn(rentshopTabCompleter);
+		when(provider.getTownTabCompleter()).thenReturn(townTabCompleter);
+		when(provider.getTownworldTabCompleter()).thenReturn(townworldTabCompleter);
+		when(provider.getUltimateEconomyEventHandler()).thenReturn(ultimateEconomyEventHandler);
 
 		File dataFolder = mock(File.class);
 		Plugin plugin = mock(Plugin.class);
@@ -249,24 +256,23 @@ public class UltimateEconomyTest {
 		verify(messageWrapper).loadLanguage(configManager.getLocale());
 		verify(bankManager).loadBankAccounts();
 		verify(jobManager).loadAllJobs();
-		
+
 		/*
-		 * TODO: Only commented out to fix a cluser of issues. When spawning the villagers at
-		 * startup without any player, then no changes to these villagers are visible
-		 * ingame (rename, move ...). In spigot it works, but in paper it doesn't. This
-		 * is just a quickfix and not a solution.
-		 * [UE-139,UE-140]
+		 * TODO: Only commented out to fix a cluser of issues. When spawning the
+		 * villagers at startup without any player, then no changes to these villagers
+		 * are visible ingame (rename, move ...). In spigot it works, but in paper it
+		 * doesn't. This is just a quickfix and not a solution. [UE-139,UE-140]
 		 */
-		
-		//verify(jobcenterManager).loadAllJobcenters();
+
+		// verify(jobcenterManager).loadAllJobcenters();
 		verify(ecoPlayerManager).loadAllEconomyPlayers();
-		//verify(adminshopManager).loadAllAdminShops();
-		//verify(playershopManager).loadAllPlayerShops();
-		//verify(rentshopManager).loadAllRentShops();
+		// verify(adminshopManager).loadAllAdminShops();
+		// verify(playershopManager).loadAllPlayerShops();
+		// verify(rentshopManager).loadAllRentShops();
 		verify(townworldManager).loadAllTownWorlds();
 		verify(spawnerManager).loadAllSpawners();
 		verify(updater).checkForUpdate("1.2.6");
-		
+
 		verify(e).getMessage();
 
 		verify(jobcenter).setExecutor(jobCommandExecutor);
@@ -298,19 +304,40 @@ public class UltimateEconomyTest {
 		verify(ueConfig).setTabCompleter(configTabCompleter);
 		verify(bank).setTabCompleter(ecoPlayerTabCompleter);
 
-		verify(pluginManager).registerEvents(any(UltimateEconomyEventHandlerImpl.class), eq(javaPlugin));
+		verify(pluginManager).registerEvents(ultimateEconomyEventHandler, javaPlugin);
 	}
-	
+
 	@Test
 	public void onEnableTest() {
-		UltimateEconomy ue = new UltimateEconomy(vaultEconomy, spawnerManager, configManager, bankManager,
-				ecoPlayerManager, jobManager, jobcenterManager, adminshopManager, playershopManager, rentshopManager,
-				townworldManager, null, updater, messageWrapper, skullService, serverProvider, shopEventHandler,
-				jobsystemEventHandler, ecoPlayerEventHandler, townsystemEventHandler, spawnerSystemEventHandler,
-				configCommandExecutor, ecoPlayerCommandExecutor, jobCommandExecutor, playershopCommandExecutor,
-				adminshopCommandExecutor, rentshopCommandExecutor, townCommandExecutor, townworldCommandExecutor,
-				ecoPlayerTabCompleter, configTabCompleter, jobTabCompleter, playershopTabCompleter,
-				adminshopTabCompleter, rentshopTabCompleter, townTabCompleter, townworldTabCompleter);
+		UltimateEconomy ue = new UltimateEconomy(provider);
+		when(provider.getServerProvider()).thenReturn(serverProvider);
+		when(provider.getConfigManager()).thenReturn(configManager);
+		when(provider.getCustomSkullService()).thenReturn(skullService);
+		when(provider.getRentshopManager()).thenReturn(rentshopManager);
+		when(provider.getMessageWrapper()).thenReturn(messageWrapper);
+		when(provider.getBankManager()).thenReturn(bankManager);
+		when(provider.getJobManager()).thenReturn(jobManager);
+		when(provider.getEconomyPlayerManager()).thenReturn(ecoPlayerManager);
+		when(provider.getTownworldManager()).thenReturn(townworldManager);
+		when(provider.getSpawnerManager()).thenReturn(spawnerManager);
+		when(provider.getUpdater()).thenReturn(updater);
+		when(provider.getAdminshopCommandExecutor()).thenReturn(adminshopCommandExecutor);
+		when(provider.getPlayershopCommandExecutor()).thenReturn(playershopCommandExecutor);
+		when(provider.getRentshopCommandExecutor()).thenReturn(rentshopCommandExecutor);
+		when(provider.getJobCommandExecutor()).thenReturn(jobCommandExecutor);
+		when(provider.getTownCommandExecutor()).thenReturn(townCommandExecutor);
+		when(provider.getConfigCommandExecutor()).thenReturn(configCommandExecutor);
+		when(provider.getTownworldCommandExecutor()).thenReturn(townworldCommandExecutor);
+		when(provider.getEconomyPlayerCommandExecutor()).thenReturn(ecoPlayerCommandExecutor);
+		when(provider.getAdminshopTabCompleter()).thenReturn(adminshopTabCompleter);
+		when(provider.getConfigTabCompleter()).thenReturn(configTabCompleter);
+		when(provider.getEconomyPlayerTabCompleter()).thenReturn(ecoPlayerTabCompleter);
+		when(provider.getJobTabCompleter()).thenReturn(jobTabCompleter);
+		when(provider.getPlayershopTabCompleter()).thenReturn(playershopTabCompleter);
+		when(provider.getRentshopTabCompleter()).thenReturn(rentshopTabCompleter);
+		when(provider.getTownTabCompleter()).thenReturn(townTabCompleter);
+		when(provider.getTownworldTabCompleter()).thenReturn(townworldTabCompleter);
+		when(provider.getUltimateEconomyEventHandler()).thenReturn(ultimateEconomyEventHandler);
 
 		File dataFolder = mock(File.class);
 		Plugin plugin = mock(Plugin.class);
@@ -357,12 +384,12 @@ public class UltimateEconomyTest {
 		UltimateEconomyCommand sethome = mock(UltimateEconomyCommand.class);
 		UltimateEconomyCommand delhome = mock(UltimateEconomyCommand.class);
 		UltimateEconomyCommand home = mock(UltimateEconomyCommand.class);
-		
+
 		assertDoesNotThrow(() -> when(serverProvider.getCommandMap(any(Field.class))).thenReturn(map));
 		when(serverProvider.createUltimateEconomyCommand("sethome")).thenReturn(sethome);
 		when(serverProvider.createUltimateEconomyCommand("delhome")).thenReturn(delhome);
 		when(serverProvider.createUltimateEconomyCommand("home")).thenReturn(home);
-		
+
 		Server server = mock(Server.class);
 		PluginManager pluginManager = mock(PluginManager.class);
 		ServicesManager servicesManager = mock(ServicesManager.class);
@@ -377,6 +404,7 @@ public class UltimateEconomyTest {
 		when(javaPlugin.getDescription()).thenReturn(description);
 		when(description.getVersion()).thenReturn("1.2.6");
 		when(configManager.isHomeSystem()).thenReturn(true);
+
 		ue.onEnable();
 
 		verify(dataFolder).mkdirs();
@@ -387,24 +415,23 @@ public class UltimateEconomyTest {
 		verify(messageWrapper).loadLanguage(configManager.getLocale());
 		verify(bankManager).loadBankAccounts();
 		verify(jobManager).loadAllJobs();
-		
+
 		/*
-		 * TODO: Only commented out to fix a cluser of issues. When spawning the villagers at
-		 * startup without any player, then no changes to these villagers are visible
-		 * ingame (rename, move ...). In spigot it works, but in paper it doesn't. This
-		 * is just a quickfix and not a solution.
-		 * [UE-139,UE-140]
+		 * TODO: Only commented out to fix a cluser of issues. When spawning the
+		 * villagers at startup without any player, then no changes to these villagers
+		 * are visible ingame (rename, move ...). In spigot it works, but in paper it
+		 * doesn't. This is just a quickfix and not a solution. [UE-139,UE-140]
 		 */
-		
-		//verify(jobcenterManager).loadAllJobcenters();
+
+		// verify(jobcenterManager).loadAllJobcenters();
 		verify(ecoPlayerManager).loadAllEconomyPlayers();
-		//verify(adminshopManager).loadAllAdminShops();
-		//verify(playershopManager).loadAllPlayerShops();
-		//verify(rentshopManager).loadAllRentShops();
+		// verify(adminshopManager).loadAllAdminShops();
+		// verify(playershopManager).loadAllPlayerShops();
+		// verify(rentshopManager).loadAllRentShops();
 		verify(townworldManager).loadAllTownWorlds();
 		verify(spawnerManager).loadAllSpawners();
 		verify(updater).checkForUpdate("1.2.6");
-		
+
 		verify(sethome).setDescription("Sets a homepoint.");
 		verify(sethome).setPermission("ultimate_economy.home");
 		verify(sethome).setLabel("sethome");
@@ -412,7 +439,7 @@ public class UltimateEconomyTest {
 		verify(sethome).setUsage("/<command> [home]");
 		verify(sethome).setExecutor(ecoPlayerCommandExecutor);
 		verify(map).register("ultimate_economy", sethome);
-		
+
 		verify(delhome).setDescription("Remove a homepoint.");
 		verify(delhome).setPermission("ultimate_economy.home");
 		verify(delhome).setLabel("delhome");
@@ -421,7 +448,7 @@ public class UltimateEconomyTest {
 		verify(delhome).setExecutor(ecoPlayerCommandExecutor);
 		verify(delhome).setTabCompleter(ecoPlayerTabCompleter);
 		verify(map).register("ultimate_economy", delhome);
-		
+
 		verify(home).setDescription("Teleports you to a homepoint.");
 		verify(home).setPermission("ultimate_economy.home");
 		verify(home).setLabel("home");
@@ -459,6 +486,6 @@ public class UltimateEconomyTest {
 		verify(ueConfig).setTabCompleter(configTabCompleter);
 		verify(bank).setTabCompleter(ecoPlayerTabCompleter);
 
-		verify(pluginManager).registerEvents(any(UltimateEconomyEventHandlerImpl.class), eq(javaPlugin));
+		verify(pluginManager).registerEvents(ultimateEconomyEventHandler, javaPlugin);
 	}
 }

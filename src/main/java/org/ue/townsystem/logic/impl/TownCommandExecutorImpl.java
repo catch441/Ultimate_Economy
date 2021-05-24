@@ -1,7 +1,5 @@
 package org.ue.townsystem.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -30,7 +28,6 @@ public class TownCommandExecutorImpl implements CommandExecutor {
 	private final MessageWrapper messageWrapper;
 	private final TownsystemValidator townsystemValidationHandler;
 
-	@Inject
 	public TownCommandExecutorImpl(ConfigManager configManager, EconomyPlayerManager ecoPlayerManager,
 			TownworldManager townworldManager, MessageWrapper messageWrapper,
 			TownsystemValidator townsystemValidationHandler) {

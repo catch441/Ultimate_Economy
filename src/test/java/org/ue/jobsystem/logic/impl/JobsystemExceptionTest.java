@@ -19,10 +19,11 @@ public class JobsystemExceptionTest {
 
 	@Test
 	public void constructorTest() {
-		when(messageWrapper.getErrorString("job_not_exist_in_jobcenter", "param1", 2)).thenReturn("my error message");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.JOB_NOT_EXIST_IN_JOBCENTER, "param1", 2))
+				.thenReturn("my error message");
 		JobsystemException e = new JobsystemException(messageWrapper, ExceptionMessageEnum.JOB_NOT_EXIST_IN_JOBCENTER,
 				"param1", 2);
-		
+
 		assertEquals(ExceptionMessageEnum.JOB_NOT_EXIST_IN_JOBCENTER, e.getKey());
 		assertEquals(2, e.getParams().length);
 		assertEquals("param1", e.getParams()[0]);

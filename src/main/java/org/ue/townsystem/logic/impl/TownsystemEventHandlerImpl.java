@@ -1,11 +1,9 @@
 package org.ue.townsystem.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Villager;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -33,7 +31,6 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final MessageWrapper messageWrapper;
 
-	@Inject
 	public TownsystemEventHandlerImpl(ConfigManager configManager, TownworldManager townworldManager,
 			EconomyPlayerManager ecoPlayerManager, MessageWrapper messageWrapper) {
 		this.configManager = configManager;
@@ -103,14 +100,14 @@ public class TownsystemEventHandlerImpl implements TownsystemEventHandler {
 		try {
 			EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getWhoClicked().getName());
 			Townworld townWorld = townworldManager.getTownWorldByName(event.getWhoClicked().getWorld().getName());
-			Chunk chunk = ((Villager) event.getClickedInventory().getHolder()).getLocation().getChunk();
+			Chunk chunk = ((Entity) event.getClickedInventory().getHolder()).getLocation().getChunk();
 			Town town = townWorld.getTownByChunk(chunk);
-			Plot plot = town.getPlotByChunk(chunk.getX() + "/" + chunk.getZ());
 
 			String inventoryName = event.getView().getTitle();
 			if (inventoryName.contains("TownManager")) {
 				town.handleInventoryClick(event.getClick(), event.getRawSlot(), ecoPlayer);
 			} else if (inventoryName.contains("Plot")) {
+				Plot plot = town.getPlotByChunk(chunk.getX() + "/" + chunk.getZ());
 				plot.handleInventoryClick(event.getClick(), event.getRawSlot(), ecoPlayer);
 			}
 		} catch (TownsystemException | EconomyPlayerException e) {

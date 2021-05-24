@@ -8,12 +8,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.reset;
 
 import java.util.Arrays;
 import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -23,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.CustomSkullService;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.logic.api.SkullTextureEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
@@ -48,7 +50,7 @@ public class RentshopRentGuiHandlerTest {
 	ServerProvider serverProvider;
 	@Mock
 	Rentshop shop;
-	
+
 	private RentshopRentGuiHandlerImpl createHandler() {
 		Inventory inv = mock(Inventory.class);
 		ItemStack rentItem = mock(ItemStack.class);
@@ -72,8 +74,8 @@ public class RentshopRentGuiHandlerTest {
 		when(shop.getName()).thenReturn("Shop#R0");
 		when(shop.getRentalFee()).thenReturn(5.5);
 		when(shop.createVillagerInventory(9, "Shop#R0")).thenReturn(inv);
-		return new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager,
-				skullService, configManager, shop, serverProvider);
+		return new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager, skullService, configManager, shop,
+				serverProvider);
 	}
 
 	@Test
@@ -100,8 +102,8 @@ public class RentshopRentGuiHandlerTest {
 		when(shop.getName()).thenReturn("Shop#R0");
 		when(shop.getRentalFee()).thenReturn(5.5);
 		when(shop.createVillagerInventory(9, "Shop#R0")).thenReturn(inv);
-		new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager,
-				skullService, configManager, shop, serverProvider);
+		new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager, skullService, configManager, shop,
+				serverProvider);
 
 		List<String> lore = Arrays.asList("§6Duration: §a1§6 Day");
 		List<String> rentLore = Arrays.asList("§6RentalFee: §a5.5");
@@ -127,168 +129,114 @@ public class RentshopRentGuiHandlerTest {
 	@Test
 	public void handleRentShopGuiClickTestPlusClick() {
 		RentshopRentGuiHandlerImpl handler = createHandler();
-		
-		InventoryClickEvent event = mock(InventoryClickEvent.class);
-		
-		ItemStack clickedItem = mock(ItemStack.class);
-		ItemMeta clickedItemMeta = mock(ItemMeta.class);
-		when(clickedItem.getItemMeta()).thenReturn(clickedItemMeta);
-		when(clickedItemMeta.getDisplayName()).thenReturn("plus");
-		
-		ItemStack operationItem = mock(ItemStack.class);
-		ItemMeta operationItemMeta = mock(ItemMeta.class);
-		when(operationItem.getItemMeta()).thenReturn(operationItemMeta);
-		when(handler.getRentGui().getItem(3)).thenReturn(operationItem);
-		when(operationItemMeta.getDisplayName()).thenReturn("plus");
-		
-		ItemStack durationItem = mock(ItemStack.class);
-		ItemMeta durationItemMeta = mock(ItemMeta.class);
-		when(durationItem.getItemMeta()).thenReturn(durationItemMeta);
-		when(handler.getRentGui().getItem(1)).thenReturn(durationItem);
-		List<String> lore = Arrays.asList("§6Duration: §a1§6 Day");
-		when(durationItemMeta.getLore()).thenReturn(lore);
-			
-		when(event.getCurrentItem()).thenReturn(clickedItem);
-		when(event.getInventory()).thenReturn(handler.getRentGui());
-		
 		ItemStack minusItem = mock(ItemStack.class);
 		when(skullService.getSkullWithName(SkullTextureEnum.MINUS, "minus")).thenReturn(minusItem);
-		
-		handler.handleRentShopGUIClick(event);
-		
-		verify(event).setCancelled(true);
-		verify(handler.getRentGui()).setItem(3, minusItem);
+		handler.handleInventoryClick(ClickType.RIGHT, 3, null);
+		verify(handler.getInventory()).setItem(3, minusItem);
 	}
 
 	@Test
 	public void handleRentShopGuiClickTestMinusClick() {
 		RentshopRentGuiHandlerImpl handler = createHandler();
-		
-		InventoryClickEvent event = mock(InventoryClickEvent.class);
-		
-		ItemStack clickedItem = mock(ItemStack.class);
-		ItemMeta clickedItemMeta = mock(ItemMeta.class);
-		when(clickedItem.getItemMeta()).thenReturn(clickedItemMeta);
-		when(clickedItemMeta.getDisplayName()).thenReturn("minus");
-		
-		ItemStack operationItem = mock(ItemStack.class);
-		ItemMeta operationItemMeta = mock(ItemMeta.class);
-		when(operationItem.getItemMeta()).thenReturn(operationItemMeta);
-		when(handler.getRentGui().getItem(3)).thenReturn(operationItem);
-		when(operationItemMeta.getDisplayName()).thenReturn("minus");
-		
-		ItemStack durationItem = mock(ItemStack.class);
-		ItemMeta durationItemMeta = mock(ItemMeta.class);
-		when(durationItem.getItemMeta()).thenReturn(durationItemMeta);
-		when(handler.getRentGui().getItem(1)).thenReturn(durationItem);
-		List<String> lore = Arrays.asList("§6Duration: §a1§6 Day");
-		when(durationItemMeta.getLore()).thenReturn(lore);
-			
-		when(event.getCurrentItem()).thenReturn(clickedItem);
-		when(event.getInventory()).thenReturn(handler.getRentGui());
-		
+
 		ItemStack plusItem = mock(ItemStack.class);
 		when(skullService.getSkullWithName(SkullTextureEnum.PLUS, "plus")).thenReturn(plusItem);
-		
-		handler.handleRentShopGUIClick(event);
-		
-		verify(event).setCancelled(true);
-		verify(handler.getRentGui(), times(1)).setItem(3, plusItem);
+		when(skullService.getSkullWithName(SkullTextureEnum.MINUS, "minus")).thenReturn(null);
+		handler.handleInventoryClick(ClickType.RIGHT, 3, null);
+		handler.handleInventoryClick(ClickType.RIGHT, 3, null);
+		verify(handler.getInventory()).setItem(3, plusItem);
 	}
 
 	@Test
 	public void handleRentShopGuiClickTestPlusOneClick() {
 		when(configManager.getMaxRentedDays()).thenReturn(10);
-		testPlusMinusDuration("Days", "Days", "plus", "one", 1, 2, 11.0);
+		testPlusMinusDuration("Days", "Days", "plus", "one", 1, 2, 11.0, 4);
 	}
 
 	@Test
 	public void handleRentShopGuiClickTestMinusOneClick() {
-		testPlusMinusDuration("Days", "Days", "minus", "one", 3, 2, 11.0);
+		when(configManager.getMaxRentedDays()).thenReturn(10);
+		testPlusMinusDuration("Days", "Days", "minus", "one", 1, 7, 38.5, 4);
 	}
 
-	private void testPlusMinusDuration(String dayDaysOld, String dayDaysNew, String operation, String amount, int durationOld, int durationNew, double fee) {
+	private void testPlusMinusDuration(String dayDaysOld, String dayDaysNew, String operation, String amount,
+			int durationOld, int durationNew, double fee, int rawslot) {
 		RentshopRentGuiHandlerImpl handler = createHandler();
-		
-		InventoryClickEvent event = mock(InventoryClickEvent.class);
-		
-		ItemStack clickedItem = mock(ItemStack.class);
-		ItemMeta clickedItemMeta = mock(ItemMeta.class);
-		when(clickedItem.getItemMeta()).thenReturn(clickedItemMeta);
-		when(clickedItemMeta.getDisplayName()).thenReturn(amount);
-		
-		ItemStack operationItem = mock(ItemStack.class);
-		ItemMeta operationItemMeta = mock(ItemMeta.class);
-		when(operationItem.getItemMeta()).thenReturn(operationItemMeta);
-		when(handler.getRentGui().getItem(3)).thenReturn(operationItem);
-		when(operationItemMeta.getDisplayName()).thenReturn(operation);
-		
-		ItemStack durationItem = mock(ItemStack.class);
-		ItemMeta durationItemMeta = mock(ItemMeta.class);
-		when(durationItem.getItemMeta()).thenReturn(durationItemMeta);
-		when(handler.getRentGui().getItem(1)).thenReturn(durationItem);
-		List<String> lore = Arrays.asList("§6Duration: §a" + durationOld + "§6 "+ dayDaysOld);
-		when(durationItemMeta.getLore()).thenReturn(lore);
-			
-		when(event.getCurrentItem()).thenReturn(clickedItem);
-		when(event.getInventory()).thenReturn(handler.getRentGui());
-				
+
 		ItemStack loreUpdateItem = mock(ItemStack.class);
 		ItemMeta loreUpdateItemMeta = mock(ItemMeta.class);
 		when(loreUpdateItem.getItemMeta()).thenReturn(loreUpdateItemMeta);
-		when(handler.getRentGui().getItem(5)).thenReturn(loreUpdateItem);
-		when(handler.getRentGui().getItem(4)).thenReturn(loreUpdateItem);
-		
+		when(handler.getInventory().getItem(5)).thenReturn(loreUpdateItem);
+		when(handler.getInventory().getItem(4)).thenReturn(loreUpdateItem);
+		when(handler.getInventory().getItem(1)).thenReturn(loreUpdateItem);
+
 		ItemStack loreUpdateRentItem = mock(ItemStack.class);
 		ItemMeta loreUpdateRentItemMeta = mock(ItemMeta.class);
 		when(loreUpdateRentItem.getItemMeta()).thenReturn(loreUpdateRentItemMeta);
-		when(handler.getRentGui().getItem(0)).thenReturn(loreUpdateRentItem);
-				
-		handler.handleRentShopGUIClick(event);
+		when(handler.getInventory().getItem(0)).thenReturn(loreUpdateRentItem);
 		
-		verify(event).setCancelled(true);
+		if (operation.equals("minus")) {
+			handler.handleInventoryClick(ClickType.RIGHT, 5, null);
+			handler.handleInventoryClick(ClickType.RIGHT, 3, null);
+			reset(loreUpdateItem);
+			reset(loreUpdateItemMeta);
+			reset(loreUpdateRentItem);
+			reset(loreUpdateRentItemMeta);
+			when(loreUpdateItem.getItemMeta()).thenReturn(loreUpdateItemMeta);
+			when(handler.getInventory().getItem(5)).thenReturn(loreUpdateItem);
+			when(handler.getInventory().getItem(4)).thenReturn(loreUpdateItem);
+			when(handler.getInventory().getItem(1)).thenReturn(loreUpdateItem);
+			when(loreUpdateRentItem.getItemMeta()).thenReturn(loreUpdateRentItemMeta);
+			when(handler.getInventory().getItem(0)).thenReturn(loreUpdateRentItem);
+		}
+
+		handler.handleInventoryClick(ClickType.RIGHT, rawslot, null);
+
 		List<String> newLore = Arrays.asList("§6Duration: §a" + durationNew + "§6 " + dayDaysNew);
 		List<String> newLoreFee = Arrays.asList("§6RentalFee: §a" + fee);
-		verify(loreUpdateItemMeta, times(2)).setLore(newLore);
+		verify(loreUpdateItemMeta, times(3)).setLore(newLore);
 		verify(loreUpdateRentItemMeta).setLore(newLoreFee);
-		verify(handler.getRentGui().getItem(1).getItemMeta()).setLore(newLore);
+		verify(loreUpdateItem, times(3)).setItemMeta(loreUpdateItemMeta);
+		verify(loreUpdateRentItem).setItemMeta(loreUpdateRentItemMeta);
 	}
 
 	@Test
 	public void handleRentShopGuiClickTestMinusOneClickMore() {
-		testPlusMinusDuration("Day", "Day", "minus", "one", 1, 1, 5.5);
+		testPlusMinusDuration("Day", "Day", "minus", "one", 1, 1, 5.5, 4);
 	}
 
 	@Test
 	public void handleRentShopGuiClickTestPlusOneClickMore() {
-		when(configManager.getMaxRentedDays()).thenReturn(10);
-		testPlusMinusDuration("Days", "Days", "plus", "one", 10, 10, 55.0);
+		when(configManager.getMaxRentedDays()).thenReturn(-10);
+		testPlusMinusDuration("Days", "Days", "plus", "one", 1, -10, -55.0, 4);
 	}
 
 	@Test
 	public void handleRentShopGuiClickTestPlusSevenClick() {
 		when(configManager.getMaxRentedDays()).thenReturn(10);
-		testPlusMinusDuration("Day", "Days", "plus", "seven", 1, 8, 44.0);
+		testPlusMinusDuration("Day", "Days", "plus", "seven", 1, 8, 44.0, 5);
 	}
 
 	@Test
 	public void handleRentShopGuiClickTestMinusSevenClick() {
-		testPlusMinusDuration("Days", "Days", "minus", "seven", 9, 2, 11.0);
+		when(configManager.getMaxRentedDays()).thenReturn(10);
+		testPlusMinusDuration("Days", "Day", "minus", "seven", 1, 1, 5.5, 5);
 	}
 
 	@Test
 	public void handleRentShopGuiClickTestMinusSevenClickMore() {
-		testPlusMinusDuration("Days", "Day", "minus", "seven", 5, 1, 5.5);
+		testPlusMinusDuration("Days", "Day", "minus", "seven", 5, 1, 5.5, 5);
 	}
 
 	@Test
 	public void handleRentShopGuiClickTestPlusSevenClickMore() {
-		when(configManager.getMaxRentedDays()).thenReturn(10);
-		testPlusMinusDuration("Days", "Days", "plus", "seven", 6, 10, 55.0);
+		when(configManager.getMaxRentedDays()).thenReturn(5);
+		testPlusMinusDuration("Days", "Days", "plus", "seven", 1, 5, 27.5, 5);
 	}
 
 	@Test
-	public void handleRentShopGuiClickTestRentClickError() throws ShopsystemException, BankException, EconomyPlayerException {
+	public void handleRentShopGuiClickTestRentClickError()
+			throws ShopsystemException, BankException, EconomyPlayerException {
 		Inventory inv = mock(Inventory.class);
 		ItemStack rentItem = mock(ItemStack.class);
 		ItemStack plusItem = mock(ItemStack.class);
@@ -313,43 +261,19 @@ public class RentshopRentGuiHandlerTest {
 		when(shop.createVillagerInventory(9, "Shop#R0")).thenReturn(inv);
 		RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager,
 				skullService, configManager, shop, serverProvider);
-		
-		InventoryClickEvent event = mock(InventoryClickEvent.class);
-		
-		ItemStack clickedItem = mock(ItemStack.class);
-		ItemMeta clickedItemMeta = mock(ItemMeta.class);
-		when(clickedItem.getItemMeta()).thenReturn(clickedItemMeta);
-		when(clickedItemMeta.getDisplayName()).thenReturn("Rent");
-		
-		ItemStack operationItem = mock(ItemStack.class);
-		ItemMeta operationItemMeta = mock(ItemMeta.class);
-		when(operationItem.getItemMeta()).thenReturn(operationItemMeta);
-		when(handler.getRentGui().getItem(3)).thenReturn(operationItem);
-		when(operationItemMeta.getDisplayName()).thenReturn("plus");
-		
-		ItemStack durationItem = mock(ItemStack.class);
-		ItemMeta durationItemMeta = mock(ItemMeta.class);
-		when(durationItem.getItemMeta()).thenReturn(durationItemMeta);
-		when(handler.getRentGui().getItem(1)).thenReturn(durationItem);
-		List<String> lore = Arrays.asList("§6Duration: §a2§6 Days");
-		when(durationItemMeta.getLore()).thenReturn(lore);
 
 		Player player = mock(Player.class);
-		when(event.getCurrentItem()).thenReturn(clickedItem);
-		when(event.getInventory()).thenReturn(handler.getRentGui());
-		when(event.getWhoClicked()).thenReturn(player);
 		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-			
-		
+
 		ShopsystemException e = mock(ShopsystemException.class);
 		when(e.getMessage()).thenReturn("my error message");
-		doThrow(e).when(shop).rentShop(ecoPlayer, 2);
-		
-		handler.handleRentShopGUIClick(event);
-		
-		verify(event).setCancelled(true);
+		doThrow(e).when(shop).rentShop(ecoPlayer, 1);
+
+		handler.handleInventoryClick(ClickType.RIGHT, 0, ecoPlayer);
+
 		verify(player).sendMessage("my error message");
 		verify(player).closeInventory();
 	}
@@ -380,39 +304,33 @@ public class RentshopRentGuiHandlerTest {
 		when(shop.createVillagerInventory(9, "Shop#R0")).thenReturn(inv);
 		RentshopRentGuiHandlerImpl handler = new RentshopRentGuiHandlerImpl(messageWrapper, ecoPlayerManager,
 				skullService, configManager, shop, serverProvider);
-		
-		InventoryClickEvent event = mock(InventoryClickEvent.class);
-		
-		ItemStack clickedItem = mock(ItemStack.class);
-		ItemMeta clickedItemMeta = mock(ItemMeta.class);
-		when(clickedItem.getItemMeta()).thenReturn(clickedItemMeta);
-		when(clickedItemMeta.getDisplayName()).thenReturn("Rent");
-		
-		ItemStack operationItem = mock(ItemStack.class);
-		ItemMeta operationItemMeta = mock(ItemMeta.class);
-		when(operationItem.getItemMeta()).thenReturn(operationItemMeta);
-		when(handler.getRentGui().getItem(3)).thenReturn(operationItem);
-		when(operationItemMeta.getDisplayName()).thenReturn("plus");
-		
+
 		ItemStack durationItem = mock(ItemStack.class);
-		ItemMeta durationItemMeta = mock(ItemMeta.class);
-		when(durationItem.getItemMeta()).thenReturn(durationItemMeta);
-		when(handler.getRentGui().getItem(1)).thenReturn(durationItem);
-		List<String> lore = Arrays.asList("§6Duration: §a2§6 Days");
-		when(durationItemMeta.getLore()).thenReturn(lore);
+		when(handler.getInventory().getItem(1)).thenReturn(durationItem);
 
 		Player player = mock(Player.class);
-		when(event.getCurrentItem()).thenReturn(clickedItem);
-		when(event.getInventory()).thenReturn(handler.getRentGui());
-		when(event.getWhoClicked()).thenReturn(player);
 		when(player.getName()).thenReturn("catch441");
-		when(messageWrapper.getString("rent_rented")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.RENT_RENTED)).thenReturn("my message");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-				
-		handler.handleRentShopGUIClick(event);
+
+		// plus 1
+		ItemStack loreUpdateItem = mock(ItemStack.class);
+		ItemMeta loreUpdateItemMeta = mock(ItemMeta.class);
+		when(loreUpdateItem.getItemMeta()).thenReturn(loreUpdateItemMeta);
+		when(handler.getInventory().getItem(5)).thenReturn(loreUpdateItem);
+		when(handler.getInventory().getItem(4)).thenReturn(loreUpdateItem);
+		when(handler.getInventory().getItem(1)).thenReturn(loreUpdateItem);
+		ItemStack loreUpdateRentItem = mock(ItemStack.class);
+		ItemMeta loreUpdateRentItemMeta = mock(ItemMeta.class);
+		when(loreUpdateRentItem.getItemMeta()).thenReturn(loreUpdateRentItemMeta);
+		when(handler.getInventory().getItem(0)).thenReturn(loreUpdateRentItem);
+		when(configManager.getMaxRentedDays()).thenReturn(10);
+		handler.handleInventoryClick(ClickType.RIGHT, 4, null);
 		
-		verify(event).setCancelled(true);
+		handler.handleInventoryClick(ClickType.RIGHT, 0, ecoPlayer);
+
 		assertDoesNotThrow(() -> verify(shop).rentShop(ecoPlayer, 2));
 		verify(player).sendMessage("my message");
 		verify(player).closeInventory();

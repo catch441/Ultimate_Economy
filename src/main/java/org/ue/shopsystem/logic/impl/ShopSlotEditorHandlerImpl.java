@@ -50,20 +50,19 @@ public class ShopSlotEditorHandlerImpl extends InventoryGuiHandlerImpl implement
 	 * @param messageWrapper
 	 * @param validationHandler
 	 * @param skullService
-	 * @param shop
 	 * @param backLink
 	 */
 	public ShopSlotEditorHandlerImpl(ServerProvider serverProvider, MessageWrapper messageWrapper,
-			ShopValidator validationHandler, CustomSkullService skullService, AbstractShop shop, Inventory backLink) {
+			ShopValidator validationHandler, CustomSkullService skullService, Inventory backLink) {
 		super(skullService, serverProvider, backLink);
-		this.shop = shop;
 		this.validationHandler = validationHandler;
 		this.messageWrapper = messageWrapper;
-		selectedEditorSlot = 0;
-		setupSlotEditor();
 	}
 
-	private void setupSlotEditor() {
+	@Override
+	public void setupSlotEditor(AbstractShop shop) {
+		selectedEditorSlot = 0;
+		this.shop = shop;
 		inventory = shop.createVillagerInventory(27, "SlotEditor");
 		setSkull(SkullTextureEnum.K_OFF, null, "factor off", 12);
 		setSkull(SkullTextureEnum.K_OFF, null, "factor off", 21);
@@ -156,6 +155,7 @@ public class ShopSlotEditorHandlerImpl extends InventoryGuiHandlerImpl implement
 				break;
 			case 26:
 				handleRemoveItem(whoClicked.getPlayer());
+				returnToBackLink(whoClicked.getPlayer());
 				break;
 			case 2:
 				amountOperatorState = handleSwitchPlusMinus(rawSlot, amountOperatorState);
@@ -215,8 +215,10 @@ public class ShopSlotEditorHandlerImpl extends InventoryGuiHandlerImpl implement
 	}
 
 	private void handleAddNewItem(Player player, ItemStack stack) throws ShopsystemException {
-		shop.addShopItem(selectedEditorSlot, selectedSellPrice, selectedBuyPrice, stack);
-		player.sendMessage(messageWrapper.getString(MessageEnum.ADDED, stack.getType().toString().toLowerCase()));
+		if(stack.getType() != Material.BARRIER) {
+			shop.addShopItem(selectedEditorSlot, selectedSellPrice, selectedBuyPrice, stack);
+			player.sendMessage(messageWrapper.getString(MessageEnum.ADDED, stack.getType().toString().toLowerCase()));
+		}
 	}
 
 	private Integer generateChangeAmount(int value, ShopItem shopItem) {
@@ -237,9 +239,6 @@ public class ShopSlotEditorHandlerImpl extends InventoryGuiHandlerImpl implement
 		ItemStack item = shop.getShopItem(selectedEditorSlot).getItemStack();
 		String deletedIem = item.getType().toString().toLowerCase();
 		shop.removeShopItem(selectedEditorSlot);
-		if (item.getType() == Material.SPAWNER) {
-			deletedIem = item.getItemMeta().getDisplayName().toLowerCase();
-		}
 		player.sendMessage(messageWrapper.getString(MessageEnum.REMOVED, deletedIem));
 	}
 
@@ -254,9 +253,9 @@ public class ShopSlotEditorHandlerImpl extends InventoryGuiHandlerImpl implement
 
 	private boolean handleSwitchPlusMinus(int slot, boolean oldState) {
 		if (oldState) {
-			setSkull(SkullTextureEnum.PLUS, null, "plus", slot);
-		} else {
 			setSkull(SkullTextureEnum.MINUS, null, "minus", slot);
+		} else {
+			setSkull(SkullTextureEnum.PLUS, null, "plus", slot);
 		}
 		return !oldState;
 	}

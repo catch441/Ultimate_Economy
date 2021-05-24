@@ -1,7 +1,5 @@
 package org.ue.shopsystem.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.entity.Entity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -24,7 +22,6 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 	private final PlayershopManager playershopManager;
 	private final RentshopManager rentshopManager;
 
-	@Inject
 	public ShopEventHandlerImpl(EconomyPlayerManager ecoPlayerManager, AdminshopManager adminshopManager,
 			PlayershopManager playershopManager, RentshopManager rentshopManager) {
 		this.ecoPlayerManager = ecoPlayerManager;

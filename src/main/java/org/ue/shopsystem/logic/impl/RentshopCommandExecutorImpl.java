@@ -1,7 +1,5 @@
 package org.ue.shopsystem.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -19,7 +17,6 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 	private final RentshopManager rentshopManager;
 	private final MessageWrapper messageWrapper;
 
-	@Inject
 	public RentshopCommandExecutorImpl(RentshopManager rentshopManager, MessageWrapper messageWrapper) {
 		this.rentshopManager = rentshopManager;
 		this.messageWrapper = messageWrapper;
@@ -114,10 +111,12 @@ public class RentshopCommandExecutorImpl implements CommandExecutor {
 	}
 
 	private boolean performEditShopCommand(String label, String[] args, Player player) throws ShopsystemException {
-		if (args.length == 2) {
-			rentshopManager.getRentShopByUniqueName(args[1] + "_" + player.getName()).getEditorHandler().openInventory(player);
-		} else {
-			player.sendMessage("/" + label + " editShop <shopname>");
+		if (player.hasPermission("ultimate_economy.rentshop.admin")) {
+			if (args.length == 2) {
+				rentshopManager.getRentShopByUniqueName(args[1] + "_" + player.getName()).getEditorHandler().openInventory(player);
+			} else {
+				player.sendMessage("/" + label + " editShop <shopname>");
+			}
 		}
 		return true;
 	}

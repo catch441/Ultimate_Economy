@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -48,7 +46,6 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 	private final JobcenterManager jobcenterManager;
 	private final ServerProvider serverProvider;
 
-	@Inject
 	public JobsystemEventHandlerImpl(ServerProvider serverProvider, JobcenterManager jobcenterManager,
 			EconomyPlayerManager ecoPlayerManager) {
 		this.ecoPlayerManager = ecoPlayerManager;

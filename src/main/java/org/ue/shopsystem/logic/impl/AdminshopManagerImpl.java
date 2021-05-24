@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +27,6 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	private final ConfigDao configDao;
 	private Map<String, Adminshop> adminShopList = new HashMap<>();
 
-	@Inject
 	public AdminshopManagerImpl(ShopValidator validationHandler, MessageWrapper messageWrapper,
 			ServerProvider serverProvider, ConfigDao configDao) {
 		this.messageWrapper = messageWrapper;
@@ -92,7 +89,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 		validationHandler.checkForValidShopName(name);
 		validationHandler.checkForValidSize(size);
 		validationHandler.checkForValueNotInList(getAdminshopNameList(), name);
-		Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
+		Adminshop shop = serverProvider.getProvider().createAdminshop();
 		shop.setupNew(name, generateFreeAdminShopId(), spawnLocation, size);
 		adminShopList.put(shop.getId(), shop);
 		configDao.saveAdminshopIds(getAdminshopIdList());
@@ -116,7 +113,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	public void loadAllAdminShops() {
 		for (String shopId : configDao.loadAdminshopIds()) {
 			try {
-				Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
+				Adminshop shop = serverProvider.getProvider().createAdminshop();
 				shop.setupExisting(shopId);
 				adminShopList.put(shopId, shop);
 			} catch (EconomyPlayerException e) {

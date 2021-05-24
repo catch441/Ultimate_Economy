@@ -37,6 +37,10 @@ public abstract class InventoryGuiHandlerImpl implements InventoryGuiHandler {
 	public Inventory getInventory() {
 		return inventory;
 	}
+	
+	protected void setBackLink(Inventory backLink) {
+		this.backLink = backLink;
+	}
 
 	protected void returnToBackLink(Player player) {
 		player.closeInventory();

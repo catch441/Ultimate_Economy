@@ -1,7 +1,5 @@
 package org.ue.spawnersystem.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -14,7 +12,6 @@ public class SpawnerManagerImpl implements SpawnerManager {
 	private final SpawnersystemDao spawnerSystemDao;
 	private final ServerProvider serverProvider;
 
-	@Inject
 	public SpawnerManagerImpl(SpawnersystemDao spawnerSystemDao, ServerProvider serverProvider) {
 		this.spawnerSystemDao = spawnerSystemDao;
 		this.serverProvider = serverProvider;

@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.slf4j.Logger;
@@ -30,7 +28,6 @@ public class TownworldDaoImpl extends EconomyVillagerDaoImpl implements Townworl
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final BankManager bankManager;
 
-	@Inject
 	public TownworldDaoImpl(TownsystemValidator validationHandler, EconomyPlayerManager ecoPlayerManager,
 			BankManager bankManager, ServerProvider serverProvider) {
 		super(serverProvider);

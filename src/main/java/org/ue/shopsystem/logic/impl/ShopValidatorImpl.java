@@ -3,8 +3,6 @@ package org.ue.shopsystem.logic.impl;
 import java.io.File;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.bukkit.inventory.Inventory;
 import org.ue.common.logic.api.ExceptionMessageEnum;
@@ -27,7 +25,6 @@ public class ShopValidatorImpl extends EconomyVillagerValidatorImpl<ShopsystemEx
 	private final ConfigManager configManager;
 	private final TownworldManager townworldManager;
 
-	@Inject
 	public ShopValidatorImpl(ServerProvider serverProvider, MessageWrapper messageWrapper,
 			ConfigManager configManager, TownworldManager townworldManager) {
 		super(serverProvider, messageWrapper);

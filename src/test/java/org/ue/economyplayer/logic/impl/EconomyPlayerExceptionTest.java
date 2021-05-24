@@ -19,7 +19,7 @@ public class EconomyPlayerExceptionTest {
 
 	@Test
 	public void constructorTest() {
-		when(messageWrapper.getErrorString("inventory_full", "param1", 2)).thenReturn("my error message");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVENTORY_FULL, "param1", 2)).thenReturn("my error message");
 		EconomyPlayerException e = new EconomyPlayerException(messageWrapper, ExceptionMessageEnum.INVENTORY_FULL,
 				"param1", 2);
 		

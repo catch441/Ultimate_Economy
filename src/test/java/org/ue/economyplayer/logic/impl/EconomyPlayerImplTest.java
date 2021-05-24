@@ -38,6 +38,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankException;
 import org.ue.bank.logic.api.BankManager;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
@@ -76,8 +77,9 @@ public class EconomyPlayerImplTest {
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
 		when(account.getIban()).thenReturn("myiban");
 		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager, player, "catch441", true);
-
+				configManager, bankManager, jobManager);
+		ecoPlayer.setupNew(player, "catch441");
+		
 		assertEquals("catch441", ecoPlayer.getName());
 		assertEquals(player, ecoPlayer.getPlayer());
 		assertTrue(ecoPlayer.getJobList().isEmpty());
@@ -118,7 +120,8 @@ public class EconomyPlayerImplTest {
 		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
 		when(ecoPlayerDao.loadJoinedTowns("catch441")).thenReturn(Arrays.asList("mytown"));
 		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager, player, "catch441", false);
+				configManager, bankManager, jobManager);
+		ecoPlayer.setupExisting(player, "catch441");
 
 		assertEquals("catch441", ecoPlayer.getName());
 		assertTrue(ecoPlayer.isScoreBoardObjectiveVisible());
@@ -171,7 +174,8 @@ public class EconomyPlayerImplTest {
 		when(ecoPlayerDao.loadJobsList("catch441")).thenReturn(Arrays.asList("myjob"));
 		when(ecoPlayerDao.loadJoinedTowns("catch441")).thenReturn(Arrays.asList("mytown"));
 		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager, player, "catch441", false);
+				configManager, bankManager, jobManager);
+		ecoPlayer.setupExisting(player, "catch441");
 
 		assertEquals("catch441", ecoPlayer.getName());
 		assertTrue(ecoPlayer.isScoreBoardObjectiveVisible());
@@ -221,7 +225,7 @@ public class EconomyPlayerImplTest {
 	public void addHomeTest() {
 		Location location = mock(Location.class);
 		when(configManager.getMaxHomes()).thenReturn(3);
-		when(messageWrapper.getString("created", "myHome")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.CREATED, "myHome")).thenReturn("My message.");
 
 		EconomyPlayer ecoPlayer = createEcoPlayerMock();
 		assertDoesNotThrow(() -> ecoPlayer.addHome("myHome", location, true));
@@ -274,7 +278,7 @@ public class EconomyPlayerImplTest {
 	@Test
 	public void removeHomeTest() {
 		Location location = mock(Location.class);
-		when(messageWrapper.getString("deleted", "myhome")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.DELETED, "myhome")).thenReturn("My message.");
 		EconomyPlayer ecoPlayer = createEcoPlayerMock();
 		assertDoesNotThrow(() -> ecoPlayer.addHome("myhome", location, false));
 		assertDoesNotThrow(() -> ecoPlayer.removeHome("myhome", true));
@@ -334,7 +338,7 @@ public class EconomyPlayerImplTest {
 	@Test
 	public void joinJobTest() {
 		when(configManager.getMaxJobs()).thenReturn(1);
-		when(messageWrapper.getString("job_join", "myjob")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.JOB_JOIN, "myjob")).thenReturn("My message.");
 		EconomyPlayer ecoPlayer = createEcoPlayerMock();
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
@@ -382,7 +386,7 @@ public class EconomyPlayerImplTest {
 
 	@Test
 	public void leaveJobTest() {
-		when(messageWrapper.getString("job_left", "myjob")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.JOB_LEFT, "myjob")).thenReturn("My message.");
 		EconomyPlayer ecoPlayer = createEcoPlayerMock();
 		Job job = mock(Job.class);
 		when(job.getName()).thenReturn("myjob");
@@ -419,8 +423,8 @@ public class EconomyPlayerImplTest {
 	public void increasePlayerAmountTest() {
 		when(configManager.getCurrencyText(10.0)).thenReturn("$");
 		when(configManager.getCurrencyText(0.0)).thenReturn("$");
-		when(messageWrapper.getString("bank")).thenReturn("Bank");
-		when(messageWrapper.getString("got_money", 10.0, "$")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.BANK)).thenReturn("Bank");
+		when(messageWrapper.getString(MessageEnum.GOT_MONEY, 10.0, "$")).thenReturn("My message.");
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
 		Player player = mock(Player.class);
@@ -437,7 +441,8 @@ public class EconomyPlayerImplTest {
 		when(o.getScore("§6$")).thenReturn(score);
 
 		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager, player, "catch441", true);
+				configManager, bankManager, jobManager);
+		ecoPlayer.setupNew(player, "catch441");
 		
 		ecoPlayer.setScoreBoardObjectiveVisible(true);
 		// start test
@@ -454,7 +459,7 @@ public class EconomyPlayerImplTest {
 	public void decreasePlayerAmountTest() {
 		when(configManager.getCurrencyText(10.0)).thenReturn("$");
 		when(configManager.getCurrencyText(0.0)).thenReturn("$");
-		when(messageWrapper.getString("bank")).thenReturn("Bank");
+		when(messageWrapper.getString(MessageEnum.BANK)).thenReturn("Bank");
 
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
@@ -470,7 +475,8 @@ public class EconomyPlayerImplTest {
 		Score score = mock(Score.class);
 		when(o.getScore("§6$")).thenReturn(score);
 		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager, player, "catch441", true);
+				configManager, bankManager, jobManager);
+		ecoPlayer.setupNew(player, "catch441");
 
 		ecoPlayer.setScoreBoardObjectiveVisible(true);
 		verify(player).setScoreboard(board);
@@ -520,8 +526,8 @@ public class EconomyPlayerImplTest {
 	@Test
 	public void payToOtherPlayerTest() {
 		when(configManager.getCurrencyText(10)).thenReturn("$");
-		when(messageWrapper.getString("got_money_with_sender", 10.0, "$", "catch441")).thenReturn("My message.");
-		when(messageWrapper.getString("gave_money", "catch441", 10.0, "$")).thenReturn("My message. 2");
+		when(messageWrapper.getString(MessageEnum.GOT_MONEY_WITH_SENDER, 10.0, "$", "catch441")).thenReturn("My message.");
+		when(messageWrapper.getString(MessageEnum.GAVE_MONEY, "catch441", 10.0, "$")).thenReturn("My message. 2");
 		EconomyPlayer reciever = createEcoPlayerMock();
 		EconomyPlayer ecoPlayer = createEcoPlayerMock();
 		assertDoesNotThrow(() -> ecoPlayer.payToOtherPlayer(reciever, 10.0, true));
@@ -603,7 +609,7 @@ public class EconomyPlayerImplTest {
 	@Test
 	public void setScoreBoardObjectiveVisibleTestTrue() {
 		when(configManager.getCurrencyText(10.0)).thenReturn("$");
-		when(messageWrapper.getString("bank")).thenReturn("bank");
+		when(messageWrapper.getString(MessageEnum.BANK)).thenReturn("bank");
 		BossBar bossBar = mock(BossBar.class);
 		BankAccount account = mock(BankAccount.class);
 		Player player = mock(Player.class);
@@ -620,7 +626,8 @@ public class EconomyPlayerImplTest {
 		when(board.getObjective(DisplaySlot.SIDEBAR)).thenReturn(o);
 		when(o.getScore("§6$")).thenReturn(score);
 		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager, player, "catch441", true);
+				configManager, bankManager, jobManager);
+		ecoPlayer.setupNew(player, "catch441");
 
 		ecoPlayer.setScoreBoardObjectiveVisible(true);
 		assertTrue(ecoPlayer.isScoreBoardObjectiveVisible());
@@ -639,7 +646,8 @@ public class EconomyPlayerImplTest {
 		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
 		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager, player, "catch441", true);
+				configManager, bankManager, jobManager);
+		ecoPlayer.setupNew(player, "catch441");
 
 		assertFalse(ecoPlayer.isScoreBoardObjectiveVisible());
 		verify(ecoPlayerDao).saveScoreboardObjectiveVisible("catch441", false);
@@ -654,7 +662,7 @@ public class EconomyPlayerImplTest {
 		Scoreboard board = mock(Scoreboard.class);
 		Objective o = mock(Objective.class);
 		Score score = mock(Score.class);
-		when(messageWrapper.getString("bank")).thenReturn("bank");
+		when(messageWrapper.getString(MessageEnum.BANK)).thenReturn("bank");
 		when(serverProvider.createScoreboard()).thenReturn(board);
 		when(player.getScoreboard()).thenReturn(board);
 		when(serverProvider.createBossBar()).thenReturn(bossBar);
@@ -665,7 +673,8 @@ public class EconomyPlayerImplTest {
 		when(o.getScore("§6$")).thenReturn(score);
 		when(board.getObjective(DisplaySlot.SIDEBAR)).thenReturn(o);
 		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
-				configManager, bankManager, jobManager, player, "catch441", true);
+				configManager, bankManager, jobManager);
+		ecoPlayer.setupNew(player, "catch441");
 		reset(ecoPlayerDao);
 		ecoPlayer.setScoreBoardObjectiveVisible(true);
 		reset(board);
@@ -684,7 +693,9 @@ public class EconomyPlayerImplTest {
 		Player player = mock(Player.class);
 		when(serverProvider.createBossBar()).thenReturn(bossBar);
 		when(bankManager.createBankAccount(0.0)).thenReturn(account);
-		return new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper, configManager,
-				bankManager, jobManager, player, "catch441", true);
+		EconomyPlayer ecoPlayer = new EconomyPlayerImpl(serverProvider, validationHandler, ecoPlayerDao, messageWrapper,
+				configManager, bankManager, jobManager);
+		ecoPlayer.setupNew(player, "catch441");
+		return ecoPlayer;
 	}
 }

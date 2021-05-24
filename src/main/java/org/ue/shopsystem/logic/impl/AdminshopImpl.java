@@ -1,7 +1,5 @@
 package org.ue.shopsystem.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -37,7 +35,6 @@ public class AdminshopImpl extends AbstractShopImpl implements Adminshop {
 	 * @param messageWrapper
 	 * @param configManager
 	 */
-	@Inject
 	public AdminshopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
 			AdminshopManager adminshopManager, ShopValidator validationHandler, MessageWrapper messageWrapper,
 			ConfigManager configManager) {

@@ -26,17 +26,14 @@ public class ShopEditorHandlerImpl extends InventoryGuiHandlerImpl implements Sh
 	 * 
 	 * @param serverProvider
 	 * @param customSkullService
-	 * @param shop
 	 */
-	public ShopEditorHandlerImpl(ServerProvider serverProvider, CustomSkullService customSkullService,
-			AbstractShop shop) {
+	public ShopEditorHandlerImpl(ServerProvider serverProvider, CustomSkullService customSkullService) {
 		super(customSkullService, serverProvider, null);
-		this.shop = shop;
-		setup(1);
 	}
 
 	@Override
-	public void setup(int reservedSlots) {
+	public void setup(AbstractShop shop, int reservedSlots) {
+		this.shop = shop;
 		inventory = shop.createVillagerInventory(shop.getSize(), "Editor");
 		List<Integer> slots = IntStream.rangeClosed(0, shop.getSize() - 1 - reservedSlots).boxed()
 				.collect(Collectors.toList());
@@ -47,7 +44,7 @@ public class ShopEditorHandlerImpl extends InventoryGuiHandlerImpl implements Sh
 		for (Integer i : slots) {
 			setOccupied(false, i);
 		}
-		setItem(Material.CRAFTING_TABLE, null, ChatColor.GOLD + "Customize", shop.getSize() - 1);
+		setItem(Material.CRAFTING_TABLE, null, ChatColor.GOLD + "Customize Villager", shop.getSize() - 1);
 	}
 
 	@Override

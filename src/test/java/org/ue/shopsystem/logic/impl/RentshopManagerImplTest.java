@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Location;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,7 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
-import org.ue.common.utils.ServiceComponent;
+import org.ue.common.utils.UltimateEconomyProvider;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
@@ -44,13 +43,6 @@ public class RentshopManagerImplTest {
 	@Mock
 	ConfigDao configDao;
 
-	@BeforeEach
-	public void cleanUp() {
-		for (Rentshop shop : rentshopManager.getRentShops()) {
-			rentshopManager.deleteRentShop(shop);
-		}
-	}
-
 	@Test
 	public void setupRentDailyTaskTest() {
 		// TODO dont know how to test
@@ -68,10 +60,10 @@ public class RentshopManagerImplTest {
 	private Rentshop createRentshop(String id) {
 		Rentshop shop = mock(Rentshop.class);
 		Location loc = mock(Location.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(shop.getShopId()).thenReturn(id);
-		when(serviceComponent.getRentshop()).thenReturn(shop);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		when(shop.getId()).thenReturn(id);
+		when(provider.createRentshop()).thenReturn(shop);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		return assertDoesNotThrow(() -> rentshopManager.createRentShop(loc, 9, 2.5));
 	}
 
@@ -182,9 +174,9 @@ public class RentshopManagerImplTest {
 	public void createRentshopTest() {
 		Rentshop shop = mock(Rentshop.class);
 		Location loc = mock(Location.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(serviceComponent.getRentshop()).thenReturn(shop);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		when(provider.createRentshop()).thenReturn(shop);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		assertDoesNotThrow(() -> rentshopManager.createRentShop(loc, 9, 2.5));
 
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPositiveValue(2.5));
@@ -199,9 +191,9 @@ public class RentshopManagerImplTest {
 	@Test
 	public void loadAllRentshopsTest() {
 		Rentshop shop = mock(Rentshop.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(serviceComponent.getRentshop()).thenReturn(shop);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		when(provider.createRentshop()).thenReturn(shop);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		when(configDao.loadRentshopIds()).thenReturn(Arrays.asList("R0"));
 		rentshopManager.loadAllRentShops();
 		assertEquals(1, rentshopManager.getRentShops().size());
@@ -211,9 +203,9 @@ public class RentshopManagerImplTest {
 	@Test
 	public void loadAllRentshopsTestWithLoadingError() throws EconomyPlayerException {
 		Rentshop shop = mock(Rentshop.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		when(serviceComponent.getRentshop()).thenReturn(shop);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		when(provider.createRentshop()).thenReturn(shop);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		when(configDao.loadRentshopIds()).thenReturn(Arrays.asList("R0"));
 		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");

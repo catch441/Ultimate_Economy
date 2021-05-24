@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.MessageEnum;
 
 @ExtendWith(MockitoExtension.class)
 public class MessageWrapperTest {
@@ -25,70 +27,70 @@ public class MessageWrapperTest {
 	@Test
 	public void getErrorStringTest() {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
-		String message = messageWrapper.getErrorString("restart");
-		assertEquals("§cPlease restart the server!", message);
+		String message = messageWrapper.getErrorString(ExceptionMessageEnum.ITEM_UNAVAILABLE);
+		assertEquals("§cThis item is unavailable!", message);
 	}
 
 	@Test
 	public void getErrorStringTestWithMissingMessage() {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
-		String message = messageWrapper.getErrorString("nothing");
+		String message = messageWrapper.getErrorString(ExceptionMessageEnum.DEV_TEST);
 		assertEquals("!nothing!", message);
 	}
 
 	@Test
 	public void getStringTest() {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
-		String message = messageWrapper.getString("restart");
+		String message = messageWrapper.getString(MessageEnum.RESTART);
 		assertEquals("§6Please restart the server!", message);
 	}
 
 	@Test
 	public void getStringTestWithMissingMessage() {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
-		String message = messageWrapper.getString("nothing");
+		String message = messageWrapper.getString(MessageEnum.DEV_TEST);
 		assertEquals("!nothing!", message);
 	}
 
 	@Test
 	public void getErrorStringTestWithParams() {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
-		String message = messageWrapper.getErrorString("got_money_with_sender", "10", "stuff", "catch");
-		assertEquals("§cYou got §410§c §4stuff§c from §4catch§c.", message);
+		String message = messageWrapper.getErrorString(ExceptionMessageEnum.SLOT_EMPTY, "10");
+		assertEquals("§cSlot §410§c is empty!", message);
 	}
 
 	@Test
 	public void getErrorStringTestWithNullParams() {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
-		String message = messageWrapper.getErrorString("got_money_with_sender", null, null, null);
-		assertEquals("§cYou got §4null§c §4null§c from §4null§c.", message);
+		String message = messageWrapper.getErrorString(ExceptionMessageEnum.ALREADY_EXISTS, null, null);
+		assertEquals("§c§4null§c already exists!", message);
 	}
 
 	@Test
 	public void getErrorStringTestWithParamsAndMissingMessage() {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
-		String message = messageWrapper.getErrorString("nothing", "10", "stuff", "catch");
+		String message = messageWrapper.getErrorString(ExceptionMessageEnum.DEV_TEST, "10", "stuff", "catch");
 		assertEquals("!nothing!", message);
 	}
 
 	@Test
 	public void getStringTestWithParams() {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
-		String message = messageWrapper.getString("got_money_with_sender", "10", "stuff", "catch");
+		String message = messageWrapper.getString(MessageEnum.GOT_MONEY_WITH_SENDER, "10", "stuff", "catch");
 		assertEquals("§6You got §a10§6 §astuff§6 from §acatch§6.", message);
 	}
 
 	@Test
 	public void getStringTestWithParamsAndMissingMessage() {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
-		String message = messageWrapper.getString("nothing", "10", "stuff", "catch");
+		String message = messageWrapper.getString(MessageEnum.DEV_TEST, "10", "stuff", "catch");
 		assertEquals("!nothing!", message);
 	}
 
 	@Test
 	public void getStringTestWithNullParams() {
 		messageWrapper.loadLanguage(new Locale("en", "US"));
-		String message = messageWrapper.getString("got_money_with_sender", null, null, null);
+		String message = messageWrapper.getString(MessageEnum.GOT_MONEY_WITH_SENDER, null, null, null);
 		assertEquals("§6You got §anull§6 §anull§6 from §anull§6.", message);
 	}
 	
@@ -97,14 +99,14 @@ public class MessageWrapperTest {
 	@Test
 	public void getErrorStringTestWithParamsFr() {
 		messageWrapper.loadLanguage(new Locale("fr", "FR"));
-		String message = messageWrapper.getErrorString("shop_sell_singular", "10", "12", "$");
-		assertEquals("§c§410§c l'article a été vendu pour §412§c §4$§c.", message);
+		String message = messageWrapper.getErrorString(ExceptionMessageEnum.NOT_ENOUGH_MONEY_PERSONAL);
+		assertEquals("§cTu n'as pas assez d'argent!", message);
 	}
 	
 	@Test
 	public void getStringTestWithParamsFr() {
 		messageWrapper.loadLanguage(new Locale("fr", "FR"));
-		String message = messageWrapper.getString("shop_sell_singular", "10", "12", "$");
+		String message = messageWrapper.getString(MessageEnum.SHOP_SELL_SINGULAR, "10", "12", "$");
 		assertEquals("§6§a10§6 l'article a été vendu pour §a12§6 §a$§6.", message);
 	}
 }

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -17,7 +15,6 @@ public class AdminshopTabCompleterImpl extends TabCompleterUtils implements TabC
 
 	private final AdminshopManager adminshopManager;
 
-	@Inject
 	public AdminshopTabCompleterImpl(AdminshopManager adminshopManager) {
 		this.adminshopManager = adminshopManager;
 	}

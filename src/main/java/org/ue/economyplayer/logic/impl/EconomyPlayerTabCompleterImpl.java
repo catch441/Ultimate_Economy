@@ -3,8 +3,6 @@ package org.ue.economyplayer.logic.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -16,7 +14,6 @@ public class EconomyPlayerTabCompleterImpl extends TabCompleterUtils implements 
 
 	private final EconomyPlayerManager ecoPlayerManager;
 	
-	@Inject
 	public EconomyPlayerTabCompleterImpl(EconomyPlayerManager ecoPlayerManager) {
 		this.ecoPlayerManager = ecoPlayerManager;
 	}

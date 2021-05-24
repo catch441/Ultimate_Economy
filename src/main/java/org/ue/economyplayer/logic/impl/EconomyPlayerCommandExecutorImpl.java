@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -35,7 +33,6 @@ public class EconomyPlayerCommandExecutorImpl implements CommandExecutor {
 	private final TownworldManager townworldManager;
 	private final EconomyPlayerValidator validationHandler;
 
-	@Inject
 	public EconomyPlayerCommandExecutorImpl(EconomyPlayerValidator validationHandler,
 			ConfigManager configManager, MessageWrapper messageWrapper, EconomyPlayerManager ecoPlayerManager,
 			TownworldManager townworldManager) {

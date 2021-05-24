@@ -1,7 +1,5 @@
 package org.ue.shopsystem.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,7 +20,6 @@ public class PlayershopCommandExecutorImpl implements CommandExecutor {
 	private final PlayershopManager playershopManager;
 	private final EconomyPlayerManager ecoPlayerManager;
 
-	@Inject
 	public PlayershopCommandExecutorImpl(MessageWrapper messageWrapper, PlayershopManager playershopManager,
 			EconomyPlayerManager ecoPlayerManager) {
 		this.messageWrapper = messageWrapper;

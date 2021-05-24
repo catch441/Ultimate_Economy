@@ -71,12 +71,12 @@ public class RentshopRentGuiHandlerImpl extends InventoryGuiHandlerImpl implemen
 	}
 
 	private List<String> createDurationLore() {
-		if (selectedDuration > 1) {
-			return Arrays.asList(
-					ChatColor.GOLD + "Duration: " + ChatColor.GREEN + selectedDuration + ChatColor.GOLD + " Days");
-		} else {
+		if(selectedDuration == 1) {
 			return Arrays.asList(
 					ChatColor.GOLD + "Duration: " + ChatColor.GREEN + selectedDuration + ChatColor.GOLD + " Day");
+		} else {
+			return Arrays.asList(
+					ChatColor.GOLD + "Duration: " + ChatColor.GREEN + selectedDuration + ChatColor.GOLD + " Days");
 		}
 	}
 
@@ -93,6 +93,7 @@ public class RentshopRentGuiHandlerImpl extends InventoryGuiHandlerImpl implemen
 					break;
 				case 3:
 					handleSwitchPlusMinus();
+					break;
 				case 0:
 					handleRentClick(whoClicked.getPlayer());
 					break;
@@ -101,6 +102,7 @@ public class RentshopRentGuiHandlerImpl extends InventoryGuiHandlerImpl implemen
 				}
 			} catch (ShopsystemException | BankException | EconomyPlayerException e) {
 				whoClicked.getPlayer().sendMessage(e.getMessage());
+				returnToBackLink(whoClicked.getPlayer());
 			}
 		}
 	}
@@ -108,7 +110,7 @@ public class RentshopRentGuiHandlerImpl extends InventoryGuiHandlerImpl implemen
 	private void handleRentClick(Player player)
 			throws ShopsystemException, BankException, EconomyPlayerException {
 		shop.rentShop(ecoPlayerManager.getEconomyPlayerByName(player.getName()), selectedDuration);
-		player.sendMessage(messageWrapper.getString(MessageEnum.RENT_RENRED));
+		player.sendMessage(messageWrapper.getString(MessageEnum.RENT_RENTED));
 		returnToBackLink(player);
 	}
 

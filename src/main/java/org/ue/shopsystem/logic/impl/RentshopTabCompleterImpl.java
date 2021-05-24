@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -17,7 +15,6 @@ public class RentshopTabCompleterImpl extends TabCompleterUtils implements TabCo
 
 	private final RentshopManager rentshopManager;
 
-	@Inject
 	public RentshopTabCompleterImpl(RentshopManager rentshopManager) {
 		this.rentshopManager = rentshopManager;
 	}
@@ -64,11 +61,11 @@ public class RentshopTabCompleterImpl extends TabCompleterUtils implements TabCo
 	}
 
 	private List<String> getAllAdminCommands() {
-		return new ArrayList<String>(Arrays.asList("create", "delete", "move", "customize"));
+		return new ArrayList<String>(Arrays.asList("create", "delete", "move", "editShop"));
 	}
 
 	private List<String> getAllPlayerCommands() {
-		return Arrays.asList("rename", "editShop");
+		return Arrays.asList("rename");
 	}
 
 	private List<String> getRentedShopsForPlayer(String arg, String player) {

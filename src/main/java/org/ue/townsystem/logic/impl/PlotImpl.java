@@ -12,7 +12,6 @@ import org.bukkit.event.inventory.ClickType;
 import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.utils.ServerProvider;
-import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerValidator;
@@ -29,90 +28,63 @@ public class PlotImpl extends EconomyVillagerImpl<TownsystemException> implement
 	private final TownsystemValidator validationHandler;
 	private final EconomyPlayerValidator ecoPlayerValidator;
 	private final TownworldDao townworldDao;
-	private final String chunkCoords;
+	private String chunkCoords;
 	private EconomyPlayer owner;
-	private List<EconomyPlayer> residents;
+	private List<EconomyPlayer> residents = new ArrayList<>();
 	private boolean isForSale;
 	private double salePrice;
 	private Town town;
 
 	/**
-	 * Creating a new plot constructor.
+	 * Inject constructor.
 	 * 
-	 * @param chunkCoords        (format "X/Z")
 	 * @param validationHandler
 	 * @param townworldDao
-	 * @param town
-	 * @param owner
 	 * @param serverProvider
 	 * @param skullService
-	 * @param messageWrapper
 	 * @param ecoPlayerValidator
 	 */
-	public PlotImpl(String chunkCoords, TownsystemValidator validationHandler, TownworldDao townworldDao, Town town,
-			EconomyPlayer owner, ServerProvider serverProvider, CustomSkullService skullService,
-			MessageWrapper messageWrapper, EconomyPlayerValidator ecoPlayerValidator) {
-		super(messageWrapper, serverProvider, townworldDao, validationHandler, skullService,
-				"Towns." + town.getTownName() + ".Plots." + chunkCoords + ".SaleVillager");
-		this.chunkCoords = chunkCoords;
-		this.town = town;
+	public PlotImpl(TownsystemValidator validationHandler, TownworldDao townworldDao, ServerProvider serverProvider,
+			CustomSkullService skullService, EconomyPlayerValidator ecoPlayerValidator) {
+		super(serverProvider, townworldDao, validationHandler, skullService);
 		this.townworldDao = townworldDao;
 		this.validationHandler = validationHandler;
 		this.ecoPlayerValidator = ecoPlayerValidator;
-		setupNewPlot(owner);
 	}
 
-	/**
-	 * Loading an existing plot constructor.
-	 * 
-	 * @param chunkCoords        (format "X/Z")
-	 * @param validationHandler
-	 * @param townworldDao
-	 * @param town
-	 * @param serverProvider
-	 * @param skullService
-	 * @param messageWrapper
-	 * @param ecoPlayerValidator
-	 * @throws EconomyPlayerException
-	 */
-	public PlotImpl(String chunkCoords, TownsystemValidator validationHandler, TownworldDao townworldDao, Town town,
-			ServerProvider serverProvider, CustomSkullService skullService, MessageWrapper messageWrapper,
-			EconomyPlayerValidator ecoPlayerValidator) throws EconomyPlayerException {
-		super(messageWrapper, serverProvider, townworldDao, validationHandler, skullService,
-				"Towns." + town.getTownName() + ".Plots." + chunkCoords + ".SaleVillager");
+	@Override
+	public void setupNew(EconomyPlayer owner, Town town, String chunkCoords) {
 		this.chunkCoords = chunkCoords;
 		this.town = town;
-		this.townworldDao = townworldDao;
-		this.validationHandler = validationHandler;
-		this.ecoPlayerValidator = ecoPlayerValidator;
-		loadExistingPlot();
+		setOwner(owner);
+		isForSale = false;
+		salePrice = 0;
+		townworldDao.savePlotResidents(town.getTownName(), chunkCoords, residents);
+		townworldDao.savePlotSalePrice(town.getTownName(), chunkCoords, salePrice);
+		townworldDao.savePlotIsForSale(town.getTownName(), chunkCoords, isForSale);
+		String savePrefix = "Towns." + town.getTownName() + ".Plots." + chunkCoords + ".SaleVillager";
+		setupNewEconomyVillager(null, EconomyVillagerType.PLOTSALE, "Plot " + chunkCoords, chunkCoords, 9, 0, false,
+				savePrefix);
+		setupSaleVillagerInventory();
 	}
 
-	private void loadExistingPlot() throws EconomyPlayerException {
+	@Override
+	public void setupExisting(Town town, String chunkCoords) throws EconomyPlayerException {
+		this.chunkCoords = chunkCoords;
+		this.town = town;
 		owner = townworldDao.loadPlotOwner(town.getTownName(), chunkCoords);
 		residents = townworldDao.loadResidents(town.getTownName(), chunkCoords);
 		salePrice = townworldDao.loadPlotSalePrice(town.getTownName(), chunkCoords);
 		isForSale = townworldDao.loadPlotIsForSale(town.getTownName(), chunkCoords);
-		setupExistingEconomyVillager(EconomyVillagerType.PLOTSALE, "Plot " + chunkCoords, chunkCoords, 0);
-		setupSaleVillagerInventory();
-	}
-
-	private void setupNewPlot(EconomyPlayer owner) {
-		setOwner(owner);
-		isForSale = false;
-		salePrice = 0;
-		residents = new ArrayList<>();
-		townworldDao.savePlotResidents(town.getTownName(), chunkCoords, residents);
-		townworldDao.savePlotSalePrice(town.getTownName(), chunkCoords, salePrice);
-		townworldDao.savePlotIsForSale(town.getTownName(), chunkCoords, isForSale);
-		setupNewEconomyVillager(null, EconomyVillagerType.PLOTSALE, "Plot " + chunkCoords, chunkCoords, 9, 0, false);
+		String savePrefix = "Towns." + town.getTownName() + ".Plots." + chunkCoords + ".SaleVillager";
+		setupExistingEconomyVillager(EconomyVillagerType.PLOTSALE, "Plot " + chunkCoords, chunkCoords, 0, savePrefix);
 		setupSaleVillagerInventory();
 	}
 
 	private void setupSaleVillagerInventory() {
 		setupSalePriceInventoryItem(salePrice);
 		List<String> listCancel = Arrays.asList(ChatColor.RED + "Only for plot owner!");
-		setItem(Material.RED_WOOL, listCancel, ChatColor.RED + "Only for plot owner!", 8);
+		setItem(Material.RED_WOOL, listCancel, ChatColor.RED + "Cancel sale", 8);
 	}
 
 	private void setupSalePriceInventoryItem(double salePrice) {
@@ -256,15 +228,14 @@ public class PlotImpl extends EconomyVillagerImpl<TownsystemException> implement
 				town.buyPlot(whoClicked, this);
 				whoClicked.getPlayer().sendMessage(ChatColor.GOLD + "Congratulation! You bought this plot!");
 				whoClicked.getPlayer().closeInventory();
-			} else if (rawSlot == 8) {
-				if (isOwner(whoClicked)) {
-					removeFromSale(whoClicked);
-					whoClicked.getPlayer().sendMessage(ChatColor.GOLD + "You removed this plot from sale!");
-				}
+			} else if (rawSlot == 8 && isOwner(whoClicked)) {
+				removeFromSale(whoClicked);
+				whoClicked.getPlayer().sendMessage(ChatColor.GOLD + "You removed this plot from sale!");
 				whoClicked.getPlayer().closeInventory();
 			}
 		} catch (EconomyPlayerException | TownsystemException | BankException e) {
 			whoClicked.getPlayer().sendMessage(e.getMessage());
+			whoClicked.getPlayer().closeInventory();
 		}
 	}
 }

@@ -70,15 +70,13 @@ public class AdminshopTabCompleterImplTest {
 		when(command.getLabel()).thenReturn("adminshop");
 		String[] args = { "" };
 		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
-		assertEquals(8, list.size());
+		assertEquals(6, list.size());
 		assertEquals("create", list.get(0));
 		assertEquals("delete", list.get(1));
 		assertEquals("move", list.get(2));
 		assertEquals("editShop", list.get(3));
 		assertEquals("rename", list.get(4));
-		assertEquals("resize", list.get(5));
-		assertEquals("changeProfession", list.get(6));
-		assertEquals("addSpawner", list.get(7));
+		assertEquals("addSpawner", list.get(5));
 	}
 
 	@Test
@@ -87,12 +85,10 @@ public class AdminshopTabCompleterImplTest {
 		when(command.getLabel()).thenReturn("adminshop");
 		String[] args = { "r" };
 		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
-		assertEquals(5, list.size());
+		assertEquals(3, list.size());
 		assertEquals("create", list.get(0));
 		assertEquals("rename", list.get(1));
-		assertEquals("resize", list.get(2));
-		assertEquals("changeProfession", list.get(3));
-		assertEquals("addSpawner", list.get(4));
+		assertEquals("addSpawner", list.get(2));
 	}
 
 	@Test
@@ -173,38 +169,6 @@ public class AdminshopTabCompleterImplTest {
 		Command command = mock(Command.class);
 		when(command.getLabel()).thenReturn("adminshop");
 		String[] args = { "editShop", "myshop1", "" };
-		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
-		assertEquals(0, list.size());
-	}
-
-	@Test
-	public void resizeTest() {
-		Command command = mock(Command.class);
-		when(command.getLabel()).thenReturn("adminshop");
-		when(adminshopManager.getAdminshopNameList()).thenReturn(Arrays.asList("myshop1", "myshop2"));
-		String[] args = { "resize", "" };
-		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
-		assertEquals(2, list.size());
-		assertEquals("myshop1", list.get(0));
-		assertEquals("myshop2", list.get(1));
-	}
-
-	@Test
-	public void resizeTestWithMatching() {
-		Command command = mock(Command.class);
-		when(command.getLabel()).thenReturn("adminshop");
-		when(adminshopManager.getAdminshopNameList()).thenReturn(Arrays.asList("myshop1"));
-		String[] args = { "resize", "1" };
-		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
-		assertEquals(1, list.size());
-		assertEquals("myshop1", list.get(0));
-	}
-
-	@Test
-	public void resizeTestWithMoreArgs() {
-		Command command = mock(Command.class);
-		when(command.getLabel()).thenReturn("adminshop");
-		String[] args = { "resize", "myshop1", "" };
 		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
 		assertEquals(0, list.size());
 	}
@@ -321,57 +285,6 @@ public class AdminshopTabCompleterImplTest {
 		Command command = mock(Command.class);
 		when(command.getLabel()).thenReturn("adminshop");
 		String[] args = { "addSpawner", "myshop1", "cow", "" };
-		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
-		assertEquals(0, list.size());
-	}
-
-	@Test
-	public void changeProfessionTestTwoArgs() {
-		Command command = mock(Command.class);
-		when(command.getLabel()).thenReturn("adminshop");
-		when(adminshopManager.getAdminshopNameList()).thenReturn(Arrays.asList("myshop1", "myshop2"));
-		String[] args = { "changeProfession", "" };
-		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
-		assertEquals(2, list.size());
-		assertEquals("myshop1", list.get(0));
-		assertEquals("myshop2", list.get(1));
-	}
-
-	@Test
-	public void changeProfessionTestWithTwoArgsMatching() {
-		Command command = mock(Command.class);
-		when(command.getLabel()).thenReturn("adminshop");
-		when(adminshopManager.getAdminshopNameList()).thenReturn(Arrays.asList("myshop1"));
-		String[] args = { "changeProfession", "1" };
-		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
-		assertEquals(1, list.size());
-		assertEquals("myshop1", list.get(0));
-	}
-
-	@Test
-	public void changeProfessionTestThreeArgs() {
-		Command command = mock(Command.class);
-		when(command.getLabel()).thenReturn("adminshop");
-		String[] args = { "changeProfession", "myshop1", "" };
-		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
-		assertEquals(15, list.size());
-	}
-
-	@Test
-	public void changeProfessionTestWithThreeArgsMatching() {
-		Command command = mock(Command.class);
-		when(command.getLabel()).thenReturn("adminshop");
-		String[] args = { "changeProfession", "myshop1", "fletch" };
-		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
-		assertEquals(1, list.size());
-		assertEquals("fletcher", list.get(0));
-	}
-
-	@Test
-	public void changeProfessionTestWithMoreArgs() {
-		Command command = mock(Command.class);
-		when(command.getLabel()).thenReturn("adminshop");
-		String[] args = { "changeProfession", "myshop1", "fletcher", "" };
 		List<String> list = tabCompleter.onTabComplete(null, command, null, args);
 		assertEquals(0, list.size());
 	}

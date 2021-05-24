@@ -58,13 +58,10 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 	 * @param configManager
 	 * @param bankManager
 	 * @param jobManager
-	 * @param player
-	 * @param name
-	 * @param isNew
 	 */
 	public EconomyPlayerImpl(ServerProvider serverProvider, EconomyPlayerValidator validationHandler,
 			EconomyPlayerDao ecoPlayerDao, MessageWrapper messageWrapper, ConfigManager configManager,
-			BankManager bankManager, JobManager jobManager, Player player, String name, boolean isNew) {
+			BankManager bankManager, JobManager jobManager) {
 		this.configManager = configManager;
 		this.bankManager = bankManager;
 		this.jobManager = jobManager;
@@ -72,12 +69,30 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 		this.ecoPlayerDao = ecoPlayerDao;
 		this.validationHandler = validationHandler;
 		this.serverProvider = serverProvider;
+	}
+
+	@Override
+	public void setupNew(Player player, String name) {
 		this.player = player;
-		if (isNew) {
-			setupNewPlayer(name);
-		} else {
-			loadExistingPlayer(name);
-		}
+		setName(name);
+		bankAccount = bankManager.createBankAccount(0.0);
+		ecoPlayerDao.saveBankIban(getName(), getBankAccount().getIban());
+		setScoreBoardObjectiveVisible(false);
+		bossBar = serverProvider.createBossBar();
+		getBossBar().setVisible(false);
+	}
+
+	@Override
+	public void setupExisting(Player player, String name) {
+		this.player = player;
+		setName(name);
+		scoreboardObjectiveVisible = ecoPlayerDao.loadScoreboardObjectiveVisible(getName());
+		loadJoinedJobs();
+		joinedTowns = ecoPlayerDao.loadJoinedTowns(getName());
+		homes = ecoPlayerDao.loadHomeList(getName());
+		loadBankAccount();
+		setupScoreboard();
+		updateScoreBoardObjective();
 		bossBar = serverProvider.createBossBar();
 		getBossBar().setVisible(false);
 	}
@@ -321,24 +336,6 @@ public class EconomyPlayerImpl implements EconomyPlayer {
 
 	private void setName(String name) {
 		this.name = name;
-	}
-
-	private void setupNewPlayer(String name) {
-		setName(name);
-		bankAccount = bankManager.createBankAccount(0.0);
-		ecoPlayerDao.saveBankIban(getName(), getBankAccount().getIban());
-		setScoreBoardObjectiveVisible(false);
-	}
-
-	private void loadExistingPlayer(String name) {
-		setName(name);
-		scoreboardObjectiveVisible = ecoPlayerDao.loadScoreboardObjectiveVisible(getName());
-		loadJoinedJobs();
-		joinedTowns = ecoPlayerDao.loadJoinedTowns(getName());
-		homes = ecoPlayerDao.loadHomeList(getName());
-		loadBankAccount();
-		setupScoreboard();
-		updateScoreBoardObjective();
 	}
 
 	private void loadBankAccount() {

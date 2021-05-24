@@ -40,6 +40,7 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 	protected final ConfigManager configManager;
 	protected final ShopValidator validationHandler;
 	protected final ShopDao shopDao;
+	protected final MessageWrapper messageWrapper;
 	protected String name;
 	private ShopEditorHandler editorHandler;
 	private ShopSlotEditorHandler slotEditorHandler;
@@ -47,10 +48,11 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 
 	public AbstractShopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService skullService,
 			ShopValidator validationHandler, MessageWrapper messageWrapper, ConfigManager configManager) {
-		super(messageWrapper, serverProvider, shopDao, validationHandler, skullService, "");
+		super(serverProvider, shopDao, validationHandler, skullService);
 		this.shopDao = shopDao;
 		this.validationHandler = validationHandler;
 		this.configManager = configManager;
+		this.messageWrapper = messageWrapper;
 	}
 
 	protected void setupNew(EconomyVillagerType ecoVillagerType, String name, String shopId, Location spawnLocation,
@@ -58,7 +60,7 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 		shopDao.setupSavefile(shopId);
 		this.name = name;
 		shopDao.saveShopName(name);
-		setupNewEconomyVillager(spawnLocation, ecoVillagerType, name, shopId, size, reservedSlots, true);
+		setupNewEconomyVillager(spawnLocation, ecoVillagerType, name, shopId, size, reservedSlots, true, "");
 		setItem(Material.ANVIL, createDefaultItemLoreList(), "Info", getSize() - 1);
 		setupEditorGuiHandlers();
 
@@ -67,15 +69,17 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 	protected void setupExisting(EconomyVillagerType ecoVillagerType, String shopId, int reservedSlots) {
 		shopDao.setupSavefile(shopId);
 		this.name = shopDao.loadShopName();
-		setupExistingEconomyVillager(ecoVillagerType, name, shopId, reservedSlots);
+		setupExistingEconomyVillager(ecoVillagerType, name, shopId, reservedSlots, "");
 		setItem(Material.ANVIL, createDefaultItemLoreList(), "Info", getSize() - 1);
+		loadShopItems();
 		setupEditorGuiHandlers();
 	}
 
 	private void setupEditorGuiHandlers() {
-		editorHandler = new ShopEditorHandlerImpl(serverProvider, skullService, this);
-		slotEditorHandler = new ShopSlotEditorHandlerImpl(serverProvider, messageWrapper, validationHandler,
-				skullService, this, editorHandler.getInventory());
+		editorHandler = serverProvider.getProvider().createShopEditorHandler();
+		editorHandler.setup(this, 1);
+		slotEditorHandler = serverProvider.getProvider().createShopSlotEditorHandler(editorHandler.getInventory());
+		slotEditorHandler.setupSlotEditor(this);
 	}
 
 	@Override
@@ -117,7 +121,7 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 	@Override
 	public void changeSize(int newSize) throws ShopsystemException {
 		super.changeSize(newSize);
-		editorHandler.setup(1);
+		editorHandler.setup(this, 1);
 	}
 
 	@Override

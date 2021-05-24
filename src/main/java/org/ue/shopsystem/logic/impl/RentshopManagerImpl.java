@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +27,6 @@ public class RentshopManagerImpl implements RentshopManager {
 	private final ConfigDao configDao;
 	private Map<String, Rentshop> rentShopList = new HashMap<>();
 
-	@Inject
 	public RentshopManagerImpl(MessageWrapper messageWrapper, ShopValidator validationHandler,
 			ServerProvider serverProvider, ConfigDao configDao) {
 		this.messageWrapper = messageWrapper;
@@ -96,7 +93,7 @@ public class RentshopManagerImpl implements RentshopManager {
 	public Rentshop createRentShop(Location spawnLocation, int size, double rentalFee) throws ShopsystemException {
 		validationHandler.checkForValidSize(size);
 		validationHandler.checkForPositiveValue(rentalFee);
-		Rentshop shop = serverProvider.getServiceComponent().getRentshop();
+		Rentshop shop = serverProvider.getProvider().createRentshop();
 		shop.setupNew(generateFreeRentShopId(), spawnLocation, size, rentalFee);
 		rentShopList.put(shop.getId(), shop);
 		configDao.saveRentshopIds(getRentShopIdList());
@@ -121,7 +118,7 @@ public class RentshopManagerImpl implements RentshopManager {
 	public void loadAllRentShops() {
 		for (String shopId : configDao.loadRentshopIds()) {
 			try {
-				Rentshop shop = serverProvider.getServiceComponent().getRentshop();
+				Rentshop shop = serverProvider.getProvider().createRentshop();
 				shop.setupExisting(shopId);
 				rentShopList.put(shopId, shop);
 			} catch (EconomyPlayerException e) {

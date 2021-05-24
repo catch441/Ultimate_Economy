@@ -3,8 +3,6 @@ package org.ue.config.dataaccess.impl;
 import java.io.File;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.ue.common.utils.SaveFileUtils;
 import org.ue.common.utils.ServerProvider;
@@ -17,7 +15,6 @@ public class ConfigDaoImpl extends SaveFileUtils implements ConfigDao {
 	 * 
 	 * @param serverProvider
 	 */
-	@Inject
 	public ConfigDaoImpl(ServerProvider serverProvider) {
 		file = new File(serverProvider.getDataFolderPath(), "config.yml");
 		if (!file.exists()) {

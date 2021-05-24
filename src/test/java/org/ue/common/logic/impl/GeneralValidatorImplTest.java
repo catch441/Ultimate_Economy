@@ -18,7 +18,7 @@ import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyvillager.logic.api.EconomyVillagerType;
 
 @ExtendWith(MockitoExtension.class)
-public class GeneralEconomyValidationHandlerImplTest {
+public class GeneralValidatorImplTest {
 
 	static AbstractValidator validator;
 

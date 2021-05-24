@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -22,7 +20,6 @@ import org.ue.shopsystem.logic.impl.ShopItemImpl;
 
 public class ShopDaoImpl extends EconomyVillagerDaoImpl implements ShopDao {
 
-	@Inject
 	public ShopDaoImpl(ServerProvider serverProvider) {
 		super(serverProvider);
 	}

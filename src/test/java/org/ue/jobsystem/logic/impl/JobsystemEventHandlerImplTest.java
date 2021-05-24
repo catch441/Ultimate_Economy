@@ -3,7 +3,6 @@ package org.ue.jobsystem.logic.impl;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -22,6 +21,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityBreedEvent;
@@ -30,8 +30,8 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -45,7 +45,6 @@ import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.jobsystem.logic.api.Job;
-import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemException;
@@ -58,12 +57,10 @@ public class JobsystemEventHandlerImplTest {
 	@Mock
 	EconomyPlayerManager ecoPlayerManager;
 	@Mock
-	JobManager jobManager;
-	@Mock
 	JobcenterManager jobcenterManager;
 	@Mock
 	ServerProvider serverProvider;
-	
+
 	@Test
 	public void handleBreedEventTest() {
 		Player player = mock(Player.class);
@@ -79,7 +76,7 @@ public class JobsystemEventHandlerImplTest {
 		eventHandler.handleBreedEvent(event);
 		assertDoesNotThrow(() -> verify(ecoPlayer).increasePlayerAmount(1.5, false));
 	}
-	
+
 	@Test
 	public void handleBreedEventTestWithEmptyJob() throws JobsystemException {
 		Player player = mock(Player.class);
@@ -95,7 +92,7 @@ public class JobsystemEventHandlerImplTest {
 		eventHandler.handleBreedEvent(event);
 		assertDoesNotThrow(() -> verify(ecoPlayer, never()).increasePlayerAmount(1.5, false));
 	}
-	
+
 	@Test
 	public void handleBreedEventTestWithNoEcoPlayer() throws EconomyPlayerException {
 		Player player = mock(Player.class);
@@ -196,7 +193,7 @@ public class JobsystemEventHandlerImplTest {
 		eventHandler.handleEntityDeath(event);
 		assertDoesNotThrow(() -> verify(ecoPlayer, never()).increasePlayerAmount(10.5, false));
 	}
-	
+
 	@Test
 	public void handleEntityDeathTestWithError() throws EconomyPlayerException {
 		when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenThrow(EconomyPlayerException.class);
@@ -319,7 +316,7 @@ public class JobsystemEventHandlerImplTest {
 		eventHandler.handleBreakBlock(event);
 		assertDoesNotThrow(() -> verify(ecoPlayer, never()).increasePlayerAmount(10.5, false));
 	}
-	
+
 	@Test
 	public void handleBreakBlockTestWithError() throws EconomyPlayerException {
 		Player player = mock(Player.class);
@@ -393,7 +390,7 @@ public class JobsystemEventHandlerImplTest {
 		eventHandler.handleFishing(event);
 		assertDoesNotThrow(() -> verify(ecoPlayer).increasePlayerAmount(10.5, false));
 	}
-	
+
 	@Test
 	public void handleFishingTestEntity() {
 		Job job = mock(Job.class);
@@ -468,7 +465,7 @@ public class JobsystemEventHandlerImplTest {
 		eventHandler.handleOpenInventory(event);
 		verify(center).openInventory(player);
 	}
-	
+
 	@Test
 	public void handleOpenInventoryTestNoJobcenter() throws JobsystemException {
 		Player player = mock(Player.class);
@@ -479,121 +476,43 @@ public class JobsystemEventHandlerImplTest {
 		PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, villager);
 		assertDoesNotThrow(() -> eventHandler.handleOpenInventory(event));
 	}
-
-	@Test
-	public void handleInventoryClickTestLeftClick() {
-		Job job = mock(Job.class);
-		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
-		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("catch441");
-		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		ItemStack stack = mock(ItemStack.class);
-		ItemMeta meta = mock(ItemMeta.class);
-		when(meta.getDisplayName()).thenReturn("myjob");
-		when(stack.getItemMeta()).thenReturn(meta);
-		InventoryClickEvent event = mock(InventoryClickEvent.class);
-		when(event.getClick()).thenReturn(ClickType.LEFT);
-		when(event.getCurrentItem()).thenReturn(stack);
-		when(event.getWhoClicked()).thenReturn(player);
-
-		eventHandler.handleInventoryClick(event);
-		verify(event).setCancelled(true);
-		verify(player, never()).sendMessage(anyString());
-		assertDoesNotThrow(() -> verify(ecoPlayer, never()).leaveJob(job, true));
-		assertDoesNotThrow(() -> verify(ecoPlayer).joinJob(job, true));
-	}
-
-	@Test
-	public void handleInventoryClickTestRightClick() {
-		Job job = mock(Job.class);
-		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
-		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("catch441");
-		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		ItemStack stack = mock(ItemStack.class);
-		ItemMeta meta = mock(ItemMeta.class);
-		when(meta.getDisplayName()).thenReturn("myjob");
-		when(stack.getItemMeta()).thenReturn(meta);
-		InventoryClickEvent event = mock(InventoryClickEvent.class);
-		when(event.getClick()).thenReturn(ClickType.RIGHT);
-		when(event.getCurrentItem()).thenReturn(stack);
-		when(event.getWhoClicked()).thenReturn(player);
-
-		eventHandler.handleInventoryClick(event);
-		verify(event).setCancelled(true);
-		verify(player, never()).sendMessage(anyString());
-		assertDoesNotThrow(() -> verify(ecoPlayer).leaveJob(job, true));
-		assertDoesNotThrow(() -> verify(ecoPlayer, never()).joinJob(job, true));
-	}
-
-	@Test
-	public void handleInventoryClickTestWithErrorMessage() throws EconomyPlayerException {
-		Job job = mock(Job.class);
-		assertDoesNotThrow(() -> when(jobManager.getJobByName("myjob")).thenReturn(job));
-		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("catch441");
-		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		ItemStack stack = mock(ItemStack.class);
-		ItemMeta meta = mock(ItemMeta.class);
-		when(meta.getDisplayName()).thenReturn("myjob");
-		when(stack.getItemMeta()).thenReturn(meta);
-		InventoryClickEvent event = mock(InventoryClickEvent.class);
-		when(event.getClick()).thenReturn(ClickType.RIGHT);
-		when(event.getCurrentItem()).thenReturn(stack);
-		when(event.getWhoClicked()).thenReturn(player);
-		EconomyPlayerException exception = mock(EconomyPlayerException.class);
-		when(exception.getMessage()).thenReturn("Error message.");
-		doThrow(exception).when(ecoPlayer).leaveJob(job, true);
-
-		eventHandler.handleInventoryClick(event);
-		verify(event).setCancelled(true);
-		verify(player).sendMessage("§cError message.");
-		assertDoesNotThrow(() -> verify(ecoPlayer, never()).joinJob(job, true));
-	}
-
-	@Test
-	public void handleInventoryClickTestInfo() {
-		Player player = mock(Player.class);
-		when(player.getName()).thenReturn("catch441");
-		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		ItemStack stack = mock(ItemStack.class);
-		ItemMeta meta = mock(ItemMeta.class);
-		when(meta.getDisplayName()).thenReturn("Info");
-		when(stack.getItemMeta()).thenReturn(meta);
-		InventoryClickEvent event = mock(InventoryClickEvent.class);
-		when(event.getClick()).thenReturn(ClickType.RIGHT);
-		when(event.getCurrentItem()).thenReturn(stack);
-		when(event.getWhoClicked()).thenReturn(player);
-
-		eventHandler.handleInventoryClick(event);
-		verify(event).setCancelled(true);
-		verify(player, never()).sendMessage(anyString());
-		assertDoesNotThrow(() -> verify(ecoPlayer, never()).leaveJob(any(Job.class), eq(true)));
-		assertDoesNotThrow(() -> verify(ecoPlayer, never()).joinJob(any(Job.class), eq(true)));
-	}
 	
 	@Test
-	public void handleInventoryClickTestWithNoJob() throws JobsystemException {
-		when(jobManager.getJobByName("myjob")).thenThrow(JobsystemException.class);
+	public void handleInventoryClickTestWithNoJobcenter() throws JobsystemException {
+		doThrow(JobsystemException.class).when(jobcenterManager).getJobcenterByName("myjobcenter");
+		InventoryClickEvent event = mock(InventoryClickEvent.class);
+		Villager villager = mock(Villager.class);
+		Inventory inv = mock(Inventory.class);
+		when(event.getInventory()).thenReturn(inv);
+		when(inv.getHolder()).thenReturn(villager);
+		MetadataValue value = mock(MetadataValue.class);
+		when(value.value()).thenReturn("myjobcenter");
+		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(value));
+
+		assertDoesNotThrow(() -> eventHandler.handleInventoryClick(event));
+	}
+
+	@Test
+	public void handleInventoryClickTest() {
+		Jobcenter jobcenter = mock(Jobcenter.class);
+		assertDoesNotThrow(() -> when(jobcenterManager.getJobcenterByName("myjobcenter")).thenReturn(jobcenter));
 		Player player = mock(Player.class);
 		when(player.getName()).thenReturn("catch441");
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		ItemStack stack = mock(ItemStack.class);
-		ItemMeta meta = mock(ItemMeta.class);
-		when(meta.getDisplayName()).thenReturn("myjob");
-		when(stack.getItemMeta()).thenReturn(meta);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		when(event.getClick()).thenReturn(ClickType.RIGHT);
-		when(event.getCurrentItem()).thenReturn(stack);
 		when(event.getWhoClicked()).thenReturn(player);
+		when(event.getRawSlot()).thenReturn(8);
+		Villager villager = mock(Villager.class);
+		Inventory inv = mock(Inventory.class);
+		when(event.getInventory()).thenReturn(inv);
+		when(inv.getHolder()).thenReturn(villager);
+		MetadataValue value = mock(MetadataValue.class);
+		when(value.value()).thenReturn("myjobcenter");
+		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(value));
 
-		assertDoesNotThrow(() -> eventHandler.handleInventoryClick(event));
-		verify(event).setCancelled(true);
-		verify(player, never()).sendMessage(anyString());
+		eventHandler.handleInventoryClick(event);
+		verify(jobcenter).handleInventoryClick(ClickType.RIGHT, 8, ecoPlayer);
 	}
 }

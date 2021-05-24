@@ -18,7 +18,6 @@ import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.logic.api.InventoryGuiHandler;
 import org.ue.common.logic.impl.InventoryGuiHandlerImpl;
 import org.ue.common.utils.ServerProvider;
-import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyvillager.dataaccess.api.EconomyVillagerDao;
 import org.ue.economyvillager.logic.api.EconomyVillager;
 import org.ue.economyvillager.logic.api.EconomyVillagerType;
@@ -29,8 +28,6 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> ext
 
 	private final EconomyVillagerDao ecoVillagerDao;
 	private final EconomyVillagerValidator<T> validator;
-	protected final MessageWrapper messageWrapper;
-	protected final CustomSkullService skullService;
 	private InventoryGuiHandler customizeGuiHandler;
 	private Villager villager;
 	private Location location;
@@ -44,15 +41,12 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> ext
 	private String savePrefix;
 	private String id;
 
-	public EconomyVillagerImpl(MessageWrapper messageWrapper, ServerProvider serverProvider,
-			EconomyVillagerDao ecoVillagerDao, EconomyVillagerValidator<T> validator, CustomSkullService skullService,
-			String savePrefix) {
+	public EconomyVillagerImpl(ServerProvider serverProvider, EconomyVillagerDao ecoVillagerDao,
+			EconomyVillagerValidator<T> validator, CustomSkullService skullService) {
 		super(skullService, serverProvider, null);
 		this.ecoVillagerDao = ecoVillagerDao;
 		this.validator = validator;
-		this.savePrefix = savePrefix;
-		this.messageWrapper = messageWrapper;
-		this.skullService = skullService;
+
 	}
 
 	@Override
@@ -166,8 +160,9 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> ext
 	}
 
 	protected void setupNewEconomyVillager(Location location, EconomyVillagerType villagerType, String name, String id,
-			int size, int reservedSlots, boolean visible) {
+			int size, int reservedSlots, boolean visible, String savePrefix) {
 		this.reservedSlots = reservedSlots;
+		this.savePrefix = savePrefix;
 		this.location = location;
 		this.size = size;
 		this.visible = visible;
@@ -181,18 +176,20 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> ext
 		if (visible) {
 			ecoVillagerDao.saveLocation(savePrefix, location);
 			setupVillager();
-			ecoVillagerDao.saveBiomeType(savePrefix, villager.getVillagerType());
+			this.biomeType = villager.getVillagerType();
+			ecoVillagerDao.saveBiomeType(savePrefix, biomeType);
 		}
 		// villager is null, when visible is false
 		inventory = serverProvider.createInventory(villager, size, name);
-		customizeGuiHandler = new EconomyVillagerCustomizeHandlerImpl<T>(messageWrapper, serverProvider, skullService, this,
-				biomeType, profession);
+		customizeGuiHandler = serverProvider.getProvider().createEconomyVillagerCustomizeHandler(this, biomeType,
+				profession);
 	}
 
 	protected void setupExistingEconomyVillager(EconomyVillagerType villagerType, String name, String id,
-			int reservedSlots) {
+			int reservedSlots, String savePrefix) {
 		this.reservedSlots = reservedSlots;
 		this.villagerType = villagerType;
+		this.savePrefix = savePrefix;
 		this.id = id;
 		location = ecoVillagerDao.loadLocation(savePrefix);
 		biomeType = ecoVillagerDao.loadBiomeType(savePrefix);
@@ -205,8 +202,8 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> ext
 		}
 		// villager is null, when visible is false
 		inventory = serverProvider.createInventory(villager, size, name);
-		customizeGuiHandler = new EconomyVillagerCustomizeHandlerImpl<T>(messageWrapper, serverProvider, skullService, this,
-				biomeType, profession);
+		customizeGuiHandler = serverProvider.getProvider().createEconomyVillagerCustomizeHandler(this, biomeType,
+				profession);
 	}
 
 	private void setupVillager() {
