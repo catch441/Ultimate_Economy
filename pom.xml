@@ -35,8 +35,8 @@
 		<junit.jupiter.version>5.5.2</junit.jupiter.version>
 		<spigot.api.version>1.16.5-R0.1-SNAPSHOT</spigot.api.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!--output.dir>./target</output.dir-->
-		<output.dir>D:\Programme\bukkitserver\paper-1.16.5\plugins\</output.dir>
+		<output.dir>./target</output.dir>
+		<!--output.dir>D:\Programme\bukkitserver\paper-1.16.5\plugins\</output.dir-->
 	</properties>
 
 	<dependencies>
