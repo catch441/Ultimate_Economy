@@ -60,7 +60,7 @@ public class TownsystemValidatorImpl extends EconomyVillagerValidatorImpl<Townsy
 
 	@Override
 	public void checkForLocationInsidePlot(String chunkCoords, Location newLocation) throws TownsystemException {
-		if (chunkCoords.equals(newLocation.getChunk().getX() + "/" + newLocation.getChunk().getZ())) {
+		if (!chunkCoords.equals(newLocation.getChunk().getX() + "/" + newLocation.getChunk().getZ())) {
 			throw createNew(messageWrapper, ExceptionMessageEnum.OUTSIDE_OF_THE_PLOT);
 		}
 	}

@@ -83,7 +83,7 @@ public class TownsystemValidationHandlerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
-		assertDoesNotThrow(() -> validationHandler.checkForLocationInsidePlot("1/4", loc));
+		assertDoesNotThrow(() -> validationHandler.checkForLocationInsidePlot("1/2", loc));
 	}
 
 	@Test
@@ -94,7 +94,7 @@ public class TownsystemValidationHandlerImplTest {
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
 		TownsystemException e = assertThrows(TownsystemException.class,
-				() -> validationHandler.checkForLocationInsidePlot("1/2", loc));
+				() -> validationHandler.checkForLocationInsidePlot("1/4", loc));
 		assertEquals(ExceptionMessageEnum.OUTSIDE_OF_THE_PLOT, e.getKey());
 		assertEquals(0, e.getParams().length);
 	}
