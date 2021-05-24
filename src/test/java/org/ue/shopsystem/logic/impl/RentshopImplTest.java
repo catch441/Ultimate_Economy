@@ -117,6 +117,8 @@ public class RentshopImplTest {
 		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
 		InventoryGuiHandler rentGuiHandler = mock(InventoryGuiHandler.class);
 		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(rentshop, null, Profession.NITWIT)).thenReturn(customizer);
 		when(serverProvider.getProvider()).thenReturn(provider);
 		when(editorHandler.getInventory()).thenReturn(backLink);
 		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
@@ -132,6 +134,7 @@ public class RentshopImplTest {
 
 		rentshop.setupNew("R0", loc, 9, 5.5);
 
+		verify(customizer).updateBackLink(backLink);
 		verify(shopDao).setupSavefile("R0");
 		verify(shopDao).saveLocation("", loc);
 		verify(shopDao).saveShopName("RentShop#R0");
@@ -178,6 +181,8 @@ public class RentshopImplTest {
 		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
 		InventoryGuiHandler rentGuiHandler = mock(InventoryGuiHandler.class);
 		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(rentshop, null, Profession.NITWIT)).thenReturn(customizer);
 		when(serverProvider.getProvider()).thenReturn(provider);
 		when(editorHandler.getInventory()).thenReturn(backLink);
 		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
@@ -209,6 +214,8 @@ public class RentshopImplTest {
 		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
 		InventoryGuiHandler rentGuiHandler = mock(InventoryGuiHandler.class);
 		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(rentshop, null, Profession.ARMORER)).thenReturn(customizer);
 		when(serverProvider.getProvider()).thenReturn(provider);
 		when(editorHandler.getInventory()).thenReturn(backLink);
 		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
@@ -235,6 +242,7 @@ public class RentshopImplTest {
 
 		assertDoesNotThrow(() -> rentshop.setupExisting("R0"));
 
+		verify(customizer).updateBackLink(backLink);
 		verify(shopDao).setupSavefile("R0");
 		verify(villager, times(2)).setCustomName("RentShop#R0");
 		verify(villager).setCustomNameVisible(true);

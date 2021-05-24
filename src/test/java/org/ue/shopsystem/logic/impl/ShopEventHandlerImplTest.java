@@ -379,7 +379,7 @@ public class ShopEventHandlerImplTest {
 		when(event.getClick()).thenReturn(ClickType.RIGHT);
 		when(event.getWhoClicked()).thenReturn(player);
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		assertDoesNotThrow(() -> when(shop.getSlotEditorHandler(1)).thenReturn(slotEditor));
+		assertDoesNotThrow(() -> when(shop.getSlotEditorHandler(null)).thenReturn(slotEditor));
 		eventHandler.handleInventoryClick(event);
 		verify(event).setCancelled(true);
 		verify(slotEditor).handleInventoryClick(ClickType.RIGHT, 1, ecoPlayer);

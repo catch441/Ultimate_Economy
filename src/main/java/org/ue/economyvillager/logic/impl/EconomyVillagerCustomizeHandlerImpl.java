@@ -143,9 +143,9 @@ public class EconomyVillagerCustomizeHandlerImpl<T extends GeneralEconomyExcepti
 	@Override
 	public void handleInventoryClick(ClickType clickType, int rawSlot, EconomyPlayer ecoPlayer) {
 		if (rawSlot == 7) {
-			ecoPlayer.getPlayer().closeInventory();
+			returnToBackLink(ecoPlayer.getPlayer());
 		} else if (rawSlot == 8) {
-			ecoPlayer.getPlayer().closeInventory();
+			returnToBackLink(ecoPlayer.getPlayer());
 			try {
 				ecoVillager.changeSize(selectedSize);
 				ecoVillager.changeProfession(selectedProfession);

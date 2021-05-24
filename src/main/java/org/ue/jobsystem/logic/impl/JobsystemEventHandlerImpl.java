@@ -183,6 +183,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 
 	@Override
 	public void handleInventoryClick(InventoryClickEvent event) {
+		event.setCancelled(true);
 		Entity entity = (Entity) event.getInventory().getHolder();
 		String id = (String) entity.getMetadata("ue-id").get(0).value();
 		try {

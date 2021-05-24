@@ -22,6 +22,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.junit.jupiter.api.Test;
@@ -258,10 +259,14 @@ public class ShopSlotEditorHandlerImplTest {
 		ItemStack selectedItem = mock(ItemStack.class);
 		ItemStack selectedItemClone = mock(ItemStack.class);
 		Player player = mock(Player.class);
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
+		InventoryView playerInv = mock(InventoryView.class);
+		when(ecoPlayer.getPlayer()).thenReturn(player);
+		when(player.getOpenInventory()).thenReturn(playerInv);
 		when(selectedItem.clone()).thenReturn(selectedItemClone);
-		when(handler.getInventory().getItem(28)).thenReturn(selectedItem);
+		when(playerInv.getItem(28)).thenReturn(selectedItem);
 
-		handler.handleInventoryClick(ClickType.RIGHT, 28, null);
+		handler.handleInventoryClick(ClickType.RIGHT, 28, ecoPlayer);
 
 		verify(selectedItemClone).setAmount(1);
 		verify(handler.getInventory()).setItem(0, selectedItemClone);
@@ -449,10 +454,11 @@ public class ShopSlotEditorHandlerImplTest {
 		ItemStack selectedItemClone = mock(ItemStack.class);
 		ItemMeta anyItemMeta = mock(ItemMeta.class);
 		Player player = mock(Player.class);
-
+		InventoryView playerInv = mock(InventoryView.class);
+		when(player.getOpenInventory()).thenReturn(playerInv);
 		when(selectedItem.clone()).thenReturn(selectedItemClone);
 		when(selectedItem.getType()).thenReturn(Material.STONE);
-		when(handler.getInventory().getItem(27)).thenReturn(selectedItem);
+		when(playerInv.getItem(27)).thenReturn(selectedItem);
 		when(anyItem.getItemMeta()).thenReturn(anyItemMeta);
 		when(shop.getShopItem(0)).thenThrow(ShopsystemException.class);
 		when(messageWrapper.getString(MessageEnum.ADDED, "stone")).thenReturn("my message");
@@ -595,6 +601,8 @@ public class ShopSlotEditorHandlerImplTest {
 		ShopItemImpl shopItem = mock(ShopItemImpl.class);
 		ItemMeta anyItemMeta = mock(ItemMeta.class);
 		Player player = mock(Player.class);
+		InventoryView playerInv = mock(InventoryView.class);
+		when(player.getOpenInventory()).thenReturn(playerInv);
 		when(anyItem.getItemMeta()).thenReturn(anyItemMeta);
 		assertDoesNotThrow(() -> when(shop.getShopItem(0)).thenReturn(shopItem));
 		when(shopItem.getItemStack()).thenReturn(shopItemStack);

@@ -99,14 +99,13 @@ public abstract class EconomyVillagerImpl<T extends GeneralEconomyException> ext
 		validator.checkForValidSize(newSize);
 		validator.checkForResizePossible(inventory, size, newSize, reservedSlots);
 		ItemStack[] content = new ItemStack[newSize];
-		int maxOldSizeUnreservedSlotIndex = size - reservedSlots - 1;
+		int maxSizeUnreservedSlotIndex = size - reservedSlots - 1;
+		if(newSize < size) {
+			maxSizeUnreservedSlotIndex = newSize - reservedSlots - 1;;
+		}
 		// copy content
-		for (int i = 0; i < size; i++) {
-			if (i <= maxOldSizeUnreservedSlotIndex) {
-				content[i] = inventory.getItem(i);
-			} else {
-				break;
-			}
+		for (int i = 0; i <= maxSizeUnreservedSlotIndex; i++) {
+			content[i] = inventory.getItem(i);
 		}
 		// copy reserved slots
 		for (int i = 0; i < reservedSlots; i++) {

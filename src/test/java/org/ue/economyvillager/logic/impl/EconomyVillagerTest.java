@@ -82,7 +82,7 @@ public class EconomyVillagerTest {
 		return new AbstractVillager(serverProvider, ecoVillagerDao, validationHandler, customSkullService);
 	}
 
-	private Villager setupMocks(AbstractVillager ecoVillager) {
+	private Villager setupMocks(AbstractVillager ecoVillager, int size) {
 		Location loc = mock(Location.class);
 		Inventory inv = mock(Inventory.class);
 		JavaPlugin plugin = mock(JavaPlugin.class);
@@ -98,11 +98,11 @@ public class EconomyVillagerTest {
 		when(villager.getVillagerType()).thenReturn(Type.DESERT);
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(duplicate));
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
-		when(serverProvider.createInventory(villager, 9, "myName")).thenReturn(inv);
+		when(serverProvider.createInventory(villager, size, "myName")).thenReturn(inv);
 		when(serverProvider.getProvider()).thenReturn(provider);
 		when(provider.createEconomyVillagerCustomizeHandler(ecoVillager, Type.DESERT, Profession.NITWIT))
 				.thenReturn(customizer);
-		ecoVillager.setupNewEconomyVillager(loc, EconomyVillagerType.ADMINSHOP, "myName", "id", 9, 2, true,
+		ecoVillager.setupNewEconomyVillager(loc, EconomyVillagerType.ADMINSHOP, "myName", "id", size, 2, true,
 				"savePrefix");
 		return villager;
 	}
@@ -204,7 +204,7 @@ public class EconomyVillagerTest {
 	@Test
 	public void despawnTest() {
 		AbstractVillager ecoVillager = createVillager();
-		Villager villager = setupMocks(ecoVillager);
+		Villager villager = setupMocks(ecoVillager,9);
 		ecoVillager.despawn();
 		verify(villager).remove();
 	}
@@ -212,7 +212,7 @@ public class EconomyVillagerTest {
 	@Test
 	public void createVillagerInventoryTest() {
 		AbstractVillager ecoVillager = createVillager();
-		Villager villager = setupMocks(ecoVillager);
+		Villager villager = setupMocks(ecoVillager,9);
 		Inventory inv = mock(Inventory.class);
 		when(serverProvider.createInventory(villager, 18, "title")).thenReturn(inv);
 		Inventory result = ecoVillager.createVillagerInventory(18, "title");
@@ -222,7 +222,7 @@ public class EconomyVillagerTest {
 	@Test
 	public void changeProfessionTest() {
 		AbstractVillager ecoVillager = createVillager();
-		Villager villager = setupMocks(ecoVillager);
+		Villager villager = setupMocks(ecoVillager,9);
 		ecoVillager.changeProfession(Profession.FARMER);
 		verify(ecoVillagerDao).saveProfession("savePrefix", Profession.FARMER);
 		verify(villager).setProfession(Profession.FARMER);
@@ -231,7 +231,7 @@ public class EconomyVillagerTest {
 	@Test
 	public void changeBiomeTypeTest() {
 		AbstractVillager ecoVillager = createVillager();
-		Villager villager = setupMocks(ecoVillager);
+		Villager villager = setupMocks(ecoVillager,9);
 		ecoVillager.changeBiomeType(Type.JUNGLE);
 		verify(ecoVillagerDao).saveBiomeType("savePrefix", Type.JUNGLE);
 		verify(villager).setVillagerType(Type.JUNGLE);
@@ -240,7 +240,7 @@ public class EconomyVillagerTest {
 	@Test
 	public void changeLocationTest() {
 		AbstractVillager ecoVillager = createVillager();
-		Villager villager = setupMocks(ecoVillager);
+		Villager villager = setupMocks(ecoVillager,9);
 		Location loc = mock(Location.class);
 		assertDoesNotThrow(() -> ecoVillager.changeLocation(loc));
 		verify(ecoVillagerDao).saveLocation("savePrefix", loc);
@@ -251,7 +251,7 @@ public class EconomyVillagerTest {
 	@Test
 	public void changeInventoryNameTest() {
 		AbstractVillager ecoVillager = createVillager();
-		Villager villager = setupMocks(ecoVillager);
+		Villager villager = setupMocks(ecoVillager,9);
 		Inventory inv = mock(Inventory.class);
 		ItemStack[] contents = new ItemStack[9];
 		when(ecoVillager.getInventory().getContents()).thenReturn(contents);
@@ -264,7 +264,7 @@ public class EconomyVillagerTest {
 	@Test
 	public void setVisibleTestFalse() {
 		AbstractVillager ecoVillager = createVillager();
-		Villager villager = setupMocks(ecoVillager);
+		Villager villager = setupMocks(ecoVillager,9);
 		assertDoesNotThrow(() -> ecoVillager.setVisible(false));
 		verify(villager).remove();
 		verify(ecoVillagerDao).saveVisible("savePrefix", false);
@@ -273,7 +273,7 @@ public class EconomyVillagerTest {
 	@Test
 	public void openInventoryTest() {
 		AbstractVillager ecoVillager = createVillager();
-		setupMocks(ecoVillager);
+		setupMocks(ecoVillager,9);
 		Player player = mock(Player.class);
 		assertDoesNotThrow(() -> ecoVillager.openInventory(player));
 		verify(player).openInventory(ecoVillager.getInventory());
@@ -282,7 +282,7 @@ public class EconomyVillagerTest {
 	@Test
 	public void setVisibleTestTrue() {
 		AbstractVillager ecoVillager = createVillager();
-		Villager villager = setupMocks(ecoVillager);
+		Villager villager = setupMocks(ecoVillager,9);
 		reset(villager);
 		reset(ecoVillagerDao);
 		assertDoesNotThrow(() -> ecoVillager.setVisible(true));
@@ -301,7 +301,7 @@ public class EconomyVillagerTest {
 	@Test
 	public void changeSizeTestWithInvalidSize() throws AbstractException {
 		AbstractVillager ecoVillager = createVillager();
-		setupMocks(ecoVillager);
+		setupMocks(ecoVillager,9);
 		reset(ecoVillagerDao);
 		doThrow(AbstractException.class).when(validationHandler).checkForValidSize(5);
 		assertThrows(AbstractException.class, () -> ecoVillager.changeSize(5));
@@ -311,7 +311,7 @@ public class EconomyVillagerTest {
 	@Test
 	public void changeSizeTestWithNotPossible() throws AbstractException {
 		AbstractVillager ecoVillager = createVillager();
-		setupMocks(ecoVillager);
+		setupMocks(ecoVillager,9);
 		reset(ecoVillagerDao);
 		doThrow(AbstractException.class).when(validationHandler).checkForResizePossible(ecoVillager.getInventory(), 9,
 				9, 2);
@@ -320,9 +320,9 @@ public class EconomyVillagerTest {
 	}
 
 	@Test
-	public void changeSizeTest() {
+	public void changeSizeTestGreater() {
 		AbstractVillager ecoVillager = createVillager();
-		Villager villager = setupMocks(ecoVillager);
+		Villager villager = setupMocks(ecoVillager,9);
 
 		Inventory oldInv = ecoVillager.getInventory();
 		Inventory inv = mock(Inventory.class);
@@ -344,6 +344,36 @@ public class EconomyVillagerTest {
 		assertEquals(inv, ecoVillager.getInventory());
 		ItemStack[] resultContents = new ItemStack[18];
 		resultContents[17] = infoItem;
+		resultContents[0] = filled;
+		verify(inv).setContents(resultContents);
+	}
+	
+	@Test
+	public void changeSizeTestSmaller() {
+		AbstractVillager ecoVillager = createVillager();
+		Villager villager = setupMocks(ecoVillager,18);
+
+		Inventory oldInv = ecoVillager.getInventory();
+		Inventory inv = mock(Inventory.class);
+		ItemStack filled = mock(ItemStack.class);
+		ItemStack infoItem = mock(ItemStack.class);
+		when(oldInv.getItem(1)).thenReturn(null);
+		when(oldInv.getItem(2)).thenReturn(null);
+		when(oldInv.getItem(3)).thenReturn(null);
+		when(oldInv.getItem(4)).thenReturn(null);
+		when(oldInv.getItem(5)).thenReturn(null);
+		when(oldInv.getItem(6)).thenReturn(null);
+
+		when(oldInv.getItem(16)).thenReturn(null);
+		when(oldInv.getItem(0)).thenReturn(filled);
+		when(oldInv.getItem(17)).thenReturn(infoItem);
+		when(serverProvider.createInventory(villager, 9, "myName")).thenReturn(inv);
+
+		assertDoesNotThrow(() -> ecoVillager.changeSize(9));
+		verify(ecoVillagerDao).saveSize("savePrefix", 9);
+		assertEquals(inv, ecoVillager.getInventory());
+		ItemStack[] resultContents = new ItemStack[9];
+		resultContents[8] = infoItem;
 		resultContents[0] = filled;
 		verify(inv).setContents(resultContents);
 	}

@@ -112,6 +112,8 @@ public class AdminshopImplTest {
 		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
 		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
 		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(adminshop, null, Profession.NITWIT)).thenReturn(customizer);
 		when(serverProvider.getProvider()).thenReturn(provider);
 		when(editorHandler.getInventory()).thenReturn(backLink);
 		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
@@ -184,9 +186,13 @@ public class AdminshopImplTest {
 		when(addedItemClone.getItemMeta()).thenReturn(addedItemMeta);
 		when(addedItem.clone()).thenReturn(addedItemClone);
 		when(view.getItem(27)).thenReturn(addedItem);
+		when(stack.getAmount()).thenReturn(10);
 		when(player.getOpenInventory()).thenReturn(view);
 		when(whoClicked.getPlayer()).thenReturn(player);
+		reset(validationHandler);
 		adminshop.handleInventoryClick(ClickType.RIGHT, 27, whoClicked);
+		
+		assertDoesNotThrow(() -> verify(validationHandler, times(2)).checkForValidSlot(2, 8));
 	}
 
 	@Test
@@ -371,6 +377,8 @@ public class AdminshopImplTest {
 		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
 		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
 		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(adminshop, null, Profession.NITWIT)).thenReturn(customizer);
 		when(serverProvider.getProvider()).thenReturn(provider);
 		when(editorHandler.getInventory()).thenReturn(backLink);
 		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
@@ -386,6 +394,7 @@ public class AdminshopImplTest {
 
 		adminshop.setupNew("myshop", "A0", loc, 9);
 
+		verify(customizer).updateBackLink(backLink);
 		verify(editorHandler).setup(adminshop, 1);
 		verify(slotEditorHandler).setupSlotEditor(adminshop);
 		verify(shopDao).setupSavefile("A0");
@@ -429,6 +438,8 @@ public class AdminshopImplTest {
 		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
 		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
 		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(adminshop, null, Profession.ARMORER)).thenReturn(customizer);
 		when(serverProvider.getProvider()).thenReturn(provider);
 		when(editorHandler.getInventory()).thenReturn(backLink);
 		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
@@ -461,6 +472,7 @@ public class AdminshopImplTest {
 
 		assertDoesNotThrow(() -> adminshop.setupExisting("A0"));
 
+		verify(customizer).updateBackLink(backLink);
 		verify(editorHandler).setup(adminshop, 1);
 		verify(slotEditorHandler).setupSlotEditor(adminshop);
 		verify(entity).remove();
@@ -1052,6 +1064,8 @@ public class AdminshopImplTest {
 		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
 		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
 		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(adminshop, null, Profession.NITWIT)).thenReturn(customizer);
 		when(serverProvider.getProvider()).thenReturn(provider);
 		when(editorHandler.getInventory()).thenReturn(backLink);
 		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
@@ -1065,7 +1079,6 @@ public class AdminshopImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 
 		adminshop.setupNew("myshop", "A0", loc, 9);
-
 		Inventory invNew = mock(Inventory.class);
 
 		when(serverProvider.createInventory(villager, 9, "newName")).thenReturn(invNew);
@@ -1101,9 +1114,12 @@ public class AdminshopImplTest {
 	@Test
 	public void changeSizeTest() {
 		Mocks mocks = createNewAdminshop();
+		reset(adminshop.getCustomizeGuiHandler());
 		reset(mocks.editorHandler);
 		assertDoesNotThrow(() -> adminshop.changeSize(27));
 		assertEquals(27, adminshop.getSize());
+		verify(mocks.slotEditorHandler).updateBackLink(mocks.editorHandler.getInventory());
+		verify(adminshop.getCustomizeGuiHandler()).updateBackLink(mocks.editorHandler.getInventory());	
 		verify(mocks.editorHandler).setup(adminshop, 1);
 	}
 
@@ -1212,6 +1228,16 @@ public class AdminshopImplTest {
 		verify(mocks.slotEditorHandler).setSelectedSlot(1);
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSlot(1, 8));
 	}
+	
+	@Test
+	public void getSlotEditorHandlerTestWithSlotAlreadySet() {
+		Mocks mocks = createNewAdminshop();
+		reset(mocks.slotEditorHandler);
+		InventoryGuiHandler result = assertDoesNotThrow(() -> adminshop.getSlotEditorHandler(null));
+		assertEquals(mocks.slotEditorHandler, result);
+		verifyNoInteractions(mocks.slotEditorHandler);
+		verifyNoInteractions(validationHandler);
+	}
 
 	@Test
 	public void getSlotEditorHandlerTestWithInvalidSlot() throws ShopsystemException {
@@ -1263,6 +1289,8 @@ public class AdminshopImplTest {
 		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
 		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
 		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(adminshop, null, Profession.NITWIT)).thenReturn(customizer);
 		when(serverProvider.getProvider()).thenReturn(provider);
 		when(editorHandler.getInventory()).thenReturn(backLink);
 		when(provider.createShopEditorHandler()).thenReturn(editorHandler);

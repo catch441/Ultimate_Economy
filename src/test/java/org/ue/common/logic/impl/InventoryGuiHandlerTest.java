@@ -52,6 +52,17 @@ public class InventoryGuiHandlerTest {
 	private AbstractInventoryGui createInventoryGui() {
 		return new AbstractInventoryGui(skullService, serverProvider, backLink, inventory);
 	}
+	
+	@Test
+	public void updateBackLinkTest() {
+		Inventory inv = mock(Inventory.class);
+		Player player = mock(Player.class);
+		AbstractInventoryGui handler = createInventoryGui();
+		handler.updateBackLink(inv);
+		handler.returnToBackLink(player);
+		verify(player).closeInventory();
+		verify(player).openInventory(inv);
+	}
 
 	@Test
 	public void openInventoryTest() {

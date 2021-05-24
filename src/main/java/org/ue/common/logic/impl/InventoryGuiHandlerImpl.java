@@ -38,7 +38,8 @@ public abstract class InventoryGuiHandlerImpl implements InventoryGuiHandler {
 		return inventory;
 	}
 	
-	protected void setBackLink(Inventory backLink) {
+	@Override
+	public void updateBackLink(Inventory backLink) {
 		this.backLink = backLink;
 	}
 

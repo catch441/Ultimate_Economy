@@ -513,6 +513,7 @@ public class JobsystemEventHandlerImplTest {
 		when(villager.getMetadata("ue-id")).thenReturn(Arrays.asList(value));
 
 		eventHandler.handleInventoryClick(event);
+		verify(event).setCancelled(true);
 		verify(jobcenter).handleInventoryClick(ClickType.RIGHT, 8, ecoPlayer);
 	}
 }

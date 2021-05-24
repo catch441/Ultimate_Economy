@@ -70,7 +70,7 @@ public class ShopEventHandlerImpl implements ShopEventHandler {
 		if ("Editor".equals(inventoryName)) {
 			abstractShop.getEditorHandler().handleInventoryClick(event.getClick(), event.getRawSlot(), ecoPlayer);
 		} else if ("SlotEditor".equals(inventoryName)) {
-			abstractShop.getSlotEditorHandler(event.getRawSlot()).handleInventoryClick(event.getClick(),
+			abstractShop.getSlotEditorHandler(null).handleInventoryClick(event.getClick(),
 					event.getRawSlot(), ecoPlayer);
 		} else if ("Customize Villager".equals(inventoryName)) {
 			abstractShop.getCustomizeGuiHandler().handleInventoryClick(event.getClick(), event.getRawSlot(), ecoPlayer);

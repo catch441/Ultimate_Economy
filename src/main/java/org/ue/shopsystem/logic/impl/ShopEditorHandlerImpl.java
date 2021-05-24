@@ -51,7 +51,7 @@ public class ShopEditorHandlerImpl extends InventoryGuiHandlerImpl implements Sh
 	public void handleInventoryClick(ClickType clickType, int rawSlot, EconomyPlayer whoClicked) {
 		if (rawSlot < (shop.getSize() - 1)) {
 			try {		
-				shop.getSlotEditorHandler(rawSlot).openInventory(whoClicked.getPlayer());	
+				shop.getSlotEditorHandler(Integer.valueOf(rawSlot)).openInventory(whoClicked.getPlayer());	
 			} catch (ShopsystemException e) {
 			}
 		} else if (rawSlot == (shop.getSize() - 1)) {

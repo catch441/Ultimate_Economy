@@ -44,6 +44,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.CustomSkullService;
+import org.ue.common.logic.api.InventoryGuiHandler;
 import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.UltimateEconomyProvider;
@@ -112,6 +113,8 @@ public class PlayershopImplTest {
 		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
 		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
 		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(playershop, null, Profession.NITWIT)).thenReturn(customizer);
 		when(serverProvider.getProvider()).thenReturn(provider);
 		when(editorHandler.getInventory()).thenReturn(backLink);
 		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
@@ -127,6 +130,7 @@ public class PlayershopImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		playershop.setupNew("myshop", ecoPlayer, "P0", loc, 9);
 
+		verify(customizer).updateBackLink(backLink);;
 		verify(editorHandler).setup(playershop, 1);
 		verify(slotEditorHandler).setupSlotEditor(playershop);
 		verify(shopDao).setupSavefile("P0");
@@ -172,6 +176,8 @@ public class PlayershopImplTest {
 		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
 		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
 		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(playershop, null, Profession.ARMORER)).thenReturn(customizer);
 		when(serverProvider.getProvider()).thenReturn(provider);
 		when(editorHandler.getInventory()).thenReturn(backLink);
 		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
@@ -205,6 +211,7 @@ public class PlayershopImplTest {
 		when(inv.getItem(0)).thenReturn(shopItemStack);
 		assertDoesNotThrow(() -> playershop.setupExisting("P0"));
 
+		verify(customizer).updateBackLink(backLink);
 		verify(editorHandler).setup(playershop, 1);
 		verify(slotEditorHandler).setupSlotEditor(playershop);
 		verify(shopDao).setupSavefile("P0");
@@ -1038,6 +1045,8 @@ public class PlayershopImplTest {
 		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
 		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
 		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(playershop, null, Profession.NITWIT)).thenReturn(customizer);
 		when(serverProvider.getProvider()).thenReturn(provider);
 		when(editorHandler.getInventory()).thenReturn(backLink);
 		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
@@ -1094,6 +1103,8 @@ public class PlayershopImplTest {
 		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
 		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
 		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(playershop, null, Profession.NITWIT)).thenReturn(customizer);
 		when(serverProvider.getProvider()).thenReturn(provider);
 		when(editorHandler.getInventory()).thenReturn(backLink);
 		when(provider.createShopEditorHandler()).thenReturn(editorHandler);

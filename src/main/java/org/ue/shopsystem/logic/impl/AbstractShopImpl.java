@@ -80,6 +80,7 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 		editorHandler.setup(this, 1);
 		slotEditorHandler = serverProvider.getProvider().createShopSlotEditorHandler(editorHandler.getInventory());
 		slotEditorHandler.setupSlotEditor(this);
+		getCustomizeGuiHandler().updateBackLink(editorHandler.getInventory());
 	}
 
 	@Override
@@ -122,6 +123,8 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 	public void changeSize(int newSize) throws ShopsystemException {
 		super.changeSize(newSize);
 		editorHandler.setup(this, 1);
+		slotEditorHandler.updateBackLink(editorHandler.getInventory());
+		getCustomizeGuiHandler().updateBackLink(editorHandler.getInventory());
 	}
 
 	@Override
@@ -210,9 +213,11 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 	}
 
 	@Override
-	public InventoryGuiHandler getSlotEditorHandler(int slot) throws ShopsystemException {
-		validationHandler.checkForValidSlot(slot, getSize() - getReservedSlots());
-		slotEditorHandler.setSelectedSlot(slot);
+	public InventoryGuiHandler getSlotEditorHandler(Integer slot) throws ShopsystemException {
+		if(slot != null) {
+			validationHandler.checkForValidSlot(slot, getSize() - getReservedSlots());
+			slotEditorHandler.setSelectedSlot(slot);
+		}
 		return slotEditorHandler;
 	}
 
@@ -235,8 +240,10 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 					}
 					break;
 				case RIGHT:
-				case SHIFT_RIGHT:
 					handleSell(clickType, rawSlot, whoClicked);
+					break;
+				case SHIFT_RIGHT:
+					handleSellAll(clickType, rawSlot, whoClicked);
 					break;
 				default:
 					break;
@@ -246,15 +253,21 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 			whoClicked.getPlayer().sendMessage(e.getMessage());
 		}
 	}
+	
+	private void handleSellAll(ClickType clickType, int slot, EconomyPlayer whoClicked)
+			throws ShopsystemException, BankException, EconomyPlayerException {
+		ShopItem shopItem = getShopItem(whoClicked.getPlayer().getOpenInventory().getItem(slot));
+		int sellAmount = getAmountInInventory(whoClicked.getPlayer().getInventory(), shopItem);
+		if (sellAmount > 0) {
+			sellShopItem(shopItem.getSlot(), sellAmount, whoClicked, true);
+		}
+	}
 
 	private void handleSell(ClickType clickType, int slot, EconomyPlayer whoClicked)
 			throws ShopsystemException, BankException, EconomyPlayerException {
 		ShopItem shopItem = getShopItem(whoClicked.getPlayer().getOpenInventory().getItem(slot));
 		int amountInInv = getAmountInInventory(whoClicked.getPlayer().getInventory(), shopItem);
-		int sellAmount = 0;
-		if (clickType == ClickType.RIGHT) {
-			sellAmount = shopItem.getAmount();
-		}
+		int sellAmount = shopItem.getAmount();
 		if (amountInInv > sellAmount) {
 			sellShopItem(shopItem.getSlot(), sellAmount, whoClicked, true);
 		}

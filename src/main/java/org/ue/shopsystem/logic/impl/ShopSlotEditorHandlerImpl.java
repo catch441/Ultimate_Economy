@@ -173,8 +173,9 @@ public class ShopSlotEditorHandlerImpl extends InventoryGuiHandlerImpl implement
 				sellFactorState = handleSwitchFactor(rawSlot, sellFactorState);
 				break;
 			default:
+
 				if (rawSlot > 26) {
-					handleAddItemToSlotEditor(rawSlot);
+					handleAddItemToSlotEditor(rawSlot, whoClicked);
 				}
 			}
 		} catch (ShopsystemException e) {
@@ -182,8 +183,8 @@ public class ShopSlotEditorHandlerImpl extends InventoryGuiHandlerImpl implement
 		}
 	}
 
-	private void handleAddItemToSlotEditor(int slot) {
-		ItemStack clickedItem = inventory.getItem(slot);
+	private void handleAddItemToSlotEditor(int slot, EconomyPlayer whoClicked) {
+		ItemStack clickedItem = whoClicked.getPlayer().getOpenInventory().getItem(slot);
 		if (clickedItem != null && clickedItem.getType() != Material.SPAWNER) {
 			ItemStack editorItemStack = clickedItem.clone();
 			editorItemStack.setAmount(selectedAmount);
@@ -215,7 +216,7 @@ public class ShopSlotEditorHandlerImpl extends InventoryGuiHandlerImpl implement
 	}
 
 	private void handleAddNewItem(Player player, ItemStack stack) throws ShopsystemException {
-		if(stack.getType() != Material.BARRIER) {
+		if (stack.getType() != Material.BARRIER) {
 			shop.addShopItem(selectedEditorSlot, selectedSellPrice, selectedBuyPrice, stack);
 			player.sendMessage(messageWrapper.getString(MessageEnum.ADDED, stack.getType().toString().toLowerCase()));
 		}

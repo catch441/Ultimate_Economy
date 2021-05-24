@@ -10,7 +10,7 @@ public class PluginImpl extends JavaPlugin {
 
 	public static PluginImpl getInstance;
 	private final UltimateEconomy ultimateEconomy;
-	public static final UltimateEconomyProvider provider = UltimateEconomyProvider.build();
+	public static UltimateEconomyProvider provider;
 
 	/**
 	 * Default constructor.
@@ -18,6 +18,7 @@ public class PluginImpl extends JavaPlugin {
 	public PluginImpl() {
 		super();
 		getInstance = this;
+		provider = UltimateEconomyProvider.build();
 		ultimateEconomy = new UltimateEconomy(provider);
 	}
 
