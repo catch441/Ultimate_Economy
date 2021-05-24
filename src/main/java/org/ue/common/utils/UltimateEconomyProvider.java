@@ -99,6 +99,7 @@ import org.ue.townsystem.logic.impl.TownImpl;
 import org.ue.townsystem.logic.impl.TownTabCompleterImpl;
 import org.ue.townsystem.logic.impl.TownsystemEventHandlerImpl;
 import org.ue.townsystem.logic.impl.TownsystemValidatorImpl;
+import org.ue.townsystem.logic.impl.TownworldCommandExecutorImpl;
 import org.ue.townsystem.logic.impl.TownworldImpl;
 import org.ue.townsystem.logic.impl.TownworldManagerImpl;
 import org.ue.townsystem.logic.impl.TownworldTabCompleterImpl;
@@ -231,8 +232,7 @@ public class UltimateEconomyProvider {
 		rentshopCommandExecutor = new RentshopCommandExecutorImpl(rentshopManager, messageWrapper);
 		townCommandExecutor = new TownCommandExecutorImpl(configManager, ecoPlayerManager, townworldManager,
 				messageWrapper, townsystemValidator);
-		townworldCommandExecutor = new TownCommandExecutorImpl(configManager, ecoPlayerManager, townworldManager,
-				messageWrapper, townsystemValidator);
+		townworldCommandExecutor = new TownworldCommandExecutorImpl(configManager, townworldManager, messageWrapper);
 
 		townsystemEventHandler = new TownsystemEventHandlerImpl(configManager, townworldManager, ecoPlayerManager,
 				messageWrapper);
