@@ -12,7 +12,7 @@ import org.ue.config.logic.api.ConfigValidator;
 public class ConfigValidatorImpl extends GeneralValidatorImpl<ConfigException>
 		implements ConfigValidator {
 	
-	private static final List<String> languages = Arrays.asList("cs", "de", "en", "fr", "zh", "ru", "es", "lt", "it", "pl");
+	private static final List<String> languages = Arrays.asList("cs", "de", "sw", "en", "fr", "zh", "ru", "es", "lt", "it", "pl");
 
 	public ConfigValidatorImpl(MessageWrapper messageWrapper) {
 		super(messageWrapper);
@@ -40,24 +40,26 @@ public class ConfigValidatorImpl extends GeneralValidatorImpl<ConfigException>
 	}
 	
 	private boolean isCountryMatching(String lang, String country) {
+		String match = "";
 		switch (lang) {
+		case "pt":
+			match = "BR";
+			break;
+		case "sw":
+			match = "DE";
+			break;
 		case "cs":
-			if ("CZ".equals(country)) {
-				return true;
-			}
+			match = "CZ";
+			break;
 		case "en":
-			if ("US".equals(country)) {
-				return true;
-			}
+			match = "US";
+			break;
 		case "zh":
-			if ("CN".equals(country)) {
-				return true;
-			}
+			match = "CN";
+			break;
 		default:
-			if (lang.toUpperCase().equals(country)) {
-				return true;
-			}
+			match = lang.toUpperCase();
 		}
-		return false;
+		return country.equals(match);
 	}
 }
