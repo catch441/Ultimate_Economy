@@ -186,7 +186,7 @@ public class AdminshopImplTest {
 		when(addedItemClone.getItemMeta()).thenReturn(addedItemMeta);
 		when(addedItem.clone()).thenReturn(addedItemClone);
 		when(view.getItem(27)).thenReturn(addedItem);
-		when(stack.getAmount()).thenReturn(10);
+		when(stack.getAmount()).thenReturn(2);
 		when(player.getOpenInventory()).thenReturn(view);
 		when(whoClicked.getPlayer()).thenReturn(player);
 		reset(validationHandler);

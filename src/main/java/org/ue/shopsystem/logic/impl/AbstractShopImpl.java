@@ -268,7 +268,7 @@ public abstract class AbstractShopImpl extends EconomyVillagerImpl<ShopsystemExc
 		ShopItem shopItem = getShopItem(whoClicked.getPlayer().getOpenInventory().getItem(slot));
 		int amountInInv = getAmountInInventory(whoClicked.getPlayer().getInventory(), shopItem);
 		int sellAmount = shopItem.getAmount();
-		if (amountInInv > sellAmount) {
+		if (amountInInv >= sellAmount) {
 			sellShopItem(shopItem.getSlot(), sellAmount, whoClicked, true);
 		}
 	}
