@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.dataaccess.api.BankDao;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankException;
-import org.ue.bank.logic.api.BankValidationHandler;
+import org.ue.bank.logic.api.BankValidator;
 
 @ExtendWith(MockitoExtension.class)
 public class BankManagerImplTest {
@@ -31,7 +31,7 @@ public class BankManagerImplTest {
 	@Mock
 	BankDao bankDao;
 	@Mock
-	BankValidationHandler validationHandler;
+	BankValidator validationHandler;
 
 	@AfterEach
 	private void cleanUp() {

@@ -28,7 +28,7 @@ import org.ue.jobsystem.dataaccess.api.JobDao;
 import org.ue.jobsystem.logic.api.FishingLootTypeEnum;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobsystemException;
-import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.jobsystem.logic.api.JobsystemValidator;
 
 @ExtendWith(MockitoExtension.class)
 public class JobImplTest {
@@ -36,18 +36,19 @@ public class JobImplTest {
 	@Mock
 	JobDao jobDao;
 	@Mock
-	JobsystemValidationHandler validationHandler;
+	JobsystemValidator validationHandler;
 
 	@Test
-	public void constructorNewTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+	public void setupNewTest() {
+		Job job = new JobImpl(validationHandler, jobDao);
+		job.setupNew("myJob");
 		verify(jobDao).setupSavefile("myJob");
 		assertEquals("myJob", job.getName());
 		verify(jobDao).saveJobName("myJob");
 	}
 
 	@Test
-	public void loadExistingShopTest() {
+	public void setupExistingTest() {
 		when(jobDao.loadJobName()).thenReturn("myJob");
 		Map<String, Double> blocks = new HashMap<>();
 		blocks.put("DIRT", 1.0);
@@ -61,7 +62,9 @@ public class JobImplTest {
 		Map<String, Double> breeder = new HashMap<>();
 		breeder.put("COW", 1.5);
 		when(jobDao.loadBreedableList()).thenReturn(breeder);
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", false);
+		when(jobDao.loadJobName()).thenReturn("myJob");
+		Job job = new JobImpl(validationHandler, jobDao);
+		job.setupExisting("myJob");
 		verify(jobDao).setupSavefile("myJob");
 		assertEquals("myJob", job.getName());
 		assertTrue(job.getBlockList().containsKey("DIRT"));
@@ -76,7 +79,7 @@ public class JobImplTest {
 
 	@Test
 	public void getBlockListTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addBlock("stone", 1.5));
 		Map<String, Double> list = job.getBlockList();
 		assertEquals(1, list.size());
@@ -86,7 +89,7 @@ public class JobImplTest {
 
 	@Test
 	public void getEntityListTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addMob("cow", 1.5));
 		Map<String, Double> list = job.getEntityList();
 		assertEquals(1, list.size());
@@ -96,7 +99,7 @@ public class JobImplTest {
 
 	@Test
 	public void getFisherListTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addFisherLootType("treasure", 1.5));
 		Map<String, Double> list = job.getFisherList();
 		assertEquals(1, list.size());
@@ -106,7 +109,7 @@ public class JobImplTest {
 
 	@Test
 	public void getKillPriceTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addMob("cow", 1.5));
 		assertEquals("1.5", assertDoesNotThrow(() -> String.valueOf(job.getKillPrice("cow"))));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValueInList(Arrays.asList("COW"), "COW"));
@@ -114,7 +117,7 @@ public class JobImplTest {
 
 	@Test
 	public void getFisherPriceTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addFisherLootType("fish", 1.5));
 		assertEquals("1.5", String.valueOf(assertDoesNotThrow(() -> job.getFisherPrice("fish"))));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValueInList(Arrays.asList("fish"), "fish"));
@@ -122,7 +125,7 @@ public class JobImplTest {
 	
 	@Test
 	public void getBlockPriceTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addBlock("stone", 1.5));
 		assertDoesNotThrow(() -> assertEquals("1.5", String.valueOf(job.getBlockPrice("stone"))));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValueInList(Arrays.asList("STONE"), "STONE"));
@@ -130,7 +133,7 @@ public class JobImplTest {
 
 	@Test
 	public void getBreedPriceTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addBreedable(EntityType.COW, 1.5));
 		assertDoesNotThrow(() -> assertEquals("1.5", String.valueOf(job.getBreedPrice(EntityType.COW))));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValueInList(Arrays.asList("COW"), "COW"));
@@ -138,13 +141,14 @@ public class JobImplTest {
 
 	@Test
 	public void getNameTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
+		job.setupNew("myJob");
 		assertEquals("myJob", job.getName());
 	}
 	
 	@Test
 	public void addBreedableTestWithInvalidBreedable() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValueInList(JobImpl.breedableMobs, EntityType.COD);
 		assertThrows(JobsystemException.class, () -> job.addBreedable(EntityType.COD, 1.5));
 		verify(jobDao, never()).saveBlockList(anyMap());
@@ -153,7 +157,7 @@ public class JobImplTest {
 
 	@Test
 	public void addBreedableTestWithInvalidPrice() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValueGreaterZero(-1.0);
 		assertThrows(JobsystemException.class, () -> job.addBreedable(EntityType.COW, -1.0));
 		verify(jobDao, never()).saveBreedableList(anyMap());
@@ -162,7 +166,7 @@ public class JobImplTest {
 
 	@Test
 	public void addBreedableTestWithAlreadyInJob() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValueNotInList(anyList(), eq("COW"));
 		assertThrows(JobsystemException.class, () -> job.addBreedable(EntityType.COW, 1.5));
 		verify(jobDao, never()).saveBreedableList(anyMap());
@@ -171,7 +175,7 @@ public class JobImplTest {
 
 	@Test
 	public void addBreedableTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addBreedable(EntityType.COW, 1.5));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValueInList(JobImpl.breedableMobs, EntityType.COW));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValueGreaterZero(1.5));
@@ -188,7 +192,7 @@ public class JobImplTest {
 
 	@Test
 	public void addBlockTestWithInvalidMaterial() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValidEnum(Material.values(), "DSADAS");
 		assertThrows(JobsystemException.class, () -> job.addBlock("dsadas", 1.0));
 		verify(jobDao, never()).saveBlockList(anyMap());
@@ -197,7 +201,7 @@ public class JobImplTest {
 
 	@Test
 	public void addBlockTestWithInvalidPrice() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValueGreaterZero(-1.0);
 		assertThrows(JobsystemException.class, () -> job.addBlock("stone", -1.0));
 		verify(jobDao, never()).saveBlockList(anyMap());
@@ -206,7 +210,7 @@ public class JobImplTest {
 
 	@Test
 	public void addBlockTestWithAlreadyInJob() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValueNotInList(anyList(), eq("STONE"));
 		assertThrows(JobsystemException.class, () -> job.addBlock("stone", 1.0));
 		verify(jobDao, never()).saveBlockList(anyMap());
@@ -215,7 +219,7 @@ public class JobImplTest {
 
 	@Test
 	public void addBlockTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addBlock("stone", 1.0));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidEnum(Material.values(), "STONE"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValueGreaterZero(1.0));
@@ -232,7 +236,7 @@ public class JobImplTest {
 
 	@Test
 	public void addMobTestWithInvalidEntity() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValidEnum(EntityType.values(), "DSADAS");
 		assertThrows(JobsystemException.class, () -> job.addMob("dsadas", 1.0));
 		verify(jobDao, never()).saveEntityList(anyMap());
@@ -241,7 +245,7 @@ public class JobImplTest {
 
 	@Test
 	public void addMobTestWithInvalidPrice() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValueGreaterZero(-1.0);
 		assertThrows(JobsystemException.class, () -> job.addMob("cow", -1.0));
 		verify(jobDao, never()).saveEntityList(anyMap());
@@ -250,7 +254,7 @@ public class JobImplTest {
 
 	@Test
 	public void addMobTestWithAlreadyInJob() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValueNotInList(anyList(), eq("COW"));
 		assertThrows(JobsystemException.class, () -> job.addMob("cow", 1.0));
 		verify(jobDao, never()).saveEntityList(anyMap());
@@ -259,7 +263,7 @@ public class JobImplTest {
 
 	@Test
 	public void addMobTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addMob("cow", 1.0));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidEnum(EntityType.values(), "COW"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValueNotInList(anyList(), eq("COW")));
@@ -272,7 +276,7 @@ public class JobImplTest {
 
 	@Test
 	public void addFisherLootTypeTestWithInvalidType() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValidEnum(FishingLootTypeEnum.values(), "dsadas");
 		assertThrows(JobsystemException.class, () -> job.addFisherLootType("dsadas", 1.0));
 		verify(jobDao, never()).saveFisherList(anyMap());
@@ -281,7 +285,7 @@ public class JobImplTest {
 
 	@Test
 	public void addFisherLootTypeTestWithInvalidPrice() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValueGreaterZero(-1.0);
 		assertThrows(JobsystemException.class, () -> job.addFisherLootType("fish", -1.0));
 		verify(jobDao, never()).saveFisherList(anyMap());
@@ -290,7 +294,7 @@ public class JobImplTest {
 
 	@Test
 	public void addFisherLootTypeTestWithAlreadyInJob() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValueNotInList(anyList(), eq("fish"));
 		assertThrows(JobsystemException.class, () -> job.addFisherLootType("fish", 1.0));
 		verify(jobDao, never()).saveFisherList(anyMap());
@@ -299,7 +303,7 @@ public class JobImplTest {
 
 	@Test
 	public void addFisherLootTypeTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addFisherLootType("fish", 1.0));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidEnum(FishingLootTypeEnum.values(), "fish"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValueGreaterZero(1.0));
@@ -312,7 +316,7 @@ public class JobImplTest {
 	
 	@Test
 	public void deleteBreedableTestWithInvalidBreedable() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addBreedable(EntityType.COD, 1.5));
 		reset(jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValueInList(JobImpl.breedableMobs, EntityType.COD);
@@ -323,7 +327,7 @@ public class JobImplTest {
 
 	@Test
 	public void deleteBreedableTestWithNotInJob() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addBreedable(EntityType.COW, 1.5));
 		reset(jobDao);
 		doNothing().when(validationHandler).checkForValueInList(JobImpl.breedableMobs, EntityType.SHEEP);;
@@ -335,7 +339,7 @@ public class JobImplTest {
 
 	@Test
 	public void deleteBreedableTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addBreedable(EntityType.COW, 1.5));
 		reset(validationHandler);
 		reset(jobDao);
@@ -348,7 +352,7 @@ public class JobImplTest {
 
 	@Test
 	public void deleteBlockTestWithInvalidBlock() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addBlock("stone", 1.5));
 		reset(jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValidEnum(Material.values(), "STONE");
@@ -359,7 +363,7 @@ public class JobImplTest {
 
 	@Test
 	public void deleteBlockTestWithNotInJob() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addBlock("stone", 1.5));
 		reset(jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValueInList(anyList(), eq("STONE"));
@@ -370,7 +374,7 @@ public class JobImplTest {
 
 	@Test
 	public void deleteBlockTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addBlock("stone", 1.0));
 		reset(validationHandler);
 		reset(jobDao);
@@ -383,7 +387,7 @@ public class JobImplTest {
 
 	@Test
 	public void deleteMobTestWithInvalidMob() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addMob("cow", 1.5));
 		reset(jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValidEnum(EntityType.values(), "BLA");
@@ -394,7 +398,7 @@ public class JobImplTest {
 
 	@Test
 	public void deleteMobTestWithNotInJob() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addMob("cow", 1.5));
 		reset(jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValueInList(anyList(), eq("COW"));
@@ -405,7 +409,7 @@ public class JobImplTest {
 
 	@Test
 	public void deleteMobTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addMob("cow", 1.0));
 		reset(validationHandler);
 		reset(jobDao);
@@ -418,7 +422,7 @@ public class JobImplTest {
 
 	@Test
 	public void delFisherLootTypeTestWithInvalidType() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addFisherLootType("DDADA", 1.5));
 		reset(jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValidEnum(FishingLootTypeEnum.values(), "DDADA");
@@ -429,7 +433,7 @@ public class JobImplTest {
 
 	@Test
 	public void delFisherLootTypeTestWithNotInJob() throws JobsystemException {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addFisherLootType("DDADA", 1.5));
 		reset(jobDao);
 		doThrow(JobsystemException.class).when(validationHandler).checkForValueInList(anyList(), eq("DDADA"));
@@ -440,7 +444,7 @@ public class JobImplTest {
 
 	@Test
 	public void delFisherLootTypeTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		assertDoesNotThrow(() -> job.addFisherLootType("fish", 1.0));
 		reset(validationHandler);
 		reset(jobDao);
@@ -453,7 +457,7 @@ public class JobImplTest {
 
 	@Test
 	public void deleteJobTest() {
-		Job job = new JobImpl(validationHandler, jobDao, "myJob", true);
+		Job job = new JobImpl(validationHandler, jobDao);
 		job.deleteJob();
 		verify(jobDao).deleteSavefile();
 	}

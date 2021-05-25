@@ -26,7 +26,7 @@ import org.ue.common.utils.ServerProvider;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
+import org.ue.townsystem.logic.api.TownsystemValidator;
 
 @ExtendWith(MockitoExtension.class)
 public class TownworldDaoImplTest {
@@ -34,7 +34,7 @@ public class TownworldDaoImplTest {
 	@InjectMocks
 	TownworldDaoImpl dao;
 	@Mock
-	TownsystemValidationHandler validationHandler;
+	TownsystemValidator validationHandler;
 	@Mock
 	EconomyPlayerManager ecoPlayerManager;
 	@Mock

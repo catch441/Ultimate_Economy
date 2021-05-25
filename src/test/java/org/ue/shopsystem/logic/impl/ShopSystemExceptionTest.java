@@ -19,7 +19,7 @@ public class ShopSystemExceptionTest {
 
 	@Test
 	public void constructorTest() {	
-		when(messageWrapper.getErrorString("already_rented", "param1", 2)).thenReturn("my error message");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.ALREADY_RENTED, "param1", 2)).thenReturn("my error message");
 		ShopsystemException e = new ShopsystemException(messageWrapper, ExceptionMessageEnum.ALREADY_RENTED,
 				"param1", 2);
 		

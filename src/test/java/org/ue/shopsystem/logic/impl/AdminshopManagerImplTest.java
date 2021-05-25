@@ -24,12 +24,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
-import org.ue.common.utils.ServiceComponent;
+import org.ue.common.utils.UltimateEconomyProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.logic.api.Adminshop;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,7 +40,7 @@ public class AdminshopManagerImplTest {
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock
-	ShopValidationHandler validationHandler;
+	ShopValidator validationHandler;
 	@Mock
 	ServerProvider serverProvider;
 	@Mock
@@ -73,10 +73,10 @@ public class AdminshopManagerImplTest {
 	@Test
 	public void createAdminshopTestSuccess() {
 		Location loc = mock(Location.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
 		Adminshop shop = mock(Adminshop.class);
-		when(serviceComponent.getAdminshop()).thenReturn(shop);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
+		when(provider.createAdminshop()).thenReturn(shop);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		assertDoesNotThrow(() -> adminshopManager.createAdminShop("myshop", loc, 9));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidShopName("myshop"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(9));
@@ -146,10 +146,10 @@ public class AdminshopManagerImplTest {
 
 	@Test
 	public void loadAllAdminShopsTest() {
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
 		Adminshop shop = mock(Adminshop.class);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(serviceComponent.getAdminshop()).thenReturn(shop);
+		when(provider.createAdminshop()).thenReturn(shop);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		when(configDao.loadAdminshopIds()).thenReturn(Arrays.asList("A0"));
 
 		adminshopManager.loadAllAdminShops();
@@ -169,12 +169,12 @@ public class AdminshopManagerImplTest {
 
 	@Test
 	public void loadAllAdminShopsTestWithLoadingError() throws EconomyPlayerException {
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
 		EconomyPlayerException e = mock(EconomyPlayerException.class);
 		when(e.getMessage()).thenReturn("my error message");
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
 		Adminshop shop = mock(Adminshop.class);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(serviceComponent.getAdminshop()).thenReturn(shop);
+		when(provider.createAdminshop()).thenReturn(shop);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		when(configDao.loadAdminshopIds()).thenReturn(Arrays.asList("A0"));
 		doThrow(e).when(shop).setupExisting("A0");
 		adminshopManager.loadAllAdminShops();
@@ -184,11 +184,11 @@ public class AdminshopManagerImplTest {
 
 	private Adminshop createAdminshop(String id) {
 		Location loc = mock(Location.class);
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
 		Adminshop shop = mock(Adminshop.class);
-		when(shop.getShopId()).thenReturn(id);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(serviceComponent.getAdminshop()).thenReturn(shop);
+		when(provider.createAdminshop()).thenReturn(shop);
+		when(shop.getId()).thenReturn(id);
+		when(serverProvider.getProvider()).thenReturn(provider);
 		assertDoesNotThrow(() -> adminshopManager.createAdminShop("myshop", loc, 9));
 		return shop;
 	}

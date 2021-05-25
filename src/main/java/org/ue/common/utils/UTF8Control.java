@@ -11,7 +11,7 @@ import java.util.ResourceBundle.Control;
 public class UTF8Control extends Control {
 
 	/**
-	 * Create ressource bundle for a given language.
+	 * Create resource bundle for a given language.
 	 * 
 	 * @param baseName
 	 * @param locale

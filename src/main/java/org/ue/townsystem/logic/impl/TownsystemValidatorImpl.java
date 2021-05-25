@@ -3,34 +3,32 @@ package org.ue.townsystem.logic.impl;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.common.logic.api.ExceptionMessageEnum;
-import org.ue.common.logic.impl.EconomyVillagerValidationHandlerImpl;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyvillager.logic.impl.EconomyVillagerValidatorImpl;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
+import org.ue.townsystem.logic.api.TownsystemValidator;
 import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
 
-import dagger.Lazy;
+public class TownsystemValidatorImpl extends EconomyVillagerValidatorImpl<TownsystemException>
+		implements TownsystemValidator {
 
-public class TownsystemValidationHandlerImpl extends EconomyVillagerValidationHandlerImpl<TownsystemException>
-		implements TownsystemValidationHandler {
+	private TownworldManager townworldManager;
 
-	private final Lazy<TownworldManager> townworldManager;
-
-	@Inject
-	public TownsystemValidationHandlerImpl(MessageWrapper messageWrapper, Lazy<TownworldManager> townworldManager,
+	public TownsystemValidatorImpl(MessageWrapper messageWrapper,
 			ServerProvider serverProvider) {
 		super(serverProvider, messageWrapper);
+	}
+	
+	public void lazyInjection(TownworldManager townworldManager) {
 		this.townworldManager = townworldManager;
 	}
 
@@ -62,7 +60,7 @@ public class TownsystemValidationHandlerImpl extends EconomyVillagerValidationHa
 
 	@Override
 	public void checkForLocationInsidePlot(String chunkCoords, Location newLocation) throws TownsystemException {
-		if (chunkCoords.equals(newLocation.getChunk().getX() + "/" + newLocation.getChunk().getZ())) {
+		if (!chunkCoords.equals(newLocation.getChunk().getX() + "/" + newLocation.getChunk().getZ())) {
 			throw createNew(messageWrapper, ExceptionMessageEnum.OUTSIDE_OF_THE_PLOT);
 		}
 	}
@@ -245,8 +243,8 @@ public class TownsystemValidationHandlerImpl extends EconomyVillagerValidationHa
 
 	@Override
 	public void checkForTownworldPlotPermission(Location location, EconomyPlayer ecoPlayer) throws TownsystemException {
-		if (townworldManager.get().isTownWorld(location.getWorld().getName())) {
-			Townworld townworld = townworldManager.get().getTownWorldByName(location.getWorld().getName());
+		if (townworldManager.isTownWorld(location.getWorld().getName())) {
+			Townworld townworld = townworldManager.getTownWorldByName(location.getWorld().getName());
 			if (townworld.isChunkFree(location.getChunk())) {
 				throw createNew(messageWrapper, ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION);
 			} else {

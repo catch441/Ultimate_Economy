@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -22,7 +20,6 @@ public class TownTabCompleterImpl extends TabCompleterUtils implements TabComple
 	private final TownworldManager townworldManager;
 	private final EconomyPlayerManager ecoPlayerManager;
 
-	@Inject
 	public TownTabCompleterImpl(TownworldManager townworldManager, EconomyPlayerManager ecoPlayerManager) {
 		this.townworldManager = townworldManager;
 		this.ecoPlayerManager = ecoPlayerManager;

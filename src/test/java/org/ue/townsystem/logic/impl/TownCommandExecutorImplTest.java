@@ -23,6 +23,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.logic.api.BankException;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
@@ -31,7 +33,7 @@ import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
+import org.ue.townsystem.logic.api.TownsystemValidator;
 import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
 
@@ -49,7 +51,7 @@ public class TownCommandExecutorImplTest {
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock
-	TownsystemValidationHandler townsystemValidationHandler;
+	TownsystemValidator townsystemValidationHandler;
 	@Mock
 	Player player;
 
@@ -92,7 +94,7 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(townworldManager.getTownByName("mytown")).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		when(messageWrapper.getString("added", "otherPlayer")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.ADDED, "otherPlayer")).thenReturn("my message");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("otherPlayer")).thenReturn(otherPlayer));
 
 		String[] args = { "addDeputy", "mytown", "otherPlayer" };
@@ -141,7 +143,7 @@ public class TownCommandExecutorImplTest {
 		when(town.hasDeputyPermissions(ecoPlayer)).thenReturn(true);
 		when(town.getTownBankAmount()).thenReturn(2.5);
 		when(configManager.getCurrencyText(2.5)).thenReturn("$");
-		when(messageWrapper.getString("town_bank", 2.5, "$")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.TOWN_BANK, 2.5, "$")).thenReturn("my message");
 
 		String[] args = { "bank", "mytown" };
 		boolean result = executor.onCommand(player, null, "town", args);
@@ -185,7 +187,7 @@ public class TownCommandExecutorImplTest {
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 
-		when(messageWrapper.getString("town_create", "mytown")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.TOWN_CREATE, "mytown")).thenReturn("my message");
 		String[] args = { "create", "mytown" };
 		boolean result = executor.onCommand(player, null, "town", args);
 		assertTrue(result);
@@ -211,7 +213,7 @@ public class TownCommandExecutorImplTest {
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 
-		when(messageWrapper.getString("town_delete", "mytown")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.TOWN_DELETE, "mytown")).thenReturn("my message");
 		String[] args = { "delete", "mytown" };
 		boolean result = executor.onCommand(player, null, "town", args);
 		assertTrue(result);
@@ -238,8 +240,8 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(townworldManager.getTownByName("mytown")).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		when(messageWrapper.getString("town_expand")).thenReturn("my message");
-		
+		when(messageWrapper.getString(MessageEnum.TOWN_EXPAND)).thenReturn("my message");
+
 		String[] args = { "expand", "mytown" };
 		boolean result = executor.onCommand(player, null, "town", args);
 		assertTrue(result);
@@ -294,7 +296,7 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(townworldManager.getTownByName("mytown")).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		when(messageWrapper.getString("town_pay", "mytown", 2.5, "$")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.TOWN_PAY, "mytown", 2.5, "$")).thenReturn("my message");
 		when(configManager.getCurrencyText(2.5)).thenReturn("$");
 
 		String[] args = { "pay", "mytown", "2.5" };
@@ -312,7 +314,7 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(townworldManager.getTownByName("mytown")).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		when(messageWrapper.getErrorString("invalid_parameter")).thenReturn("my error message");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER)).thenReturn("my error message");
 
 		String[] args = { "pay", "mytown", "invalid" };
 		boolean result = executor.onCommand(player, null, "town", args);
@@ -357,7 +359,7 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(townworldManager.getTownByName("mytown")).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		when(messageWrapper.getString("removed", "otherPlayer")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.REMOVED, "otherPlayer")).thenReturn("my message");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("otherPlayer")).thenReturn(otherPlayer));
 
 		String[] args = { "removeDeputy", "mytown", "otherPlayer" };
@@ -395,7 +397,7 @@ public class TownCommandExecutorImplTest {
 		assertTrue(result);
 		verify(player).sendMessage("/town plot [setForSale/setForRent]");
 	}
-	
+
 	@Test
 	public void setForSaleCommandTest() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
@@ -415,7 +417,7 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(town.getPlotByChunk("1/2")).thenReturn(plot));
 		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
-		when(messageWrapper.getString("town_plot_setForSale")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.TOWN_PLOT_SETFORSALE)).thenReturn("my message");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 
 		String[] args = { "plot", "setForSale", "2.5" };
@@ -424,7 +426,7 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> verify(plot).setForSale(2.5, loc, ecoPlayer));
 		verify(player).sendMessage("my message");
 	}
-	
+
 	@Test
 	public void setForSaleCommandTestWithInvalidArgNumber() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
@@ -436,7 +438,7 @@ public class TownCommandExecutorImplTest {
 		assertTrue(result);
 		verify(player).sendMessage("/town plot setForSale <price>");
 	}
-	
+
 	@Test
 	public void plotSetForRentCommandTestWithInvalidArgNumber() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
@@ -448,7 +450,7 @@ public class TownCommandExecutorImplTest {
 		assertTrue(result);
 		verify(player).sendMessage("/town plot setForRent <price/24h>");
 	}
-	
+
 	@Test
 	public void plotSetForRentCommandTest() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
@@ -476,8 +478,8 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(townworldManager.getTownByName("mytown")).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		when(messageWrapper.getString("town_rename", "mytown", "newname")).thenReturn("my message");
-		
+		when(messageWrapper.getString(MessageEnum.TOWN_RENAME, "mytown", "newname")).thenReturn("my message");
+
 		String[] args = { "rename", "mytown", "newname" };
 		boolean result = executor.onCommand(player, null, "town", args);
 		assertTrue(result);
@@ -506,13 +508,13 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(townworldManager.getTownByName("mytown")).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		when(messageWrapper.getString("town_setTownSpawn", 1, 2, 3)).thenReturn("my message");
-		
+		when(messageWrapper.getString(MessageEnum.TOWN_SETTOWNSPAWN, 1, 2, 3)).thenReturn("my message");
+
 		String[] args = { "setTownSpawn", "mytown" };
 		boolean result = executor.onCommand(player, null, "town", args);
 		assertTrue(result);
 		assertDoesNotThrow(() -> verify(town).changeTownSpawn(loc, ecoPlayer));
-		
+
 		verify(player).sendMessage("my message");
 	}
 
@@ -594,7 +596,7 @@ public class TownCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(townworldManager.getTownByName("mytown")).thenReturn(town));
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		when(messageWrapper.getErrorString("invalid_parameter")).thenReturn("my error message");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER)).thenReturn("my error message");
 
 		String[] args = { "withdraw", "mytown", "invalid" };
 		boolean result = executor.onCommand(player, null, "town", args);

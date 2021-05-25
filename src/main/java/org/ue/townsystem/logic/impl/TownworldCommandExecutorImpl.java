@@ -1,10 +1,10 @@
 package org.ue.townsystem.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.townsystem.logic.api.TownsystemException;
@@ -17,7 +17,6 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 	private final TownworldManager townworldManager;
 	private final MessageWrapper messageWrapper;
 
-	@Inject
 	public TownworldCommandExecutorImpl(ConfigManager configManager, TownworldManager townworldManager,
 			MessageWrapper messageWrapper) {
 		this.configManager = configManager;
@@ -36,7 +35,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 		} catch (TownsystemException e) {
 			sender.sendMessage(e.getMessage());
 		} catch (NumberFormatException e) {
-			sender.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[2]));
+			sender.sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, args[2]));
 		}
 		return true;
 	}
@@ -61,7 +60,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, TownsystemException {
 		if (args.length == 3) {
 			townworldManager.getTownWorldByName(args[1]).setExpandPrice(Double.valueOf(args[2]));
-			sender.sendMessage(messageWrapper.getString("townworld_setExpandPrice", args[2],
+			sender.sendMessage(messageWrapper.getString(MessageEnum.TOWNWORLD_SETEXPANDPRICE, args[2],
 					configManager.getCurrencyText(Double.valueOf(args[2]))));
 		} else {
 			sender.sendMessage("/" + label + " setExpandPrice <world> <price/chunk>");
@@ -73,7 +72,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, TownsystemException {
 		if (args.length == 3) {
 			townworldManager.getTownWorldByName(args[1]).setFoundationPrice(Double.valueOf(args[2]));
-			sender.sendMessage(messageWrapper.getString("townworld_setFoundationPrice", args[2],
+			sender.sendMessage(messageWrapper.getString(MessageEnum.TOWNWORLD_SETFOUNDATIONPRICE, args[2],
 					configManager.getCurrencyText(Double.valueOf(args[2]))));
 		} else {
 			sender.sendMessage("/" + label + " setFoundationPrice <world> <price>");
@@ -85,7 +84,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 			throws TownsystemException {
 		if (args.length == 2) {
 			townworldManager.deleteTownWorld(args[1]);
-			sender.sendMessage(messageWrapper.getString("townworld_disable", args[1]));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.TOWNWORLD_DISABLE, args[1]));
 		} else {
 			sender.sendMessage("/" + label + " disable <world>");
 		}
@@ -95,7 +94,7 @@ public class TownworldCommandExecutorImpl implements CommandExecutor {
 	private boolean performEnableCommand(CommandSender sender, String label, String[] args) throws TownsystemException {
 		if (args.length == 2) {
 			townworldManager.createTownWorld(args[1]);
-			sender.sendMessage(messageWrapper.getString("townworld_enable", args[1]));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.TOWNWORLD_ENABLE, args[1]));
 		} else {
 			sender.sendMessage("/" + label + " enable <world>");
 		}

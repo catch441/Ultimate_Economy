@@ -1,7 +1,5 @@
 package org.ue.economyplayer.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.ue.bank.logic.api.BankException;
 import org.ue.config.logic.api.ConfigManager;
@@ -15,7 +13,6 @@ public class EconomyPlayerEventHandlerImpl implements EconomyPlayerEventHandler 
 	private final ConfigManager configManager;
 	private final EconomyPlayerManager ecoPlayerManager;
 
-	@Inject
 	public EconomyPlayerEventHandlerImpl(ConfigManager configManager, EconomyPlayerManager ecoPlayerManager) {
 		this.configManager = configManager;
 		this.ecoPlayerManager = ecoPlayerManager;

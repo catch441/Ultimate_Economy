@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,20 +16,19 @@ import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.logic.api.Playershop;
 import org.ue.shopsystem.logic.api.PlayershopManager;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class PlayershopManagerImpl implements PlayershopManager {
 
 	private static final Logger log = LoggerFactory.getLogger(PlayershopManagerImpl.class);
 	private final MessageWrapper messageWrapper;
-	private final ShopValidationHandler validationHandler;
+	private final ShopValidator validationHandler;
 	private final ConfigDao configDao;
 	private final ServerProvider serverProvider;
 	private Map<String, Playershop> playerShopList = new HashMap<>();
 
-	@Inject
-	public PlayershopManagerImpl(ConfigDao configDao, ShopValidationHandler validationHandler,
+	public PlayershopManagerImpl(ConfigDao configDao, ShopValidator validationHandler,
 			MessageWrapper messageWrapper, ServerProvider serverProvider) {
 		this.configDao = configDao;
 		this.messageWrapper = messageWrapper;
@@ -96,15 +93,15 @@ public class PlayershopManagerImpl implements PlayershopManager {
 		validationHandler.checkForPlayerHasPermissionAtLocation(spawnLocation, ecoPlayer);
 		validationHandler.checkForShopNameIsFree(getPlayerShopUniqueNameList(), name, ecoPlayer);
 		validationHandler.checkForValidSize(size);
-		Playershop shop = serverProvider.getServiceComponent().getPlayershop();
+		Playershop shop = serverProvider.getProvider().createPlayershop();
 		shop.setupNew(name, ecoPlayer, generateFreePlayerShopId(), spawnLocation, size);
-		playerShopList.put(shop.getShopId(), shop);
+		playerShopList.put(shop.getId(), shop);
 		configDao.savePlayershopIds(getPlayershopIdList());
 	}
 
 	@Override
 	public void deletePlayerShop(Playershop playershop) {
-		playerShopList.remove(playershop.getShopId());
+		playerShopList.remove(playershop.getId());
 		playershop.deleteShop();
 		configDao.savePlayershopIds(getPlayershopIdList());
 	}
@@ -120,7 +117,7 @@ public class PlayershopManagerImpl implements PlayershopManager {
 	public void loadAllPlayerShops() {
 		for (String shopId : configDao.loadPlayershopIds()) {
 			try {
-				Playershop shop = serverProvider.getServiceComponent().getPlayershop();
+				Playershop shop = serverProvider.getProvider().createPlayershop();
 				shop.setupExisting(shopId);
 				playerShopList.put(shopId, shop);
 			} catch (EconomyPlayerException e) {

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -20,7 +18,6 @@ public class JobTabCompleterImpl extends TabCompleterUtils implements TabComplet
 	private final JobcenterManager jobcenterManager;
 	private final JobManager jobManager;
 
-	@Inject
 	public JobTabCompleterImpl(JobManager jobManager, JobcenterManager jobcenterManager) {
 		this.jobcenterManager = jobcenterManager;
 		this.jobManager = jobManager;

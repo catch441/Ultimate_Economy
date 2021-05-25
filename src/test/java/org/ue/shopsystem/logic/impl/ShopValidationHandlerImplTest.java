@@ -38,7 +38,7 @@ import org.ue.townsystem.logic.api.TownworldManager;
 public class ShopValidationHandlerImplTest {
 
 	@InjectMocks
-	ShopValidationHandlerImpl validationHandler;
+	ShopValidatorImpl validationHandler;
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock

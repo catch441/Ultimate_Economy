@@ -1,11 +1,11 @@
 package org.ue.config.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigCommandEnum;
 import org.ue.config.logic.api.ConfigException;
@@ -19,7 +19,6 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final MessageWrapper messageWrapper;
 
-	@Inject
 	public ConfigCommandExecutorImpl(ConfigManager configManager, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper) {
 		this.configManager = configManager;
@@ -35,7 +34,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 			} catch (ConfigException e) {
 				sender.sendMessage(ChatColor.RED + e.getMessage());
 			} catch (IllegalArgumentException e) {
-				sender.sendMessage(messageWrapper.getErrorString("invalid_parameter", args[1]));
+				sender.sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, args[1]));
 			}
 		} else {
 			return false;
@@ -80,7 +79,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 2) {
 			boolean input = stringToBoolean(args[1]);
 			configManager.setAllowQuickshop(input);
-			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, args[1]));
 		} else {
 			sender.sendMessage("/" + label + " allowQuickshop <true/false>");
 		}
@@ -91,18 +90,17 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, ConfigException {
 		if (args.length == 2) {
 			configManager.setStartAmount(Double.valueOf(args[1]));
-			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, args[1]));
 		} else {
 			sender.sendMessage("/" + label + " startAmount <amount>");
 		}
 		return true;
 	}
 
-	private boolean performLanguageCommand(String label, String[] args, CommandSender sender)
-			throws ConfigException {
+	private boolean performLanguageCommand(String label, String[] args, CommandSender sender) throws ConfigException {
 		if (args.length == 3) {
 			configManager.setLocale(args[1], args[2]);
-			sender.sendMessage(messageWrapper.getString("restart"));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.RESTART));
 		} else {
 			sender.sendMessage("/" + label + " language <language> <country>");
 		}
@@ -113,7 +111,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, ConfigException {
 		if (args.length == 2) {
 			configManager.setMaxHomes(Integer.valueOf(args[1]));
-			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, args[1]));
 		} else {
 			sender.sendMessage("/" + label + " maxHomes <number>");
 		}
@@ -124,7 +122,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, ConfigException {
 		if (args.length == 2) {
 			configManager.setMaxRentedDays(Integer.valueOf(args[1]));
-			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, args[1]));
 		} else {
 			sender.sendMessage("/" + label + " maxRentedDays <number>");
 		}
@@ -135,7 +133,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, ConfigException {
 		if (args.length == 2) {
 			configManager.setMaxJobs(Integer.valueOf(args[1]));
-			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, args[1]));
 		} else {
 			sender.sendMessage("/" + label + " maxJobs <number>");
 		}
@@ -146,7 +144,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, ConfigException {
 		if (args.length == 2) {
 			configManager.setMaxJoinedTowns(Integer.valueOf(args[1]));
-			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, args[1]));
 		} else {
 			sender.sendMessage("/" + label + " maxJoinedTowns <number>");
 		}
@@ -156,8 +154,8 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 	private boolean performHomesCommand(String label, String[] args, CommandSender sender) {
 		if (args.length == 2) {
 			configManager.setHomeSystem(stringToBoolean(args[1]));
-			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
-			sender.sendMessage(messageWrapper.getString("restart"));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, args[1]));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.RESTART));
 		} else {
 			sender.sendMessage("/" + label + " homes <true/false>");
 		}
@@ -168,7 +166,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 			throws NumberFormatException, ConfigException {
 		if (args.length == 2) {
 			configManager.setMaxPlayershops(Integer.valueOf(args[1]));
-			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, args[1]));
 		} else {
 			sender.sendMessage("/" + label + " maxPlayershops <number>");
 		}
@@ -178,7 +176,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 	private boolean performExtendedInteractionCommand(String label, String[] args, CommandSender sender) {
 		if (args.length == 2) {
 			configManager.setExtendedInteraction(stringToBoolean(args[1]));
-			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, args[1]));
 		} else {
 			sender.sendMessage("/" + label + " extendedInteraction <true/false>");
 		}
@@ -198,7 +196,7 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 					player.denyWildernessPermission();
 				}
 			}
-			sender.sendMessage(messageWrapper.getString("config_change", args[1]));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, args[1]));
 		} else {
 			sender.sendMessage("/" + label + " wildernessInteraction <true/false>");
 		}
@@ -209,8 +207,8 @@ public class ConfigCommandExecutorImpl implements CommandExecutor {
 		if (args.length == 3) {
 			configManager.setCurrencyPl(args[2]);
 			configManager.setCurrencySg(args[1]);
-			sender.sendMessage(messageWrapper.getString("config_change", args[1] + " " + args[2]));
-			sender.sendMessage(messageWrapper.getString("restart"));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, args[1] + " " + args[2]));
+			sender.sendMessage(messageWrapper.getString(MessageEnum.RESTART));
 		} else {
 			sender.sendMessage("/" + label + " currency <singular> <plural>");
 		}

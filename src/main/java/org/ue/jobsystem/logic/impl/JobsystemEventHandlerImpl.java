@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -19,7 +17,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -31,7 +28,7 @@ import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
 import org.ue.jobsystem.logic.api.Job;
-import org.ue.jobsystem.logic.api.JobManager;
+import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemEventHandler;
 import org.ue.jobsystem.logic.api.JobsystemException;
@@ -46,15 +43,12 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 	private final ArrayList<Material> crops = new ArrayList<>(Arrays.asList(Material.POTATOES, Material.CARROTS,
 			Material.WHEAT, Material.NETHER_WART_BLOCK, Material.BEETROOTS, Material.COCOA));
 	private final EconomyPlayerManager ecoPlayerManager;
-	private final JobManager jobManager;
 	private final JobcenterManager jobcenterManager;
 	private final ServerProvider serverProvider;
-	
-	@Inject
+
 	public JobsystemEventHandlerImpl(ServerProvider serverProvider, JobcenterManager jobcenterManager,
-			JobManager jobManager, EconomyPlayerManager ecoPlayerManager) {
+			EconomyPlayerManager ecoPlayerManager) {
 		this.ecoPlayerManager = ecoPlayerManager;
-		this.jobManager = jobManager;
 		this.jobcenterManager = jobcenterManager;
 		this.serverProvider = serverProvider;
 	}
@@ -139,8 +133,7 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 		}
 	}
 
-	private void payForCrops(Block block, EconomyPlayer ecoPlayer, Job job)
-			throws JobsystemException, BankException {
+	private void payForCrops(Block block, EconomyPlayer ecoPlayer, Job job) throws JobsystemException, BankException {
 		Ageable ageable = (Ageable) block.getBlockData();
 		if (ageable.getAge() == ageable.getMaximumAge()) {
 			double d = job.getBlockPrice(block.getType().toString());
@@ -190,24 +183,14 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 
 	@Override
 	public void handleInventoryClick(InventoryClickEvent event) {
-		if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null) {
-			event.setCancelled(true);
-			try {
-				EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getWhoClicked().getName());
-				String displayname = event.getCurrentItem().getItemMeta().getDisplayName();
-				if (displayname != null) {
-					if (event.getClick() == ClickType.RIGHT) {
-						if (!"Info".equals(displayname)) {
-							ecoPlayer.leaveJob(jobManager.getJobByName(displayname), true);
-						}
-					} else if (event.getClick() == ClickType.LEFT) {
-						ecoPlayer.joinJob(jobManager.getJobByName(displayname), true);
-					}
-				}
-			} catch (JobsystemException e) {
-			} catch (EconomyPlayerException e) {
-				event.getWhoClicked().sendMessage(ChatColor.RED + e.getMessage());
-			}
+		event.setCancelled(true);
+		Entity entity = (Entity) event.getInventory().getHolder();
+		String id = (String) entity.getMetadata("ue-id").get(0).value();
+		try {
+			Jobcenter jobcenter = jobcenterManager.getJobcenterByName(id);
+			EconomyPlayer ecoPlayer = ecoPlayerManager.getEconomyPlayerByName(event.getWhoClicked().getName());
+			jobcenter.handleInventoryClick(event.getClick(), event.getRawSlot(), ecoPlayer);
+		} catch (JobsystemException | EconomyPlayerException e) {
 		}
 	}
 
@@ -215,7 +198,8 @@ public class JobsystemEventHandlerImpl implements JobsystemEventHandler {
 	public void handleOpenInventory(PlayerInteractEntityEvent event) {
 		try {
 			event.setCancelled(true);
-			jobcenterManager.getJobcenterByName(event.getRightClicked().getCustomName()).openInventory(event.getPlayer());
+			jobcenterManager.getJobcenterByName(event.getRightClicked().getCustomName())
+					.openInventory(event.getPlayer());
 		} catch (JobsystemException e) {
 		}
 	}

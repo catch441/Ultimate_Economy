@@ -1,4 +1,4 @@
-package org.ue.common.logic.impl;
+package org.ue.economyvillager.logic.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,7 +26,7 @@ public class EconomyVillagerValidationHandlerTest {
 
 	static AbstractValidator validator;
 
-	private static class AbstractValidator extends EconomyVillagerValidationHandlerImpl<AbstractException> {
+	private static class AbstractValidator extends EconomyVillagerValidatorImpl<AbstractException> {
 
 		public AbstractValidator(ServerProvider serverProvider, MessageWrapper messageWrapper) {
 			super(serverProvider, messageWrapper);

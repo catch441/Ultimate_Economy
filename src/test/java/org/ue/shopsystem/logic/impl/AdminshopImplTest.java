@@ -16,6 +16,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -33,7 +34,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Villager.Profession;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -46,15 +49,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.logic.api.CustomSkullService;
 import org.ue.common.logic.api.ExceptionMessageEnum;
-import org.ue.common.logic.api.SkullTextureEnum;
+import org.ue.common.logic.api.InventoryGuiHandler;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.ServerProvider;
+import org.ue.common.utils.UltimateEconomyProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
 import org.ue.shopsystem.logic.api.AdminshopManager;
+import org.ue.shopsystem.logic.api.ShopEditorHandler;
 import org.ue.shopsystem.logic.api.ShopItem;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopSlotEditorHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,18 +78,24 @@ public class AdminshopImplTest {
 	@Mock
 	ShopDao shopDao;
 	@Mock
-	ShopValidationHandler validationHandler;
+	ShopValidator validationHandler;
 	@Mock
 	ConfigManager configManager;
 	@Mock
 	AdminshopManager adminshopManager;
-	
+
 	private class Mocks {
 		Villager villager;
 		Inventory inventory;
-		public Mocks(Villager villager,Inventory inventory) {
+		ShopEditorHandler editorHandler;
+		ShopSlotEditorHandler slotEditorHandler;
+
+		public Mocks(Villager villager, Inventory inventory, ShopEditorHandler editorHandler,
+				ShopSlotEditorHandler slotEditorHandler) {
 			this.villager = villager;
 			this.inventory = inventory;
+			this.editorHandler = editorHandler;
+			this.slotEditorHandler = slotEditorHandler;
 		}
 	}
 
@@ -95,10 +108,16 @@ public class AdminshopImplTest {
 		ItemStack infoItem = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory editorStuff = mock(Inventory.class);
-		when(meta.getDisplayName()).thenReturn("Info");
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editorStuff);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-SlotEditor"))).thenReturn(editorStuff);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
+		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
+		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(adminshop, null, Profession.NITWIT)).thenReturn(customizer);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(editorHandler.getInventory()).thenReturn(backLink);
+		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
+		when(provider.createShopSlotEditorHandler(backLink)).thenReturn(slotEditorHandler);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop"))).thenReturn(inv);
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
@@ -106,9 +125,125 @@ public class AdminshopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		adminshop.setupNew("myshop", "A0", loc, 9);
-		return new Mocks(villager, inv);
+		return new Mocks(villager, inv, editorHandler, slotEditorHandler);
+	}
+	
+	@Test
+	public void handleInventoryClickTestWithOutsideClick() {
+		createNewAdminshop();
+		adminshop.handleInventoryClick(ClickType.LEFT, 8, null);
+	}
+
+	@Test
+	public void handleInventoryClickTestWithBuyItem() {
+		createNewAdminshop();
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		when(stack.getAmount()).thenReturn(2);
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
+		assertDoesNotThrow(() -> adminshop.addShopItem(2, 1, 0, stack));
+
+		assertDoesNotThrow(() -> adminshop.getShopItem(0));
+		EconomyPlayer whoClicked = mock(EconomyPlayer.class);
+		Player player = mock(Player.class);
+		when(whoClicked.getPlayer()).thenReturn(player);
+		adminshop.handleInventoryClick(ClickType.LEFT, 2, whoClicked);
+	}
+
+	@Test
+	public void handleInventoryClickTestWithSellItemSpecific() {
+		createNewAdminshop();
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack stackCloneClone = mock(ItemStack.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		when(stack.getAmount()).thenReturn(2);
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		when(stackClone.clone()).thenReturn(stackCloneClone);
+		when(stackCloneClone.toString()).thenReturn("123");
+		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
+		assertDoesNotThrow(() -> adminshop.addShopItem(2, 0, 1, stack));
+
+		ItemStack addedItem = mock(ItemStack.class);
+		ItemStack addedItemClone = mock(ItemStack.class);
+		ItemMeta addedItemMeta = mock(ItemMeta.class);
+		EconomyPlayer whoClicked = mock(EconomyPlayer.class);
+		Player player = mock(Player.class);
+		PlayerInventory playerInventory = mock(PlayerInventory.class);
+		InventoryView view = mock(InventoryView.class);
+		ItemStack[] contents = new ItemStack[2];
+		contents[0] = null;
+		contents[1] = stack;
+		when(playerInventory.getStorageContents()).thenReturn(contents);
+		when(stack.isSimilar(stackCloneClone)).thenReturn(true);
+		when(player.getInventory()).thenReturn(playerInventory);
+		when(addedItemClone.toString()).thenReturn("123");
+		when(addedItemClone.getItemMeta()).thenReturn(addedItemMeta);
+		when(addedItem.clone()).thenReturn(addedItemClone);
+		when(view.getItem(27)).thenReturn(addedItem);
+		when(stack.getAmount()).thenReturn(10);
+		when(player.getOpenInventory()).thenReturn(view);
+		when(whoClicked.getPlayer()).thenReturn(player);
+		reset(validationHandler);
+		adminshop.handleInventoryClick(ClickType.RIGHT, 27, whoClicked);
+		
+		assertDoesNotThrow(() -> verify(validationHandler, times(2)).checkForValidSlot(2, 8));
+	}
+
+	@Test
+	public void handleInventoryClickTestWithSellItemAll() {
+		createNewAdminshop();
+		ItemStack stack = mock(ItemStack.class);
+		ItemStack stackClone = mock(ItemStack.class);
+		ItemStack stackCloneClone = mock(ItemStack.class);
+		ItemMeta stackMetaClone = mock(ItemMeta.class);
+		when(stack.getAmount()).thenReturn(2);
+		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
+		when(stack.clone()).thenReturn(stackClone);
+		when(stackClone.clone()).thenReturn(stackCloneClone);
+		when(stackCloneClone.toString()).thenReturn("123");
+		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
+		assertDoesNotThrow(() -> adminshop.addShopItem(2, 0, 1, stack));
+
+		ItemStack addedItem = mock(ItemStack.class);
+		ItemStack addedItemClone = mock(ItemStack.class);
+		ItemMeta addedItemMeta = mock(ItemMeta.class);
+		EconomyPlayer whoClicked = mock(EconomyPlayer.class);
+		Player player = mock(Player.class);
+		PlayerInventory playerInventory = mock(PlayerInventory.class);
+		InventoryView view = mock(InventoryView.class);
+		ItemStack[] contents = new ItemStack[2];
+		contents[0] = null;
+		contents[1] = stack;
+		when(playerInventory.getStorageContents()).thenReturn(contents);
+		when(stack.isSimilar(stackCloneClone)).thenReturn(true);
+		when(player.getInventory()).thenReturn(playerInventory);
+		when(addedItemClone.toString()).thenReturn("123");
+		when(addedItemClone.getItemMeta()).thenReturn(addedItemMeta);
+		when(addedItem.clone()).thenReturn(addedItemClone);
+		when(view.getItem(2)).thenReturn(addedItem);
+		when(player.getOpenInventory()).thenReturn(view);
+		when(whoClicked.getPlayer()).thenReturn(player);
+		adminshop.handleInventoryClick(ClickType.SHIFT_RIGHT, 2, whoClicked);
+	}
+	
+	@Test
+	public void handleInventoryClickTestWithError() throws ShopsystemException {
+		createNewAdminshop();
+		assertDoesNotThrow(() -> adminshop.getShopItem(0));
+		EconomyPlayer whoClicked = mock(EconomyPlayer.class);
+		Player player = mock(Player.class);
+		when(whoClicked.getPlayer()).thenReturn(player);
+		ShopsystemException e = mock(ShopsystemException.class);
+		when(e.getMessage()).thenReturn("error");
+		doThrow(e).when(validationHandler).checkForPlayerIsOnline(whoClicked);
+		adminshop.handleInventoryClick(ClickType.LEFT, 2, whoClicked);
+		verify(player).sendMessage("error");
 	}
 
 	@Test
@@ -132,7 +267,6 @@ public class AdminshopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack stackCloneClone = mock(ItemStack.class);
-		ItemStack stackCloneCloneClone = mock(ItemStack.class);
 		ItemStack contentStack = mock(ItemStack.class);
 		ItemStack contentStackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
@@ -151,11 +285,9 @@ public class AdminshopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(contentStack.clone()).thenReturn(contentStackClone);
 		assertDoesNotThrow(() -> adminshop.addShopItem(3, 1, 2, stack));
-		when(stackCloneClone.clone()).thenReturn(stackCloneCloneClone);
-		when(contentStackClone.toString()).thenReturn("itemString");
-		when(stackCloneCloneClone.toString()).thenReturn("itemString");
 		when(configManager.getCurrencyText(10.0)).thenReturn("$");
-		when(messageWrapper.getString("shop_sell_plural", "10", 10.0, "$")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_SELL_PLURAL, "10", 10.0, "$")).thenReturn("my message");
+		when(stackCloneClone.isSimilar(contentStack)).thenReturn(true);
 		reset(validationHandler);
 		assertDoesNotThrow(() -> adminshop.sellShopItem(3, 10, ecoPlayer, true));
 
@@ -174,7 +306,6 @@ public class AdminshopImplTest {
 		ItemStack stack = mock(ItemStack.class);
 		ItemStack stackClone = mock(ItemStack.class);
 		ItemStack stackCloneClone = mock(ItemStack.class);
-		ItemStack stackCloneCloneClone = mock(ItemStack.class);
 		ItemStack contentStack = mock(ItemStack.class);
 		ItemStack contentStackClone = mock(ItemStack.class);
 		ItemMeta stackMetaClone = mock(ItemMeta.class);
@@ -193,11 +324,9 @@ public class AdminshopImplTest {
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(contentStack.clone()).thenReturn(contentStackClone);
 		assertDoesNotThrow(() -> adminshop.addShopItem(3, 1, 2, stack));
-		when(stackCloneClone.clone()).thenReturn(stackCloneCloneClone);
-		when(contentStackClone.toString()).thenReturn("itemString");
-		when(stackCloneCloneClone.toString()).thenReturn("itemString");
 		when(configManager.getCurrencyText(1.0)).thenReturn("$");
-		when(messageWrapper.getString("shop_sell_singular", "1", 1.0, "$")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_SELL_SINGULAR, "1", 1.0, "$")).thenReturn("my message");
+		when(stackCloneClone.isSimilar(contentStack)).thenReturn(true);
 		reset(validationHandler);
 		assertDoesNotThrow(() -> adminshop.sellShopItem(3, 1, ecoPlayer, true));
 
@@ -241,32 +370,33 @@ public class AdminshopImplTest {
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
 		Chunk chunk = mock(Chunk.class);
-		ItemStack skullInfoItem = mock(ItemStack.class);
 		ItemStack infoItem = mock(ItemStack.class);
-		ItemStack stuff = mock(ItemStack.class);
-		ItemMeta stuffMeta = mock(ItemMeta.class);
 		ItemMeta infoItemMeta = mock(ItemMeta.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory editorStuff = mock(Inventory.class);
-		when(infoItemMeta.getDisplayName()).thenReturn("Info");
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editorStuff);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-SlotEditor"))).thenReturn(editorStuff);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
+		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
+		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(adminshop, null, Profession.NITWIT)).thenReturn(customizer);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(editorHandler.getInventory()).thenReturn(backLink);
+		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
+		when(provider.createShopSlotEditorHandler(backLink)).thenReturn(slotEditorHandler);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop"))).thenReturn(inv);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(infoItem);
-		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(stuff);
-		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(stuff);
-		when(serverProvider.createItemStack(Material.BARRIER, 1)).thenReturn(stuff);
 
 		when(loc.getWorld()).thenReturn(world);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
-		when(stuff.getItemMeta()).thenReturn(stuffMeta);
 		when(infoItem.getItemMeta()).thenReturn(infoItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(skullInfoItem);
 
 		adminshop.setupNew("myshop", "A0", loc, 9);
 
+		verify(customizer).updateBackLink(backLink);
+		verify(editorHandler).setup(adminshop, 1);
+		verify(slotEditorHandler).setupSlotEditor(adminshop);
 		verify(shopDao).setupSavefile("A0");
 		verify(shopDao).saveLocation("", loc);
 		verify(shopDao).saveShopName("myshop");
@@ -279,12 +409,12 @@ public class AdminshopImplTest {
 		verify(villager).setProfession(Profession.NITWIT);
 		verify(villager).setMetadata(eq("ue-id"), any(FixedMetadataValue.class));
 		verify(villager).setMetadata(eq("ue-type"), any(FixedMetadataValue.class));
-		assertEquals("A0", adminshop.getShopId());
+		assertEquals("A0", adminshop.getId());
 		assertEquals(loc, adminshop.getLocation());
 		assertEquals("myshop", adminshop.getName());
 
 		verify(infoItemMeta).setDisplayName("Info");
-		verify(infoItem, times(2)).setItemMeta(infoItemMeta);
+		verify(infoItem).setItemMeta(infoItemMeta);
 		verify(infoItemMeta).setLore(Arrays.asList("§6Rightclick: §asell specified amount",
 				"§6Shift-Rightclick: §asell all", "§6Leftclick: §abuy"));
 		verify(inv).setItem(8, infoItem);
@@ -297,42 +427,35 @@ public class AdminshopImplTest {
 		World world = mock(World.class);
 		Villager villager = mock(Villager.class);
 		Chunk chunk = mock(Chunk.class);
-		ItemStack skullInfoItem = mock(ItemStack.class);
 		ItemStack infoItem = mock(ItemStack.class);
-		ItemStack emptyItem = mock(ItemStack.class);
-		ItemStack stuff = mock(ItemStack.class);
-		ItemStack filledItem = mock(ItemStack.class);
 		ItemStack shopItemStack = mock(ItemStack.class);
 		ItemMeta shopItemStackMeta = mock(ItemMeta.class);
-		ItemMeta stuffMeta = mock(ItemMeta.class);
 		ItemMeta infoItemMeta = mock(ItemMeta.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory editor = mock(Inventory.class);
-		Inventory slotEditor = mock(Inventory.class);
 		ShopItemImpl shopItem = mock(ShopItemImpl.class);
 		Entity entity = mock(Entity.class);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
+		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
+		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(adminshop, null, Profession.ARMORER)).thenReturn(customizer);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(editorHandler.getInventory()).thenReturn(backLink);
+		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
+		when(provider.createShopSlotEditorHandler(backLink)).thenReturn(slotEditorHandler);
 		when(entity.getName()).thenReturn("myshop");
 		when(world.getNearbyEntities(loc, 10, 10, 10)).thenReturn(Arrays.asList(entity));
-		when(infoItemMeta.getDisplayName()).thenReturn("Info");
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editor);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-SlotEditor"))).thenReturn(slotEditor);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop"))).thenReturn(inv);
 		when(serverProvider.createItemStack(Material.ANVIL, 1)).thenReturn(infoItem);
-		when(serverProvider.createItemStack(Material.GREEN_WOOL, 1)).thenReturn(stuff);
-		when(serverProvider.createItemStack(Material.RED_WOOL, 1)).thenReturn(stuff);
-		when(serverProvider.createItemStack(Material.BARRIER, 1)).thenReturn(stuff);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
 		when(loc.getWorld()).thenReturn(world);
 		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
 		when(shopItemStack.getItemMeta()).thenReturn(shopItemStackMeta);
-		when(stuff.getItemMeta()).thenReturn(stuffMeta);
 
 		when(infoItem.getItemMeta()).thenReturn(infoItemMeta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1")).thenReturn(filledItem);
-		when(skullService.getSkullWithName(eq(SkullTextureEnum.SLOTEMPTY), anyString())).thenReturn(emptyItem);
-		when(skullService.getSkullWithName(eq(SkullTextureEnum.K_OFF), anyString())).thenReturn(skullInfoItem);
 
 		when(shopDao.loadShopName()).thenReturn("myshop");
 		when(shopDao.loadSize("")).thenReturn(9);
@@ -349,8 +472,9 @@ public class AdminshopImplTest {
 
 		assertDoesNotThrow(() -> adminshop.setupExisting("A0"));
 
-		verify(editor).setItem(0, filledItem);
-		verify(editor, times(7)).setItem(anyInt(), eq(emptyItem));
+		verify(customizer).updateBackLink(backLink);
+		verify(editorHandler).setup(adminshop, 1);
+		verify(slotEditorHandler).setupSlotEditor(adminshop);
 		verify(entity).remove();
 		verify(shopDao).setupSavefile("A0");
 		verify(villager).setCustomName("myshop");
@@ -362,13 +486,13 @@ public class AdminshopImplTest {
 		verify(villager).setProfession(Profession.ARMORER);
 		verify(villager).setMetadata(eq("ue-id"), any(FixedMetadataValue.class));
 		verify(villager).setMetadata(eq("ue-type"), any(FixedMetadataValue.class));
-		assertEquals("A0", adminshop.getShopId());
+		assertEquals("A0", adminshop.getId());
 		assertEquals(loc, adminshop.getLocation());
 		assertEquals("myshop", adminshop.getName());
 		assertDoesNotThrow(() -> assertEquals(shopItem, adminshop.getShopItem(0)));
 
 		verify(infoItemMeta).setDisplayName("Info");
-		verify(infoItem, times(2)).setItemMeta(infoItemMeta);
+		verify(infoItem).setItemMeta(infoItemMeta);
 		verify(infoItemMeta).setLore(Arrays.asList("§6Rightclick: §asell specified amount",
 				"§6Shift-Rightclick: §asell all", "§6Leftclick: §abuy"));
 		verify(inv).setItem(8, infoItem);
@@ -487,7 +611,7 @@ public class AdminshopImplTest {
 		when(ecoPlayer.getPlayer()).thenReturn(player);
 		when(player.getInventory()).thenReturn(inv);
 		when(configManager.getCurrencyText(2.0)).thenReturn("$");
-		when(messageWrapper.getString("shop_buy_singular", "1", 2.0, "$")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_BUY_SINGULAR, "1", 2.0, "$")).thenReturn("my message");
 		reset(validationHandler);
 		assertDoesNotThrow(() -> adminshop.buyShopItem(3, ecoPlayer, true));
 
@@ -520,7 +644,7 @@ public class AdminshopImplTest {
 		when(ecoPlayer.getPlayer()).thenReturn(player);
 		when(player.getInventory()).thenReturn(inv);
 		when(configManager.getCurrencyText(4.0)).thenReturn("$");
-		when(messageWrapper.getString("shop_buy_plural", "2", 4.0, "$")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_BUY_PLURAL, "2", 4.0, "$")).thenReturn("my message");
 		reset(validationHandler);
 		assertDoesNotThrow(() -> adminshop.buyShopItem(3, ecoPlayer, true));
 
@@ -558,7 +682,7 @@ public class AdminshopImplTest {
 		when(ecoPlayer.getPlayer()).thenReturn(player);
 		when(player.getInventory()).thenReturn(inv);
 		when(configManager.getCurrencyText(2.0)).thenReturn("$");
-		when(messageWrapper.getString("shop_buy_singular", "1", 2.0, "$")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_BUY_SINGULAR, "1", 2.0, "$")).thenReturn("my message");
 		reset(validationHandler);
 		assertDoesNotThrow(() -> adminshop.buyShopItem(3, ecoPlayer, true));
 
@@ -601,11 +725,7 @@ public class AdminshopImplTest {
 		assertEquals(1.0, shopItem.getSellPrice());
 		assertEquals(0, shopItem.getSlot());
 		assertEquals(stackCloneClone, shopItem.getItemStack());
-		// verify that the set occupied method of the editor is called
-		verify(skullService).getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1");
-		verify(mocks.inventory).setItem(0, stackClone);
-		verify(stackClone).setAmount(2);
-		verify(stackMetaClone).setLore(Arrays.asList("§62 buy for §a4.0 $", "§62 sell for §a1.0 $"));
+		verify(mocks.editorHandler).setOccupied(true, 0);
 	}
 
 	@Test
@@ -634,11 +754,7 @@ public class AdminshopImplTest {
 		assertEquals(0.0, shopItem.getSellPrice());
 		assertEquals(0, shopItem.getSlot());
 		assertEquals(stackCloneClone, shopItem.getItemStack());
-		// verify that the set occupied method of the editor is called
-		verify(skullService).getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1");
-		verify(mocks.inventory).setItem(0, stackClone);
-		verify(stackClone).setAmount(2);
-		verify(stackMetaClone).setLore(Arrays.asList("§62 buy for §a4.0 $"));
+		verify(mocks.editorHandler).setOccupied(true, 0);
 	}
 
 	@Test
@@ -653,7 +769,7 @@ public class AdminshopImplTest {
 		when(stack.clone()).thenReturn(stackClone);
 		when(stackClone.clone()).thenReturn(stackCloneClone);
 		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
-		
+
 		assertDoesNotThrow(() -> adminshop.addShopItem(0, 1, 0, stack));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForSlotIsEmpty(anySet(), eq(0)));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForPositiveValue(1.0));
@@ -667,11 +783,7 @@ public class AdminshopImplTest {
 		assertEquals(1.0, shopItem.getSellPrice());
 		assertEquals(0, shopItem.getSlot());
 		assertEquals(stackCloneClone, shopItem.getItemStack());
-		// verify that the set occupied method of the editor is called
-		verify(skullService).getSkullWithName(SkullTextureEnum.SLOTFILLED, "Slot 1");
-		verify(mocks.inventory).setItem(0, stackClone);
-		verify(stackClone).setAmount(2);
-		verify(stackMetaClone).setLore(Arrays.asList("§62 sell for §a1.0 $"));
+		verify(mocks.editorHandler).setOccupied(true, 0);
 	}
 
 	@Test
@@ -694,8 +806,7 @@ public class AdminshopImplTest {
 	@Test
 	public void addShopItemTestWithOccupiedSlot() throws ShopsystemException {
 		createNewAdminshop();
-		doThrow(ShopsystemException.class).when(validationHandler)
-				.checkForSlotIsEmpty(new HashSet<Integer>(), 0);
+		doThrow(ShopsystemException.class).when(validationHandler).checkForSlotIsEmpty(new HashSet<Integer>(), 0);
 		assertThrows(ShopsystemException.class, () -> adminshop.addShopItem(0, 0.0, 0.0, null));
 		verify(shopDao, never()).saveShopItem(any(ShopItemImpl.class), eq(false));
 	}
@@ -875,8 +986,7 @@ public class AdminshopImplTest {
 
 		assertDoesNotThrow(() -> verify(validationHandler).checkForItemCanBeDeleted(3, 9));
 		assertDoesNotThrow(() -> verify(validationHandler, times(2)).checkForValidSlot(3, 8));
-		assertDoesNotThrow(() -> verify(validationHandler, times(2))
-				.checkForSlotIsNotEmpty(anySet(), eq(3)));
+		assertDoesNotThrow(() -> verify(validationHandler, times(2)).checkForSlotIsNotEmpty(anySet(), eq(3)));
 		verify(mocks.inventory).clear(3);
 		verify(shopDao).saveShopItem(any(), eq(true));
 		assertDoesNotThrow(() -> assertEquals(0, adminshop.getItemList().size()));
@@ -950,11 +1060,16 @@ public class AdminshopImplTest {
 		ItemStack infoItem = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory editor = mock(Inventory.class);
-		Inventory slotEditor = mock(Inventory.class);
-		when(meta.getDisplayName()).thenReturn("Info");
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editor);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-SlotEditor"))).thenReturn(slotEditor);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
+		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
+		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(adminshop, null, Profession.NITWIT)).thenReturn(customizer);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(editorHandler.getInventory()).thenReturn(backLink);
+		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
+		when(provider.createShopSlotEditorHandler(backLink)).thenReturn(slotEditorHandler);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop"))).thenReturn(inv);
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
@@ -962,25 +1077,17 @@ public class AdminshopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 
 		adminshop.setupNew("myshop", "A0", loc, 9);
-
 		Inventory invNew = mock(Inventory.class);
-		Inventory editorNew = mock(Inventory.class);
-		Inventory slotEditorNew = mock(Inventory.class);
 
 		when(serverProvider.createInventory(villager, 9, "newName")).thenReturn(invNew);
-		when(serverProvider.createInventory(villager, 9, "newName-Editor")).thenReturn(editorNew);
-		when(serverProvider.createInventory(villager, 27, "newName-SlotEditor")).thenReturn(slotEditorNew);
 
 		assertDoesNotThrow(() -> adminshop.changeShopName("newName"));
 
 		assertEquals("newName", adminshop.getName());
 		verify(shopDao).saveShopName("newName");
 		verify(invNew).setContents(inv.getContents());
-		verify(editorNew).setContents(editor.getContents());
-		verify(slotEditorNew).setContents(slotEditor.getContents());
 
 		verify(villager).setCustomName("newName");
 	}
@@ -1007,53 +1114,13 @@ public class AdminshopImplTest {
 	@Test
 	public void changeSizeTest() {
 		Mocks mocks = createNewAdminshop();
-		ItemStack stack = mock(ItemStack.class);
-		ItemStack stackClone = mock(ItemStack.class);
-		ItemMeta stackMetaClone = mock(ItemMeta.class);
-		when(stack.getAmount()).thenReturn(2);
-		when(stackClone.getItemMeta()).thenReturn(stackMetaClone);
-		when(stack.clone()).thenReturn(stackClone);
-		when(configManager.getCurrencyText(anyDouble())).thenReturn("$");
-		assertDoesNotThrow(() -> adminshop.addShopItem(0, 1, 4, stack));
-
-		Inventory oldInv = mocks.inventory;
-		Inventory inv = mock(Inventory.class);
-		Inventory editorStuff = mock(Inventory.class);
-		ItemStack empty = mock(ItemStack.class);
-		ItemStack filled = mock(ItemStack.class);
-		ItemStack infoItem = mock(ItemStack.class);
-		when(oldInv.getItem(1)).thenReturn(null);
-		when(oldInv.getItem(2)).thenReturn(null);
-		when(oldInv.getItem(3)).thenReturn(null);
-		when(oldInv.getItem(4)).thenReturn(null);
-		when(oldInv.getItem(5)).thenReturn(null);
-		when(oldInv.getItem(6)).thenReturn(null);
-		when(oldInv.getItem(7)).thenReturn(null);
-		when(oldInv.getItem(0)).thenReturn(stackClone);
-		when(oldInv.getItem(8)).thenReturn(infoItem);
-		when(skullService.getSkullWithName(eq(SkullTextureEnum.SLOTFILLED), anyString())).thenReturn(filled);
-		when(skullService.getSkullWithName(eq(SkullTextureEnum.SLOTEMPTY), anyString())).thenReturn(empty);
-		when(serverProvider.createInventory(mocks.villager, 18, "myshop-Editor")).thenReturn(editorStuff);
-		when(serverProvider.createInventory(mocks.villager, 18, "myshop")).thenReturn(inv);
-		
-		assertDoesNotThrow(() -> adminshop.changeSize(18));
-		verify(shopDao).saveSize("", 18);
-		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSize(18));
-		assertDoesNotThrow(() -> verify(validationHandler).checkForResizePossible(oldInv, 9, 18, 1));
-		assertEquals(18, adminshop.getSize());
-
-		verify(editorStuff, times(16)).setItem(anyInt(), eq(empty));
-		verify(editorStuff).setItem(0, filled);
-
-		verify(serverProvider).createInventory(mocks.villager, 18, "myshop");
-		verify(serverProvider).createInventory(mocks.villager, 18, "myshop-Editor");
-		
-		verify(shopDao).saveSize("", 18);
-		assertEquals(18, adminshop.getSize());
-		ItemStack[] resultContents = new ItemStack[18];
-		resultContents[17] = infoItem;
-		resultContents[0] = stackClone;
-		verify(inv).setContents(resultContents);
+		reset(adminshop.getCustomizeGuiHandler());
+		reset(mocks.editorHandler);
+		assertDoesNotThrow(() -> adminshop.changeSize(27));
+		assertEquals(27, adminshop.getSize());
+		verify(mocks.slotEditorHandler).updateBackLink(mocks.editorHandler.getInventory());
+		verify(adminshop.getCustomizeGuiHandler()).updateBackLink(mocks.editorHandler.getInventory());	
+		verify(mocks.editorHandler).setup(adminshop, 1);
 	}
 
 	@Test
@@ -1067,8 +1134,7 @@ public class AdminshopImplTest {
 	@Test
 	public void changeShopSizeTestWithOccupiedSlots() throws ShopsystemException {
 		Mocks mocks = createNewAdminshop();
-		doThrow(ShopsystemException.class).when(validationHandler).checkForResizePossible(mocks.inventory, 9,
-				18, 1);
+		doThrow(ShopsystemException.class).when(validationHandler).checkForResizePossible(mocks.inventory, 9, 18, 1);
 		assertThrows(ShopsystemException.class, () -> adminshop.changeSize(18));
 		assertEquals(9, adminshop.getSize());
 	}
@@ -1155,45 +1221,31 @@ public class AdminshopImplTest {
 	}
 
 	@Test
-	public void openSlotEditorTest() throws ShopsystemException {
-		JavaPlugin plugin = mock(JavaPlugin.class);
-		Location loc = mock(Location.class);
-		World world = mock(World.class);
-		Villager villager = mock(Villager.class);
-		Chunk chunk = mock(Chunk.class);
-		ItemStack infoItem = mock(ItemStack.class);
-		ItemMeta meta = mock(ItemMeta.class);
-		Inventory inv = mock(Inventory.class);
-		Inventory editor = mock(Inventory.class);
-		Inventory slotEditor = mock(Inventory.class);
-		Player player = mock(Player.class);
-		when(meta.getDisplayName()).thenReturn("Info");
-		doThrow(ShopsystemException.class).when(validationHandler).checkForSlotIsNotEmpty(anySet(), eq(0));
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editor);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-SlotEditor"))).thenReturn(slotEditor);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop"))).thenReturn(inv);
-		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
-		when(loc.getWorld()).thenReturn(world);
-		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
-		when(infoItem.getItemMeta()).thenReturn(meta);
-		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
-		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
-		adminshop.setupNew("myshop", "A0", loc, 9);
-
-		assertDoesNotThrow(() -> adminshop.openSlotEditor(player, 0));
-
-		assertDoesNotThrow(() -> verify(validationHandler, times(3)).checkForValidSlot(0, 8));
-		verify(player).openInventory(slotEditor);
+	public void getSlotEditorHandlerTest() {
+		Mocks mocks = createNewAdminshop();
+		InventoryGuiHandler result = assertDoesNotThrow(() -> adminshop.getSlotEditorHandler(1));
+		assertEquals(mocks.slotEditorHandler, result);
+		verify(mocks.slotEditorHandler).setSelectedSlot(1);
+		assertDoesNotThrow(() -> verify(validationHandler).checkForValidSlot(1, 8));
+	}
+	
+	@Test
+	public void getSlotEditorHandlerTestWithSlotAlreadySet() {
+		Mocks mocks = createNewAdminshop();
+		reset(mocks.slotEditorHandler);
+		InventoryGuiHandler result = assertDoesNotThrow(() -> adminshop.getSlotEditorHandler(null));
+		assertEquals(mocks.slotEditorHandler, result);
+		verifyNoInteractions(mocks.slotEditorHandler);
+		verifyNoInteractions(validationHandler);
 	}
 
 	@Test
-	public void openSlotEditorTestWithInvalidSlot() throws ShopsystemException {
-		createNewAdminshop();
-		Player player = mock(Player.class);
+	public void getSlotEditorHandlerTestWithInvalidSlot() throws ShopsystemException {
+		Mocks mocks = createNewAdminshop();
 		doThrow(ShopsystemException.class).when(validationHandler).checkForValidSlot(0, 8);
-		assertThrows(ShopsystemException.class, () -> adminshop.openSlotEditor(player, 0));
-		verify(player, never()).openInventory(any(Inventory.class));
+		reset(mocks.slotEditorHandler);
+		assertThrows(ShopsystemException.class, () -> adminshop.getSlotEditorHandler(0));
+		verifyNoInteractions(mocks.slotEditorHandler);
 	}
 
 	@Test
@@ -1205,34 +1257,10 @@ public class AdminshopImplTest {
 	}
 
 	@Test
-	public void openEditorInventoryTest() {
-		JavaPlugin plugin = mock(JavaPlugin.class);
-		Location loc = mock(Location.class);
-		World world = mock(World.class);
-		Villager villager = mock(Villager.class);
-		Chunk chunk = mock(Chunk.class);
-		ItemStack infoItem = mock(ItemStack.class);
-		ItemMeta meta = mock(ItemMeta.class);
-		Inventory inv = mock(Inventory.class);
-		Inventory editor = mock(Inventory.class);
-		Inventory slotEditor = mock(Inventory.class);
-		when(meta.getDisplayName()).thenReturn("Info");
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editor);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-SlotEditor"))).thenReturn(slotEditor);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop"))).thenReturn(inv);
-		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
-		when(loc.getWorld()).thenReturn(world);
-		when(serverProvider.getJavaPluginInstance()).thenReturn(plugin);
-		when(infoItem.getItemMeta()).thenReturn(meta);
-		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
-		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
-		adminshop.setupNew("myshop", "A0", loc, 9);
-		Player player = mock(Player.class);
-
-		assertDoesNotThrow(() -> adminshop.openEditor(player));
-
-		verify(player).openInventory(editor);
+	public void getEditorHandlerTest() {
+		Mocks mocks = createNewAdminshop();
+		InventoryGuiHandler handler = adminshop.getEditorHandler();
+		assertEquals(mocks.editorHandler, handler);
 	}
 
 	@Test
@@ -1244,7 +1272,7 @@ public class AdminshopImplTest {
 	@Test
 	public void getShopIdTest() {
 		createNewAdminshop();
-		assertEquals("A0", adminshop.getShopId());
+		assertEquals("A0", adminshop.getId());
 	}
 
 	@Test
@@ -1257,10 +1285,16 @@ public class AdminshopImplTest {
 		ItemStack infoItem = mock(ItemStack.class);
 		ItemMeta meta = mock(ItemMeta.class);
 		Inventory inv = mock(Inventory.class);
-		Inventory editorStuff = mock(Inventory.class);
-		when(meta.getDisplayName()).thenReturn("Info");
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-Editor"))).thenReturn(editorStuff);
-		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop-SlotEditor"))).thenReturn(editorStuff);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		ShopEditorHandler editorHandler = mock(ShopEditorHandler.class);
+		ShopSlotEditorHandler slotEditorHandler = mock(ShopSlotEditorHandler.class);
+		Inventory backLink = mock(Inventory.class);
+		InventoryGuiHandler customizer = mock(InventoryGuiHandler.class);
+		when(provider.createEconomyVillagerCustomizeHandler(adminshop, null, Profession.NITWIT)).thenReturn(customizer);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(editorHandler.getInventory()).thenReturn(backLink);
+		when(provider.createShopEditorHandler()).thenReturn(editorHandler);
+		when(provider.createShopSlotEditorHandler(backLink)).thenReturn(slotEditorHandler);
 		when(serverProvider.createInventory(eq(villager), anyInt(), eq("myshop"))).thenReturn(inv);
 		when(serverProvider.createItemStack(any(), eq(1))).thenReturn(infoItem);
 		when(loc.getWorld()).thenReturn(world);
@@ -1268,7 +1302,6 @@ public class AdminshopImplTest {
 		when(infoItem.getItemMeta()).thenReturn(meta);
 		when(world.spawnEntity(loc, EntityType.VILLAGER)).thenReturn(villager);
 		when(loc.getChunk()).thenReturn(chunk);
-		when(skullService.getSkullWithName(any(SkullTextureEnum.class), anyString())).thenReturn(infoItem);
 		adminshop.setupNew("myshop", "A0", loc, 9);
 
 		assertEquals(loc, adminshop.getLocation());

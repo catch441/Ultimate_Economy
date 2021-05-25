@@ -3,7 +3,7 @@ package org.ue.common.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TabCompleterUtils {
+public abstract class TabCompleterUtils {
 	
 	protected void addIfMatching(List<String> list, String command, String arg) {
 		if (command.contains(arg)) {

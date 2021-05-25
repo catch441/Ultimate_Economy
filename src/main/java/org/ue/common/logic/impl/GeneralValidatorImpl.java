@@ -4,15 +4,15 @@ import java.util.List;
 
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.logic.api.GeneralEconomyException;
-import org.ue.common.logic.api.GeneralValidationHandler;
+import org.ue.common.logic.api.GeneralValidator;
 import org.ue.common.utils.api.MessageWrapper;
 
-public abstract class GeneralValidationHandlerImpl<T extends GeneralEconomyException>
-		implements GeneralValidationHandler<T> {
+public abstract class GeneralValidatorImpl<T extends GeneralEconomyException>
+		implements GeneralValidator<T> {
 
 	protected final MessageWrapper messageWrapper;
 
-	public GeneralValidationHandlerImpl(MessageWrapper messageWrapper) {
+	public GeneralValidatorImpl(MessageWrapper messageWrapper) {
 		this.messageWrapper = messageWrapper;
 
 	}

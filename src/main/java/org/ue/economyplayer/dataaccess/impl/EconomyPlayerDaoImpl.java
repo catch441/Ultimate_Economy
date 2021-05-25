@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.ue.bank.logic.api.BankAccount;
@@ -22,7 +20,6 @@ public class EconomyPlayerDaoImpl extends SaveFileUtils implements EconomyPlayer
 	private final BankManager bankManager;
 	private final ServerProvider serverProvider;
 
-	@Inject
 	public EconomyPlayerDaoImpl(BankManager bankManager, ServerProvider serverProvider) {
 		this.bankManager = bankManager;
 		this.serverProvider = serverProvider;

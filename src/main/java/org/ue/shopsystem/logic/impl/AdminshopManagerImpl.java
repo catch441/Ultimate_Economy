@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,20 +15,19 @@ import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.logic.api.Adminshop;
 import org.ue.shopsystem.logic.api.AdminshopManager;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class AdminshopManagerImpl implements AdminshopManager {
 
 	private static final Logger log = LoggerFactory.getLogger(AdminshopManagerImpl.class);
 	private final MessageWrapper messageWrapper;
-	private final ShopValidationHandler validationHandler;
+	private final ShopValidator validationHandler;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
 	private Map<String, Adminshop> adminShopList = new HashMap<>();
 
-	@Inject
-	public AdminshopManagerImpl(ShopValidationHandler validationHandler, MessageWrapper messageWrapper,
+	public AdminshopManagerImpl(ShopValidator validationHandler, MessageWrapper messageWrapper,
 			ServerProvider serverProvider, ConfigDao configDao) {
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
@@ -92,15 +89,15 @@ public class AdminshopManagerImpl implements AdminshopManager {
 		validationHandler.checkForValidShopName(name);
 		validationHandler.checkForValidSize(size);
 		validationHandler.checkForValueNotInList(getAdminshopNameList(), name);
-		Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
+		Adminshop shop = serverProvider.getProvider().createAdminshop();
 		shop.setupNew(name, generateFreeAdminShopId(), spawnLocation, size);
-		adminShopList.put(shop.getShopId(), shop);
+		adminShopList.put(shop.getId(), shop);
 		configDao.saveAdminshopIds(getAdminshopIdList());
 	}
 
 	@Override
 	public void deleteAdminShop(Adminshop adminshop) {
-		adminShopList.remove(adminshop.getShopId());
+		adminShopList.remove(adminshop.getId());
 		adminshop.deleteShop();
 		configDao.saveAdminshopIds(getAdminshopIdList());
 	}
@@ -116,7 +113,7 @@ public class AdminshopManagerImpl implements AdminshopManager {
 	public void loadAllAdminShops() {
 		for (String shopId : configDao.loadAdminshopIds()) {
 			try {
-				Adminshop shop = serverProvider.getServiceComponent().getAdminshop();
+				Adminshop shop = serverProvider.getProvider().createAdminshop();
 				shop.setupExisting(shopId);
 				adminShopList.put(shopId, shop);
 			} catch (EconomyPlayerException e) {

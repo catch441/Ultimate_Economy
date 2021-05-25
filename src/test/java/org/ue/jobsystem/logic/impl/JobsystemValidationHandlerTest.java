@@ -22,7 +22,7 @@ import org.ue.jobsystem.logic.api.JobsystemException;
 public class JobsystemValidationHandlerTest {
 
 	@InjectMocks
-	JobsystemValidationHandlerImpl validationHandler;
+	JobsystemValidatorImpl validationHandler;
 	@Mock
 	MessageWrapper messageWrapper;
 

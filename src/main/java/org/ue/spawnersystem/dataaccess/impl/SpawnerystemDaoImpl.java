@@ -4,20 +4,17 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.ue.common.utils.SaveFileUtils;
 import org.ue.common.utils.ServerProvider;
-import org.ue.spawnersystem.dataaccess.api.SpawnerSystemDao;
+import org.ue.spawnersystem.dataaccess.api.SpawnersystemDao;
 
-public class SpawnerSystemDaoImpl extends SaveFileUtils implements SpawnerSystemDao {
+public class SpawnerystemDaoImpl extends SaveFileUtils implements SpawnersystemDao {
 	
 	private final ServerProvider serverProvider;
 	
-	@Inject
-	public SpawnerSystemDaoImpl(ServerProvider serverProvider) {
+	public SpawnerystemDaoImpl(ServerProvider serverProvider) {
 		this.serverProvider = serverProvider;
 	}
 	

@@ -21,17 +21,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.utils.ServerProvider;
-import org.ue.common.utils.ServiceComponent;
+import org.ue.common.utils.UltimateEconomyProvider;
 import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.jobsystem.dataaccess.api.JobDao;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemException;
-import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.jobsystem.logic.api.JobsystemValidator;
 
 @ExtendWith(MockitoExtension.class)
 public class JobManagerImplTest {
@@ -43,7 +42,7 @@ public class JobManagerImplTest {
 	@Mock
 	JobcenterManager jobcenterManager;
 	@Mock
-	JobsystemValidationHandler validationHandler;
+	JobsystemValidator validationHandler;
 	@Mock
 	EconomyPlayerManager ecoPlayerManager;
 	@Mock
@@ -52,27 +51,28 @@ public class JobManagerImplTest {
 	@Test
 	public void loadAllJobsTest() {
 		when(configDao.loadJobList()).thenReturn(Arrays.asList("myJob"));
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		JobDao jobDao = mock(JobDao.class);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(serviceComponent.getJobDao()).thenReturn(jobDao);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		Job job = mock(Job.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(provider.createJob()).thenReturn(job);
 		jobManager.loadAllJobs();
-		Job job = jobManager.getJobList().get(0);
-		assertEquals(job, jobManager.getJobList().get(0));
-		verify(jobDao).loadBlockList();
+		Job result = jobManager.getJobList().get(0);
+		assertEquals(job, result);
+		verify(job).setupExisting("myJob");
 	}
 
 	@Test
 	public void createJobTest() {
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		JobDao jobDao = mock(JobDao.class);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(serviceComponent.getJobDao()).thenReturn(jobDao);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		Job job = mock(Job.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(provider.createJob()).thenReturn(job);
 		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
 		assertDoesNotThrow(() -> verify(validationHandler).checkForValueNotInList(anyList(), eq("myJob")));
 		verify(configDao).saveJobList(anyList());
 		assertEquals(1, jobManager.getJobList().size());
-		assertEquals("myJob", jobManager.getJobList().get(0).getName());
+		assertEquals(job, jobManager.getJobList().get(0));
+		verify(job).setupNew("myJob");
 	}
 
 	@Test
@@ -109,22 +109,22 @@ public class JobManagerImplTest {
 
 	@Test
 	public void deleteJobTest() {
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		JobDao jobDao = mock(JobDao.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(Arrays.asList(ecoPlayer));
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(serviceComponent.getJobDao()).thenReturn(jobDao);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		Job job = mock(Job.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(provider.createJob()).thenReturn(job);
 		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
 		reset(configDao);
-		Job job = jobManager.getJobList().get(0);
 		Jobcenter jobcenter = mock(Jobcenter.class);
 		when(jobcenterManager.getJobcenterList()).thenReturn(Arrays.asList(jobcenter));
 		when(jobcenter.hasJob(job)).thenReturn(true);
 		when(ecoPlayer.hasJob(job)).thenReturn(true);
+		when(job.getName()).thenReturn("myJob");
+		when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(Arrays.asList(ecoPlayer));
 		jobManager.deleteJob(job);
-		verify(jobDao).deleteSavefile();
-		;
+		verify(job).deleteJob();
+
 		verify(configDao).saveJobList(anyList());
 		assertDoesNotThrow(() -> verify(ecoPlayer).leaveJob(job, false));
 		assertDoesNotThrow(() -> verify(jobcenter).removeJob(job));
@@ -133,25 +133,24 @@ public class JobManagerImplTest {
 
 	@Test
 	public void deleteJobTestWithFailedToRemoveJob() throws JobsystemException {
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		JobDao jobDao = mock(JobDao.class);
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(Arrays.asList(ecoPlayer));
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(serviceComponent.getJobDao()).thenReturn(jobDao);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		Job job = mock(Job.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(provider.createJob()).thenReturn(job);
 		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
 		reset(configDao);
-		Job job = jobManager.getJobList().get(0);
 		Jobcenter jobcenter = mock(Jobcenter.class);
 		JobsystemException e = mock(JobsystemException.class);
 		when(e.getMessage()).thenReturn("my error message");
 		doThrow(e).when(jobcenter).removeJob(job);
+		when(job.getName()).thenReturn("myJob");
 		when(jobcenterManager.getJobcenterList()).thenReturn(Arrays.asList(jobcenter));
 		when(jobcenter.hasJob(job)).thenReturn(true);
 		when(ecoPlayer.hasJob(job)).thenReturn(true);
 		jobManager.deleteJob(job);
-		verify(jobDao).deleteSavefile();
-		;
+		verify(job).deleteJob();
 		verify(configDao).saveJobList(anyList());
 		assertDoesNotThrow(() -> verify(ecoPlayer).leaveJob(job, false));
 		verify(e).getMessage();
@@ -160,22 +159,22 @@ public class JobManagerImplTest {
 
 	@Test
 	public void getJobListTest() {
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		JobDao jobDao = mock(JobDao.class);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(serviceComponent.getJobDao()).thenReturn(jobDao);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		Job job = mock(Job.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(provider.createJob()).thenReturn(job);
 		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
 		List<Job> list = jobManager.getJobList();
 		assertEquals(1, list.size());
-		assertEquals("myJob", list.get(0).getName());
+		assertEquals(job, list.get(0));
 	}
 
 	@Test
 	public void getJobNameList() {
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		JobDao jobDao = mock(JobDao.class);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(serviceComponent.getJobDao()).thenReturn(jobDao);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		Job job = mock(Job.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(provider.createJob()).thenReturn(job);
 		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
 		assertDoesNotThrow(() -> jobManager.createJob("myJob2"));
 		List<String> list = jobManager.getJobNameList();
@@ -186,12 +185,12 @@ public class JobManagerImplTest {
 
 	@Test
 	public void getJobByNameTest() {
-		ServiceComponent serviceComponent = mock(ServiceComponent.class);
-		JobDao jobDao = mock(JobDao.class);
-		when(serverProvider.getServiceComponent()).thenReturn(serviceComponent);
-		when(serviceComponent.getJobDao()).thenReturn(jobDao);
+		UltimateEconomyProvider provider = mock(UltimateEconomyProvider.class);
+		Job job = mock(Job.class);
+		when(serverProvider.getProvider()).thenReturn(provider);
+		when(provider.createJob()).thenReturn(job);
 		assertDoesNotThrow(() -> jobManager.createJob("myJob"));
-		assertDoesNotThrow(() -> assertEquals("myJob", jobManager.getJobByName("myJob").getName()));
+		assertDoesNotThrow(() -> assertEquals(job, jobManager.getJobByName("myJob")));
 	}
 
 	@Test

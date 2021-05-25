@@ -3,32 +3,29 @@ package org.ue.shopsystem.logic.impl;
 import java.io.File;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.bukkit.inventory.Inventory;
 import org.ue.common.logic.api.ExceptionMessageEnum;
-import org.ue.common.logic.impl.EconomyVillagerValidationHandlerImpl;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyvillager.logic.impl.EconomyVillagerValidatorImpl;
 import org.ue.shopsystem.logic.api.Playershop;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
 import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
 
-public class ShopValidationHandlerImpl extends EconomyVillagerValidationHandlerImpl<ShopsystemException>
-		implements ShopValidationHandler {
+public class ShopValidatorImpl extends EconomyVillagerValidatorImpl<ShopsystemException>
+		implements ShopValidator {
 
 	private final ConfigManager configManager;
 	private final TownworldManager townworldManager;
 
-	@Inject
-	public ShopValidationHandlerImpl(ServerProvider serverProvider, MessageWrapper messageWrapper,
+	public ShopValidatorImpl(ServerProvider serverProvider, MessageWrapper messageWrapper,
 			ConfigManager configManager, TownworldManager townworldManager) {
 		super(serverProvider, messageWrapper);
 		this.configManager = configManager;

@@ -7,29 +7,41 @@ import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.ue.common.logic.api.CustomSkullService;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.logic.api.SkullTextureEnum;
+import org.ue.common.logic.impl.InventoryGuiHandlerImpl;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
+import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.shopsystem.logic.api.AbstractShop;
 import org.ue.shopsystem.logic.api.ShopItem;
 import org.ue.shopsystem.logic.api.ShopSlotEditorHandler;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
-public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
+public class ShopSlotEditorHandlerImpl extends InventoryGuiHandlerImpl implements ShopSlotEditorHandler {
 
-	private Inventory slotEditorInv;
-	private int selectedEditorSlot;
-	private AbstractShop shop;
-	private final CustomSkullService skullService;
-	private final ShopValidationHandler validationHandler;
+	private final ShopValidator validationHandler;
 	private final MessageWrapper messageWrapper;
-	private final ServerProvider serverProvider;
+	private AbstractShop shop;
+
+	// current state, false = off/minus
+	private boolean sellFactorState = false;
+	private boolean buyFactorState = false;
+
+	private boolean sellOperatorState = true;
+	private boolean buyOperatorState = true;
+	private boolean amountOperatorState = true;
+
+	private double selectedBuyPrice = 0.0;
+	private double selectedSellPrice = 0.0;
+	private int selectedAmount = 1;
+
+	private int selectedEditorSlot;
 
 	/**
 	 * Constructor for a new Slot Editor handler.
@@ -38,51 +50,26 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	 * @param messageWrapper
 	 * @param validationHandler
 	 * @param skullService
-	 * @param shop
+	 * @param backLink
 	 */
 	public ShopSlotEditorHandlerImpl(ServerProvider serverProvider, MessageWrapper messageWrapper,
-			ShopValidationHandler validationHandler, CustomSkullService skullService, AbstractShop shop) {
-		this.shop = shop;
-		this.skullService = skullService;
+			ShopValidator validationHandler, CustomSkullService skullService, Inventory backLink) {
+		super(skullService, serverProvider, backLink);
 		this.validationHandler = validationHandler;
 		this.messageWrapper = messageWrapper;
-		this.serverProvider = serverProvider;
+	}
+
+	@Override
+	public void setupSlotEditor(AbstractShop shop) {
 		selectedEditorSlot = 0;
-		setupSlotEditor();
-	}
+		this.shop = shop;
+		inventory = shop.createVillagerInventory(27, "SlotEditor");
+		setSkull(SkullTextureEnum.K_OFF, null, "factor off", 12);
+		setSkull(SkullTextureEnum.K_OFF, null, "factor off", 21);
 
-	private void setupSlotEditor() {
-		slotEditorInv = shop.createVillagerInventory(27, shop.getName() + "-SlotEditor");
-		setupFactorItem();
-		setupDefaultItem(Material.GREEN_WOOL, ChatColor.YELLOW + "save changes", 8);
-		setupDefaultItem(Material.RED_WOOL, ChatColor.RED + "exit without save", 7);
-		setupDefaultItem(Material.BARRIER, ChatColor.RED + "remove item", 26);
-	}
-
-	private void setupFactorItem() {
-		ItemStack item = skullService.getSkullWithName(SkullTextureEnum.K_OFF, "factor off");
-		getSlotEditorInventory().setItem(12, item);
-		getSlotEditorInventory().setItem(21, item);
-	}
-
-	private void setupDefaultItem(Material material, String displayName, int slot) {
-		ItemStack item = serverProvider.createItemStack(material, 1);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(displayName);
-		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(slot, item);
-	}
-
-	@Override
-	public Inventory getSlotEditorInventory() {
-		return slotEditorInv;
-	}
-
-	@Override
-	public void changeInventoryName(String newName) {
-		Inventory slotEditorNew = shop.createVillagerInventory(27, newName + "-SlotEditor");
-		slotEditorNew.setContents(getSlotEditorInventory().getContents());
-		slotEditorInv = slotEditorNew;
+		setItem(Material.GREEN_WOOL, null, ChatColor.YELLOW + "save changes", 8);
+		setItem(Material.RED_WOOL, null, ChatColor.RED + "exit without save", 7);
+		setItem(Material.BARRIER, null, ChatColor.RED + "remove item", 26);
 	}
 
 	@Override
@@ -92,162 +79,146 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 	}
 
 	private void setupSlotEditorWithShopItemInformations(int slot) {
-		double buyPrice = 0;
-		double sellPrice = 0;
 		try {
 			ShopItem item = shop.getShopItem(slot);
-			buyPrice = item.getBuyPrice();
-			sellPrice = item.getSellPrice();
+			selectedBuyPrice = item.getBuyPrice();
+			selectedSellPrice = item.getSellPrice();
+			selectedAmount = item.getAmount();
+
+			ItemStack stack = item.getItemStack();
+			stack.setAmount(selectedAmount);
+			inventory.setItem(0, stack);
 		} catch (ShopsystemException e) {
+			setItem(Material.BARRIER, null, ChatColor.GREEN + "select item", 0);
 		}
-		List<String> listBuy = new ArrayList<String>();
-		List<String> listSell = new ArrayList<String>();
-		listBuy.add(ChatColor.GOLD + "Price: " + buyPrice);
-		listSell.add(ChatColor.GOLD + "Price: " + sellPrice);
+		List<String> listBuy = Arrays.asList(ChatColor.GOLD + "Price: " + selectedBuyPrice);
+		List<String> listSell = Arrays.asList(ChatColor.GOLD + "Price: " + selectedSellPrice);
 		setupItemsInSlotEditor(Arrays.asList(2, 11, 20), SkullTextureEnum.PLUS, "plus", listBuy, listSell);
 		setupItemsInSlotEditor(Arrays.asList(6, 15, 24), SkullTextureEnum.TWENTY, "twenty", listBuy, listSell);
 		setupItemsInSlotEditor(Arrays.asList(5, 14, 23), SkullTextureEnum.TEN, "ten", listBuy, listSell);
 		setupItemsInSlotEditor(Arrays.asList(4, 13, 22), SkullTextureEnum.ONE, "one", listBuy, listSell);
-		addSkullToSlotEditor("sellprice", 18, listSell, SkullTextureEnum.SELL);
-		addSkullToSlotEditor("buyprice", 9, listBuy, SkullTextureEnum.BUY);
-		setupSlotItemInSlotEditor(slot);
-	}
 
-	private void setupSlotItemInSlotEditor(int slot) {
-		try {
-			ShopItem item = shop.getShopItem(slot);
-			ItemStack stack = item.getItemStack();
-			stack.setAmount(item.getAmount());
-			getSlotEditorInventory().setItem(0, stack);
-		} catch (ShopsystemException e) {
-			ItemStack item = serverProvider.createItemStack(Material.BARRIER, 1);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(ChatColor.GREEN + "select item");
-			item.setItemMeta(meta);
-			getSlotEditorInventory().setItem(0, item);
-		}
-	}
-
-	private void addSkullToSlotEditor(String displayName, int slot, List<String> loreList, SkullTextureEnum skull) {
-		ItemStack item = skullService.getSkullWithName(skull, displayName);
-		ItemMeta meta = item.getItemMeta();
-		meta.setLore(loreList);
-		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(slot, item);
+		setSkull(SkullTextureEnum.SELL, listSell, "sellprice", 18);
+		setSkull(SkullTextureEnum.BUY, listBuy, "buyprice", 9);
 	}
 
 	private void setupItemsInSlotEditor(List<Integer> slots, SkullTextureEnum skullType, String skullName,
 			List<String> listBuy, List<String> listSell) {
-		ItemStack item = skullService.getSkullWithName(skullType, skullName);
-		getSlotEditorInventory().setItem(slots.get(0), item);
-		ItemMeta meta = item.getItemMeta();
-		meta.setLore(listBuy);
-		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(slots.get(1), item);
-		meta = item.getItemMeta();
-		meta.setLore(listSell);
-		item.setItemMeta(meta);
-		getSlotEditorInventory().setItem(slots.get(2), item);
+		setSkull(skullType, null, skullName, slots.get(0));
+		setSkull(skullType, listBuy, skullName, slots.get(1));
+		setSkull(skullType, listSell, skullName, slots.get(2));
 	}
 
 	@Override
-	public void handleSlotEditor(InventoryClickEvent event) {
-		if (event.getCurrentItem() != null) {
-			event.setCancelled(true);
-			Player player = (Player) event.getWhoClicked();
-			try {
-				int slot = event.getSlot();
-				String operator = getOperatorForHandleSlotEditor(event, slot);
-				double price = getPriceForHandleSlotEditor(event, slot);
-				ItemStack editorItemStack = slotEditorInv.getItem(0);
-				// to exclude any interactio with the selected item
-				if (editorItemStack != event.getCurrentItem()) {
-					String command = "";
-					if (event.getCurrentItem().getItemMeta() != null) {
-						command = event.getCurrentItem().getItemMeta().getDisplayName();
-					}
-					handleSlotEditorCommand(event, player, slot, operator, price, editorItemStack, command);
+	public void handleInventoryClick(ClickType clickType, int rawSlot, EconomyPlayer whoClicked) {
+		List<Integer> buySlotList = Arrays.asList(9, 11, 13, 14, 15);
+		List<Integer> sellSlotList = Arrays.asList(18, 20, 22, 23, 24);
+		try {
+			switch (rawSlot) {
+			case 4:
+				handlePlusMinusAmount(1, amountOperatorState);
+				break;
+			case 5:
+				handlePlusMinusAmount(10, amountOperatorState);
+				break;
+			case 6:
+				handlePlusMinusAmount(20, amountOperatorState);
+				break;
+			case 13:
+				selectedBuyPrice = handlePlusMinusPrice(buySlotList, 1, buyFactorState, buyOperatorState,
+						selectedBuyPrice);
+				break;
+			case 14:
+				selectedBuyPrice = handlePlusMinusPrice(buySlotList, 10, buyFactorState, buyOperatorState,
+						selectedBuyPrice);
+				break;
+			case 15:
+				selectedBuyPrice = handlePlusMinusPrice(buySlotList, 20, buyFactorState, buyOperatorState,
+						selectedBuyPrice);
+				break;
+			case 22:
+				selectedSellPrice = handlePlusMinusPrice(sellSlotList, 1, sellFactorState, sellOperatorState,
+						selectedSellPrice);
+				break;
+			case 23:
+				selectedSellPrice = handlePlusMinusPrice(sellSlotList, 10, sellFactorState, sellOperatorState,
+						selectedSellPrice);
+				break;
+			case 24:
+				selectedSellPrice = handlePlusMinusPrice(sellSlotList, 20, sellFactorState, sellOperatorState,
+						selectedSellPrice);
+				break;
+			case 8:
+				handleSaveChanges(whoClicked.getPlayer());
+			case 7:
+				returnToBackLink(whoClicked.getPlayer());
+				break;
+			case 26:
+				handleRemoveItem(whoClicked.getPlayer());
+				returnToBackLink(whoClicked.getPlayer());
+				break;
+			case 2:
+				amountOperatorState = handleSwitchPlusMinus(rawSlot, amountOperatorState);
+				break;
+			case 11:
+				buyOperatorState = handleSwitchPlusMinus(rawSlot, buyOperatorState);
+				break;
+			case 20:
+				sellOperatorState = handleSwitchPlusMinus(rawSlot, sellOperatorState);
+				break;
+			case 12:
+				buyFactorState = handleSwitchFactor(rawSlot, buyFactorState);
+				break;
+			case 21:
+				sellFactorState = handleSwitchFactor(rawSlot, sellFactorState);
+				break;
+			default:
+
+				if (rawSlot > 26) {
+					handleAddItemToSlotEditor(rawSlot, whoClicked);
 				}
-			} catch (ShopsystemException e) {
-				player.sendMessage(e.getMessage());
 			}
+		} catch (ShopsystemException e) {
+			whoClicked.getPlayer().sendMessage(e.getMessage());
 		}
 	}
 
-	private void handleSlotEditorCommand(InventoryClickEvent event, Player player, int slot, String operator,
-			double price, ItemStack editorItemStack, String command) throws ShopsystemException {
-		switch (ChatColor.stripColor(command)) {
-		case "minus":
-		case "plus":
-			handleSwitchPlusMinus(slot, command);
-			break;
-		case "factor off":
-		case "factor on":
-			handleSwitchFactor(slot, command);
-			break;
-		case "one":
-			handlePlusMinusNumber(1, Arrays.asList(4, 13, 22), slot, operator, price, editorItemStack);
-			break;
-		case "ten":
-			handlePlusMinusNumber(10, Arrays.asList(5, 14, 23), slot, operator, price, editorItemStack);
-			break;
-		case "twenty":
-			handlePlusMinusNumber(20, Arrays.asList(6, 15, 24), slot, operator, price, editorItemStack);
-			break;
-		case "save changes":
-			handleSaveChanges(player);
-			shop.openEditor(player);
-			break;
-		case "remove item":
-			handleRemoveItem(player);
-		case "exit without save":
-			shop.openEditor(player);
-			break;
-		default:
-			if (!"buyprice".equals(command) && !"sellprice".equals(command)) {
-				handleAddItemToSlotEditor(event.getCurrentItem());
-			}
-			break;
-		}
-	}
-
-	private void handleAddItemToSlotEditor(ItemStack clickedItem) {
-		if (clickedItem.getType() != Material.SPAWNER) {
+	private void handleAddItemToSlotEditor(int slot, EconomyPlayer whoClicked) {
+		ItemStack clickedItem = whoClicked.getPlayer().getOpenInventory().getItem(slot);
+		if (clickedItem != null && clickedItem.getType() != Material.SPAWNER) {
 			ItemStack editorItemStack = clickedItem.clone();
-			editorItemStack.setAmount(1);
-			getSlotEditorInventory().setItem(0, editorItemStack);
+			editorItemStack.setAmount(selectedAmount);
+			inventory.setItem(0, editorItemStack);
 		}
 	}
 
 	private void handleSaveChanges(Player player) throws ShopsystemException {
-		double buyPrice = Double
-				.valueOf(getSlotEditorInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
-		double sellPrice = Double
-				.valueOf(getSlotEditorInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
-		validationHandler.checkForPricesGreaterThenZero(sellPrice, buyPrice);
-		ItemStack stackInEditor = getSlotEditorInventory().getItem(0);
+		validationHandler.checkForPricesGreaterThenZero(selectedSellPrice, selectedBuyPrice);
+		ItemStack stackInEditor = inventory.getItem(0);
 		try {
 			ShopItem shopItem = shop.getShopItem(selectedEditorSlot);
 			// slot is occupied, check if item changed
 			if (!shopItem.getItemStack().isSimilar(stackInEditor)) {
 				// remove and add
 				handleRemoveItem(player);
-				shop.addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
-				player.sendMessage(messageWrapper.getString("added", stackInEditor.getType().toString().toLowerCase()));
+				handleAddNewItem(player, stackInEditor);
 			} else {
 				// edit
 				Integer amountChange = generateChangeAmount(stackInEditor.getAmount(), shopItem);
-				Double sellPriceChange = generateChangeSellPrice(sellPrice, shopItem);
-				Double buyPriceChange = generateChangeBuyPrice(buyPrice, shopItem);
+				Double sellPriceChange = generateChangeValue(shopItem.getSellPrice(), selectedSellPrice);
+				Double buyPriceChange = generateChangeValue(shopItem.getBuyPrice(), selectedBuyPrice);
 				player.sendMessage(
 						shop.editShopItem(selectedEditorSlot, amountChange, sellPriceChange, buyPriceChange));
 			}
 		} catch (ShopsystemException e) {
-			// item is new
-			if (stackInEditor.getType() != Material.BARRIER) {
-				shop.addShopItem(selectedEditorSlot, sellPrice, buyPrice, stackInEditor);
-				player.sendMessage(messageWrapper.getString("added", stackInEditor.getType().toString().toLowerCase()));
-			}
+			handleAddNewItem(player, stackInEditor);
+		}
+	}
+
+	private void handleAddNewItem(Player player, ItemStack stack) throws ShopsystemException {
+		if (stack.getType() != Material.BARRIER) {
+			shop.addShopItem(selectedEditorSlot, selectedSellPrice, selectedBuyPrice, stack);
+			player.sendMessage(messageWrapper.getString(MessageEnum.ADDED, stack.getType().toString().toLowerCase()));
 		}
 	}
 
@@ -258,151 +229,80 @@ public class ShopSlotEditorHandlerImpl implements ShopSlotEditorHandler {
 		return value;
 	}
 
-	private Double generateChangeSellPrice(double value, ShopItem shopItem) {
-		if (shopItem.getSellPrice() == value) {
+	private Double generateChangeValue(double oldPrice, double newPrice) {
+		if (oldPrice == newPrice) {
 			return null;
 		}
-		return value;
-	}
-
-	private Double generateChangeBuyPrice(double value, ShopItem shopItem) {
-		if (shopItem.getBuyPrice() == value) {
-			return null;
-		}
-		return value;
+		return newPrice;
 	}
 
 	private void handleRemoveItem(Player player) throws ShopsystemException {
 		ItemStack item = shop.getShopItem(selectedEditorSlot).getItemStack();
 		String deletedIem = item.getType().toString().toLowerCase();
 		shop.removeShopItem(selectedEditorSlot);
-		if (item.getType() == Material.SPAWNER) {
-			player.sendMessage(messageWrapper.getString("removed", item.getItemMeta().getDisplayName().toLowerCase()));
+		player.sendMessage(messageWrapper.getString(MessageEnum.REMOVED, deletedIem));
+	}
+
+	private boolean handleSwitchFactor(int slot, boolean oldState) {
+		if (oldState) {
+			setSkull(SkullTextureEnum.K_OFF, null, "factor off", slot);
 		} else {
-			player.sendMessage(messageWrapper.getString("removed", deletedIem));
+			setSkull(SkullTextureEnum.K_ON, null, "factor on", slot);
 		}
+		return !oldState;
 	}
 
-	private void handleSwitchFactor(int slot, String state) {
-		if ("factor off".equals(state)) {
-			ItemStack item = skullService.getSkullWithName(SkullTextureEnum.K_ON, "factor on");
-			getSlotEditorInventory().setItem(slot, item);
+	private boolean handleSwitchPlusMinus(int slot, boolean oldState) {
+		if (oldState) {
+			setSkull(SkullTextureEnum.MINUS, null, "minus", slot);
 		} else {
-			ItemStack item = skullService.getSkullWithName(SkullTextureEnum.K_OFF, "factor off");
-			getSlotEditorInventory().setItem(slot, item);
+			setSkull(SkullTextureEnum.PLUS, null, "plus", slot);
 		}
+		return !oldState;
 	}
 
-	private void handleSwitchPlusMinus(int slot, String state) {
-		if ("plus".equals(state)) {
-			ItemStack item = skullService.getSkullWithName(SkullTextureEnum.MINUS, "minus");
-			getSlotEditorInventory().setItem(slot, item);
+	private void handlePlusMinusAmount(int value, boolean state) {
+		ItemStack editorItemStack = inventory.getItem(0);
+		int newAmount = editorItemStack.getAmount();
+		if (state) {
+			newAmount += value;
+			if (newAmount > 64) {
+				newAmount = 64;
+			}
 		} else {
-			ItemStack item = skullService.getSkullWithName(SkullTextureEnum.PLUS, "plus");
-			getSlotEditorInventory().setItem(slot, item);
-		}
-	}
-
-	private void handlePlusMinusNumber(int amount, List<Integer> slots, int slot, String operator, double price,
-			ItemStack editorItemStack) {
-		if (slots.get(0) == slot) {
-			handlePlusMinusAmount(amount, operator, editorItemStack);
-		} else if (slots.get(1) == slot) {
-			handlePlusMinusPrice(Arrays.asList(9, 11, 13, 14, 15), amount, getFactor(12), operator, price);
-		} else if (slots.get(2) == slot) {
-			handlePlusMinusPrice(Arrays.asList(18, 20, 22, 23, 24), amount, getFactor(21), operator, price);
-		}
-	}
-
-	private int getFactor(int slot) {
-		int factor = 1;
-		if (getSlotEditorInventory().getItem(slot).getItemMeta().getDisplayName().equals("factor on")) {
-			factor = 1000;
-		}
-		return factor;
-	}
-
-	private void handlePlusMinusAmount(int value, String operator, ItemStack editorItemStack) {
-		if (editorItemStack != null) {
-			if ("plus".equals(operator)) {
-				if ((editorItemStack.getAmount() + value <= 64)) {
-					editorItemStack.setAmount(editorItemStack.getAmount() + value);
-				} else {
-					editorItemStack.setAmount(64);
-				}
-			} else {
-				if (editorItemStack.getAmount() > value) {
-					editorItemStack.setAmount(editorItemStack.getAmount() - value);
-				} else {
-					editorItemStack.setAmount(1);
-				}
+			newAmount -= value;
+			if (newAmount < 1) {
+				newAmount = 1;
 			}
 		}
+		editorItemStack.setAmount(newAmount);
+		selectedAmount = newAmount;
 	}
 
-	private void handlePlusMinusPrice(List<Integer> slots, int value, int factor, String operator, double price) {
-		if (price >= (value * factor) && "minus".equals(operator)) {
-			updateEditorPrice(slots.get(0), slots.get(1), slots.get(2), slots.get(3), slots.get(4),
-					price - value * factor);
-		} else if ("plus".equals(operator)) {
-			updateEditorPrice(slots.get(0), slots.get(1), slots.get(2), slots.get(3), slots.get(4),
-					price + value * factor);
+	private double handlePlusMinusPrice(List<Integer> slots, int value, boolean factorState, boolean operatorState,
+			double oldPrice) {
+		double newPrice = oldPrice;
+		int factor = 1;
+		if (factorState) {
+			factor = 1000;
+		}
+		if (operatorState) {
+			newPrice += factor * value;
 		} else {
-			updateEditorPrice(slots.get(0), slots.get(1), slots.get(2), slots.get(3), slots.get(4), 0.0);
+			newPrice -= factor * value;
+			if (newPrice < 0) {
+				newPrice = 0;
+			}
 		}
+		updateEditorPrice(slots, newPrice);
+		return newPrice;
 	}
 
-	private double getPriceForHandleSlotEditor(InventoryClickEvent event, int slot) {
-		switch (slot) {
-		case 13:
-		case 14:
-		case 15:
-			return Double.valueOf(getSlotEditorInventory().getItem(9).getItemMeta().getLore().get(0).substring(9));
-		case 22:
-		case 23:
-		case 24:
-			return Double.valueOf(getSlotEditorInventory().getItem(18).getItemMeta().getLore().get(0).substring(9));
-		default:
-			return 0.0;
-		}
-	}
-
-	private String getOperatorForHandleSlotEditor(InventoryClickEvent event, int slot) {
-		switch (slot) {
-		case 4:
-		case 5:
-		case 6:
-			return getSlotEditorInventory().getItem(2).getItemMeta().getDisplayName();
-		case 13:
-		case 14:
-		case 15:
-			return getSlotEditorInventory().getItem(11).getItemMeta().getDisplayName();
-		case 22:
-		case 23:
-		case 24:
-			return getSlotEditorInventory().getItem(20).getItemMeta().getDisplayName();
-		default:
-			return null;
-		}
-	}
-
-	private void updateEditorPrice(int a, int b, int c, int d, int e, Double price) {
+	private void updateEditorPrice(List<Integer> slots, Double price) {
 		List<String> list = new ArrayList<>();
 		list.add(ChatColor.GOLD + "Price: " + price);
-		ItemMeta meta = getSlotEditorInventory().getItem(a).getItemMeta();
-		meta.setLore(list);
-		getSlotEditorInventory().getItem(a).setItemMeta(meta);
-		meta = getSlotEditorInventory().getItem(b).getItemMeta();
-		meta.setLore(list);
-		getSlotEditorInventory().getItem(b).setItemMeta(meta);
-		meta = getSlotEditorInventory().getItem(c).getItemMeta();
-		meta.setLore(list);
-		getSlotEditorInventory().getItem(c).setItemMeta(meta);
-		meta = getSlotEditorInventory().getItem(d).getItemMeta();
-		meta.setLore(list);
-		getSlotEditorInventory().getItem(d).setItemMeta(meta);
-		meta = getSlotEditorInventory().getItem(e).getItemMeta();
-		meta.setLore(list);
-		getSlotEditorInventory().getItem(e).setItemMeta(meta);
+		for (Integer slot : slots) {
+			updateItemLore(slot, list);
+		}
 	}
 }

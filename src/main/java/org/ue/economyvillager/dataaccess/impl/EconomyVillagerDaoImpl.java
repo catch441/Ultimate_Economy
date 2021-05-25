@@ -1,10 +1,11 @@
-package org.ue.common.dataaccess.impl;
+package org.ue.economyvillager.dataaccess.impl;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Villager.Profession;
-import org.ue.common.dataaccess.api.EconomyVillagerDao;
+import org.bukkit.entity.Villager.Type;
 import org.ue.common.utils.SaveFileUtils;
 import org.ue.common.utils.ServerProvider;
+import org.ue.economyvillager.dataaccess.api.EconomyVillagerDao;
 
 public abstract class EconomyVillagerDaoImpl extends SaveFileUtils implements EconomyVillagerDao {
 
@@ -30,6 +31,13 @@ public abstract class EconomyVillagerDaoImpl extends SaveFileUtils implements Ec
 		config.set(prefix + "Profession", profession.name());
 		save();
 	}
+	
+	@Override
+	public void saveBiomeType(String prefix, Type biomeType) {
+		prefix = prefixValidationCheck(prefix);
+		config.set(prefix + "Biome", biomeType.name());
+		save();
+	}
 
 	@Override
 	public void saveSize(String prefix, int size) {
@@ -51,6 +59,13 @@ public abstract class EconomyVillagerDaoImpl extends SaveFileUtils implements Ec
 		addVisibleIfNotSet(prefix);
 		return config.getBoolean(prefix + "visible");
 	}
+	
+	@Override
+	 public Type loadBiomeType(String prefix) {
+		prefix = prefixValidationCheck(prefix);
+		addBiomeTypeIfNotSet(prefix);
+		return Type.valueOf(config.getString(prefix + "Biome"));
+	 }
 
 	@Override
 	public Profession loadProfession(String prefix) {
@@ -76,6 +91,16 @@ public abstract class EconomyVillagerDaoImpl extends SaveFileUtils implements Ec
 		convertToCorrectSize(prefix);
 		addSizeIfNotSet(prefix);
 		return config.getInt(prefix + "Size");
+	}
+	
+	/**
+	 * @since 1.2.8
+	 */
+	@Deprecated
+	private void addBiomeTypeIfNotSet(String prefix) {
+		if (!config.isSet(prefix + "Biome")) {
+			saveBiomeType(prefix, Type.PLAINS);
+		}
 	}
 	
 	/**

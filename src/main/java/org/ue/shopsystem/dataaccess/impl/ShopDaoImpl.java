@@ -7,22 +7,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.ue.common.dataaccess.impl.EconomyVillagerDaoImpl;
 import org.ue.common.utils.ServerProvider;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
+import org.ue.economyvillager.dataaccess.impl.EconomyVillagerDaoImpl;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
 import org.ue.shopsystem.logic.api.ShopItem;
 import org.ue.shopsystem.logic.impl.ShopItemImpl;
 
 public class ShopDaoImpl extends EconomyVillagerDaoImpl implements ShopDao {
 
-	@Inject
 	public ShopDaoImpl(ServerProvider serverProvider) {
 		super(serverProvider);
 	}

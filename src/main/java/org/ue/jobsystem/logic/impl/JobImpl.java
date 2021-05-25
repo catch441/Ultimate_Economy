@@ -12,16 +12,16 @@ import org.ue.jobsystem.dataaccess.api.JobDao;
 import org.ue.jobsystem.logic.api.FishingLootTypeEnum;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobsystemException;
-import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.jobsystem.logic.api.JobsystemValidator;
 
 public class JobImpl implements Job {
 
-	protected static final List<EntityType> breedableMobs = Arrays.asList(EntityType.BEE, EntityType.COW, EntityType.HOGLIN,
-			EntityType.MUSHROOM_COW, EntityType.PIG, EntityType.SHEEP, EntityType.WOLF, EntityType.CAT,
-			EntityType.DONKEY, EntityType.HORSE, EntityType.OCELOT, EntityType.POLAR_BEAR, EntityType.TURTLE,
-			EntityType.CHICKEN, EntityType.FOX, EntityType.LLAMA, EntityType.PANDA, EntityType.RABBIT,
-			EntityType.VILLAGER);
-	private final JobsystemValidationHandler validationHandler;
+	protected static final List<EntityType> breedableMobs = Arrays.asList(EntityType.BEE, EntityType.COW,
+			EntityType.HOGLIN, EntityType.MUSHROOM_COW, EntityType.PIG, EntityType.SHEEP, EntityType.WOLF,
+			EntityType.CAT, EntityType.DONKEY, EntityType.HORSE, EntityType.OCELOT, EntityType.POLAR_BEAR,
+			EntityType.TURTLE, EntityType.CHICKEN, EntityType.FOX, EntityType.LLAMA, EntityType.PANDA,
+			EntityType.RABBIT, EntityType.VILLAGER);
+	private final JobsystemValidator validationHandler;
 	private final JobDao jobDao;
 	private Map<String, Double> entityList = new HashMap<>();
 	private Map<String, Double> blockList = new HashMap<>();
@@ -30,23 +30,31 @@ public class JobImpl implements Job {
 	private String name;
 
 	/**
-	 * Constructor to create a new or load an existing job.
+	 * Inject constructor.
 	 * 
 	 * @param validationHandler
 	 * @param jobDao
-	 * @param name
-	 * @param isNew
 	 */
-	public JobImpl(JobsystemValidationHandler validationHandler,
-			JobDao jobDao, String name, boolean isNew) {
+	public JobImpl(JobsystemValidator validationHandler, JobDao jobDao) {
 		this.jobDao = jobDao;
 		this.validationHandler = validationHandler;
+	}
+
+	@Override
+	public void setupNew(String name) {
+		this.name = name;
 		jobDao.setupSavefile(name);
-		if (isNew) {
-			setupJobName(name);
-		} else {
-			loadExistingJob();
-		}
+		jobDao.saveJobName(name);
+	}
+
+	@Override
+	public void setupExisting(String name) {
+		jobDao.setupSavefile(name);
+		breedableList = jobDao.loadBreedableList();
+		fisherList = jobDao.loadFisherList();
+		entityList = jobDao.loadEntityList();
+		blockList = jobDao.loadBlockList();
+		this.name = jobDao.loadJobName();
 	}
 
 	@Override
@@ -182,18 +190,5 @@ public class JobImpl implements Job {
 	@Override
 	public Map<String, Double> getFisherList() {
 		return fisherList;
-	}
-
-	private void setupJobName(String name) {
-		this.name = name;
-		jobDao.saveJobName(name);
-	}
-
-	private void loadExistingJob() {
-		breedableList = jobDao.loadBreedableList();
-		fisherList = jobDao.loadFisherList();
-		entityList = jobDao.loadEntityList();
-		blockList = jobDao.loadBlockList();
-		this.name = jobDao.loadJobName();
 	}
 }

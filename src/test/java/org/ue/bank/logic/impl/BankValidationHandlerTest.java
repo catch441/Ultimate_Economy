@@ -2,7 +2,7 @@ package org.ue.bank.logic.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.ExceptionMessageEnum;
-import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.utils.api.MessageWrapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,13 +23,9 @@ public class BankValidationHandlerTest {
 
 	@Test
 	public void checkForHasEnoughMoneyTestFail() {
-		try {
-			validationHandler.checkForHasEnoughMoney(10.0, 20.0);
-			fail();
-		} catch (GeneralEconomyException e) {
-			assertEquals(0, e.getParams().length);
-			assertEquals(ExceptionMessageEnum.NOT_ENOUGH_MONEY, e.getKey());
-		}
+		BankException e = assertThrows(BankException.class, () -> validationHandler.checkForHasEnoughMoney(10.0, 20.0));
+		assertEquals(0, e.getParams().length);
+		assertEquals(ExceptionMessageEnum.NOT_ENOUGH_MONEY, e.getKey());
 	}
 
 	@Test

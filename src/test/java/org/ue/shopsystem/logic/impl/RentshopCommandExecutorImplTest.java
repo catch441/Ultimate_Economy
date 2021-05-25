@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -16,12 +14,14 @@ import static org.mockito.Mockito.when;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager.Profession;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.InventoryGuiHandler;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopManager;
@@ -81,11 +81,21 @@ public class RentshopCommandExecutorImplTest {
 	@Test
 	public void createCommandTestWithInvalidArgNumber() {
 		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
-		String[] args = { "create", "9", "10", "kth" };
+		String[] args = { "create", "9", "10", "catch" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
 		verify(player).sendMessage("/rentshop create <size> <rentalFee per 24h>");
 		verifyNoMoreInteractions(player);
+	}
+	
+	@Test
+	public void createCommandTestWithInvalidNumberFormat() {
+		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
+		String[] args = { "create", "invalid", "10"};
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "number")).thenReturn("message");
+		boolean result = executor.onCommand(player, null, "rentshop", args);
+		assertTrue(result);
+		verify(player).sendMessage("message");
 	}
 
 	@Test
@@ -95,7 +105,7 @@ public class RentshopCommandExecutorImplTest {
 		assertDoesNotThrow(() -> when(rentshopManager.createRentShop(loc, 18, 4.0)).thenReturn(shop));
 		when(shop.getName()).thenReturn("RentShop#R0");
 		when(player.getLocation()).thenReturn(loc);
-		when(messageWrapper.getString("created", "RentShop#R0")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.CREATED, "RentShop#R0")).thenReturn("my message");
 		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
 		String[] args = { "create", "18", "4" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
@@ -119,18 +129,30 @@ public class RentshopCommandExecutorImplTest {
 	@Test
 	public void deleteCommandTestWithInvalidArgNumber() {
 		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
-		String[] args = { "delete", "RentShop#R0", "kth" };
+		String[] args = { "delete", "RentShop#R0", "catch" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
 		verify(player).sendMessage("/rentshop delete <shopname>");
 		verifyNoMoreInteractions(player);
+	}
+	
+	@Test
+	public void deleteCommandTestWithNoShop() throws ShopsystemException {
+		ShopsystemException e = mock(ShopsystemException.class);
+		when(rentshopManager.getRentShopByUniqueName("RentShop#R0")).thenThrow(e);
+		when(e.getMessage()).thenReturn("message");
+		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
+		String[] args = { "delete", "RentShop#R0" };
+		boolean result = executor.onCommand(player, null, "rentshop", args);
+		assertTrue(result);
+		verify(player).sendMessage("message");
 	}
 
 	@Test
 	public void deleteCommandTest() {
 		Rentshop shop = mock(Rentshop.class);
 		assertDoesNotThrow(() -> when(rentshopManager.getRentShopByUniqueName("RentShop#R0")).thenReturn(shop));
-		when(messageWrapper.getString("deleted", "RentShop#R0")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.DELETED, "RentShop#R0")).thenReturn("my message");
 		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
 		String[] args = { "delete", "RentShop#R0" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
@@ -154,7 +176,7 @@ public class RentshopCommandExecutorImplTest {
 	@Test
 	public void moveCommandTestWithInvalidArgNumber() {
 		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
-		String[] args = { "move", "RentShop#R0", "kth" };
+		String[] args = { "move", "RentShop#R0", "catch" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
 		verify(player).sendMessage("/rentshop move <shopname>");
@@ -176,108 +198,8 @@ public class RentshopCommandExecutorImplTest {
 	}
 
 	@Test
-	public void resizeCommandTestWithNoPermission() {
-		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(false);
-		String[] args = { "resize", "RentShop#R0", "9" };
-		boolean result = executor.onCommand(player, null, "rentshop", args);
-		assertTrue(result);
-		verifyNoInteractions(rentshopManager);
-		verify(player).hasPermission("ultimate_economy.rentshop.admin");
-		verifyNoMoreInteractions(player);
-	}
-
-	@Test
-	public void resizeCommandTestWithInvalidArgNumber() {
-		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
-		String[] args = { "resize", "RentShop#R0", "9", "kth" };
-		boolean result = executor.onCommand(player, null, "rentshop", args);
-		assertTrue(result);
-		verify(player).sendMessage("/rentshop resize <shopname> <new size>");
-		verifyNoMoreInteractions(player);
-	}
-
-	@Test
-	public void resizeCommandTestWithInvalidSize() throws ShopsystemException {
-		ShopsystemException e = mock(ShopsystemException.class);
-		Rentshop shop = mock(Rentshop.class);
-		doThrow(e).when(shop).changeSize(16);
-		when(e.getMessage()).thenReturn("my error message");
-		assertDoesNotThrow(() -> when(rentshopManager.getRentShopByUniqueName("RentShop#R0")).thenReturn(shop));
-		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
-		String[] args = { "resize", "RentShop#R0", "16" };
-		boolean result = executor.onCommand(player, null, "rentshop", args);
-		assertTrue(result);
-		verify(player).sendMessage("my error message");
-		verify(player, times(1)).sendMessage(anyString());
-	}
-
-	@Test
-	public void resizeCommandTestWithInvalidSize2() {
-		Rentshop shop = mock(Rentshop.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "number")).thenReturn("my error message");
-		assertDoesNotThrow(() -> when(rentshopManager.getRentShopByUniqueName("RentShop#R0")).thenReturn(shop));
-		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
-		String[] args = { "resize", "RentShop#R0", "kth" };
-		boolean result = executor.onCommand(player, null, "rentshop", args);
-		assertTrue(result);
-		verify(player).sendMessage("my error message");
-		verify(player, times(1)).sendMessage(anyString());
-	}
-
-	@Test
-	public void resizeCommandTest() {
-		Rentshop shop = mock(Rentshop.class);
-		assertDoesNotThrow(() -> when(rentshopManager.getRentShopByUniqueName("RentShop#R0")).thenReturn(shop));
-		when(messageWrapper.getString("shop_resize", "9")).thenReturn("my message");
-		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
-		String[] args = { "resize", "RentShop#R0", "9" };
-		boolean result = executor.onCommand(player, null, "rentshop", args);
-		assertTrue(result);
-		assertDoesNotThrow(() -> verify(shop).changeSize(9));
-		verify(player).sendMessage("my message");
-		verify(player, times(1)).sendMessage(anyString());
-	}
-
-	@Test
-	public void changeProfessionCommandTestWithInvalidArgNumber() {
-		String[] args = { "changeProfession", "Shop#R0_1catch441", "9", "kth" };
-		boolean result = executor.onCommand(player, null, "rentshop", args);
-		assertTrue(result);
-		verify(player).sendMessage("/rentshop changeProfession <shopname> <profession>");
-		verifyNoMoreInteractions(player);
-	}
-
-	@Test
-	public void changeProfessionCommandTestWithInvalidProfession() {
-		Rentshop shop = mock(Rentshop.class);
-		assertDoesNotThrow(() -> when(rentshopManager.getRentShopByUniqueName("Shop#R0_catch441")).thenReturn(shop));
-		when(messageWrapper.getErrorString("invalid_parameter", "kth")).thenReturn("my error message");
-		when(player.getName()).thenReturn("catch441");
-		String[] args = { "changeProfession", "Shop#R0", "kth" };
-		boolean result = executor.onCommand(player, null, "rentshop", args);
-		assertTrue(result);
-		verify(shop, never()).changeProfession(any());
-		verify(player).sendMessage("my error message");
-		verify(player, times(1)).sendMessage(anyString());
-	}
-	
-	@Test
-	public void changeProfessionCommandTestRented() {
-		Rentshop shop = mock(Rentshop.class);
-		assertDoesNotThrow(() -> when(rentshopManager.getRentShopByUniqueName("Shop#R0_catch441")).thenReturn(shop));
-		when(messageWrapper.getString("profession_changed")).thenReturn("my message");
-		when(player.getName()).thenReturn("catch441");
-		String[] args = { "changeProfession", "Shop#R0", "Farmer" };
-		boolean result = executor.onCommand(player, null, "rentshop", args);
-		assertTrue(result);
-		verify(shop).changeProfession(Profession.FARMER);
-		verify(player).sendMessage("my message");
-		verify(player, times(1)).sendMessage(anyString());
-	}
-
-	@Test
 	public void renameCommandTestWithInvalidArgNumber() {
-		String[] args = { "rename", "Shop#R0_1catch441", "9", "kth" };
+		String[] args = { "rename", "Shop#R0_1catch441", "9", "catch" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
 		verify(player).sendMessage("/rentshop rename <oldName> <newName>");
@@ -288,7 +210,7 @@ public class RentshopCommandExecutorImplTest {
 	public void renameCommandTestRented() throws ShopsystemException {
 		Rentshop shop = mock(Rentshop.class);
 		assertDoesNotThrow(() -> when(rentshopManager.getRentShopByUniqueName("Shop#R0_catch441")).thenReturn(shop));
-		when(messageWrapper.getString("shop_rename", "Shop#R0", "NewName")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_RENAME, "Shop#R0", "NewName")).thenReturn("my message");
 		when(player.getName()).thenReturn("catch441");
 		String[] args = { "rename", "Shop#R0", "NewName" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
@@ -300,7 +222,8 @@ public class RentshopCommandExecutorImplTest {
 
 	@Test
 	public void editShopCommandTestWithInvalidArgNumber() {
-		String[] args = { "editShop", "Shop#R0_1catch441", "9", "kth" };
+		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
+		String[] args = { "editShop", "Shop#R0_1catch441", "9", "catch" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
 		verify(player).sendMessage("/rentshop editShop <shopname>");
@@ -309,29 +232,28 @@ public class RentshopCommandExecutorImplTest {
 
 	@Test
 	public void editShopCommandTest() {
+		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(true);
 		Rentshop shop = mock(Rentshop.class);
+		InventoryGuiHandler editor = mock(InventoryGuiHandler.class);
+		when(shop.getEditorHandler()).thenReturn(editor);
 		assertDoesNotThrow(() -> when(rentshopManager.getRentShopByUniqueName("Shop#R0_catch441")).thenReturn(shop));
 		when(player.getName()).thenReturn("catch441");
 		String[] args = { "editShop", "Shop#R0" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(shop).openEditor(player));
+		assertDoesNotThrow(() -> verify(editor).openInventory(player));
 		verify(player).getName();
 		verifyNoMoreInteractions(player);
 	}
-
+	
 	@Test
-	public void editShopCommandTestWithNotRentedError() throws ShopsystemException {
-		ShopsystemException e = mock(ShopsystemException.class);
-		Rentshop shop = mock(Rentshop.class);
-		doThrow(e).when(shop).openEditor(player);
-		when(e.getMessage()).thenReturn("my error message");
-		assertDoesNotThrow(() -> when(rentshopManager.getRentShopByUniqueName("RentShop#R0_catch441")).thenReturn(shop));
-		when(player.getName()).thenReturn("catch441");
-		String[] args = { "editShop", "RentShop#R0" };
+	public void editShopCommandTestWithNoPermission() {
+		when(player.hasPermission("ultimate_economy.rentshop.admin")).thenReturn(false);
+		String[] args = { "editShop", "Shop#R0" };
 		boolean result = executor.onCommand(player, null, "rentshop", args);
 		assertTrue(result);
-		verify(player).sendMessage("my error message");
-		verify(player, times(1)).sendMessage(anyString());
+		verifyNoInteractions(rentshopManager);
+		verify(player).hasPermission("ultimate_economy.rentshop.admin");
+		verifyNoMoreInteractions(player);
 	}
 }

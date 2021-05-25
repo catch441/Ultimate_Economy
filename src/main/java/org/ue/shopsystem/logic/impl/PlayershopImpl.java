@@ -2,26 +2,25 @@ package org.ue.shopsystem.logic.impl;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.ue.bank.logic.api.BankException;
 import org.ue.common.logic.api.CustomSkullService;
-import org.ue.common.logic.api.EconomyVillagerType;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
+import org.ue.economyvillager.logic.api.EconomyVillagerType;
 import org.ue.shopsystem.dataaccess.api.ShopDao;
 import org.ue.shopsystem.logic.api.Playershop;
 import org.ue.shopsystem.logic.api.PlayershopManager;
 import org.ue.shopsystem.logic.api.ShopItem;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 import org.ue.townsystem.logic.api.TownworldManager;
 
@@ -45,9 +44,8 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	 * @param townworldManager
 	 * @param playershopManager
 	 */
-	@Inject
 	public PlayershopImpl(ShopDao shopDao, ServerProvider serverProvider, CustomSkullService customSkullService,
-			ShopValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
+			ShopValidator validationHandler, EconomyPlayerManager ecoPlayerManager,
 			MessageWrapper messageWrapper, ConfigManager configManager, TownworldManager townworldManager,
 			PlayershopManager playershopManager) {
 		super(shopDao, serverProvider, customSkullService, validationHandler, messageWrapper, configManager);
@@ -60,13 +58,11 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 	public void setupNew(String name, EconomyPlayer owner, String shopId, Location spawnLocation, int size) {
 		setupNew(EconomyVillagerType.PLAYERSHOP, name, shopId, spawnLocation, size, 1);
 		setupShopOwner(owner);
-		getEditorHandler().setup(1);
 	}
 
 	@Override
 	public void setupExisting(String shopId) throws EconomyPlayerException {
 		setupExisting(EconomyVillagerType.PLAYERSHOP, shopId, 1);
-		getEditorHandler().setup(1);
 		loadStock();
 		loadOwner();
 	}
@@ -183,7 +179,7 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 			newName += "_" + getOwner().getName();
 		}
 		getVillager().setCustomName(newName);
-		changeInventoryNames(name);
+		changeInventoryName(name);
 	}
 
 	@Override
@@ -257,11 +253,11 @@ public class PlayershopImpl extends AbstractShopImpl implements Playershop {
 
 	private void sendBuySellOwnerMessage(int amount, String gotAdded) {
 		if (amount > 1) {
-			getOwner().getPlayer()
-					.sendMessage(messageWrapper.getString("shop_" + gotAdded + "_item_plural", String.valueOf(amount)));
+			getOwner().getPlayer().sendMessage(
+					messageWrapper.getString(MessageEnum.getGotAddedPluralValue(gotAdded), String.valueOf(amount)));
 		} else {
 			getOwner().getPlayer().sendMessage(
-					messageWrapper.getString("shop_" + gotAdded + "_item_singular", String.valueOf(amount)));
+					messageWrapper.getString(MessageEnum.getGotAddedSingularValue(gotAdded), String.valueOf(amount)));
 		}
 	}
 

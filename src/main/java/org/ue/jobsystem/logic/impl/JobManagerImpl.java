@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ue.common.utils.ServerProvider;
@@ -14,27 +12,25 @@ import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.jobsystem.dataaccess.api.JobDao;
 import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.JobManager;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemException;
-import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.jobsystem.logic.api.JobsystemValidator;
 
 public class JobManagerImpl implements JobManager {
 
 	private static final Logger log = LoggerFactory.getLogger(JobManagerImpl.class);
 	private final EconomyPlayerManager ecoPlayerManager;
-	private final JobsystemValidationHandler validationHandler;
+	private final JobsystemValidator validationHandler;
 	private final JobcenterManager jobcenterManager;
 	private final ConfigDao configDao;
 	private final ServerProvider serverProvider;
 	private Map<String, Job> jobList = new HashMap<>();
 
-	@Inject
 	public JobManagerImpl(ServerProvider serverProvider, ConfigDao configDao, JobcenterManager jobcenterManager,
-			JobsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager) {
+			JobsystemValidator validationHandler, EconomyPlayerManager ecoPlayerManager) {
 		this.configDao = configDao;
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.validationHandler = validationHandler;
@@ -71,16 +67,18 @@ public class JobManagerImpl implements JobManager {
 	@Override
 	public void createJob(String jobName) throws JobsystemException {
 		validationHandler.checkForValueNotInList(getJobNameList(), jobName);
-		JobDao jobDao = serverProvider.getServiceComponent().getJobDao();
-		jobList.put(jobName, new JobImpl(validationHandler, jobDao, jobName, true));
+		Job job = serverProvider.getProvider().createJob();
+		job.setupNew(jobName);
+		jobList.put(jobName, job);
 		configDao.saveJobList(getJobNameList());
 	}
 
 	@Override
 	public void loadAllJobs() {
 		for (String jobName : configDao.loadJobList()) {
-			JobDao jobDao = serverProvider.getServiceComponent().getJobDao();
-			jobList.put(jobName, new JobImpl(validationHandler, jobDao, jobName, false));
+			Job job = serverProvider.getProvider().createJob();
+			job.setupExisting(jobName);
+			jobList.put(jobName, job);
 		}
 	}
 

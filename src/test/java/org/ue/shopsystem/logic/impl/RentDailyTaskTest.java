@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
@@ -39,7 +40,7 @@ public class RentDailyTaskTest {
 		EconomyPlayer owner = mock(EconomyPlayer.class);
 		Player player = mock(Player.class);
 		Rentshop shop = mock(Rentshop.class);
-		when(messageWrapper.getString("rent_reminder")).thenReturn("my reminder");
+		when(messageWrapper.getString(MessageEnum.RENT_REMINDER)).thenReturn("my reminder");
 		when(shop.getOwner()).thenReturn(owner);
 		when(owner.getPlayer()).thenReturn(player);
 		when(owner.isOnline()).thenReturn(true);

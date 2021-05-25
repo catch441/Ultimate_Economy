@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Villager.Profession;
 import org.ue.common.utils.TabCompleterUtils;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopManager;
@@ -18,7 +15,6 @@ public class RentshopTabCompleterImpl extends TabCompleterUtils implements TabCo
 
 	private final RentshopManager rentshopManager;
 
-	@Inject
 	public RentshopTabCompleterImpl(RentshopManager rentshopManager) {
 		this.rentshopManager = rentshopManager;
 	}
@@ -30,28 +26,16 @@ public class RentshopTabCompleterImpl extends TabCompleterUtils implements TabCo
 			return new ArrayList<>();
 		case "delete":
 		case "move":
-		case "resize":
-			return handleDeleteAndMoveAndResizeTabComplete(sender, args);
+			return handleDeleteAndMoveTabComplete(sender, args);
 		case "rename":
 		case "editShop":
 			return handleRenameAndEditShopTabComplete(sender, args);
-		case "changeProfession":
-			return handleChangeProfessionTabComplete(sender, args);
 		default:
 			return handleDefaultMatchingTabComplete(sender, args);
 		}
 	}
 
-	private List<String> handleChangeProfessionTabComplete(CommandSender sender, String[] args) {
-		if (args.length == 2) {
-			return getRentedShopsForPlayer(args[1], sender.getName());
-		} else if (args.length == 3) {
-			return getMatchingEnumList(Profession.values(), args[2]);
-		}
-		return new ArrayList<>();
-	}
-
-	private List<String> handleDeleteAndMoveAndResizeTabComplete(CommandSender sender, String[] args) {
+	private List<String> handleDeleteAndMoveTabComplete(CommandSender sender, String[] args) {
 		if (sender.hasPermission("ultimate_economy.rentshop.admin") && args.length == 2) {
 			return rentshopManager.getRentShopUniqueNameList();
 		}
@@ -77,11 +61,11 @@ public class RentshopTabCompleterImpl extends TabCompleterUtils implements TabCo
 	}
 
 	private List<String> getAllAdminCommands() {
-		return new ArrayList<String>(Arrays.asList("create", "delete", "move", "resize"));
+		return new ArrayList<String>(Arrays.asList("create", "delete", "move", "editShop"));
 	}
 
 	private List<String> getAllPlayerCommands() {
-		return Arrays.asList("rename", "editShop", "changeProfession");
+		return Arrays.asList("rename");
 	}
 
 	private List<String> getRentedShopsForPlayer(String arg, String player) {

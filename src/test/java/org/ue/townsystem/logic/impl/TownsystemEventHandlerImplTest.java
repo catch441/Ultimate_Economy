@@ -4,13 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -19,6 +17,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -26,21 +25,19 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.InventoryView;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ue.bank.logic.api.BankAccount;
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigManager;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
-import org.ue.economyplayer.logic.api.EconomyPlayerValidationHandler;
+import org.ue.economyplayer.logic.api.EconomyPlayerValidator;
 import org.ue.townsystem.logic.api.Plot;
 import org.ue.townsystem.logic.api.Town;
 import org.ue.townsystem.logic.api.TownsystemException;
@@ -61,7 +58,7 @@ public class TownsystemEventHandlerImplTest {
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock
-	EconomyPlayerValidationHandler ecoPlayerValidationHandler;
+	EconomyPlayerValidator ecoPlayerValidationHandler;
 
 	@Test
 	public void handlePlayerTeleportTest() {
@@ -245,17 +242,9 @@ public class TownsystemEventHandlerImplTest {
 	@Test
 	public void handleInventoryClickTestWithError() throws TownsystemException {
 		Player player = mock(Player.class);
-		ItemStack currentItem = mock(ItemStack.class);
-		ItemMeta currentItemMeta = mock(ItemMeta.class);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		World world = mock(World.class);
-		Inventory inv = mock(Inventory.class);
-		Villager villager = mock(Villager.class);
-		when(inv.getHolder()).thenReturn(villager);
-		when(event.getClickedInventory()).thenReturn(inv);
 		when(world.getName()).thenReturn("world");
-		when(event.getCurrentItem()).thenReturn(currentItem);
-		when(currentItem.getItemMeta()).thenReturn(currentItemMeta);
 		when(event.getWhoClicked()).thenReturn(player);
 		when(player.getWorld()).thenReturn(world);
 
@@ -263,238 +252,79 @@ public class TownsystemEventHandlerImplTest {
 				.thenThrow(new TownsystemException(messageWrapper, ExceptionMessageEnum.ALREADY_EXISTS));
 
 		assertDoesNotThrow(() -> eventHandler.handleInventoryClick(event));
+		verify(event).setCancelled(true);
 	}
 
 	@Test
-	public void handleInventoryClickTestLeave() {
+	public void handleInventoryClickTestTownmanager() {
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Player player = mock(Player.class);
-		ItemStack currentItem = mock(ItemStack.class);
-		ItemMeta currentItemMeta = mock(ItemMeta.class);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
+		Inventory inv = mock(Inventory.class);
 		World world = mock(World.class);
 		Townworld townworld = mock(Townworld.class);
 		Villager villager = mock(Villager.class);
-		Inventory inv = mock(Inventory.class);
 		Location loc = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
 		Town town = mock(Town.class);
-		Plot plot = mock(Plot.class);
-		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		when(chunk.getX()).thenReturn(1);
-		when(chunk.getZ()).thenReturn(2);
+		InventoryView view = mock(InventoryView.class);
+		when(view.getTitle()).thenReturn("mytown TownManager");
+		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
 		when(loc.getChunk()).thenReturn(chunk);
 		when(villager.getLocation()).thenReturn(loc);
-		when(inv.getHolder()).thenReturn(villager);
 		when(world.getName()).thenReturn("world");
-		when(event.getCurrentItem()).thenReturn(currentItem);
-		when(currentItem.getItemMeta()).thenReturn(currentItemMeta);
-		when(currentItemMeta.getDisplayName()).thenReturn("Leave");
-		when(event.getWhoClicked()).thenReturn(player);
 		when(player.getWorld()).thenReturn(world);
-		when(player.getName()).thenReturn("catch441");
-		when(event.getClickedInventory()).thenReturn(inv);
-		when(town.getTownName()).thenReturn("town");
-
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		assertDoesNotThrow(() -> when(town.getPlotByChunk("1/2")).thenReturn(plot));
-		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
-
-		eventHandler.handleInventoryClick(event);
-		assertDoesNotThrow(() -> verify(town).leaveTown(ecoPlayer));
-		verify(player).sendMessage(ChatColor.GOLD + "You left the town town.");
-	}
-
-	@Test
-	public void handleInventoryClickTestBuy() {
-		Player player = mock(Player.class);
-		ItemStack currentItem = mock(ItemStack.class);
-		ItemMeta currentItemMeta = mock(ItemMeta.class);
-		InventoryClickEvent event = mock(InventoryClickEvent.class);
-		World world = mock(World.class);
-		Townworld townworld = mock(Townworld.class);
-		Villager villager = mock(Villager.class);
-		Inventory inv = mock(Inventory.class);
-		Location loc = mock(Location.class);
-		Chunk chunk = mock(Chunk.class);
-		Town town = mock(Town.class);
-		Plot plot = mock(Plot.class);
-		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		BankAccount account = mock(BankAccount.class);
-		EconomyPlayer plotOwner = mock(EconomyPlayer.class);
-		when(plot.getOwner()).thenReturn(plotOwner);
-		when(ecoPlayer.getBankAccount()).thenReturn(account);
-		when(plot.getSalePrice()).thenReturn(1.5);
-		when(chunk.getX()).thenReturn(1);
-		when(chunk.getZ()).thenReturn(2);
-		when(loc.getChunk()).thenReturn(chunk);
-		when(villager.getLocation()).thenReturn(loc);
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
+		when(event.getWhoClicked()).thenReturn(player);
+		when(player.getName()).thenReturn("catch441");
 		when(inv.getHolder()).thenReturn(villager);
-		when(world.getName()).thenReturn("world");
-		when(event.getCurrentItem()).thenReturn(currentItem);
-		when(currentItem.getItemMeta()).thenReturn(currentItemMeta);
-		when(currentItemMeta.getDisplayName()).thenReturn("Buy");
-		when(event.getWhoClicked()).thenReturn(player);
-		when(player.getWorld()).thenReturn(world);
-		when(player.getName()).thenReturn("catch441");
 		when(event.getClickedInventory()).thenReturn(inv);
-
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		assertDoesNotThrow(() -> when(town.getPlotByChunk("1/2")).thenReturn(plot));
-		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
-		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
-
-		eventHandler.handleInventoryClick(event);
-
-		assertDoesNotThrow(() -> verify(ecoPlayerValidationHandler).checkForEnoughMoney(account, 1.5, true));
-		assertDoesNotThrow(() -> verify(ecoPlayer).payToOtherPlayer(plotOwner, 1.5, false));
-		assertDoesNotThrow(() -> verify(town).buyPlot(ecoPlayer, 1, 2));
-		verify(player).sendMessage(ChatColor.GOLD + "Congratulation! You bought this plot!");
-	}
-
-	@Test
-	public void handleInventoryClickTestJoin() {
-		Player player = mock(Player.class);
-		ItemStack currentItem = mock(ItemStack.class);
-		ItemMeta currentItemMeta = mock(ItemMeta.class);
-		InventoryClickEvent event = mock(InventoryClickEvent.class);
-		World world = mock(World.class);
-		Townworld townworld = mock(Townworld.class);
-		Villager villager = mock(Villager.class);
-		Inventory inv = mock(Inventory.class);
-		Location loc = mock(Location.class);
-		Chunk chunk = mock(Chunk.class);
-		Town town = mock(Town.class);
-		Plot plot = mock(Plot.class);
-		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		when(chunk.getX()).thenReturn(1);
-		when(chunk.getZ()).thenReturn(2);
-		when(loc.getChunk()).thenReturn(chunk);
-		when(villager.getLocation()).thenReturn(loc);
-		when(inv.getHolder()).thenReturn(villager);
-		when(world.getName()).thenReturn("world");
-		when(event.getCurrentItem()).thenReturn(currentItem);
-		when(currentItem.getItemMeta()).thenReturn(currentItemMeta);
-		when(currentItemMeta.getDisplayName()).thenReturn("Join");
-		when(event.getWhoClicked()).thenReturn(player);
-		when(player.getWorld()).thenReturn(world);
-		when(player.getName()).thenReturn("catch441");
-		when(event.getClickedInventory()).thenReturn(inv);
-		when(town.getTownName()).thenReturn("town");
-
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		assertDoesNotThrow(() -> when(town.getPlotByChunk("1/2")).thenReturn(plot));
-		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
-		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
-
-		eventHandler.handleInventoryClick(event);
-		assertDoesNotThrow(() -> verify(town).joinTown(ecoPlayer));
-		verify(player).sendMessage(ChatColor.GOLD + "You joined the town town.");
-	}
-
-	@Test
-	public void handleInventoryClickTestCancelSale() {
-		Player player = mock(Player.class);
-		ItemStack currentItem = mock(ItemStack.class);
-		ItemMeta currentItemMeta = mock(ItemMeta.class);
-		InventoryClickEvent event = mock(InventoryClickEvent.class);
-		World world = mock(World.class);
-		Townworld townworld = mock(Townworld.class);
-		Villager villager = mock(Villager.class);
-		Inventory inv = mock(Inventory.class);
-		Location loc = mock(Location.class);
-		Chunk chunk = mock(Chunk.class);
-		Town town = mock(Town.class);
-		Plot plot = mock(Plot.class);
-		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		when(chunk.getX()).thenReturn(1);
-		when(chunk.getZ()).thenReturn(2);
-		when(loc.getChunk()).thenReturn(chunk);
-		when(villager.getLocation()).thenReturn(loc);
-		when(inv.getHolder()).thenReturn(villager);
-		when(world.getName()).thenReturn("world");
-		when(event.getCurrentItem()).thenReturn(currentItem);
-		when(currentItem.getItemMeta()).thenReturn(currentItemMeta);
-		when(currentItemMeta.getDisplayName()).thenReturn("Cancel Sale");
-		when(event.getWhoClicked()).thenReturn(player);
-		when(player.getWorld()).thenReturn(world);
-		when(player.getName()).thenReturn("catch441");
-		when(event.getClickedInventory()).thenReturn(inv);
-		when(plot.isOwner(ecoPlayer)).thenReturn(true);
-
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		assertDoesNotThrow(() -> when(town.getPlotByChunk("1/2")).thenReturn(plot));
-		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
-		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
+		when(event.getClick()).thenReturn(ClickType.RIGHT);
+		when(event.getRawSlot()).thenReturn(2);
+		when(event.getView()).thenReturn(view);
 
 		eventHandler.handleInventoryClick(event);
 		verify(event).setCancelled(true);
-		assertDoesNotThrow(() -> verify(plot).removeFromSale(ecoPlayer));
-		verify(player).sendMessage(ChatColor.GOLD + "You removed this plot from sale!");
+		verify(town).handleInventoryClick(ClickType.RIGHT, 2, ecoPlayer);
 	}
-
+	
 	@Test
-	public void handleInventoryClickTestPlayerInv() {
+	public void handleInventoryClickTestPlot() {
+		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Player player = mock(Player.class);
-		ItemStack currentItem = mock(ItemStack.class);
-		ItemMeta currentItemMeta = mock(ItemMeta.class);
 		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		Inventory inv = mock(Inventory.class);
-		when(inv.getHolder()).thenReturn(player);
-		when(event.getCurrentItem()).thenReturn(currentItem);
-		when(currentItem.getItemMeta()).thenReturn(currentItemMeta);
-		when(event.getClickedInventory()).thenReturn(inv);
-
-		eventHandler.handleInventoryClick(event);
-		verify(event).setCancelled(true);
-		verify(player, never()).sendMessage(anyString());
-	}
-
-	@Test
-	public void handleInventoryClickWithEcoPlayerError() throws EconomyPlayerException {
-		Player player = mock(Player.class);
-		ItemStack currentItem = mock(ItemStack.class);
-		ItemMeta currentItemMeta = mock(ItemMeta.class);
-		InventoryClickEvent event = mock(InventoryClickEvent.class);
 		World world = mock(World.class);
 		Townworld townworld = mock(Townworld.class);
 		Villager villager = mock(Villager.class);
-		Inventory inv = mock(Inventory.class);
 		Location loc = mock(Location.class);
 		Chunk chunk = mock(Chunk.class);
 		Town town = mock(Town.class);
+		InventoryView view = mock(InventoryView.class);
 		Plot plot = mock(Plot.class);
-		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
-		BankAccount account = mock(BankAccount.class);
-		when(ecoPlayer.getBankAccount()).thenReturn(account);
-		when(plot.getSalePrice()).thenReturn(1.5);
+		assertDoesNotThrow(() -> when(town.getPlotByChunk("1/2")).thenReturn(plot));
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
+		when(view.getTitle()).thenReturn("Plot 1/2");
+		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
 		when(loc.getChunk()).thenReturn(chunk);
 		when(villager.getLocation()).thenReturn(loc);
-		when(inv.getHolder()).thenReturn(villager);
 		when(world.getName()).thenReturn("world");
-		when(event.getCurrentItem()).thenReturn(currentItem);
-		when(currentItem.getItemMeta()).thenReturn(currentItemMeta);
-		when(currentItemMeta.getDisplayName()).thenReturn("Buy");
-		when(event.getWhoClicked()).thenReturn(player);
 		when(player.getWorld()).thenReturn(world);
-		when(player.getName()).thenReturn("catch441");
-		when(event.getClickedInventory()).thenReturn(inv);
-
-		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		assertDoesNotThrow(() -> when(town.getPlotByChunk("1/2")).thenReturn(plot));
-		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
-
-		EconomyPlayerException e = mock(EconomyPlayerException.class);
-		when(e.getMessage()).thenReturn("my error message");
-		doThrow(e).when(ecoPlayerValidationHandler).checkForEnoughMoney(account, 1.5, true);
+		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
+		when(event.getWhoClicked()).thenReturn(player);
+		when(player.getName()).thenReturn("catch441");
+		when(inv.getHolder()).thenReturn(villager);
+		when(event.getClickedInventory()).thenReturn(inv);
+		when(event.getClick()).thenReturn(ClickType.RIGHT);
+		when(event.getRawSlot()).thenReturn(2);
+		when(event.getView()).thenReturn(view);
 
 		eventHandler.handleInventoryClick(event);
-
-		assertDoesNotThrow(() -> verify(town, never()).buyPlot(ecoPlayer, 1, 2));
-		verify(player).sendMessage("my error message");
+		verify(event).setCancelled(true);
+		verify(plot).handleInventoryClick(ClickType.RIGHT, 2, ecoPlayer);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -520,7 +350,7 @@ public class TownsystemEventHandlerImplTest {
 
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		when(messageWrapper.getErrorString("wilderness")).thenReturn("my error message");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.WILDERNESS)).thenReturn("my error message");
 
 		eventHandler.handlePlayerInteract(event);
 
@@ -668,7 +498,7 @@ public class TownsystemEventHandlerImplTest {
 		assertDoesNotThrow(() -> when(townworld.getTownByChunk(chunk)).thenReturn(town));
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
-		when(messageWrapper.getErrorString("no_permission_on_plot")).thenReturn("my error message");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.NO_PERMISSION_ON_PLOT)).thenReturn("my error message");
 
 		eventHandler.handlePlayerInteract(event);
 

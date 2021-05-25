@@ -1,10 +1,9 @@
 package org.ue.shopsystem.logic.impl;
 
-import javax.inject.Inject;
-
 import org.bukkit.scheduler.BukkitRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.shopsystem.logic.api.Rentshop;
@@ -19,7 +18,6 @@ public class RentDailyTask extends BukkitRunnable {
 	private final RentshopManager rentshopManager;
 	private final ServerProvider serverProvider;
 
-	@Inject
 	public RentDailyTask(MessageWrapper messageWrapper, RentshopManager rentshopManager,
 			ServerProvider serverProvider) {
 		this.messageWrapper = messageWrapper;
@@ -42,7 +40,7 @@ public class RentDailyTask extends BukkitRunnable {
 
 	private void sendReminder(Rentshop shop) {
 		if (shop.getOwner().isOnline()) {
-			shop.getOwner().getPlayer().sendMessage(messageWrapper.getString("rent_reminder"));
+			shop.getOwner().getPlayer().sendMessage(messageWrapper.getString(MessageEnum.RENT_REMINDER));
 		}
 	}
 

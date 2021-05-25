@@ -5,12 +5,12 @@ import java.util.UUID;
 import org.ue.bank.dataaccess.api.BankDao;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankException;
-import org.ue.bank.logic.api.BankValidationHandler;
+import org.ue.bank.logic.api.BankValidator;
 
 public class BankAccountImpl implements BankAccount {
 
 	private final BankDao bankDao;
-	private final BankValidationHandler validationHandler;
+	private final BankValidator validationHandler;
 	private double amount;
 	private final String iban;
 
@@ -21,7 +21,7 @@ public class BankAccountImpl implements BankAccount {
 	 * @param validationHandler
 	 * @param startAmount
 	 */
-	public BankAccountImpl(BankDao bankDao, BankValidationHandler validationHandler, double startAmount) {
+	public BankAccountImpl(BankDao bankDao, BankValidator validationHandler, double startAmount) {
 		this.bankDao = bankDao;
 		this.validationHandler = validationHandler;
 		iban = UUID.randomUUID().toString();
@@ -37,7 +37,7 @@ public class BankAccountImpl implements BankAccount {
 	 * @param startAmount
 	 * @param externalIban
 	 */
-	public BankAccountImpl(BankDao bankDao, BankValidationHandler validationHandler, double startAmount,
+	public BankAccountImpl(BankDao bankDao, BankValidator validationHandler, double startAmount,
 			String externalIban) {
 		this.bankDao = bankDao;
 		this.validationHandler = validationHandler;
@@ -53,7 +53,7 @@ public class BankAccountImpl implements BankAccount {
 	 * @param validationHandler
 	 * @param iban
 	 */
-	public BankAccountImpl(BankDao bankDao, BankValidationHandler validationHandler, String iban) {
+	public BankAccountImpl(BankDao bankDao, BankValidator validationHandler, String iban) {
 		this.bankDao = bankDao;
 		this.validationHandler = validationHandler;
 		this.iban = iban;

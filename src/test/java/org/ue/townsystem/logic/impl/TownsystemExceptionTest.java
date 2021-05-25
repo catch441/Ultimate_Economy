@@ -19,7 +19,7 @@ public class TownsystemExceptionTest {
 
 	@Test
 	public void constructorTest() {
-		when(messageWrapper.getErrorString("plot_is_not_for_sale", "param1", 2)).thenReturn("my error message");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.PLOT_IS_NOT_FOR_SALE, "param1", 2)).thenReturn("my error message");
 		TownsystemException e = new TownsystemException(messageWrapper, ExceptionMessageEnum.PLOT_IS_NOT_FOR_SALE,
 				"param1", 2);
 		

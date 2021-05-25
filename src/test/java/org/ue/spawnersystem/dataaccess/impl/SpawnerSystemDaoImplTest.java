@@ -24,7 +24,7 @@ import org.ue.common.utils.ServerProvider;
 public class SpawnerSystemDaoImplTest {
 
 	@InjectMocks
-	SpawnerSystemDaoImpl dao;
+	SpawnerystemDaoImpl dao;
 	@Mock
 	ServerProvider serverProvider;
 	

@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.ue.common.utils.SaveFileUtils;
 import org.ue.common.utils.ServerProvider;
@@ -15,7 +13,6 @@ public class JobDaoImpl extends SaveFileUtils implements JobDao {
 
 	private final ServerProvider serverProvider;
 	
-	@Inject
 	public JobDaoImpl(ServerProvider serverProvider) {
 		this.serverProvider = serverProvider;
 	}

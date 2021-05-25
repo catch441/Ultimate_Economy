@@ -5,22 +5,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.ue.bank.dataaccess.api.BankDao;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankException;
 import org.ue.bank.logic.api.BankManager;
-import org.ue.bank.logic.api.BankValidationHandler;
+import org.ue.bank.logic.api.BankValidator;
 
 public class BankManagerImpl implements BankManager {
 
 	private final BankDao bankDao;
-	private final BankValidationHandler validationHandler;
+	private final BankValidator validationHandler;
 	private Map<String, BankAccount> accounts = new HashMap<>();
 
-	@Inject
-	public BankManagerImpl(BankDao bankDao, BankValidationHandler validationHandler) {
+	public BankManagerImpl(BankDao bankDao, BankValidator validationHandler) {
 		this.bankDao = bankDao;
 		this.validationHandler = validationHandler;
 	}

@@ -15,12 +15,14 @@ import static org.mockito.Mockito.when;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager.Profession;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.ue.common.logic.api.ExceptionMessageEnum;
+import org.ue.common.logic.api.InventoryGuiHandler;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
@@ -54,7 +56,7 @@ public class PlayershopCommandExecutorImplTest {
 	public void createCommandTest() {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		Location loc = mock(Location.class);
-		when(messageWrapper.getString("created", "myshop")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.CREATED, "myshop")).thenReturn("my message");
 		when(player.getLocation()).thenReturn(loc);
 		assertDoesNotThrow(() -> when(ecoPlayerManager.getEconomyPlayerByName("catch441")).thenReturn(ecoPlayer));
 		when(player.getName()).thenReturn("catch441");
@@ -77,7 +79,8 @@ public class PlayershopCommandExecutorImplTest {
 
 	@Test
 	public void createCommandTestWithInvalidNumber() {
-		when(messageWrapper.getErrorString("invalid_parameter", "dsa")).thenReturn("my error message");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "dsa"))
+				.thenReturn("my error message");
 		String[] args = { "create", "myshop", "dsa" };
 		boolean result = executor.onCommand(player, null, "playershop", args);
 		assertTrue(result);
@@ -111,7 +114,7 @@ public class PlayershopCommandExecutorImplTest {
 		Playershop shop = mock(Playershop.class);
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(playershopManager.getPlayerShopByUniqueName("myshop_catch441")).thenReturn(shop));
-		when(messageWrapper.getString("deleted", "myshop")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.DELETED, "myshop")).thenReturn("my message");
 		String[] args = { "delete", "myshop" };
 		boolean result = executor.onCommand(player, null, "playershop", args);
 		assertTrue(result);
@@ -138,7 +141,7 @@ public class PlayershopCommandExecutorImplTest {
 		Playershop shop = mock(Playershop.class);
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(playershopManager.getPlayerShopByUniqueName("myshop_catch441")).thenReturn(shop));
-		when(messageWrapper.getString("shop_rename", "myshop", "mynewshop")).thenReturn("my message");
+		when(messageWrapper.getString(MessageEnum.SHOP_RENAME, "myshop", "mynewshop")).thenReturn("my message");
 		String[] args = { "rename", "myshop", "mynewshop" };
 		boolean result = executor.onCommand(player, null, "playershop", args);
 		assertTrue(result);
@@ -172,88 +175,16 @@ public class PlayershopCommandExecutorImplTest {
 	}
 
 	@Test
-	public void resizeCommandTestWithInvalidArgumentNumber() {
-		String[] args = { "resize", "myshop" };
-		boolean result = executor.onCommand(player, null, "playershop", args);
-		assertTrue(result);
-		verify(player).sendMessage("/playershop resize <shop> <new size>");
-		verifyNoMoreInteractions(player);
-	}
-
-	@Test
-	public void resizeCommandTest() {
-		Playershop shop = mock(Playershop.class);
-		when(player.getName()).thenReturn("catch441");
-		assertDoesNotThrow(() -> when(playershopManager.getPlayerShopByUniqueName("myshop_catch441")).thenReturn(shop));
-		when(messageWrapper.getString("shop_resize", "27")).thenReturn("my message");
-		String[] args = { "resize", "myshop", "27" };
-		boolean result = executor.onCommand(player, null, "playershop", args);
-		assertTrue(result);
-		assertDoesNotThrow(() -> verify(shop).changeSize(27));
-		verify(player).sendMessage("my message");
-		verify(player, times(1)).sendMessage(anyString());
-	}
-
-	@Test
-	public void resizeCommandTestWithInvalidSize() throws ShopsystemException {
-		ShopsystemException e = mock(ShopsystemException.class);
-		Playershop shop = mock(Playershop.class);
-		when(e.getMessage()).thenReturn("my error message");
-		when(player.getName()).thenReturn("catch441");
-		doThrow(e).when(shop).changeSize(7);
-		assertDoesNotThrow(() -> when(playershopManager.getPlayerShopByUniqueName("myshop_catch441")).thenReturn(shop));
-		String[] args = { "resize", "myshop", "7" };
-		boolean result = executor.onCommand(player, null, "playershop", args);
-		assertTrue(result);
-		verify(player).sendMessage("my error message");
-		verify(player, times(1)).sendMessage(anyString());
-	}
-
-	@Test
-	public void changeProfessionCommandTestWithInvalidProfession() {
-		Playershop shop = mock(Playershop.class);
-		when(player.getName()).thenReturn("catch441");
-		assertDoesNotThrow(() -> when(playershopManager.getPlayerShopByUniqueName("myshop_catch441")).thenReturn(shop));
-		when(messageWrapper.getErrorString("invalid_parameter", "kardoffl")).thenReturn("my error message");
-		String[] args = { "changeProfession", "myshop", "kardoffl" };
-		boolean result = executor.onCommand(player, null, "playershop", args);
-		assertTrue(result);
-		verify(player).sendMessage("my error message");
-		verify(player, times(1)).sendMessage(anyString());
-	}
-
-	@Test
-	public void changeProfessionCommandTestWithInvalidArgNumber() {
-		String[] args = { "changeProfession", "myshop" };
-		boolean result = executor.onCommand(player, null, "playershop", args);
-		assertTrue(result);
-		verify(player).sendMessage("/playershop changeProfession <shop> <profession>");
-		verifyNoMoreInteractions(player);
-	}
-
-	@Test
-	public void changeProfessionCommandTest() {
-		Playershop shop = mock(Playershop.class);
-		when(player.getName()).thenReturn("catch441");
-		assertDoesNotThrow(() -> when(playershopManager.getPlayerShopByUniqueName("myshop_catch441")).thenReturn(shop));
-		when(messageWrapper.getString("profession_changed")).thenReturn("my message");
-		String[] args = { "changeProfession", "myshop", "Farmer" };
-		boolean result = executor.onCommand(player, null, "playershop", args);
-		assertTrue(result);
-		assertDoesNotThrow(() -> verify(shop).changeProfession(Profession.FARMER));
-		verify(player).sendMessage("my message");
-		verify(player, times(1)).sendMessage(anyString());
-	}
-
-	@Test
 	public void editShopCommandTest() {
 		Playershop shop = mock(Playershop.class);
+		InventoryGuiHandler handler = mock(InventoryGuiHandler.class);
+		when(shop.getEditorHandler()).thenReturn(handler);
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(playershopManager.getPlayerShopByUniqueName("myshop_catch441")).thenReturn(shop));
 		String[] args = { "editShop", "myshop" };
 		boolean result = executor.onCommand(player, null, "playershop", args);
 		assertTrue(result);
-		assertDoesNotThrow(() -> verify(shop).openEditor(player));
+		assertDoesNotThrow(() -> verify(handler).openInventory(player));
 		verify(player, never()).sendMessage(anyString());
 	}
 
@@ -311,8 +242,8 @@ public class PlayershopCommandExecutorImplTest {
 		EconomyPlayer newOwner = mock(EconomyPlayer.class);
 		Player newPlayer = mock(Player.class);
 		Playershop shop = mock(Playershop.class);
-		when(messageWrapper.getString("shop_changeOwner1", "kthschnll")).thenReturn("my message1");
-		when(messageWrapper.getString("shop_changeOwner", "myshop", "catch441")).thenReturn("my message2");
+		when(messageWrapper.getString(MessageEnum.SHOP_CHANGEOWNER1, "kthschnll")).thenReturn("my message1");
+		when(messageWrapper.getString(MessageEnum.SHOP_CHANGEOWNER, "myshop", "catch441")).thenReturn("my message2");
 		when(newOwner.getPlayer()).thenReturn(newPlayer);
 		when(newOwner.isOnline()).thenReturn(true);
 		when(player.getName()).thenReturn("catch441");
@@ -333,7 +264,7 @@ public class PlayershopCommandExecutorImplTest {
 		EconomyPlayer newOwner = mock(EconomyPlayer.class);
 		Player newPlayer = mock(Player.class);
 		Playershop shop = mock(Playershop.class);
-		when(messageWrapper.getString("shop_changeOwner1", "kthschnll")).thenReturn("my message1");
+		when(messageWrapper.getString(MessageEnum.SHOP_CHANGEOWNER1, "kthschnll")).thenReturn("my message1");
 		when(newOwner.isOnline()).thenReturn(false);
 		when(player.getName()).thenReturn("catch441");
 		assertDoesNotThrow(() -> when(playershopManager.getPlayerShopByUniqueName("myshop_catch441")).thenReturn(shop));
@@ -388,8 +319,9 @@ public class PlayershopCommandExecutorImplTest {
 	@Test
 	public void deleteOtherCommandTest() {
 		Playershop shop = mock(Playershop.class);
-		when(messageWrapper.getString("deleted", "myshop_kthschnll")).thenReturn("my message");
-		assertDoesNotThrow(() -> when(playershopManager.getPlayerShopByUniqueName("myshop_kthschnll")).thenReturn(shop));
+		when(messageWrapper.getString(MessageEnum.DELETED, "myshop_kthschnll")).thenReturn("my message");
+		assertDoesNotThrow(
+				() -> when(playershopManager.getPlayerShopByUniqueName("myshop_kthschnll")).thenReturn(shop));
 		when(player.hasPermission("ultimate_economy.adminshop")).thenReturn(true);
 		String[] args = { "deleteOther", "myshop_kthschnll" };
 		boolean result = executor.onCommand(player, null, "playershop", args);

@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.ue.bank.dataaccess.api.BankDao;
 import org.ue.common.utils.SaveFileUtils;
@@ -16,7 +14,6 @@ public class BankDaoImpl extends SaveFileUtils implements BankDao {
 
 	private final ServerProvider serverProvider;
 	
-	@Inject
 	public BankDaoImpl(ServerProvider serverProvider) {
 		this.serverProvider = serverProvider;
 	}

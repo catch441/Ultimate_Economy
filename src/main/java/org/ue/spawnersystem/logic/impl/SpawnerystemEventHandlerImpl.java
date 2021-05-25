@@ -2,8 +2,6 @@ package org.ue.spawnersystem.logic.impl;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
@@ -21,16 +19,15 @@ import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.utils.ServerProvider;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.spawnersystem.logic.api.SpawnerManager;
-import org.ue.spawnersystem.logic.api.SpawnerSystemEventHandler;
+import org.ue.spawnersystem.logic.api.SpawnersystemEventHandler;
 
-public class SpawnerSystemEventHandlerImpl implements SpawnerSystemEventHandler {
+public class SpawnerystemEventHandlerImpl implements SpawnersystemEventHandler {
 
 	private final MessageWrapper messageWrapper;
 	private final ServerProvider serverProvider;
 	private final SpawnerManager spawnerManager;
 
-	@Inject
-	public SpawnerSystemEventHandlerImpl(MessageWrapper messageWrapper, ServerProvider serverProvider,
+	public SpawnerystemEventHandlerImpl(MessageWrapper messageWrapper, ServerProvider serverProvider,
 			SpawnerManager spawnerManager) {
 		this.messageWrapper = messageWrapper;
 		this.serverProvider = serverProvider;
@@ -61,7 +58,7 @@ public class SpawnerSystemEventHandlerImpl implements SpawnerSystemEventHandler 
 			String blockname = s.asString();
 			if (event.getPlayer().getInventory().firstEmpty() == -1) {
 				event.setCancelled(true);
-				event.getPlayer().sendMessage(messageWrapper.getErrorString("inventory_full"));
+				event.getPlayer().sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.INVENTORY_FULL));
 			} else if (event.getPlayer().getName().equals(blockname)) {
 				if (!event.getBlock().getMetadata("entity").isEmpty()) {
 					spawnerManager.removeSpawner(event.getBlock().getLocation());
@@ -74,8 +71,8 @@ public class SpawnerSystemEventHandlerImpl implements SpawnerSystemEventHandler 
 				}
 			} else {
 				event.setCancelled(true);
-				event.getPlayer().sendMessage(
-						messageWrapper.getErrorString(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()));
+				event.getPlayer()
+						.sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION));
 			}
 		}
 	}
@@ -112,8 +109,7 @@ public class SpawnerSystemEventHandlerImpl implements SpawnerSystemEventHandler 
 			spawnerManager.addSpawner(string.substring(0, string.lastIndexOf("-")), event.getPlayer(),
 					event.getBlock().getLocation());
 		} else {
-			event.getPlayer()
-					.sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()));
+			event.getPlayer().sendMessage(messageWrapper.getErrorString(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION));
 			event.setCancelled(true);
 		}
 	}

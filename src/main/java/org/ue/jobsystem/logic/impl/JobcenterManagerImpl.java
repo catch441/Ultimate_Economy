@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,20 +17,19 @@ import org.ue.jobsystem.logic.api.Job;
 import org.ue.jobsystem.logic.api.Jobcenter;
 import org.ue.jobsystem.logic.api.JobcenterManager;
 import org.ue.jobsystem.logic.api.JobsystemException;
-import org.ue.jobsystem.logic.api.JobsystemValidationHandler;
+import org.ue.jobsystem.logic.api.JobsystemValidator;
 
 public class JobcenterManagerImpl implements JobcenterManager {
 
 	private static final Logger log = LoggerFactory.getLogger(JobcenterManagerImpl.class);
 	private final EconomyPlayerManager ecoPlayerManager;
-	private final JobsystemValidationHandler validationHandler;
+	private final JobsystemValidator validationHandler;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
 	private Map<String, Jobcenter> jobcenterList = new HashMap<>();
 
-	@Inject
 	public JobcenterManagerImpl(ConfigDao configDao, ServerProvider serverProvider,
-			EconomyPlayerManager ecoPlayerManager, JobsystemValidationHandler validationHandler) {
+			EconomyPlayerManager ecoPlayerManager, JobsystemValidator validationHandler) {
 		this.ecoPlayerManager = ecoPlayerManager;
 		this.serverProvider = serverProvider;
 		this.configDao = configDao;
@@ -94,7 +91,7 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	public void createJobcenter(String name, Location spawnLocation, int size) throws JobsystemException {
 		validationHandler.checkForValueNotInList(getJobcenterNameList(), name);
 		validationHandler.checkForValidSize(size);
-		Jobcenter jobcenter = serverProvider.getServiceComponent().getJobcenter();
+		Jobcenter jobcenter = serverProvider.getProvider().createJobcenter();
 		jobcenter.setupNew(name, spawnLocation, size);
 		jobcenterList.put(name, jobcenter);
 		configDao.saveJobcenterList(getJobcenterNameList());
@@ -103,7 +100,7 @@ public class JobcenterManagerImpl implements JobcenterManager {
 	@Override
 	public void loadAllJobcenters() {
 		for (String jobcenterName : configDao.loadJobcenterList()) {
-			Jobcenter jobcenter = serverProvider.getServiceComponent().getJobcenter();
+			Jobcenter jobcenter = serverProvider.getProvider().createJobcenter();
 			jobcenter.setupExisting(jobcenterName);
 			jobcenterList.put(jobcenterName, jobcenter);
 		}

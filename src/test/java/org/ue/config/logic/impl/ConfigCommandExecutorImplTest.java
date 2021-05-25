@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ue.common.logic.api.ExceptionMessageEnum;
 import org.ue.common.logic.api.GeneralEconomyException;
+import org.ue.common.logic.api.MessageEnum;
 import org.ue.common.utils.api.MessageWrapper;
 import org.ue.config.logic.api.ConfigException;
 import org.ue.config.logic.api.ConfigManager;
@@ -79,9 +80,9 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void currencyCommandTestWithThreeArg() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("config_change", "catch catchs"))
+		when(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, "catch catchs"))
 				.thenReturn("§6The configuration was changed to §acatch catchs§6.");
-		when(messageWrapper.getString("restart")).thenReturn("§6Please restart the server!");
+		when(messageWrapper.getString(MessageEnum.RESTART)).thenReturn("§6Please restart the server!");
 
 		String[] args = { "currency", "catch", "catchs" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
@@ -126,7 +127,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void languageCommandTestWithTwoArgs() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("restart")).thenReturn("§6Please restart the server!");
+		when(messageWrapper.getString(MessageEnum.RESTART)).thenReturn("§6Please restart the server!");
 
 		String[] args = { "language", "de", "DE" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
@@ -139,7 +140,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void languageCommandTestWithException() throws GeneralEconomyException {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "catch")).thenReturn("My error message!");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "catch")).thenReturn("My error message!");
 		doThrow(new ConfigException(messageWrapper, ExceptionMessageEnum.INVALID_PARAMETER, "catch"))
 				.when(configManager).setLocale("de", "DE");
 
@@ -153,7 +154,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxRentedDaysCommandTestWithAll() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("config_change", "8")).thenReturn("§6The configuration was changed to §a8§6.");
+		when(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, "8")).thenReturn("§6The configuration was changed to §a8§6.");
 
 		String[] args = { "maxRentedDays", "8" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
@@ -176,7 +177,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxRentedDaysCommandTestWithInvalidInteger() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "catch"))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "catch"))
 				.thenReturn("§c§cThe parameter §4catch§c is invalid!");
 
 		String[] args = { "maxRentedDays", "catch" };
@@ -189,7 +190,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void startAmountCommandTestWithAll() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("config_change", "1.5")).thenReturn("§6The configuration was changed to §a1.5§6.");
+		when(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, "1.5")).thenReturn("§6The configuration was changed to §a1.5§6.");
 
 		String[] args = { "startAmount", "1.5" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
@@ -212,7 +213,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void startAmountCommandTestWithInvalidInteger() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "stuff"))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "stuff"))
 				.thenReturn("§c§cThe parameter §4stuff§c is invalid!");
 
 		String[] args = { "startAmount", "stuff" };
@@ -225,7 +226,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxHomesCommandTestWithAll() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("config_change", "8")).thenReturn("§6The configuration was changed to §a8§6.");
+		when(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, "8")).thenReturn("§6The configuration was changed to §a8§6.");
 
 		String[] args = { "maxHomes", "8" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
@@ -248,7 +249,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxHomesCommandTestWithInvalidInteger() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "catch"))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "catch"))
 				.thenReturn("§c§cThe parameter §4catch§c is invalid!");
 
 		String[] args = { "maxHomes", "catch" };
@@ -261,7 +262,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxJobsCommandTestWithAll() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("config_change", "8")).thenReturn("§6The configuration was changed to §a8§6.");
+		when(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, "8")).thenReturn("§6The configuration was changed to §a8§6.");
 
 		String[] args = { "maxJobs", "8" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
@@ -284,7 +285,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxJobsCommandTestWithInvalidInteger() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "catch"))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "catch"))
 				.thenReturn("§c§cThe parameter §4catch§c is invalid!");
 
 		String[] args = { "maxJobs", "catch" };
@@ -297,7 +298,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxJoinedTownsCommandTestWithAll() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("config_change", "8")).thenReturn("§6The configuration was changed to §a8§6.");
+		when(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, "8")).thenReturn("§6The configuration was changed to §a8§6.");
 
 		String[] args = { "maxJoinedTowns", "8" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
@@ -320,7 +321,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxJoinedTownsCommandTestWithInvalidInteger() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "catch"))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "catch"))
 				.thenReturn("§c§cThe parameter §4catch§c is invalid!");
 
 		String[] args = { "maxJoinedTowns", "catch" };
@@ -333,7 +334,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxPlayershopsCommandTestWithAll() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("config_change", "8")).thenReturn("§6The configuration was changed to §a8§6.");
+		when(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, "8")).thenReturn("§6The configuration was changed to §a8§6.");
 
 		String[] args = { "maxPlayershops", "8" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
@@ -356,7 +357,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void maxPlayershopsCommandTestWithInvalidInteger() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "catch"))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "catch"))
 				.thenReturn("§c§cThe parameter §4catch§c is invalid!");
 
 		String[] args = { "maxPlayershops", "catch" };
@@ -369,9 +370,9 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void homesCommandTestWithAll() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("config_change", "false"))
+		when(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, "false"))
 				.thenReturn("§6The configuration was changed to §afalse§6.");
-		when(messageWrapper.getString("restart")).thenReturn("§6Please restart the server!");
+		when(messageWrapper.getString(MessageEnum.RESTART)).thenReturn("§6Please restart the server!");
 
 		String[] args = { "homes", "false" };
 		boolean result = executor.onCommand(player, null, "ue-config", args);
@@ -395,7 +396,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void homesCommandTestWithInvalidNumber() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "catch"))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "catch"))
 				.thenReturn("§cThe parameter §4catch§c is invalid!");
 
 		String[] args = { "homes", "catch" };
@@ -408,7 +409,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void extendedInteractionCommandTestWithAll() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("config_change", "false"))
+		when(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, "false"))
 				.thenReturn("§6The configuration was changed to §afalse§6.");
 
 		String[] args = { "extendedInteraction", "false" };
@@ -432,7 +433,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void extendedInteractionCommandTestWithInvalidInteger() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "abc"))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "abc"))
 				.thenReturn("§cThe parameter §4abc§c is invalid!");
 
 		String[] args = { "extendedInteraction", "abc" };
@@ -445,7 +446,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void allowQuickshopCommandTestWithAll() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("config_change", "false"))
+		when(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, "false"))
 				.thenReturn("§6The configuration was changed to §afalse§6.");
 
 		String[] args = { "allowQuickshop", "false" };
@@ -469,7 +470,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void allowQuickshopCommandTestWithInvalidInteger() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "abc"))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "abc"))
 				.thenReturn("§cThe parameter §4abc§c is invalid!");
 
 		String[] args = { "allowQuickshop", "abc" };
@@ -484,9 +485,9 @@ public class ConfigCommandExecutorImplTest {
 		EconomyPlayer ecoPlayer = mock(EconomyPlayer.class);
 		when(ecoPlayerManager.getAllEconomyPlayers()).thenReturn(Arrays.asList(ecoPlayer));
 		Player player = mock(Player.class);
-		when(messageWrapper.getString("config_change", "false"))
+		when(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, "false"))
 				.thenReturn("§6The configuration was changed to §afalse§6.");
-		when(messageWrapper.getString("config_change", "true"))
+		when(messageWrapper.getString(MessageEnum.CONFIG_CHANGE, "true"))
 				.thenReturn("§6The configuration was changed to §atrue§6.");
 
 		String[] args = { "wildernessInteraction", "false" };
@@ -518,7 +519,7 @@ public class ConfigCommandExecutorImplTest {
 	@Test
 	public void wildernessInteractionCommandTestWithInvalidBoolean() {
 		Player player = mock(Player.class);
-		when(messageWrapper.getErrorString("invalid_parameter", "catch"))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVALID_PARAMETER, "catch"))
 				.thenReturn("§cThe parameter §4catch§c is invalid!");
 
 		String[] args = { "wildernessInteraction", "catch" };

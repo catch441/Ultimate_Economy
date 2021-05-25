@@ -15,6 +15,7 @@ import java.util.Map;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,21 +32,22 @@ import org.ue.townsystem.logic.api.TownsystemException;
 import org.ue.townsystem.logic.api.Townworld;
 import org.ue.townsystem.logic.api.TownworldManager;
 
-import dagger.Lazy;
-
 @ExtendWith(MockitoExtension.class)
 public class TownsystemValidationHandlerImplTest {
 
 	@InjectMocks
-	TownsystemValidationHandlerImpl validationHandler;
+	TownsystemValidatorImpl validationHandler;
 	@Mock
 	MessageWrapper messageWrapper;
-	@Mock
-	Lazy<TownworldManager> townworldManagerLazy;
 	@Mock
 	TownworldManager townworldManager;
 	@Mock
 	ServerProvider serverProvider;
+	
+	@BeforeEach
+	public void setup() {
+		validationHandler.lazyInjection(townworldManager);
+	}
 	
 	@Test
 	public void checkForEnoughMoneyTestValid() {
@@ -81,7 +83,7 @@ public class TownsystemValidationHandlerImplTest {
 		when(loc.getChunk()).thenReturn(chunk);
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
-		assertDoesNotThrow(() -> validationHandler.checkForLocationInsidePlot("1/4", loc));
+		assertDoesNotThrow(() -> validationHandler.checkForLocationInsidePlot("1/2", loc));
 	}
 
 	@Test
@@ -92,7 +94,7 @@ public class TownsystemValidationHandlerImplTest {
 		when(chunk.getX()).thenReturn(1);
 		when(chunk.getZ()).thenReturn(2);
 		TownsystemException e = assertThrows(TownsystemException.class,
-				() -> validationHandler.checkForLocationInsidePlot("1/2", loc));
+				() -> validationHandler.checkForLocationInsidePlot("1/4", loc));
 		assertEquals(ExceptionMessageEnum.OUTSIDE_OF_THE_PLOT, e.getKey());
 		assertEquals(0, e.getParams().length);
 	}
@@ -510,7 +512,6 @@ public class TownsystemValidationHandlerImplTest {
 		World world = mock(World.class);
 		when(loc.getWorld()).thenReturn(world);
 		when(world.getName()).thenReturn("world");
-		when(townworldManagerLazy.get()).thenReturn(townworldManager);
 		when(townworldManager.isTownWorld("world")).thenReturn(false);
 		assertDoesNotThrow(() -> validationHandler.checkForTownworldPlotPermission(loc, null));
 	}
@@ -524,7 +525,6 @@ public class TownsystemValidationHandlerImplTest {
 		when(loc.getWorld()).thenReturn(world);
 		when(world.getName()).thenReturn("world");
 		when(loc.getChunk()).thenReturn(chunk);
-		when(townworldManagerLazy.get()).thenReturn(townworldManager);
 		when(townworldManager.isTownWorld("world")).thenReturn(true);
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 		when(townworld.isChunkFree(chunk)).thenReturn(true);
@@ -548,7 +548,6 @@ public class TownsystemValidationHandlerImplTest {
 		when(loc.getWorld()).thenReturn(world);
 		when(world.getName()).thenReturn("world");
 		when(loc.getChunk()).thenReturn(chunk);
-		when(townworldManagerLazy.get()).thenReturn(townworldManager);
 		when(townworldManager.isTownWorld("world")).thenReturn(true);
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 		when(townworld.isChunkFree(chunk)).thenReturn(false);
@@ -572,7 +571,6 @@ public class TownsystemValidationHandlerImplTest {
 		when(loc.getWorld()).thenReturn(world);
 		when(world.getName()).thenReturn("world");
 		when(loc.getChunk()).thenReturn(chunk);
-		when(townworldManagerLazy.get()).thenReturn(townworldManager);
 		when(townworldManager.isTownWorld("world")).thenReturn(true);
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 		when(townworld.isChunkFree(chunk)).thenReturn(false);
@@ -595,7 +593,6 @@ public class TownsystemValidationHandlerImplTest {
 		when(loc.getWorld()).thenReturn(world);
 		when(world.getName()).thenReturn("world");
 		when(loc.getChunk()).thenReturn(chunk);
-		when(townworldManagerLazy.get()).thenReturn(townworldManager);
 		when(townworldManager.isTownWorld("world")).thenReturn(true);
 		assertDoesNotThrow(() -> when(townworldManager.getTownWorldByName("world")).thenReturn(townworld));
 		when(townworld.isChunkFree(chunk)).thenReturn(true);

@@ -1,4 +1,4 @@
-package org.ue.common.dataaccess.impl;
+package org.ue.economyvillager.dataaccess.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Villager.Profession;
+import org.bukkit.entity.Villager.Type;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,6 +80,17 @@ public class EconomyVillagerDaoImplTest {
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		assertEquals("ARMORER", config.getString("prefix.Profession"));
 	}
+	
+	@Test
+	public void saveBiomeTypeTest() {
+		AbstractDao dao = new AbstractDao(serverProvider);
+		dao.setup();
+		File file = new File("src/villager.yml");
+
+		dao.saveBiomeType("prefix", Type.JUNGLE);
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		assertEquals("JUNGLE", config.getString("prefix.Biome"));
+	}
 
 	@Test
 	public void saveSizeTest() {
@@ -117,6 +129,23 @@ public class EconomyVillagerDaoImplTest {
 		dao.setup();
 		Profession result = dao.loadProfession("prefix");
 		assertEquals(Profession.NITWIT, result);
+	}
+	
+	@Test
+	public void loadBiomeTypeTest() {
+		AbstractDao dao = new AbstractDao(serverProvider);
+		dao.setup();
+		dao.saveBiomeType("prefix", Type.JUNGLE);
+		Type result = dao.loadBiomeType("prefix");
+		assertEquals(Type.JUNGLE, result);
+	}
+
+	@Test
+	public void loadBiomeTypeTestWithNotSet() {
+		AbstractDao dao = new AbstractDao(serverProvider);
+		dao.setup();
+		Type result = dao.loadBiomeType("prefix");
+		assertEquals(Type.PLAINS, result);
 	}
 
 	@Test

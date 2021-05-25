@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.inject.Inject;
-
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -29,7 +27,6 @@ public class CustomSkullServiceImpl implements CustomSkullService {
 	private final ServerProvider serverProvider;
 	private Map<SkullTextureEnum, ItemStack> customSkullMap = new HashMap<>();
 	
-	@Inject
 	public CustomSkullServiceImpl(ServerProvider serverProvider) {
 		this.serverProvider = serverProvider;
 	}

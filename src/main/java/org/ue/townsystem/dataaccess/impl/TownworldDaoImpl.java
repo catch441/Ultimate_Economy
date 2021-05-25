@@ -5,33 +5,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ue.bank.logic.api.BankAccount;
 import org.ue.bank.logic.api.BankManager;
-import org.ue.common.dataaccess.impl.EconomyVillagerDaoImpl;
 import org.ue.common.logic.api.GeneralEconomyException;
 import org.ue.common.utils.ServerProvider;
 import org.ue.economyplayer.logic.api.EconomyPlayer;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.economyplayer.logic.api.EconomyPlayerManager;
+import org.ue.economyvillager.dataaccess.impl.EconomyVillagerDaoImpl;
 import org.ue.townsystem.dataaccess.api.TownworldDao;
 import org.ue.townsystem.logic.api.TownsystemException;
-import org.ue.townsystem.logic.api.TownsystemValidationHandler;
+import org.ue.townsystem.logic.api.TownsystemValidator;
 
 public class TownworldDaoImpl extends EconomyVillagerDaoImpl implements TownworldDao {
 
 	private static final Logger log = LoggerFactory.getLogger(TownworldDaoImpl.class);
-	private final TownsystemValidationHandler validationHandler;
+	private final TownsystemValidator validationHandler;
 	private final EconomyPlayerManager ecoPlayerManager;
 	private final BankManager bankManager;
 
-	@Inject
-	public TownworldDaoImpl(TownsystemValidationHandler validationHandler, EconomyPlayerManager ecoPlayerManager,
+	public TownworldDaoImpl(TownsystemValidator validationHandler, EconomyPlayerManager ecoPlayerManager,
 			BankManager bankManager, ServerProvider serverProvider) {
 		super(serverProvider);
 		this.validationHandler = validationHandler;

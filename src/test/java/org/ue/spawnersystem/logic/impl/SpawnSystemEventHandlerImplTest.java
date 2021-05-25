@@ -47,7 +47,7 @@ import org.ue.spawnersystem.logic.api.SpawnerManager;
 public class SpawnSystemEventHandlerImplTest {
 
 	@InjectMocks
-	SpawnerSystemEventHandlerImpl eventHandler;
+	SpawnerystemEventHandlerImpl eventHandler;
 	@Mock
 	MessageWrapper messageWrapper;
 	@Mock
@@ -158,7 +158,7 @@ public class SpawnSystemEventHandlerImplTest {
 		when(block.getBlockData()).thenReturn(data);
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		when(player.getName()).thenReturn("catch441");
-		when(messageWrapper.getErrorString(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION))
 				.thenReturn("my error");
 		eventHandler.handleSetBlockEvent(event);
 		verifyNoInteractions(spawnerManager);
@@ -241,7 +241,7 @@ public class SpawnSystemEventHandlerImplTest {
 		when(player.getGameMode()).thenReturn(GameMode.SURVIVAL);
 		when(inv.firstEmpty()).thenReturn(-1);
 		when(player.getInventory()).thenReturn(inv);
-		when(messageWrapper.getErrorString("inventory_full")).thenReturn("my error");
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.INVENTORY_FULL)).thenReturn("my error");
 		eventHandler.handleBreakBlockEvent(event);
 		verifyNoInteractions(spawnerManager);
 		assertTrue(event.isCancelled());
@@ -260,7 +260,7 @@ public class SpawnSystemEventHandlerImplTest {
 		when(inv.firstEmpty()).thenReturn(1);
 		when(player.getName()).thenReturn("Wulfgar");
 		when(player.getInventory()).thenReturn(inv);
-		when(messageWrapper.getErrorString(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION.getValue()))
+		when(messageWrapper.getErrorString(ExceptionMessageEnum.YOU_HAVE_NO_PERMISSION))
 				.thenReturn("my error");
 		eventHandler.handleBreakBlockEvent(event);
 		verifyNoInteractions(spawnerManager);

@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.bukkit.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,20 +15,19 @@ import org.ue.config.dataaccess.api.ConfigDao;
 import org.ue.economyplayer.logic.api.EconomyPlayerException;
 import org.ue.shopsystem.logic.api.Rentshop;
 import org.ue.shopsystem.logic.api.RentshopManager;
-import org.ue.shopsystem.logic.api.ShopValidationHandler;
+import org.ue.shopsystem.logic.api.ShopValidator;
 import org.ue.shopsystem.logic.api.ShopsystemException;
 
 public class RentshopManagerImpl implements RentshopManager {
 
 	private static final Logger log = LoggerFactory.getLogger(RentshopManagerImpl.class);
 	private final MessageWrapper messageWrapper;
-	private final ShopValidationHandler validationHandler;
+	private final ShopValidator validationHandler;
 	private final ServerProvider serverProvider;
 	private final ConfigDao configDao;
 	private Map<String, Rentshop> rentShopList = new HashMap<>();
 
-	@Inject
-	public RentshopManagerImpl(MessageWrapper messageWrapper, ShopValidationHandler validationHandler,
+	public RentshopManagerImpl(MessageWrapper messageWrapper, ShopValidator validationHandler,
 			ServerProvider serverProvider, ConfigDao configDao) {
 		this.messageWrapper = messageWrapper;
 		this.validationHandler = validationHandler;
@@ -62,7 +59,7 @@ public class RentshopManagerImpl implements RentshopManager {
 	public Rentshop getRentShopByUniqueName(String name) throws ShopsystemException {
 		for (Rentshop shop : getRentShops()) {
 			if (shop.isRentable()) {
-				if (("RentShop#" + shop.getShopId()).equals(name)) {
+				if (("RentShop#" + shop.getId()).equals(name)) {
 					return shop;
 				}
 			} else {
@@ -79,7 +76,7 @@ public class RentshopManagerImpl implements RentshopManager {
 		List<String> list = new ArrayList<>();
 		for (Rentshop shop : getRentShops()) {
 			if (shop.isRentable()) {
-				list.add("RentShop#" + shop.getShopId());
+				list.add("RentShop#" + shop.getId());
 			} else {
 				list.add(shop.getName() + "_" + shop.getOwner().getName());
 			}
@@ -96,16 +93,16 @@ public class RentshopManagerImpl implements RentshopManager {
 	public Rentshop createRentShop(Location spawnLocation, int size, double rentalFee) throws ShopsystemException {
 		validationHandler.checkForValidSize(size);
 		validationHandler.checkForPositiveValue(rentalFee);
-		Rentshop shop = serverProvider.getServiceComponent().getRentshop();
+		Rentshop shop = serverProvider.getProvider().createRentshop();
 		shop.setupNew(generateFreeRentShopId(), spawnLocation, size, rentalFee);
-		rentShopList.put(shop.getShopId(), shop);
+		rentShopList.put(shop.getId(), shop);
 		configDao.saveRentshopIds(getRentShopIdList());
 		return shop;
 	}
 
 	@Override
 	public void deleteRentShop(Rentshop rentshop) {
-		rentShopList.remove(rentshop.getShopId());
+		rentShopList.remove(rentshop.getId());
 		rentshop.deleteShop();
 		configDao.saveRentshopIds(getRentShopIdList());
 	}
@@ -121,7 +118,7 @@ public class RentshopManagerImpl implements RentshopManager {
 	public void loadAllRentShops() {
 		for (String shopId : configDao.loadRentshopIds()) {
 			try {
-				Rentshop shop = serverProvider.getServiceComponent().getRentshop();
+				Rentshop shop = serverProvider.getProvider().createRentshop();
 				shop.setupExisting(shopId);
 				rentShopList.put(shopId, shop);
 			} catch (EconomyPlayerException e) {
