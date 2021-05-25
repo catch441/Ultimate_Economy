@@ -32,6 +32,12 @@ public class LanguagePackConsistencyCheck {
 		messageWrapper.loadLanguage(new Locale("de", "DE"));
 		checkKeys();
 	}
+	
+	@Test
+	public void checkswDELanguage() {
+		messageWrapper.loadLanguage(new Locale("sw", "DE"));
+		checkKeys();
+	}
 
 	@Test
 	public void checkEsESLanguage() {

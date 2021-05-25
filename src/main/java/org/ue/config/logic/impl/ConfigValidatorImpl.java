@@ -12,7 +12,7 @@ import org.ue.config.logic.api.ConfigValidator;
 public class ConfigValidatorImpl extends GeneralValidatorImpl<ConfigException>
 		implements ConfigValidator {
 	
-	private static final List<String> languages = Arrays.asList("cs", "de", "en", "fr", "zh", "ru", "es", "lt", "it", "pl");
+	private static final List<String> languages = Arrays.asList("cs", "de", "sw", "en", "fr", "zh", "ru", "es", "lt", "it", "pl");
 
 	public ConfigValidatorImpl(MessageWrapper messageWrapper) {
 		super(messageWrapper);
@@ -41,6 +41,10 @@ public class ConfigValidatorImpl extends GeneralValidatorImpl<ConfigException>
 	
 	private boolean isCountryMatching(String lang, String country) {
 		switch (lang) {
+		case "sw":
+			if ("DE".equals(country)) {
+				return true;
+			}
 		case "cs":
 			if ("CZ".equals(country)) {
 				return true;

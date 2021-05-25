@@ -190,17 +190,18 @@ public class ConfigTabCompleterImplTest {
 	public void languageArgTest() {
 		String[] args = { "language", "" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-		assertEquals(10, result.size());
+		assertEquals(11, result.size());
 		assertEquals("de", result.get(0));
-		assertEquals("en", result.get(1));
-		assertEquals("cs", result.get(2));
-		assertEquals("fr", result.get(3));
-		assertEquals("zh", result.get(4));
-		assertEquals("ru", result.get(5));
-		assertEquals("es", result.get(6));
-		assertEquals("lt", result.get(7));
-		assertEquals("it", result.get(8));
-		assertEquals("pl", result.get(9));
+		assertEquals("sw", result.get(1));
+		assertEquals("en", result.get(2));
+		assertEquals("cs", result.get(3));
+		assertEquals("fr", result.get(4));
+		assertEquals("zh", result.get(5));
+		assertEquals("ru", result.get(6));
+		assertEquals("es", result.get(7));
+		assertEquals("lt", result.get(8));
+		assertEquals("it", result.get(9));
+		assertEquals("pl", result.get(10));
 	}
 
 	@Test
@@ -243,6 +244,14 @@ public class ConfigTabCompleterImplTest {
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(1, result.size());
 		assertEquals("CZ", result.get(0));
+	}
+	
+	@Test
+	public void languageCountryArgTestDE() {
+		String[] args = { "language", "sw", "" };
+		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+		assertEquals(1, result.size());
+		assertEquals("DE", result.get(0));
 	}
 
 	@Test
