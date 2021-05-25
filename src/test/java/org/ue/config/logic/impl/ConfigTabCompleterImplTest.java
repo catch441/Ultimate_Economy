@@ -190,7 +190,7 @@ public class ConfigTabCompleterImplTest {
 	public void languageArgTest() {
 		String[] args = { "language", "" };
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
-		assertEquals(11, result.size());
+		assertEquals(12, result.size());
 		assertEquals("de", result.get(0));
 		assertEquals("sw", result.get(1));
 		assertEquals("en", result.get(2));
@@ -202,7 +202,7 @@ public class ConfigTabCompleterImplTest {
 		assertEquals("lt", result.get(8));
 		assertEquals("it", result.get(9));
 		assertEquals("pl", result.get(10));
-	}
+		assertEquals("pt", result.get(11));}
 
 	@Test
 	public void languageArgTestWithMatching() {
@@ -252,6 +252,14 @@ public class ConfigTabCompleterImplTest {
 		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
 		assertEquals(1, result.size());
 		assertEquals("DE", result.get(0));
+	}
+	
+	@Test
+	public void languageCountryArgTestBR() {
+		String[] args = { "language", "pt", "" };
+		List<String> result = tabCompleter.onTabComplete(null, null, null, args);
+		assertEquals(1, result.size());
+		assertEquals("BR", result.get(0));
 	}
 
 	@Test

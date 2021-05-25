@@ -40,28 +40,26 @@ public class ConfigValidatorImpl extends GeneralValidatorImpl<ConfigException>
 	}
 	
 	private boolean isCountryMatching(String lang, String country) {
+		String match = "";
 		switch (lang) {
+		case "pt":
+			match = "BR";
+			break;
 		case "sw":
-			if ("DE".equals(country)) {
-				return true;
-			}
+			match = "DE";
+			break;
 		case "cs":
-			if ("CZ".equals(country)) {
-				return true;
-			}
+			match = "CZ";
+			break;
 		case "en":
-			if ("US".equals(country)) {
-				return true;
-			}
+			match = "US";
+			break;
 		case "zh":
-			if ("CN".equals(country)) {
-				return true;
-			}
+			match = "CN";
+			break;
 		default:
-			if (lang.toUpperCase().equals(country)) {
-				return true;
-			}
+			match = lang.toUpperCase();
 		}
-		return false;
+		return country.equals(match);
 	}
 }

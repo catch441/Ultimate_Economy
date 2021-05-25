@@ -61,6 +61,9 @@ public class ConfigTabCompleterImpl extends TabCompleterUtils implements TabComp
 	private List<String> getMatchingCountry(String[] args) {
 		List<String> list = new ArrayList<>();
 		switch (args[1]) {
+		case "pt":
+			list.add("BR");
+			break;
 		case "cs":
 			list.add("CZ");
 			break;
@@ -80,7 +83,7 @@ public class ConfigTabCompleterImpl extends TabCompleterUtils implements TabComp
 	}
 
 	private List<String> getAllLanguages() {
-		return Arrays.asList("de", "sw", "en", "cs", "fr", "zh", "ru", "es", "lt", "it", "pl");
+		return Arrays.asList("de", "sw", "en", "cs", "fr", "zh", "ru", "es", "lt", "it", "pl", "pt");
 	}
 
 	private List<String> handleHomesAndWildernessInteractionTabComplete(String[] args) {

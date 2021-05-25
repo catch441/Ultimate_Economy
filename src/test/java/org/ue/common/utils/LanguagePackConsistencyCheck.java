@@ -14,6 +14,13 @@ import org.ue.common.logic.api.MessageEnum;
 public class LanguagePackConsistencyCheck {
 
 	MessageWrapperImpl messageWrapper = new MessageWrapperImpl();
+	
+	@Test
+	public void checkPtBrLanguage() {
+		messageWrapper.loadLanguage(new Locale("pt", "BR"));
+		checkKeys();
+	}
+
 
 	@Test
 	public void checkEnUsLanguage() {

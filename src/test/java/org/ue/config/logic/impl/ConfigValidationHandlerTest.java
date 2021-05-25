@@ -59,6 +59,11 @@ public class ConfigValidationHandlerTest {
 	public void checkForMatchingCountryTestValid5() {
 		assertDoesNotThrow(() -> validationHandler.checkForCountryMatching("sw", "DE"));
 	}
+	
+	@Test
+	public void checkForMatchingCountryTestValid6() {
+		assertDoesNotThrow(() -> validationHandler.checkForCountryMatching("pt", "BR"));
+	}
 
 	@Test
 	public void checkForMatchingCountryTestFail() {
